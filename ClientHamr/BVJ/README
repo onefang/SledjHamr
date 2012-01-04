@@ -1,1 +1,7 @@
 Refer to - http://wiki.infinitegrid.org/index.php/BVJ
+
+BVJ is extensions to the BVH animation format used by SL technology. 
+It's in the ClientHamr section coz on the server side, they are just
+dealt with as blobs to be sent to the viewers.  This may change if we
+implement animating link sets, and interaction with the sim physics.
+

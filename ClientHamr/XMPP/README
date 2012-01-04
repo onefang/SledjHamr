@@ -1,1 +1,5 @@
 Viewer integration with XMPP, and using it for as many services as it can.
+
+XMPP / jabber is a good protocol to base presence, IM, groups, and other
+related stuff on.  We should do so.
+
