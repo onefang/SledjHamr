@@ -1,0 +1,4 @@
+*.edj
+*.o
+LuaSL/src/LuaSL
+
