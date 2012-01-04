@@ -1,8 +1,9 @@
 #! /bin/bash
 
-cd src
 
 export LOCALDIR=`pwd`
+
+cd src
 
 if [ -d "/opt/e17" ]
 then
@@ -13,7 +14,7 @@ fi
 
 # No need for a make file, or dependencies, the entire thing takes only a few seconds to build.
 
-CFLAGS="-g -Wall -I include -I $LOCALDIR"
+CFLAGS="-g -Wall -I include -I $LOCALDIR/src"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1/eina"
 CFLAGS="$CFLAGS -I $E17DIR/include/eet-1"
@@ -51,20 +52,20 @@ names="LuaSL_main LuaSL_utilities"
 EDJE_FLAGS="-id images -fd fonts"
 
 rm -f LuaSL *.o *.edj
-command="edje_cc $EDJE_FLAGS LuaSL.edc LuaSL.edj"
+command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
 echo $command
 $command
 
 objects=""
 for i in $names
 do
-    command="gcc $CFLAGS -c -o $i.o $i.c"
+    command="gcc $CFLAGS -c -o ../$i.o $i.c"
     echo $command
     $command
-    objects="$objects $i.o"
+    objects="$objects ../$i.o"
 done
 
-command="gcc $CFLAGS -o LuaSL $objects $LDFLAGS $libs"
+command="gcc $CFLAGS -o ../LuaSL $objects $LDFLAGS $libs"
 echo $command
 $command
 
