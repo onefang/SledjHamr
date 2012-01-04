@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Eina
+Description: A Library that implements fast data types and miscellaneous tools
+Requires.private: valgrind 
+Version: 1.1.0
+Libs: -L${libdir} -leina -pthread
+Libs.private:  -pthread -lrt  -ldl -lrt -lm 
+Cflags: -I${includedir}/eina-1 -I${includedir}/eina-1/eina
