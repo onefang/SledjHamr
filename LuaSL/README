@@ -1,1 +1,64 @@
 Refer to - http://wiki.infinitegrid.org/index.php/LuaSL_-_New_scripting_engine
+
+LuaSL is a Lua based LSL scripting engine that will aim for LSL
+compatability first, then adding Lua extensions.  It aims to replace the
+woeful XEngine from OpenSim, and at a later stage, be the basis for a
+client side scripting engine.
+
+
+Design.
+-------
+
+The basic design will be made up as I go along, but so far I have this -
+
+An object is a file system directory, full of LSL scripts as text files,
+notecards as text files, animations as BVH (or later BVJ) files, etc. 
+There will be some sort of metadata in place.
+
+A parser parses an LSL script, validating it and reporting errors.
+
+A preprocessor takes the result of the parse, and converts it into Lua
+source.  Each LSL script becomes a Lua state.  LSL states are handled as
+Lua tables, with each LSL state function being a table function in a
+common metatable.  LL and OS functions are likely to be C functions. 
+Careful testing should be done with LuaJIT FFI, sandboxing, and
+performance testing.
+
+The Lua source is compiled by the Lua compiler.
+
+LuaJIT is used as the Lua compiler, library, and runtime.
+
+Luaproc is used to start up operating system threads and hand Lua
+states between them.
+
+Nails is used to pump commands in and out of the LuaSL system.  Incoming
+commands invoke LSL events via the LuaSL state metatable.  LL and OS
+functions that impact the world will be converted to nails commands sent
+to the command pump.
+
+A watchdog thread is used to make sure no LuaSL script spends forever
+processing any event.
+
+Some form of serialization will need to be created for saving script
+state during shutdowns, passing script state to other threads /
+processes / computers.
+
+
+Test harness.
+-------------
+
+I'll build a test harness.  It will be based on EFL Edje Lua, with
+buttons for triggering LSL events, SL style dialogs, and other goodies.
+
+The initial goal will be to run standard MLP scripts.  They have minimal
+interface to the world, and exercise quite a bit of the rest of LSL. 
+They are also quite common, and sometimes responsible for a lot of the
+script running load.
+
+Various eina logging domains will be used to handle whisper, say, shout,
+etc.
+
+Performance testing will have to be done on 5000 scripts, to see how
+that compares against XEngine.
+
+
