@@ -55,7 +55,8 @@ typedef struct
     int logDom;
 } gameGlobals;
 
-typedef void (*doSomething) (gameGlobals *game, unsigned char key);
+
+Eina_Bool compileLSL(gameGlobals *game, char *script);
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);

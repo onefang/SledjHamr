@@ -104,7 +104,7 @@ main(int argc, char **argv)
 	    return -1;
 	}
 	game.canvas = ecore_evas_get(game.ee);
-	ecore_evas_title_set(game.ee, "LuaoSL test harness");
+	ecore_evas_title_set(game.ee, "LuaSL test harness");
 	ecore_evas_show(game.ee);
 
 	game.bg = evas_object_rectangle_add(game.canvas);
@@ -159,6 +159,12 @@ main(int argc, char **argv)
 	// Setup our callbacks.
 	ecore_evas_callback_delete_request_set(game.ee, _on_delete);
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
+
+	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
+	if (compileLSL(&game, buf))
+	    PIm("Against all odds, the compile of %s worked!  lol", buf);
+	else
+	    PEm("The compile of %s failed, as expected!", buf);
 
 	ecore_main_loop_begin();
 

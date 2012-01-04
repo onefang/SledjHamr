@@ -47,7 +47,7 @@ libs="-lecore -levas -ledje -leet -leina"
 #-lrt \
 #-lz
 
-names="LuaSL_main LuaSL_utilities"
+names="LuaSL_main LuaSL_compile LuaSL_utilities"
 
 EDJE_FLAGS="-id images -fd fonts"
 
