@@ -1,0 +1,11 @@
+OpenSim (OS) and Second Life (SL) technology leave a lot to be desired. 
+If they are ever going to take off, there needs to be a serious
+redesign.  However, writing an entire virtual world system from scratch
+is a huge job, especially for a tiny team.  So we will use the existing
+OS and SL open source software as crutches, using them to run at least
+one virtual world, while we slowly replace bits and pieces as we get to
+them.  In this way, we can have our cake and eat it to.  Not having to
+slave away for years just to get to the point where we have a single
+avatar standing still in an empty world.
+
+http://wiki.infinitegrid.org/index.php/OMG discusses our plans.
