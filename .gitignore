@@ -1,3 +1,8 @@
 *.edj
 *.o
 LuaSL/LuaSL
+LuaSL/LuaSL_parser
+LuaSL/src/*.tab.*
+LuaSL/src/LuaSL_lexer.c
+LuaSL/src/LuaSL_lexer.h
+
