@@ -188,7 +188,7 @@ static Yshort *yylexemes = 0;
 /* Local prototypes. */
 int yyparse(void *YYPARSE_PARAM);
 
-static int yyLex1(yyscan_t scanner);
+static int yyLex1(YYSTYPE *yylval, yyscan_t scanner);
 static int yyExpand();
 static void yySCopy(YYSTYPE *to, YYSTYPE *from, int size);
 static void yyPCopy(YYPOSN  *to, YYPOSN  *from, int size);
@@ -264,7 +264,7 @@ int yyparse(void *YYPARSE_PARAM) {
 
   /* Read one token */
   if (yychar < 0) {
-    yychar = yyLex1(YYLEX_PARAM);
+    yychar = yyLex1(&yylval, YYLEX_PARAM);
     if (yychar < 0) yychar = 0;
 #   if YYDEBUG
     if (yydebug) {
@@ -658,7 +658,7 @@ yyreduce:
     *++(yyps->psp) = yyps->pos;
     yyretposn = yyps->pos;  /* return value of root position to yyposn */
     if (yychar < 0) {
-      if ((yychar = yyLex1(YYLEX_PARAM)) < 0) {
+      if ((yychar = yyLex1(&yylval, YYLEX_PARAM)) < 0) {
         yychar = 0;
       }
 #   if YYDEBUG
@@ -781,24 +781,24 @@ yyaccept:
 
 
 /* Call yylex() unless the token has already been read. */
-static int yyLex1(yyscan_t scanner) {
+static int yyLex1(YYSTYPE *yylval, yyscan_t scanner) {
   if(yylvp < yylve) {
     /* we're currently re-reading tokens */
-    yylval = *yylvp++;
+    *yylval = *yylvp++;
     yyposn = *yylpp++;
     return *yylexp++;
   } else if(yyps->save) {
     /* in trial mode; save scanner results for future parse attempts */
     if(yylvp == yylvlim)
       yyExpand();
-    *yylexp = yylex(&yylval, scanner);
-    *yylvp++ = yylval;
+    *yylexp = yylex(yylval, scanner);
+    *yylvp++ = *yylval;
     yylve++;
     *yylpp++ = yyposn;
     yylpe++;
     return *yylexp++;
   } else { /* normal operation, no conflict encountered */
-    return yylex(&yylval, scanner);
+    return yylex(yylval, scanner);
   }
 }
 
