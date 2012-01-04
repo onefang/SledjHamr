@@ -14,8 +14,25 @@
  */
 typedef union tagTypeParser
 {
-        SExpression *expression;
-        int value;
+        SExpression			*expression;
+        int				value;
+	int				ival;
+	float				fval;
+	char				*sval;
+//	class LLScriptType		*type;
+//	class LLScriptConstant		*constant;
+//	class LLScriptIdentifier	*identifier;
+//	class LLScriptSimpleAssignable	*assignable;
+//	class LLScriptGlobalVariable	*global;
+//	class LLScriptEvent		*event;
+//	class LLScriptEventHandler	*handler;
+//	class LLScriptExpression	*expression;
+//	class LLScriptStatement		*statement;
+//	class LLScriptGlobalFunctions	*global_funcs;
+//	class LLScriptFunctionDec	*global_decl;
+//	class LLScriptState		*state;
+//	class LLScritpGlobalStorage	*global_store;
+//	class LLScriptScript		*script;
 }STypeParser;
  
 // define the type for flex and bison
@@ -25,5 +42,4 @@ int yyerror(const char *msg);
 
  
 #endif // __TYPE_PARSER_H__
-
 

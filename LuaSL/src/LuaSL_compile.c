@@ -6,6 +6,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
     Eina_Bool result = EINA_FALSE;
 
 // Parse the  LSL script, validating it and reporting errors.
+//   Just pass all constants and function names through to Lua, assume they are globals there.
 
 // Take the result of the parse, and convert it into Lua source.
 //   Each LSL script becomes a Lua state.
