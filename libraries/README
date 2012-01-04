@@ -1,0 +1,4 @@
+There are some base libraries that should be used in common.  Notable
+the Enlightenment Foundation Libraries.  Other external open source
+projects that we just use directly should go here to.  Makes it easy to
+compile it all.
