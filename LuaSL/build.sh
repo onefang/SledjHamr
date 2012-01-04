@@ -1,0 +1,70 @@
+#! /bin/bash
+
+cd src
+
+export LOCALDIR=`pwd`
+
+if [ -d "/opt/e17" ]
+then
+    export E17DIR="/opt/e17"
+else
+    export E17DIR="/usr"
+fi
+
+# No need for a make file, or dependencies, the entire thing takes only a few seconds to build.
+
+CFLAGS="-g -Wall -I include -I $LOCALDIR"
+CFLAGS="$CFLAGS -I $E17DIR/include/eina-1"
+CFLAGS="$CFLAGS -I $E17DIR/include/eina-1/eina"
+CFLAGS="$CFLAGS -I $E17DIR/include/eet-1"
+CFLAGS="$CFLAGS -I $E17DIR/include/edje-1"
+CFLAGS="$CFLAGS -I $E17DIR/include/evas-1"
+CFLAGS="$CFLAGS -I $E17DIR/include/ecore-1"
+CFLAGS="$CFLAGS -I $E17DIR/include"
+CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
+
+LDFLAGS="-L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+libs="-lecore -levas -ledje -leet -leina"
+# These need to be added to libs if linking staticaly, though some part of EFL don't like that.
+#-lecore_evas \
+#-lecore_fb \
+#-lecore_file \
+#-lecore \
+#-ledje \
+#-levas \
+#-lembryo \
+#-leet \
+#-leina \
+#-llua \
+#-lm \
+#-ldl \
+#-lglib-2.0 \
+#-lpthread \
+#-lfontconfig \
+#-lfreetype \
+#-lexpat \
+#-lrt \
+#-lz
+
+names="LuaSL_main LuaSL_utilities"
+
+EDJE_FLAGS="-id images -fd fonts"
+
+rm -f LuaSL *.o *.edj
+command="edje_cc $EDJE_FLAGS LuaSL.edc LuaSL.edj"
+echo $command
+$command
+
+objects=""
+for i in $names
+do
+    command="gcc $CFLAGS -c -o $i.o $i.c"
+    echo $command
+    $command
+    objects="$objects $i.o"
+done
+
+command="gcc $CFLAGS -o LuaSL $objects $LDFLAGS $libs"
+echo $command
+$command
+
