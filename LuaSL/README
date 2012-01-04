@@ -53,7 +53,8 @@ buttons for triggering LSL events, SL style dialogs, and other goodies.
 The initial goal will be to run standard MLP scripts.  They have minimal
 interface to the world, and exercise quite a bit of the rest of LSL. 
 They are also quite common, and sometimes responsible for a lot of the
-script running load.
+script running load.  Gotta start somewhere, so start with the ~run
+script.
 
 Various eina logging domains will be used to handle whisper, say, shout,
 etc.

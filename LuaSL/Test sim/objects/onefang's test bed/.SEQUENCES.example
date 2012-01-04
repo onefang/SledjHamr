@@ -1,0 +1,48 @@
+/ Sequence config for MLPV2.3
+/ lines beginning with slash are comments
+
+/ Global commands (these are commented out)
+/ Use any number of these by deleting the slash at the beginning
+/ debug | 1             | sequence start/stop
+/ debug | 2             | echo each command as executed
+/ debug | 4             | avatar hop on/off
+/ debug | -1            | all debugging
+
+/ Sequence Commands:
+/ =======
+/ SEQUENCE | seqence-name
+/ MENU | menu-name                                                       | set number & colors of balls
+/ POSE | pose-name | chat-chan | chat-message      | start a pose (chan & message are optional; message is whispered).
+/ AVWAIT | 0 1 2 3 | chat-message-if-waiting            | pause the sequence until the balls listed are sat on (0 1 2 3 in this example)
+/ SAY | chat-chan | chat-message                                | say the given text on the given chat chan
+/ WHISPER | chat-chan | chat-message                       | whisper the given text on the given chat chan
+/ WAIT | wait-seconds                                                      | pause before executing next command
+/ LABEL | label-name                                                         | set a target for GOTO
+/ GOTO | label-name                                                         | go to a label, to loop the bottom of a sequence
+/ REPEAT                                                                               | repeat the whole sequence
+
+/ Chat-messages can include the first names of participants using /0 for avatar on first ball, /1 for av on 2nd ball, etc.
+/ (See the names of the ball objects.)
+
+SEQUENCE | Tour1
+MENU | Example...
+POSE | standing
+AVWAIT | 0 | Waiting for someone to sit on blue ball
+WHISPER | 0 | /0 and /1 stand together
+WAIT | 10
+POSE | pillow-sit | 0 | /0 and /1 sit with a comfy pillow
+WAIT | 10
+POSE | sit2 | 0 | The pillow disappears
+WAIT | 10
+REPEAT
+
+SEQUENCE | tour2
+MENU | Example...
+POSE | standing | 0 | The two of you stand
+WAIT | 10
+LABEL | here
+POSE | pillow-sit | 0 | /0 and /1 sit with a pillow
+WAIT | 10
+POSE | sit2 | 0 | Where did the pillow go?
+WAIT | 10
+GOTO | here

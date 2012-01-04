@@ -1,0 +1,211 @@
+POSE stand | stand | stand  | stand                        //pose before starting and when stopping
+POSE default | sit_ground | sit_ground | sit_ground   //default pose when no animation entered
+
+MENUORDER         // use new (sane) menu button order -- same as in files.  Omit this for MLP compatibility.
+// NORELOAD            // inhibit reload on rez -- use for worn item, but "Menu Reset" if you make a copy!
+
+
+MENU MAIN MENU | ALL
+TOMENU Relax
+TOMENU Hugs
+TOMENU Dances
+TOMENU Lick girl
+TOMENU Lick boy
+TOMENU Stand sex
+TOMENU Girl on top
+TOMENU Boy on top
+TOMENU Side by side
+TOMENU - // 10 (total) blank spaces for modular configs.  Unused entries are automatically deleted.
+STOP                                             //remove poseballs
+TOMENU Options >>                      // options menu
+
+
+MENU Dances | ALL | BLUE | PINK 
+TOMENU Slow dances
+BACK
+
+
+MENU Slow dances | ALL | BLUE |  PINK 
+SWAP
+BACK
+
+
+MENU Relax | ALL | BLUE | PINK
+POSE pillow-sit | sit_ground | sit_ground
+//POSE sit 1 | sitting chair f07 | sitting ground f08
+//POSE sit 2 | sitting ground f02 | sitting ground f03
+POSE sit2 | sit_ground | sit_ground
+//POSE sit 3 | lovermale14 | lovefemale14
+//POSE sit 4 | lovefemale20b|flay6
+//POSE sit 5 | f_yabyum3 | sitting ground f05
+//POSE sit 6 | sitting ground f01 | sitting ground f04
+//POSE sit 7 | sitting couch f07 | sitting couch f06
+POSE standing | stand | stand
+//SOUND ☊guitar | mood4aday
+TOMENU Meditation
+TOMENU 6-way
+SWAP
+BACK
+
+
+MENU Meditation | ALL | BLUE | PINK
+//POSE Birth | m2_birth | f2_birth
+//POSE Birth 1 | m2_birth | f2_birth
+//POSE Pray| praykneeing2 | praykneeing2 1
+//POSE Meditate | med f4 | med f4 1
+//POSE Meditate 1 | m_meditation | f_meditation
+//POSE YabYum | R lovemale19d | R lovefemale19a
+SWAP
+BACK
+
+
+MENU 6-way | ALL | BLUE | PINK | GREEN | RED | BLUE2 | PINK2
+POSE default | sit_ground | sit_ground | sit_ground | sit_ground
+POSE 6way-1 |  jP-sit-m-01-filt | jP-sit-f-03-filt | jP-sit-m-02-filt | jP-sit-f-04-filt | jP-sit-m-03-filt | jP-sit-f-05-filt
+POSE 6way-2 |  jP-sit-m-03-filt | jP-sit-f-05-filt | jP-sit-m-02-filt | jP-sit-f-04-filt | jP-sit-m-01-filt | jP-sit-f-03-filt
+SWAP
+BACK
+
+
+MENU  Hugs | ALL | BLUE | PINK
+TOMENU Sit hugs
+TOMENU Stand hugs
+TOMENU Lay hugs
+BACK
+
+
+MENU Stand hugs | ALL | BLUE | PINK
+POSE Big kiss | long-kiss-masculine | kiss
+POSE Hug | HUG | HUG
+//POSE Lovers 5 | lovermale5 | lovefemale5a
+//POSE Lovers 14 | lovermale14 | lovefemale14
+//POSE Hug | hug-feminine | hug-masculine
+//POSE Lovers 1 | lovermale1 | lovefemale1
+//POSE Lovers 2 | lovermale2 | lovefemale2
+SWAP
+BACK
+
+
+MENU Sit hugs | ALL | BLUE | PINK
+//POSE Relax | flay6 | flay18
+//POSE Lovers 20 | lovermale20 | lovefemale20b
+//POSE Lovers 23 | mslmale23a | mslfemale23b
+//POSE Lovers 29 | mslmale29 | mslfemale29
+//POSE Lovers 3 | lovermale3b | lovefemale3b
+//POSE Lovers 4 | lovermale4 | lovefemale4
+//POSE Lovers 7 | lovemale7e | lovefemale7
+//POSE Chat | sit on ground m retime 90 M pr2 | sit on ground F v2 retime 90 F
+//POSE Kiss | Ground_Kiss_M | Ground_Kiss_F
+POSE Cradle her | cpose10 v5 M | cpose10 v6 F
+SWAP
+BACK
+
+
+MENU Lay hugs | ALL | BLUE | PINK
+//POSE Embrace | Laying_Arm_Across_M | Laying_Arm_Across_F
+//POSE Gaze | LS 2 static M | LS 2 static F
+//POSE Lay | laying_arm_across_f | laying_arm_across_m
+//POSE Lay kiss | Laying_Pinned_Kiss_M | Laying_Pinned_Kiss_F
+//POSE Lay on side | cpose3v4 m | cpose3v4 f
+//POSE Lovers 1a | csmale1 | csfemale1a
+POSE Make out | laying_makeout_m | laying_makeout_f
+//POSE Neck | Laying_Neck_Kiss_M | Laying_Neck_Kiss_F
+POSE Pinned | laying_pinned_m | laying_pinned_f
+//POSE Prop | Laying_Propped_Arm_M | Laying_Propped_Arm_F
+//POSE Reflect | couchfidget 1 | couchlay2 f2
+//POSE Rest | lusirestkr5 | massage receiver
+//POSE Side | Laying_Side_M | Laying_Side_F
+//POSE Spoon | Laying_Spoon_M | Laying_Spoon_F
+POSE Snuggle him | couple pose 7 v4 M | couple pose 7 v4 F
+SWAP
+BACK
+
+
+
+MENU  Lick girl | ALL | BLUE | PINK
+//POSE 69 | 69_M | 69_F
+//POSE Lick me | ASK_k_43_M_(BA_bundle) | ASK_k_43_F_(BA_bundle)
+POSE Taste | rimm | rimf
+POSE Lick her | 1licker | 1lickeee
+SWAP
+BACK
+
+
+MENU Lick boy | ALL | BLUE | PINK
+//POSE 69 | 69_M | 69_F
+//POSE BlowJob 1 | BJ_M | BJ_F
+SWAP
+BACK
+
+
+MENU Boy on top | ALL | BLUE | PINK
+//POSE Behind | Chair_M | Chair_F
+POSE Deckchair | Deckchair position-m | Deckchair position-f
+POSE Eagle | Spread Eagle-m | Spread Eagle-f
+//POSE Missionary | Missionary_M | Missionary_F
+//POSE So hard! | Kaly_Kam58 M_3_ADV | Kaly_Kam58 F_1_ADV
+SWAP
+BACK
+
+
+MENU Girl on top | ALL | BLUE | PINK
+POSE Butterfly | Butterfly position-m | Butterfly position-f
+//POSE Cowgirl | Rub_M | Lay_F
+POSE Cowgirl 2 | Cowgirl-m | Cowgirl-f
+//POSE Ride 1 | Ride_M | Ride_F
+//POSE Ride 2 | RideB_M | RideB_F
+//POSE Ride 3 | Ground_M | Ground_F
+//POSE Ride me 1 | ASK_k_43bis_M_(BA_bundle) | ASK_k_43_F_(BA_bundle)
+SWAP
+BACK
+
+
+MENU Side by side | ALL | BLUE | PINK
+POSE Side Entry | Side Entry Missionary-m | Side Entry Missionary-f
+POSE Spoon 2 | Spoons Position-m | Spoons Position-f
+SWAP
+BACK
+
+
+MENU Stand sex | ALL | BLUE | PINK
+//POSE Doggy 1| Doggy_M | Doggy_F
+POSE Doggy Style | Doggy Style-m | Doggy Style-f
+POSE Leapfrog | Leapfrog Position-m | Leapfrog Position-f
+//POSE Lifted | Table_M | Table_F
+//POSE Post 1 | Wall_M | Wall_F
+//POSE Post 2 | Wall2_M | Wall2_F
+POSE Standing Assfuck | Take from behind standing-m | Take from behind standing-f
+SWAP
+BACK
+
+
+
+MENU Options >> | OWNER           //this menu can be accessed by the OWNER only (other options: GROUP / ALL)
+SHOW Show
+HIDE Hide
+ADJUST Adjust Pos                       //changes poseballs into transparant beams easy to select for moving
+Z+1                                                //adjust Z = height offset in cm - use any integer to set the step size
+Z+10
+SAVE Save Pos                              //saves the poseball positions of the currently selected pose into memory
+Z-1                                                 //adjust Z = height offset   (so you don't have to adjust the positions of
+Z-10                                              //                                                 each individual pose for different bodies/places)
+DUMP Dump Pos                    //lists all positions stored in memory, copy/paste into .POSITIONS for backup
+TOMENU ShutDown >>
+BACK
+LINKMSG Save Prop | 0,-4,1,SAVEPROP      // save position/rotation for a prop
+LINKMSG Dump Props | 0,-4,1,DUMPPROPS    // dump all prop configs
+REDO Redo Menu | ON
+CHAT Chat Info | ON                             //switches chat info ON/OFF
+INVISIBLE Invisible                  //make the main object invisible/visible (usefull if it's worn)
+BALLUSERS Ball Users  | ALL              //switches who can sit on the poseballs (ALL/GROUP)
+MENUUSERS Menu Users  | ALL         //switches who access main menu (ALL/GROUP/OWNER)
+BACK
+
+
+MENU ShutDown >> | OWNER
+RELOAD Pos Reset                          // use after changing *.POSITIONS* or *.PROPS* files
+CHECK ConfigCheck                       // check config consistency.  NOTE: does a Pos Reset when done!
+RESET Menu Reset                         // use after changing *.MENUITEMS* files
+RESTART Restart
+OFF ShutDown
+BACK

@@ -1,0 +1,287 @@
+MLPV2 Version 2.3, by Learjeff Innis, based on
+MLP - MULTI-LOVE-POSE V1.2 - Copyright (c) 2006, by Miffy Fluffy (BSD License)
+
+OpenSim port by Jez Ember.  This should be fully functional, and works around various scope changes and bugs in OS LSL.  Don't take this back to SL - pick up the regular release there.
+
+The BSD Licence allows anybody to use the source code, in any manner they wish, providing that they provide the copyright notice above on further distributions.
+So it's totally free, however if you like it, I would be very happy if you donate any L$. If you're using significant parts of this code in commercial products, I would appreciate if you donate me at least L$1 for each sold product (preferably more :). And it's nice if you could send me a copy of each commercial product, incl. updates (as I do get a lot of questions from buyers of commercial products made with the MLP, also please indicate who to contact, not me :)
+I won't give support, however I'll make an exception for end-users that donated L$1000 or more (for commercial support, custom versions, contact me, however my time is limited).
+To donate, go to my profile (Search - People - Miffy Fluffy) and use the "Pay..." button, thanks!
+You can also find the link to the latest version here.
+
+Please feel free to donate to Learjeff Innis for the MLPV2 enhancements.  My thanks to Miffy Fluffy for the original!  Find MLPV2 scripts for L$1 at http://XStreetSL.com .
+
+FEATURES:
+- Put all your poseball animations into one object (50 pairs or even more should be no problem).
+- Create submenus for each category of poses, for instance: "Solo, Boy-Girl, Girl-Girl, Dance, 3some, 4some"
+- Shows 1, 2, 3, or 4 poseballs depending on the submenu you select
+- Positions can be adjusted and saved into memory (backup is easy: select Memory Dump and copy-paste into notecard)
+- Portable, can be worn and used everywhere
+- Option to adjust height offset (Z) of all poses at once (for different persons/locations).
+- 15 poseball colors:
+    PINK, BLUE, PINK2, BLUE2, GREEN, MAGENTA, RED, ORANGE, WHITE, BLACK, YELLOW, CYAN, RED2, TEAL, GREEN2
+    
+OPERATION:
+- Click the MLP object to switch it on
+- When everything has loaded click again for the menu
+- Select a submenu containing poses, and select a pose.  Poseballs will appear.
+- Sit on your poseball (Right-click - LOVE)
+- Accept the popup asking permission to animate your avatar.  (Might be behind the MLP menu, click ">>>" to see.)
+- To disable expressions, use Page Down key.  To re-enable them, use Page Up.  This only affects you and not people on other poseballs.  Expressions are re-enabled by default when anyone else sits on the poseball.
+- To remove the balls, select 'STOP'.
+
+
+TO ADJUST POSITIONS:
+You can adjust the poses to fit your own avatar and those you share MLP with.
+- Select a pose you want to adjust and sit on the balls.
+- Go back to the main menu, select "Options - Adjust Pos".  This changes the balls into transparant beams.
+- Right-click a beam, select Edit and adjust the position (Shift-click to select more than one).
+- Position the balls anywhere within 10m from the MLP object.
+- "Save Pos" stores the position into memory.
+- Important!  Back it up; see below.
+ 
+TO MAKE A BACKUP:
+Saved positions are stored in memory but are not permanent.  They are lost on script error (See "Script run-time error / Stack-Heap Collision" below).  They are also lost on shutdown/startup, or "Pos Reset".  To back the positions up more permanently you have to copy them into the .POSITIONS notecard:
+- Select "Mem Dump"
+- Copy the complete dump (from Chat-History)
+- Paste it into the .POSITIONS notecard (just replace everything, you don't need to edit/format anything).
+- Delete any other *.POSITIONS* files.
+    
+Note: After changing any *.POSITIONS* files, use the "Pos Reset" command to verify your changes, if desired.  This also helps to avoid losing changes due to Stac-Heap collisions.
+
+TO ADJUST HEIGHT OFFSET (Z):
+Select "Height Adj" and click the "Z"-buttons, this will adjust the height for all poses.
+Note: the offset height is stored in the Object Description, so any descriptions will be replaced.
+
+TO ADD POSES:
+Copy all animations into the MLP object (if you want to use existing poseballs, open them to rip their animations). Note: you can use any object as MLP, just copy the MLP contents in the object of your choice.
+Open the .MENUITEMS and add the animations:
+POSE name | animation1 | animation2 ... 
+The changes will become active after MLP is (re)started.  Use the "Menu Reset" command after changing *.MENUITEMS* files.
+
+To give an expression to an animation, add one of the following suffixes to the anim name in the POSE line.
+ (Just add it to the POSE config line, don't change the anim name.)
+ 
+   Suffix / expression
+    *        open mouth
+    ::1      open mouth
+    ::2      surprise
+    ::3      tongue out
+    ::4      smile
+    ::5      toothsmile
+    ::6      wink
+    ::7      cry
+    ::8      kiss
+    ::9      laugh
+    ::10    disdain
+    ::11    repulsed
+    ::12    anger
+    ::13    bored
+    ::14    sad
+    ::15    embarrassed
+    ::16    frown
+    ::17    shrug
+    ::18    afraid
+    ::19    worry
+    ::20    sleeping (combination of disdain and smile, closest I could find)
+
+To make the expression happen periodically rather than constantly, add another extension and the period (in seconds).
+
+For example, to use MyAnim with open mouth every 5.5 seconds:
+
+    POSE Mypose | MyAnim::1::5.5
+
+TO ADD SOUNDS (buttons to play sounds), in a menu (just like a POSE button), add a line like this:
+
+    SOUND She moans |  female-moan
+
+where "She moans" will be the button label, and "female-moan" is the animation to play, which must be in object inventory.
+For sounds in menus with poses (rather than in a menu specifically for sounds) I recommend you begin the pose name with "☊" (which looks a bit like headphones, the best I could find for the purpose).  This serves as a clue to the user that the button plays a sound.
+
+TO CREATE ANIMATION SETS (menus)
+Create .MENUITEMS.xxx and .POSITIONS.xxx files (where xxx is whatever you want) and put the corresponding menu configs and poses in them.  This way you can deliver a bed with folders of add-on menus so the customer can choose what types of anims they want to add to the menu.  Note that you get at most 12 top menu choices.  The scripts read the .POSITIONS files in alphabetical order (and .POSITIONS must be first).  The menus are assembled in the usual SL ass-backwards-by-three manner. 
+
+This also allows you to sell furniture with "enhancement packs", which are simply collections of .MENUITEMS.xxx, .POSITIONS.xxx, and the associated animations for the customer to drop into the furniture.  Customers can easily select furniture appearance and pose bundles independently!
+
+Note for those who are adding animation sets to MLP V1.2 configurations: For this feature to work, there must be "TOMENU -" entries in the main menu.  These are very easy to add to an existing configuration, just delete all "TOMENU" lines in the main menu and replace them with "TOMENU -" lines.  Also, add a "MENUORDER" to the .MENUITEMS file.  Now, all MENU configs that don't have a corresponding "TOMENU" entry will be put in the main menu, replacing a blank one.  Unused blank ones are deleted automatically.  See the .MENUITEMS file from the MLPV2 release for more info.
+
+ACCESS TO THE MAIN MENU:
+The owner is the only one who can start/restart/shutdown, in all cases.
+- if "Options - MenuUser" is set to OWNER: the owner is the only one who can access the menus
+- if "Options - MenuUser" is set to ALL: anyone can access the MAIN MENU
+- if "Options - MenuUser" is set to GROUP: members of the same Group as the MLP object can access the MAIN MENU (the MLP Group can set by right-clicking MLP and selecting Edit, More >> General tab - Group: Set)
+Note: even if "MenuUser" is set to ALL or GROUP, individual SUBMENUS can still be blocked (you can define access for each submenu in .MENUITEMS, see examples in .MENUITEMS).
+
+POSEBALL ACCESS:
+- if "Options - BallUsers" is set to ALL: anyone can sit on the ball
+- if "Options - BallUsers" is set to GROUP: only groupmembers can sit on a poseball. The balls will check if the person who tries to sit on the ball belongs to the same Group as the ~ball object (to set the Group of the ball, take a new copy of the MLP with your preferred Group set active on you. You could also take the ~ball out of the MLP, into the world, right-click, Edit, More >> General tab - Group: Set, thereafter take the edited ~ball into your Inventory (note: do this within a minute or so, because balls commit suicide after a while when taken into the world), delete the old ~ball in the MLP, and drag the new ~ball from your Inventory to the MLP).
+
+PORTABLE USE:
+Attach the object to the HUD, you can use it's default shape and color for clickable bar on one of the edges of your screen (to move HUD position: Right-click - Edit), you can edit color/transparancy/size/position.
+Adjust the height offset (Z). Note: the balls will appear relative to the initial MLP position (to reset where the balls appear, press STOP to remove the balls. and reselect a submenu to rez them again).
+
+================================================
+
+FAQ for END USERS:
+- Why do I hover, sitting, after sitting on a poseball?
+Be sure to answer "Yes" to the popup that asks permission to animate your avatar.  This is often buried under the MLP main menu, so click the ">>>" to cycle through menus.  This is SL behavior and there's no way to fix it, other than turning "remenu" off.
+
+- Will my animations be lost if I lose a poseball?
+No. The animations are not placed the balls, they remain in the main MLP object. Don't worry about the poseballs, they are copies of the one in the MLP object. A balls will commit suicide if left behind somewhere (the MLP object needs to be within 20m).
+
+- Sometimes notecards or scripts won't open for editing, why?
+If the MLP contains many animations, access to it's contents can be slow, try again after a few seconds.
+
+- "Script run-time error / Stack-Heap Collision"?
+Right-click/Edit the object, and use SL menu: "Tools -> Reset Scripts in Selection" to reset.
+Any saved positions that were not backed up in .POSITIONS files are lost, so if your furniture has lots of poses (over 50) and you save positions, be sure to back up regularly.  Use OPTIONS -> Pos Reset after changing .POSITIONS* files.
+
+FAQ for those who edit *.MENUITEMS files:
+
+- "Script run-time error / Stack-Heap Collision"?
+After a restart, this is a clue that there are too many items in *.MENUITEMS* or *.POSITIONS* files.  Trim the menu, or pray for Mono to arrive soon.
+
+- My new menu appears on the main page, rather than as a submenu where I configured it.  Why?
+Most likely, you named it differently in the MENU line versus the TOMENU line.  When MPL sees a MENU line, it looks for the same name in a TOMENU line.  If it doesn't find it, it replaces any "TOMENU -" entries it finds, generally on the main menu.
+
+
+================================================
+2.3l: fixed prim/script ownership, fixed ball listening on old channels, fixed prop jumping when saved twice
+2.3k: fixed startup race condition (stopping before reading MENUITEMS), fixed sequence labels not found
+2.3j: height menu bug fix (probably broken since 2.3's reorient menu added)
+2.3i: bug fix (remenu broken in 2.3h)
+2.3h: sequences: rez balls on sequence start
+2.3g: reset fixes:
+- kill balls on reset in ~menu startup
+- don't say "click to start" until ready, in ~run
+================================================
+
+CHANGES in MLPV2 Version 2.3:
+
+- Supports sounds
+
+- Supports up to 6 avatars (poseballs)
+
+- Sequences (tours) -- set up a menu button that plays a sequence of poses and chats.  You configure the sequences in a new .SEQUENCE type of notecard.  More info on that here:
+
+    ?
+
+- When rezzed, balls are now named ~ball0 .. ~ball5, to support easy sitting for bot clients (used for machinima, not camping!)  The object name in inventory has not changed.
+
+- "Adjust Pos" is now a toggle.  Try it and see!  Avs can hop on and off and balls return to the 'adjusting' shape.  You can also use STOP to return to normal mode.
+
+- EZ-Adust!  Now, when you're in adjust mode and you change poses, it saves the current pose before swithcing to new pose.  To abandon changes, quit adjust mode, STOP, or just re-select the current pose.
+
+- Tools pack:
+    - "Reorient" menu for more easily adapting an existing pose set to a new furniture item
+    - script to check anim permissions
+    - script to check for unused animations
+    - Three different example xcite adaptor scripts (requires Xcite! Partner script from Xcite)
+    - AutoZhao adaptor script
+    - touch passer moved here, since it's never required in the MLP prim
+
+================================================
+
+CHANGES in MLPV2 Version 2.2 (unreleased other than to MLPV2 group)
+
+- Added LMs when avs sit or unsit, to make it possible to add support for things like xcite and cuffs without modifying MLP scripts.  Read more here:
+
+    ?
+
+- Cleaner chat on DUMP (omits object name)
+
+================================================
+
+CHANGES in MLPV2 Version 2.1:
+
+- Props!  Rez an object per pose.  Object is deleted when changing to new pose, or after 3 minutes if bed is deleted.
+
+- 15 ball colors supported!
+
+- AUTOBACK - automatically inserts BACK before MORE--> button (optional, off by default)
+
+- Bug fix for AUTOMORE on main menus with too many buttons.  AUTOMORE no longer supported for main menu.  Might be fixed some day.
+
+- Bug fix for AUTOMORE menues with more than one extra page.
+
+- Expression control code removed -- didn't work out.  MLPV2 no longer takes controls.
+
+Of course, still compatible with all MLP and MLPV2.0 scripts.
+
+================================================
+
+CHANGES in MLPV2, Version 2.0:
+
+- Now supports Solo, 3some, and 4some menus.
+
+- Memory optimized: now holds over 70 couples poses.
+
+- Expressions supported (20 expressions, constant or periodic).  See "TO ADD POSES" above.
+
+- Extended menus.  (Automatic "More-->" button for menus with more than 12 buttons.)
+
+- Menu buttons now appear in menus in the same order as in the configuration
+        (but only if the new MENUORDER config item appears -- otherwise order is same as before, for backwards compatibility).
+
+- Modular configuration: reads all *.MENUITEMS* and *.POSITIONS* files, in sort order (same as in object contents).
+        MENU config lines with no corresponding TOMENU lines get added to the main menu (replacing a blank "TOMENU -" line).
+        This allows  makers to easily provide add-on packs, each being folder containing .MENUITEMS*, .POSITIONS*, and animations files.
+        Customer simply drops the folder in and resets.
+
+- Backwards-compatible with MLP V1.2 configurations.
+
+- Ball timeouts have been disabled.  This should make MLPV2 a little more efficient.
+        However, if you move a bed with balls rezzed, you'll need to delete the balls manually.
+
+- Set poseball's floating text and pie menu sit text by changing its description.
+        Also, if the ball's description begins with an asterisk ("*"), the poseball is phantom.
+        After changing ball's description, STOP to delete any balls and then select any pose.
+
+- New LM button type, to pass LMs to other scripts/prims.
+        This allows adding features to furniture, with buttons in the MLP menus, without changing any MLP scripts.
+
+- Warning for duplicate entries in .POSITIONS* files.
+
+- Configuration consistency checker: try "ConfigCheck" in Shutdown menu
+        NOTE: this will reload .POSITIONS.* files, so backup any saved positions first!
+        It will find buttons with no positions and vice versa.
+
+- AutoZhao support
+
+- Restart menu reorganized:
+        Use "Pos Reset" button after changing *.POSITIONS* files.
+        Use "Menu Reset" button after changing *.MENUITEMS* files.
+        Use "Restart" button to restart all.  This used to do only a menu reset.
+
+- MLP bug fix: if you rez a copy, it uses the same channel as the original, and on MLP V1.2 you'd get crosstalk.
+        The menu script is now reset on rez.  This does not reset positions; saved positions are not lost.
+
+- MLP bug fix: Avoid reanimating a non-sitting avatar!  This happened in these cases that I'm aware of:
+        A)  Avatar is posed and STOP button is hit and then a new pose is selected.  The avatar (no longer sitting) would get animated.
+        B) Same as above, but instead of STOP button, avatar teleports or relogs
+
+
+
+CHANGES IN MLP V1.2:
+- now checks if the balls are rezzed, it will rez new balls after a ball has disappeared unexpectedly for some reason (after a few minutes)
+- ownership change is detected (thanks to Kokoro Fasching)
+- added STAND button (now different from STOP button), to avoid confusion. STAND will always set the default stand pose. STOP will always remove the balls.
+- added GROUP access option to MAIN MENU, in the Options menu - 'MenuUser' you can select between OWNER/GROUP/ALL (previous users need to adjust their .MENUITEMS notecard, USERS has become MENUUSERS with the new options).
+- added GROUP access option for each individual SUBMENU, in .MENUITEMS you can define the access restriction for each submenu: OWNER/GROUP/ALL.
+- added GROUP access option for the poseballs,  In the Options menu - 'BallUsers' you can select between GROUP/ALL. 
+- If you select the menu while it has been used by someone else within the last minute, you're asked if you want to continue. (In previous versions the owner did get a chat message if any user operated the menu, this has been removed. To add this feature again: uncomment line #51 in ~menu.)
+- note: menu's and poses can not have the same name anymore, users of previous versions should change the name of the 'Shut Down' button to something else  (f.i: ShutDown!) if they also have a menu with the same name.
+
+CHANGES IN MLP V1.11:
+- fixed a mistake I made which caused the balls to dissappear within 60 seconds.
+
+CHANGES IN MLP V1.1:
+- adjusted sit height on the balls, so the balls will remain visible with most objects
+- altough not really necessary, I've added the possibility to SHOW/HIDE the balls via the menu (you can add a SHOW and/or HIDE button somewhere in the .MENUITEMS notecard)
+- improved menuacces: selections from previous menudialogs will be disregarded (avoids problems with multiple users too)
+- reduced load: no timers are running anymore when no balls are rezzed
+
+
+Please report any bugs, or improvements in efficiency without losing readability of the code (In many instances I've chosen readabilty over speed or size because I think it's reasonable to expect that the compiler will improve in the future). If you want to read the code start reading the comments in ~run for an overview. The source code used in ~menu is partly based on the Menu Engine by Zonax Delorean (BSD License), thanks. I included some free poses as examples, thanks to their makers. Thanks to Purrcat Miranda for testing with me :) Thanks to other creative people in SL too, and thanks for any donations. Have fun!
+
+MLP - MULTI-LOVE-POSE V1.2 - Copyright (c) 2006, by Miffy Fluffy (BSD License)
