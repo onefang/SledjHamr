@@ -1,0 +1,63 @@
+Unless otherwise stated, all of this is covered by the following BSD style
+licence.
+
+--------------------------------------------------------------------------------
+
+Copyright notice for SledjHamr:
+
+Copyright (C) 2011 David Walter Seikel and various contributors (see
+AUTHORS)
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+1. Redistributions of source code must retain the above copyright      
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright       
+notice, this list of conditions and the following disclaimer in the      
+documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------------
+
+The Enlightenment Foundation Libraries are mostly BSD, and copyright by
+the various people mentioned in their respective AUTHORS files, except -
+
+Edje's epp - GPL 2.
+Eina - GPL 2.1.
+Embryo - partly BSD, partly something similar to BSD.
+
+See the various COPYING and AUTHORS files for details.
+
+--------------------------------------------------------------------------------
+
+The MLP scripts used for testing are BSD, Copyright (c) 2006, by Miffy Fluffy.
+
+--------------------------------------------------------------------------------
+
+The flex and btyacc source files, plus the C source files that wrap them
+in LuaSL, where originally based on flex and bison examples provided on
+the Wikipedia page -
+
+http://en.wikipedia.org/wiki/GNU_bison
+
+This is covered by "Creative Commons Attribution-ShareAlike 3.0 Unported
+License".  The attribution portion is covered by the URL above, as per
+the Wikipedia Terms of Use.
+
+--------------------------------------------------------------------------------
+
