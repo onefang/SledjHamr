@@ -10,7 +10,8 @@ FS			(f|F)
 
 %{
 
-#include "LuaSL_type_parser.h"
+#define excludeLexer
+#include "LuaSL_LSL_tree.h"
 #include "LuaSL_LSLS_yaccer.tab.h"
 
 

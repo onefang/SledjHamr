@@ -1,28 +1,21 @@
 %{
-	#include "linden_common.h"
-	#include "lscript_tree.h"
 
-    #ifdef __cplusplus
-    extern "C" {
-    #endif
+#include "LuaSL_LSL_tree.h"
 
-	int yylex(void);
-	int yyparse( void );
-	int yyerror(const char *fmt, ...);
+//int yylex(void);
+//int yyparse( void );
+//int yyerror(const char *fmt, ...);
 
-    #if LL_LINUX
-    // broken yacc codegen...  --ryan.
+#if LL_LINUX
+// broken yacc codegen...  --ryan.
     #define getenv getenv_workaround
-    #endif
+#endif
 
-    #ifdef LL_WINDOWS
-	#pragma warning (disable : 4702) // warning C4702: unreachable code
-	#pragma warning( disable : 4065 )	// warning: switch statement contains 'default' but no 'case' labels
-	#endif
+#ifdef LL_WINDOWS
+    #pragma warning (disable : 4702) // warning C4702: unreachable code
+    #pragma warning( disable : 4065 )	// warning: switch statement contains 'default' but no 'case' labels
+#endif
 
-    #ifdef __cplusplus
-    }
-    #endif
 %}
 
 
