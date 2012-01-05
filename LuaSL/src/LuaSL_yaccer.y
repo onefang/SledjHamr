@@ -14,21 +14,21 @@
 %token TOKEN_PLUS
 %token TOKEN_MULTIPLY
 
-%token <value> TOKEN_NUMBER
+%token <integerValue> TOKEN_NUMBER
 
-%type <expression> expr
+%type <expressionValue> expr
 
 %%
 
 input: 
-        expr { ((SParserParam*)data)->expression = $1; }
+        expr { ((LuaSL_yyparseParam*)data)->expression = $1; }
         ;
 
 expr:
-      expr TOKEN_PLUS expr { $$ = createOperation( ePLUS, $1, $3 ); }
-    | expr TOKEN_MULTIPLY expr { $$ = createOperation( eMULTIPLY, $1, $3 ); }
+      expr TOKEN_PLUS expr { $$ = addOperation( LSL_ADD, $1, $3 ); }
+    | expr TOKEN_MULTIPLY expr { $$ = addOperation( LSL_MULTIPLY, $1, $3 ); }
     | TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
-    | TOKEN_NUMBER { $$ = createNumber($1); }
+    | TOKEN_NUMBER { $$ = addInteger($1); }
 ;
 
 %%

@@ -19,7 +19,7 @@ WS          [ \r\n\t]*
 %%
 
 {WS}            { /* Skip blanks. */ }
-{NUMBER}        { sscanf(yytext,"%d",&yylval->value); return TOKEN_NUMBER; }
+{NUMBER}        { sscanf(yytext,"%d",&yylval->integerValue); return TOKEN_NUMBER; }
 
 {MULTIPLY}      { return TOKEN_MULTIPLY; }
 {PLUS}          { return TOKEN_PLUS; }

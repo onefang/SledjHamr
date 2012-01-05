@@ -2,83 +2,275 @@
  * Implementation of functions used to build the abstract syntax tree.
  */
 
+
+#define LSL_Keywords_define
+#define LSL_Tokens_define
 #include "LuaSL_LSL_tree.h"
 #include <stdlib.h>
 
+
 /**
- * @brief Allocates space for expression
+ * @brief Allocates space for an AST leaf
  * @return The expression or NULL if not enough memory
  */
-static SExpression* newExpression(EOperationType type, SExpression *left, SExpression *right, int value)
+
+/*
+static LSL_AST *newLeaf(LSL_Type type, LSL_AST *left, LSL_AST *right)
 {
-    SExpression* b = malloc(sizeof *b);
+    LSL_AST *leaf = malloc(sizeof(LSL_AST));
 
-    if (b == NULL) return NULL;
+    if (leaf == NULL) return NULL;
 
-    b->type = type;
-    b->value = value;
-    b->left = left;
-    b->right = right;
+    leaf->type = type;
+    leaf->left = left;
+    leaf->right = right;
+    leaf->line = -1;
+    leaf->character = -1;
 
-    return b;
+    return leaf;
+}
+*/
+
+void burnLeaf(LSL_AST *leaf)
+{
+    if (leaf == NULL) return;
+
+    burnLeaf(leaf->left);
+    burnLeaf(leaf->right);
+    free(leaf);
 }
 
-SExpression* createNumber(int value)
+static LSL_Expression *newLSLExpression(LSL_Type type, LSL_Expression *left, LSL_Expression *right)
 {
-    return newExpression(eVALUE, NULL, NULL, value);
+    LSL_Expression *exp = malloc(sizeof(LSL_Expression));
+
+    if (exp == NULL) return NULL;
+
+    exp->type = type;
+    exp->left = left;
+    exp->right = right;
+    exp->expression=0;
+
+    return exp;
 }
 
-SExpression *createOperation(EOperationType type, SExpression *left, SExpression *right)
+void burnLSLExpression(LSL_Expression *exp)
 {
-    return newExpression(type, left, right, 0);
+    if (exp == NULL) return;
+
+    burnLSLExpression(exp->left);
+    burnLSLExpression(exp->right);
+    free(exp);
 }
 
-int evaluate(SExpression *e)
+LSL_Expression *addInteger(int value)
 {
-    switch(e->type)
+    LSL_Expression *exp = newLSLExpression(LSL_INTEGER, NULL, NULL);
+
+    if (exp)
+	exp->value.integerValue = value;
+
+    return exp;
+}
+
+LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right)
+{
+    LSL_Expression *exp = newLSLExpression(LSL_EXPRESSION, left, right);
+
+    if (exp)
+	exp->expression = type;
+
+    return exp;
+}
+
+LSL_Expression *newTree(const char *expr)
+{
+    LuaSL_yyparseParam param;
+    YY_BUFFER_STATE state;
+
+    param.expression = NULL;
+    if (yylex_init(&(param.scanner)))
+	return NULL;
+
+    state = yy_scan_string(expr, param.scanner);
+    if (yyparse(&param))
+	return NULL;
+
+    yy_delete_buffer(state, param.scanner);
+    yylex_destroy(param.scanner);
+
+    return param.expression;
+}
+
+int evaluateExpression(LSL_Expression *exp, int old)
+{
+    switch(exp->type)
     {
-        case eVALUE:
-            return e->value;
-        case eMULTIPLY:
-            return evaluate(e->left) * evaluate(e->right);
-        case ePLUS:
-            return evaluate(e->left) + evaluate(e->right);
-        default:
-            // shouldn't be here
-            return 0;
+	case LSL_COMMENT	:
+	case LSL_TYPE		:
+	case LSL_NAME		:
+	case LSL_IDENTIFIER	:
+	    break;
+	case LSL_FLOAT		: return (int) exp->value.floatValue;
+	case LSL_INTEGER	: return exp->value.integerValue;
+	case LSL_STRING		:
+	case LSL_KEY		:
+	case LSL_VECTOR		:
+	case LSL_ROTATION	:
+	case LSL_LIST		:
+	case LSL_LABEL		:
+	    break;
+	case LSL_EXPRESSION	:
+	{
+	    switch (exp->expression)
+	    {
+		case LSL_COMMA			:
+		case LSL_INCREMENT_PRE		:
+		case LSL_INCREMENT_POST		:
+		case LSL_DECREMENT_PRE		:
+		case LSL_DECREMENT_POST		:
+		case LSL_DOT			:
+		case LSL_ASSIGNMENT_PLAIN	:
+		case LSL_ASSIGNMENT_DIVIDE	:
+		case LSL_ASSIGNMENT_MODULO	:
+		case LSL_ASSIGNMENT_MULTIPLY	:
+		case LSL_ASSIGNMENT_SUBTRACT	:
+		case LSL_ASSIGNMENT_ADD		:
+		case LSL_ASSIGNMENT_CONCATENATE	:
+		case LSL_PARENTHESIS_OPEN	:
+		case LSL_PARENTHESIS_CLOSE	:
+		case LSL_BRACKET_OPEN		:
+		case LSL_BRACKET_CLOSE		:
+		case LSL_ANGLE_OPEN		:
+		case LSL_ANGLE_CLOSE		:
+		case LSL_TYPECAST		:
+		case LSL_BIT_NOT		:
+		case LSL_BOOL_NOT		:
+		case LSL_NEGATION		:
+		    break;
+		case LSL_DIVIDE			: return evaluateExpression(exp->left, old) /  evaluateExpression(exp->right, old);
+		case LSL_MODULO			: return evaluateExpression(exp->left, old) %  evaluateExpression(exp->right, old);
+		case LSL_MULTIPLY		: return evaluateExpression(exp->left, old) *  evaluateExpression(exp->right, old);
+		case LSL_DOT_PRODUCT		: break;
+		case LSL_CROSS_PRODUCT		: break;
+		case LSL_SUBTRACT		: return evaluateExpression(exp->left, old) -  evaluateExpression(exp->right, old);
+		case LSL_ADD			: return evaluateExpression(exp->left, old) +  evaluateExpression(exp->right, old);
+		case LSL_CONCATENATE		: break;
+		case LSL_LEFT_SHIFT		: return evaluateExpression(exp->left, old) << evaluateExpression(exp->right, old);
+		case LSL_RIGHT_SHIFT		: return evaluateExpression(exp->left, old) >> evaluateExpression(exp->right, old);
+		case LSL_LESS_THAN		: return evaluateExpression(exp->left, old) <  evaluateExpression(exp->right, old);
+		case LSL_GREATER_THAN		: return evaluateExpression(exp->left, old) >  evaluateExpression(exp->right, old);
+		case LSL_LESS_EQUAL		: return evaluateExpression(exp->left, old) <= evaluateExpression(exp->right, old);
+		case LSL_GREATER_EQUAL		: return evaluateExpression(exp->left, old) >= evaluateExpression(exp->right, old);
+		case LSL_EQUAL			: return evaluateExpression(exp->left, old) == evaluateExpression(exp->right, old);
+		case LSL_NOT_EQUAL		: return evaluateExpression(exp->left, old) != evaluateExpression(exp->right, old);
+		case LSL_BIT_AND		: return evaluateExpression(exp->left, old) &  evaluateExpression(exp->right, old);
+		case LSL_BIT_XOR		: return evaluateExpression(exp->left, old) ^  evaluateExpression(exp->right, old);
+		case LSL_BIT_OR			: return evaluateExpression(exp->left, old) |  evaluateExpression(exp->right, old);
+		case LSL_BOOL_OR		: return evaluateExpression(exp->left, old) || evaluateExpression(exp->right, old);
+		case LSL_BOOL_AND		: return evaluateExpression(exp->left, old) && evaluateExpression(exp->right, old);
+	    }
+	    break;
+	}
+	case LSL_DO		:
+	case LSL_FOR		:
+	case LSL_IF		:
+	case LSL_ELSE		:
+	case LSL_ELSEIF		:
+	case LSL_JUMP		:
+	case LSL_STATE_CHANGE	:
+	case LSL_WHILE		:
+	case LSL_RETURN		:
+	case LSL_STATEMENT	:
+	case LSL_BLOCK		:
+	case LSL_PARAMETER	:
+	case LSL_FUNCTION	:
+	case LSL_STATE		:
+	case LSL_SCRIPT		:
+	    break;
+    }
+
+    return old;
+
+}
+
+void outputExpression(LSL_Expression *exp)
+{
+    switch(exp->type)
+    {
+	case LSL_COMMENT	: return;
+	case LSL_TYPE		: return;
+	case LSL_NAME		: return;
+	case LSL_IDENTIFIER	: return;
+	case LSL_FLOAT		: printf("%f", exp->value.floatValue);		break;
+	case LSL_INTEGER	: printf("%d", exp->value.integerValue);	break;
+	case LSL_STRING		: return;
+	case LSL_KEY		: return;
+	case LSL_VECTOR		: return;
+	case LSL_ROTATION	: return;
+	case LSL_LIST		: return;
+	case LSL_LABEL		: return;
+	case LSL_EXPRESSION	:
+	    outputExpression(exp->left);
+	    printf(" %s ", LSL_Tokens[exp->expression].token);
+	    outputExpression(exp->right);
+	    break;
+	case LSL_DO		: return;
+	case LSL_FOR		: return;
+	case LSL_IF		: return;
+	case LSL_ELSE		: return;
+	case LSL_ELSEIF		: return;
+	case LSL_JUMP		: return;
+	case LSL_STATE_CHANGE	: return;
+	case LSL_WHILE		: return;
+	case LSL_RETURN		: return;
+	case LSL_STATEMENT	: return;
+	case LSL_BLOCK		: return;
+	case LSL_PARAMETER	: return;
+	case LSL_FUNCTION	: return;
+	case LSL_STATE		: return;
+	case LSL_SCRIPT		: return;
     }
 }
 
-void deleteExpression(SExpression *b)
+void convertExpression2Lua(LSL_Expression *exp)
 {
-    if (b == NULL) return;
-
-    deleteExpression(b->left);
-    deleteExpression(b->right);
-
-    free(b);
-}
-
-SExpression *getAST(const char *expr)
-{
-    SParserParam p;
-    YY_BUFFER_STATE state;
-
-    p.expression = NULL;
-    if (yylex_init(&(p.scanner)))
-        return NULL;
-
-    state = yy_scan_string(expr, p.scanner);
-    if (yyparse(&p))
-        return NULL;
-
-    yy_delete_buffer(state, p.scanner);
-    yylex_destroy(p.scanner);
-    return p.expression;
+    switch(exp->type)
+    {
+	case LSL_COMMENT	: return;
+	case LSL_TYPE		: return;
+	case LSL_NAME		: return;
+	case LSL_IDENTIFIER	: return;
+	case LSL_FLOAT		: return;
+	case LSL_INTEGER	: return;
+	case LSL_STRING		: return;
+	case LSL_KEY		: return;
+	case LSL_VECTOR		: return;
+	case LSL_ROTATION	: return;
+	case LSL_LIST		: return;
+	case LSL_LABEL		: return;
+	case LSL_EXPRESSION	: return;
+	case LSL_DO		: return;
+	case LSL_FOR		: return;
+	case LSL_IF		: return;
+	case LSL_ELSE		: return;
+	case LSL_ELSEIF		: return;
+	case LSL_JUMP		: return;
+	case LSL_STATE_CHANGE	: return;
+	case LSL_WHILE		: return;
+	case LSL_RETURN		: return;
+	case LSL_STATEMENT	: return;
+	case LSL_BLOCK		: return;
+	case LSL_PARAMETER	: return;
+	case LSL_FUNCTION	: return;
+	case LSL_STATE		: return;
+	case LSL_SCRIPT		: return;
+    }
 }
 
 int yyerror(const char *msg)
 {
-    fprintf(stderr,"Error:%s\n",msg); return 0;
+    fprintf(stderr, "Parser error: %s\n", msg);
+    return 0;
 }
 

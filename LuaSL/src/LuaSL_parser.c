@@ -5,14 +5,16 @@
 int main(void)
 {
     const char test[] = " 4 + 2*10 + 3*( 5 + 1 )";
-    SExpression *e = NULL;
+    LSL_Expression *exp;
 
-    if ((e = getAST(test)))
+    if ((exp = newTree(test)))
     {
-	int result = evaluate(e);
+	int result = evaluateExpression(exp, 0);
 
 	printf("Result of '%s' is %d\n", test, result);
-	deleteExpression(e);
+	outputExpression(exp);
+	printf("\n");
+	burnLSLExpression(exp);
     }
 
     return 0;

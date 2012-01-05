@@ -5,4 +5,6 @@ LuaSL/LuaSL_parser
 LuaSL/src/*.tab.*
 LuaSL/src/LuaSL_lexer.c
 LuaSL/src/LuaSL_lexer.h
+LuaSL/src/LuaSL_LSL_lexer.c
+LuaSL/src/LuaSL_LSL_lexer.h
 
