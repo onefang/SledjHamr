@@ -1,7 +1,6 @@
 %{
 
-#include "LuaSL_parser_param.h"
-#include "LuaSL_yaccer.tab.h"
+#include "LuaSL_LSL_tree.h"
 
 %}
 

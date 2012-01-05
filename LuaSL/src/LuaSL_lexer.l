@@ -1,7 +1,7 @@
 %{
 
-#include "LuaSL_type_parser.h"
-#include "LuaSL_yaccer.tab.h"
+#define excludeLexer
+#include "LuaSL_LSL_tree.h"
 
 %}
 
@@ -28,4 +28,16 @@ WS          [ \r\n\t]*
 .               {  }
 
 %%
+
+int XXyywrap()
+{
+#ifdef FLEX_SCANNER
+    #ifndef LL_WINDOWS
+	// get gcc to stop complaining about lack of use of yyunput
+	(void) yyunput;
+	(void) input;
+    #endif
+#endif
+	return(1);
+}
 
