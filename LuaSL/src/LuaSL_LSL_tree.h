@@ -9,6 +9,8 @@
 #include "LuaSL_yaccer.tab.h"
 #endif
 
+#include <stddef.h>	// So we can have NULL defined.
+
 #define YYERRCODE 256
 #define YYDEBUG 1
 extern int yydebug;
@@ -18,12 +20,13 @@ extern int yydebug;
 
 typedef enum
 {
-    LSL_LEFT2RIGHT	= 0,
-    LSL_RIGHT2LEFT	= 1,
-    LSL_INNER2OUTER	= 2,
-    LSL_UNARY		= 4,
-    LSL_ASSIGNMENT	= 8,
-    LSL_CREATION	= 16
+    LSL_NONE		= 0,
+    LSL_LEFT2RIGHT	= 1,
+    LSL_RIGHT2LEFT	= 2,
+    LSL_INNER2OUTER	= 4,
+    LSL_UNARY		= 8,
+    LSL_ASSIGNMENT	= 16,
+    LSL_CREATION	= 32
 } LSL_Flags;
 
 #ifdef LUASL_USE_ENUM
@@ -80,68 +83,6 @@ typedef enum			// In order of precedence, high to low.
 typedef int LSL_Operation;
 #endif
 
-typedef struct
-{
-//    LSL_Operation	operation,
-    char 		*token;
-    LSL_Flags		flags;
-} LSL_Operator;
-
-// QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
-// QUIRK - Conditionals are executed right to left.  Or left to right, depending on who you ask.  lol
-// QUIRK - No boolean short circuiting.
-
-#ifdef LSL_Tokens_define
-LSL_Operator LSL_Tokens[] =
-{
-    {",", LSL_LEFT2RIGHT},
-    {"++", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"++", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"--", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"--", LSL_RIGHT2LEFT | LSL_UNARY},
-    {".", LSL_RIGHT2LEFT},
-    {"=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"/=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"%=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"*=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"-=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"+=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"+=", LSL_RIGHT2LEFT | LSL_ASSIGNMENT},
-    {"(", LSL_INNER2OUTER},
-    {")", LSL_INNER2OUTER},
-    {"[", LSL_INNER2OUTER | LSL_CREATION},
-    {"]", LSL_INNER2OUTER | LSL_CREATION},
-    {"<", LSL_LEFT2RIGHT | LSL_CREATION},
-    {">", LSL_LEFT2RIGHT | LSL_CREATION},
-    {"()", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"~", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"!", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"-", LSL_RIGHT2LEFT | LSL_UNARY},
-    {"/", LSL_LEFT2RIGHT},
-    {"%", LSL_LEFT2RIGHT},
-    {"*", LSL_LEFT2RIGHT},
-    {"*", LSL_LEFT2RIGHT},
-    {"%", LSL_LEFT2RIGHT},
-    {"-", LSL_LEFT2RIGHT},
-    {"+", LSL_LEFT2RIGHT},
-    {"+", LSL_LEFT2RIGHT},
-    {"<<", LSL_LEFT2RIGHT},
-    {">>", LSL_LEFT2RIGHT},
-    {"<", LSL_LEFT2RIGHT},
-    {">", LSL_LEFT2RIGHT},
-    {"<=", LSL_LEFT2RIGHT},
-    {">=", LSL_LEFT2RIGHT},
-    {"==", LSL_LEFT2RIGHT},
-    {"!=", LSL_LEFT2RIGHT},
-    {"&", LSL_LEFT2RIGHT},
-    {"^", LSL_LEFT2RIGHT},
-    {"|", LSL_LEFT2RIGHT},
-    {"||", LSL_LEFT2RIGHT},
-    {"&&", LSL_LEFT2RIGHT}
-};
-#endif
-
-
 #ifdef LUASL_USE_ENUM
 typedef enum
 {
@@ -176,41 +117,6 @@ typedef enum
 } LSL_Type;
 #else
 typedef int LSL_Type;
-#define LSL_EXPRESSION 1
-#endif
-
-#ifdef LSL_Keywords_define
-char *LSL_Keywords[] =
-{
-    "//",	// Also "/*",
-    "",
-    "",
-    "",
-    "float",
-    "integer",
-    "string",
-    "key",
-    "vector",
-    "rotation",
-    "list",
-    "@",
-    "",
-    "do",
-    "for",
-    "if",
-    "else",
-    "else if",
-    "jump",
-    "state",
-    "while",
-    "return",
-    ";",
-    "{}",
-    "",
-    "",
-    "",
-    ""
-};
 #endif
 
 typedef struct
@@ -276,6 +182,20 @@ typedef union LSL_Leaf
     LSL_Script			*scriptValue;
 } LSL_Leaf;
 
+typedef void (*convertToken2Lua) (LSL_Leaf *content);
+typedef void (*outputToken) (LSL_Leaf *content);
+typedef LSL_Leaf *(*evaluateToken) (LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+
+typedef struct
+{
+    LSL_Type		type;
+    char 		*token;
+    LSL_Flags		flags;
+    outputToken		output;
+    convertToken2Lua	convert;
+    evaluateToken	evaluate;
+} LSL_Token;
+
 typedef struct
 {
     char		*name;
@@ -287,6 +207,7 @@ typedef struct LSL_Expression
 {
     struct LSL_Expression	*left;
     struct LSL_Expression	*right;
+    LSL_Token			*token;
     LSL_Type			type;
     LSL_Leaf			content;
 } LSL_Expression;
@@ -297,6 +218,7 @@ typedef struct LSL_AST
     struct LSL_AST	*right;
     int			line;
     int			character;
+    LSL_Token		*token;
     LSL_Type		type;
     LSL_Leaf		content;
 } LSL_AST;
@@ -325,17 +247,9 @@ typedef struct
 #define YYLEX_PARAM   ((LuaSL_yyparseParam*)data)->scanner
 
 
-void burnLSLExpression(LSL_Expression *exp);
-void burnAST(LSL_AST *ast);
 LSL_AST *addExpression(LSL_Expression *exp);
 LSL_Expression *addInteger(int value);
 LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right);
-int evaluateExpression(LSL_Expression *exp, int old);
-int evaluateAST(LSL_AST *ast, int old);
-void outputExpression(LSL_Expression *exp);
-void outputAST(LSL_AST *ast);
-void convertAST2Lua(LSL_AST *ast);
-LSL_AST *newTree(const char *expr);
 
 int yyerror(const char *msg);
 int yyparse(void *param);

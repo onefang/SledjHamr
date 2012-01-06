@@ -1,9 +1,106 @@
 
-#define LSL_Keywords_define
-#define LSL_Tokens_define
 #include "LuaSL_LSL_tree.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+static void outputExpressionToken(LSL_Leaf *content);
+static LSL_Leaf *evaluateExpressionToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+static void outputIntegerToken(LSL_Leaf *content);
+static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+
+LSL_Token LSL_Tokens[] =
+{
+    // Start with expression operators.
+    // In order of precedence, high to low.
+    // Left to right, unless oterwise stated.
+    // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
+
+//    {LSL_COMMA,				",",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+//    {LSL_INCREMENT_PRE,			"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+//    {LSL_INCREMENT_POST,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+//    {LSL_DECREMENT_PRE,			"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+//    {LSL_DECREMENT_POST,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+//    {LSL_DOT,				".",	LSL_RIGHT2LEFT,				NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_PLAIN,		"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_DIVIDE,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_MULTIPLY,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_SUBTRACT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_ADD,		"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+//    {LSL_ASSIGNMENT_CONCATENATE,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, NULL},
+    {LSL_PARENTHESIS_OPEN,		"(",	LSL_INNER2OUTER,			NULL, NULL, NULL},
+    {LSL_PARENTHESIS_CLOSE,		")",	LSL_INNER2OUTER,			NULL, NULL, NULL},
+//    {LSL_BRACKET_OPEN,			"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, NULL},
+//    {LSL_BRACKET_CLOSE,			"]",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, NULL},
+//    {LSL_ANGLE_OPEN,			"<",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, NULL},
+//    {LSL_ANGLE_CLOSE,			">",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, NULL},
+//    {LSL_TYPECAST_OPEN,			"(",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+//    {LSL_TYPECAST_CLOSE,		")",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+    {LSL_BIT_NOT,			"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+    {LSL_BOOL_NOT,			"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+    {LSL_NEGATION,			"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, NULL},
+    {LSL_DIVIDE,			"/",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_MODULO,			"%",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_MULTIPLY,			"*",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+//    {LSL_DOT_PRODUCT,			"*",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+//    {LSL_CROSS_PRODUCT,			"%",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_SUBTRACT,			"-",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_ADD,				"+",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+//    {LSL_CONCATENATE,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_LEFT_SHIFT,			"<<",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_RIGHT_SHIFT,			">>",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+// QUIRK - Conditionals are executed right to left.  Or left to right, depending on who you ask.  lol
+    {LSL_LESS_THAN,			"<",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_GREATER_THAN,			">",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_LESS_EQUAL,			"<=",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_GREATER_EQUAL,			">=",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_EQUAL,				"==",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_NOT_EQUAL,			"!=",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_BIT_AND,			"&",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_BIT_XOR,			"^",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_BIT_OR,			"|",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+// QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
+// QUIRK - No boolean short circuiting.
+    {LSL_BOOL_OR,			"||",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+    {LSL_BOOL_AND,			"&&",	LSL_LEFT2RIGHT,				NULL, NULL, NULL},
+
+    // Then the rest of the syntax tokens.
+
+//    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_TYPE,				"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_NAME,				"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_IDENTIFIER,			"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_FLOAT,				"float",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_INTEGER,			"integer",	LSL_NONE,			outputIntegerToken, NULL, evaluateIntegerToken},
+//    {LSL_STRING,			"string",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_KEY,				"key",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_VECTOR,			"vector",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_ROTATION,			"rotation",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_LIST,				"list",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_LABEL,				"@",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_EXPRESSION,			"",		LSL_NONE,			outputExpressionToken, NULL, evaluateExpressionToken},
+//    {LSL_DO,				"do",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_FOR,				"for",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_IF,				"if",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_ELSE,				"else",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_ELSE_IF,			"else if",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_JUMP,				"jump",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_STATE_CHANGE,			"state",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_WHILE,				"while",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_RETURN,			"return",	LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_STATEMENT,			";",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_BLOCK_OPEN,			"{",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_BLOCK_CLOSE,			"}",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_PARAMETER,			"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_FUNCTION,			"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_STATE,				"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_SCRIPT,			"",		LSL_NONE,			NULL, NULL, NULL},
+    {999999, NULL, LSL_NONE, NULL, NULL, NULL}
+};
+
+LSL_Token **tokens = NULL;
+int lowestToken = 999999;
 
 
 static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
@@ -17,16 +114,21 @@ static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
     ast->right = right;
     ast->line = -1;
     ast->character = -1;
+    if (tokens)
+	ast->token = tokens[type - lowestToken];
+    else
+	ast->token = NULL;
 
     return ast;
 }
 
-void burnAST(LSL_AST *ast)
+static void burnAST(LSL_AST *ast)
 {
     if (ast == NULL) return;
 
     burnAST(ast->left);
     burnAST(ast->right);
+    // TODO - burn the contents to.
     free(ast);
 }
 
@@ -49,11 +151,15 @@ static LSL_Expression *newLSLExpression(LSL_Type type, LSL_Expression *left, LSL
     exp->type = type;
     exp->left = left;
     exp->right = right;
+    if (tokens)
+	exp->token = tokens[type - lowestToken];
+    else
+	exp->token = NULL;
 
     return exp;
 }
 
-void burnLSLExpression(LSL_Expression *exp)
+static void burnLSLExpression(LSL_Expression *exp)
 {
     if (exp == NULL) return;
 
@@ -77,21 +183,23 @@ LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expre
     LSL_Expression *exp = newLSLExpression(LSL_EXPRESSION, left, right);
 
     if (exp)
+    {
 	exp->content.operationValue = type;
+	if (tokens)
+	    exp->token = tokens[type - lowestToken];
+	else
+	    exp->token = NULL;
+    }
 
     return exp;
 }
 
-int evaluateExpression(LSL_Expression *exp, int old)
+static int evaluateExpression(LSL_Expression *exp, int old)
 {
     if (NULL == exp)
 	return old;
 #ifdef LUASL_DEBUG
-    #ifdef LUASL_USE_ENUM
-	printf(" %s ", LSL_Tokens[exp->content.operationValue - LSL_COMMA].token);
-    #else
-	printf(" # ");
-    #endif
+	printf(" %s ", exp->token->token);
 #endif
 
     if (LSL_INTEGER == exp->type)
@@ -162,8 +270,30 @@ int evaluateExpression(LSL_Expression *exp, int old)
     return old;
 }
 
-int evaluateAST(LSL_AST *ast, int old)
+static LSL_Leaf *evaluateExpressionToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old)
 {
+//    if (content)
+//	return evaluateExpression(content->expressionValue, old->integerValue);
+    return old;
+}
+
+static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old)
+{
+    if (content)
+    {
+#ifdef LUASL_DEBUG
+	printf("%d", content->integerValue);
+#endif
+	return content;
+    }
+    return old;
+}
+
+static int evaluateAST(LSL_AST *ast, int old)
+{
+//    if ((ast) && (ast->token) && (ast->token->evaluate))
+//	return ast->token->evaluate(&(ast->content), oldType, old);
+
     if (NULL == ast)
 	return old;
     switch(ast->type)
@@ -214,7 +344,7 @@ int evaluateAST(LSL_AST *ast, int old)
     return old;
 }
 
-void outputExpression(LSL_Expression *exp)
+static void outputExpression(LSL_Expression *exp)
 {
     if (NULL == exp)
 	return;
@@ -226,93 +356,33 @@ void outputExpression(LSL_Expression *exp)
     else
     {
 	outputExpression(exp->left);
-#ifdef LUASL_USE_ENUM
-	printf(" %s ", LSL_Tokens[exp->content.operationValue - LSL_COMMA].token);
-#else
-	printf(" # ");
-#endif
+	printf(" %s ", exp->token->token);
 	outputExpression(exp->right);
     }
 }
 
-void outputAST(LSL_AST *ast)
+static void outputExpressionToken(LSL_Leaf *content)
 {
-    if (NULL == ast)
-	return;
-    switch(ast->type)
-    {
-#ifdef LUASL_USE_ENUM
-	case LSL_COMMENT	: return;
-	case LSL_TYPE		: return;
-	case LSL_NAME		: return;
-	case LSL_IDENTIFIER	: return;
-	case LSL_FLOAT		: printf("%f", ast->content.floatValue);		break;
-	case LSL_INTEGER	: printf("%d", ast->content.integerValue);		break;
-	case LSL_STRING		: return;
-	case LSL_KEY		: return;
-	case LSL_VECTOR		: return;
-	case LSL_ROTATION	: return;
-	case LSL_LIST		: return;
-	case LSL_LABEL		: return;
-#endif
-	case LSL_EXPRESSION	: outputExpression(ast->content.expressionValue);	break;
-#ifdef LUASL_USE_ENUM
-	case LSL_DO		: return;
-	case LSL_FOR		: return;
-	case LSL_IF		: return;
-	case LSL_ELSE		: return;
-	case LSL_ELSEIF		: return;
-	case LSL_JUMP		: return;
-	case LSL_STATE_CHANGE	: return;
-	case LSL_WHILE		: return;
-	case LSL_RETURN		: return;
-	case LSL_STATEMENT	: return;
-	case LSL_BLOCK		: return;
-	case LSL_PARAMETER	: return;
-	case LSL_FUNCTION	: return;
-	case LSL_STATE		: return;
-	case LSL_SCRIPT		: return;
-#endif
-    }
+    if (content)
+	outputExpression(content->expressionValue);
 }
 
-void convertAST2Lua(LSL_AST *ast)
+static void outputIntegerToken(LSL_Leaf *content)
 {
-#ifdef LUASL_USE_ENUM
-    if (NULL == ast)
-	return;
-    switch(ast->type)
-    {
-	case LSL_COMMENT	: return;
-	case LSL_TYPE		: return;
-	case LSL_NAME		: return;
-	case LSL_IDENTIFIER	: return;
-	case LSL_FLOAT		: return;
-	case LSL_INTEGER	: return;
-	case LSL_STRING		: return;
-	case LSL_KEY		: return;
-	case LSL_VECTOR		: return;
-	case LSL_ROTATION	: return;
-	case LSL_LIST		: return;
-	case LSL_LABEL		: return;
-	case LSL_EXPRESSION	: return;
-	case LSL_DO		: return;
-	case LSL_FOR		: return;
-	case LSL_IF		: return;
-	case LSL_ELSE		: return;
-	case LSL_ELSEIF		: return;
-	case LSL_JUMP		: return;
-	case LSL_STATE_CHANGE	: return;
-	case LSL_WHILE		: return;
-	case LSL_RETURN		: return;
-	case LSL_STATEMENT	: return;
-	case LSL_BLOCK		: return;
-	case LSL_PARAMETER	: return;
-	case LSL_FUNCTION	: return;
-	case LSL_STATE		: return;
-	case LSL_SCRIPT		: return;
-    }
-#endif
+    if (content)
+	printf("%d", content->integerValue);
+}
+
+static void outputAST(LSL_AST *ast)
+{
+    if ((ast) && (ast->token) && (ast->token->output))
+	ast->token->output(&(ast->content));
+}
+
+static void convertAST2Lua(LSL_AST *ast)
+{
+    if ((ast) && (ast->token) && (ast->token->convert))
+	ast->token->convert(&(ast->content));
 }
 
 int yyerror(const char *msg)
@@ -321,7 +391,7 @@ int yyerror(const char *msg)
     return 0;
 }
 
-LSL_AST *newTree(const char *expr)
+static LSL_AST *newTree(const char *expr)
 {
     LuaSL_yyparseParam param;
     YY_BUFFER_STATE state;
@@ -352,6 +422,25 @@ int main(void)
 {
     const char test[] = " 4 + 2 * 10 + 3 * ( 5 + 1 )";
     LSL_AST *ast;
+    int i;
+
+    // Figure out what numbers yacc gave to our tokens.
+    for (i = 0; LSL_Tokens[i].token != NULL; i++)
+    {
+	if (lowestToken > LSL_Tokens[i].type)
+	    lowestToken = LSL_Tokens[i].type;
+    }
+    tokens = malloc(sizeof(LSL_Token *) * (i + 1));
+    if (tokens)
+    {
+	// Sort the token table.
+	for (i = 0; LSL_Tokens[i].token != NULL; i++)
+	{
+	    int j = LSL_Tokens[i].type - lowestToken;
+
+	    tokens[j] = &(LSL_Tokens[i]);
+	}
+    }
 
     if ((ast = newTree(test)))
     {
@@ -362,6 +451,8 @@ int main(void)
 #endif
 	printf("Result of '%s' is %d\n", test, result);
 	outputAST(ast);
+	printf("\n");
+	convertAST2Lua(ast);
 	printf("\n");
 	burnAST(ast);
     }
