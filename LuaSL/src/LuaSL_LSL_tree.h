@@ -1,6 +1,4 @@
-/*
- * Definition of the structure used to build the abstract syntax tree.
- */
+
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
@@ -215,109 +213,83 @@ char *LSL_Keywords[] =
 };
 #endif
 
-typedef union
-{
-    float		floatValue;
-    int			integerValue;
-    char		*stringValue;
-    char		*keyValue;
-    float		vectorValue[3];
-    float		rotationValue[4];
-    union LSL_Leaf	*listValue;
-} LSL_Value;
-
 typedef struct
 {
-    char		*name;
-    LSL_Type		type;
-    LSL_Value		value;
-} LSL_Identifier;
-
-typedef struct LSL_Expression
-{
-    struct LSL_Expression *left;
-    struct LSL_Expression *right;
-    LSL_Value		value;
-    LSL_Operation	expression;
-    LSL_Type		type;
-} LSL_Expression;
-
-typedef struct
-{
-    LSL_Type		type;
-    LSL_Expression	*expressions;
+    LSL_Type			type;
+    struct LSL_Expression	*expressions;
 } LSL_Statement;
 
 typedef struct
 {
-    LSL_Statement	*statements;
+    LSL_Statement		*statements;
 } LSL_Block;
 
 typedef struct
 {
-    char		*name;
-    LSL_Identifier	*parameters;
-    LSL_Block		block;
-    LSL_Type		type;
+    char			*name;
+    struct LSL_Identifier	*parameters;
+    LSL_Block			block;
+    LSL_Type			type;
 } LSL_Function;
 
 typedef struct
 {
-    char		*name;
-    LSL_Function	*handlers;
+    char			*name;
+    LSL_Function		*handlers;
 } LSL_State;
 
 typedef struct
 {
-    char		*name;
-    LSL_Identifier	*variables;
-    LSL_Function	*functions;
-    LSL_State		*states;
+    char			*name;
+    struct LSL_Identifier	*variables;
+    LSL_Function		*functions;
+    LSL_State			*states;
 } LSL_Script;
 
 typedef union LSL_Leaf
 {
-    char		*commentValue;
-    LSL_Type		typeValue;
-    char		*nameValue;
-    LSL_Identifier	*identifierValue;
-    float		floatValue;
-    int			integerValue;
-    char		*stringValue;
-    char		*keyValue;
-    float		vectorValue[3];
-    float		rotationValue[4];
-    union LSL_Leaf	*listValue;
-    char		*labelValue;
-//    LSL_Operation	expressionValue;
-    LSL_Expression	*expressionValue;
-    LSL_Statement	*doValue;
-    LSL_Statement	*forValue;
-    LSL_Statement	*ifValue;
-    LSL_Statement	*elseValue;
-    LSL_Statement	*elseIfValue;
-    char		*jumpValue;
-    char		*stateChangeValue;
-    LSL_Statement	*statementValue;
-    LSL_Identifier	*parameterValue;
-    LSL_Function	*functionValue;
-    LSL_State		*stateValue;
-    LSL_Script		*scriptValue;
-//	class LLScriptType		*type;
-//	class LLScriptConstant		*constant;
-//	class LLScriptIdentifier	*identifier;
-//	class LLScriptSimpleAssignable	*assignable;
-//	class LLScriptGlobalVariable	*global;
-//	class LLScriptEvent		*event;
-//	class LLScriptEventHandler	*handler;
-//	class LLScriptExpression	*expression;
-//	class LLScriptStatement		*statement;
-//	class LLScriptGlobalFunctions	*global_funcs;
-//	class LLScriptFunctionDec	*global_decl;
-//	class LLScriptState		*state;
-//	class LLScritpGlobalStorage	*global_store;
-//	class LLScriptScript		*script;
+    char			*commentValue;
+    LSL_Type			typeValue;
+    char			*nameValue;
+    struct LSL_Identifier	*identifierValue;
+    float			floatValue;
+    int				integerValue;
+    char			*stringValue;
+    char			*keyValue;
+    float			vectorValue[3];
+    float			rotationValue[4];
+    union LSL_Leaf		*listValue;
+    char			*labelValue;
+    LSL_Operation		operationValue;
+    struct LSL_Expression	*expressionValue;
+    LSL_Statement		*doValue;
+    LSL_Statement		*forValue;
+    LSL_Statement		*ifValue;
+    LSL_Statement		*elseValue;
+    LSL_Statement		*elseIfValue;
+    char			*jumpValue;
+    char			*stateChangeValue;
+    LSL_Statement		*statementValue;
+    struct LSL_Identifier	*parameterValue;
+    LSL_Function		*functionValue;
+    LSL_State			*stateValue;
+    LSL_Script			*scriptValue;
 } LSL_Leaf;
+
+typedef struct
+{
+    char		*name;
+    LSL_Type		type;
+    LSL_Leaf		content;
+} LSL_Identifier;
+
+typedef struct LSL_Expression
+{
+    struct LSL_Expression	*left;
+    struct LSL_Expression	*right;
+    LSL_Type			type;
+    LSL_Leaf			content;
+} LSL_Expression;
 
 typedef struct LSL_AST
 {
@@ -342,18 +314,8 @@ typedef struct LSL_AST
 typedef struct
 {
         yyscan_t scanner;
-        LSL_Expression *expression;
+        LSL_AST *ast;
 } LuaSL_yyparseParam;
-
-
-void burnLeaf(LSL_AST *leaf);
-void burnLSLExpression(LSL_Expression *exp);
-LSL_Expression *addInteger(int value);
-LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right);
-LSL_Expression *newTree(const char *expr);
-int evaluateExpression(LSL_Expression *exp, int old);
-void outputExpression(LSL_Expression *exp);
-void convertExpression2Lua(LSL_Expression *exp);
 
 // the parameter name (of the reentrant 'yyparse' function)
 // data is a pointer to a 'SParserParam' structure
@@ -361,6 +323,19 @@ void convertExpression2Lua(LSL_Expression *exp);
  
 // the argument for the 'yylex' function
 #define YYLEX_PARAM   ((LuaSL_yyparseParam*)data)->scanner
+
+
+void burnLSLExpression(LSL_Expression *exp);
+void burnAST(LSL_AST *ast);
+LSL_AST *addExpression(LSL_Expression *exp);
+LSL_Expression *addInteger(int value);
+LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right);
+int evaluateExpression(LSL_Expression *exp, int old);
+int evaluateAST(LSL_AST *ast, int old);
+void outputExpression(LSL_Expression *exp);
+void outputAST(LSL_AST *ast);
+void convertAST2Lua(LSL_AST *ast);
+LSL_AST *newTree(const char *expr);
 
 int yyerror(const char *msg);
 int yyparse(void *param);

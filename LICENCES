@@ -59,11 +59,16 @@ This is covered by "Creative Commons Attribution-ShareAlike 3.0 Unported
 License".  The attribution portion is covered by the URL above, as per
 the Wikipedia Terms of Use.
 
+There is no longer any parts of that code left I think.
+
 --------------------------------------------------------------------------------
 
 The flex and bison source files for the LSL parser are from the SL
 viewer under GPL 2 and copyright at some unknown date (due to missing
 copyright notice in those specific files) by Linden Research, Inc.
+
+It's likely this will go away, as I'm writing my own, and most of it was
+useless to me anyway.
 
 --------------------------------------------------------------------------------
 

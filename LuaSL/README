@@ -78,6 +78,6 @@ useful extras.  btyacc version 3 (the version coming from my version of
 Ubuntu) apparently no longer supports C, only C++.  It's written in C
 though.
 
-Let's see if flex and btyacc will do the trick, and output C.
-
-Might be best to have the LSL to Lua converter as a seperate executable.
+Let's see if flex and btyacc will do the trick, and output C.  Might be
+best to have the LSL to Lua converter as a seperate executable.  Think
+I'll end up writing my own parser.

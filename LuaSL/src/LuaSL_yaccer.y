@@ -28,7 +28,7 @@
 %%
 
 input : 
-    expr { ((LuaSL_yyparseParam*)data)->expression = $1; }
+    expr { ((LuaSL_yyparseParam*)data)->ast = addExpression($1); }
 ;
 
 expr :
