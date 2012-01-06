@@ -139,6 +139,13 @@ int evaluateExpression(LSL_Expression *exp, int old)
 #endif
 	case LSL_EXPRESSION	:
 	{
+#ifdef LUASL_DEBUG
+    #ifdef LUASL_USE_ENUM
+	    printf(" %s ", LSL_Tokens[exp->expression - LSL_COMMA].token);
+    #else
+	    printf(" # ");
+    #endif
+#endif
 	    switch (exp->expression)
 	    {
 #ifdef LUASL_USE_ENUM
@@ -162,30 +169,25 @@ int evaluateExpression(LSL_Expression *exp, int old)
 		case LSL_ANGLE_OPEN		:
 		case LSL_ANGLE_CLOSE		:
 		case LSL_TYPECAST		:
-		case LSL_BIT_NOT		:
-		case LSL_BOOL_NOT		:
-		case LSL_NEGATION		:
 		    break;
+#endif
+		case LSL_BIT_NOT		: return ~ evaluateExpression(exp->right, old);
+		case LSL_BOOL_NOT		: return ! evaluateExpression(exp->right, old);
+		case LSL_NEGATION		: return 0 - evaluateExpression(exp->right, old);
 		case LSL_DIVIDE			: return evaluateExpression(exp->left, old) /  evaluateExpression(exp->right, old);
+#ifdef LUASL_USE_ENUM
 		case LSL_MODULO			: return evaluateExpression(exp->left, old) %  evaluateExpression(exp->right, old);
 #endif
-		case LSL_MULTIPLY		:
-#ifdef LUASL_DEBUG
-		    printf(" * ");
-#endif
-		    return evaluateExpression(exp->left, old) *  evaluateExpression(exp->right, old);
+		case LSL_MULTIPLY		: return evaluateExpression(exp->left, old) *  evaluateExpression(exp->right, old);
 #ifdef LUASL_USE_ENUM
 		case LSL_DOT_PRODUCT		: break;
 		case LSL_CROSS_PRODUCT		: break;
+#endif
 		case LSL_SUBTRACT		: return evaluateExpression(exp->left, old) -  evaluateExpression(exp->right, old);
-#endif
-		case LSL_ADD			:
-#ifdef LUASL_DEBUG
-		    printf(" + ");
-#endif
-		    return evaluateExpression(exp->left, old) +  evaluateExpression(exp->right, old);
+		case LSL_ADD			: return evaluateExpression(exp->left, old) +  evaluateExpression(exp->right, old);
 #ifdef LUASL_USE_ENUM
 		case LSL_CONCATENATE		: break;
+#endif
 		case LSL_LEFT_SHIFT		: return evaluateExpression(exp->left, old) << evaluateExpression(exp->right, old);
 		case LSL_RIGHT_SHIFT		: return evaluateExpression(exp->left, old) >> evaluateExpression(exp->right, old);
 		case LSL_LESS_THAN		: return evaluateExpression(exp->left, old) <  evaluateExpression(exp->right, old);
@@ -199,7 +201,6 @@ int evaluateExpression(LSL_Expression *exp, int old)
 		case LSL_BIT_OR			: return evaluateExpression(exp->left, old) |  evaluateExpression(exp->right, old);
 		case LSL_BOOL_OR		: return evaluateExpression(exp->left, old) || evaluateExpression(exp->right, old);
 		case LSL_BOOL_AND		: return evaluateExpression(exp->left, old) && evaluateExpression(exp->right, old);
-#endif
 	    }
 	    break;
 	}
