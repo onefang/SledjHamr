@@ -1,5 +1,6 @@
 *.edj
 *.o
+*.output
 LuaSL/LuaSL
 LuaSL/LuaSL_parser
 LuaSL/src/*.tab.*

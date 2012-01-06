@@ -6,15 +6,15 @@
 
 %define api.pure
 
-%left '+' TOKEN_PLUS
-%left '*' TOKEN_MULTIPLY
+%left '+' LSL_ADD
+%left '*' LSL_MULTIPLY
 
-%token TOKEN_LPAREN
-%token TOKEN_RPAREN
-%token TOKEN_PLUS
-%token TOKEN_MULTIPLY
+%token LSL_PARENTHESIS_OPEN
+%token LSL_PARENTHESIS_CLOSE
+%token LSL_ADD
+%token LSL_MULTIPLY
 
-%token <integerValue> TOKEN_NUMBER
+%token <integerValue> LSL_INTEGER
 
 %type <expressionValue> expr
 
@@ -25,10 +25,10 @@ input:
         ;
 
 expr:
-      expr TOKEN_PLUS expr { $$ = addOperation( LSL_ADD, $1, $3 ); }
-    | expr TOKEN_MULTIPLY expr { $$ = addOperation( LSL_MULTIPLY, $1, $3 ); }
-    | TOKEN_LPAREN expr TOKEN_RPAREN { $$ = $2; }
-    | TOKEN_NUMBER { $$ = addInteger($1); }
+      expr LSL_ADD expr { $$ = addOperation( LSL_ADD, $1, $3 ); }
+    | expr LSL_MULTIPLY expr { $$ = addOperation( LSL_MULTIPLY, $1, $3 ); }
+    | LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = $2; }
+    | LSL_INTEGER { $$ = addInteger($1); }
 ;
 
 %%

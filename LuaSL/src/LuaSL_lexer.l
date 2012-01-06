@@ -8,24 +8,21 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
-LPAREN      "("
-RPAREN      ")"
-PLUS        "+"
-MULTIPLY    "*"
-
+SPACE       [ \r\n\t]*
 NUMBER      [0-9]+
-WS          [ \r\n\t]*
+NAME        [a-zA-Z][a-zA-Z0-9]*
 
 %%
 
-{WS}            { /* Skip blanks. */ }
-{NUMBER}        { sscanf(yytext,"%d",&yylval->integerValue); return TOKEN_NUMBER; }
+{SPACE}         { /* Skip blanks. */ }
+{NUMBER}        { yylval->integerValue = atoi(yytext); return LSL_INTEGER; }
+{NAME}          { /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ }
 
-{MULTIPLY}      { return TOKEN_MULTIPLY; }
-{PLUS}          { return TOKEN_PLUS; }
-{LPAREN}        { return TOKEN_LPAREN; }
-{RPAREN}        { return TOKEN_RPAREN; }
-.               {  }
+"*"             { return LSL_MULTIPLY; }
+"+"             { return LSL_ADD; }
+"("             { return LSL_PARENTHESIS_OPEN; }
+")"             { return LSL_PARENTHESIS_CLOSE; }
+.               { /* This should return an "unknown character" error */  }
 
 %%
 

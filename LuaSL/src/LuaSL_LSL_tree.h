@@ -8,6 +8,8 @@
 #define YY_NO_UNISTD_H 1
 #endif // YY_NO_UNISTD_H
 
+#include "LuaSL_yaccer.tab.h"
+
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
 typedef enum
@@ -20,6 +22,7 @@ typedef enum
     LSL_CREATION	= 16
 } LSL_Flags;
 
+/*
 typedef enum			// In order of precedence, high to low.
 				// Left to right, unless oterwise stated.
 				// According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
@@ -69,6 +72,9 @@ typedef enum			// In order of precedence, high to low.
     LSL_BOOL_OR,
     LSL_BOOL_AND
 } LSL_Operation;
+*/
+
+typedef int LSL_Operation;
 
 typedef struct
 {
@@ -131,6 +137,7 @@ LSL_Operator LSL_Tokens[] =
 };
 #endif
 
+/*
 typedef enum
 {
     LSL_COMMENT,
@@ -162,6 +169,11 @@ typedef enum
     LSL_STATE,
     LSL_SCRIPT
 } LSL_Type;
+*/
+
+typedef int LSL_Type;
+#define LSL_EXPRESSION 1
+
 
 #ifdef LSL_Keywords_define
 char *LSL_Keywords[] =
@@ -285,29 +297,6 @@ typedef union LSL_Leaf
     LSL_Function	*functionValue;
     LSL_State		*stateValue;
     LSL_Script		*scriptValue;
-} LSL_Leaf;
-
-typedef struct LSL_AST
-{
-    struct LSL_AST	*left;
-    struct LSL_AST	*right;
-    int			line;
-    int			character;
-    LSL_Type		type;
-    LSL_Leaf		content;
-} LSL_AST;
-
-
-/**
- * @brief The structure used by flex and bison
- */
-//typedef union tagTypeParser
-//{
-//        SExpression			*expression;
-//        int				value;
-//	int				ival;
-//	float				fval;
-//	char				*sval;
 //	class LLScriptType		*type;
 //	class LLScriptConstant		*constant;
 //	class LLScriptIdentifier	*identifier;
@@ -322,7 +311,18 @@ typedef struct LSL_AST
 //	class LLScriptState		*state;
 //	class LLScritpGlobalStorage	*global_store;
 //	class LLScriptScript		*script;
-//}STypeParser;
+} LSL_Leaf;
+
+typedef struct LSL_AST
+{
+    struct LSL_AST	*left;
+    struct LSL_AST	*right;
+    int			line;
+    int			character;
+    LSL_Type		type;
+    LSL_Leaf		content;
+} LSL_AST;
+
  
 // define the type for flex and bison
 #define YYSTYPE LSL_Leaf
@@ -358,8 +358,6 @@ void convertExpression2Lua(LSL_Expression *exp);
 
 int yyerror(const char *msg);
 int yyparse(void *param);
-
-#include "LuaSL_yaccer.tab.h"
 
 
 #endif // __EXPRESSION_H__
