@@ -11,7 +11,6 @@
     #define ECHO {}
 #endif
 
-
 %}
 
 %option reentrant noyywrap never-interactive nounistd
