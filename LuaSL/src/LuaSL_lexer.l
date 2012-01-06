@@ -3,26 +3,35 @@
 #define excludeLexer
 #include "LuaSL_LSL_tree.h"
 
+#ifdef LUASL_DEBUG
+    #undef ECHO
+    #define ECHO printf ("[%s]\n", yytext)
+#else
+    #undef ECHO
+    #define ECHO {}
+#endif
+
+
 %}
 
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
 SPACE       [ \r\n\t]*
+NAME        [a-zA-Z_][a-zA-Z0-9_]*
 NUMBER      [0-9]+
-NAME        [a-zA-Z][a-zA-Z0-9]*
 
 %%
 
-{SPACE}         { /* Skip blanks. */ }
-{NUMBER}        { yylval->integerValue = atoi(yytext); return LSL_INTEGER; }
-{NAME}          { /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ }
+{SPACE}         { ECHO; /* Skip blanks. */ }
+{NAME}          { ECHO; /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ }
+{NUMBER}        { ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; }
 
-"*"             { return LSL_MULTIPLY; }
-"+"             { return LSL_ADD; }
-"("             { return LSL_PARENTHESIS_OPEN; }
-")"             { return LSL_PARENTHESIS_CLOSE; }
-.               { /* This should return an "unknown character" error */  }
+"("             { ECHO; return LSL_PARENTHESIS_OPEN; }
+")"             { ECHO; return LSL_PARENTHESIS_CLOSE; }
+"*"             { ECHO; return LSL_MULTIPLY; }
+"+"             { ECHO; return LSL_ADD; }
+.               { ECHO; printf(" unexpected character.\n"); }
 
 %%
 

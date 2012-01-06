@@ -8,7 +8,17 @@
 #define YY_NO_UNISTD_H 1
 #endif // YY_NO_UNISTD_H
 
+//#define LUASL_USE_ENUM
+#define LUASL_DEBUG
+
+#ifndef LUASL_USE_ENUM
 #include "LuaSL_yaccer.tab.h"
+#endif
+
+#define YYERRCODE 256
+#define YYDEBUG 1
+extern int yydebug;
+
 
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
@@ -22,12 +32,12 @@ typedef enum
     LSL_CREATION	= 16
 } LSL_Flags;
 
-/*
+#ifdef LUASL_USE_ENUM
 typedef enum			// In order of precedence, high to low.
 				// Left to right, unless oterwise stated.
 				// According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
 {
-    LSL_COMMA,
+    LSL_COMMA = 257,
     LSL_INCREMENT_PRE,		// Right to left.
     LSL_INCREMENT_POST,		// Right to left.
     LSL_DECREMENT_PRE,		// Right to left.
@@ -72,9 +82,9 @@ typedef enum			// In order of precedence, high to low.
     LSL_BOOL_OR,
     LSL_BOOL_AND
 } LSL_Operation;
-*/
-
+#else
 typedef int LSL_Operation;
+#endif
 
 typedef struct
 {
@@ -137,10 +147,11 @@ LSL_Operator LSL_Tokens[] =
 };
 #endif
 
-/*
+
+#ifdef LUASL_USE_ENUM
 typedef enum
 {
-    LSL_COMMENT,
+    LSL_COMMENT = (LSL_BOOL_AND + 1),
     LSL_TYPE,
     LSL_NAME,
     LSL_IDENTIFIER,
@@ -169,11 +180,10 @@ typedef enum
     LSL_STATE,
     LSL_SCRIPT
 } LSL_Type;
-*/
-
+#else
 typedef int LSL_Type;
 #define LSL_EXPRESSION 1
-
+#endif
 
 #ifdef LSL_Keywords_define
 char *LSL_Keywords[] =

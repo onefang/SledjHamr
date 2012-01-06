@@ -2,6 +2,9 @@
 
 #include "LuaSL_LSL_tree.h"
 
+//extern char *yytext;
+//#define YYDEBUG_LEXER_TEXT yytext
+
 %}
 
 %define api.pure
@@ -25,9 +28,9 @@ input:
         ;
 
 expr:
-      expr LSL_ADD expr { $$ = addOperation( LSL_ADD, $1, $3 ); }
+     LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = $2; }
     | expr LSL_MULTIPLY expr { $$ = addOperation( LSL_MULTIPLY, $1, $3 ); }
-    | LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = $2; }
+    | expr LSL_ADD expr { $$ = addOperation( LSL_ADD, $1, $3 ); }
     | LSL_INTEGER { $$ = addInteger($1); }
 ;
 
