@@ -97,13 +97,3 @@ command="gcc $CFLAGS -o ../LuaSL_parser $objects $LDFLAGS $libs"
 echo $command
 $command
 
-
-command="flex --outfile=LuaSL_LSL_lexer.c --header-file=LuaSL_LSL_lexer.h LuaSL_LSL_lexer.l"
-echo $command
-$command
-
-command="btyacc -d -b LuaSL_LSL_yaccer -S btyacc-c.ske LuaSL_LSL_yaccer.y"
-echo $command
-$command
-
-
