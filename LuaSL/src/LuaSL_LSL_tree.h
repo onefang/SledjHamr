@@ -4,10 +4,6 @@
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
-#ifndef YY_NO_UNISTD_H
-#define YY_NO_UNISTD_H 1
-#endif // YY_NO_UNISTD_H
-
 //#define LUASL_USE_ENUM
 #define LUASL_DEBUG
 

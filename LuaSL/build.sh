@@ -74,7 +74,7 @@ $command
 names="LuaSL_LSL_tree LuaSL_lexer LuaSL_yaccer.tab"
 
 LFLAGS="-d"
-command="flex -dbpv --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
+command="flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
 

@@ -13,10 +13,15 @@
 
 %}
 
-%option reentrant noyywrap never-interactive nounistd
-%option bison-bridge
+%option reentrant never-interactive batch
+%option bison-bridge yylineno 8bit 
+%option noreject noyymore noyywrap
+%option backup debug perf-report perf-report verbose warn
+%option align full
 
 SPACE       [ \r\n\t]*
+ENDSPACE    {SPACE}$
+
 LETTER      [A-Za-z]
 DECIMAL     [0-9]
 HEX         [0-9A-Fa-f]
@@ -28,11 +33,14 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 
 %%
 
-{SPACE}         { ECHO; /* Skip blanks. */ }
-{NAME}          { ECHO; /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ }
-{INTEGER}       { ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; }
-{FLOAT}         { ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ }
+ /* Basic tokens */
+{ENDSPACE}      %{ /* Skip blanks at end of lines. */ %}
+{SPACE}         %{ ECHO; /* Skip blanks. */ %}
+{NAME}          %{ ECHO; /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ %}
+{INTEGER}       %{ ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; %}
+{FLOAT}         %{ ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ %}
 
+ /* Expression tokens */
 "&&"            { ECHO; return LSL_BOOL_AND; }
 "||"            { ECHO; return LSL_BOOL_OR; }
 "|"             { ECHO; return LSL_BIT_OR; }
@@ -56,7 +64,8 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 "("             { ECHO; return LSL_PARENTHESIS_OPEN; }
 ")"             { ECHO; return LSL_PARENTHESIS_CLOSE; }
 
-.               { ECHO; printf(" unexpected character.\n"); }
+ /* Everything else */
+.               %{ ECHO; printf(" unexpected character.\n"); %}
 
 %%
 
