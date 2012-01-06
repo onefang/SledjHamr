@@ -51,7 +51,7 @@ names="LuaSL_main LuaSL_compile LuaSL_utilities"
 
 EDJE_FLAGS="-id images -fd fonts"
 
-rm -f ../LuaSL ../LuaSL_parser ../*.o *.output ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_yaccer.h LuaSL_yaccer.tab.c
+rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_yaccer.h LuaSL_yaccer.tab.c
 command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
 echo $command
 $command
@@ -71,12 +71,14 @@ $command
 
 
 
-names="LuaSL_parser LuaSL_LSL_tree LuaSL_lexer LuaSL_yaccer.tab"
+names="LuaSL_LSL_tree LuaSL_lexer LuaSL_yaccer.tab"
 
-command="flex --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
+LFLAGS="-d"
+command="flex -dbpv --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
 
+# I want to remove -d, coz I want an enum, not a bunch of #defines, but btyacc creates #defines internally anyway.  sigh
 # Should add -t as well for debugging, but it causes errors.
 command="btyacc -d -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
 echo $command

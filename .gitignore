@@ -1,3 +1,4 @@
+*.backup
 *.edj
 *.o
 *.output
