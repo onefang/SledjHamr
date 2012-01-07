@@ -190,7 +190,7 @@ typedef struct
 
 typedef void (*convertToken2Lua) (LSL_Leaf *content);
 typedef void (*outputToken) (LSL_Leaf *content);
-typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Value *result);
+typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
 
 typedef struct
 {
