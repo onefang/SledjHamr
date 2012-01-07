@@ -11,6 +11,7 @@
 
 %token <integerValue> LSL_INTEGER
 
+%nonassoc LSL_STATEMENT
 %left LSL_BOOL_AND
 %left LSL_BOOL_OR
 %left LSL_BIT_AND LSL_BIT_XOR LSL_BIT_OR
@@ -25,10 +26,17 @@
 
 %type <expressionValue> expr
 
+%type <statementValue> statement
+
 %%
 
 input :
     expr { ((LuaSL_yyparseParam*)data)->ast = addOperation(LSL_EXPRESSION, $1, $1); }
+    | statement { ((LuaSL_yyparseParam*)data)->ast = addStatement($1, ((LuaSL_yyparseParam*)data)->ast); }
+;
+
+statement :
+    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); }
 ;
 
 expr :
@@ -54,7 +62,7 @@ expr :
     | LSL_BIT_NOT expr { $$ = addOperation( LSL_BIT_NOT, NULL, $2 ); }
     | LSL_BOOL_NOT expr { $$ = addOperation( LSL_BOOL_NOT, NULL, $2 ); }
     | LSL_SUBTRACT expr { $$ = addOperation( LSL_NEGATION, NULL, $2 ); }  %prec LSL_NEGATION
-    | LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = $2; }
+    | LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = addParenthesis($2); }
 ;
 
 %%

@@ -4,9 +4,12 @@
 #include <stdio.h>
 
 static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
+static void evaluateNoToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right);
 static void evaluateOperationToken(LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
+static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right);
 static void outputIntegerToken(LSL_Leaf *content);
 static void outputOperationToken(LSL_Leaf *content);
+static void outputStatementToken(LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -28,8 +31,8 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_ASSIGNMENT_SUBTRACT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	outputOperationToken, NULL, evaluateOperationToken},
 //    {LSL_ASSIGNMENT_ADD,		"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	outputOperationToken, NULL, evaluateOperationToken},
 //    {LSL_ASSIGNMENT_CONCATENATE,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	outputOperationToken, NULL, evaluateOperationToken},
-    {LSL_PARENTHESIS_OPEN,		"(",	LSL_INNER2OUTER,			outputOperationToken, NULL, evaluateOperationToken},
-    {LSL_PARENTHESIS_CLOSE,		")",	LSL_INNER2OUTER,			outputOperationToken, NULL, evaluateOperationToken},
+    {LSL_PARENTHESIS_OPEN,		"(",	LSL_INNER2OUTER,			NULL, NULL, NULL},
+    {LSL_PARENTHESIS_CLOSE,		")",	LSL_INNER2OUTER,			NULL, NULL, evaluateNoToken},
 //    {LSL_BRACKET_OPEN,			"[",	LSL_INNER2OUTER | LSL_CREATION,		outputOperationToken, NULL, evaluateOperationToken},
 //    {LSL_BRACKET_CLOSE,			"]",	LSL_INNER2OUTER | LSL_CREATION,		outputOperationToken, NULL, evaluateOperationToken},
 //    {LSL_ANGLE_OPEN,			"<",	LSL_LEFT2RIGHT | LSL_CREATION,		outputOperationToken, NULL, evaluateOperationToken},
@@ -66,6 +69,7 @@ LSL_Token LSL_Tokens[] =
 
     // Then the rest of the syntax tokens.
 
+//    {LSL_SPACE,			" ",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_TYPE,				"type",		LSL_NONE,			NULL, NULL, NULL},
@@ -89,7 +93,7 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_STATE_CHANGE,			"state",	LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_WHILE,				"while",	LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_RETURN,			"return",	LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_STATEMENT,			";",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_STATEMENT,			";",		LSL_NONE,			outputStatementToken, NULL, evaluateStatementToken},
 //    {LSL_BLOCK_OPEN,			"{",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_BLOCK_CLOSE,			"}",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_PARAMETER,			"parameter",		LSL_NONE,			NULL, NULL, NULL},
@@ -156,6 +160,37 @@ LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right)
     return ast;
 }
 
+LSL_AST *addParenthesis(LSL_AST *expr)
+{
+    LSL_AST *ast = newAST(LSL_PARENTHESIS_OPEN, NULL, expr);
+
+    if (ast)
+	ast = newAST(LSL_PARENTHESIS_CLOSE, ast, NULL);
+
+    return ast;
+}
+
+LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
+{
+    LSL_Statement *stat = malloc(sizeof(LSL_Statement));
+
+    if (stat == NULL) return NULL;
+
+    stat->type = type;
+    stat->expression = expr;
+
+    return stat;
+}
+
+LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root)
+{
+    LSL_AST *ast = newAST(LSL_STATEMENT, root, NULL);
+
+    ast->content.statementValue = statement;
+
+    return ast;
+}
+
 static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
 {
     if (ast)
@@ -192,7 +227,9 @@ static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
 	}
 	else
 	{
+#ifdef LUASL_DEBUG
 	    printf(" eval <%s %d %d %d %d> ", ast->token->token, left->content.integerValue, right->content.integerValue, lresult.content.integerValue, rresult.content.integerValue);
+#endif
 	    memcpy(left, &rresult, sizeof(LSL_Value));
 	}
     }
@@ -208,6 +245,10 @@ static void evaluateIntegerToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *
 	left->content.integerValue = content->integerValue;
 	left->type = LSL_INTEGER;
     }
+}
+
+static void evaluateNoToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+{
 }
 
 static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
@@ -278,6 +319,12 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
     }
 }
 
+static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+{
+    if (content)
+	evaluateAST(content->statementValue->expression, left, right);
+}
+
 static void outputAST(LSL_AST *ast)
 {
     if (ast)
@@ -286,7 +333,7 @@ static void outputAST(LSL_AST *ast)
 	if (ast->token->output)
 	    ast->token->output(&(ast->content));
 	else
-	    printf(" <%s> ", ast->token->token);
+	    printf(" %s ", ast->token->token);
 	outputAST(ast->right);
     }
 }
@@ -303,6 +350,13 @@ static void outputOperationToken(LSL_Leaf *content)
 	printf(" %s ", tokens[content->operationValue - lowestToken]->token);
 }
 
+static void outputStatementToken(LSL_Leaf *content)
+{
+    if (content)
+	outputAST(content->statementValue->expression);
+    printf(";");
+}
+
 static void convertAST2Lua(LSL_AST *ast)
 {
     if (ast)
@@ -312,6 +366,8 @@ static void convertAST2Lua(LSL_AST *ast)
 	    ast->token->convert(&(ast->content));
 	else if (ast->token->output)
 	    ast->token->output(&(ast->content));
+	else
+	    printf(" %s ", ast->token->token);
 	convertAST2Lua(ast->right);
     }
 }

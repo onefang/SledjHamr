@@ -39,6 +39,7 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 {FLOAT}         %{ ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ %}
 
  /* Expression tokens */
+";"             { ECHO; return LSL_STATEMENT; }
 "&&"            { ECHO; return LSL_BOOL_AND; }
 "||"            { ECHO; return LSL_BOOL_OR; }
 "|"             { ECHO; return LSL_BIT_OR; }

@@ -3,7 +3,7 @@
 #define __EXPRESSION_H__
 
 //#define LUASL_USE_ENUM
-//#define LUASL_DEBUG
+#define LUASL_DEBUG
 
 #ifndef LUASL_USE_ENUM
 #include "LuaSL_yaccer.tab.h"
@@ -134,7 +134,7 @@ typedef int LSL_Type;
 typedef struct
 {
     LSL_Type			type;
-    struct LSL_AST		*expressions;
+    struct LSL_AST		*expression;
 } LSL_Statement;
 
 typedef struct
@@ -258,6 +258,9 @@ typedef struct
 LSL_AST *addExpression(LSL_AST *exp);
 LSL_AST *addInteger(int value);
 LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right);
+LSL_AST *addParenthesis(LSL_AST *expr);
+LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr);
+LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *left);
 
 int yyerror(const char *msg);
 int yyparse(void *param);
