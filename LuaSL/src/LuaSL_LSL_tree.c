@@ -277,6 +277,7 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 #endif
     }
 }
+
 static void outputAST(LSL_AST *ast)
 {
     if (ast)
