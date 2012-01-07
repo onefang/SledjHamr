@@ -104,28 +104,6 @@ LSL_Token **tokens = NULL;
 int lowestToken = 999999;
 
 
-static LSL_Expression *newLSLExpression(LSL_Type type, LSL_Expression *left, LSL_Expression *right)
-{
-    LSL_Expression *exp = malloc(sizeof(LSL_Expression));
-
-    if (exp == NULL) return NULL;
-
-    exp->left = left;
-    exp->right = right;
-    exp->token = tokens[type - lowestToken];
-
-    return exp;
-}
-
-static void burnLSLExpression(LSL_Expression *exp)
-{
-    if (exp == NULL) return;
-
-    burnLSLExpression(exp->left);
-    burnLSLExpression(exp->right);
-    free(exp);
-}
-
 static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
 {
     LSL_AST *ast = malloc(sizeof(LSL_AST));
@@ -147,13 +125,10 @@ static void burnAST(LSL_AST *ast)
 
     burnAST(ast->left);
     burnAST(ast->right);
-    // Burn the contents to.
-    if ((ast->token) && (ast->token->type == LSL_EXPRESSION))
-	burnLSLExpression(ast->content.expressionValue);
     free(ast);
 }
 
-LSL_AST *addExpression(LSL_Expression *exp)
+LSL_AST *addExpression(LSL_AST *exp)
 {
     LSL_AST *ast = newAST(LSL_EXPRESSION, NULL, NULL);
 
@@ -163,9 +138,9 @@ LSL_AST *addExpression(LSL_Expression *exp)
     return ast;
 }
 
-LSL_Expression *addInteger(int value)
+LSL_AST *addInteger(int value)
 {
-    LSL_Expression *exp = newLSLExpression(LSL_INTEGER, NULL, NULL);
+    LSL_AST *exp = newAST(LSL_INTEGER, NULL, NULL);
 
     if (exp)
 	exp->content.integerValue = value;
@@ -173,9 +148,9 @@ LSL_Expression *addInteger(int value)
     return exp;
 }
 
-LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right)
+LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right)
 {
-    LSL_Expression *exp = newLSLExpression(LSL_EXPRESSION, left, right);
+    LSL_AST *exp = newAST(LSL_EXPRESSION, left, right);
 
     if (exp)
     {
@@ -198,7 +173,7 @@ static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Value *result)
     }
 }
 
-static void evaluateExpression(LSL_Expression *exp, LSL_Value *result)
+static void evaluateExpression(LSL_AST *exp, LSL_Value *result)
 {
     LSL_Value left, right;
 
@@ -300,7 +275,7 @@ static void evaluateAST(LSL_AST *ast, LSL_Value *result)
 	ast->token->evaluate(&(ast->content), result);
 }
 
-static void outputExpression(LSL_Expression *exp)
+static void outputExpression(LSL_AST *exp)
 {
     if (NULL == exp)
 	return;

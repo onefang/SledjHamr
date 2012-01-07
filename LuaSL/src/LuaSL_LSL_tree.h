@@ -122,7 +122,7 @@ typedef int LSL_Type;
 typedef struct
 {
     LSL_Type			type;
-    struct LSL_Expression	*expressions;
+    struct LSL_AST		*expressions;
 } LSL_Statement;
 
 typedef struct
@@ -167,7 +167,7 @@ typedef union LSL_Leaf
     union LSL_Leaf		*listValue;
     char			*labelValue;
     LSL_Operation		operationValue;
-    struct LSL_Expression	*expressionValue;
+    struct LSL_AST		*expressionValue;
     LSL_Statement		*doValue;
     LSL_Statement		*forValue;
     LSL_Statement		*ifValue;
@@ -209,14 +209,6 @@ typedef struct
     LSL_Leaf		content;
 } LSL_Identifier;
 
-typedef struct LSL_Expression
-{
-    struct LSL_Expression	*left;
-    struct LSL_Expression	*right;
-    LSL_Token			*token;
-    LSL_Leaf			content;
-} LSL_Expression;
-
 typedef struct LSL_AST
 {
     struct LSL_AST	*left;
@@ -251,9 +243,9 @@ typedef struct
 #define YYLEX_PARAM   ((LuaSL_yyparseParam*)data)->scanner
 
 
-LSL_AST *addExpression(LSL_Expression *exp);
-LSL_Expression *addInteger(int value);
-LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expression *right);
+LSL_AST *addExpression(LSL_AST *exp);
+LSL_AST *addInteger(int value);
+LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right);
 
 int yyerror(const char *msg);
 int yyparse(void *param);
