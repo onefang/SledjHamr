@@ -4,9 +4,9 @@
 #include <stdio.h>
 
 static void outputExpressionToken(LSL_Leaf *content);
-static LSL_Leaf *evaluateExpressionToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+static void evaluateExpressionToken(LSL_Leaf  *content, LSL_Value *result);
 static void outputIntegerToken(LSL_Leaf *content);
-static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Value *result);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -96,6 +96,7 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_FUNCTION,			"",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_STATE,				"",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_SCRIPT,			"",		LSL_NONE,			NULL, NULL, NULL},
+//    {LSL_UNKNOWN,			"",	LSL_NONE,				NULL, NULL, NULL},
     {999999, NULL, LSL_NONE, NULL, NULL, NULL}
 };
 
@@ -103,58 +104,15 @@ LSL_Token **tokens = NULL;
 int lowestToken = 999999;
 
 
-static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
-{
-    LSL_AST *ast = malloc(sizeof(LSL_AST));
-
-    if (ast == NULL) return NULL;
-
-    ast->type = type;
-    ast->left = left;
-    ast->right = right;
-    ast->line = -1;
-    ast->character = -1;
-    if (tokens)
-	ast->token = tokens[type - lowestToken];
-    else
-	ast->token = NULL;
-
-    return ast;
-}
-
-static void burnAST(LSL_AST *ast)
-{
-    if (ast == NULL) return;
-
-    burnAST(ast->left);
-    burnAST(ast->right);
-    // TODO - burn the contents to.
-    free(ast);
-}
-
-LSL_AST *addExpression(LSL_Expression *exp)
-{
-    LSL_AST *ast = newAST(LSL_EXPRESSION, NULL, NULL);
-
-    if (ast)
-	ast->content.expressionValue = exp;
-
-    return ast;
-}
-
 static LSL_Expression *newLSLExpression(LSL_Type type, LSL_Expression *left, LSL_Expression *right)
 {
     LSL_Expression *exp = malloc(sizeof(LSL_Expression));
 
     if (exp == NULL) return NULL;
 
-    exp->type = type;
     exp->left = left;
     exp->right = right;
-    if (tokens)
-	exp->token = tokens[type - lowestToken];
-    else
-	exp->token = NULL;
+    exp->token = tokens[type - lowestToken];
 
     return exp;
 }
@@ -166,6 +124,43 @@ static void burnLSLExpression(LSL_Expression *exp)
     burnLSLExpression(exp->left);
     burnLSLExpression(exp->right);
     free(exp);
+}
+
+static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
+{
+    LSL_AST *ast = malloc(sizeof(LSL_AST));
+
+    if (ast == NULL) return NULL;
+
+    ast->left = left;
+    ast->right = right;
+    ast->line = -1;
+    ast->character = -1;
+    ast->token = tokens[type - lowestToken];
+
+    return ast;
+}
+
+static void burnAST(LSL_AST *ast)
+{
+    if (ast == NULL) return;
+
+    burnAST(ast->left);
+    burnAST(ast->right);
+    // Burn the contents to.
+    if ((ast->token) && (ast->token->type == LSL_EXPRESSION))
+	burnLSLExpression(ast->content.expressionValue);
+    free(ast);
+}
+
+LSL_AST *addExpression(LSL_Expression *exp)
+{
+    LSL_AST *ast = newAST(LSL_EXPRESSION, NULL, NULL);
+
+    if (ast)
+	ast->content.expressionValue = exp;
+
+    return ast;
 }
 
 LSL_Expression *addInteger(int value)
@@ -185,30 +180,55 @@ LSL_Expression *addOperation(LSL_Operation type, LSL_Expression *left, LSL_Expre
     if (exp)
     {
 	exp->content.operationValue = type;
-	if (tokens)
-	    exp->token = tokens[type - lowestToken];
-	else
-	    exp->token = NULL;
+	exp->token = tokens[type - lowestToken];
     }
 
     return exp;
 }
 
-static int evaluateExpression(LSL_Expression *exp, int old)
+static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Value *result)
 {
-    if (NULL == exp)
-	return old;
-#ifdef LUASL_DEBUG
-	printf(" %s ", exp->token->token);
-#endif
-
-    if (LSL_INTEGER == exp->type)
+    if (content)
     {
 #ifdef LUASL_DEBUG
-	printf("%d", exp->content.integerValue);
+	printf(" %d ", content->integerValue);
 #endif
-	return exp->content.integerValue;
+	result->content.integerValue = content->integerValue;
+	result->type = LSL_INTEGER;
     }
+}
+
+static void evaluateExpression(LSL_Expression *exp, LSL_Value *result)
+{
+    LSL_Value left, right;
+
+    if ((NULL == exp) || (NULL == result))
+	return;
+
+    if (LSL_INTEGER == exp->token->type)
+    {
+	evaluateIntegerToken(&(exp->content), result);
+	return;
+    }
+    else if (LSL_LEFT2RIGHT & exp->token->flags)
+    {
+	evaluateExpression(exp->left, &left);
+	if (!(LSL_UNARY & exp->token->flags))
+	    evaluateExpression(exp->right, &right);
+    }
+    else if (LSL_RIGHT2LEFT & exp->token->flags)
+    {
+	evaluateExpression(exp->right, &right);
+	if (!(LSL_UNARY & exp->token->flags))
+	    evaluateExpression(exp->left, &left);
+    }
+    else
+    {
+    }
+
+#ifdef LUASL_DEBUG
+    printf(" %s ", exp->token->token);
+#endif
 
     switch (exp->content.operationValue)
     {
@@ -235,113 +255,49 @@ static int evaluateExpression(LSL_Expression *exp, int old)
 	case LSL_TYPECAST		:
 	    break;
 #endif
-	case LSL_BIT_NOT		: return ~ evaluateExpression(exp->right, old);
-	case LSL_BOOL_NOT		: return ! evaluateExpression(exp->right, old);
-	case LSL_NEGATION		: return 0 - evaluateExpression(exp->right, old);
-	case LSL_DIVIDE			: return evaluateExpression(exp->left, old) /  evaluateExpression(exp->right, old);
-#ifdef LUASL_USE_ENUM
-	case LSL_MODULO			: return evaluateExpression(exp->left, old) %  evaluateExpression(exp->right, old);
-#endif
-	case LSL_MULTIPLY		: return evaluateExpression(exp->left, old) *  evaluateExpression(exp->right, old);
+	case LSL_BIT_NOT		:  result->content.integerValue = ~ right.content.integerValue;					break;
+	case LSL_BOOL_NOT		:  result->content.integerValue = ! right.content.integerValue;					break;
+	case LSL_NEGATION		:  result->content.integerValue = 0 - right.content.integerValue;				break;
+	case LSL_DIVIDE			:  result->content.integerValue = left.content.integerValue / right.content.integerValue;	break;
+	case LSL_MODULO			:  result->content.integerValue = left.content.integerValue % right.content.integerValue;	break;
+	case LSL_MULTIPLY		:  result->content.integerValue = left.content.integerValue * right.content.integerValue;	break;
 #ifdef LUASL_USE_ENUM
 	case LSL_DOT_PRODUCT		: break;
 	case LSL_CROSS_PRODUCT		: break;
 #endif
-	case LSL_SUBTRACT		: return evaluateExpression(exp->left, old) -  evaluateExpression(exp->right, old);
-	case LSL_ADD			: return evaluateExpression(exp->left, old) +  evaluateExpression(exp->right, old);
+	case LSL_SUBTRACT		:  result->content.integerValue = left.content.integerValue - right.content.integerValue;	break;
+	case LSL_ADD			:  result->content.integerValue = left.content.integerValue + right.content.integerValue;	break;
 #ifdef LUASL_USE_ENUM
 	case LSL_CONCATENATE		: break;
 #endif
-	case LSL_LEFT_SHIFT		: return evaluateExpression(exp->left, old) << evaluateExpression(exp->right, old);
-	case LSL_RIGHT_SHIFT		: return evaluateExpression(exp->left, old) >> evaluateExpression(exp->right, old);
-	case LSL_LESS_THAN		: return evaluateExpression(exp->left, old) <  evaluateExpression(exp->right, old);
-	case LSL_GREATER_THAN		: return evaluateExpression(exp->left, old) >  evaluateExpression(exp->right, old);
-	case LSL_LESS_EQUAL		: return evaluateExpression(exp->left, old) <= evaluateExpression(exp->right, old);
-	case LSL_GREATER_EQUAL		: return evaluateExpression(exp->left, old) >= evaluateExpression(exp->right, old);
-	case LSL_EQUAL			: return evaluateExpression(exp->left, old) == evaluateExpression(exp->right, old);
-	case LSL_NOT_EQUAL		: return evaluateExpression(exp->left, old) != evaluateExpression(exp->right, old);
-	case LSL_BIT_AND		: return evaluateExpression(exp->left, old) &  evaluateExpression(exp->right, old);
-	case LSL_BIT_XOR		: return evaluateExpression(exp->left, old) ^  evaluateExpression(exp->right, old);
-	case LSL_BIT_OR			: return evaluateExpression(exp->left, old) |  evaluateExpression(exp->right, old);
-	case LSL_BOOL_OR		: return evaluateExpression(exp->left, old) || evaluateExpression(exp->right, old);
-	case LSL_BOOL_AND		: return evaluateExpression(exp->left, old) && evaluateExpression(exp->right, old);
+	case LSL_LEFT_SHIFT		:  result->content.integerValue = left.content.integerValue << right.content.integerValue;	break;
+	case LSL_RIGHT_SHIFT		:  result->content.integerValue = left.content.integerValue >> right.content.integerValue;	break;
+	case LSL_LESS_THAN		:  result->content.integerValue = left.content.integerValue < right.content.integerValue;	break;
+	case LSL_GREATER_THAN		:  result->content.integerValue = left.content.integerValue > right.content.integerValue;	break;
+	case LSL_LESS_EQUAL		:  result->content.integerValue = left.content.integerValue <= right.content.integerValue;	break;
+	case LSL_GREATER_EQUAL		:  result->content.integerValue = left.content.integerValue >= right.content.integerValue;	break;
+	case LSL_EQUAL			:  result->content.integerValue = left.content.integerValue == right.content.integerValue;	break;
+	case LSL_NOT_EQUAL		:  result->content.integerValue = left.content.integerValue != right.content.integerValue;	break;
+	case LSL_BIT_AND		:  result->content.integerValue = left.content.integerValue & right.content.integerValue;	break;
+	case LSL_BIT_XOR		:  result->content.integerValue = left.content.integerValue ^ right.content.integerValue;	break;
+	case LSL_BIT_OR			:  result->content.integerValue = left.content.integerValue | right.content.integerValue;	break;
+	case LSL_BOOL_OR		:  result->content.integerValue = left.content.integerValue || right.content.integerValue;	break;
+	case LSL_BOOL_AND		:  result->content.integerValue = left.content.integerValue && right.content.integerValue;	break;
     }
 
-    return old;
+    return;
 }
 
-static LSL_Leaf *evaluateExpressionToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old)
-{
-//    if (content)
-//	return evaluateExpression(content->expressionValue, old->integerValue);
-    return old;
-}
-
-static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old)
+static void evaluateExpressionToken(LSL_Leaf  *content, LSL_Value *result)
 {
     if (content)
-    {
-#ifdef LUASL_DEBUG
-	printf("%d", content->integerValue);
-#endif
-	return content;
-    }
-    return old;
+	evaluateExpression(content->expressionValue, result);
 }
 
-static int evaluateAST(LSL_AST *ast, int old)
+static void evaluateAST(LSL_AST *ast, LSL_Value *result)
 {
-//    if ((ast) && (ast->token) && (ast->token->evaluate))
-//	return ast->token->evaluate(&(ast->content), oldType, old);
-
-    if (NULL == ast)
-	return old;
-    switch(ast->type)
-    {
-#ifdef LUASL_USE_ENUM
-	case LSL_COMMENT	:
-	case LSL_TYPE		:
-	case LSL_NAME		:
-	case LSL_IDENTIFIER	:
-	    break;
-	case LSL_FLOAT		: return (int) ast->content.floatValue;
-#endif
-	case LSL_INTEGER	:
-#ifdef LUASL_DEBUG
-	    printf("%d", ast->content.integerValue);
-#endif
-	    return ast->content.integerValue;
-#ifdef LUASL_USE_ENUM
-	case LSL_STRING		:
-	case LSL_KEY		:
-	case LSL_VECTOR		:
-	case LSL_ROTATION	:
-	case LSL_LIST		:
-	case LSL_LABEL		:
-	    break;
-#endif
-	case LSL_EXPRESSION	: return evaluateExpression(ast->content.expressionValue, old);
-#ifdef LUASL_USE_ENUM
-	case LSL_DO		:
-	case LSL_FOR		:
-	case LSL_IF		:
-	case LSL_ELSE		:
-	case LSL_ELSEIF		:
-	case LSL_JUMP		:
-	case LSL_STATE_CHANGE	:
-	case LSL_WHILE		:
-	case LSL_RETURN		:
-	case LSL_STATEMENT	:
-	case LSL_BLOCK		:
-	case LSL_PARAMETER	:
-	case LSL_FUNCTION	:
-	case LSL_STATE		:
-	case LSL_SCRIPT		:
-	    break;
-#endif
-    }
-
-    return old;
+    if ((ast) && (ast->token) && (ast->token->evaluate))
+	ast->token->evaluate(&(ast->content), result);
 }
 
 static void outputExpression(LSL_Expression *exp)
@@ -349,7 +305,7 @@ static void outputExpression(LSL_Expression *exp)
     if (NULL == exp)
 	return;
 
-    if (LSL_INTEGER == exp->type)
+    if (LSL_INTEGER == exp->token->type)
     {
 	printf("%d", exp->content.integerValue);
     }
@@ -420,8 +376,6 @@ static LSL_AST *newTree(const char *expr)
 
 int main(void)
 {
-    const char test[] = " 4 + 2 * 10 + 3 * ( 5 + 1 )";
-    LSL_AST *ast;
     int i;
 
     // Figure out what numbers yacc gave to our tokens.
@@ -430,9 +384,12 @@ int main(void)
 	if (lowestToken > LSL_Tokens[i].type)
 	    lowestToken = LSL_Tokens[i].type;
     }
-    tokens = malloc(sizeof(LSL_Token *) * (i + 1));
+    tokens = calloc(i + 1, sizeof(LSL_Token *));
     if (tokens)
     {
+	const char test[] = " 4 + 2 * 10 + 3 * ( 5 + 1 )";
+	LSL_AST *ast;
+
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].token != NULL; i++)
 	{
@@ -440,21 +397,31 @@ int main(void)
 
 	    tokens[j] = &(LSL_Tokens[i]);
 	}
-    }
 
-    if ((ast = newTree(test)))
-    {
-	int result = evaluateAST(ast, 0);
+	// Run the parser on a test.
+	if ((ast = newTree(test)))
+	{
+	    LSL_Value result;
+
+	    result.content.integerValue = 0;
+	    result.type = LSL_INTEGER;
+	    evaluateAST(ast, &result);
 
 #ifdef LUASL_DEBUG
-	printf("\n");
+	    printf("\n");
 #endif
-	printf("Result of '%s' is %d\n", test, result);
-	outputAST(ast);
-	printf("\n");
-	convertAST2Lua(ast);
-	printf("\n");
-	burnAST(ast);
+	    printf("Result of '%s' is %d\n", test, result.content.integerValue);
+	    outputAST(ast);
+	    printf("\n");
+	    convertAST2Lua(ast);
+	    printf("\n");
+	    burnAST(ast);
+	}
+    }
+    else
+    {
+	fprintf(stderr, "No memory for tokens!");
+	return 1;
     }
 
     return 0;

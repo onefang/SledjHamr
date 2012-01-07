@@ -182,9 +182,15 @@ typedef union LSL_Leaf
     LSL_Script			*scriptValue;
 } LSL_Leaf;
 
+typedef struct
+{
+    LSL_Type		type;
+    LSL_Leaf		content;
+} LSL_Value;
+
 typedef void (*convertToken2Lua) (LSL_Leaf *content);
 typedef void (*outputToken) (LSL_Leaf *content);
-typedef LSL_Leaf *(*evaluateToken) (LSL_Leaf  *content, LSL_Type oldType, LSL_Leaf *old);
+typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Value *result);
 
 typedef struct
 {
@@ -208,7 +214,6 @@ typedef struct LSL_Expression
     struct LSL_Expression	*left;
     struct LSL_Expression	*right;
     LSL_Token			*token;
-    LSL_Type			type;
     LSL_Leaf			content;
 } LSL_Expression;
 
@@ -219,7 +224,6 @@ typedef struct LSL_AST
     int			line;
     int			character;
     LSL_Token		*token;
-    LSL_Type		type;
     LSL_Leaf		content;
 } LSL_AST;
 
