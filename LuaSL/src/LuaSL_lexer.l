@@ -15,12 +15,11 @@
 
 %option reentrant never-interactive batch
 %option bison-bridge yylineno 8bit 
-%option noreject noyymore noyywrap
+%option noreject noyymore
 %option backup debug perf-report perf-report verbose warn
 %option align full
 
 SPACE       [ \r\n\t]*
-ENDSPACE    {SPACE}$
 
 LETTER      [A-Za-z]
 DECIMAL     [0-9]
@@ -34,7 +33,6 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 %%
 
  /* Basic tokens */
-{ENDSPACE}      %{ /* Skip blanks at end of lines. */ %}
 {SPACE}         %{ ECHO; /* Skip blanks. */ %}
 {NAME}          %{ ECHO; /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ %}
 {INTEGER}       %{ ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; %}
@@ -64,12 +62,14 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 "("             { ECHO; return LSL_PARENTHESIS_OPEN; }
 ")"             { ECHO; return LSL_PARENTHESIS_CLOSE; }
 
+<<EOF>>         { yyterminate(); }
+
  /* Everything else */
 .               %{ ECHO; printf(" unexpected character.\n"); %}
 
 %%
 
-int XXyywrap()
+int yywrap(yyscan_t yyscanner)
 {
 #ifdef FLEX_SCANNER
     #ifndef LL_WINDOWS
@@ -78,6 +78,7 @@ int XXyywrap()
 	(void) input;
     #endif
 #endif
+// TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them asd return 0.  Return 1 when there are no more files.
 	return(1);
 }
 

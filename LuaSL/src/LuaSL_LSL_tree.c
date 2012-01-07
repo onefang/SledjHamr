@@ -322,35 +322,9 @@ int yyerror(const char *msg)
     return 0;
 }
 
-static LSL_AST *newTree(const char *expr)
+int main(int argc, char **argv)
 {
-    LuaSL_yyparseParam param;
-    YY_BUFFER_STATE state;
-
-#ifdef LUASL_DEBUG
-    yydebug= 5;
-#endif
-
-    param.ast = NULL;
-    if (yylex_init(&(param.scanner)))
-	return NULL;
-
-#ifdef LUASL_DEBUG
-    yyset_debug(1, param.scanner);
-#endif
-
-    state = yy_scan_string(expr, param.scanner);
-    if (yyparse(&param))
-	return NULL;
-
-    yy_delete_buffer(state, param.scanner);
-    yylex_destroy(param.scanner);
-
-    return param.ast;
-}
-
-int main(void)
-{
+    char *programName = argv[0];
     int i;
 
     // Figure out what numbers yacc gave to our tokens.
@@ -362,8 +336,12 @@ int main(void)
     tokens = calloc(i + 1, sizeof(LSL_Token *));
     if (tokens)
     {
-	const char test[] = " 4 + 2 * 10 + 3 * ( 5 + 1 )";
+	char buffer[4096];
 	LSL_AST *ast;
+	LuaSL_yyparseParam param;
+	int count;
+	FILE *file;
+	boolean badArgs = FALSE;
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].token != NULL; i++)
@@ -373,26 +351,113 @@ int main(void)
 	    tokens[j] = &(LSL_Tokens[i]);
 	}
 
-	// Run the parser on a test.
-	if ((ast = newTree(test)))
-	{
-	    LSL_Value left, right;
+	buffer[0] = '\0';
 
-	    left.content.integerValue = 0;
-	    left.type = LSL_INTEGER;
-	    right.content.integerValue = 0;
-	    right.type = LSL_INTEGER;
-	    evaluateAST(ast, &left, &right);
+	// get the arguments passed in
+	while (--argc > 0 && *++argv != '\0')
+	{
+	    if (*argv[0] == '-')
+	    {
+		// point to the characters after the '-' sign
+		char *s = argv[0] + 1;
+
+		switch (*s)
+		{
+		    case 'f': // file
+		    {
+			if (--argc > 0 && *++argv != '\0')
+			{
+			    strncpy(buffer, *argv, 4095);
+			    buffer[4095] = '\0';;
+			}
+			else
+			    badArgs = TRUE;
+			break;
+		    }
+		    default:
+			badArgs = TRUE;
+		}
+	    }
+	    else
+		badArgs = TRUE;
+	}
+
+	if (badArgs)
+	{
+	    printf("Usage: %s [-f filename]\n", programName);
+	    printf("   -f: Script file to run.\n");
+	    printf("Or pass filenames in stdin.\n");
+	    return 1;
+	}
+
+	if ('\0' == buffer[0])
+	{
+	    count = read(STDIN_FILENO, buffer, sizeof(buffer));
+	    if (0 > count)
+	    {
+		printf("Error in stdin!\n");
+		return 1;
+	    }
+	    else if (0 == count)
+	    {
+		printf("No bytes in stdin!\n");
+		return 1;
+	    }
+	    else
+	    {
+		buffer[count] = '\0';
+		printf("Filename %s in stdin.\n", buffer);
+	    }
+	}
+	else
+	    printf("Filename %s in argument.\n", buffer);
+
+	file = fopen(buffer, "r");
+	if (NULL == file)
+	{
+	    printf("Error opening file %s.\n", buffer);
+	    return 1;
+	}
 
 #ifdef LUASL_DEBUG
-	    printf("\n");
+	yydebug= 5;
 #endif
-	    printf("Result of '%s' is %d %d\n", test, left.content.integerValue, right.content.integerValue);
-	    outputAST(ast);
-	    printf("\n");
-	    convertAST2Lua(ast);
-	    printf("\n");
-	    burnAST(ast);
+
+	param.ast = NULL;
+	if (yylex_init(&(param.scanner)))
+	    return 1;
+
+#ifdef LUASL_DEBUG
+	yyset_debug(1, param.scanner);
+#endif
+	yyset_in(file, param.scanner);
+
+	if (!yyparse(&param))
+	{
+	    yylex_destroy(param.scanner);
+	    ast = param.ast;
+
+	    if (ast)
+	    {
+		LSL_Value left, right;
+
+		left.content.integerValue = 0;
+		left.type = LSL_INTEGER;
+		right.content.integerValue = 0;
+		right.type = LSL_INTEGER;
+		evaluateAST(ast, &left, &right);
+
+#ifdef LUASL_DEBUG
+		printf("\n");
+#endif
+		printf("Result of -\n");
+		outputAST(ast);
+		printf("\n");
+		printf("is %d %d.  And converted to Lua it is -\n", left.content.integerValue, right.content.integerValue);
+		convertAST2Lua(ast);
+		printf("\n");
+		burnAST(ast);
+	    }
 	}
     }
     else

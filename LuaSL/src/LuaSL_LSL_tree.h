@@ -3,20 +3,32 @@
 #define __EXPRESSION_H__
 
 //#define LUASL_USE_ENUM
-#define LUASL_DEBUG
+//#define LUASL_DEBUG
 
 #ifndef LUASL_USE_ENUM
 #include "LuaSL_yaccer.tab.h"
 #endif
 
 #include <stddef.h>	// So we can have NULL defined.
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+                    
 #define YYERRCODE 256
 #define YYDEBUG 1
 extern int yydebug;
 
 
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
+
+#ifndef FALSE
+// NEVER change this
+typedef enum
+{
+    FALSE	= 0, 
+    TRUE	= 1
+} boolean;
+#endif
 
 typedef enum
 {
