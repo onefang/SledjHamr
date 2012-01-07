@@ -69,7 +69,7 @@ LSL_Token LSL_Tokens[] =
 
     // Then the rest of the syntax tokens.
 
-//    {LSL_SPACE,			" ",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_SPACE,			" ",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_TYPE,				"type",		LSL_NONE,			NULL, NULL, NULL},
@@ -142,7 +142,7 @@ LSL_AST *addInteger(int value)
     return ast;
 }
 
-LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right)
+LSL_AST *addOperation(LSL_Type type, LSL_AST *left, LSL_AST *right)
 {
     LSL_AST *ast = newAST(type, left, right);
 
@@ -182,11 +182,22 @@ LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
     return stat;
 }
 
+LSL_AST *addSpace(char *text, LSL_AST *root)
+{
+    LSL_AST *ast = newAST(LSL_SPACE, root, NULL);
+
+    if (ast)
+	ast->content.spaceValue = text;
+
+    return ast;
+}
+
 LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root)
 {
     LSL_AST *ast = newAST(LSL_STATEMENT, root, NULL);
 
-    ast->content.statementValue = statement;
+    if (ast)
+	ast->content.statementValue = statement;
 
     return ast;
 }

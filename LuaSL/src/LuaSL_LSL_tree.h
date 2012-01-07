@@ -89,16 +89,12 @@ typedef enum			// In order of precedence, high to low.
     LSL_BIT_XOR,
     LSL_BIT_OR,
     LSL_BOOL_OR,
-    LSL_BOOL_AND
-} LSL_Operation;
-#else
-typedef int LSL_Operation;
-#endif
+    LSL_BOOL_AND,
 
-#ifdef LUASL_USE_ENUM
-typedef enum
-{
-    LSL_COMMENT = (LSL_BOOL_AND + 1),
+    // The rest are not operater types.
+
+    LSL_SPACE,
+    LSL_COMMENT,
     LSL_TYPE,
     LSL_NAME,
     LSL_IDENTIFIER,
@@ -125,7 +121,8 @@ typedef enum
     LSL_PARAMETER,
     LSL_FUNCTION,
     LSL_STATE,
-    LSL_SCRIPT
+    LSL_SCRIPT,
+    LSL_UNKNOWN
 } LSL_Type;
 #else
 typedef int LSL_Type;
@@ -166,6 +163,7 @@ typedef struct
 
 typedef union LSL_Leaf
 {
+    char			*spaceValue;
     char			*commentValue;
     LSL_Type			typeValue;
     char			*nameValue;
@@ -178,7 +176,7 @@ typedef union LSL_Leaf
     float			rotationValue[4];
     union LSL_Leaf		*listValue;
     char			*labelValue;
-    LSL_Operation		operationValue;
+    LSL_Type			operationValue;
     struct LSL_AST		*expressionValue;
     LSL_Statement		*doValue;
     LSL_Statement		*forValue;
@@ -192,6 +190,7 @@ typedef union LSL_Leaf
     LSL_Function		*functionValue;
     LSL_State			*stateValue;
     LSL_Script			*scriptValue;
+    char			*unknownValue;
 } LSL_Leaf;
 
 typedef struct
@@ -257,10 +256,11 @@ typedef struct
 
 LSL_AST *addExpression(LSL_AST *exp);
 LSL_AST *addInteger(int value);
-LSL_AST *addOperation(LSL_Operation type, LSL_AST *left, LSL_AST *right);
+LSL_AST *addOperation(LSL_Type type, LSL_AST *left, LSL_AST *right);
 LSL_AST *addParenthesis(LSL_AST *expr);
-LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr);
-LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *left);
+LSL_Statement *createStatement(LSL_Type type, LSL_AST *root);
+LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root);
+LSL_AST *addSpace(char *text, LSL_AST *root);
 
 int yyerror(const char *msg);
 int yyparse(void *param);

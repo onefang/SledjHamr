@@ -19,22 +19,17 @@
 %option backup debug perf-report perf-report verbose warn
 %option align full
 
-SPACE       [ \r\n\t]*
-
-LETTER      [A-Za-z]
-DECIMAL     [0-9]
-HEX         [0-9A-Fa-f]
-
-NAME        {LETTER}(_|{LETTER}|{DECIMAL})*
-INTEGER     {DECIMAL}+
+HEX         [[:xdigit:]]
+NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
+INTEGER     [[:digit:]]+
 EXPONANT    [eE][+-]?{INTEGER}
 FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 
 %%
 
  /* Basic tokens */
-{SPACE}         %{ ECHO; /* Skip blanks. */ %}
-{NAME}          %{ ECHO; /* yylval->nameValue=strdup(yytext); return LSL_NAME; */ %}
+[[:space:]]+    %{ /* ECHO; yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
+{NAME}          %{ ECHO; /* yylval->nameValue = strdup(yytext); return LSL_NAME; */ %}
 {INTEGER}       %{ ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; %}
 {FLOAT}         %{ ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ %}
 
@@ -74,12 +69,12 @@ int yywrap(yyscan_t yyscanner)
 {
 #ifdef FLEX_SCANNER
     #ifndef LL_WINDOWS
-	// get gcc to stop complaining about lack of use of yyunput
+	// Get gcc to stop complaining about lack of use of yyunput and input.
 	(void) yyunput;
 	(void) input;
     #endif
 #endif
-// TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them asd return 0.  Return 1 when there are no more files.
+// TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them and return 0.  Return 1 when there are no more files.
 	return(1);
 }
 
