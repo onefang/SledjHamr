@@ -40,17 +40,8 @@ input :
     | ignorable { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
 ;
 
-ignorable :
-    LSL_SPACE { $$ = strdup($1); }
-;
-
-statement :
-    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); }
-;
-
 expr :
-    LSL_INTEGER { $$ = addInteger($1); }
-    | expr LSL_BOOL_AND expr { $$ = addOperation( LSL_BOOL_AND, $1, $3 ); }
+    expr LSL_BOOL_AND expr { $$ = addOperation( LSL_BOOL_AND, $1, $3 ); }
     | expr LSL_BOOL_OR expr { $$ = addOperation( LSL_BOOL_OR, $1, $3 ); }
     | expr LSL_BIT_OR expr { $$ = addOperation( LSL_BIT_OR, $1, $3 ); }
     | expr LSL_BIT_XOR expr { $$ = addOperation( LSL_BIT_XOR, $1, $3 ); }
@@ -72,6 +63,15 @@ expr :
     | LSL_BOOL_NOT expr { $$ = addOperation( LSL_BOOL_NOT, NULL, $2 ); }
     | LSL_SUBTRACT expr { $$ = addOperation( LSL_NEGATION, NULL, $2 ); }  %prec LSL_NEGATION
     | LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE { $$ = addParenthesis($2); }
+    | LSL_INTEGER { $$ = addInteger($1); }
+;
+
+statement :
+    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); }
+;
+
+ignorable :
+    LSL_SPACE { $$ = strdup($1); }
 ;
 
 %%
