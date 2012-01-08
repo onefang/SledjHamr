@@ -79,8 +79,7 @@ echo $command
 $command
 
 # I want to remove -d, coz I want an enum, not a bunch of #defines, but btyacc creates #defines internally anyway.  sigh
-# Should add -t as well for debugging, but it causes errors.
-command="btyacc -d -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
+command="btyacc -d -t -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
 echo $command
 $command
 
