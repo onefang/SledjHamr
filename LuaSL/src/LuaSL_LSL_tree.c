@@ -272,44 +272,38 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 
 	switch (content->operationValue)
 	{
-#ifdef LUASL_USE_ENUM
-	    case LSL_COMMA			:
-	    case LSL_INCREMENT_PRE		:
-	    case LSL_INCREMENT_POST		:
-	    case LSL_DECREMENT_PRE		:
-	    case LSL_DECREMENT_POST		:
-	    case LSL_DOT			:
-	    case LSL_ASSIGNMENT_PLAIN		:
-	    case LSL_ASSIGNMENT_DIVIDE		:
-	    case LSL_ASSIGNMENT_MODULO		:
-	    case LSL_ASSIGNMENT_MULTIPLY	:
-	    case LSL_ASSIGNMENT_SUBTRACT	:
-	    case LSL_ASSIGNMENT_ADD		:
-	    case LSL_ASSIGNMENT_CONCATENATE	:
-	    case LSL_PARENTHESIS_OPEN		:
-	    case LSL_PARENTHESIS_CLOSE		:
-	    case LSL_BRACKET_OPEN		:
-	    case LSL_BRACKET_CLOSE		:
-	    case LSL_ANGLE_OPEN			:
-	    case LSL_ANGLE_CLOSE		:
-	    case LSL_TYPECAST			:
-		break;
-#endif
+//	    case LSL_COMMA			:
+//	    case LSL_INCREMENT_PRE		:
+//	    case LSL_INCREMENT_POST		:
+//	    case LSL_DECREMENT_PRE		:
+//	    case LSL_DECREMENT_POST		:
+//	    case LSL_DOT			:
+//	    case LSL_ASSIGNMENT_PLAIN		:
+//	    case LSL_ASSIGNMENT_DIVIDE		:
+//	    case LSL_ASSIGNMENT_MODULO		:
+//	    case LSL_ASSIGNMENT_MULTIPLY	:
+//	    case LSL_ASSIGNMENT_SUBTRACT	:
+//	    case LSL_ASSIGNMENT_ADD		:
+//	    case LSL_ASSIGNMENT_CONCATENATE	:
+//	    case LSL_PARENTHESIS_OPEN		:
+//	    case LSL_PARENTHESIS_CLOSE		:
+//	    case LSL_BRACKET_OPEN		:
+//	    case LSL_BRACKET_CLOSE		:
+//	    case LSL_ANGLE_OPEN			:
+//	    case LSL_ANGLE_CLOSE		:
+//	    case LSL_TYPECAST			:
+//		break;
 	    case LSL_BIT_NOT		:  left->content.integerValue = ~ right->content.integerValue;					break;
 	    case LSL_BOOL_NOT		:  left->content.integerValue = ! right->content.integerValue;					break;
 	    case LSL_NEGATION		:  left->content.integerValue = 0 - right->content.integerValue;				break;
 	    case LSL_DIVIDE		:  left->content.integerValue = left->content.integerValue /  right->content.integerValue;	break;
 	    case LSL_MODULO		:  left->content.integerValue = left->content.integerValue %  right->content.integerValue;	break;
 	    case LSL_MULTIPLY		:  left->content.integerValue = left->content.integerValue *  right->content.integerValue;	break;
-#ifdef LUASL_USE_ENUM
-	    case LSL_DOT_PRODUCT	: break;
-	    case LSL_CROSS_PRODUCT	: break;
-#endif
+//	    case LSL_DOT_PRODUCT	: break;
+//	    case LSL_CROSS_PRODUCT	: break;
 	    case LSL_SUBTRACT		:  left->content.integerValue = left->content.integerValue -  right->content.integerValue;	break;
 	    case LSL_ADD		:  left->content.integerValue = left->content.integerValue +  right->content.integerValue;	break;
-#ifdef LUASL_USE_ENUM
-	    case LSL_CONCATENATE	: break;
-#endif
+//	    case LSL_CONCATENATE	: break;
 	    case LSL_LEFT_SHIFT		:  left->content.integerValue = left->content.integerValue << right->content.integerValue;	break;
 	    case LSL_RIGHT_SHIFT	:  left->content.integerValue = left->content.integerValue >> right->content.integerValue;	break;
 	    case LSL_LESS_THAN		:  left->content.integerValue = left->content.integerValue <  right->content.integerValue;	break;
