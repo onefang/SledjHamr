@@ -45,6 +45,8 @@
 %type <statementValue> statement
 %nonassoc LSL_STATEMENT
 
+%type <scriptValue> script
+
 %%
 
 input :
@@ -84,8 +86,11 @@ expr :
 ;
 
 statement :
-    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); }
+    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); YYVALID; }
 ;
+
+script :
+    script LSL_STATEMENT statement
 
 %%
 
