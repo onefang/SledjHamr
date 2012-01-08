@@ -10,12 +10,13 @@ static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 static void outputIntegerToken(LSL_Leaf *content);
 static void outputOperationToken(LSL_Leaf *content);
 static void outputStatementToken(LSL_Leaf *content);
+static void outputSpaceToken(LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
 //    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_SPACE,			" ",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_SPACE,			" ",		LSL_NONE,			outputSpaceToken, NULL, NULL},
 
     // Operators, in order of precedence, low to high
     // Left to right, unless oterwise stated.
@@ -358,7 +359,7 @@ static void outputAST(LSL_AST *ast)
 	if (ast->token->output)
 	    ast->token->output(&(ast->content));
 	else
-	    printf(" %s ", ast->token->token);
+	    printf("%s", ast->token->token);
 	outputAST(ast->right);
     }
 }
@@ -372,7 +373,7 @@ static void outputIntegerToken(LSL_Leaf *content)
 static void outputOperationToken(LSL_Leaf *content)
 {
     if (content)
-	printf(" %s ", tokens[content->operationValue - lowestToken]->token);
+	printf("%s", tokens[content->operationValue - lowestToken]->token);
 }
 
 static void outputStatementToken(LSL_Leaf *content)
@@ -380,6 +381,12 @@ static void outputStatementToken(LSL_Leaf *content)
     if (content)
 	outputAST(content->statementValue->expression);
     printf(";");
+}
+
+static void outputSpaceToken(LSL_Leaf *content)
+{
+    if (content)
+	printf("%s", content->spaceValue);
 }
 
 static void convertAST2Lua(LSL_AST *ast)
@@ -392,7 +399,7 @@ static void convertAST2Lua(LSL_AST *ast)
 	else if (ast->token->output)
 	    ast->token->output(&(ast->content));
 	else
-	    printf(" %s ", ast->token->token);
+	    printf("%s", ast->token->token);
 	convertAST2Lua(ast->right);
     }
 }

@@ -30,7 +30,7 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
  /* The order here is important, in mysterious ways. The more specific the lower in case of ambiguities like "floats contain integers". I think, not tested that well yet. */
 
  /* White space. */
-[[:space:]]+    %{ /* ECHO; yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
+[[:space:]]+    %{ ECHO; /* yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
 
  /* Operations. */
 "&&"            { ECHO; return LSL_BOOL_AND; }
