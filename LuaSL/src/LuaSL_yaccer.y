@@ -9,12 +9,11 @@
 
 %define api.pure
 
+
+%type <spaceValue> ignorable
 %token <spaceValue> LSL_SPACE
 
-%nonassoc LSL_STATEMENT
-
-%token <integerValue> LSL_INTEGER
-
+%type <expressionValue> expr
 %left LSL_BOOL_AND
 %left LSL_BOOL_OR
 %left LSL_BIT_AND LSL_BIT_XOR LSL_BIT_OR
@@ -23,21 +22,23 @@
 %left LSL_LEFT_SHIFT LSL_RIGHT_SHIFT
 %left LSL_SUBTRACT LSL_ADD
 %left LSL_DIVIDE LSL_MODULO LSL_MULTIPLY
-
 %right LSL_BIT_NOT LSL_BOOL_NOT LSL_NEGATION
-
 %token LSL_PARENTHESIS_OPEN LSL_PARENTHESIS_CLOSE LSL_EXPRESSION
+%token <integerValue> LSL_INTEGER
 
-%type <expressionValue> expr
 %type <statementValue> statement
-%type <spaceValue> ignorable
+%nonassoc LSL_STATEMENT
 
 %%
 
 input :
-    expr { ((LuaSL_yyparseParam*)data)->ast = addOperation(LSL_EXPRESSION, $1, $1); }
+    ignorable { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
+    | expr { ((LuaSL_yyparseParam*)data)->ast = addOperation(LSL_EXPRESSION, $1, $1); }
     | statement { ((LuaSL_yyparseParam*)data)->ast = addStatement($1, ((LuaSL_yyparseParam*)data)->ast); }
-    | ignorable { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
+;
+
+ignorable :
+    LSL_SPACE { $$ = strdup($1); }
 ;
 
 expr :
@@ -68,10 +69,6 @@ expr :
 
 statement :
     expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); }
-;
-
-ignorable :
-    LSL_SPACE { $$ = strdup($1); }
 ;
 
 %%

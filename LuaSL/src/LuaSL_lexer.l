@@ -20,21 +20,19 @@
 %option align full
 
 HEX         [[:xdigit:]]
-NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 INTEGER     [[:digit:]]+
 EXPONANT    [eE][+-]?{INTEGER}
 FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
+NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
- /* Basic tokens */
-[[:space:]]+    %{ /* ECHO; yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
-{NAME}          %{ ECHO; /* yylval->nameValue = strdup(yytext); return LSL_NAME; */ %}
-{INTEGER}       %{ ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; %}
-{FLOAT}         %{ ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ %}
+ /* The order here is important, in mysterious ways. The more specific the lower in case of ambiguities like "floats contain integers". I think, not tested that well yet. */
 
- /* Expression tokens */
-";"             { ECHO; return LSL_STATEMENT; }
+ /* White space. */
+[[:space:]]+    %{ /* ECHO; yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
+
+ /* Operations. */
 "&&"            { ECHO; return LSL_BOOL_AND; }
 "||"            { ECHO; return LSL_BOOL_OR; }
 "|"             { ECHO; return LSL_BIT_OR; }
@@ -57,6 +55,14 @@ FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 "~"             { ECHO; return LSL_BIT_NOT; }
 "("             { ECHO; return LSL_PARENTHESIS_OPEN; }
 ")"             { ECHO; return LSL_PARENTHESIS_CLOSE; }
+
+ /* Types. */
+{INTEGER}       %{ ECHO; yylval->integerValue = atoi(yytext); return LSL_INTEGER; %}
+{FLOAT}         %{ ECHO; /* yylval->floatValue = atof(yytext); return LSL_FLOAT; */ %}
+
+{NAME}          %{ ECHO; /* yylval->nameValue = strdup(yytext); return LSL_NAME; */ %}
+
+";"             { ECHO; return LSL_STATEMENT; }
 
 <<EOF>>         { yyterminate(); }
 
