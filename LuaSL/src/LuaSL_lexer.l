@@ -79,6 +79,7 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 "integer"       %{ ECHO; return LSL_TYPE_INTEGER; %}
 "key"           %{ ECHO; return LSL_TYPE_KEY; %}
 "list"          %{ ECHO; return LSL_TYPE_LIST; %}
+"quaternion"    %{ ECHO; return LSL_TYPE_ROTATION; %}
 "rotation"      %{ ECHO; return LSL_TYPE_ROTATION; %}
 "string"        %{ ECHO; return LSL_TYPE_STRING; %}
 "vector"        %{ ECHO; return LSL_TYPE_VECTOR; %}
