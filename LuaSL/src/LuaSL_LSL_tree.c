@@ -149,20 +149,42 @@ static void burnAST(LSL_AST *ast)
 
     burnAST(ast->left);
     burnAST(ast->right);
+    free(ast->content.ignorableText);
     free(ast);
 }
 
-LSL_AST *addInteger(int value)
+static LSL_AST *checkAndAddIgnorable(LSL_AST *root)
+{
+    if (root)
+    {
+	if (root->content.ignorableText)
+	{
+	    LSL_AST *ast = newAST(LSL_SPACE, NULL, root);
+
+	    if (ast)
+	    {
+		ast->content.value.spaceValue = root->content.ignorableText;
+		return ast;
+	    }
+	}
+    }
+    return root;
+}
+
+LSL_AST *addInteger(LSL_Leaf *lval, int value)
 {
     LSL_AST *ast = newAST(LSL_INTEGER, NULL, NULL);
 
     if (ast)
-	ast->content.integerValue = value;
+    {
+	ast->content.value.integerValue = value;
+	ast->content.ignorableText = lval->ignorableText;
+    }
 
-    return ast;
+    return checkAndAddIgnorable(ast);
 }
 
-LSL_AST *addOperation(LSL_Type type, LSL_AST *left, LSL_AST *right)
+LSL_AST *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_AST *left, LSL_AST *right)
 {
     LSL_AST *ast = newAST(type, left, right);
 
@@ -170,24 +192,30 @@ LSL_AST *addOperation(LSL_Type type, LSL_AST *left, LSL_AST *right)
     {
 	if (LSL_EXPRESSION == type)
 	{
-	    ast->content.expressionValue = right;
+	    ast->content.value.expressionValue = right;
 	    ast->left = NULL;
 	}
 	else
-	    ast->content.operationValue = type;
+	{
+	    ast->content.value.operationValue = type;
+	    ast->content.ignorableText = lval->ignorableText;
+	}
     }
 
-    return ast;
+    return checkAndAddIgnorable(ast);
 }
 
-LSL_AST *addParenthesis(LSL_AST *expr)
+LSL_AST *addParenthesis(LSL_Leaf *lval, LSL_AST *expr)
 {
     LSL_AST *ast = newAST(LSL_PARENTHESIS_OPEN, NULL, expr);
 
     if (ast)
+    {
 	ast = newAST(LSL_PARENTHESIS_CLOSE, ast, NULL);
+	ast->content.ignorableText = lval->ignorableText;
+    }
 
-    return ast;
+    return checkAndAddIgnorable(ast);
 }
 
 LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
@@ -202,24 +230,14 @@ LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
     return stat;
 }
 
-LSL_AST *addSpace(char *text, LSL_AST *root)
-{
-    LSL_AST *ast = newAST(LSL_SPACE, root, NULL);
-
-    if (ast)
-	ast->content.spaceValue = text;
-
-    return ast;
-}
-
 LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root)
 {
     LSL_AST *ast = newAST(LSL_STATEMENT, root, NULL);
 
     if (ast)
-	ast->content.statementValue = statement;
+	ast->content.value.statementValue = statement;
 
-    return ast;
+    return checkAndAddIgnorable(ast);
 }
 
 static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
@@ -259,7 +277,7 @@ static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
 	else
 	{
 #ifdef LUASL_DEBUG
-	    printf(" eval <%s %d %d %d %d> ", ast->token->token, left->content.integerValue, right->content.integerValue, lresult.content.integerValue, rresult.content.integerValue);
+	    printf(" eval <%s %d %d %d %d> ", ast->token->token, left->content.value.integerValue, right->content.value.integerValue, lresult.content.value.integerValue, rresult.content.value.integerValue);
 #endif
 	    memcpy(left, &rresult, sizeof(LSL_Value));
 	}
@@ -271,9 +289,9 @@ static void evaluateIntegerToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *
     if (content)
     {
 #ifdef LUASL_DEBUG
-	printf(" <%d> ", content->integerValue);
+	printf(" <%d> ", content->value.integerValue);
 #endif
-	left->content.integerValue = content->integerValue;
+	left->content.value.integerValue = content->value.integerValue;
 	left->type = LSL_INTEGER;
     }
 }
@@ -284,13 +302,13 @@ static void evaluateNoToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right
 
 static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
 {
-    if ((content) && (content->operationValue))
+    if ((content) && (content->value.operationValue))
     {
 #ifdef LUASL_DEBUG
-	printf(" [%s] ", tokens[content->operationValue - lowestToken]->token);
+	printf(" [%s] ", tokens[content->value.operationValue - lowestToken]->token);
 #endif
 
-	switch (content->operationValue)
+	switch (content->value.operationValue)
 	{
 	    case LSL_COMMA			:
 	    case LSL_INCREMENT_PRE		:
@@ -314,33 +332,33 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 //	    case LSL_TYPECAST_OPEN		:
 //	    case LSL_TYPECAST_CLOSE		:
 		break;
-	    case LSL_BIT_NOT		:  left->content.integerValue = ~ right->content.integerValue;					break;
-	    case LSL_BOOL_NOT		:  left->content.integerValue = ! right->content.integerValue;					break;
-	    case LSL_NEGATION		:  left->content.integerValue = 0 - right->content.integerValue;				break;
-	    case LSL_DIVIDE		:  left->content.integerValue = left->content.integerValue /  right->content.integerValue;	break;
-	    case LSL_MODULO		:  left->content.integerValue = left->content.integerValue %  right->content.integerValue;	break;
-	    case LSL_MULTIPLY		:  left->content.integerValue = left->content.integerValue *  right->content.integerValue;	break;
+	    case LSL_BIT_NOT		:  left->content.value.integerValue = ~ right->content.value.integerValue;					break;
+	    case LSL_BOOL_NOT		:  left->content.value.integerValue = ! right->content.value.integerValue;					break;
+	    case LSL_NEGATION		:  left->content.value.integerValue = 0 - right->content.value.integerValue;					break;
+	    case LSL_DIVIDE		:  left->content.value.integerValue = left->content.value.integerValue /  right->content.value.integerValue;	break;
+	    case LSL_MODULO		:  left->content.value.integerValue = left->content.value.integerValue %  right->content.value.integerValue;	break;
+	    case LSL_MULTIPLY		:  left->content.value.integerValue = left->content.value.integerValue *  right->content.value.integerValue;	break;
 //	    case LSL_DOT_PRODUCT	: break;
 //	    case LSL_CROSS_PRODUCT	: break;
-	    case LSL_SUBTRACT		:  left->content.integerValue = left->content.integerValue -  right->content.integerValue;	break;
-	    case LSL_ADD		:  left->content.integerValue = left->content.integerValue +  right->content.integerValue;	break;
+	    case LSL_SUBTRACT		:  left->content.value.integerValue = left->content.value.integerValue -  right->content.value.integerValue;	break;
+	    case LSL_ADD		:  left->content.value.integerValue = left->content.value.integerValue +  right->content.value.integerValue;	break;
 //	    case LSL_CONCATENATE	: break;
-	    case LSL_LEFT_SHIFT		:  left->content.integerValue = left->content.integerValue << right->content.integerValue;	break;
-	    case LSL_RIGHT_SHIFT	:  left->content.integerValue = left->content.integerValue >> right->content.integerValue;	break;
-	    case LSL_LESS_THAN		:  left->content.integerValue = left->content.integerValue <  right->content.integerValue;	break;
-	    case LSL_GREATER_THAN	:  left->content.integerValue = left->content.integerValue >  right->content.integerValue;	break;
-	    case LSL_LESS_EQUAL		:  left->content.integerValue = left->content.integerValue <= right->content.integerValue;	break;
-	    case LSL_GREATER_EQUAL	:  left->content.integerValue = left->content.integerValue >= right->content.integerValue;	break;
-	    case LSL_EQUAL		:  left->content.integerValue = left->content.integerValue == right->content.integerValue;	break;
-	    case LSL_NOT_EQUAL		:  left->content.integerValue = left->content.integerValue != right->content.integerValue;	break;
-	    case LSL_BIT_AND		:  left->content.integerValue = left->content.integerValue &  right->content.integerValue;	break;
-	    case LSL_BIT_XOR		:  left->content.integerValue = left->content.integerValue ^  right->content.integerValue;	break;
-	    case LSL_BIT_OR		:  left->content.integerValue = left->content.integerValue |  right->content.integerValue;	break;
-	    case LSL_BOOL_OR		:  left->content.integerValue = left->content.integerValue || right->content.integerValue;	break;
-	    case LSL_BOOL_AND		:  left->content.integerValue = left->content.integerValue && right->content.integerValue;	break;
+	    case LSL_LEFT_SHIFT		:  left->content.value.integerValue = left->content.value.integerValue << right->content.value.integerValue;	break;
+	    case LSL_RIGHT_SHIFT	:  left->content.value.integerValue = left->content.value.integerValue >> right->content.value.integerValue;	break;
+	    case LSL_LESS_THAN		:  left->content.value.integerValue = left->content.value.integerValue <  right->content.value.integerValue;	break;
+	    case LSL_GREATER_THAN	:  left->content.value.integerValue = left->content.value.integerValue >  right->content.value.integerValue;	break;
+	    case LSL_LESS_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue <= right->content.value.integerValue;	break;
+	    case LSL_GREATER_EQUAL	:  left->content.value.integerValue = left->content.value.integerValue >= right->content.value.integerValue;	break;
+	    case LSL_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue == right->content.value.integerValue;	break;
+	    case LSL_NOT_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue != right->content.value.integerValue;	break;
+	    case LSL_BIT_AND		:  left->content.value.integerValue = left->content.value.integerValue &  right->content.value.integerValue;	break;
+	    case LSL_BIT_XOR		:  left->content.value.integerValue = left->content.value.integerValue ^  right->content.value.integerValue;	break;
+	    case LSL_BIT_OR		:  left->content.value.integerValue = left->content.value.integerValue |  right->content.value.integerValue;	break;
+	    case LSL_BOOL_OR		:  left->content.value.integerValue = left->content.value.integerValue || right->content.value.integerValue;	break;
+	    case LSL_BOOL_AND		:  left->content.value.integerValue = left->content.value.integerValue && right->content.value.integerValue;	break;
 	}
 #ifdef LUASL_DEBUG
-	printf(" (=%d) ", left->content.integerValue);
+	printf(" (=%d) ", left->content.value.integerValue);
 #endif
     }
 }
@@ -348,7 +366,7 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
 {
     if (content)
-	evaluateAST(content->statementValue->expression, left, right);
+	evaluateAST(content->value.statementValue->expression, left, right);
 }
 
 static void outputAST(LSL_AST *ast)
@@ -367,26 +385,26 @@ static void outputAST(LSL_AST *ast)
 static void outputIntegerToken(LSL_Leaf *content)
 {
     if (content)
-	printf("%d", content->integerValue);
+	printf("%d", content->value.integerValue);
 }
 
 static void outputOperationToken(LSL_Leaf *content)
 {
     if (content)
-	printf("%s", tokens[content->operationValue - lowestToken]->token);
+	printf("%s", tokens[content->value.operationValue - lowestToken]->token);
 }
 
 static void outputStatementToken(LSL_Leaf *content)
 {
     if (content)
-	outputAST(content->statementValue->expression);
+	outputAST(content->value.statementValue->expression);
     printf(";");
 }
 
 static void outputSpaceToken(LSL_Leaf *content)
 {
     if (content)
-	printf("%s", content->spaceValue);
+	printf("%s", content->value.spaceValue);
 }
 
 static void convertAST2Lua(LSL_AST *ast)
@@ -523,9 +541,9 @@ int main(int argc, char **argv)
 	    {
 		LSL_Value left, right;
 
-		left.content.integerValue = 0;
+		left.content.value.integerValue = 0;
 		left.type = LSL_INTEGER;
-		right.content.integerValue = 0;
+		right.content.value.integerValue = 0;
 		right.type = LSL_INTEGER;
 		evaluateAST(ast, &left, &right);
 
@@ -535,7 +553,7 @@ int main(int argc, char **argv)
 		printf("Result of -\n");
 		outputAST(ast);
 		printf("\n");
-		printf("is %d %d.  And converted to Lua it is -\n", left.content.integerValue, right.content.integerValue);
+		printf("is %d %d.  And converted to Lua it is -\n", left.content.value.integerValue, right.content.value.integerValue);
 		convertAST2Lua(ast);
 		printf("\n");
 		burnAST(ast);

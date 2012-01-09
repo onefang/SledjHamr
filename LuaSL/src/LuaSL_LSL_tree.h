@@ -20,7 +20,7 @@ extern int yydebug;
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
 
-typedef union  _LSL_Leaf	LSL_Leaf;
+typedef struct _LSL_Leaf	LSL_Leaf;
 typedef struct _LSL_Value	LSL_Value;
 typedef struct _LSL_Identifier	LSL_Identifier;
 typedef struct _LSL_Statement	LSL_Statement;
@@ -65,43 +65,48 @@ typedef struct
     evaluateToken	evaluate;
 } LSL_Token;
 
-union _LSL_Leaf
+struct _LSL_Leaf
 {
-    char		*commentValue;
-    char		*spaceValue;
+    union
+    {
+	char		*commentValue;
+	char		*spaceValue;
 
-    LSL_Type		operationValue;
-    LSL_AST		*expressionValue;
+	LSL_Type		operationValue;
+	LSL_AST		*expressionValue;
 
-    float		floatValue;
-    int			integerValue;
-    char		*keyValue;
-    LSL_Leaf		*listValue;
-    char		*stringValue;
-    float		vectorValue[3];
-    float		rotationValue[4];
+	float		floatValue;
+	int			integerValue;
+	char		*keyValue;
+	LSL_Leaf		*listValue;
+	char		*stringValue;
+	float		vectorValue[3];
+	float		rotationValue[4];
 
-    LSL_Identifier	*variableValue;
+	LSL_Identifier	*variableValue;
 
-    char		*labelValue;
-    LSL_Statement	*doValue;
-    LSL_Statement	*forValue;
-    LSL_Statement	*elseIfValue;
-    LSL_Statement	*elseValue;
-    LSL_Statement	*ifValue;
-    char		*jumpValue;
-    LSL_Statement	*returnValue;
-    char		*stateChangeValue;
-    LSL_Statement	*whileValue;
-    LSL_Statement	*statementValue;
+	char		*labelValue;
+	LSL_Statement	*doValue;
+	LSL_Statement	*forValue;
+	LSL_Statement	*elseIfValue;
+	LSL_Statement	*elseValue;
+	LSL_Statement	*ifValue;
+	char		*jumpValue;
+	LSL_Statement	*returnValue;
+	char		*stateChangeValue;
+	LSL_Statement	*whileValue;
+	LSL_Statement	*statementValue;
 
-    LSL_Block		*blockValue;
-    LSL_Identifier	*parameterValue;
-    LSL_Function	*functionValue;
-    LSL_State		*stateValue;
-    LSL_Script		*scriptValue;
+	LSL_Block		*blockValue;
+	LSL_Identifier	*parameterValue;
+	LSL_Function	*functionValue;
+	LSL_State		*stateValue;
+	LSL_Script		*scriptValue;
 
-    char		*unknownValue;
+	char		*unknownValue;
+    } value;
+    char	*ignorableText;
+    int line, column;
 };
 
 struct _LSL_Value
@@ -176,7 +181,7 @@ typedef struct
 } LuaSL_yyparseParam;
 
 // the parameter name (of the reentrant 'yyparse' function)
-// data is a pointer to a 'SParserParam' structure
+// data is a pointer to a 'yyparseParam' structure
 #define YYPARSE_PARAM data
  
 // the argument for the 'yylex' function
@@ -184,12 +189,11 @@ typedef struct
 
 
 LSL_AST *addExpression(LSL_AST *exp);
-LSL_AST *addInteger(int value);
-LSL_AST *addOperation(LSL_Type type, LSL_AST *left, LSL_AST *right);
-LSL_AST *addParenthesis(LSL_AST *expr);
+LSL_AST *addInteger(LSL_Leaf *lval, int value);
+LSL_AST *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_AST *left, LSL_AST *right);
+LSL_AST *addParenthesis(LSL_Leaf *lval, LSL_AST *expr);
 LSL_Statement *createStatement(LSL_Type type, LSL_AST *root);
 LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root);
-LSL_AST *addSpace(char *text, LSL_AST *root);
 
 int yyerror(const char *msg);
 int yyparse(void *param);
