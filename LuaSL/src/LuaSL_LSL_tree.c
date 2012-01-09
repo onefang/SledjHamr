@@ -154,17 +154,19 @@ static void burnLeaf(LSL_Leaf *leaf)
     }
 }
 
-LSL_Leaf *addInteger(LSL_Leaf *lval, int value)
+static LSL_Leaf *cloneLeaf(LSL_Leaf *source)
 {
-    LSL_Leaf *leaf = newLeaf(LSL_INTEGER, NULL, NULL);
+    LSL_Leaf *leaf = newLeaf(LSL_UNKNOWN, NULL, NULL);
 
     if (leaf)
-    {
-	leaf->value.integerValue = value;
-	leaf->ignorableText = lval->ignorableText;
-    }
+	memcpy(leaf, source, sizeof(LSL_Leaf));
 
     return leaf;
+}
+
+LSL_Leaf *addInteger(LSL_Leaf *lval, int value)
+{
+    return cloneLeaf(lval);
 }
 
 LSL_Leaf *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
@@ -216,7 +218,9 @@ LSL_Leaf *addStatement(LSL_Statement *statement, LSL_Leaf *root)
     LSL_Leaf *leaf = newLeaf(LSL_STATEMENT, root, NULL);
 
     if (leaf)
+    {
 	leaf->value.statementValue = statement;
+    }
 
     return leaf;
 }
