@@ -128,118 +128,102 @@ LSL_Token **tokens = NULL;
 int lowestToken = 999999;
 
 
-static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
+static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 {
-    LSL_AST *ast = malloc(sizeof(LSL_AST));
+    LSL_Leaf *leaf = malloc(sizeof(LSL_Leaf));
 
-    if (ast == NULL) return NULL;
-
-    ast->left = left;
-    ast->right = right;
-    ast->content.token = tokens[type - lowestToken];
-
-    return ast;
-}
-
-static void burnAST(LSL_AST *ast)
-{
-    if (ast == NULL) return;
-
-    burnAST(ast->left);
-    burnAST(ast->right);
-    free(ast->content.ignorableText);
-    free(ast);
-}
-
-static LSL_AST *checkAndAddIgnorable(LSL_AST *root)
-{
-    if (root)
+    if (leaf)
     {
-	if (root->content.ignorableText)
-	{
-	    LSL_AST *ast = newAST(LSL_SPACE, NULL, root);
-
-	    if (ast)
-	    {
-		ast->content.value.spaceValue = root->content.ignorableText;
-		return ast;
-	    }
-	}
-    }
-    return root;
-}
-
-LSL_AST *addInteger(LSL_Leaf *lval, int value)
-{
-    LSL_AST *ast = newAST(LSL_INTEGER, NULL, NULL);
-
-    if (ast)
-    {
-	ast->content.value.integerValue = value;
-	ast->content.ignorableText = lval->ignorableText;
+	leaf->left = left;
+	leaf->right = right;
+	leaf->token = tokens[type - lowestToken];
     }
 
-    return checkAndAddIgnorable(ast);
+    return leaf;
 }
 
-LSL_AST *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_AST *left, LSL_AST *right)
+static void burnLeaf(LSL_Leaf *leaf)
 {
-    LSL_AST *ast = newAST(type, left, right);
+    if (leaf)
+    {
+	burnLeaf(leaf->left);
+	burnLeaf(leaf->right);
+	// TODO - Should free up the value to.
+	free(leaf->ignorableText);
+	free(leaf);
+    }
+}
 
-    if (ast)
+LSL_Leaf *addInteger(LSL_Leaf *lval, int value)
+{
+    LSL_Leaf *leaf = newLeaf(LSL_INTEGER, NULL, NULL);
+
+    if (leaf)
+    {
+	leaf->value.integerValue = value;
+	leaf->ignorableText = lval->ignorableText;
+    }
+
+    return leaf;
+}
+
+LSL_Leaf *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
+{
+    LSL_Leaf *leaf = newLeaf(type, left, right);
+
+    if (leaf)
     {
 	if (LSL_EXPRESSION == type)
 	{
-	    ast->content.value.expressionValue = right;
-	    ast->left = NULL;
+	    leaf->value.expressionValue = right;
+	    leaf->left = NULL;
 	}
 	else
 	{
-	    ast->content.value.operationValue = type;
-	    ast->content.ignorableText = lval->ignorableText;
+	    leaf->value.operationValue = type;
+	    leaf->ignorableText = lval->ignorableText;
 	}
     }
 
-    return checkAndAddIgnorable(ast);
+    return leaf;
 }
 
-LSL_AST *addParenthesis(LSL_Leaf *lval, LSL_AST *expr)
+LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr)
 {
-    LSL_AST *ast = newAST(LSL_PARENTHESIS_OPEN, NULL, expr);
+    LSL_Leaf *leaf = newLeaf(LSL_PARENTHESIS_OPEN, NULL, expr);
 
-    if (ast)
+    if (leaf)
     {
-	ast = newAST(LSL_PARENTHESIS_CLOSE, ast, NULL);
-	ast->content.ignorableText = lval->ignorableText;
+	leaf->ignorableText = lval->ignorableText;
+	leaf = newLeaf(LSL_PARENTHESIS_CLOSE, leaf, NULL);
     }
 
-    return checkAndAddIgnorable(ast);
+    return leaf;
 }
 
-LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
+LSL_Statement *createStatement(LSL_Type type, LSL_Leaf *expr)
 {
     LSL_Statement *stat = malloc(sizeof(LSL_Statement));
 
-    if (stat == NULL) return NULL;
-
-    stat->expressions = expr;
+    if (stat)
+	stat->expressions = expr;
 
     return stat;
 }
 
-LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root)
+LSL_Leaf *addStatement(LSL_Statement *statement, LSL_Leaf *root)
 {
-    LSL_AST *ast = newAST(LSL_STATEMENT, root, NULL);
+    LSL_Leaf *leaf = newLeaf(LSL_STATEMENT, root, NULL);
 
-    if (ast)
-	ast->content.value.statementValue = statement;
+    if (leaf)
+	leaf->value.statementValue = statement;
 
-    return checkAndAddIgnorable(ast);
+    return leaf;
 }
 
-static void evaluateAST(LSL_AST *ast, LSL_Leaf *left, LSL_Leaf *right)
+static void evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
 {
-    if (ast)
+    if (leaf)
     {
 	LSL_Leaf lresult;
 	LSL_Leaf rresult;
@@ -247,34 +231,34 @@ static void evaluateAST(LSL_AST *ast, LSL_Leaf *left, LSL_Leaf *right)
 	memcpy(&lresult, left, sizeof(LSL_Leaf));
 	memcpy(&rresult, right, sizeof(LSL_Leaf));
 
-	if (LSL_RIGHT2LEFT & ast->content.token->flags)
+	if (LSL_RIGHT2LEFT & leaf->token->flags)
 	{
 	    memcpy(&rresult, left, sizeof(LSL_Leaf));
-	    evaluateAST(ast->right, &rresult, right);
-	    if (!(LSL_UNARY & ast->content.token->flags))
+	    evaluateLeaf(leaf->right, &rresult, right);
+	    if (!(LSL_UNARY & leaf->token->flags))
 	    {
-		evaluateAST(ast->left, &lresult, right);
+		evaluateLeaf(leaf->left, &lresult, right);
 	    }
 	}
 	else // Assume left to right.
 	{
-	    evaluateAST(ast->left, &lresult, right);
-	    if (!(LSL_UNARY & ast->content.token->flags))
+	    evaluateLeaf(leaf->left, &lresult, right);
+	    if (!(LSL_UNARY & leaf->token->flags))
 	    {
 		memcpy(&rresult, left, sizeof(LSL_Leaf));
-		evaluateAST(ast->right, &rresult, right);
+		evaluateLeaf(leaf->right, &rresult, right);
 	    }
 	}
 
-	if (ast->content.token->evaluate)
+	if (leaf->token->evaluate)
 	{
-	    ast->content.token->evaluate(&(ast->content), &lresult, &rresult);
+	    leaf->token->evaluate(leaf, &lresult, &rresult);
 	    memcpy(left, &lresult, sizeof(LSL_Leaf));
 	}
 	else
 	{
 #ifdef LUASL_DEBUG
-	    printf(" eval <%s %d %d %d %d> ", ast->content.token->token, left->value.integerValue, right->value.integerValue, lresult.value.integerValue, rresult.value.integerValue);
+	    printf(" eval <%s %d %d %d %d> ", leaf->token->token, left->value.integerValue, right->value.integerValue, lresult.value.integerValue, rresult.value.integerValue);
 #endif
 	    memcpy(left, &rresult, sizeof(LSL_Leaf));
 	}
@@ -289,7 +273,7 @@ static void evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *ri
 	printf(" <%d> ", content->value.integerValue);
 #endif
 	left->value.integerValue = content->value.integerValue;
-	left->type = LSL_INTEGER;
+	left->token = tokens[LSL_INTEGER - lowestToken];
     }
 }
 
@@ -364,19 +348,21 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *
 static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     if (content)
-	evaluateAST(content->value.statementValue->expressions, left, right);
+	evaluateLeaf(content->value.statementValue->expressions, left, right);
 }
 
-static void outputAST(LSL_AST *ast)
+static void outputLeaf(LSL_Leaf *leaf)
 {
-    if (ast)
+    if (leaf)
     {
-	outputAST(ast->left);
-	if (ast->content.token->output)
-	    ast->content.token->output(&(ast->content));
+	outputLeaf(leaf->left);
+	if (leaf->ignorableText)
+	    printf("%s", leaf->ignorableText);
+	if (leaf->token->output)
+	    leaf->token->output(leaf);
 	else
-	    printf("%s", ast->content.token->token);
-	outputAST(ast->right);
+	    printf("%s", leaf->token->token);
+	outputLeaf(leaf->right);
     }
 }
 
@@ -395,7 +381,7 @@ static void outputOperationToken(LSL_Leaf *content)
 static void outputStatementToken(LSL_Leaf *content)
 {
     if (content)
-	outputAST(content->value.statementValue->expressions);
+	outputLeaf(content->value.statementValue->expressions);
     printf(";");
 }
 
@@ -405,18 +391,18 @@ static void outputSpaceToken(LSL_Leaf *content)
 	printf("%s", content->value.spaceValue);
 }
 
-static void convertAST2Lua(LSL_AST *ast)
+static void convertLeaf2Lua(LSL_Leaf *leaf)
 {
-    if (ast)
+    if (leaf)
     {
-	convertAST2Lua(ast->left);
-	if (ast->content.token->convert)
-	    ast->content.token->convert(&(ast->content));
-	else if (ast->content.token->output)
-	    ast->content.token->output(&(ast->content));
+	convertLeaf2Lua(leaf->left);
+	if (leaf->token->convert)
+	    leaf->token->convert(leaf);
+	else if (leaf->token->output)
+	    leaf->token->output(leaf);
 	else
-	    printf("%s", ast->content.token->token);
-	convertAST2Lua(ast->right);
+	    printf("%s", leaf->token->token);
+	convertLeaf2Lua(leaf->right);
     }
 }
 
@@ -435,7 +421,6 @@ int main(int argc, char **argv)
     if (tokens)
     {
 	char buffer[4096];
-	LSL_AST *ast;
 	LuaSL_yyparseParam param;
 	int count;
 	FILE *file;
@@ -533,28 +518,27 @@ int main(int argc, char **argv)
 	if (!yyparse(&param))
 	{
 	    yylex_destroy(param.scanner);
-	    ast = param.ast;
 
-	    if (ast)
+	    if (param.ast)
 	    {
 		LSL_Leaf left, right;
 
 		left.value.integerValue = 0;
-		left.type = LSL_INTEGER;
+		left.token = tokens[LSL_INTEGER - lowestToken];
 		right.value.integerValue = 0;
-		right.type = LSL_INTEGER;
-		evaluateAST(ast, &left, &right);
+		right.token = tokens[LSL_INTEGER - lowestToken];
+		evaluateLeaf(param.ast, &left, &right);
 
 #ifdef LUASL_DEBUG
 		printf("\n");
 #endif
 		printf("Result of -\n");
-		outputAST(ast);
+		outputLeaf(param.ast);
 		printf("\n");
 		printf("is %d %d.  And converted to Lua it is -\n", left.value.integerValue, right.value.integerValue);
-		convertAST2Lua(ast);
+		convertLeaf2Lua(param.ast);
 		printf("\n");
-		burnAST(ast);
+		burnLeaf(param.ast);
 	    }
 	}
     }

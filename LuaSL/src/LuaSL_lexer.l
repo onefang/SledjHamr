@@ -140,7 +140,6 @@ int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type)
 	else
 	    column++;
 
-    lval->type = type;
     lval->token = tokens[type - lowestToken];
     lval->line = line;
     lval->column = column;
