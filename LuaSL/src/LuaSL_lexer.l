@@ -4,7 +4,6 @@
 #include "LuaSL_LSL_tree.h"
 #include <stdio.h>
 
-void comment(yyscan_t yyscanner);
 int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type);
 
 %}
@@ -93,7 +92,7 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 "state"         %{ return common(yylval, yytext, TRUE, LSL_STATE_CHANGE); %}
 "while"         %{ return common(yylval, yytext, TRUE, LSL_WHILE); %}
 
-{IDENTIFIER}    %{ /* yylval->value.nameValue = strdup(yytext); */ common(yylval, yytext, TRUE, LSL_IDENTIFIER); %}
+{IDENTIFIER}    %{ /* yylval->value.identifierValue = strdup(yytext); */ common(yylval, yytext, TRUE, LSL_IDENTIFIER); %}
 
  /* Other symbols. */
 "@"             %{ return common(yylval, yytext, TRUE, LSL_LABEL); %}
@@ -107,19 +106,6 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 .               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = strdup(yytext); common(yylval, yytext, TRUE, LSL_UNKNOWN); %}
 
 %%
-
-void comment(yyscan_t yyscanner)
-{
-    char c, prev = 0;
-
-    while ((c = input(yyscanner)) != 0)      /* (EOF maps to 0) */
-    {
-	if (c == '/' && prev == '*')
-	    return;
-	prev = c;
-    }
-    yyerror("unterminated comment");
-}
 
 static char *ignorableText = NULL;
 static int column = 0;
@@ -182,6 +168,7 @@ int yywrap(yyscan_t yyscanner)
     #ifndef LL_WINDOWS
 	// Get gcc to stop complaining about lack of use of yyunput and input.
 	(void) yyunput;
+	(void) input;
     #endif
 #endif
 // TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them and return 0.  Return 1 when there are no more files.

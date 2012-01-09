@@ -87,6 +87,7 @@ struct _LSL_Leaf
 	float		vectorValue[3];
 	float		rotationValue[4];
 
+	LSL_Identifier	*identifierValue;
 	LSL_Identifier	*variableValue;
 
 	char		*labelValue;
