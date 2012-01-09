@@ -4,6 +4,7 @@
 #include "LuaSL_LSL_tree.h"
 #include <stdio.h>
 
+void comment(yyscan_t yyscanner);
 void count(char *text);
 
 #ifdef LUASL_DEBUG
@@ -36,8 +37,8 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
  /* White space. */
 [[:space:]]+    %{ ECHO; /* yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
-"/*"            %{ /* count(); comment(); */ %}
-"//"[^\n]*      %{ /* consume //-comment */ %}
+"/*"            %{ ECHO; comment(yyscanner); %}
+"//"[^\n]*      %{ ECHO; /* consume //-comment */ %}
 
  /* Operations. */
 "&&"            { ECHO; return LSL_BOOL_AND; }
@@ -116,6 +117,19 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
+void comment(yyscan_t yyscanner)
+{
+    char c, prev = 0;
+
+    while ((c = input(yyscanner)) != 0)      /* (EOF maps to 0) */
+    {
+	if (c == '/' && prev == '*')
+	    return;
+	prev = c;
+    }
+    yyerror("unterminated comment");
+}
+
 int column = 0;
 int line = 0;
 
@@ -147,7 +161,6 @@ int yywrap(yyscan_t yyscanner)
     #ifndef LL_WINDOWS
 	// Get gcc to stop complaining about lack of use of yyunput and input.
 	(void) yyunput;
-	(void) input;
     #endif
 #endif
 // TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them and return 0.  Return 1 when there are no more files.
