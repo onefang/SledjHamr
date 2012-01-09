@@ -74,6 +74,14 @@ $command
 names="LuaSL_LSL_tree LuaSL_lexer LuaSL_yaccer.tab"
 
 LFLAGS="-d"
+
+# Hmmm, we have a circular dependencie with the include fiels each of flex and btyacc generate.  So run btyacc twice.
+
+# I want to remove -d, coz I want an enum, not a bunch of #defines, but btyacc creates #defines internally anyway.  sigh
+command="btyacc -d -t -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
+echo $command
+$command
+
 command="flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
@@ -82,6 +90,7 @@ $command
 command="btyacc -d -t -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
 echo $command
 $command
+
 
 objects=""
 for i in $names
