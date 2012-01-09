@@ -50,14 +50,14 @@
 %%
 
 input :
-    ignorable { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
+    ignorable { }
     | expr { ((LuaSL_yyparseParam*)data)->ast = addOperation(LSL_EXPRESSION, $1, $1); }
     | statement { ((LuaSL_yyparseParam*)data)->ast = addStatement($1, ((LuaSL_yyparseParam*)data)->ast); }
     | script { }
 ;
 
 ignorable :
-    LSL_SPACE { $$ = strdup($1); }
+    LSL_SPACE { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
 ;
 
 expr :
