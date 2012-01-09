@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
-static void evaluateNoToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right);
-static void evaluateOperationToken(LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
-static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right);
+static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static void evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static void outputIntegerToken(LSL_Leaf *content);
 static void outputOperationToken(LSL_Leaf *content);
 static void outputStatementToken(LSL_Leaf *content);
@@ -14,8 +14,8 @@ static void outputSpaceToken(LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
-//    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
     {LSL_SPACE,			" ",		LSL_NONE,			outputSpaceToken, NULL, NULL},
 
     // Operators, in order of precedence, low to high
@@ -95,7 +95,7 @@ LSL_Token LSL_Tokens[] =
 
     // Then the rest of the syntax tokens.
 
-//    {LSL_IDENTIFIER,			"identifier",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_IDENTIFIER,			"identifier",		LSL_NONE,			NULL, NULL, NULL},
 
     {LSL_LABEL,				"@",		LSL_NONE,			NULL, NULL, NULL},
 
@@ -117,7 +117,7 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_STATE,				"state",		LSL_NONE,			NULL, NULL, NULL},
 //    {LSL_SCRIPT,			"script",		LSL_NONE,			NULL, NULL, NULL},
 
-//    {LSL_UNKNOWN,			"unknown",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_UNKNOWN,			"unknown",	LSL_NONE,				NULL, NULL, NULL},
 
     // A sentinal.
 
@@ -136,9 +136,7 @@ static LSL_AST *newAST(LSL_Type type, LSL_AST *left, LSL_AST *right)
 
     ast->left = left;
     ast->right = right;
-    ast->line = -1;
-    ast->character = -1;
-    ast->token = tokens[type - lowestToken];
+    ast->content.token = tokens[type - lowestToken];
 
     return ast;
 }
@@ -224,8 +222,7 @@ LSL_Statement *createStatement(LSL_Type type, LSL_AST *expr)
 
     if (stat == NULL) return NULL;
 
-    stat->type = type;
-    stat->expression = expr;
+    stat->expressions = expr;
 
     return stat;
 }
@@ -240,21 +237,21 @@ LSL_AST *addStatement(LSL_Statement *statement, LSL_AST *root)
     return checkAndAddIgnorable(ast);
 }
 
-static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
+static void evaluateAST(LSL_AST *ast, LSL_Leaf *left, LSL_Leaf *right)
 {
     if (ast)
     {
-	LSL_Value lresult;
-	LSL_Value rresult;
+	LSL_Leaf lresult;
+	LSL_Leaf rresult;
 
-	memcpy(&lresult, left, sizeof(LSL_Value));
-	memcpy(&rresult, right, sizeof(LSL_Value));
+	memcpy(&lresult, left, sizeof(LSL_Leaf));
+	memcpy(&rresult, right, sizeof(LSL_Leaf));
 
-	if (LSL_RIGHT2LEFT & ast->token->flags)
+	if (LSL_RIGHT2LEFT & ast->content.token->flags)
 	{
-	    memcpy(&rresult, left, sizeof(LSL_Value));
+	    memcpy(&rresult, left, sizeof(LSL_Leaf));
 	    evaluateAST(ast->right, &rresult, right);
-	    if (!(LSL_UNARY & ast->token->flags))
+	    if (!(LSL_UNARY & ast->content.token->flags))
 	    {
 		evaluateAST(ast->left, &lresult, right);
 	    }
@@ -262,50 +259,51 @@ static void evaluateAST(LSL_AST *ast, LSL_Value *left, LSL_Value *right)
 	else // Assume left to right.
 	{
 	    evaluateAST(ast->left, &lresult, right);
-	    if (!(LSL_UNARY & ast->token->flags))
+	    if (!(LSL_UNARY & ast->content.token->flags))
 	    {
-		memcpy(&rresult, left, sizeof(LSL_Value));
+		memcpy(&rresult, left, sizeof(LSL_Leaf));
 		evaluateAST(ast->right, &rresult, right);
 	    }
 	}
 
-	if (ast->token->evaluate)
+	if (ast->content.token->evaluate)
 	{
-	    ast->token->evaluate(&(ast->content), &lresult, &rresult);
-	    memcpy(left, &lresult, sizeof(LSL_Value));
+	    ast->content.token->evaluate(&(ast->content), &lresult, &rresult);
+	    memcpy(left, &lresult, sizeof(LSL_Leaf));
 	}
 	else
 	{
 #ifdef LUASL_DEBUG
-	    printf(" eval <%s %d %d %d %d> ", ast->token->token, left->content.value.integerValue, right->content.value.integerValue, lresult.content.value.integerValue, rresult.content.value.integerValue);
+	    printf(" eval <%s %d %d %d %d> ", ast->content.token->token, left->value.integerValue, right->value.integerValue, lresult.value.integerValue, rresult.value.integerValue);
 #endif
-	    memcpy(left, &rresult, sizeof(LSL_Value));
+	    memcpy(left, &rresult, sizeof(LSL_Leaf));
 	}
     }
 }
 
-static void evaluateIntegerToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+static void evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     if (content)
     {
 #ifdef LUASL_DEBUG
 	printf(" <%d> ", content->value.integerValue);
 #endif
-	left->content.value.integerValue = content->value.integerValue;
+	left->value.integerValue = content->value.integerValue;
 	left->type = LSL_INTEGER;
     }
 }
 
-static void evaluateNoToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
+    // Do nothing, that's the point.
 }
 
-static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+static void evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     if ((content) && (content->value.operationValue))
     {
 #ifdef LUASL_DEBUG
-	printf(" [%s] ", tokens[content->value.operationValue - lowestToken]->token);
+	printf(" [%s] ", content->token->token);
 #endif
 
 	switch (content->value.operationValue)
@@ -332,41 +330,41 @@ static void evaluateOperationToken(LSL_Leaf *content, LSL_Value *left, LSL_Value
 //	    case LSL_TYPECAST_OPEN		:
 //	    case LSL_TYPECAST_CLOSE		:
 		break;
-	    case LSL_BIT_NOT		:  left->content.value.integerValue = ~ right->content.value.integerValue;					break;
-	    case LSL_BOOL_NOT		:  left->content.value.integerValue = ! right->content.value.integerValue;					break;
-	    case LSL_NEGATION		:  left->content.value.integerValue = 0 - right->content.value.integerValue;					break;
-	    case LSL_DIVIDE		:  left->content.value.integerValue = left->content.value.integerValue /  right->content.value.integerValue;	break;
-	    case LSL_MODULO		:  left->content.value.integerValue = left->content.value.integerValue %  right->content.value.integerValue;	break;
-	    case LSL_MULTIPLY		:  left->content.value.integerValue = left->content.value.integerValue *  right->content.value.integerValue;	break;
+	    case LSL_BIT_NOT		:  left->value.integerValue = ~ right->value.integerValue;				break;
+	    case LSL_BOOL_NOT		:  left->value.integerValue = ! right->value.integerValue;				break;
+	    case LSL_NEGATION		:  left->value.integerValue = 0 - right->value.integerValue;				break;
+	    case LSL_DIVIDE		:  left->value.integerValue = left->value.integerValue /  right->value.integerValue;	break;
+	    case LSL_MODULO		:  left->value.integerValue = left->value.integerValue %  right->value.integerValue;	break;
+	    case LSL_MULTIPLY		:  left->value.integerValue = left->value.integerValue *  right->value.integerValue;	break;
 //	    case LSL_DOT_PRODUCT	: break;
 //	    case LSL_CROSS_PRODUCT	: break;
-	    case LSL_SUBTRACT		:  left->content.value.integerValue = left->content.value.integerValue -  right->content.value.integerValue;	break;
-	    case LSL_ADD		:  left->content.value.integerValue = left->content.value.integerValue +  right->content.value.integerValue;	break;
+	    case LSL_SUBTRACT		:  left->value.integerValue = left->value.integerValue -  right->value.integerValue;	break;
+	    case LSL_ADD		:  left->value.integerValue = left->value.integerValue +  right->value.integerValue;	break;
 //	    case LSL_CONCATENATE	: break;
-	    case LSL_LEFT_SHIFT		:  left->content.value.integerValue = left->content.value.integerValue << right->content.value.integerValue;	break;
-	    case LSL_RIGHT_SHIFT	:  left->content.value.integerValue = left->content.value.integerValue >> right->content.value.integerValue;	break;
-	    case LSL_LESS_THAN		:  left->content.value.integerValue = left->content.value.integerValue <  right->content.value.integerValue;	break;
-	    case LSL_GREATER_THAN	:  left->content.value.integerValue = left->content.value.integerValue >  right->content.value.integerValue;	break;
-	    case LSL_LESS_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue <= right->content.value.integerValue;	break;
-	    case LSL_GREATER_EQUAL	:  left->content.value.integerValue = left->content.value.integerValue >= right->content.value.integerValue;	break;
-	    case LSL_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue == right->content.value.integerValue;	break;
-	    case LSL_NOT_EQUAL		:  left->content.value.integerValue = left->content.value.integerValue != right->content.value.integerValue;	break;
-	    case LSL_BIT_AND		:  left->content.value.integerValue = left->content.value.integerValue &  right->content.value.integerValue;	break;
-	    case LSL_BIT_XOR		:  left->content.value.integerValue = left->content.value.integerValue ^  right->content.value.integerValue;	break;
-	    case LSL_BIT_OR		:  left->content.value.integerValue = left->content.value.integerValue |  right->content.value.integerValue;	break;
-	    case LSL_BOOL_OR		:  left->content.value.integerValue = left->content.value.integerValue || right->content.value.integerValue;	break;
-	    case LSL_BOOL_AND		:  left->content.value.integerValue = left->content.value.integerValue && right->content.value.integerValue;	break;
+	    case LSL_LEFT_SHIFT		:  left->value.integerValue = left->value.integerValue << right->value.integerValue;	break;
+	    case LSL_RIGHT_SHIFT	:  left->value.integerValue = left->value.integerValue >> right->value.integerValue;	break;
+	    case LSL_LESS_THAN		:  left->value.integerValue = left->value.integerValue <  right->value.integerValue;	break;
+	    case LSL_GREATER_THAN	:  left->value.integerValue = left->value.integerValue >  right->value.integerValue;	break;
+	    case LSL_LESS_EQUAL		:  left->value.integerValue = left->value.integerValue <= right->value.integerValue;	break;
+	    case LSL_GREATER_EQUAL	:  left->value.integerValue = left->value.integerValue >= right->value.integerValue;	break;
+	    case LSL_EQUAL		:  left->value.integerValue = left->value.integerValue == right->value.integerValue;	break;
+	    case LSL_NOT_EQUAL		:  left->value.integerValue = left->value.integerValue != right->value.integerValue;	break;
+	    case LSL_BIT_AND		:  left->value.integerValue = left->value.integerValue &  right->value.integerValue;	break;
+	    case LSL_BIT_XOR		:  left->value.integerValue = left->value.integerValue ^  right->value.integerValue;	break;
+	    case LSL_BIT_OR		:  left->value.integerValue = left->value.integerValue |  right->value.integerValue;	break;
+	    case LSL_BOOL_OR		:  left->value.integerValue = left->value.integerValue || right->value.integerValue;	break;
+	    case LSL_BOOL_AND		:  left->value.integerValue = left->value.integerValue && right->value.integerValue;	break;
 	}
 #ifdef LUASL_DEBUG
-	printf(" (=%d) ", left->content.value.integerValue);
+	printf(" (=%d) ", left->value.integerValue);
 #endif
     }
 }
 
-static void evaluateStatementToken(LSL_Leaf *content, LSL_Value *left, LSL_Value *right)
+static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     if (content)
-	evaluateAST(content->value.statementValue->expression, left, right);
+	evaluateAST(content->value.statementValue->expressions, left, right);
 }
 
 static void outputAST(LSL_AST *ast)
@@ -374,10 +372,10 @@ static void outputAST(LSL_AST *ast)
     if (ast)
     {
 	outputAST(ast->left);
-	if (ast->token->output)
-	    ast->token->output(&(ast->content));
+	if (ast->content.token->output)
+	    ast->content.token->output(&(ast->content));
 	else
-	    printf("%s", ast->token->token);
+	    printf("%s", ast->content.token->token);
 	outputAST(ast->right);
     }
 }
@@ -391,13 +389,13 @@ static void outputIntegerToken(LSL_Leaf *content)
 static void outputOperationToken(LSL_Leaf *content)
 {
     if (content)
-	printf("%s", tokens[content->value.operationValue - lowestToken]->token);
+	printf("%s", content->token->token);
 }
 
 static void outputStatementToken(LSL_Leaf *content)
 {
     if (content)
-	outputAST(content->value.statementValue->expression);
+	outputAST(content->value.statementValue->expressions);
     printf(";");
 }
 
@@ -412,12 +410,12 @@ static void convertAST2Lua(LSL_AST *ast)
     if (ast)
     {
 	convertAST2Lua(ast->left);
-	if (ast->token->convert)
-	    ast->token->convert(&(ast->content));
-	else if (ast->token->output)
-	    ast->token->output(&(ast->content));
+	if (ast->content.token->convert)
+	    ast->content.token->convert(&(ast->content));
+	else if (ast->content.token->output)
+	    ast->content.token->output(&(ast->content));
 	else
-	    printf("%s", ast->token->token);
+	    printf("%s", ast->content.token->token);
 	convertAST2Lua(ast->right);
     }
 }
@@ -539,11 +537,11 @@ int main(int argc, char **argv)
 
 	    if (ast)
 	    {
-		LSL_Value left, right;
+		LSL_Leaf left, right;
 
-		left.content.value.integerValue = 0;
+		left.value.integerValue = 0;
 		left.type = LSL_INTEGER;
-		right.content.value.integerValue = 0;
+		right.value.integerValue = 0;
 		right.type = LSL_INTEGER;
 		evaluateAST(ast, &left, &right);
 
@@ -553,7 +551,7 @@ int main(int argc, char **argv)
 		printf("Result of -\n");
 		outputAST(ast);
 		printf("\n");
-		printf("is %d %d.  And converted to Lua it is -\n", left.content.value.integerValue, right.content.value.integerValue);
+		printf("is %d %d.  And converted to Lua it is -\n", left.value.integerValue, right.value.integerValue);
 		convertAST2Lua(ast);
 		printf("\n");
 		burnAST(ast);

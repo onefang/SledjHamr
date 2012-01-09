@@ -20,8 +20,8 @@ extern int yydebug;
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
 
+typedef struct _LSL_Token	LSL_Token;
 typedef struct _LSL_Leaf	LSL_Leaf;
-typedef struct _LSL_Value	LSL_Value;
 typedef struct _LSL_Identifier	LSL_Identifier;
 typedef struct _LSL_Statement	LSL_Statement;
 typedef struct _LSL_Block	LSL_Block;
@@ -30,11 +30,14 @@ typedef struct _LSL_State	LSL_State;
 typedef struct _LSL_Script	LSL_Script;
 typedef struct _LSL_AST		LSL_AST;
 
+extern LSL_Token **tokens;
+extern int lowestToken;
+
 typedef int LSL_Type;
 
 typedef void (*convertToken2Lua) (LSL_Leaf *content);
 typedef void (*outputToken) (LSL_Leaf *content);
-typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Value *left, LSL_Value *right);
+typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
 #ifndef FALSE
 typedef enum
@@ -55,7 +58,7 @@ typedef enum
     LSL_CREATION	= 32
 } LSL_Flags;
 
-typedef struct
+struct _LSL_Token
 {
     LSL_Type		type;
     char 		*token;
@@ -63,7 +66,7 @@ typedef struct
     outputToken		output;
     convertToken2Lua	convert;
     evaluateToken	evaluate;
-} LSL_Token;
+};
 
 struct _LSL_Leaf
 {
@@ -72,13 +75,13 @@ struct _LSL_Leaf
 	char		*commentValue;
 	char		*spaceValue;
 
-	LSL_Type		operationValue;
+	LSL_Type	operationValue;
 	LSL_AST		*expressionValue;
 
 	float		floatValue;
-	int			integerValue;
+	int		integerValue;
 	char		*keyValue;
-	LSL_Leaf		*listValue;
+	LSL_Leaf	*listValue;
 	char		*stringValue;
 	float		vectorValue[3];
 	float		rotationValue[4];
@@ -97,34 +100,29 @@ struct _LSL_Leaf
 	LSL_Statement	*whileValue;
 	LSL_Statement	*statementValue;
 
-	LSL_Block		*blockValue;
+	LSL_Block	*blockValue;
 	LSL_Identifier	*parameterValue;
 	LSL_Function	*functionValue;
-	LSL_State		*stateValue;
-	LSL_Script		*scriptValue;
+	LSL_State	*stateValue;
+	LSL_Script	*scriptValue;
 
 	char		*unknownValue;
     } value;
-    char	*ignorableText;
-    int line, column;
-};
-
-struct _LSL_Value
-{
-    LSL_Leaf		content;
+    char		*ignorableText;
+    LSL_Token		*token;
     LSL_Type		type;
+    int 		line, column;
 };
 
 struct _LSL_Identifier	// For variables and function parameters.
 {
     char		*name;
-    LSL_Value		value;
+    LSL_Leaf		value;
 };
 
 struct _LSL_Statement
 {
-    LSL_AST		*expression;
-    LSL_Type		type;
+    LSL_AST		*expressions;	/// For things like a for statement, might hold three expressions.
 };
 
 struct _LSL_Block
@@ -137,7 +135,7 @@ struct _LSL_Function
     char		*name;
     LSL_Block		block;
     LSL_Identifier	*parameters;
-    LSL_Type		type;
+    LSL_Type		type;	// Return type.
 };
 
 struct _LSL_State
@@ -158,10 +156,7 @@ struct _LSL_AST
 {
     LSL_AST		*left;
     LSL_AST		*right;
-    LSL_Token		*token;
     LSL_Leaf		content;
-    int			line;
-    int			character;
 };
 
 

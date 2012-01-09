@@ -11,6 +11,11 @@
 
 
 %token <value.spaceValue> LSL_SPACE  /* Never actually emitted, but we need it in the token table. */
+%token <value.commentValue> LSL_COMMENT  /* Never actually emitted, but we need it in the token table. */
+%token <value.commentValue> LSL_COMMENT_LINE  /* Never actually emitted, but we need it in the token table. */
+%token <value.unknownValue> LSL_UNKNOWN  /* Never actually emitted, but we need it in the token table. */
+
+%token <value.variableValue> LSL_IDENTIFIER
 
 %type  <value.expressionValue> expr
 %left  LSL_BOOL_AND

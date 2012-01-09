@@ -5,8 +5,7 @@
 #include <stdio.h>
 
 void comment(yyscan_t yyscanner);
-void common(YYSTYPE *lval, char *text, boolean checkIgnorable);
-void ignorable(char *text);
+int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type);
 
 %}
 
@@ -22,90 +21,90 @@ EXPONANT    [eE][+-]?{INTEGER}
 FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
 CHAR        '(\\.|[^\\'\n])+'
 STRING      \"(\\.|[^\\"\n])*\"
-NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
+IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
  /* The order here is important, in mysterious ways. The more specific the lower in case of ambiguities like "floats contain integers". I think, not tested that well yet. */
 
  /* Ignorables. */
-[[:space:]]+    %{ common(yylval, yytext, FALSE); ignorable(yytext); %}
+[[:space:]]+    %{ common(yylval, yytext, FALSE, LSL_SPACE); %}
  /* Yes I know this will have problems with huge comments, just being simple to get it to work for now. */
-"/*"([^"*/"]*)"*/"   %{ common(yylval, yytext, FALSE); ignorable(yytext); %}
-"//"[^\n]*      %{ common(yylval, yytext, FALSE); ignorable(yytext); %}
+"/*"([^"*/"]*)"*/"   %{ common(yylval, yytext, FALSE, LSL_COMMENT); %}
+"//"[^\n]*      %{ common(yylval, yytext, FALSE, LSL_COMMENT_LINE); %}
 
  /* Operations. */
-"&&"            { common(yylval, yytext, TRUE); return LSL_BOOL_AND; }
-"||"            { common(yylval, yytext, TRUE); return LSL_BOOL_OR; }
-"|"             { common(yylval, yytext, TRUE); return LSL_BIT_OR; }
-"^"             { common(yylval, yytext, TRUE); return LSL_BIT_XOR; }
-"&"             { common(yylval, yytext, TRUE); return LSL_BIT_AND; }
-"!="            { common(yylval, yytext, TRUE); return LSL_NOT_EQUAL; }
-"=="            { common(yylval, yytext, TRUE); return LSL_EQUAL; }
-">="            { common(yylval, yytext, TRUE); return LSL_GREATER_EQUAL; }
-"<="            { common(yylval, yytext, TRUE); return LSL_LESS_EQUAL; }
-">"             { common(yylval, yytext, TRUE); return LSL_GREATER_THAN; }
-"<"             { common(yylval, yytext, TRUE); return LSL_LESS_THAN; }
-">>"            { common(yylval, yytext, TRUE); return LSL_RIGHT_SHIFT; }
-"<<"            { common(yylval, yytext, TRUE); return LSL_LEFT_SHIFT; }
-"+"             { common(yylval, yytext, TRUE); return LSL_ADD; }
-"-"             { common(yylval, yytext, TRUE); return LSL_SUBTRACT; }
-"*"             { common(yylval, yytext, TRUE); return LSL_MULTIPLY; }
-"%"             { common(yylval, yytext, TRUE); return LSL_MODULO; }
-"/"             { common(yylval, yytext, TRUE); return LSL_DIVIDE; }
-"!"             { common(yylval, yytext, TRUE); return LSL_BOOL_NOT; }
-"~"             { common(yylval, yytext, TRUE); return LSL_BIT_NOT; }
-"["             { common(yylval, yytext, TRUE); return LSL_BRACKET_OPEN; }
-"]"             { common(yylval, yytext, TRUE); return LSL_BRACKET_CLOSE; }
-"("             { common(yylval, yytext, TRUE); return LSL_PARENTHESIS_OPEN; }
-")"             { common(yylval, yytext, TRUE); return LSL_PARENTHESIS_CLOSE; }
-"+="            { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_ADD; }
-"-="            { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_SUBTRACT; }
-"*="            { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_MULTIPLY; }
-"%="            { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_MODULO; }
-"/="            { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_DIVIDE; }
-"="             { common(yylval, yytext, TRUE); return LSL_ASSIGNMENT_PLAIN; }
-"."             { common(yylval, yytext, TRUE); return LSL_DOT; }
-"--"            { common(yylval, yytext, TRUE); return LSL_DECREMENT_PRE; }
-"++"            { common(yylval, yytext, TRUE); return LSL_INCREMENT_PRE; }
-","             { common(yylval, yytext, TRUE); return LSL_COMMA; }
+"&&"            { return common(yylval, yytext, TRUE, LSL_BOOL_AND); }
+"||"            { return common(yylval, yytext, TRUE, LSL_BOOL_OR); }
+"|"             { return common(yylval, yytext, TRUE, LSL_BIT_OR); }
+"^"             { return common(yylval, yytext, TRUE, LSL_BIT_XOR); }
+"&"             { return common(yylval, yytext, TRUE, LSL_BIT_AND); }
+"!="            { return common(yylval, yytext, TRUE, LSL_NOT_EQUAL); }
+"=="            { return common(yylval, yytext, TRUE, LSL_EQUAL); }
+">="            { return common(yylval, yytext, TRUE, LSL_GREATER_EQUAL); }
+"<="            { return common(yylval, yytext, TRUE, LSL_LESS_EQUAL); }
+">"             { return common(yylval, yytext, TRUE, LSL_GREATER_THAN); }
+"<"             { return common(yylval, yytext, TRUE, LSL_LESS_THAN); }
+">>"            { return common(yylval, yytext, TRUE, LSL_RIGHT_SHIFT); }
+"<<"            { return common(yylval, yytext, TRUE, LSL_LEFT_SHIFT); }
+"+"             { return common(yylval, yytext, TRUE, LSL_ADD); }
+"-"             { return common(yylval, yytext, TRUE, LSL_SUBTRACT); }
+"*"             { return common(yylval, yytext, TRUE, LSL_MULTIPLY); }
+"%"             { return common(yylval, yytext, TRUE, LSL_MODULO); }
+"/"             { return common(yylval, yytext, TRUE, LSL_DIVIDE); }
+"!"             { return common(yylval, yytext, TRUE, LSL_BOOL_NOT); }
+"~"             { return common(yylval, yytext, TRUE, LSL_BIT_NOT); }
+"["             { return common(yylval, yytext, TRUE, LSL_BRACKET_OPEN); }
+"]"             { return common(yylval, yytext, TRUE, LSL_BRACKET_CLOSE); }
+"("             { return common(yylval, yytext, TRUE, LSL_PARENTHESIS_OPEN); }
+")"             { return common(yylval, yytext, TRUE, LSL_PARENTHESIS_CLOSE); }
+"+="            { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_ADD); }
+"-="            { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_SUBTRACT); }
+"*="            { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_MULTIPLY); }
+"%="            { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_MODULO); }
+"/="            { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_DIVIDE); }
+"="             { return common(yylval, yytext, TRUE, LSL_ASSIGNMENT_PLAIN); }
+"."             { return common(yylval, yytext, TRUE, LSL_DOT); }
+"--"            { return common(yylval, yytext, TRUE, LSL_DECREMENT_PRE); }
+"++"            { return common(yylval, yytext, TRUE, LSL_INCREMENT_PRE); }
+","             { return common(yylval, yytext, TRUE, LSL_COMMA); }
 
  /* Types. */
-{INTEGER}       %{ common(yylval, yytext, TRUE); yylval->value.integerValue = atoi(yytext); return LSL_INTEGER; %}
-{FLOAT}         %{ common(yylval, yytext, TRUE); yylval->value.floatValue = atof(yytext); return LSL_FLOAT; %}
+{INTEGER}       %{ yylval->value.integerValue = atoi(yytext); return common(yylval, yytext, TRUE, LSL_INTEGER); %}
+{FLOAT}         %{ yylval->value.floatValue = atof(yytext); return common(yylval, yytext, TRUE, LSL_FLOAT); %}
 
  /* Type keywords. */
-"float"         %{ common(yylval, yytext, TRUE); return LSL_TYPE_FLOAT; %}
-"integer"       %{ common(yylval, yytext, TRUE); return LSL_TYPE_INTEGER; %}
-"key"           %{ common(yylval, yytext, TRUE); return LSL_TYPE_KEY; %}
-"list"          %{ common(yylval, yytext, TRUE); return LSL_TYPE_LIST; %}
-"quaternion"    %{ common(yylval, yytext, TRUE); return LSL_TYPE_ROTATION; %}
-"rotation"      %{ common(yylval, yytext, TRUE); return LSL_TYPE_ROTATION; %}
-"string"        %{ common(yylval, yytext, TRUE); return LSL_TYPE_STRING; %}
-"vector"        %{ common(yylval, yytext, TRUE); return LSL_TYPE_VECTOR; %}
+"float"         %{ return common(yylval, yytext, TRUE, LSL_TYPE_FLOAT); %}
+"integer"       %{ return common(yylval, yytext, TRUE, LSL_TYPE_INTEGER); %}
+"key"           %{ return common(yylval, yytext, TRUE, LSL_TYPE_KEY); %}
+"list"          %{ return common(yylval, yytext, TRUE, LSL_TYPE_LIST); %}
+"quaternion"    %{ return common(yylval, yytext, TRUE, LSL_TYPE_ROTATION); %}
+"rotation"      %{ return common(yylval, yytext, TRUE, LSL_TYPE_ROTATION); %}
+"string"        %{ return common(yylval, yytext, TRUE, LSL_TYPE_STRING); %}
+"vector"        %{ return common(yylval, yytext, TRUE, LSL_TYPE_VECTOR); %}
 
  /* Statement keywords. */
-"do"            %{ common(yylval, yytext, TRUE); return LSL_DO; %}
-"for"           %{ common(yylval, yytext, TRUE); return LSL_FOR; %}
-"else"          %{ common(yylval, yytext, TRUE); return LSL_ELSE; %}
-"if"            %{ common(yylval, yytext, TRUE); return LSL_IF; %}
-"jump"          %{ common(yylval, yytext, TRUE); return LSL_JUMP; %}
-"return"        %{ common(yylval, yytext, TRUE); return LSL_RETURN; %}
-"state"         %{ common(yylval, yytext, TRUE); return LSL_STATE_CHANGE; %}
-"while"         %{ common(yylval, yytext, TRUE); return LSL_WHILE; %}
+"do"            %{ return common(yylval, yytext, TRUE, LSL_DO); %}
+"for"           %{ return common(yylval, yytext, TRUE, LSL_FOR); %}
+"else"          %{ return common(yylval, yytext, TRUE, LSL_ELSE); %}
+"if"            %{ return common(yylval, yytext, TRUE, LSL_IF); %}
+"jump"          %{ return common(yylval, yytext, TRUE, LSL_JUMP); %}
+"return"        %{ return common(yylval, yytext, TRUE, LSL_RETURN); %}
+"state"         %{ return common(yylval, yytext, TRUE, LSL_STATE_CHANGE); %}
+"while"         %{ return common(yylval, yytext, TRUE, LSL_WHILE); %}
 
-{NAME}          %{ common(yylval, yytext, TRUE); /* yylval->value.nameValue = strdup(yytext); return LSL_NAME; */ %}
+{IDENTIFIER}    %{ /* yylval->value.nameValue = strdup(yytext); */ common(yylval, yytext, TRUE, LSL_IDENTIFIER); %}
 
  /* Other symbols. */
-"@"             %{ common(yylval, yytext, TRUE); return LSL_LABEL; %}
-"{"             %{ common(yylval, yytext, TRUE); return LSL_BLOCK_OPEN; %}
-"}"             %{ common(yylval, yytext, TRUE); return LSL_BLOCK_CLOSE; %}
-";"             %{ common(yylval, yytext, TRUE); return LSL_STATEMENT; %}
+"@"             %{ return common(yylval, yytext, TRUE, LSL_LABEL); %}
+"{"             %{ return common(yylval, yytext, TRUE, LSL_BLOCK_OPEN); %}
+"}"             %{ return common(yylval, yytext, TRUE, LSL_BLOCK_CLOSE); %}
+";"             %{ return common(yylval, yytext, TRUE, LSL_STATEMENT); %}
 
 <<EOF>>         { yyterminate(); }
 
  /* Everything else */
-.               %{ common(yylval, yytext, TRUE); printf(" unexpected character.\n"); %}
+.               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = strdup(yytext); common(yylval, yytext, TRUE, LSL_UNKNOWN); %}
 
 %%
 
@@ -126,7 +125,7 @@ static char *ignorableText = NULL;
 static int column = 0;
 static int line = 0;
 
-void common(YYSTYPE *lval, char *text, boolean checkIgnorable)
+int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type)
 {
     int i;
 
@@ -141,6 +140,8 @@ void common(YYSTYPE *lval, char *text, boolean checkIgnorable)
 	else
 	    column++;
 
+    lval->type = type;
+    lval->token = tokens[type - lowestToken];
     lval->line = line;
     lval->column = column;
 
@@ -149,24 +150,25 @@ void common(YYSTYPE *lval, char *text, boolean checkIgnorable)
 	lval->ignorableText = ignorableText;
 	ignorableText = NULL;
     }
+    else
+    {
+	if (ignorableText)
+	{
+	    int lenI = strlen(ignorableText);
+	    int lenT = strlen(text);
+
+	    ignorableText = realloc(ignorableText, lenI + lenT + 1);
+	    sprintf(&ignorableText[lenI], "%s", text);
+	}
+	else
+	    ignorableText = strdup(text);
+    }
 
 #ifdef LUASL_DEBUG
 	printf ("%04d, %04d [%s]\n", line, column, text);
 #endif
-}
 
-void ignorable(char *text)
-{
-    if (ignorableText)
-    {
-	int lenI = strlen(ignorableText);
-	int lenT = strlen(text);
-
-	ignorableText = realloc(ignorableText, lenI + lenT + 1);
-	sprintf(&ignorableText[lenI], "%s", text);
-    }
-    else
-	ignorableText = strdup(text);
+    return type;
 }
 
 int yyerror(const char *msg)
