@@ -2,13 +2,16 @@
 
 #define excludeLexer
 #include "LuaSL_LSL_tree.h"
+#include <stdio.h>
+
+void count(char *text);
 
 #ifdef LUASL_DEBUG
     #undef ECHO
-    #define ECHO printf ("[%s]\n", yytext)
+    #define ECHO count(yytext); printf ("[%s]\n", yytext)
 #else
     #undef ECHO
-    #define ECHO {}
+    #define ECHO count(yytext)
 #endif
 
 %}
@@ -23,6 +26,8 @@ HEX         [[:xdigit:]]
 INTEGER     [[:digit:]]+
 EXPONANT    [eE][+-]?{INTEGER}
 FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
+CHAR        '(\\.|[^\\'\n])+'
+STRING      \"(\\.|[^\\"\n])*\"
 NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
@@ -31,6 +36,8 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
  /* White space. */
 [[:space:]]+    %{ ECHO; /* yylval->spaceValue = strdup(yytext); return LSL_SPACE; */ %}
+"/*"            %{ /* count(); comment(); */ %}
+"//"[^\n]*      %{ /* consume //-comment */ %}
 
  /* Operations. */
 "&&"            { ECHO; return LSL_BOOL_AND; }
@@ -108,6 +115,31 @@ NAME        [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 .               %{ ECHO; printf(" unexpected character.\n"); %}
 
 %%
+
+int column = 0;
+int line = 0;
+
+void count(char *text)
+{
+    int i;
+
+    for (i = 0; text[i] != '\0'; i++)
+	if (text[i] == '\n')
+	{
+	    column = 0;
+	    line++;
+	}
+	else if (text[i] == '\t')
+	    column += 8 - (column % 8);
+	else
+	    column++;
+}
+
+int yyerror(const char *msg)
+{
+    fprintf(stderr, "Parser error on line %d, column %d: %s\n", line, column, msg);
+    return 0;
+}
 
 int yywrap(yyscan_t yyscanner)
 {

@@ -404,12 +404,6 @@ static void convertAST2Lua(LSL_AST *ast)
     }
 }
 
-int yyerror(const char *msg)
-{
-    fprintf(stderr, "Parser error: %s\n", msg);
-    return 0;
-}
-
 int main(int argc, char **argv)
 {
     char *programName = argv[0];
