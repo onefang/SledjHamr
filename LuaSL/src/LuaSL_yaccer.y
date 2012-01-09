@@ -50,14 +50,13 @@
 %%
 
 input :
-    ignorable { }
+    ignorable
     | expr { ((LuaSL_yyparseParam*)data)->ast = addOperation(LSL_EXPRESSION, $1, $1); }
     | statement { ((LuaSL_yyparseParam*)data)->ast = addStatement($1, ((LuaSL_yyparseParam*)data)->ast); }
-    | script { }
+    | script
 ;
 
-ignorable :
-    LSL_SPACE { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
+ignorable : LSL_SPACE { ((LuaSL_yyparseParam*)data)->ast = addSpace($1, ((LuaSL_yyparseParam*)data)->ast); }
 ;
 
 expr :
@@ -86,12 +85,10 @@ expr :
     | LSL_INTEGER { $$ = addInteger($1); }
 ;
 
-statement :
-    expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); YYVALID; }
+statement : expr LSL_STATEMENT { $$ = createStatement(LSL_EXPRESSION, $1); YYVALID; }
 ;
 
-script :
-    script LSL_STATEMENT statement
+script : script LSL_STATEMENT statement
 
 %%
 
