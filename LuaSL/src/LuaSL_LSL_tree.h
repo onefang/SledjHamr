@@ -168,6 +168,13 @@ struct _LSL_Script
     LSL_Identifier	*variables;
 };
 
+typedef struct
+{
+    char *ignorableText;
+    int column;
+    int line;
+} LuaSL_yyparseExtra;
+
 
 // define the type for flex and lemon3
 #define YYSTYPE LSL_Leaf
@@ -176,7 +183,6 @@ struct _LSL_Script
 #ifndef excludeLexer
     #include "LuaSL_lexer.h"
 #endif
-
 
 typedef struct
 {
@@ -199,8 +205,6 @@ LSL_Leaf *addExpression(LSL_Leaf *exp);
 LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
-
-int yyerror(const char *msg);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);

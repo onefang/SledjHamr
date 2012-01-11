@@ -411,6 +411,7 @@ int main(int argc, char **argv)
 	char buffer[PATH_MAX];
 	char fileName[PATH_MAX];
 	LuaSL_yyparseParam param;
+	LuaSL_yyparseExtra extra;
 	int file;
 	int count;
 	boolean badArgs = FALSE;
@@ -499,7 +500,8 @@ int main(int argc, char **argv)
 
 	param.ast = NULL;
 	param.lval = calloc(1, sizeof(LSL_Leaf));
-	if (yylex_init(&(param.scanner)))
+	memset(&extra, 0, sizeof(extra));
+	if (yylex_init_extra(&extra, &(param.scanner)))
 	    return 1;
 
 #ifdef LUASL_DEBUG
@@ -561,8 +563,8 @@ int main(int argc, char **argv)
 		    sprintf(buffer, "diff %s %s", fileName, outName);
 		    count = system(buffer);
 		    printf("Return value of %s is %d\n", buffer, count);
-		    if (0 != count}
-			printf(stderr, "%s says they are different!\n", buffer);
+		    if (0 != count)
+			fprintf(stderr, "%s says they are different!\n", buffer);
 		    
 		}
 		else
