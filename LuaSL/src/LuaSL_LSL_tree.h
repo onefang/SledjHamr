@@ -86,13 +86,11 @@ struct _LSL_Leaf
 {
     LSL_Leaf		*left;
     LSL_Leaf		*right;
+    LSL_Token		*token;
+    char		*ignorableText;
+    int 		line, column;
     union
     {
-	char		*commentValue;
-	char		*spaceValue;
-
-	LSL_Type	operationValue;
-	LSL_Leaf	*expressionValue;
 	LSL_Parenthesis *parenthesis;
 
 	float		floatValue;
@@ -126,9 +124,6 @@ struct _LSL_Leaf
 
 	char		*unknownValue;
     } value;
-    char		*ignorableText;
-    LSL_Token		*token;
-    int 		line, column;
 };
 
 struct _LSL_Parenthesis
@@ -205,7 +200,7 @@ typedef struct
 
 void burnLeaf(LSL_Leaf *leaf);
 LSL_Leaf *addExpression(LSL_Leaf *exp);
-LSL_Leaf *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *right);
+LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
 

@@ -11,13 +11,12 @@ static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *
 static void outputIntegerToken(LSL_Leaf *content);
 static void outputParenthesisToken(LSL_Leaf *content);
 static void outputStatementToken(LSL_Leaf *content);
-static void outputSpaceToken(LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
     {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
     {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_SPACE,			" ",		LSL_NONE,			outputSpaceToken, NULL, NULL},
+    {LSL_SPACE,				" ",		LSL_NONE,			NULL, NULL, NULL},
 
     // Operators, in order of precedence, low to high
     // Left to right, unless oterwise stated.
@@ -96,7 +95,7 @@ LSL_Token LSL_Tokens[] =
 
     // Then the rest of the syntax tokens.
 
-    {LSL_IDENTIFIER,			"identifier",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_IDENTIFIER,			"identifier",	LSL_NONE,			NULL, NULL, NULL},
 
     {LSL_LABEL,				"@",		LSL_NONE,			NULL, NULL, NULL},
 
@@ -118,7 +117,7 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_STATE,				"state",		LSL_NONE,			NULL, NULL, NULL},
     {LSL_SCRIPT,			"",		LSL_NONE,			NULL, NULL, NULL},
 
-    {LSL_UNKNOWN,			"unknown",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_UNKNOWN,			"unknown",	LSL_NONE,			NULL, NULL, NULL},
 
     // A sentinal.
 
@@ -129,6 +128,7 @@ LSL_Token **tokens = NULL;
 int lowestToken = 999999;
 
 
+/*  Not actually used, but it might be some day.
 static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 {
     LSL_Leaf *leaf = calloc(1, sizeof(LSL_Leaf));
@@ -142,6 +142,7 @@ static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 
     return leaf;
 }
+*/
 
 void burnLeaf(LSL_Leaf *leaf)
 {
@@ -155,22 +156,12 @@ void burnLeaf(LSL_Leaf *leaf)
     }
 }
 
-LSL_Leaf *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
+LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
-printf("******************************addOperation(%s, %d, , )\n", lval->token->token, type);
     if (lval)
     {
 	lval->left = left;
 	lval->right = right;
-	if (LSL_EXPRESSION == type)
-	{
-	    lval->value.expressionValue = right;
-	    lval->left = NULL;
-	}
-	else
-	{
-	    lval->value.operationValue = type;
-	}
     }
 
     return lval;
@@ -194,7 +185,6 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval)
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
 {
     LSL_Statement *stat = malloc(sizeof(LSL_Statement));
-printf("******************************addStatement(%s, %d, , )\n", lval->token->token, type);
 
     if (stat)
     {
@@ -270,13 +260,13 @@ static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 
 static void evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
-    if ((content) && (content->value.operationValue))
+    if (content)
     {
 #ifdef LUASL_DEBUG
 	printf(" [%s] ", content->token->token);
 #endif
 
-	switch (content->value.operationValue)
+	switch (content->token->type)
 	{
 	    case LSL_COMMA			:
 	    case LSL_INCREMENT_PRE		:
@@ -389,12 +379,6 @@ static void outputStatementToken(LSL_Leaf *content)
 	    printf("%s", content->ignorableText);
 	printf("%s", content->token->token);
     }
-}
-
-static void outputSpaceToken(LSL_Leaf *content)
-{
-    if (content)
-	printf("%s", content->value.spaceValue);
 }
 
 static void convertLeaf2Lua(LSL_Leaf *leaf)
