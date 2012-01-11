@@ -8,9 +8,9 @@ static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static void evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static void eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
-static void outputIntegerToken(LSL_Leaf *content);
-static void outputParenthesisToken(LSL_Leaf *content);
-static void outputStatementToken(LSL_Leaf *content);
+static void outputIntegerToken(FILE *file, LSL_Leaf *content);
+static void outputParenthesisToken(FILE *file, LSL_Leaf *content);
+static void outputStatementToken(FILE *file, LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -335,62 +335,62 @@ static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *
     }
 }
 
-static void outputLeaf(LSL_Leaf *leaf)
+static void outputLeaf(FILE *file, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	outputLeaf(leaf->left);
+	outputLeaf(file, leaf->left);
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
-	    printf("%s", leaf->ignorableText);
+	    fprintf(file, "%s", leaf->ignorableText);
 	if (leaf->token->output)
-	    leaf->token->output(leaf);
+	    leaf->token->output(file, leaf);
 	else
-	    printf("%s", leaf->token->token);
-	outputLeaf(leaf->right);
+	    fprintf(file, "%s", leaf->token->token);
+	outputLeaf(file, leaf->right);
     }
 }
 
-static void outputIntegerToken(LSL_Leaf *content)
+static void outputIntegerToken(FILE *file, LSL_Leaf *content)
 {
     if (content)
-	printf("%d", content->value.integerValue);
+	fprintf(file, "%d", content->value.integerValue);
 }
 
-static void outputParenthesisToken(LSL_Leaf *content)
+static void outputParenthesisToken(FILE *file, LSL_Leaf *content)
 {
     if (content)
     {
-	printf("%s", content->token->token);
-	outputLeaf(content->value.parenthesis->expression);
-	outputLeaf(content->value.parenthesis->right);
+	fprintf(file, "%s", content->token->token);
+	outputLeaf(file, content->value.parenthesis->expression);
+	outputLeaf(file, content->value.parenthesis->right);
     }
 }
 
-static void outputStatementToken(LSL_Leaf *content)
+static void outputStatementToken(FILE *file, LSL_Leaf *content)
 {
     if (content)
     {
-	outputLeaf(content->value.statementValue->expressions);
+	outputLeaf(file, content->value.statementValue->expressions);
 	if (content->ignorableText)
-	    printf("%s", content->ignorableText);
-	printf("%s", content->token->token);
+	    fprintf(file, "%s", content->ignorableText);
+	fprintf(file, "%s", content->token->token);
     }
 }
 
-static void convertLeaf2Lua(LSL_Leaf *leaf)
+static void convertLeaf2Lua(FILE *file, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	convertLeaf2Lua(leaf->left);
+	convertLeaf2Lua(file, leaf->left);
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
-	    printf("%s", leaf->ignorableText);
+	    fprintf(file, "%s", leaf->ignorableText);
 	if (leaf->token->convert)
-	    leaf->token->convert(leaf);
+	    leaf->token->convert(file, leaf);
 	else if (leaf->token->output)
-	    leaf->token->output(leaf);
+	    leaf->token->output(file, leaf);
 	else
-	    printf("%s", leaf->token->token);
-	convertLeaf2Lua(leaf->right);
+	    fprintf(file, "%s", leaf->token->token);
+	convertLeaf2Lua(file, leaf->right);
     }
 }
 
@@ -408,7 +408,8 @@ int main(int argc, char **argv)
     tokens = calloc(i + 1, sizeof(LSL_Token *));
     if (tokens)
     {
-	char buffer[4096];
+	char buffer[PATH_MAX];
+	char fileName[PATH_MAX];
 	LuaSL_yyparseParam param;
 	int file;
 	int count;
@@ -422,7 +423,7 @@ int main(int argc, char **argv)
 	    tokens[j] = &(LSL_Tokens[i]);
 	}
 
-	buffer[0] = '\0';
+	fileName[0] = '\0';
 
 	// get the arguments passed in
 	while (--argc > 0 && *++argv != '\0')
@@ -438,8 +439,8 @@ int main(int argc, char **argv)
 		    {
 			if (--argc > 0 && *++argv != '\0')
 			{
-			    strncpy(buffer, *argv, 4095);
-			    buffer[4095] = '\0';;
+			    strncpy(fileName, *argv, PATH_MAX - 1);
+			    fileName[PATH_MAX - 1] = '\0';;
 			}
 			else
 			    badArgs = TRUE;
@@ -461,11 +462,11 @@ int main(int argc, char **argv)
 	    return 1;
 	}
 
-	if ('\0' == buffer[0])
+	if ('\0' == fileName[0])
 	{
-//strcpy(buffer, "test.lsl");
+//strcpy(fileName, "test.lsl");
 
-	    count = read(STDIN_FILENO, buffer, sizeof(buffer));
+	    count = read(STDIN_FILENO, fileName, PATH_MAX - 1);
 	    if (0 > count)
 	    {
 		printf("Error in stdin!\n");
@@ -478,18 +479,18 @@ int main(int argc, char **argv)
 	    }
 	    else
 	    {
-		buffer[count] = '\0';
-		printf("Filename %s in stdin.\n", buffer);
+		fileName[count] = '\0';
+		printf("Filename %s in stdin.\n", fileName);
 	    }
 
 	}
 	else
-	    printf("Filename %s in argument.\n", buffer);
+	    printf("Filename %s in argument.\n", fileName);
 
-	file = open(buffer, 0);
+	file = open(fileName, 0);
 	if (-1 == file)
 	{
-	    printf("Error opening file %s.\n", buffer);
+	    printf("Error opening file %s.\n", fileName);
 	    return 1;
 	}
 #ifdef LUASL_DEBUG
@@ -512,7 +513,7 @@ int main(int argc, char **argv)
 
 	    ParseTrace(stdout, "LSL_lemon ");
 
-	    while ((i = read(file, buffer, 4095)) >  0)
+	    while ((i = read(file, buffer, PATH_MAX - 1)) >  0)
 	    {
 		buffer[i] = '\0';
 		yy_scan_string(buffer, param.scanner);
@@ -532,6 +533,10 @@ int main(int argc, char **argv)
 
 	    if (param.ast)
 	    {
+		FILE *out;
+		char outName[PATH_MAX];
+		char luaName[PATH_MAX];
+
 		LSL_Leaf left, right;
 
 		left.value.integerValue = 0;
@@ -539,13 +544,37 @@ int main(int argc, char **argv)
 		right.value.integerValue = 0;
 		right.token = tokens[LSL_INTEGER - lowestToken];
 
-		outputLeaf(param.ast);
+		outputLeaf(stdout, param.ast);
 		printf("\n");
 		evaluateLeaf(param.ast, &left, &right);
-
-		printf("\nAnd converted to Lua it is -\n");
-		convertLeaf2Lua(param.ast);
 		printf("\n");
+
+		strcpy(outName, fileName);
+		strcat(outName, "2");
+		strcpy(luaName, fileName);
+		strcat(luaName, ".lua");
+		out = fopen(outName, "w");
+		if (out)
+		{
+		    outputLeaf(out, param.ast);
+		    fclose(out);
+		    sprintf(buffer, "diff %s %s", fileName, outName);
+		    count = system(buffer);
+		    printf("Return value of %s is %d\n", buffer, count);
+		    if (0 != count}
+			printf(stderr, "%s says they are different!\n", buffer);
+		    
+		}
+		else
+		    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
+		out = fopen(luaName, "w");
+		if (out)
+		{
+		    convertLeaf2Lua(out, param.ast);
+		    fclose(out);
+		}
+		else
+		    fprintf(stderr, "Unable to open file %s for writing!\n", luaName);
 		burnLeaf(param.ast);
 	    }
 

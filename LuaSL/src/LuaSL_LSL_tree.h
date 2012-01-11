@@ -16,7 +16,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-//#define BUFS 1024
+#include <stdio.h>
+#include <limits.h>	// For PATH_MAX.
 
 #include "LuaSL_lemon_yaccer.h"
                     
@@ -43,8 +44,8 @@ extern int lowestToken;
 
 typedef int LSL_Type;
 
-typedef void (*convertToken2Lua) (LSL_Leaf *content);
-typedef void (*outputToken) (LSL_Leaf *content);
+typedef void (*convertToken2Lua) (FILE *file, LSL_Leaf *content);
+typedef void (*outputToken) (FILE *file, LSL_Leaf *content);
 typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
 #ifndef FALSE
