@@ -394,9 +394,29 @@ static void convertLeaf2Lua(FILE *file, LSL_Leaf *leaf)
     }
 }
 
+int nextFile(LuaSL_yyparseExtra *extra)
+{
+    if (NULL != extra->file)
+	fclose(extra->file);
+    if (--(extra->argc) > 0 && *++(extra->argv) != '\0')
+    {
+	strncpy(extra->fileName, *(extra->argv), PATH_MAX - 1);
+	extra->fileName[PATH_MAX - 1] = '\0';
+	extra->file = fopen(extra->fileName, "r");
+	if (NULL == extra->file)
+	{
+	    fprintf(stderr, "Error opening file %s.\n", extra->fileName);
+	    return 1;
+	}
+	printf("Opened %s.\n", extra->fileName);
+	return(0);
+    }
+    return(1);
+}
+
 int main(int argc, char **argv)
 {
-    char *programName = argv[0];
+//    char *programName = argv[0];
     int i;
 
     // Figure out what numbers yacc gave to our tokens.
@@ -412,9 +432,7 @@ int main(int argc, char **argv)
 	char fileName[PATH_MAX];
 	LuaSL_yyparseParam param;
 	LuaSL_yyparseExtra extra;
-	int file;
 	int count;
-	boolean badArgs = FALSE;
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].token != NULL; i++)
@@ -425,44 +443,18 @@ int main(int argc, char **argv)
 	}
 
 	fileName[0] = '\0';
-
-	// get the arguments passed in
-	while (--argc > 0 && *++argv != '\0')
-	{
-	    if (*argv[0] == '-')
-	    {
-		// point to the characters after the '-' sign
-		char *s = argv[0] + 1;
-
-		switch (*s)
-		{
-		    case 'f': // file
-		    {
-			if (--argc > 0 && *++argv != '\0')
-			{
-			    strncpy(fileName, *argv, PATH_MAX - 1);
-			    fileName[PATH_MAX - 1] = '\0';;
-			}
-			else
-			    badArgs = TRUE;
-			break;
-		    }
-		    default:
-			badArgs = TRUE;
-		}
-	    }
-	    else
-		badArgs = TRUE;
-	}
-
-	if (badArgs)
-	{
-	    printf("Usage: %s [-f filename]\n", programName);
-	    printf("   -f: Script file to run.\n");
-	    printf("Or pass filenames in stdin.\n");
+	param.ast = NULL;
+	param.lval = calloc(1, sizeof(LSL_Leaf));
+	memset(&extra, 0, sizeof(extra));
+	extra.argc = argc;
+	extra.argv = argv;
+	extra.fileName = fileName;
+	extra.file = NULL;
+	// Grab the first file name, if any.
+	if (1 == nextFile(&extra))
 	    return 1;
-	}
 
+/*
 	if ('\0' == fileName[0])
 	{
 //strcpy(fileName, "test.lsl");
@@ -485,40 +477,37 @@ int main(int argc, char **argv)
 	    }
 
 	}
-	else
-	    printf("Filename %s in argument.\n", fileName);
+*/
 
-	file = open(fileName, 0);
-	if (-1 == file)
-	{
-	    printf("Error opening file %s.\n", fileName);
-	    return 1;
-	}
-#ifdef LUASL_DEBUG
-//	yydebug= 5;
-#endif
-
-	param.ast = NULL;
-	param.lval = calloc(1, sizeof(LSL_Leaf));
-	memset(&extra, 0, sizeof(extra));
 	if (yylex_init_extra(&extra, &(param.scanner)))
 	    return 1;
 
 #ifdef LUASL_DEBUG
+//	yydebug= 5;
+#endif
+
+
+#ifdef LUASL_DEBUG
 	yyset_debug(1, param.scanner);
 #endif
-//	yyset_in(file, param.scanner);
 
+#ifdef LUASL_FILES
+	yyset_in(extra.file, &(param.scanner));
+#endif
 	{
 	    void *pParser = ParseAlloc(malloc);
 	    int yv;
 
 	    ParseTrace(stdout, "LSL_lemon ");
 
-	    while ((i = read(file, buffer, PATH_MAX - 1)) >  0)
+#ifndef LUASL_FILES
+	    while ((i = fread(buffer, 1, PATH_MAX - 1, extra.file)) >  0)
+#endif
 	    {
+#ifndef LUASL_FILES
 		buffer[i] = '\0';
 		yy_scan_string(buffer, param.scanner);
+#endif
 		// on EOF yylex will return 0
 		while((yv = yylex(param.lval, param.scanner)) != 0)
 		{

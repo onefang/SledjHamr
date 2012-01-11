@@ -151,6 +151,11 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseExtra *extra, boolean checkIg
 
 int yywrap(yyscan_t yyscanner)
 {
+#ifdef LUASL_FILES
+    LuaSL_yyparseExtra *extra = yyget_extra(yyscanner);
+#endif
+    int result = 1;
+
 #ifdef FLEX_SCANNER
     #ifndef LL_WINDOWS
 	// Get gcc to stop complaining about lack of use of yyunput and input.
@@ -158,7 +163,12 @@ int yywrap(yyscan_t yyscanner)
 	(void) input;
     #endif
 #endif
-// TODO - If we are getting files from stdin, or multiple -f arguments, we should loop through them and return 0.  Return 1 when there are no more files.
-	return(1);
+
+#ifdef LUASL_FILES
+    result = nextFile(extra);
+    if (0 == result)
+	yyset_in(extra->file, yyscanner);
+#endif
+    return result;
 }
 

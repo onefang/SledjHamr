@@ -3,6 +3,7 @@
 #define __LSL_TREE_H__
 
 #define LUASL_DEBUG
+//#define LUASL_FILES
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -173,6 +174,10 @@ typedef struct
     char *ignorableText;
     int column;
     int line;
+    int argc;
+    char **argv;
+    char *fileName;
+    FILE *file;
 } LuaSL_yyparseExtra;
 
 
@@ -201,6 +206,7 @@ typedef struct
 //#define ParseARG_PDECL , LuaSL_yyparseParam *param
 
 void burnLeaf(LSL_Leaf *leaf);
+int nextFile(LuaSL_yyparseExtra *extra);
 LSL_Leaf *addExpression(LSL_Leaf *exp);
 LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
