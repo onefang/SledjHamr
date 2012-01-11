@@ -51,7 +51,7 @@ names="LuaSL_main LuaSL_compile LuaSL_utilities"
 
 EDJE_FLAGS="-id images -fd fonts"
 
-rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_yaccer.h LuaSL_yaccer.tab.c
+rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
 command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
 echo $command
 $command
@@ -71,26 +71,19 @@ $command
 
 
 
-names="LuaSL_LSL_tree LuaSL_lexer LuaSL_yaccer.tab"
+names="LuaSL_LSL_tree LuaSL_lexer LuaSL_lemon_yaccer"
 
 LFLAGS="-d"
 
-# Hmmm, we have a circular dependencie with the include fiels each of flex and btyacc generate.  So run btyacc twice.
-
-# I want to remove -d, coz I want an enum, not a bunch of #defines, but btyacc creates #defines internally anyway.  sigh
-command="btyacc -d -t -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
-echo $command
-$command
+# Hmmm, we have a circular dependencie with the include fiels each of flex and btyacc generate.  So run lemon twice?
 
 command="flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
 
-# I want to remove -d, coz I want an enum, not a bunch of #defines, but btyacc creates #defines internally anyway.  sigh
-command="btyacc -d -t -v -b LuaSL_yaccer -S btyacc-c.ske LuaSL_yaccer.y"
+command="lemon -s LuaSL_lemon_yaccer.y"
 echo $command
 $command
-
 
 objects=""
 for i in $names

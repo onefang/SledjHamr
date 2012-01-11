@@ -100,7 +100,7 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 "}"             %{ return common(yylval, yytext, TRUE, LSL_BLOCK_CLOSE); %}
 ";"             %{ return common(yylval, yytext, TRUE, LSL_STATEMENT); %}
 
-<<EOF>>         { yyterminate(); }
+<<EOF>>         { return common(yylval, yytext, TRUE, LSL_SCRIPT); }
 
  /* Everything else */
 .               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = strdup(yytext); common(yylval, yytext, TRUE, LSL_UNKNOWN); %}
@@ -150,7 +150,7 @@ int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type)
     }
 
 #ifdef LUASL_DEBUG
-	printf ("%04d, %04d [%s]\n", line, column, text);
+	printf ("******************************common(%s, \"%s\", , %d) %04d, %04d\n", lval->token->token, text, type, line, column);
 #endif
 
     return type;

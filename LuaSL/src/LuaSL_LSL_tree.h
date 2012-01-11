@@ -10,7 +10,20 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "LuaSL_yaccer.tab.h"
+//#include <iostream>
+//#include <cstdlib>
+#include "assert.h"  
+//#include "ex5def.h"
+//#include "example5.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+//#include "lexglobal.h"
+//#define BUFS 1024
+
+#include "LuaSL_lemon_yaccer.h"
                     
 #define YYERRCODE 256
 #define YYDEBUG 1
@@ -22,6 +35,7 @@ extern int yydebug;
 
 typedef struct _LSL_Token	LSL_Token;
 typedef struct _LSL_Leaf	LSL_Leaf;
+typedef struct _LSL_Parenthesis LSL_Parenthesis;
 typedef struct _LSL_Identifier	LSL_Identifier;
 typedef struct _LSL_Statement	LSL_Statement;
 typedef struct _LSL_Block	LSL_Block;
@@ -54,7 +68,8 @@ typedef enum
     LSL_INNER2OUTER	= 4,
     LSL_UNARY		= 8,
     LSL_ASSIGNMENT	= 16,
-    LSL_CREATION	= 32
+    LSL_CREATION	= 32,
+    LSL_NOIGNORE	= 64
 } LSL_Flags;
 
 struct _LSL_Token
@@ -78,6 +93,7 @@ struct _LSL_Leaf
 
 	LSL_Type	operationValue;
 	LSL_Leaf	*expressionValue;
+	LSL_Parenthesis *parenthesis;
 
 	float		floatValue;
 	int		integerValue;
@@ -115,6 +131,13 @@ struct _LSL_Leaf
     int 		line, column;
 };
 
+struct _LSL_Parenthesis
+{
+    LSL_Leaf		*left;
+    LSL_Leaf		*expression;
+    LSL_Leaf		*right;
+};
+
 struct _LSL_Identifier	// For variables and function parameters.
 {
     char		*name;
@@ -124,6 +147,7 @@ struct _LSL_Identifier	// For variables and function parameters.
 struct _LSL_Statement
 {
     LSL_Leaf		*expressions;	/// For things like a for statement, might hold three expressions.
+    LSL_Type		type;	// Expression type.
 };
 
 struct _LSL_Block
@@ -167,25 +191,30 @@ typedef struct
 {
         yyscan_t scanner;
         LSL_Leaf *ast;
+        LSL_Leaf *lval;
 } LuaSL_yyparseParam;
 
 // the parameter name (of the reentrant 'yyparse' function)
 // data is a pointer to a 'yyparseParam' structure
-#define YYPARSE_PARAM data
+//#define YYPARSE_PARAM data
  
 // the argument for the 'yylex' function
 #define YYLEX_PARAM   ((LuaSL_yyparseParam*)data)->scanner
+//#define ParseTOKENTYPE YYSTYPE *
+//#define ParseARG_PDECL , LuaSL_yyparseParam *param
 
-
+void burnLeaf(LSL_Leaf *leaf);
 LSL_Leaf *addExpression(LSL_Leaf *exp);
-LSL_Leaf *addInteger(LSL_Leaf *lval, int value);
 LSL_Leaf *addOperation(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *right);
-LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr);
-LSL_Statement *createStatement(LSL_Type type, LSL_Leaf *root);
-LSL_Leaf *addStatement(LSL_Statement *statement, LSL_Leaf *root);
+LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
+LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
 
 int yyerror(const char *msg);
-int yyparse(void *param);
+
+void *ParseAlloc(void *(*mallocProc)(size_t));
+void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
+void Parse(void *yyp, int yymajor, LSL_Leaf *yyminor, LuaSL_yyparseParam *param);
+void ParseFree(void *p, void (*freeProc)(void*));
 
 
 #endif // __EXPRESSION_H__
