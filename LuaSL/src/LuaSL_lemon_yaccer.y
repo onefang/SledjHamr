@@ -2,13 +2,13 @@
 #include "LuaSL_LSL_tree.h"
 }
 
-%extra_argument { LuaSL_yyparseParam *param }
+%extra_argument {LuaSL_yyparseParam *param}
 
 %stack_size 256
 
 %token_type {LSL_Leaf *}
 %default_type  {LSL_Leaf *}
-%token_destructor { burnLeaf($$); }
+%token_destructor {burnLeaf($$);}
 
 
 program ::= script LSL_SCRIPT(A).						{ A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
@@ -82,17 +82,11 @@ script ::= statement(A).							{ A->left = param->ast;  param->ast = A; }
 
 %parse_accept {printf("Parsing complete.\n");}
 
-%parse_failure {
-    fprintf(stderr,"Giving up.  Parser is hopelessly lost...\n");
-}
+%parse_failure {fprintf(stderr,"Giving up.  Parser is hopelessly lost...\n");}
 
-%stack_overflow {
-    fprintf(stderr,"Giving up.  Parser stack overflow!\n");
-}
+%stack_overflow {fprintf(stderr,"Giving up.  Parser stack overflow!\n");}
 
-%syntax_error {
-    fprintf(stderr,"Syntax error!\n");
-}
+%syntax_error {fprintf(stderr,"Syntax error!\n");}
 
 /* Undocumented shit that might be useful later.  Pffft
 
