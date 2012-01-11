@@ -1,6 +1,6 @@
 
-#ifndef __EXPRESSION_H__
-#define __EXPRESSION_H__
+#ifndef __LSL_TREE_H__
+#define __LSL_TREE_H__
 
 #define LUASL_DEBUG
 
@@ -10,17 +10,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-//#include <iostream>
-//#include <cstdlib>
 #include "assert.h"  
-//#include "ex5def.h"
-//#include "example5.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-//#include "lexglobal.h"
 //#define BUFS 1024
 
 #include "LuaSL_lemon_yaccer.h"
@@ -173,7 +168,7 @@ struct _LSL_Script
 };
 
 
-// define the type for flex and bison
+// define the type for flex and lemon3
 #define YYSTYPE LSL_Leaf
 
 
@@ -212,5 +207,5 @@ void Parse(void *yyp, int yymajor, LSL_Leaf *yyminor, LuaSL_yyparseParam *param)
 void ParseFree(void *p, void (*freeProc)(void*));
 
 
-#endif // __EXPRESSION_H__
+#endif // __LSL_TREE_H__
 

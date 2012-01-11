@@ -107,6 +107,7 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
+// TODO - this is not reentrant, should make it so.
 static char *ignorableText = NULL;
 static int column = 0;
 static int line = 0;
@@ -148,10 +149,6 @@ int common(YYSTYPE *lval, char *text, boolean checkIgnorable, int type)
 	else
 	    ignorableText = strdup(text);
     }
-
-#ifdef LUASL_DEBUG
-	printf ("******************************common(%s, \"%s\", , %d) %04d, %04d\n", lval->token->token, text, type, line, column);
-#endif
 
     return type;
 }

@@ -14,6 +14,7 @@ static void outputStatementToken(LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
+    // Various forms of "space".
     {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
     {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
     {LSL_SPACE,				" ",		LSL_NONE,			NULL, NULL, NULL},
@@ -21,7 +22,6 @@ LSL_Token LSL_Tokens[] =
     // Operators, in order of precedence, low to high
     // Left to right, unless oterwise stated.
     // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
-
     {LSL_BOOL_AND,			"&&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
@@ -74,7 +74,6 @@ LSL_Token LSL_Tokens[] =
     {LSL_EXPRESSION,			"expression",	LSL_NONE,			NULL, NULL, NULL},
 
     // Types.
-
     {LSL_FLOAT,				"float",	LSL_NONE,			NULL, NULL, NULL},
     {LSL_INTEGER,			"integer",	LSL_NONE,			outputIntegerToken, NULL, evaluateIntegerToken},
 //    {LSL_KEY,				"key",		LSL_NONE,			NULL, NULL, NULL},
@@ -84,7 +83,6 @@ LSL_Token LSL_Tokens[] =
 //    {LSL_VECTOR,			"vector",	LSL_NONE,			NULL, NULL, NULL},
 
     // Types names.
-
     {LSL_TYPE_FLOAT,			"float",	LSL_NONE,			NULL, NULL, NULL},
     {LSL_TYPE_INTEGER,			"integer",	LSL_NONE,			NULL, NULL, NULL},
     {LSL_TYPE_KEY,			"key",		LSL_NONE,			NULL, NULL, NULL},
@@ -94,7 +92,6 @@ LSL_Token LSL_Tokens[] =
     {LSL_TYPE_VECTOR,			"vector",	LSL_NONE,			NULL, NULL, NULL},
 
     // Then the rest of the syntax tokens.
-
     {LSL_IDENTIFIER,			"identifier",	LSL_NONE,			NULL, NULL, NULL},
 
     {LSL_LABEL,				"@",		LSL_NONE,			NULL, NULL, NULL},
@@ -120,7 +117,6 @@ LSL_Token LSL_Tokens[] =
     {LSL_UNKNOWN,			"unknown",	LSL_NONE,			NULL, NULL, NULL},
 
     // A sentinal.
-
     {999999, NULL, LSL_NONE, NULL, NULL, NULL}
 };
 
@@ -415,6 +411,7 @@ int main(int argc, char **argv)
 	char buffer[4096];
 	LuaSL_yyparseParam param;
 	int file;
+	int count;
 	boolean badArgs = FALSE;
 
 	// Sort the token table.
@@ -461,13 +458,13 @@ int main(int argc, char **argv)
 	    printf("Usage: %s [-f filename]\n", programName);
 	    printf("   -f: Script file to run.\n");
 	    printf("Or pass filenames in stdin.\n");
-//	    return 1;
+	    return 1;
 	}
 
 	if ('\0' == buffer[0])
 	{
-strcpy(buffer, "test.lsl");
-/*
+//strcpy(buffer, "test.lsl");
+
 	    count = read(STDIN_FILENO, buffer, sizeof(buffer));
 	    if (0 > count)
 	    {
@@ -484,7 +481,7 @@ strcpy(buffer, "test.lsl");
 		buffer[count] = '\0';
 		printf("Filename %s in stdin.\n", buffer);
 	    }
-*/
+
 	}
 	else
 	    printf("Filename %s in argument.\n", buffer);
@@ -522,7 +519,6 @@ strcpy(buffer, "test.lsl");
 		// on EOF yylex will return 0
 		while((yv = yylex(param.lval, param.scanner)) != 0)
 		{
-printf("******************************PARSING - %d %s\n", yv, param.lval->token->token);
 		    Parse(pParser, yv, param.lval, &param);
 		    if (LSL_SCRIPT == yv)
 			break;

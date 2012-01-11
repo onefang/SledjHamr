@@ -11,7 +11,7 @@
 %token_destructor { burnLeaf($$); }
 
 
-program ::= script LSL_SCRIPT(A).					{ A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
+program ::= script LSL_SCRIPT(A).						{ A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
 
 
 %left  LSL_BOOL_AND.
@@ -62,7 +62,7 @@ expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addP
 
 %nonassoc  LSL_FLOAT.
 %nonassoc LSL_INTEGER.
-expr(A) ::= LSL_INTEGER(B).						{ A = B; }
+expr(A) ::= LSL_INTEGER(B).							{ A = B; }
 
 %nonassoc LSL_TYPE_FLOAT LSL_TYPE_INTEGER LSL_TYPE_KEY LSL_TYPE_LIST LSL_TYPE_ROTATION LSL_TYPE_STRING LSL_TYPE_VECTOR.
 
@@ -73,11 +73,11 @@ expr(A) ::= LSL_INTEGER(B).						{ A = B; }
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE.
 
 %nonassoc LSL_STATEMENT.
-statement(A) ::= expr(B) LSL_STATEMENT(D).				{ A = addStatement(D, LSL_EXPRESSION,		B); }
+statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESSION, B); }
 
 %nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_IDENTIFIER LSL_SCRIPT LSL_UNKNOWN.
-script ::= script statement(A).						{ A->left = param->ast;  param->ast = A; }
-script ::= statement(A).						{ A->left = param->ast;  param->ast = A; }
+script ::= script statement(A).							{ A->left = param->ast;  param->ast = A; }
+script ::= statement(A).							{ A->left = param->ast;  param->ast = A; }
 
 
 %parse_accept {printf("Parsing complete.\n");}
