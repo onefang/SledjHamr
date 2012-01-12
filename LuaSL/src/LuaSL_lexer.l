@@ -16,9 +16,12 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseExtra *extra, boolean checkIg
 %option extra-type="LuaSL_yyparseExtra *"
 
 HEX         [[:xdigit:]]
-INTEGER     [[:digit:]]+
-EXPONANT    [eE][+-]?{INTEGER}
-FLOAT       {INTEGER}("."{INTEGER})?{EXPONANT}?
+DECIMAL     [[:digit:]]
+ /* LSL has no octal integer type. */
+INTEGER     ({DECIMAL}+)|(0[xX]{HEX}+)
+EXPONANT    [eE][+-]?{DECIMAL}
+ /* Floats can be "0." but I don't think ".0" is valid. */
+FLOAT       {DECIMAL}("."{DECIMAL})?{EXPONANT}?[fF]?
 CHAR        '(\\.|[^\\'\n])+'
 STRING      \"(\\.|[^\\"\n])*\"
 IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
