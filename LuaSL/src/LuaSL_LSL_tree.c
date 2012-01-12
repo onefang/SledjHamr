@@ -257,6 +257,62 @@ static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 
 static void evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
+/*  Typecasting
+
+LSL is statically typed, so stored values are not converted, only the values used in expressions are.
+Lua is dynamically typed, so stored values are changed (sometimes I think).
+
+LSL implicitly typecasts - There is a shitload of QUIRKs about this.  Apparently some don't work anyway.
+			integer -> float  (Says in lslwiki that precision is never lost, which is bullshit, since they are both 32 bit.  Would be true if the float is 64 bit.  Lua suggest to use 64 bit floats to emulate 32 bit integers.)
+			string  -> key
+			    Some functions need help with this or the other way around.
+			string  -> vector (Maybe, should test that.)
+			vector  -> string (Maybe, should test that.)
+	Also happens when getting stuff from lists.
+
+Explicit type casting -
+			string -> integer
+			    Leading spaces are ignored, as are any characters after the run of digits.
+			    All other strings convert to 0.
+			    Which means "" and " " convert to 0.
+			    Strings in hexadecimal format will work.
+			keys <-> string
+			    No other typecasting can be done with keys.
+			float -> string
+			    You get a bunch of trailing 0s.
+
+QUIRK - I have seen cases where a double explicit typecast was needed in SL, but was considered to be invalid syntax in OS.
+
+Any binary operation involving a float and an integer implicitly casts the integer to float.
+
+A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
+Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
+
+intefer  = integer0   % integer1;  // Apparently only applies to integers.
+string   = string0    + string1;   // Concatenation.
+list     = list0      + list1;     // Concatenation.   Also works if either is not a list, it's promoted to a list first.
+list     = (list=[])  + list + ["new_item"];  // Voodoo needed for old LSL, works in Mono but not needed, does not work in OS.  Works for strings to.
+list == !=                         // Only compares the lengths, probably applies to the other conditionals to.
+vector   = vector0    + vector1;   // Add elements together.
+vector   = vector0    - vector1;   // Subtract elements of vector1 from elements of vector0.
+float    = vector0    * vector1;   // A dot product of the vectors.
+vector   = vector0    % vector1;   // A cross product of the vectors.
+vector   = vector     * float;     // Scale the vector, works the other way around I think.
+vector   = vector     * integer;   // Scale the vector, works the other way around I think.
+vector   = vector     / float;     // Scale the vector, works the other way around I think.
+vector   = vector     / integer;   // Scale the vector, works the other way around I think.
+vector   = vector     * rotation;  // Rotate the vector by the rotation.  Other way around wont compile.
+vector   = vector     / rotation;  // Rotate the vector by the rotation, in the opposite direction.  Other way around wont compile.
+rotation = llGetRot() * rotation;  // Rotate an object around the global axis.
+rotation = rotation   * llGetLocalRot();  // Rotate an object around the local axis.
+rotation = rotation0  * rotation1; // Add two rotations, so the result is as if you applied each rotation one after the other.
+rotation = rotation0  + rotation1; // Similar to vector, but it's a meaningless thing as far as rotations go.
+rotation = rotation0  - rotation1; // Similar to vector, but it's a meaningless thing as far as rotations go.
+				   // Division rotates in the opposite direction.
+
+*/
+
+
     if (content)
     {
 #ifdef LUASL_DEBUG
