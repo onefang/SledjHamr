@@ -13,10 +13,9 @@
 
 program ::= script LSL_SCRIPT(A).						{ A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
 
-
-%left  LSL_BOOL_AND.
+%right  LSL_BOOL_AND.
 expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
-%left  LSL_BOOL_OR.
+%right  LSL_BOOL_OR.
 expr(A) ::= expr(B) LSL_BOOL_OR(C)		expr(D).			{ A = addOperation(B, C, D); }
 
 %left  LSL_BIT_AND LSL_BIT_XOR LSL_BIT_OR.
@@ -24,10 +23,10 @@ expr(A) ::= expr(B) LSL_BIT_OR(C)		expr(D).			{ A = addOperation(B, C, D); }
 expr(A) ::= expr(B) LSL_BIT_XOR(C)		expr(D).			{ A = addOperation(B, C, D); }
 expr(A) ::= expr(B) LSL_BIT_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
 
-%left  LSL_EQUAL LSL_NOT_EQUAL.
+%right  LSL_EQUAL LSL_NOT_EQUAL.
 expr(A) ::= expr(B) LSL_NOT_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
 expr(A) ::= expr(B) LSL_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
-%left  LSL_LESS_THAN LSL_GREATER_THAN LSL_LESS_EQUAL LSL_GREATER_EQUAL.
+%right  LSL_LESS_THAN LSL_GREATER_THAN LSL_LESS_EQUAL LSL_GREATER_EQUAL.
 expr(A) ::= expr(B) LSL_GREATER_EQUAL(C)	expr(D).			{ A = addOperation(B, C, D); }
 expr(A) ::= expr(B) LSL_LESS_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
 expr(A) ::= expr(B) LSL_GREATER_THAN(C)		expr(D).			{ A = addOperation(B, C, D); }
@@ -75,9 +74,11 @@ expr(A) ::= LSL_INTEGER(B).							{ A = B; }
 %nonassoc LSL_STATEMENT.
 statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESSION, B); }
 
-%nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_IDENTIFIER LSL_SCRIPT LSL_UNKNOWN.
+%nonassoc LSL_IDENTIFIER LSL_SCRIPT.
 script ::= script statement(A).							{ A->left = param->ast;  param->ast = A; }
 script ::= statement(A).							{ A->left = param->ast;  param->ast = A; }
+
+%nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_UNKNOWN.
 
 
 %parse_accept {printf("Parsing complete.\n");}

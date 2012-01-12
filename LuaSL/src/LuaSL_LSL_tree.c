@@ -22,20 +22,21 @@ LSL_Token LSL_Tokens[] =
     // Operators, in order of precedence, low to high
     // Left to right, unless oterwise stated.
     // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
-    {LSL_BOOL_AND,			"&&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_AND,			"&&",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
-    {LSL_BOOL_OR,			"||",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+// QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
+    {LSL_BOOL_OR,			"||",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
     {LSL_BIT_OR,			"|",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
     {LSL_BIT_XOR,			"^",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
     {LSL_BIT_AND,			"&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-// QUIRK - Conditionals are executed right to left.  Or left to right, depending on who you ask.  lol
-    {LSL_NOT_EQUAL,			"!=",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_EQUAL,				"==",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_EQUAL,			">=",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_EQUAL,			"<=",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_THAN,			">",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_THAN,			"<",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+// QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
+    {LSL_NOT_EQUAL,			"!=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_EQUAL,				"==",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_GREATER_EQUAL,			">=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_LESS_EQUAL,			"<=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_GREATER_THAN,			">",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_LESS_THAN,			"<",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
     {LSL_RIGHT_SHIFT,			">>",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
     {LSL_LEFT_SHIFT,			"<<",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
 //    {LSL_CONCATENATE,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
