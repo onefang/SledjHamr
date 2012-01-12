@@ -82,11 +82,13 @@ script ::= statement(A).							{ A->left = param->ast;  param->ast = A; }
 
 %parse_accept {printf("Parsing complete.\n");}
 
+// TODO - Alledgedly this gets passed some sort of apparently useful information.  shrug
+%syntax_error {fprintf(stderr,"Syntax error!\n");}
+
 %parse_failure {fprintf(stderr,"Giving up.  Parser is hopelessly lost...\n");}
 
 %stack_overflow {fprintf(stderr,"Giving up.  Parser stack overflow!\n");}
 
-%syntax_error {fprintf(stderr,"Syntax error!\n");}
 
 /* Undocumented shit that might be useful later.  Pffft
 
