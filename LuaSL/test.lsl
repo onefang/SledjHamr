@@ -2,5 +2,5 @@
  3 /* c5 */ * /* c6 */ ( /* c7 */ 5 /* c8 */ + /* c9 */ 1 /* cA */ ) /* cB */ ; /* cE */
 // Some more arithmetic -
 1+1;
-
+20.5 + 20 + 1.5;
 // This is the end my friend.

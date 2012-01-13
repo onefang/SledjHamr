@@ -19,9 +19,9 @@ HEX         [[:xdigit:]]
 DECIMAL     [[:digit:]]
  /* LSL has no octal integer type. */
 INTEGER     ({DECIMAL}+)|(0[xX]{HEX}+)
-EXPONANT    [eE][+-]?{DECIMAL}
- /* Floats can be "0." but I don't think ".0" is valid. */
-FLOAT       {DECIMAL}("."{DECIMAL})?{EXPONANT}?[fF]?
+EXPONANT    [eE][+-]?{DECIMAL}+
+ /* Floats can be "0." but I don't think ".0" is valid.  It might be though, need to double check that. */
+FLOAT       {DECIMAL}+"."{DECIMAL}*{EXPONANT}?[fF]?
 CHAR        '(\\.|[^\\'\n])+'
 STRING      \"(\\.|[^\\"\n])*\"
 IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*

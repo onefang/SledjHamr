@@ -60,8 +60,9 @@ expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addP
 %nonassoc LSL_COMMA.
 
 %nonassoc  LSL_FLOAT.
+expr(A) ::= LSL_FLOAT(B).							{ B->basicType = OT_float; A = B; }
 %nonassoc LSL_INTEGER.
-expr(A) ::= LSL_INTEGER(B).							{ A = B; }
+expr(A) ::= LSL_INTEGER(B).							{ B->basicType = OT_integer; A = B; }
 
 %nonassoc LSL_TYPE_FLOAT LSL_TYPE_INTEGER LSL_TYPE_KEY LSL_TYPE_LIST LSL_TYPE_ROTATION LSL_TYPE_STRING LSL_TYPE_VECTOR.
 

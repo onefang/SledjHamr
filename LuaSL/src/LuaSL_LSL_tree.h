@@ -30,6 +30,7 @@ extern int yydebug;
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
 
+typedef struct _allowedTypes	allowedTypes;
 typedef struct _LSL_Token	LSL_Token;
 typedef struct _LSL_Leaf	LSL_Leaf;
 typedef struct _LSL_Parenthesis LSL_Parenthesis;
@@ -47,7 +48,7 @@ typedef int LSL_Type;
 
 typedef void (*convertToken2Lua) (FILE *file, LSL_Leaf *content);
 typedef void (*outputToken) (FILE *file, LSL_Leaf *content);
-typedef void (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+typedef LSL_Leaf * (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
 #ifndef FALSE
 typedef enum
@@ -69,9 +70,99 @@ typedef enum
     LSL_NOIGNORE	= 64
 } LSL_Flags;
 
+typedef enum
+{
+    OT_nothing,
+
+    OT_bool,
+    OT_integer,
+    OT_float,
+    OT_key,
+    OT_list,
+    OT_rotation,
+    OT_string,
+    OT_vector,
+    OT_other,
+
+    OT_boolBool,
+    OT_intInt,
+    OT_intFloat,
+    OT_floatInt,
+    OT_floatFloat,
+    OT_keyString,
+    OT_stringKey,
+    OT_stringString,
+    OT_listList,
+    OT_listInt,
+    OT_listFloat,
+    OT_intList,
+    OT_floatList,
+    OT_listOther,
+    OT_vectorVector,
+    OT_vectorFloat,
+    OT_vectorRotation,
+    OT_rotationRotation,
+    OT_otherOther,
+    OT_invalid
+} opType;
+
+/*
+Each op is of a specific type -
+
+bool				!
+int				- ~
+float				-
+
+bool		bool		&& ||     == !=           =
+int		int		* / + - % == != < > <= >= = += -= *= /= %= & | ^ << >>
+int		float		cast to float float
+float		int		cast to float float
+float		float		* / + -   == != < > <= >= = += -= *= /= 
+
+key		string		cast to string string
+string		key		cast to string string
+string		string		+         == !=           = +=
+
+list		list		+         == !=           = +=
+list		integer/float	+               < > <= >= = +=
+integer/float	list		+               < > <= >=
+list		other		+                         = +=
+
+vector		vector		* / + - % == !=           = += -= *= /= %=
+vector		float		* /
+vector		rotation	* /
+
+rotation	rotation	* / + -   == !=           = += -= *= /= 
+*/
+
+typedef enum
+{
+    ST_NONE		= 0,
+    ST_ASSIGNMENT	= 1,	// -= *= /=
+    ST_BIT_NOT		= 2,	// ~
+    ST_BOOL_NOT		= 4,	// !
+    ST_BITWISE		= 8,	// & | ^ << >>
+    ST_BOOLEAN		= 16,	// && !!
+    ST_COMPARISON	= 32,	// < > <= >=
+    ST_CONCATENATION	= 64,	// = +=
+    ST_EQUALITY		= 128,	// == !=
+    ST_ADD		= 512,	// +
+    ST_SUBTRACT		= 1024,	// -
+    ST_NEGATE		= 2048,	// -
+    ST_MULTIPLY		= 4096,	// * /
+    ST_MODULO		= 8192	// % %=
+} opSubType;
+
+struct _allowedTypes
+{
+    opType	result;
+    int         subTypes;
+};
+
 struct _LSL_Token
 {
     LSL_Type		type;
+    opSubType		subType;
     char 		*token;
     LSL_Flags		flags;
     outputToken		output;
@@ -86,8 +177,10 @@ struct _LSL_Leaf
     LSL_Token		*token;
     char		*ignorableText;
     int 		line, column;
+    opType		basicType;
     union
     {
+	opType		operationValue;
 	LSL_Parenthesis *parenthesis;
 
 	float		floatValue;

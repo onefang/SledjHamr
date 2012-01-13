@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
-static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
-static void evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
-static void eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
-static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static void outputFloatToken(FILE *file, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, LSL_Leaf *content);
 static void outputParenthesisToken(FILE *file, LSL_Leaf *content);
 static void outputStatementToken(FILE *file, LSL_Leaf *content);
@@ -15,111 +17,163 @@ static void outputStatementToken(FILE *file, LSL_Leaf *content);
 LSL_Token LSL_Tokens[] =
 {
     // Various forms of "space".
-    {LSL_COMMENT,			"/*",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_COMMENT_LINE,			"//",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_SPACE,				" ",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_COMMENT,		ST_NONE,		"/*",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_COMMENT_LINE,		ST_NONE,		"//",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_SPACE,			ST_NONE,		" ",	LSL_NONE,				NULL, NULL, NULL},
 
     // Operators, in order of precedence, low to high
     // Left to right, unless oterwise stated.
     // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
-    {LSL_BOOL_AND,			"&&",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
 // QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
-    {LSL_BOOL_OR,			"||",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_OR,			"|",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_XOR,			"^",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_AND,			"&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_OR,		ST_BOOLEAN,		"||",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BIT_OR,		ST_BITWISE,		"|",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BIT_XOR,		ST_BITWISE,		"^",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BIT_AND,		ST_BITWISE,		"&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
 // QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
-    {LSL_NOT_EQUAL,			"!=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_EQUAL,				"==",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_EQUAL,			">=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_EQUAL,			"<=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_THAN,			">",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_THAN,			"<",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_RIGHT_SHIFT,			">>",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LEFT_SHIFT,			"<<",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-//    {LSL_CONCATENATE,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_ADD,				"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_SUBTRACT,			"-",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-//    {LSL_CROSS_PRODUCT,			"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-//    {LSL_DOT_PRODUCT,			"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_MULTIPLY,			"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_MODULO,			"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_DIVIDE,			"/",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_NEGATION,			"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_BOOL_NOT,			"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_NOT,			"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-//    {LSL_TYPECAST_CLOSE,		")",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-//    {LSL_TYPECAST_OPEN,			"(",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_ANGLE_CLOSE,			">",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_ANGLE_OPEN,			"<",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_BRACKET_CLOSE,			"]",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_BRACKET_OPEN,			"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_PARENTHESIS_CLOSE,		")",	LSL_INNER2OUTER,			NULL, NULL, evaluateNoToken},
-    {LSL_PARENTHESIS_OPEN,		"(",	LSL_INNER2OUTER,			outputParenthesisToken, NULL, eveluateParenthesisToken},
-//    {LSL_ASSIGNMENT_CONCATENATE,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_ADD,		"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_SUBTRACT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MULTIPLY,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_DIVIDE,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_PLAIN,		"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_DOT,				".",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-//    {LSL_DECREMENT_POST,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_DECREMENT_PRE,			"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-//    {LSL_INCREMENT_POST,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_INCREMENT_PRE,			"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_COMMA,				",",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_NOT_EQUAL,		ST_EQUALITY,		"!=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_EQUAL,			ST_EQUALITY,		"==",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_GREATER_EQUAL,		ST_COMPARISON,		">=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_LESS_EQUAL,		ST_COMPARISON,		"<=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_GREATER_THAN,		ST_COMPARISON,		">",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_LESS_THAN,		ST_COMPARISON,		"<",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+//    {LSL_CONCATENATE,		ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_ADD,			ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_SUBTRACT,		ST_SUBTRACT,		"-",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+//    {LSL_CROSS_PRODUCT,	ST_NONE,		"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+//    {LSL_DOT_PRODUCT,		ST_NONE,		"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_MULTIPLY,		ST_MULTIPLY,		"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_MODULO,		ST_MODULO,		"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_DIVIDE,		ST_MULTIPLY,		"/",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_NEGATION,		ST_NEGATE,		"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_NOT,		ST_BOOL_NOT,		"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+//    {LSL_TYPECAST_CLOSE,	ST_NONE,		")",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+//    {LSL_TYPECAST_OPEN,	ST_NONE,		"(",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_ANGLE_CLOSE,		ST_NONE,		">",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
+    {LSL_ANGLE_OPEN,		ST_NONE,		"<",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
+    {LSL_BRACKET_CLOSE,		ST_NONE,		"]",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
+    {LSL_BRACKET_OPEN,		ST_NONE,		"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
+    {LSL_PARENTHESIS_CLOSE,	ST_NONE,		")",	LSL_INNER2OUTER,			NULL, NULL, evaluateNoToken},
+    {LSL_PARENTHESIS_OPEN,	ST_NONE,		"(",	LSL_INNER2OUTER,			outputParenthesisToken, NULL, eveluateParenthesisToken},
+//    {LSL_ASSIGNMENT_CONCATENATE,	ST_CONCATENATION	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_ADD,	ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_SUBTRACT,	ST_ASSIGNMENT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MULTIPLY,	ST_ASSIGNMENT,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MODULO,	ST_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
+    {LSL_DOT,			ST_NONE,		".",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+//    {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+//    {LSL_INCREMENT_POST,	ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_INCREMENT_PRE,		ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
+    {LSL_COMMA,			ST_NONE,		",",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
 
-    {LSL_EXPRESSION,			"expression",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_EXPRESSION,		ST_NONE,	"expression",	LSL_NONE	,			NULL, NULL, NULL},
 
     // Types.
-    {LSL_FLOAT,				"float",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_INTEGER,			"integer",	LSL_NONE,			outputIntegerToken, NULL, evaluateIntegerToken},
-//    {LSL_KEY,				"key",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_LIST,				"list",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_ROTATION,			"rotation",	LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_STRING,			"string",	LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_VECTOR,			"vector",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_FLOAT,			ST_NONE,	"float",	LSL_NONE,				outputFloatToken, NULL, evaluateFloatToken},
+    {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, NULL, evaluateIntegerToken},
+//    {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_LIST,		ST_NONE,	"list",		LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL, NULL},
 
     // Types names.
-    {LSL_TYPE_FLOAT,			"float",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_INTEGER,			"integer",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_KEY,			"key",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_LIST,			"list",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_ROTATION,			"rotation",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_STRING,			"string",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_TYPE_VECTOR,			"vector",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_KEY,		ST_NONE,	"key",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_LIST,		ST_NONE,	"list",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL, NULL},
 
     // Then the rest of the syntax tokens.
-    {LSL_IDENTIFIER,			"identifier",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				NULL, NULL, NULL},
 
-    {LSL_LABEL,				"@",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL, NULL},
 
-    {LSL_DO,				"do",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_FOR,				"for",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_ELSE_IF,			"else if",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_ELSE,				"else",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_IF,				"if",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_JUMP,				"jump",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_RETURN,			"return",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_STATE_CHANGE,			"state",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_WHILE,				"while",	LSL_NONE,			NULL, NULL, NULL},
-    {LSL_STATEMENT,			";",		LSL_NOIGNORE,			outputStatementToken, NULL, evaluateStatementToken},
+    {LSL_DO,			ST_NONE,	"do",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_FOR,			ST_NONE,	"for",		LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_ELSE_IF,		ST_NONE,	"else if",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_ELSE,			ST_NONE,	"else",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_IF,			ST_NONE,	"if",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_JUMP,			ST_NONE,	"jump",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_RETURN,		ST_NONE,	"return",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_STATE_CHANGE,		ST_NONE,	"state",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_WHILE,			ST_NONE,	"while",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_STATEMENT,		ST_NONE,	";",		LSL_NOIGNORE,				outputStatementToken, NULL, evaluateStatementToken},
 
-    {LSL_BLOCK_CLOSE,			"}",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_BLOCK_OPEN,			"{",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_PARAMETER,			"parameter",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_FUNCTION,			"function",		LSL_NONE,			NULL, NULL, NULL},
-//    {LSL_STATE,				"state",		LSL_NONE,			NULL, NULL, NULL},
-    {LSL_SCRIPT,			"",		LSL_NONE,			NULL, NULL, NULL},
+    {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				NULL, NULL, NULL},
+//    {LSL_STATE,		ST_NONE,	"state",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL, NULL, NULL},
 
-    {LSL_UNKNOWN,			"unknown",	LSL_NONE,			NULL, NULL, NULL},
+    {LSL_UNKNOWN,		ST_NONE,	"unknown",	LSL_NONE,				NULL, NULL, NULL},
 
     // A sentinal.
-    {999999, NULL, LSL_NONE, NULL, NULL, NULL}
+    {999999, ST_NONE, NULL, LSL_NONE, NULL, NULL, NULL}
 };
+
+allowedTypes allowed[] = 
+{
+    {OT_nothing,	(ST_NONE)},
+
+    {OT_bool,		(ST_BOOL_NOT)},
+    {OT_integer,	(ST_BIT_NOT | ST_NEGATE)},
+    {OT_float,		(ST_NONE)},
+    {OT_key,		(ST_NONE)},
+    {OT_list,		(ST_NONE)},
+    {OT_rotation,	(ST_NONE)},
+    {OT_string,		(ST_NONE)},
+    {OT_vector,		(ST_NONE)},
+    {OT_other,		(ST_NONE)},
+
+    {OT_bool,		(ST_BOOLEAN | ST_EQUALITY)},
+    {OT_integer,	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},
+    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_list,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_list,		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
+    {OT_list,		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
+    {OT_integer,	(ST_ADD | ST_COMPARISON)},
+    {OT_float,		(ST_ADD | ST_COMPARISON)},
+    {OT_list,		(ST_ADD | ST_CONCATENATION)},
+    {OT_vector,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO)},
+    {OT_vector,		(ST_MULTIPLY)},
+    {OT_vector,		(ST_MULTIPLY)},
+    {OT_rotation,	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_other,		(ST_NONE)},
+    {OT_invalid,	(ST_NONE)}
+};
+
+opType opExpr[][10] =
+{
+    {OT_nothing,  OT_bool,     OT_integer,  OT_float,       OT_key,       OT_list,      OT_rotation,         OT_string,       OT_vector,       OT_other},
+    {OT_bool,     OT_boolBool, OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
+    {OT_integer,  OT_invalid,  OT_intInt,   OT_intFloat,    OT_invalid,   OT_intList,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
+    {OT_float,    OT_invalid,  OT_floatInt, OT_floatFloat,  OT_invalid,   OT_floatList, OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
+    {OT_key,      OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_keyString,    OT_invalid,      OT_invalid},
+    {OT_list,     OT_invalid,  OT_listInt,  OT_listFloat,   OT_invalid,   OT_listList,  OT_invalid,          OT_invalid,      OT_invalid,      OT_listOther},
+    {OT_rotation, OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_rotationRotation, OT_invalid,      OT_invalid,      OT_invalid},
+    {OT_string,   OT_invalid,  OT_invalid,  OT_invalid,     OT_stringKey, OT_invalid,   OT_invalid,          OT_stringString, OT_invalid,      OT_invalid},
+    {OT_vector,   OT_invalid,  OT_invalid,  OT_vectorFloat, OT_invalid,   OT_invalid,   OT_vectorRotation,   OT_invalid,      OT_vectorVector, OT_invalid},
+    {OT_other,    OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_invalid,      OT_invalid,      OT_otherOther}
+
+};
+
 
 LSL_Token **tokens = NULL;
 int lowestToken = 999999;
@@ -157,8 +211,68 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
     if (lval)
     {
+	opType lType, rType;
+
 	lval->left = left;
 	lval->right = right;
+
+	// Try to figure out what type of operation this is.
+	if (NULL == left)
+	    lType = OT_nothing;
+	else
+	{
+	    lType = left->basicType;
+	    if (OT_vector < lType)
+		lType = allowed[lType].result;
+	}
+	if (NULL == right)
+	    rType = OT_nothing;
+	else
+	{
+	    rType = right->basicType;
+	    if (OT_vector < rType)
+		rType = allowed[rType].result;
+	}
+
+	// The basic lookup.
+	lval->basicType = opExpr[lType][rType];
+	if (OT_invalid != lval->basicType)
+	{
+	    // Check if it's an allowed operation.
+	    if (0 == (lval->token->subType & allowed[lval->basicType].subTypes))
+	    {
+		lval->basicType = OT_invalid;
+	    }
+	    else
+	    {
+		// Double check the corner cases.
+		switch (lval->token->subType)
+		{
+		    case ST_BOOLEAN :
+			lval->basicType = OT_bool;
+			break;
+		    case ST_COMPARISON :
+			lval->basicType = OT_bool;
+			break;
+		    case ST_MULTIPLY :
+			if (OT_vectorVector == lval->basicType)
+			{
+			    if (LSL_MULTIPLY == lval->token->type)
+			    {
+				lval->basicType = OT_float;
+//			    	lval->token = tokens[LSL_DOT_PRODUCT - lowestToken];
+			    }
+			    else
+				lval->basicType = OT_vector;
+			}
+			break;
+		    default :
+			break;
+		}
+	    }
+	}
+	if (OT_invalid == lval->basicType)
+	    fprintf(stderr, "Invalid operation [%s] type at line %d column %d\n", lval->token->token, lval->line, lval->column);
     }
 
     return lval;
@@ -174,7 +288,10 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval)
 	parens->expression = expr;
 	parens->right = rval;
 	if (lval)
+	{
 	    lval->value.parenthesis = parens;
+	    lval->basicType = expr->basicType;
+	}
     }
     return lval;
 }
@@ -194,69 +311,83 @@ LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
     return lval;
 }
 
-static void evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
+static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
 {
+    LSL_Leaf *result = NULL;
+
     if (leaf)
     {
-	LSL_Leaf lresult;
-	LSL_Leaf rresult;
-
-	memcpy(&lresult, left, sizeof(LSL_Leaf));
-	memcpy(&rresult, right, sizeof(LSL_Leaf));
+	LSL_Leaf *lresult = NULL;
+	LSL_Leaf *rresult = NULL;
 
 	if (LSL_RIGHT2LEFT & leaf->token->flags)
 	{
-	    memcpy(&rresult, left, sizeof(LSL_Leaf));
-	    evaluateLeaf(leaf->right, &rresult, right);
+	    rresult = evaluateLeaf(leaf->right, left, right);
 	    if (!(LSL_UNARY & leaf->token->flags))
-	    {
-		evaluateLeaf(leaf->left, &lresult, right);
-	    }
+		lresult = evaluateLeaf(leaf->left, left, right);
 	}
 	else // Assume left to right.
 	{
-	    evaluateLeaf(leaf->left, &lresult, right);
+	    lresult = evaluateLeaf(leaf->left, left, right);
 	    if (!(LSL_UNARY & leaf->token->flags))
-	    {
-		memcpy(&rresult, left, sizeof(LSL_Leaf));
-		evaluateLeaf(leaf->right, &rresult, right);
-	    }
+		rresult = evaluateLeaf(leaf->right, left, right);
 	}
 
 	if (leaf->token->evaluate)
-	{
-	    leaf->token->evaluate(leaf, &lresult, &rresult);
-	    memcpy(left, &lresult, sizeof(LSL_Leaf));
-	}
+	    result = leaf->token->evaluate(leaf, lresult, rresult);
 	else
 	{
-#ifdef LUASL_DEBUG
-	    printf(" eval <%s %d %d %d %d> ", leaf->token->token, left->value.integerValue, right->value.integerValue, lresult.value.integerValue, rresult.value.integerValue);
-#endif
-	    memcpy(left, &rresult, sizeof(LSL_Leaf));
+	    result = calloc(1, sizeof(LSL_Leaf));
+	    if (rresult && result)
+		memcpy(result, rresult, sizeof(LSL_Leaf));
 	}
+
+	if (lresult)
+	    free(lresult);
+	if (rresult)
+	    free(rresult);
     }
+
+    return result;
 }
 
-static void evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+static LSL_Leaf *evaluateFloatToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
-    if (content)
+    LSL_Leaf *result = malloc(sizeof(LSL_Leaf));
+
+    if (content && result)
+    {
+#ifdef LUASL_DEBUG
+	printf(" <%g> ", content->value.floatValue);
+#endif
+	memcpy(result, content, sizeof(LSL_Leaf));
+	result->basicType = OT_float;
+    }
+    return result;
+}
+
+static LSL_Leaf *evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+{
+    LSL_Leaf *result = malloc(sizeof(LSL_Leaf));
+
+    if (content && result)
     {
 #ifdef LUASL_DEBUG
 	printf(" <%d> ", content->value.integerValue);
 #endif
-	left->value.integerValue = content->value.integerValue;
-	left->token = tokens[LSL_INTEGER - lowestToken];
+	memcpy(result, content, sizeof(LSL_Leaf));
+	result->basicType = OT_integer;
     }
+    return result;
 }
 
-static void evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+static LSL_Leaf *evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     // Do nothing, that's the point.
+
+    return content;
 }
 
-static void evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
-{
 /*  Typecasting
 
 LSL is statically typed, so stored values are not converted, only the values used in expressions are.
@@ -288,108 +419,192 @@ Any binary operation involving a float and an integer implicitly casts the integ
 A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
 Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
 
-intefer  = integer0   % integer1;  // Apparently only applies to integers.
+integer  = integer0   % integer1;  // Apparently only applies to integers.
 string   = string0    + string1;   // Concatenation.
 list     = list0      + list1;     // Concatenation.   Also works if either is not a list, it's promoted to a list first.
 list     = (list=[])  + list + ["new_item"];  // Voodoo needed for old LSL, works in Mono but not needed, does not work in OS.  Works for strings to.
-list == !=                         // Only compares the lengths, probably applies to the other conditionals to.
+bool     = list == != int          // Only compares the lengths, probably applies to the other conditionals to.
 vector   = vector0    + vector1;   // Add elements together.
 vector   = vector0    - vector1;   // Subtract elements of vector1 from elements of vector0.
 float    = vector0    * vector1;   // A dot product of the vectors.
 vector   = vector0    % vector1;   // A cross product of the vectors.
-vector   = vector     * float;     // Scale the vector, works the other way around I think.
-vector   = vector     * integer;   // Scale the vector, works the other way around I think.
-vector   = vector     / float;     // Scale the vector, works the other way around I think.
-vector   = vector     / integer;   // Scale the vector, works the other way around I think.
+vector   = vector     * float;     // Scale the vector, works the other way around I think.  Works for integer to, but it will end up being cast to float.
+vector   = vector     / float;     // Scale the vector, works the other way around I think.  Works for integer to, but it will end up being cast to float.
 vector   = vector     * rotation;  // Rotate the vector by the rotation.  Other way around wont compile.
 vector   = vector     / rotation;  // Rotate the vector by the rotation, in the opposite direction.  Other way around wont compile.
 rotation = llGetRot() * rotation;  // Rotate an object around the global axis.
 rotation = rotation   * llGetLocalRot();  // Rotate an object around the local axis.
 rotation = rotation0  * rotation1; // Add two rotations, so the result is as if you applied each rotation one after the other.
+				   // Division rotates in the opposite direction.
 rotation = rotation0  + rotation1; // Similar to vector, but it's a meaningless thing as far as rotations go.
 rotation = rotation0  - rotation1; // Similar to vector, but it's a meaningless thing as far as rotations go.
-				   // Division rotates in the opposite direction.
+
+A boolean     operator results in a boolean value.	(any types)
+A comparison  operator results in a boolean value.	(any types)
+A bitwise     operator results in an integer value.	(intInt or int)
+A dot product operator results in a float value.  	(vector * vector)
+A vectorFloat          results in a vector value.
 
 */
 
+static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+{
+    LSL_Leaf *result = calloc(1, sizeof(LSL_Leaf));
 
-    if (content)
+    if (content && result)
     {
 #ifdef LUASL_DEBUG
 	printf(" [%s] ", content->token->token);
 #endif
 
-	switch (content->token->type)
+	memcpy(result, content, sizeof(LSL_Leaf));
+
+	// Figure out the type of the operation.
+	if (OT_vector < result->basicType)
+	    result->basicType = allowed[result->basicType].result;
+
+	switch (result->basicType)
 	{
-	    case LSL_COMMA			:
-	    case LSL_INCREMENT_PRE		:
-//	    case LSL_INCREMENT_POST		:
-	    case LSL_DECREMENT_PRE		:
-//	    case LSL_DECREMENT_POST		:
-	    case LSL_DOT			:
-	    case LSL_ASSIGNMENT_PLAIN		:
-	    case LSL_ASSIGNMENT_DIVIDE		:
-	    case LSL_ASSIGNMENT_MODULO		:
-	    case LSL_ASSIGNMENT_MULTIPLY	:
-	    case LSL_ASSIGNMENT_SUBTRACT	:
-	    case LSL_ASSIGNMENT_ADD		:
-//	    case LSL_ASSIGNMENT_CONCATENATE	:
-	    case LSL_PARENTHESIS_OPEN		:
-	    case LSL_PARENTHESIS_CLOSE		:
-	    case LSL_BRACKET_OPEN		:
-	    case LSL_BRACKET_CLOSE		:
-	    case LSL_ANGLE_OPEN			:
-	    case LSL_ANGLE_CLOSE		:
-//	    case LSL_TYPECAST_OPEN		:
-//	    case LSL_TYPECAST_CLOSE		:
-		break;
-	    case LSL_BIT_NOT		:  left->value.integerValue = ~ right->value.integerValue;				break;
-	    case LSL_BOOL_NOT		:  left->value.integerValue = ! right->value.integerValue;				break;
-	    case LSL_NEGATION		:  left->value.integerValue = 0 - right->value.integerValue;				break;
-	    case LSL_DIVIDE		:  left->value.integerValue = left->value.integerValue /  right->value.integerValue;	break;
-	    case LSL_MODULO		:  left->value.integerValue = left->value.integerValue %  right->value.integerValue;	break;
-	    case LSL_MULTIPLY		:  left->value.integerValue = left->value.integerValue *  right->value.integerValue;	break;
-//	    case LSL_DOT_PRODUCT	: break;
-//	    case LSL_CROSS_PRODUCT	: break;
-	    case LSL_SUBTRACT		:  left->value.integerValue = left->value.integerValue -  right->value.integerValue;	break;
-	    case LSL_ADD		:  left->value.integerValue = left->value.integerValue +  right->value.integerValue;	break;
-//	    case LSL_CONCATENATE	: break;
-	    case LSL_LEFT_SHIFT		:  left->value.integerValue = left->value.integerValue << right->value.integerValue;	break;
-	    case LSL_RIGHT_SHIFT	:  left->value.integerValue = left->value.integerValue >> right->value.integerValue;	break;
-	    case LSL_LESS_THAN		:  left->value.integerValue = left->value.integerValue <  right->value.integerValue;	break;
-	    case LSL_GREATER_THAN	:  left->value.integerValue = left->value.integerValue >  right->value.integerValue;	break;
-	    case LSL_LESS_EQUAL		:  left->value.integerValue = left->value.integerValue <= right->value.integerValue;	break;
-	    case LSL_GREATER_EQUAL	:  left->value.integerValue = left->value.integerValue >= right->value.integerValue;	break;
-	    case LSL_EQUAL		:  left->value.integerValue = left->value.integerValue == right->value.integerValue;	break;
-	    case LSL_NOT_EQUAL		:  left->value.integerValue = left->value.integerValue != right->value.integerValue;	break;
-	    case LSL_BIT_AND		:  left->value.integerValue = left->value.integerValue &  right->value.integerValue;	break;
-	    case LSL_BIT_XOR		:  left->value.integerValue = left->value.integerValue ^  right->value.integerValue;	break;
-	    case LSL_BIT_OR		:  left->value.integerValue = left->value.integerValue |  right->value.integerValue;	break;
-	    case LSL_BOOL_OR		:  left->value.integerValue = left->value.integerValue || right->value.integerValue;	break;
-	    case LSL_BOOL_AND		:  left->value.integerValue = left->value.integerValue && right->value.integerValue;	break;
-	}
+	    case OT_float   :
+	    {
+		float fleft  = left->value.floatValue;
+		float fright = right->value.floatValue;
+
+		// Do the casting.
+		if (OT_floatInt == content->basicType)
+		    fright = right->value.integerValue;
+		if (OT_intFloat == content->basicType)
+		    fleft = left->value.integerValue;
+		switch (result->token->type)
+		{
+		    case LSL_COMMA			:
+		    case LSL_INCREMENT_PRE		:
+//		    case LSL_INCREMENT_POST		:
+		    case LSL_DECREMENT_PRE		:
+//		    case LSL_DECREMENT_POST		:
+		    case LSL_ASSIGNMENT_PLAIN		:
+		    case LSL_ASSIGNMENT_DIVIDE		:
+		    case LSL_ASSIGNMENT_MULTIPLY	:
+		    case LSL_ASSIGNMENT_SUBTRACT	:
+		    case LSL_ASSIGNMENT_ADD		:
+		    case LSL_BRACKET_OPEN		:
+		    case LSL_BRACKET_CLOSE		:
+		    case LSL_ANGLE_OPEN			:
+		    case LSL_ANGLE_CLOSE		:
+//		    case LSL_TYPECAST_OPEN		:
+//		    case LSL_TYPECAST_CLOSE		:
+//		    case LSL_DOT_PRODUCT		:
+			break;
+		    case LSL_NEGATION		:  result->value.floatValue = 0 - fright;	break;
+		    case LSL_DIVIDE		:  result->value.floatValue = fleft /  fright;	break;
+		    case LSL_MULTIPLY		:  result->value.floatValue = fleft *  fright;	break;
+		    case LSL_SUBTRACT		:  result->value.floatValue = fleft -  fright;	break;
+		    case LSL_ADD		:  result->value.floatValue = fleft +  fright;	break;
+		    case LSL_LESS_THAN		:  result->value.floatValue = fleft <  fright;	break;
+		    case LSL_GREATER_THAN	:  result->value.floatValue = fleft >  fright;	break;
+		    case LSL_LESS_EQUAL		:  result->value.floatValue = fleft <= fright;	break;
+		    case LSL_GREATER_EQUAL	:  result->value.floatValue = fleft >= fright;	break;
+		    case LSL_EQUAL		:  result->value.floatValue = fleft == fright;	break;
+		    case LSL_NOT_EQUAL		:  result->value.floatValue = fleft != fright;	break;
+		}
 #ifdef LUASL_DEBUG
-	printf(" (=%d) ", left->value.integerValue);
+		printf(" (=%g) ", result->value.floatValue);
 #endif
+		break;
+	    }
+
+	    case OT_integer :
+	    {
+		switch (result->token->type)
+		{
+		    case LSL_COMMA			:
+		    case LSL_INCREMENT_PRE		:
+//		    case LSL_INCREMENT_POST		:
+		    case LSL_DECREMENT_PRE		:
+//		    case LSL_DECREMENT_POST		:
+		    case LSL_DOT			:
+		    case LSL_ASSIGNMENT_PLAIN		:
+		    case LSL_ASSIGNMENT_DIVIDE		:
+		    case LSL_ASSIGNMENT_MODULO		:
+		    case LSL_ASSIGNMENT_MULTIPLY	:
+		    case LSL_ASSIGNMENT_SUBTRACT	:
+		    case LSL_ASSIGNMENT_ADD		:
+		    case LSL_BRACKET_OPEN		:
+		    case LSL_BRACKET_CLOSE		:
+		    case LSL_ANGLE_OPEN			:
+		    case LSL_ANGLE_CLOSE		:
+//		    case LSL_TYPECAST_OPEN		:
+//		    case LSL_TYPECAST_CLOSE		:
+			break;
+		    case LSL_BIT_NOT		:  result->value.integerValue = ~ right->value.integerValue;				break;
+		    case LSL_BOOL_NOT		:  result->value.integerValue = ! right->value.integerValue;				break;
+		    case LSL_NEGATION		:  result->value.integerValue = 0 - right->value.integerValue;				break;
+		    case LSL_DIVIDE		:  result->value.integerValue = left->value.integerValue /  right->value.integerValue;	break;
+		    case LSL_MODULO		:  result->value.integerValue = left->value.integerValue %  right->value.integerValue;	break;
+		    case LSL_MULTIPLY		:  result->value.integerValue = left->value.integerValue *  right->value.integerValue;	break;
+		    case LSL_SUBTRACT		:  result->value.integerValue = left->value.integerValue -  right->value.integerValue;	break;
+		    case LSL_ADD		:  result->value.integerValue = left->value.integerValue +  right->value.integerValue;	break;
+		    case LSL_LEFT_SHIFT		:  result->value.integerValue = left->value.integerValue << right->value.integerValue;	break;
+		    case LSL_RIGHT_SHIFT	:  result->value.integerValue = left->value.integerValue >> right->value.integerValue;	break;
+		    case LSL_LESS_THAN		:  result->value.integerValue = left->value.integerValue <  right->value.integerValue;	break;
+		    case LSL_GREATER_THAN	:  result->value.integerValue = left->value.integerValue >  right->value.integerValue;	break;
+		    case LSL_LESS_EQUAL		:  result->value.integerValue = left->value.integerValue <= right->value.integerValue;	break;
+		    case LSL_GREATER_EQUAL	:  result->value.integerValue = left->value.integerValue >= right->value.integerValue;	break;
+		    case LSL_EQUAL		:  result->value.integerValue = left->value.integerValue == right->value.integerValue;	break;
+		    case LSL_NOT_EQUAL		:  result->value.integerValue = left->value.integerValue != right->value.integerValue;	break;
+		    case LSL_BIT_AND		:  result->value.integerValue = left->value.integerValue &  right->value.integerValue;	break;
+		    case LSL_BIT_XOR		:  result->value.integerValue = left->value.integerValue ^  right->value.integerValue;	break;
+		    case LSL_BIT_OR		:  result->value.integerValue = left->value.integerValue |  right->value.integerValue;	break;
+		    case LSL_BOOL_OR		:  result->value.integerValue = left->value.integerValue || right->value.integerValue;	break;
+		    case LSL_BOOL_AND		:  result->value.integerValue = left->value.integerValue && right->value.integerValue;	break;
+		}
+#ifdef LUASL_DEBUG
+		printf(" (=%d) ", result->value.integerValue);
+#endif
+		break;
+	    }
+
+	    default :
+		break;
+	}
     }
+    return result;
 }
 
-static void eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
+    LSL_Leaf *result = NULL;
+
     if (content)
-	evaluateLeaf(content->value.parenthesis->expression, left, right);
+	result = evaluateLeaf(content->value.parenthesis->expression, left, right);
+    return result;
 }
 
 
-static void evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
+static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
+    LSL_Leaf *result = NULL;
+
     if (content)
     {
-	evaluateLeaf(content->value.statementValue->expressions, left, right);
-	printf("\nResult is %d.\n", left->value.integerValue);
-	left->value.integerValue = 0;
-	right->value.integerValue = 0;
+	result = evaluateLeaf(content->value.statementValue->expressions, left, right);
+	if (result)
+	{
+	    switch (result->basicType)
+	    {
+		case OT_float   :  printf("\nResult is the float %g.\n", result->value.floatValue);  break;
+		case OT_integer :  printf("\nResult is the integer %d.\n", result->value.integerValue);  break;
+		default         :  printf("\nResult of an unknown type [%d] %d!\n", result->basicType, result->value.integerValue);  break;
+	    }
+	    free(result);
+	    result = NULL;
+	}
+	if (left)
+	    left->value.integerValue = 0;
+	if (right)
+	    right->value.integerValue = 0;
     }
+    return result;
 }
 
 static void outputLeaf(FILE *file, LSL_Leaf *leaf)
@@ -405,6 +620,12 @@ static void outputLeaf(FILE *file, LSL_Leaf *leaf)
 	    fprintf(file, "%s", leaf->token->token);
 	outputLeaf(file, leaf->right);
     }
+}
+
+static void outputFloatToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+	fprintf(file, "%g", content->value.floatValue);
 }
 
 static void outputIntegerToken(FILE *file, LSL_Leaf *content)
@@ -585,16 +806,9 @@ int main(int argc, char **argv)
 		char outName[PATH_MAX];
 		char luaName[PATH_MAX];
 
-		LSL_Leaf left, right;
-
-		left.value.integerValue = 0;
-		left.token = tokens[LSL_INTEGER - lowestToken];
-		right.value.integerValue = 0;
-		right.token = tokens[LSL_INTEGER - lowestToken];
-
 		outputLeaf(stdout, param.ast);
 		printf("\n");
-		evaluateLeaf(param.ast, &left, &right);
+		evaluateLeaf(param.ast, NULL, NULL);
 		printf("\n");
 
 		strcpy(outName, fileName);
@@ -611,7 +825,6 @@ int main(int argc, char **argv)
 		    printf("Return value of %s is %d\n", buffer, count);
 		    if (0 != count)
 			fprintf(stderr, "%s says they are different!\n", buffer);
-		    
 		}
 		else
 		    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
@@ -625,9 +838,7 @@ int main(int argc, char **argv)
 		    fprintf(stderr, "Unable to open file %s for writing!\n", luaName);
 		burnLeaf(param.ast);
 	    }
-
 	}
-
     }
     else
     {
