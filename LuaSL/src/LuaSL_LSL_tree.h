@@ -231,13 +231,15 @@ struct _LSL_Identifier	// For variables and function parameters.
 
 struct _LSL_Statement
 {
-    LSL_Leaf		*expressions;	/// For things like a for statement, might hold three expressions.
-    LSL_Type		type;	// Expression type.
+    LSL_Leaf		*expressions;	// For things like a for statement, might hold three expressions.
+    LSL_Type		type;		// Expression type.
 };
 
 struct _LSL_Block
 {
+    LSL_Block		*outerBlock;
     LSL_Statement	*statements;
+    LSL_Identifier	*scopeVariables;
 };
 
 struct _LSL_Function

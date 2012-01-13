@@ -22,7 +22,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_SPACE,			ST_NONE,		" ",	LSL_NONE,				NULL, NULL, NULL},
 
     // Operators, in order of precedence, low to high
-    // Left to right, unless oterwise stated.
+    // Left to right, unless otherwise stated.
     // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
     {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
