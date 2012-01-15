@@ -21,10 +21,10 @@ INTEGER     ({DECIMAL}+)|(0[xX]{HEX}+)
 EXPONANT    [eE][+-]?{DECIMAL}+
  /* Floats can be "0." or".0", but "." is not valid.  At least in OpenSim. A single dot should be caught by the LSL_Dot rule first anyway.*/
 FLOAT       {DECIMAL}*"."{DECIMAL}*{EXPONANT}?[fF]?
+IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 CHAR        '(\\.|[^\\'\n])+'
 KEY         \"{HEX}{8}-{HEX}{4}-{HEX}{4}-{HEX}{4}-{HEX}{12}\"
 STRING      \"(\\.|[^\\"\n])*\"
-IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
@@ -72,11 +72,11 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 "++"            { return common(yylval, yytext, yyextra, TRUE, LSL_INCREMENT_PRE); }
 ","             { return common(yylval, yytext, yyextra, TRUE, LSL_COMMA); }
 
- /* Types. */
-{INTEGER}       %{ yylval->value.integerValue = atoi(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_INTEGER); %}
-{FLOAT}         %{ yylval->value.floatValue = atof(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_FLOAT); %}
-{KEY}           %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_KEY); %}
-{STRING}        %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_STRING); %}
+ /* Other symbols. */
+"@"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_LABEL); %}
+"{"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_OPEN); %}
+"}"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_CLOSE); %}
+";"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_STATEMENT); %}
 
  /* Type keywords. */
 "float"         %{ return common(yylval, yytext, yyextra, TRUE, LSL_TYPE_FLOAT); %}
@@ -98,13 +98,13 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 "state"         %{ return common(yylval, yytext, yyextra, TRUE, LSL_STATE_CHANGE); %}
 "while"         %{ return common(yylval, yytext, yyextra, TRUE, LSL_WHILE); %}
 
-{IDENTIFIER}    %{ /* yylval->value.identifierValue = strdup(yytext); */ common(yylval, yytext, yyextra, TRUE, LSL_IDENTIFIER); %}
+{IDENTIFIER}    %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_IDENTIFIER); %}
 
- /* Other symbols. */
-"@"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_LABEL); %}
-"{"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_OPEN); %}
-"}"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_CLOSE); %}
-";"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_STATEMENT); %}
+ /* Types. */
+{INTEGER}       %{ yylval->value.integerValue = atoi(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_INTEGER); %}
+{FLOAT}         %{ yylval->value.floatValue = atof(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_FLOAT); %}
+{KEY}           %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_KEY); %}
+{STRING}        %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_STRING); %}
 
 <<EOF>>         { return common(yylval, yytext, yyextra, TRUE, LSL_SCRIPT); }
 
