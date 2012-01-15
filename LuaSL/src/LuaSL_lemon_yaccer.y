@@ -4,14 +4,68 @@
 
 %extra_argument {LuaSL_yyparseParam *param}
 
-%stack_size 256
+%stack_size 1024
 
 %token_type {LSL_Leaf *}
 %default_type  {LSL_Leaf *}
 %token_destructor {burnLeaf($$);}
+%default_destructor {burnLeaf($$);}
 
 
 program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
+
+%nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_UNKNOWN.
+
+%nonassoc LSL_SCRIPT.
+script ::= script state.
+script ::= script function.
+script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
+script ::= .
+
+stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
+state ::= LSL_IDENTIFIER stateBlock.
+
+%nonassoc LSL_PARAMETER LSL_FUNCTION LSL_STATE.
+parameter ::= type LSL_IDENTIFIER.
+parameterList ::= parameterList LSL_COMMA parameter.
+parameterList ::= parameter.
+parameterList ::= .
+function ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE funcBlock.
+function ::= type LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE funcBlock.
+functionList ::= functionList function.
+functionList ::= .
+
+%nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE.
+funcBlock ::= LSL_BLOCK_OPEN statementList LSL_BLOCK_CLOSE.
+block ::= funcBlock.
+block ::= statement.
+
+%nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
+%nonassoc LSL_ELSE.
+statement ::= LSL_DO block LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE LSL_STATEMENT.
+statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_STATEMENT expr LSL_STATEMENT expr LSL_PARENTHESIS_CLOSE block.
+
+ifBlock ::= ifBlock LSL_ELSE block.
+ifBlock ::= block.
+statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	//[LSL_ELSE]
+
+statement ::= LSL_JUMP LSL_IDENTIFIER LSL_STATEMENT.
+statement ::= LSL_RETURN expr LSL_STATEMENT.
+statement ::= LSL_RETURN LSL_STATEMENT.
+statement ::= LSL_STATE_CHANGE LSL_IDENTIFIER LSL_STATEMENT.
+statement ::= LSL_WHILE LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block.
+
+%nonassoc LSL_LABEL.
+target ::= LSL_LABEL LSL_IDENTIFIER LSL_STATEMENT.
+
+%nonassoc LSL_STATEMENT.
+statement ::= target LSL_STATEMENT.
+statement ::= type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr LSL_STATEMENT.
+statement ::= type LSL_IDENTIFIER LSL_STATEMENT.
+statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESSION, B); }
+
+statementList ::= statementList statement.
+statementList ::= .
 
 %right  LSL_BOOL_AND.
 expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
@@ -63,30 +117,29 @@ type ::= LSL_TYPE_VECTOR.
 %nonassoc LSL_BRACKET_OPEN LSL_BRACKET_CLOSE.
 %nonassoc LSL_PARENTHESIS_OPEN LSL_PARENTHESIS_CLOSE LSL_EXPRESSION.
 
-exprList ::= exprList LSL_COMMA expr.
-exprList ::= expr.
-exprList ::= .
-expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addParenthesis(B, C, D); }
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D) expr(E).	{ A = addTypecast(B, C, D, E); }
 
-%right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_CONCATENATE expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_ADD expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_SUBTRACT expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_MULTIPLY expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_MODULO expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_DIVIDE expr.
-expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr.
-%right LSL_DOT.
-expr ::= LSL_IDENTIFIER LSL_DOT LSL_IDENTIFIER.
-%right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
-expr ::= LSL_IDENTIFIER LSL_DECREMENT_PRE.
-expr ::= LSL_IDENTIFIER LSL_INCREMENT_PRE.
-expr ::= LSL_DECREMENT_PRE LSL_IDENTIFIER.
-expr ::= LSL_INCREMENT_PRE LSL_IDENTIFIER.
+%right LSL_DOT LSL_IDENTIFIER.
+identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
+identifier ::= LSL_IDENTIFIER.
 
-%nonassoc LSL_COMMA.
+expr ::= identifier.
+
+%right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
+expr ::= identifier LSL_ASSIGNMENT_CONCATENATE expr.
+expr ::= identifier LSL_ASSIGNMENT_ADD expr.
+expr ::= identifier LSL_ASSIGNMENT_SUBTRACT expr.
+expr ::= identifier LSL_ASSIGNMENT_MULTIPLY expr.
+expr ::= identifier LSL_ASSIGNMENT_MODULO expr.
+expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
+expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
+
+%right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
+expr ::= identifier LSL_DECREMENT_PRE.
+expr ::= identifier LSL_INCREMENT_PRE.
+expr ::= LSL_DECREMENT_PRE identifier.
+expr ::= LSL_INCREMENT_PRE identifier.
 
 %nonassoc  LSL_FLOAT.
 expr(A) ::= LSL_FLOAT(B).							{ B->basicType = OT_float; A = B; }
@@ -104,66 +157,21 @@ expr(A) ::= LSL_STRING(B).							{ B->basicType = OT_string; A = B; }
 expr ::= LSL_VECTOR.
 expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.
 
-%nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
-%nonassoc LSL_ELSE.
-statement ::= LSL_DO block LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE LSL_STATEMENT.
-statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_PARENTHESIS_CLOSE block.
+%nonassoc LSL_COMMA.
 
-ifBlock ::= ifBlock LSL_ELSE block.
-ifBlock ::= block.
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	//[LSL_ELSE]
-
-statement ::= LSL_JUMP LSL_IDENTIFIER LSL_STATEMENT.
-statement ::= LSL_RETURN expr LSL_STATEMENT.
-statement ::= LSL_RETURN LSL_STATEMENT.
-statement ::= LSL_STATE_CHANGE LSL_IDENTIFIER LSL_STATEMENT.
-statement ::= LSL_WHILE LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block.
-
-%nonassoc LSL_LABEL.
-target ::= LSL_LABEL LSL_IDENTIFIER LSL_STATEMENT.
-
-%nonassoc  LSL_IDENTIFIER LSL_STATEMENT.
-statement ::= target LSL_STATEMENT.
-statement ::= type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr LSL_STATEMENT.
-statement ::= type LSL_IDENTIFIER LSL_STATEMENT.
-statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESSION, B); }
-
-statementList ::= statementList statement.
-statementList ::= .
-
-%nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE.
-block ::= LSL_BLOCK_OPEN statementList LSL_BLOCK_CLOSE.
-block ::= statement.
-
-%nonassoc LSL_PARAMETER LSL_FUNCTION LSL_STATE.
-parameter ::= type LSL_IDENTIFIER.
-parameterList ::= parameterList LSL_COMMA parameter.
-parameterList ::= parameter.
-parameterList ::= .
-//function ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
-function ::= type LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
-functionList ::= functionList function.
-functionList ::= .
-
-stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
-state ::= LSL_IDENTIFIER stateBlock.
-
-%nonassoc LSL_SCRIPT.
-script ::= script state.
-script ::= script function.
-script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
-script ::= .
-
-%nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_UNKNOWN.
+exprList ::= exprList LSL_COMMA expr.
+exprList ::= expr.
+exprList ::= .
+expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 
 
 %parse_accept {printf("Parsing complete.\n");}
 
 %parse_failure {fprintf(stderr,"Giving up.  Parser is hopelessly lost!\n");}
 
-%stack_overflow {fprintf(stderr,"Giving up.  Parser stack overflow @ line %04d column %04d\n", yypMinor->yy0->line, yypMinor->yy0->column);}  // Gotta love consistancy, if it ever happens.
+%stack_overflow {fprintf(stderr,"*******************************************************************Giving up.  Parser stack overflow @ line %04d column %04d\n", yypMinor->yy0->line, yypMinor->yy0->column);}  // Gotta love consistancy, if it ever happens.
 
-%syntax_error {fprintf(stderr,"Syntax error @ line %04d column %04d\n", yyminor.yy0->line, yyminor.yy0->column);}
+%syntax_error {fprintf(stderr,"*******************************************************************Syntax error @ line %04d column %04d\n", yyminor.yy0->line, yyminor.yy0->column);}
 
 
 /* Undocumented shit that might be useful later.  Pffft
@@ -177,6 +185,14 @@ script ::= .
 ** and Z.  Whenever one of the tokens X, Y, or Z is input to the parser
 ** but it does not parse, the type of the token is changed to ID and
 ** the parse is retried before an error is thrown.
+
+%wildcard
+%code
+
+%ifdef
+%endif
+%ifndef
+%endif
 
 */
 
