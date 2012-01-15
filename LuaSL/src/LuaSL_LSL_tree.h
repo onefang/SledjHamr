@@ -289,7 +289,7 @@ LSL_Leaf *addExpression(LSL_Leaf *exp);
 LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
-LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
+LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);

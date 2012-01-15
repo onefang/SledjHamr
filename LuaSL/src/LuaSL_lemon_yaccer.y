@@ -11,7 +11,7 @@
 %token_destructor {burnLeaf($$);}
 
 
-program ::= script LSL_SCRIPT(A).						{ A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
+program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  param->ast = A; }  // Lemon does not like the start symbol to be on the RHS, so give it a dummy one.
 
 %right  LSL_BOOL_AND.
 expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
@@ -68,7 +68,7 @@ exprList ::= expr.
 exprList ::= .
 expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addParenthesis(B, C, D); }
-expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D).	{ A = addTypecast(B, C, D); }
+expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D) expr(E).	{ A = addTypecast(B, C, D, E); }
 
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
 expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_CONCATENATE expr.
@@ -151,7 +151,7 @@ state ::= LSL_IDENTIFIER stateBlock.
 %nonassoc LSL_SCRIPT.
 script ::= script state.
 script ::= script function.
-script ::= script statement(A).							{ A->left = param->ast;  param->ast = A; }
+script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= .
 
 %nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_UNKNOWN.

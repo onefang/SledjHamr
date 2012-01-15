@@ -290,7 +290,8 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval)
 	if (lval)
 	{
 	    lval->value.parenthesis = parens;
-	    lval->basicType = expr->basicType;
+	    if (expr)
+		lval->basicType = expr->basicType;
 	}
     }
     return lval;
@@ -311,19 +312,20 @@ LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
     return lval;
 }
 
-LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval)
+LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr)
 {
     LSL_Parenthesis *parens = malloc(sizeof(LSL_Parenthesis));
 
     if (parens)
     {
 	parens->left = lval;
-	parens->expression = type;
+	parens->expression = expr;
 	parens->right = rval;
 	if (lval)
 	{
 	    lval->value.parenthesis = parens;
-	    lval->basicType = type->basicType;
+	    if (type)
+		lval->basicType = type->basicType;
 	    lval->token = tokens[LSL_TYPECAST_OPEN - lowestToken];
 	}
 	if (rval)
