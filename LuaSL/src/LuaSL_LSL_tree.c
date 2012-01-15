@@ -841,7 +841,9 @@ int main(int argc, char **argv)
 	    yyset_debug(1, param.scanner);
 #endif
 	    yyset_in(param.file, param.scanner);
+#ifdef LUASL_DEBUG
 	    ParseTrace(stdout, "LSL_lemon ");
+#endif
 	    // on EOF yylex will return 0
 	    while((yv = yylex(param.lval, param.scanner)) != 0)
 	    {
