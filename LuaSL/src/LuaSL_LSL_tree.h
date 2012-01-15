@@ -276,6 +276,7 @@ typedef struct
     LSL_Leaf *ast;
     char *ignorableText;
     LSL_Leaf *lval;
+    int column, line;
 } LuaSL_yyparseParam;
 
 

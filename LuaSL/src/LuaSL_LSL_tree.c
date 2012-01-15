@@ -761,6 +761,9 @@ static int nextFile(LuaSL_yyparseParam *param)
 	burnLeaf(param->ast);
 	param->ast = NULL;
 	param->lval = calloc(1, sizeof(LSL_Leaf));
+	// Text editors usually start counting at 1, even programmers editors.
+	param->column = 1;
+	param->line = 1;
 	return TRUE;
     }
 /*

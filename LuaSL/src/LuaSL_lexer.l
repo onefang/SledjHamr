@@ -8,7 +8,7 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIg
 %}
 
 %option reentrant never-interactive batch
-%option bison-bridge yylineno 8bit 
+%option bison-bridge 8bit 
 %option noreject noyymore
 %option backup debug perf-report perf-report verbose warn
 %option align full
@@ -115,9 +115,22 @@ STRING      \"(\\.|[^\\"\n])*\"
 
 int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type)
 {
+    char *p;
+
+    for (p = text; *p; p++)
+    {
+	if ('\n' == *p)
+	{
+	    param->line++;
+	    param->column = 1;
+	}
+	else
+	    param->column++;
+    }
+
     lval->token = tokens[type - lowestToken];
-    lval->line = yyget_lineno(param->scanner);
-    lval->column = yyget_column(param->scanner);
+    lval->line = param->line;
+    lval->column = param->column;
 
     if (checkIgnorable)
     {
