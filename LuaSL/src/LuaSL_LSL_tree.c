@@ -419,7 +419,7 @@ Any binary operation involving a float and an integer implicitly casts the integ
 A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
 Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
 
-integer  = integer0   % integer1;  // Apparently only applies to integers.
+integer  = integer0   % integer1;  // Apparently only applies to integers, but works fine on floats in OS.
 string   = string0    + string1;   // Concatenation.
 list     = list0      + list1;     // Concatenation.   Also works if either is not a list, it's promoted to a list first.
 list     = (list=[])  + list + ["new_item"];  // Voodoo needed for old LSL, works in Mono but not needed, does not work in OS.  Works for strings to.
