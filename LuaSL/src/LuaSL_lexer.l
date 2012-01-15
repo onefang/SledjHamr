@@ -3,7 +3,7 @@
 #define excludeLexer
 #include "LuaSL_LSL_tree.h"
 
-int common(YYSTYPE *lval, char *text, LuaSL_yyparseExtra *extra, boolean checkIgnorable, int type);
+int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type);
 
 %}
 
@@ -12,7 +12,7 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseExtra *extra, boolean checkIg
 %option noreject noyymore
 %option backup debug perf-report perf-report verbose warn
 %option align full
-%option extra-type="LuaSL_yyparseExtra *"
+%option extra-type="LuaSL_yyparseParam *"
 
 HEX         [[:xdigit:]]
 DECIMAL     [[:digit:]]
@@ -110,54 +110,49 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 %%
 
-int common(YYSTYPE *lval, char *text, LuaSL_yyparseExtra *extra, boolean checkIgnorable, int type)
+int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type)
 {
     int i;
 
     for (i = 0; text[i] != '\0'; i++)
 	if (text[i] == '\n')
 	{
-	    extra->column = 0;
-	    extra->line++;
+	    param->column = 0;
+	    param->line++;
 	}
 	else if (text[i] == '\t')
-	    extra->column += 8 - (extra->column % 8);
+	    param->column += 8 - (param->column % 8);
 	else
-	    extra->column++;
+	    param->column++;
 
     lval->token = tokens[type - lowestToken];
-    lval->line = extra->line;
-    lval->column = extra->column;
+    lval->line = param->line;
+    lval->column = param->column;
 
     if (checkIgnorable)
     {
-	lval->ignorableText = extra->ignorableText;
-	extra->ignorableText = NULL;
+	lval->ignorableText = param->ignorableText;
+	param->ignorableText = NULL;
     }
     else
     {
-	if (extra->ignorableText)
+	if (param->ignorableText)
 	{
-	    int lenI = strlen(extra->ignorableText);
+	    int lenI = strlen(param->ignorableText);
 	    int lenT = strlen(text);
 
-	    extra->ignorableText = realloc(extra->ignorableText, lenI + lenT + 1);
-	    sprintf(&(extra->ignorableText[lenI]), "%s", text);
+	    param->ignorableText = realloc(param->ignorableText, lenI + lenT + 1);
+	    sprintf(&(param->ignorableText[lenI]), "%s", text);
 	}
 	else
-	    extra->ignorableText = strdup(text);
+	    param->ignorableText = strdup(text);
     }
 
     return type;
 }
 
-int yywrap(yyscan_t yyscanner)
+int yywrap(yyscan_t yyscanner)  // This as actually useless for our needs, as it is called BEFORE the last token is dealt with.
 {
-#ifdef LUASL_FILES
-    LuaSL_yyparseExtra *extra = yyget_extra(yyscanner);
-#endif
-    int result = 1;
-
 #ifdef FLEX_SCANNER
     #ifndef LL_WINDOWS
 	// Get gcc to stop complaining about lack of use of yyunput and input.
@@ -166,11 +161,6 @@ int yywrap(yyscan_t yyscanner)
     #endif
 #endif
 
-#ifdef LUASL_FILES
-    result = nextFile(extra);
-    if (0 == result)
-	yyset_in(extra->file, yyscanner);
-#endif
-    return result;
+    return 1;
 }
 

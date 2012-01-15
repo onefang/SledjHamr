@@ -672,66 +672,74 @@ static void convertLeaf2Lua(FILE *file, LSL_Leaf *leaf)
     }
 }
 
-int nextFile(LuaSL_yyparseExtra *extra)
+static void doneParsing(LuaSL_yyparseParam *param)
 {
-    if (NULL != extra->file)
-	fclose(extra->file);
-    if (--(extra->argc) > 0 && *++(extra->argv) != '\0')
+    if (param->ast)
     {
-	strncpy(extra->fileName, *(extra->argv), PATH_MAX - 1);
-	extra->fileName[PATH_MAX - 1] = '\0';
-	extra->file = fopen(extra->fileName, "r");
-	if (NULL == extra->file)
-	{
-	    fprintf(stderr, "Error opening file %s.\n", extra->fileName);
-	    return 1;
-	}
-	printf("Opened %s.\n", extra->fileName);
-	return(0);
-    }
-    return(1);
-}
-
-int main(int argc, char **argv)
-{
-//    char *programName = argv[0];
-    int i;
-
-    // Figure out what numbers yacc gave to our tokens.
-    for (i = 0; LSL_Tokens[i].token != NULL; i++)
-    {
-	if (lowestToken > LSL_Tokens[i].type)
-	    lowestToken = LSL_Tokens[i].type;
-    }
-    tokens = calloc(i + 1, sizeof(LSL_Token *));
-    if (tokens)
-    {
+	FILE *out;
 	char buffer[PATH_MAX];
-	char fileName[PATH_MAX];
-	LuaSL_yyparseParam param;
-	LuaSL_yyparseExtra extra;
+	char outName[PATH_MAX];
+	char luaName[PATH_MAX];
 	int count;
 
-	// Sort the token table.
-	for (i = 0; LSL_Tokens[i].token != NULL; i++)
+	outputLeaf(stdout, param->ast);
+	printf("\n");
+	evaluateLeaf(param->ast, NULL, NULL);
+	printf("\n");
+
+	strcpy(outName, param->fileName);
+	strcat(outName, "2");
+	strcpy(luaName, param->fileName);
+	strcat(luaName, ".lua");
+	out = fopen(outName, "w");
+	if (out)
 	{
-	    int j = LSL_Tokens[i].type - lowestToken;
-
-	    tokens[j] = &(LSL_Tokens[i]);
+	    outputLeaf(out, param->ast);
+	    fclose(out);
+	    sprintf(buffer, "diff %s %s", param->fileName, outName);
+	    count = system(buffer);
+	    printf("Return value of %s is %d\n", buffer, count);
+	    if (0 != count)
+	        fprintf(stderr, "%s says they are different!\n", buffer);
 	}
+	else
+	    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
+	out = fopen(luaName, "w");
+	if (out)
+	{
+	    convertLeaf2Lua(out, param->ast);
+	    fclose(out);
+	}
+	else
+	    fprintf(stderr, "Unable to open file %s for writing!\n", luaName);
+    }
+}
 
-	fileName[0] = '\0';
-	param.ast = NULL;
-	param.lval = calloc(1, sizeof(LSL_Leaf));
-	memset(&extra, 0, sizeof(extra));
-	extra.argc = argc;
-	extra.argv = argv;
-	extra.fileName = fileName;
-	extra.file = NULL;
-	// Grab the first file name, if any.
-	if (1 == nextFile(&extra))
-	    return 1;
-
+static int nextFile(LuaSL_yyparseParam *param)
+{
+    if (NULL != param->file)
+    {
+	fclose(param->file);
+	param->file = NULL;
+    }
+    if (--(param->argc) > 0 && *++(param->argv) != '\0')
+    {
+	strncpy(param->fileName, *(param->argv), PATH_MAX - 1);
+	param->fileName[PATH_MAX - 1] = '\0';
+	param->file = fopen(param->fileName, "r");
+	if (NULL == param->file)
+	{
+	    fprintf(stderr, "Error opening file %s.\n", param->fileName);
+	    return FALSE;
+	}
+	printf("Opened %s.\n", param->fileName);
+	burnLeaf(param->ast);
+	param->ast = NULL;
+	param->lval = calloc(1, sizeof(LSL_Leaf));
+	param->line = 0;
+	param->column = 0;
+	return TRUE;
+    }
 /*
 	if ('\0' == fileName[0])
 	{
@@ -757,87 +765,67 @@ int main(int argc, char **argv)
 	}
 */
 
-	if (yylex_init_extra(&extra, &(param.scanner)))
-	    return 1;
+    return FALSE;
+}
 
-#ifdef LUASL_DEBUG
-//	yydebug= 5;
-#endif
+int main(int argc, char **argv)
+{
+//    char *programName = argv[0];
+    int i;
 
+    // Figure out what numbers yacc gave to our tokens.
+    for (i = 0; LSL_Tokens[i].token != NULL; i++)
+    {
+	if (lowestToken > LSL_Tokens[i].type)
+	    lowestToken = LSL_Tokens[i].type;
+    }
+    tokens = calloc(i + 1, sizeof(LSL_Token *));
+    if (tokens)
+    {
+	LuaSL_yyparseParam param;
 
-#ifdef LUASL_DEBUG
-	yyset_debug(1, param.scanner);
-#endif
+	// Sort the token table.
+	for (i = 0; LSL_Tokens[i].token != NULL; i++)
+	{
+	    int j = LSL_Tokens[i].type - lowestToken;
 
-#ifdef LUASL_FILES
-	yyset_in(extra.file, &(param.scanner));
-#endif
+	    tokens[j] = &(LSL_Tokens[i]);
+	}
+
+	// First time setup.
+	memset(&param, 0, sizeof(param));
+	param.argc = argc;
+	param.argv = argv;
+
+	// Loop through the files.
+	while (nextFile(&param))
 	{
 	    void *pParser = ParseAlloc(malloc);
 	    int yv;
 
+#ifdef LUASL_DEBUG
+//	    yydebug= 5;
+#endif
+	    if (yylex_init_extra(&param, &(param.scanner)))
+		return 1;
+#ifdef LUASL_DEBUG
+	    yyset_debug(1, param.scanner);
+#endif
+	    yyset_in(param.file, param.scanner);
 	    ParseTrace(stdout, "LSL_lemon ");
-
-#ifndef LUASL_FILES
-	    while ((i = fread(buffer, 1, PATH_MAX - 1, extra.file)) >  0)
-#endif
+	    // on EOF yylex will return 0
+	    while((yv = yylex(param.lval, param.scanner)) != 0)
 	    {
-#ifndef LUASL_FILES
-		buffer[i] = '\0';
-		yy_scan_string(buffer, param.scanner);
-#endif
-		// on EOF yylex will return 0
-		while((yv = yylex(param.lval, param.scanner)) != 0)
-		{
-		    Parse(pParser, yv, param.lval, &param);
-		    if (LSL_SCRIPT == yv)
-			break;
-		    param.lval = calloc(1, sizeof(LSL_Leaf));
-		}
+		Parse(pParser, yv, param.lval, &param);
+		if (LSL_SCRIPT == yv)
+		    break;
+		param.lval = calloc(1, sizeof(LSL_Leaf));
 	    }
 
 	    yylex_destroy(param.scanner);
 	    Parse (pParser, 0, param.lval, &param);
 	    ParseFree(pParser, free);
-
-	    if (param.ast)
-	    {
-		FILE *out;
-		char outName[PATH_MAX];
-		char luaName[PATH_MAX];
-
-		outputLeaf(stdout, param.ast);
-		printf("\n");
-		evaluateLeaf(param.ast, NULL, NULL);
-		printf("\n");
-
-		strcpy(outName, fileName);
-		strcat(outName, "2");
-		strcpy(luaName, fileName);
-		strcat(luaName, ".lua");
-		out = fopen(outName, "w");
-		if (out)
-		{
-		    outputLeaf(out, param.ast);
-		    fclose(out);
-		    sprintf(buffer, "diff %s %s", fileName, outName);
-		    count = system(buffer);
-		    printf("Return value of %s is %d\n", buffer, count);
-		    if (0 != count)
-			fprintf(stderr, "%s says they are different!\n", buffer);
-		}
-		else
-		    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
-		out = fopen(luaName, "w");
-		if (out)
-		{
-		    convertLeaf2Lua(out, param.ast);
-		    fclose(out);
-		}
-		else
-		    fprintf(stderr, "Unable to open file %s for writing!\n", luaName);
-		burnLeaf(param.ast);
-	    }
+	    doneParsing(&param);
 	}
     }
     else

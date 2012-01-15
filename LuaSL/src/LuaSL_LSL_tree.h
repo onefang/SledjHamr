@@ -3,7 +3,6 @@
 #define __LSL_TREE_H__
 
 #define LUASL_DEBUG
-//#define LUASL_FILES
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -264,44 +263,30 @@ struct _LSL_Script
     LSL_Identifier	*variables;
 };
 
+// Define the type for flex and lemon.
+#define YYSTYPE LSL_Leaf
+
 typedef struct
 {
-    char *ignorableText;
-    int column;
-    int line;
+    void *scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
     int argc;
     char **argv;
-    char *fileName;
+    char fileName[PATH_MAX];
     FILE *file;
-} LuaSL_yyparseExtra;
-
-
-// define the type for flex and lemon3
-#define YYSTYPE LSL_Leaf
+    LSL_Leaf *ast;
+    char *ignorableText;
+    LSL_Leaf *lval;
+    int column;
+    int line;
+} LuaSL_yyparseParam;
 
 
 #ifndef excludeLexer
     #include "LuaSL_lexer.h"
 #endif
 
-typedef struct
-{
-        yyscan_t scanner;
-        LSL_Leaf *ast;
-        LSL_Leaf *lval;
-} LuaSL_yyparseParam;
-
-// the parameter name (of the reentrant 'yyparse' function)
-// data is a pointer to a 'yyparseParam' structure
-//#define YYPARSE_PARAM data
- 
-// the argument for the 'yylex' function
-#define YYLEX_PARAM   ((LuaSL_yyparseParam*)data)->scanner
-//#define ParseTOKENTYPE YYSTYPE *
-//#define ParseARG_PDECL , LuaSL_yyparseParam *param
 
 void burnLeaf(LSL_Leaf *leaf);
-int nextFile(LuaSL_yyparseExtra *extra);
 LSL_Leaf *addExpression(LSL_Leaf *exp);
 LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
