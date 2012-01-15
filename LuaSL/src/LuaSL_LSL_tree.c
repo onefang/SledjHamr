@@ -789,6 +789,8 @@ static int nextFile(LuaSL_yyparseParam *param)
     return FALSE;
 }
 
+char *test[] = {"test2.lsl", "test2.lsl"};
+
 int main(int argc, char **argv)
 {
 //    char *programName = argv[0];
@@ -814,6 +816,12 @@ int main(int argc, char **argv)
 	}
 
 	// First time setup.
+	if (1 == argc)
+	{
+	    // Fake a test file if there is none.  Mostly for ddd.
+	    argc++;
+	    argv = test;
+	}
 	memset(&param, 0, sizeof(param));
 	param.argc = argc;
 	param.argv = argv;
