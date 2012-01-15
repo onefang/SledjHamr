@@ -140,6 +140,7 @@ parameter ::= type LSL_IDENTIFIER.
 parameterList ::= parameterList LSL_COMMA parameter.
 parameterList ::= parameter.
 parameterList ::= .
+//function ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
 function ::= type LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
 functionList ::= functionList function.
 functionList ::= .
