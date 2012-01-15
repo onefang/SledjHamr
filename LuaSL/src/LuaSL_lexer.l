@@ -112,22 +112,9 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
 int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type)
 {
-    int i;
-
-    for (i = 0; text[i] != '\0'; i++)
-	if (text[i] == '\n')
-	{
-	    param->column = 0;
-	    param->line++;
-	}
-	else if (text[i] == '\t')
-	    param->column += 8 - (param->column % 8);
-	else
-	    param->column++;
-
     lval->token = tokens[type - lowestToken];
-    lval->line = param->line;
-    lval->column = param->column;
+    lval->line = yyget_lineno(param->scanner);
+    lval->column = yyget_column(param->scanner);
 
     if (checkIgnorable)
     {

@@ -736,8 +736,6 @@ static int nextFile(LuaSL_yyparseParam *param)
 	burnLeaf(param->ast);
 	param->ast = NULL;
 	param->lval = calloc(1, sizeof(LSL_Leaf));
-	param->line = 0;
-	param->column = 0;
 	return TRUE;
     }
 /*
