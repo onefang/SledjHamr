@@ -62,9 +62,13 @@ type ::= LSL_TYPE_VECTOR.
 %left  LSL_ANGLE_OPEN LSL_ANGLE_CLOSE.
 %nonassoc LSL_BRACKET_OPEN LSL_BRACKET_CLOSE.
 %nonassoc LSL_PARENTHESIS_OPEN LSL_PARENTHESIS_CLOSE LSL_EXPRESSION.
+
+exprList ::= exprList LSL_COMMA expr.
+exprList ::= expr.
+exprList ::= .
+expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addParenthesis(B, C, D); }
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D).	{ A = addTypecast(B, C, D); }
-//expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
 expr ::= LSL_IDENTIFIER LSL_ASSIGNMENT_CONCATENATE expr.
@@ -83,10 +87,6 @@ expr ::= LSL_DECREMENT_PRE LSL_IDENTIFIER.
 expr ::= LSL_INCREMENT_PRE LSL_IDENTIFIER.
 
 %nonassoc LSL_COMMA.
-
-exprList ::= exprList LSL_COMMA expr.
-exprList ::= expr.
-exprList ::= .
 
 %nonassoc  LSL_FLOAT.
 expr(A) ::= LSL_FLOAT(B).							{ B->basicType = OT_float; A = B; }
@@ -107,21 +107,17 @@ expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.
 %nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
 %nonassoc LSL_ELSE.
 statement ::= LSL_DO block LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE LSL_STATEMENT.
-statement ::= LSL_DO statement LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE LSL_STATEMENT.
 statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_PARENTHESIS_CLOSE block.
-statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_PARENTHESIS_CLOSE statement.
 
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block.	[LSL_ELSE]
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE statement.	[LSL_ELSE]
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block LSL_ELSE block.
-//statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE statement LSL_ELSE statement.
+ifBlock ::= ifBlock LSL_ELSE block.
+ifBlock ::= block.
+statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	//[LSL_ELSE]
 
 statement ::= LSL_JUMP LSL_IDENTIFIER LSL_STATEMENT.
 statement ::= LSL_RETURN expr LSL_STATEMENT.
 statement ::= LSL_RETURN LSL_STATEMENT.
 statement ::= LSL_STATE_CHANGE LSL_IDENTIFIER LSL_STATEMENT.
 statement ::= LSL_WHILE LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block.
-statement ::= LSL_WHILE LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE statement.
 
 %nonassoc LSL_LABEL.
 target ::= LSL_LABEL LSL_IDENTIFIER LSL_STATEMENT.
@@ -137,22 +133,25 @@ statementList ::= .
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE.
 block ::= LSL_BLOCK_OPEN statementList LSL_BLOCK_CLOSE.
+block ::= statement.
 
 %nonassoc LSL_PARAMETER LSL_FUNCTION LSL_STATE.
 parameter ::= type LSL_IDENTIFIER.
 parameterList ::= parameterList LSL_COMMA parameter.
 parameterList ::= parameter.
 parameterList ::= .
-function ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
 function ::= type LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE block.
+functionList ::= functionList function.
+functionList ::= .
 
-state ::= LSL_IDENTIFIER block.
+stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
+state ::= LSL_IDENTIFIER stateBlock.
 
 %nonassoc LSL_SCRIPT.
 script ::= script state.
 script ::= script function.
 script ::= script statement(A).							{ A->left = param->ast;  param->ast = A; }
-script ::= statement(A).							{ A->left = param->ast;  param->ast = A; }
+script ::= .
 
 %nonassoc LSL_SPACE LSL_COMMENT LSL_COMMENT_LINE LSL_UNKNOWN.
 
