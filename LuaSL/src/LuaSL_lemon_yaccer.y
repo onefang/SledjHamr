@@ -74,9 +74,11 @@ expr(A) ::= LSL_FLOAT(B).							{ B->basicType = OT_float; A = B; }
 %nonassoc LSL_INTEGER.
 expr(A) ::= LSL_INTEGER(B).							{ B->basicType = OT_integer; A = B; }
 %nonassoc  LSL_KEY.
+expr(A) ::= LSL_KEY(B).								{ B->basicType = OT_key; A = B; }
 %nonassoc  LSL_LIST.
 %nonassoc  LSL_ROTATION.
 %nonassoc  LSL_STRING.
+expr(A) ::= LSL_STRING(B).							{ B->basicType = OT_string; A = B; }
 %nonassoc  LSL_VECTOR.
 
 %nonassoc LSL_DO LSL_FOR LSL_ELSE LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.

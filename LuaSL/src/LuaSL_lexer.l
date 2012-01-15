@@ -22,6 +22,7 @@ EXPONANT    [eE][+-]?{DECIMAL}+
  /* Floats can be "0." or".0", but "." is not valid.  At least in OpenSim. A single dot should be caught by the LSL_Dot rule first anyway.*/
 FLOAT       {DECIMAL}*"."{DECIMAL}*{EXPONANT}?[fF]?
 CHAR        '(\\.|[^\\'\n])+'
+KEY         \"{HEX}{8}-{HEX}{4}-{HEX}{4}-{HEX}{4}-{HEX}{12}\"
 STRING      \"(\\.|[^\\"\n])*\"
 IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
 
@@ -74,6 +75,8 @@ IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
  /* Types. */
 {INTEGER}       %{ yylval->value.integerValue = atoi(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_INTEGER); %}
 {FLOAT}         %{ yylval->value.floatValue = atof(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_FLOAT); %}
+{KEY}           %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_KEY); %}
+{STRING}        %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyextra, TRUE, LSL_STRING); %}
 
  /* Type keywords. */
 "float"         %{ return common(yylval, yytext, yyextra, TRUE, LSL_TYPE_FLOAT); %}
