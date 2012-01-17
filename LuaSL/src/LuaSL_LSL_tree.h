@@ -160,6 +160,7 @@ typedef enum
 struct _allowedTypes
 {
     opType	result;
+    char	*name;
     int         subTypes;
 };
 

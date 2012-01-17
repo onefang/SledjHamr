@@ -131,38 +131,38 @@ LSL_Token LSL_Tokens[] =
 
 allowedTypes allowed[] = 
 {
-    {OT_nothing,	(ST_NONE)},
+    {OT_nothing,	"nothing",	(ST_NONE)},
 
-    {OT_bool,		(ST_BOOL_NOT)},
-    {OT_integer,	(ST_BIT_NOT | ST_NEGATE)},
-    {OT_float,		(ST_NONE)},
-    {OT_key,		(ST_NONE)},
-    {OT_list,		(ST_NONE)},
-    {OT_rotation,	(ST_NONE)},
-    {OT_string,		(ST_NONE)},
-    {OT_vector,		(ST_NONE)},
-    {OT_other,		(ST_NONE)},
+    {OT_bool,		"boolean",	(ST_BOOL_NOT)},
+    {OT_integer,	"integer",	(ST_BIT_NOT | ST_NEGATE)},
+    {OT_float,		"float",	(ST_NONE)},
+    {OT_key,		"key",		(ST_NONE)},
+    {OT_list,		"list",		(ST_NONE)},
+    {OT_rotation,	"rotation",	(ST_NONE)},
+    {OT_string,		"string",	(ST_NONE)},
+    {OT_vector,		"vector",	(ST_NONE)},
+    {OT_other,		"other",	(ST_NONE)},
 
-    {OT_bool,		(ST_BOOLEAN | ST_EQUALITY)},
-    {OT_integer,	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},
-    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
-    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
-    {OT_float,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
-    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
-    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
-    {OT_string,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
-    {OT_list,		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
-    {OT_list,		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
-    {OT_list,		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
-    {OT_integer,	(ST_ADD | ST_COMPARISON)},
-    {OT_float,		(ST_ADD | ST_COMPARISON)},
-    {OT_list,		(ST_ADD | ST_CONCATENATION)},
-    {OT_vector,		(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO)},
-    {OT_vector,		(ST_MULTIPLY)},
-    {OT_vector,		(ST_MULTIPLY)},
-    {OT_rotation,	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},
-    {OT_other,		(ST_NONE)},
-    {OT_invalid,	(ST_NONE)}
+    {OT_bool,		"boolean",	(ST_BOOLEAN | ST_EQUALITY)},
+    {OT_integer,	"integer",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},
+    {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_list,		"list",		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},
+    {OT_integer,	"integer",	(ST_ADD | ST_COMPARISON)},
+    {OT_float,		"float",	(ST_ADD | ST_COMPARISON)},
+    {OT_list,		"list",		(ST_ADD | ST_CONCATENATION)},
+    {OT_vector,		"vector",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO)},
+    {OT_vector,		"vector",	(ST_MULTIPLY)},
+    {OT_vector,		"vector",	(ST_MULTIPLY)},
+    {OT_rotation,	"rotation",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},
+    {OT_other,		"other",	(ST_NONE)},
+    {OT_invalid,	"invalid",	(ST_NONE)}
 };
 
 opType opExpr[][10] =
@@ -277,14 +277,14 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 	}
 	if (OT_invalid == lval->basicType)
 	{
-	    if ((left) && (right))
-		fprintf(stderr, "Invalid operation [%s %s %s] type at line %d column %d\n", left->token->token, lval->token->token, right->token->token, lval->line, lval->column);
-	    else if (left)
-		fprintf(stderr, "Invalid operation [%s %s] type at line %d column %d\n", left->token->token, lval->token->token, lval->line, lval->column);
-	    else if (left)
-		fprintf(stderr, "Invalid operation [%s %s] type at line %d column %d\n", lval->token->token, right->token->token, lval->line, lval->column);
-	    else
-		fprintf(stderr, "Invalid operation [%s] type at line %d column %d\n", lval->token->token, lval->line, lval->column);
+	    char *leftType = "", *rightType = "";
+
+	    if (left)
+		leftType = allowed[left->basicType].name;
+	    if (right)
+		rightType = allowed[right->basicType].name;
+
+	    fprintf(stderr, "Invalid operation [%s %s %s] @ line %d column %d\n", leftType, lval->token->token, rightType, lval->line, lval->column);
 	}
     }
 
