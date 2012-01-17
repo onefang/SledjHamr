@@ -277,7 +277,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	}
 	if (OT_invalid == lval->basicType)
 	{
-	    char *leftType = "", *rightType = "";
+	    const char *leftType = "", *rightType = "";
 
 	    if (left)
 		leftType = allowed[left->basicType].name;
@@ -335,7 +335,7 @@ LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_
     {
 	if (identifier)
 	{
-	    char *temp = identifier->value.stringValue;
+	    const char *temp = identifier->value.stringValue;
 
 	    identifier->token = tokens[LSL_FUNCTION - lowestToken];
 	    identifier->value.functionValue = func;

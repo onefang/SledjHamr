@@ -159,7 +159,7 @@ typedef enum
 struct _allowedTypes
 {
     opType	result;
-    char	*name;
+    const char	*name;
     int         subTypes;
 };
 
@@ -167,7 +167,7 @@ struct _LSL_Token
 {
     LSL_Type		type;
     opSubType		subType;
-    char 		*token;
+    const char 		*token;
     LSL_Flags		flags;
     outputToken		output;
     evaluateToken	evaluate;
@@ -190,22 +190,22 @@ struct _LSL_Leaf
 	int		integerValue;
 	char		*keyValue;
 	LSL_Leaf	*listValue;
-	char		*stringValue;
+	const char	*stringValue;
 	float		vectorValue[3];
 	float		rotationValue[4];
 
 	LSL_Identifier	*identifierValue;
 	LSL_Identifier	*variableValue;
 
-	char		*labelValue;
+	const char	*labelValue;
 	LSL_Statement	*doValue;
 	LSL_Statement	*forValue;
 	LSL_Statement	*elseIfValue;
 	LSL_Statement	*elseValue;
 	LSL_Statement	*ifValue;
-	char		*jumpValue;
+	const char	*jumpValue;
 	LSL_Statement	*returnValue;
-	char		*stateChangeValue;
+	const char	*stateChangeValue;
 	LSL_Statement	*whileValue;
 	LSL_Statement	*statementValue;
 
@@ -215,7 +215,7 @@ struct _LSL_Leaf
 	LSL_State	*stateValue;
 	LSL_Script	*scriptValue;
 
-	char		*unknownValue;
+	const char	*unknownValue;
     } value;
 };
 
@@ -229,7 +229,7 @@ struct _LSL_Parenthesis
 
 struct _LSL_Identifier	// For variables and function parameters.
 {
-    char		*name;
+    const char		*name;
     LSL_Leaf		value;
 };
 
@@ -249,7 +249,7 @@ struct _LSL_Block
 
 struct _LSL_Function
 {
-    char	*name;
+    const char	*name;
     LSL_Leaf	*type;
     LSL_Leaf	*params;
     LSL_Leaf	*block;
@@ -257,14 +257,14 @@ struct _LSL_Function
 
 struct _LSL_State
 {
-    char		*name;
+    const char		*name;
     LSL_Leaf		*block;
     LSL_Function	**handlers;
 };
 
 struct _LSL_Script
 {
-    char		*name;
+    const char		*name;
     LSL_Function	**functions;
     LSL_State		**states;
     LSL_Identifier	**variables;

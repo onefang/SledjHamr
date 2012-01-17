@@ -98,18 +98,18 @@ STRING      \"(\\.|[^\\"\n])*\"
 "state"         %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STATE_CHANGE); %}
 "while"         %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_WHILE); %}
 
-{IDENTIFIER}    %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_IDENTIFIER); %}
+{IDENTIFIER}    %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_IDENTIFIER); %}
 
  /* Types. */
 {INTEGER}       %{ yylval->value.integerValue = atoi(yytext);  return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_INTEGER); %}
 {FLOAT}         %{ yylval->value.floatValue = atof(yytext);    return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FLOAT); %}
-{KEY}           %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_KEY); %}
-{STRING}        %{ yylval->value.stringValue = strdup(yytext); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STRING); %}
+{KEY}           %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_KEY); %}
+{STRING}        %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STRING); %}
 
 <<EOF>>         { return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_SCRIPT); }
 
  /* Everything else */
-.               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = strdup(yytext); common(yylval, yytext, yyleng, yyextra, TRUE, LSL_UNKNOWN); %}
+.               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = eina_stringshare_add_length(yytext, yyleng); common(yylval, yytext, yyleng, yyextra, TRUE, LSL_UNKNOWN); %}
 
 %%
 
