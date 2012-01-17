@@ -178,7 +178,7 @@ struct _LSL_Leaf
     LSL_Leaf		*left;
     LSL_Leaf		*right;
     LSL_Token		*token;
-    char		*ignorableText;
+    Eina_Strbuf		*ignorableText;
     int 		line, column, len;
     opType		basicType;
     union
@@ -265,7 +265,7 @@ typedef struct
     FILE	*file;
     LSL_Leaf	*ast;
     LSL_Script	script;
-    char	*ignorableText;
+    Eina_Strbuf	*ignorableText;
     LSL_Leaf	*lval;
     int		column, line;
     LSL_Block	*currentBlock;

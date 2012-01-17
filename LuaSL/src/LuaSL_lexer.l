@@ -136,21 +136,10 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
     if (checkIgnorable)
     {
 	lval->ignorableText = compiler->ignorableText;
-	compiler->ignorableText = NULL;
+	compiler->ignorableText = eina_strbuf_new();
     }
     else
-    {
-	if (compiler->ignorableText)
-	{
-	    int lenI = strlen(compiler->ignorableText);
-	    int lenT = strlen(text);
-
-	    compiler->ignorableText = realloc(compiler->ignorableText, lenI + lenT + 1);
-	    sprintf(&(compiler->ignorableText[lenI]), "%s", text);
-	}
-	else
-	    compiler->ignorableText = strdup(text);
-    }
+	eina_strbuf_append_length(compiler->ignorableText, text, len);
 
     return type;
 }

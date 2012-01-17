@@ -203,7 +203,7 @@ void burnLeaf(LSL_Leaf *leaf)
 	burnLeaf(leaf->left);
 	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
-	free(leaf->ignorableText);
+	eina_strbuf_free(leaf->ignorableText);
 	free(leaf);
     }
 }
@@ -447,9 +447,9 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	}
 	if (compiler->currentBlock)
 	{
-	    compiler->currentBlock->vcount++;
-	    compiler->currentBlock->variables = realloc(compiler->currentBlock->variables, compiler->currentBlock->vcount * sizeof(LSL_Identifier *));
-	    compiler->currentBlock->variables[compiler->currentBlock->vcount - 1] = result;
+//	    compiler->currentBlock->vcount++;
+//	    compiler->currentBlock->variables = realloc(compiler->currentBlock->variables, compiler->currentBlock->vcount * sizeof(LSL_Identifier *));
+//	    compiler->currentBlock->variables[compiler->currentBlock->vcount - 1] = result;
 	}
 	else
 	{
@@ -784,7 +784,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     {
 	outputLeaf(file, mode, leaf->left);
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
-	    fprintf(file, "%s", leaf->ignorableText);
+	    fwrite(eina_strbuf_string_get(leaf->ignorableText), 1, eina_strbuf_length_get(leaf->ignorableText), file);
 	if (leaf->token->output)
 	    leaf->token->output(file, mode, leaf);
 	else
@@ -857,7 +857,7 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
     {
 	outputLeaf(file, mode, content->value.statementValue->expressions);
 	if (content->ignorableText)
-	    fprintf(file, "%s", content->ignorableText);
+	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
 	fprintf(file, "%s", content->token->token);
     }
 }
@@ -947,6 +947,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 
     memset(&compiler, 0, sizeof(LuaSL_compiler));
     compiler.game = game;
+    compiler.ignorableText = eina_strbuf_new();
 
     strncpy(compiler.fileName, script, PATH_MAX - 1);
     compiler.fileName[PATH_MAX - 1] = '\0';
