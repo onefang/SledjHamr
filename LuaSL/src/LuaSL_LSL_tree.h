@@ -179,7 +179,7 @@ struct _LSL_Leaf
     LSL_Leaf		*right;
     LSL_Token		*token;
     char		*ignorableText;
-    int 		line, column;
+    int 		line, column, len;
     opType		basicType;
     union
     {
