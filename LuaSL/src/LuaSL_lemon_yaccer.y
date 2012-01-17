@@ -162,8 +162,8 @@ expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
 expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
 
 // Hmm think this can have commas seperating the assignment parts.
-statement(A) ::= type(B) identifier(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
-statement(A) ::= type(B) identifier(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
+statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
+statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
 
 %right LSL_DOT LSL_IDENTIFIER.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
