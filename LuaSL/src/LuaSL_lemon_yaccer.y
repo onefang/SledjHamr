@@ -23,7 +23,7 @@ program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  p
 // Basic script structure.
 
 %nonassoc LSL_SCRIPT.
-script ::= script state.
+script ::= script state(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= script function(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= .
@@ -32,7 +32,7 @@ script ::= .
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
 stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
-state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(param, I->value.stringValue, B); }
+state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(param, I, B); }
 
 // Function definitions.
 

@@ -15,6 +15,7 @@ static void outputIntegerToken(FILE *file, LSL_Leaf *content);
 static void outputParameterToken(FILE *file, LSL_Leaf *content);
 static void outputParameterListToken(FILE *file, LSL_Leaf *content);
 static void outputParenthesisToken(FILE *file, LSL_Leaf *content);
+static void outputStateToken(FILE *file, LSL_Leaf *content);
 static void outputStatementToken(FILE *file, LSL_Leaf *content);
 static void outputVariableToken(FILE *file, LSL_Leaf *content);
 
@@ -119,7 +120,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputParameterToken, NULL, NULL},
     {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL, NULL},
     {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL, NULL},
-    {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken, NULL, NULL},
     {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL, NULL, NULL},
 
     {LSL_UNKNOWN,		ST_NONE,	"unknown",	LSL_NONE,				NULL, NULL, NULL},
@@ -362,19 +363,21 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
     return lval;
 }
 
-LSL_Leaf *addState(LuaSL_yyparseParam *param, char *name, LSL_Leaf *state)
+LSL_Leaf *addState(LuaSL_yyparseParam *param, LSL_Leaf *identifier, LSL_Leaf *block)
 {
     LSL_State *result = calloc(1, sizeof(LSL_State));
 
-    if (result)
+    if ((identifier) && (result))
     {
-	result->name = name;
+	result->name = identifier->value.stringValue;
+	result->block = block;
+	identifier->value.stateValue = result;
 	param->script.scount++;
 	param->script.states = realloc(param->script.states, param->script.scount * sizeof(LSL_State *));
 	param->script.states[param->script.scount - 1] = result;
     }
 
-    return state;
+    return identifier;
 }
 
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
@@ -826,6 +829,17 @@ static void outputParenthesisToken(FILE *file, LSL_Leaf *content)
 	fprintf(file, "%s", content->token->token);
 	outputLeaf(file, content->value.parenthesis->contents);
 	outputLeaf(file, content->value.parenthesis->right);
+    }
+}
+
+static void outputStateToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_State *state = content->value.stateValue;
+
+	fprintf(file, "%s", state->name);
+	outputLeaf(file, state->block);
     }
 }
 
