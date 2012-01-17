@@ -209,6 +209,27 @@ void burnLeaf(void *data)
     }
 }
 
+
+static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
+{
+    LSL_Block *block = compiler->currentBlock;
+    LSL_Leaf  *var = NULL;
+
+    if (name)
+    {
+	while ((block) && (NULL == var))
+	{
+	    if (block->variables)
+		var = eina_hash_find(block->variables, name);
+	    block = block->outerBlock;
+	}
+	if (NULL == var)
+	    var = eina_hash_find(compiler->script.variables, name);
+    }
+
+    return var;
+}
+
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
     gameGlobals *game = compiler->game;
