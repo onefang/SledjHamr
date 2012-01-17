@@ -24,7 +24,7 @@ program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = compiler->ast;
 
 %nonassoc LSL_SCRIPT.
 script ::= script state(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
-script ::= script function(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
+script ::= script functionBody(A).						{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
 script ::= script statement(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
 script ::= .
 
@@ -37,16 +37,18 @@ state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(compiler, I, B)
 // Function definitions.
 
 %nonassoc LSL_PARAMETER LSL_PARAMETER_LIST LSL_FUNCTION.
-functionList ::= functionList function.
+functionList ::= functionList functionBody.
 functionList ::= .
 
-parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(B, C, D); }
-parameterList(A) ::= parameter(D).						{ A = collectParameters(NULL, NULL, D); }
-parameterList(A) ::= .								{ A = collectParameters(NULL, NULL, NULL); }
-parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(B, C); }
+functionBody(A) ::= function(B) funcBlock(C).					{ A = addFunctionBody(compiler, B, C); }
+
+parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(compiler, B, C, D); }
+parameterList(A) ::= parameter(D).						{ A = collectParameters(compiler, NULL, NULL, D); }
+parameterList(A) ::= .								{ A = collectParameters(compiler, NULL, NULL, NULL); }
+parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(compiler, B, C); }
 // Causes a conflict when it's an empty parameterList with calling the same type of function.
-function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(compiler, NULL, C, D, E, F, G); }
-function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(compiler, B, C, D, E, F, G); }
+function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F).		{ A = addFunction(compiler, NULL, C, D, E, F); }
+function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F).	{ A = addFunction(compiler, B, C, D, E, F); }
 
 // Blocks.
 

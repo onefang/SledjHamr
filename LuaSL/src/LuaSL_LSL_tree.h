@@ -225,6 +225,7 @@ struct _LSL_Block
     LSL_Block		*outerBlock;
 //    Eina_Hash		*statements;	// Probably should be some sort of eina list.
     Eina_Hash		*variables;	// Those variables in this scope.
+    LSL_Function	*function;
 };
 
 struct _LSL_Function
@@ -232,6 +233,7 @@ struct _LSL_Function
     const char	*name;
     LSL_Leaf	*type;
     LSL_Leaf	*params;
+    Eina_Hash	*variables;
     LSL_Leaf	*block;
 };
 
@@ -255,18 +257,18 @@ struct _LSL_Script
 
 typedef struct
 {
-    gameGlobals *game;
-    void	*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
-    int		argc;
-    char	**argv;
-    char	fileName[PATH_MAX];
-    FILE	*file;
-    LSL_Leaf	*ast;
-    LSL_Script	script;
-    Eina_Strbuf	*ignorableText;
-    LSL_Leaf	*lval;
-    int		column, line;
-    LSL_Block	*currentBlock;
+    gameGlobals		*game;
+    void		*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
+    int			argc;
+    char		**argv;
+    char		fileName[PATH_MAX];
+    FILE		*file;
+    LSL_Leaf		*ast;
+    LSL_Script		script;
+    Eina_Strbuf		*ignorableText;
+    LSL_Leaf		*lval;
+    int			column, line;
+    LSL_Block		*currentBlock;
 } LuaSL_compiler;
 
 
@@ -276,9 +278,10 @@ typedef struct
 
 
 void burnLeaf(void *data);
-LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
+LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
+LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block);
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
-LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *newParam);
+LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
 LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *block);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
@@ -287,7 +290,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
-LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
+LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));

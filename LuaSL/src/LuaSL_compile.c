@@ -219,10 +219,13 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 
 	while ((block) && (NULL == var))
 	{
-	    if (block->variables)
+	    if (block->function)
+		var = eina_hash_find(block->function->variables, name);
+	    if ((NULL == var) && block->variables)
 		var = eina_hash_find(block->variables, name);
 	    block = block->outerBlock;
 	}
+
 	if (NULL == var)
 	    var = eina_hash_find(compiler->script.variables, name);
     }
@@ -351,7 +354,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
     return lval;
 }
 
-LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *identifier)
+LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier)
 {
     LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));
 
@@ -370,7 +373,7 @@ LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *identifier)
     return identifier;
 }
 
-LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
+LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
 {
     LSL_Leaf *newList = newLeaf(LSL_PARAMETER_LIST, NULL, NULL);
 
@@ -379,15 +382,13 @@ LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
 	newList->left = list;
 	newList->value.listValue = newParam;
 	if ((list) && (list->value.listValue))
-	{
 	    list->value.listValue->right = comma;
-	}
     }
 
     return newList;
 }
 
-LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
+LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
 {
     LSL_Function *func = calloc(1, sizeof(LSL_Function));
 
@@ -398,17 +399,38 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    func->name = identifier->value.stringValue;
 	    identifier->token = tokens[LSL_FUNCTION - lowestToken];
 	    identifier->value.functionValue = func;
-	    identifier->value.functionValue->block = block;
 	    func->type = type;
 	    if (type)
 		identifier->basicType = type->basicType;
 	    else
 		identifier->basicType = OT_nothing;
-	    func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
 	    eina_hash_add(compiler->script.functions, func->name, identifier);
+	    func->variables = eina_hash_stringshared_new(burnLeaf);
+	    func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
+	    while (params)
+	    {
+		if (params->value.listValue)
+		{
+		    LSL_Identifier *identifier = params->value.listValue->value.identifierValue;
+
+		    if (identifier)
+			eina_hash_add(func->variables, identifier->name, identifier);
+		}
+		params = params->left;
+	    }
+	    if (compiler->currentBlock)
+		compiler->currentBlock->function = func;
 	}
     }
     return identifier;
+}
+
+LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block)
+{
+    if (function)
+	function->value.functionValue->block = block;
+
+    return function;
 }
 
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
@@ -514,7 +536,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 {
-    LSL_Block *blok = malloc(sizeof(LSL_Block));
+    LSL_Block *blok = calloc(1, sizeof(LSL_Block));
 
     if (blok)
     {
