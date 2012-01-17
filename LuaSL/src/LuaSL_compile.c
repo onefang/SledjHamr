@@ -201,14 +201,13 @@ void burnLeaf(void *data)
     LSL_Leaf *leaf = data;
     if (leaf)
     {
-	burnLeaf(leaf->left);
-	burnLeaf(leaf->right);
+//	burnLeaf(leaf->left);
+//	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
-	eina_strbuf_free(leaf->ignorableText);
-	free(leaf);
+//	eina_strbuf_free(leaf->ignorableText);
+//	free(leaf);
     }
 }
-
 
 static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 {
