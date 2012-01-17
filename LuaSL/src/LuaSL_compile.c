@@ -209,9 +209,9 @@ void burnLeaf(LSL_Leaf *leaf)
     }
 }
 
-LSL_Leaf *addOperation(LuaSL_yyparseParam *param, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
+LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
     if (lval)
     {
@@ -372,7 +372,7 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
     return lval;
 }
 
-LSL_Leaf *addState(LuaSL_yyparseParam *param, LSL_Leaf *identifier, LSL_Leaf *block)
+LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *block)
 {
     LSL_State *result = calloc(1, sizeof(LSL_State));
 
@@ -381,9 +381,9 @@ LSL_Leaf *addState(LuaSL_yyparseParam *param, LSL_Leaf *identifier, LSL_Leaf *bl
 	result->name = identifier->value.stringValue;
 	result->block = block;
 	identifier->value.stateValue = result;
-	param->script.scount++;
-	param->script.states = realloc(param->script.states, param->script.scount * sizeof(LSL_State *));
-	param->script.states[param->script.scount - 1] = result;
+	compiler->script.scount++;
+	compiler->script.states = realloc(compiler->script.states, compiler->script.scount * sizeof(LSL_State *));
+	compiler->script.states[compiler->script.scount - 1] = result;
     }
 
     return identifier;
@@ -429,7 +429,7 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
     return lval;
 }
 
-LSL_Leaf *addVariable(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr)
+LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr)
 {
     LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));
 
@@ -446,38 +446,38 @@ LSL_Leaf *addVariable(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *ident
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
 	}
-	if (param->currentBlock)
+	if (compiler->currentBlock)
 	{
-	    param->currentBlock->vcount++;
-	    param->currentBlock->variables = realloc(param->currentBlock->variables, param->currentBlock->vcount * sizeof(LSL_Identifier *));
-	    param->currentBlock->variables[param->currentBlock->vcount - 1] = result;
+	    compiler->currentBlock->vcount++;
+	    compiler->currentBlock->variables = realloc(compiler->currentBlock->variables, compiler->currentBlock->vcount * sizeof(LSL_Identifier *));
+	    compiler->currentBlock->variables[compiler->currentBlock->vcount - 1] = result;
 	}
 	else
 	{
-	    param->script.vcount++;
-	    param->script.variables = realloc(param->script.variables, param->script.vcount * sizeof(LSL_Identifier *));
-	    param->script.variables[param->script.vcount - 1] = result;
+	    compiler->script.vcount++;
+	    compiler->script.variables = realloc(compiler->script.variables, compiler->script.vcount * sizeof(LSL_Identifier *));
+	    compiler->script.variables[compiler->script.vcount - 1] = result;
 	}
     }
 
     return identifier;
 }
 
-void beginBlock(LuaSL_yyparseParam *param, LSL_Leaf *block)
+void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 {
     LSL_Block *blok = malloc(sizeof(LSL_Block));
 
     if (blok)
     {
 	block->value.blockValue = blok;
-	blok->outerBlock = param->currentBlock;
-	param->currentBlock = blok;
+	blok->outerBlock = compiler->currentBlock;
+	compiler->currentBlock = blok;
     }
 }
 
-void endBlock(LuaSL_yyparseParam *param, LSL_Leaf *block)
+void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 {
-    param->currentBlock = param->currentBlock->outerBlock;
+    compiler->currentBlock = compiler->currentBlock->outerBlock;
 }
 
 static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
@@ -869,33 +869,33 @@ static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s", content->value.variableValue->name);
 }
 
-static void doneParsing(LuaSL_yyparseParam *param)
+static void doneParsing(LuaSL_compiler *compiler)
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
-    if (param->ast)
+    if (compiler->ast)
     {
 	FILE *out;
 	char buffer[PATH_MAX];
 	char outName[PATH_MAX];
 	char luaName[PATH_MAX];
 
-	outputLeaf(stdout, OM_LSL, param->ast);
+	outputLeaf(stdout, OM_LSL, compiler->ast);
 	printf("\n");
-	evaluateLeaf(param->ast, NULL, NULL);
+	evaluateLeaf(compiler->ast, NULL, NULL);
 	printf("\n");
 
-	strcpy(outName, param->fileName);
+	strcpy(outName, compiler->fileName);
 	strcat(outName, "2");
-	strcpy(luaName, param->fileName);
+	strcpy(luaName, compiler->fileName);
 	strcat(luaName, ".lua");
 	out = fopen(outName, "w");
 	if (out)
 	{
 //	    int count;
-	    outputLeaf(out, OM_LSL, param->ast);
+	    outputLeaf(out, OM_LSL, compiler->ast);
 	    fclose(out);
-	    sprintf(buffer, "diff %s %s", param->fileName, outName);
+	    sprintf(buffer, "diff %s %s", compiler->fileName, outName);
 //	    count = system(buffer);
 //	    PI("Return value of %s is %d", buffer, count);
 //	    if (0 != count)
@@ -906,7 +906,7 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	out = fopen(luaName, "w");
 	if (out)
 	{
-	    outputLeaf(out, OM_LUA, param->ast);
+	    outputLeaf(out, OM_LUA, compiler->ast);
 	    fclose(out);
 	}
 	else
@@ -945,57 +945,56 @@ Eina_Bool compilerSetup(gameGlobals *game)
 Eina_Bool compileLSL(gameGlobals *game, char *script)
 {
     Eina_Bool result = EINA_FALSE;
-    LuaSL_yyparseParam param;
+    LuaSL_compiler compiler;
     void *pParser = ParseAlloc(malloc);
     int yv;
 
 // Parse the  LSL script, validating it and reporting errors.
 //   Just pass all constants and function names through to Lua, assume they are globals there.
 
-    memset(&param, 0, sizeof(LuaSL_yyparseParam));
-    param.game = game;
+    memset(&compiler, 0, sizeof(LuaSL_compiler));
+    compiler.game = game;
 
-
-    strncpy(param.fileName, script, PATH_MAX - 1);
-    param.fileName[PATH_MAX - 1] = '\0';
-    param.file = fopen(param.fileName, "r");
-    if (NULL == param.file)
+    strncpy(compiler.fileName, script, PATH_MAX - 1);
+    compiler.fileName[PATH_MAX - 1] = '\0';
+    compiler.file = fopen(compiler.fileName, "r");
+    if (NULL == compiler.file)
     {
-	PE("Error opening file %s.", param.fileName);
+	PE("Error opening file %s.", compiler.fileName);
 	return FALSE;
     }
-    PI("Opened %s.", param.fileName);
-    param.ast = NULL;
-    param.lval = calloc(1, sizeof(LSL_Leaf));
+    PI("Opened %s.", compiler.fileName);
+    compiler.ast = NULL;
+    compiler.lval = calloc(1, sizeof(LSL_Leaf));
     // Text editors usually start counting at 1, even programmers editors.
-    param.column = 1;
-    param.line = 1;
+    compiler.column = 1;
+    compiler.line = 1;
 
 #ifdef LUASL_DEBUG
 //    yydebug= 5;
 #endif
-    if (yylex_init_extra(&param, &(param.scanner)))
+    if (yylex_init_extra(&compiler, &(compiler.scanner)))
 	return result;
 #ifdef LUASL_DEBUG
-    yyset_debug(1, param.scanner);
+    yyset_debug(1, compiler.scanner);
 #endif
-    yyset_in(param.file, param.scanner);
+    yyset_in(compiler.file, compiler.scanner);
 #ifdef LUASL_DEBUG
     ParseTrace(stdout, "LSL_lemon ");
 #endif
     // on EOF yylex will return 0
-    while((yv = yylex(param.lval, param.scanner)) != 0)
+    while((yv = yylex(compiler.lval, compiler.scanner)) != 0)
     {
-	Parse(pParser, yv, param.lval, &param);
+	Parse(pParser, yv, compiler.lval, &compiler);
 	if (LSL_SCRIPT == yv)
 	    break;
-	param.lval = calloc(1, sizeof(LSL_Leaf));
+	compiler.lval = calloc(1, sizeof(LSL_Leaf));
     }
 
-    yylex_destroy(param.scanner);
-    Parse (pParser, 0, param.lval, &param);
+    yylex_destroy(compiler.scanner);
+    Parse (pParser, 0, compiler.lval, &compiler);
     ParseFree(pParser, free);
-    doneParsing(&param);
+    doneParsing(&compiler);
 
 // Take the result of the parse, and convert it into Lua source.
 //   Each LSL script becomes a Lua state.
@@ -1004,12 +1003,12 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 
 // Compile the Lua source by the Lua compiler.
 
-    if (NULL != param.file)
+    if (NULL != compiler.file)
     {
-	fclose(param.file);
-	param.file = NULL;
+	fclose(compiler.file);
+	compiler.file = NULL;
     }
-    burnLeaf(param.ast);
+    burnLeaf(compiler.ast);
 
     return result;
 }

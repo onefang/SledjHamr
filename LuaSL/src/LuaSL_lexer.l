@@ -3,7 +3,7 @@
 #define excludeLexer
 #include "LuaSL.h"
 
-int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type);
+int common(YYSTYPE *lval, char *text, LuaSL_compiler *compiler, boolean checkIgnorable, int type);
 
 %}
 
@@ -12,7 +12,7 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIg
 %option noreject noyymore
 %option backup debug perf-report perf-report verbose warn
 %option align full
-%option extra-type="LuaSL_yyparseParam *"
+%option extra-type="LuaSL_compiler *"
 
 HEX         [[:xdigit:]]
 DECIMAL     [[:digit:]]
@@ -113,7 +113,7 @@ STRING      \"(\\.|[^\\"\n])*\"
 
 %%
 
-int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type)
+int common(YYSTYPE *lval, char *text, LuaSL_compiler *compiler, boolean checkIgnorable, int type)
 {
     char *p;
 
@@ -121,33 +121,33 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIg
     {
 	if ('\n' == *p)
 	{
-	    param->line++;
-	    param->column = 1;
+	    compiler->line++;
+	    compiler->column = 1;
 	}
 	else
-	    param->column++;
+	    compiler->column++;
     }
     lval->token = tokens[type - lowestToken];
-    lval->line = param->line;
-    lval->column = param->column;
+    lval->line = compiler->line;
+    lval->column = compiler->column;
 
     if (checkIgnorable)
     {
-	lval->ignorableText = param->ignorableText;
-	param->ignorableText = NULL;
+	lval->ignorableText = compiler->ignorableText;
+	compiler->ignorableText = NULL;
     }
     else
     {
-	if (param->ignorableText)
+	if (compiler->ignorableText)
 	{
-	    int lenI = strlen(param->ignorableText);
+	    int lenI = strlen(compiler->ignorableText);
 	    int lenT = strlen(text);
 
-	    param->ignorableText = realloc(param->ignorableText, lenI + lenT + 1);
-	    sprintf(&(param->ignorableText[lenI]), "%s", text);
+	    compiler->ignorableText = realloc(compiler->ignorableText, lenI + lenT + 1);
+	    sprintf(&(compiler->ignorableText[lenI]), "%s", text);
 	}
 	else
-	    param->ignorableText = strdup(text);
+	    compiler->ignorableText = strdup(text);
     }
 
     return type;

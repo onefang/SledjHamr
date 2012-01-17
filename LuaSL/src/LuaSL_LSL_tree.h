@@ -1,6 +1,6 @@
 
-#ifndef __LSL_TREE_H__
-#define __LSL_TREE_H__
+#ifndef __LUASL_TREE_H__
+#define __LUASL_TREE_H__
 
 //#define LUASL_DEBUG
 
@@ -289,7 +289,7 @@ typedef struct
     LSL_Leaf	*lval;
     int		column, line;
     LSL_Block	*currentBlock;
-} LuaSL_yyparseParam;
+} LuaSL_compiler;
 
 
 #ifndef excludeLexer
@@ -299,23 +299,23 @@ typedef struct
 
 void burnLeaf(LSL_Leaf *leaf);
 LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
-LSL_Leaf *addOperation(LuaSL_yyparseParam *param, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
+LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
-LSL_Leaf *addState(LuaSL_yyparseParam *param, LSL_Leaf *identifier, LSL_Leaf *block);
+LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *block);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr);
-LSL_Leaf *addVariable(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
+LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
 
-void beginBlock(LuaSL_yyparseParam *param, LSL_Leaf *block);
+void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
-void endBlock(LuaSL_yyparseParam *param, LSL_Leaf *block);
+void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
-void Parse(void *yyp, int yymajor, LSL_Leaf *yyminor, LuaSL_yyparseParam *param);
+void Parse(void *yyp, int yymajor, LSL_Leaf *yyminor, LuaSL_compiler *compiler);
 void ParseFree(void *p, void (*freeProc)(void*));
 
 
-#endif // __LSL_TREE_H__
+#endif // __LUASL_LSL_TREE_H__
 

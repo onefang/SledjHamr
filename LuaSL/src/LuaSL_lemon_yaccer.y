@@ -2,7 +2,7 @@
 #include "LuaSL.h"
 }
 
-%extra_argument {LuaSL_yyparseParam *param}
+%extra_argument {LuaSL_compiler *compiler}
 
 %stack_size 1024
 
@@ -14,7 +14,7 @@
 // The start symbol, just coz we need one.
 
 // Lemon does not like the start symbol to be on the RHS, so give it a dummy start symbol.
-program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  param->ast = A; }
+program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
 
 // Various forms of "space".  The lexer takes care of them for us.
 
@@ -23,16 +23,16 @@ program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  p
 // Basic script structure.
 
 %nonassoc LSL_SCRIPT.
-script ::= script state(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
-script ::= script function(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
-script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
+script ::= script state(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
+script ::= script function(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
+script ::= script statement(A).							{ if (NULL != A) A->left = compiler->ast;  compiler->ast = A; }
 script ::= .
 
 // State definitions.
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
 stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
-state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(param, I, B); }
+state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(compiler, I, B); }
 
 // Function definitions.
 
@@ -89,40 +89,40 @@ exprList ::= expr.
 exprList ::= .
 
 %right  LSL_BOOL_AND.
-expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 %right  LSL_BOOL_OR.
-expr(A) ::= expr(B) LSL_BOOL_OR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_BOOL_OR(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 
 %left  LSL_BIT_AND LSL_BIT_XOR LSL_BIT_OR.
-expr(A) ::= expr(B) LSL_BIT_OR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_BIT_XOR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_BIT_AND(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_OR(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_XOR(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_AND(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 
 %right  LSL_EQUAL LSL_NOT_EQUAL.
-expr(A) ::= expr(B) LSL_NOT_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_NOT_EQUAL(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_EQUAL(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 %right  LSL_LESS_THAN LSL_GREATER_THAN LSL_LESS_EQUAL LSL_GREATER_EQUAL.
-expr(A) ::= expr(B) LSL_GREATER_EQUAL(C)	expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_LESS_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_GREATER_THAN(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_LESS_THAN(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_GREATER_EQUAL(C)	expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_LESS_EQUAL(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_GREATER_THAN(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_LESS_THAN(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 
 %left  LSL_LEFT_SHIFT LSL_RIGHT_SHIFT.
-expr(A) ::= expr(B) LSL_RIGHT_SHIFT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_LEFT_SHIFT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_RIGHT_SHIFT(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_LEFT_SHIFT(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 
 %left  LSL_SUBTRACT LSL_ADD LSL_CONCATENATE.
-expr(A) ::= expr(B) LSL_ADD(C)			expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_SUBTRACT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_ADD(C)			expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_SUBTRACT(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 %left  LSL_DIVIDE LSL_MODULO LSL_MULTIPLY LSL_DOT_PRODUCT LSL_CROSS_PRODUCT.
-expr(A) ::= expr(B) LSL_MULTIPLY(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_MODULO(C)		expr(D).			{ A = addOperation(param, B, C, D); }
-expr(A) ::= expr(B) LSL_DIVIDE(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_MULTIPLY(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_MODULO(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= expr(B) LSL_DIVIDE(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
 
 %right LSL_BIT_NOT LSL_BOOL_NOT LSL_NEGATION.
-expr(A) ::= LSL_BIT_NOT(B)			expr(C).			{ A = addOperation(param, NULL, B, C); }
-expr(A) ::= LSL_BOOL_NOT(B)			expr(C).			{ A = addOperation(param, NULL, B, C); }
-expr(A) ::= LSL_SUBTRACT(B)			expr(C).	[LSL_NEGATION]	{ A = addOperation(param, NULL, B, C); }
+expr(A) ::= LSL_BIT_NOT(B)			expr(C).			{ A = addOperation(compiler, NULL, B, C); }
+expr(A) ::= LSL_BOOL_NOT(B)			expr(C).			{ A = addOperation(compiler, NULL, B, C); }
+expr(A) ::= LSL_SUBTRACT(B)			expr(C).	[LSL_NEGATION]	{ A = addOperation(compiler, NULL, B, C); }
 
 // Types, typecasts, and expression reordering.
 
@@ -162,8 +162,8 @@ expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
 expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
 
 // Hmm think this can have commas seperating the assignment parts.
-statement(A) ::= type(B) identifier(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(param, B, C, D, E)); }
-statement(A) ::= type(B) identifier(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(param, B, C, NULL, NULL)); }
+statement(A) ::= type(B) identifier(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
+statement(A) ::= type(B) identifier(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
 
 %right LSL_DOT LSL_IDENTIFIER.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
@@ -200,28 +200,28 @@ expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.			[L
 
 %parse_accept
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
     PI("Parsing complete.");
 }
 
 %parse_failure
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
     PE("Giving up.  Parser is hopelessly lost!");
 }
 
 %stack_overflow
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
     PE("Giving up.  Parser stack overflow @ line %04d column %04d.", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
 }
 
 %syntax_error
 {
-    gameGlobals *game = param->game;
+    gameGlobals *game = compiler->game;
 
     PE("Syntax error @ line %04d column %04d.", yyminor.yy0->line, yyminor.yy0->column);
 }
