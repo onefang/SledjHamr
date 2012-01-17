@@ -276,7 +276,16 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 	    }
 	}
 	if (OT_invalid == lval->basicType)
-	    fprintf(stderr, "Invalid operation [%s] type at line %d column %d\n", lval->token->token, lval->line, lval->column);
+	{
+	    if ((left) && (right))
+		fprintf(stderr, "Invalid operation [%s %s %s] type at line %d column %d\n", left->token->token, lval->token->token, right->token->token, lval->line, lval->column);
+	    else if (left)
+		fprintf(stderr, "Invalid operation [%s %s] type at line %d column %d\n", left->token->token, lval->token->token, lval->line, lval->column);
+	    else if (left)
+		fprintf(stderr, "Invalid operation [%s %s] type at line %d column %d\n", lval->token->token, right->token->token, lval->line, lval->column);
+	    else
+		fprintf(stderr, "Invalid operation [%s] type at line %d column %d\n", lval->token->token, lval->line, lval->column);
+	}
     }
 
     return lval;
