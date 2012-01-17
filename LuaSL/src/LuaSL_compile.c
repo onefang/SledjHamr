@@ -212,11 +212,12 @@ void burnLeaf(void *data)
 
 static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 {
-    LSL_Block *block = compiler->currentBlock;
     LSL_Leaf  *var = NULL;
 
     if (name)
     {
+	LSL_Block *block = compiler->currentBlock;
+
 	while ((block) && (NULL == var))
 	{
 	    if (block->variables)

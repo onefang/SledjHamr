@@ -225,7 +225,6 @@ struct _LSL_Block
     LSL_Block		*outerBlock;
 //    Eina_Hash		*statements;	// Probably should be some sort of eina list.
     Eina_Hash		*variables;	// Those variables in this scope.
-    int			scount;
 };
 
 struct _LSL_Function
