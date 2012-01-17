@@ -9,124 +9,124 @@ static LSL_Leaf *evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *ri
 static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
-static void outputFloatToken(FILE *file, LSL_Leaf *content);
-static void outputFunctionToken(FILE *file, LSL_Leaf *content);
-static void outputIntegerToken(FILE *file, LSL_Leaf *content);
-static void outputParameterToken(FILE *file, LSL_Leaf *content);
-static void outputParameterListToken(FILE *file, LSL_Leaf *content);
-static void outputParenthesisToken(FILE *file, LSL_Leaf *content);
-static void outputStateToken(FILE *file, LSL_Leaf *content);
-static void outputStatementToken(FILE *file, LSL_Leaf *content);
-static void outputVariableToken(FILE *file, LSL_Leaf *content);
+static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputParameterToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
     // Various forms of "space".
-    {LSL_COMMENT,		ST_NONE,		"/*",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_COMMENT_LINE,		ST_NONE,		"//",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_SPACE,			ST_NONE,		" ",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_COMMENT,		ST_NONE,		"/*",	LSL_NONE,				NULL, NULL},
+    {LSL_COMMENT_LINE,		ST_NONE,		"//",	LSL_NONE,				NULL, NULL},
+    {LSL_SPACE,			ST_NONE,		" ",	LSL_NONE,				NULL, NULL},
 
     // Operators, in order of precedence, low to high
     // Left to right, unless otherwise stated.
     // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
-    {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
 // QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
-    {LSL_BOOL_OR,		ST_BOOLEAN,		"||",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_OR,		ST_BITWISE,		"|",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_XOR,		ST_BITWISE,		"^",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_AND,		ST_BITWISE,		"&",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_BOOL_OR,		ST_BOOLEAN,		"||",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_BIT_OR,		ST_BITWISE,		"|",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_BIT_XOR,		ST_BITWISE,		"^",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_BIT_AND,		ST_BITWISE,		"&",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
 // QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
-    {LSL_NOT_EQUAL,		ST_EQUALITY,		"!=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_EQUAL,			ST_EQUALITY,		"==",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_EQUAL,		ST_COMPARISON,		">=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_EQUAL,		ST_COMPARISON,		"<=",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_GREATER_THAN,		ST_COMPARISON,		">",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LESS_THAN,		ST_COMPARISON,		"<",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_CONCATENATE,		ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_ADD,			ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_SUBTRACT,		ST_SUBTRACT,		"-",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_CROSS_PRODUCT,		ST_NONE,		"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_DOT_PRODUCT,		ST_NONE,		"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_MULTIPLY,		ST_MULTIPLY,		"*",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_MODULO,		ST_MODULO,		"%",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_DIVIDE,		ST_MULTIPLY,		"/",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
-    {LSL_NEGATION,		ST_NEGATE,		"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_BOOL_NOT,		ST_BOOL_NOT,		"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_TYPECAST_CLOSE,	ST_NONE,		")",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateNoToken},
-    {LSL_TYPECAST_OPEN,		ST_NONE,		"(",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_ANGLE_CLOSE,		ST_NONE,		">",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateNoToken},
-    {LSL_ANGLE_OPEN,		ST_NONE,		"<",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_BRACKET_CLOSE,		ST_NONE,		"]",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateNoToken},
-    {LSL_BRACKET_OPEN,		ST_NONE,		"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, NULL, evaluateOperationToken},
-    {LSL_PARENTHESIS_CLOSE,	ST_NONE,		")",	LSL_INNER2OUTER,			NULL, NULL, evaluateNoToken},
-    {LSL_PARENTHESIS_OPEN,	ST_NONE,		"(",	LSL_INNER2OUTER,			outputParenthesisToken, NULL, eveluateParenthesisToken},
-    {LSL_ASSIGNMENT_CONCATENATE,ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_ADD,	ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_SUBTRACT,	ST_ASSIGNMENT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MULTIPLY,	ST_ASSIGNMENT,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MODULO,	ST_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, NULL, evaluateOperationToken},
-    {LSL_DOT,			ST_NONE,		".",	LSL_RIGHT2LEFT,				NULL, NULL, evaluateOperationToken},
-    {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_INCREMENT_POST,	ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_INCREMENT_PRE,		ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, NULL, evaluateOperationToken},
-    {LSL_COMMA,			ST_NONE,		",",	LSL_LEFT2RIGHT,				NULL, NULL, evaluateOperationToken},
+    {LSL_NOT_EQUAL,		ST_EQUALITY,		"!=",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_EQUAL,			ST_EQUALITY,		"==",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_GREATER_EQUAL,		ST_COMPARISON,		">=",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_LESS_EQUAL,		ST_COMPARISON,		"<=",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_GREATER_THAN,		ST_COMPARISON,		">",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_LESS_THAN,		ST_COMPARISON,		"<",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_CONCATENATE,		ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_ADD,			ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_SUBTRACT,		ST_SUBTRACT,		"-",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_CROSS_PRODUCT,		ST_NONE,		"%",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_DOT_PRODUCT,		ST_NONE,		"*",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_MULTIPLY,		ST_MULTIPLY,		"*",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_MODULO,		ST_MODULO,		"%",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_DIVIDE,		ST_MULTIPLY,		"/",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_NEGATION,		ST_NEGATE,		"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_BOOL_NOT,		ST_BOOL_NOT,		"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_TYPECAST_CLOSE,	ST_NONE,		")",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateNoToken},
+    {LSL_TYPECAST_OPEN,		ST_NONE,		"(",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_ANGLE_CLOSE,		ST_NONE,		">",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, evaluateNoToken},
+    {LSL_ANGLE_OPEN,		ST_NONE,		"<",	LSL_LEFT2RIGHT | LSL_CREATION,		NULL, evaluateOperationToken},
+    {LSL_BRACKET_CLOSE,		ST_NONE,		"]",	LSL_INNER2OUTER | LSL_CREATION,		NULL, evaluateNoToken},
+    {LSL_BRACKET_OPEN,		ST_NONE,		"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, evaluateOperationToken},
+    {LSL_PARENTHESIS_CLOSE,	ST_NONE,		")",	LSL_INNER2OUTER,			NULL, evaluateNoToken},
+    {LSL_PARENTHESIS_OPEN,	ST_NONE,		"(",	LSL_INNER2OUTER,			outputParenthesisToken, eveluateParenthesisToken},
+    {LSL_ASSIGNMENT_CONCATENATE,ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_ADD,	ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_SUBTRACT,	ST_ASSIGNMENT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MULTIPLY,	ST_ASSIGNMENT,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MODULO,	ST_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_DOT,			ST_NONE,		".",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
+    {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_INCREMENT_POST,	ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_INCREMENT_PRE,		ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_COMMA,			ST_NONE,		",",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
 
-    {LSL_EXPRESSION,		ST_NONE,	"expression",	LSL_NONE	,			NULL, NULL, NULL},
+    {LSL_EXPRESSION,		ST_NONE,	"expression",	LSL_NONE	,			NULL, NULL},
 
     // Types.
-    {LSL_FLOAT,			ST_NONE,	"float",	LSL_NONE,				outputFloatToken, NULL, evaluateFloatToken},
-    {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, NULL, evaluateIntegerToken},
-    {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_FLOAT,			ST_NONE,	"float",	LSL_NONE,				outputFloatToken, evaluateFloatToken},
+    {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, evaluateIntegerToken},
+    {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				NULL, NULL},
+    {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				NULL, NULL},
+    {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
+    {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL},
+    {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Types names.
-    {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_KEY,		ST_NONE,	"key",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_LIST,		ST_NONE,	"list",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_KEY,		ST_NONE,	"key",		LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_LIST,		ST_NONE,	"list",		LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Then the rest of the syntax tokens.
-    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputVariableToken, NULL, NULL},
+    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputVariableToken, NULL},
 
-    {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL},
 
-    {LSL_DO,			ST_NONE,	"do",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_FOR,			ST_NONE,	"for",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_ELSE_IF,		ST_NONE,	"else if",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_ELSE,			ST_NONE,	"else",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_IF,			ST_NONE,	"if",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_JUMP,			ST_NONE,	"jump",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_RETURN,		ST_NONE,	"return",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_STATE_CHANGE,		ST_NONE,	"state",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_WHILE,			ST_NONE,	"while",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_STATEMENT,		ST_NONE,	";",		LSL_NOIGNORE,				outputStatementToken, NULL, evaluateStatementToken},
+    {LSL_DO,			ST_NONE,	"do",		LSL_NONE,				NULL, NULL},
+    {LSL_FOR,			ST_NONE,	"for",		LSL_NONE,				NULL, NULL},
+    {LSL_ELSE_IF,		ST_NONE,	"else if",	LSL_NONE,				NULL, NULL},
+    {LSL_ELSE,			ST_NONE,	"else",		LSL_NONE,				NULL, NULL},
+    {LSL_IF,			ST_NONE,	"if",		LSL_NONE,				NULL, NULL},
+    {LSL_JUMP,			ST_NONE,	"jump",		LSL_NONE,				NULL, NULL},
+    {LSL_RETURN,		ST_NONE,	"return",	LSL_NONE,				NULL, NULL},
+    {LSL_STATE_CHANGE,		ST_NONE,	"state",	LSL_NONE,				NULL, NULL},
+    {LSL_WHILE,			ST_NONE,	"while",	LSL_NONE,				NULL, NULL},
+    {LSL_STATEMENT,		ST_NONE,	";",		LSL_NOIGNORE,				outputStatementToken, evaluateStatementToken},
 
-    {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputParameterToken, NULL, NULL},
-    {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL, NULL},
-    {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL, NULL},
-    {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken, NULL, NULL},
-    {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL, NULL, NULL},
+    {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL},
+    {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL},
+    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputParameterToken, NULL},
+    {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL},
+    {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL},
+    {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken, NULL},
+    {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL,  NULL},
 
-    {LSL_UNKNOWN,		ST_NONE,	"unknown",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_UNKNOWN,		ST_NONE,	"unknown",	LSL_NONE,				NULL, NULL},
 
     // A sentinal.
-    {999999, ST_NONE, NULL, LSL_NONE, NULL, NULL, NULL}
+    {999999, ST_NONE, NULL, LSL_NONE, NULL, NULL}
 };
 
 allowedTypes allowed[] = 
@@ -770,112 +770,94 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
     return result;
 }
 
-static void outputLeaf(FILE *file, LSL_Leaf *leaf)
+static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	outputLeaf(file, leaf->left);
+	outputLeaf(file, mode, leaf->left);
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
 	    fprintf(file, "%s", leaf->ignorableText);
 	if (leaf->token->output)
-	    leaf->token->output(file, leaf);
+	    leaf->token->output(file, mode, leaf);
 	else
 	    fprintf(file, "%s", leaf->token->token);
-	outputLeaf(file, leaf->right);
+	outputLeaf(file, mode, leaf->right);
     }
 }
 
-static void outputFloatToken(FILE *file, LSL_Leaf *content)
+static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%g", content->value.floatValue);
 }
 
-static void outputFunctionToken(FILE *file, LSL_Leaf *content)
+static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
 	LSL_Function *func = content->value.functionValue;
 
-	outputLeaf(file, func->type);
+	outputLeaf(file, mode, func->type);
 	fprintf(file, "%s", func->name);
-	outputLeaf(file, func->params);
-	outputLeaf(file, func->block);
+	outputLeaf(file, mode, func->params);
+	outputLeaf(file, mode, func->block);
     }
 }
 
-static void outputIntegerToken(FILE *file, LSL_Leaf *content)
+static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%d", content->value.integerValue);
 }
 
-static void outputParameterToken(FILE *file, LSL_Leaf *content)
+static void outputParameterToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%s", content->value.parameterValue->name);
 }
 
-static void outputParameterListToken(FILE *file, LSL_Leaf *content)
+static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	outputLeaf(file, content->value.listValue);
+	outputLeaf(file, mode, content->value.listValue);
 }
 
-static void outputParenthesisToken(FILE *file, LSL_Leaf *content)
+static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
 	fprintf(file, "%s", content->token->token);
-	outputLeaf(file, content->value.parenthesis->contents);
-	outputLeaf(file, content->value.parenthesis->right);
+	outputLeaf(file, mode, content->value.parenthesis->contents);
+	outputLeaf(file, mode, content->value.parenthesis->right);
     }
 }
 
-static void outputStateToken(FILE *file, LSL_Leaf *content)
+static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
 	LSL_State *state = content->value.stateValue;
 
 	fprintf(file, "%s", state->name);
-	outputLeaf(file, state->block);
+	outputLeaf(file, mode, state->block);
     }
 }
 
-static void outputStatementToken(FILE *file, LSL_Leaf *content)
+static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
-	outputLeaf(file, content->value.statementValue->expressions);
+	outputLeaf(file, mode, content->value.statementValue->expressions);
 	if (content->ignorableText)
 	    fprintf(file, "%s", content->ignorableText);
 	fprintf(file, "%s", content->token->token);
     }
 }
 
-static void outputVariableToken(FILE *file, LSL_Leaf *content)
+static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%s", content->value.variableValue->name);
-}
-
-
-static void convertLeaf2Lua(FILE *file, LSL_Leaf *leaf)
-{
-    if (leaf)
-    {
-	convertLeaf2Lua(file, leaf->left);
-	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
-	    fprintf(file, "%s", leaf->ignorableText);
-	if (leaf->token->convert)
-	    leaf->token->convert(file, leaf);
-	else if (leaf->token->output)
-	    leaf->token->output(file, leaf);
-	else
-	    fprintf(file, "%s", leaf->token->token);
-	convertLeaf2Lua(file, leaf->right);
-    }
 }
 
 static void doneParsing(LuaSL_yyparseParam *param)
@@ -887,7 +869,7 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	char outName[PATH_MAX];
 	char luaName[PATH_MAX];
 
-	outputLeaf(stdout, param->ast);
+	outputLeaf(stdout, OM_LSL, param->ast);
 	printf("\n");
 	evaluateLeaf(param->ast, NULL, NULL);
 	printf("\n");
@@ -900,7 +882,7 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	if (out)
 	{
 //	    int count;
-	    outputLeaf(out, param->ast);
+	    outputLeaf(out, OM_LSL, param->ast);
 	    fclose(out);
 	    sprintf(buffer, "diff %s %s", param->fileName, outName);
 //	    count = system(buffer);
@@ -913,7 +895,7 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	out = fopen(luaName, "w");
 	if (out)
 	{
-	    convertLeaf2Lua(out, param->ast);
+	    outputLeaf(out, OM_LUA, param->ast);
 	    fclose(out);
 	}
 	else

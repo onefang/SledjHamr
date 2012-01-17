@@ -45,8 +45,13 @@ extern int lowestToken;
 
 typedef int LSL_Type;
 
-typedef void (*convertToken2Lua) (FILE *file, LSL_Leaf *content);
-typedef void (*outputToken) (FILE *file, LSL_Leaf *content);
+typedef enum
+{
+    OM_LSL,
+    OM_LUA
+} outputMode;
+
+typedef void (*outputToken) (FILE *file, outputMode mode, LSL_Leaf *content);
 typedef LSL_Leaf * (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
 #ifndef FALSE
@@ -165,7 +170,6 @@ struct _LSL_Token
     char 		*token;
     LSL_Flags		flags;
     outputToken		output;
-    convertToken2Lua	convert;
     evaluateToken	evaluate;
 };
 
