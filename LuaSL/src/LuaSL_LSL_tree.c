@@ -291,7 +291,7 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
     return lval;
 }
 
-LSL_Leaf *addParameter(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier)
+LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *identifier)
 {
     LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));
 
@@ -310,7 +310,7 @@ LSL_Leaf *addParameter(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *iden
     return identifier;
 }
 
-LSL_Leaf *collectParameters(LuaSL_yyparseParam *param, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
+LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
 {
     LSL_Leaf *newList = newLeaf(LSL_PARAMETER_LIST, NULL, NULL);
 
@@ -327,7 +327,7 @@ LSL_Leaf *collectParameters(LuaSL_yyparseParam *param, LSL_Leaf *list, LSL_Leaf 
     return newList;
 }
 
-LSL_Leaf *addFunction(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
+LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
 {
     LSL_Function *func = calloc(1, sizeof(LSL_Function));
 

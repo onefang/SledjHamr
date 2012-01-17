@@ -40,13 +40,13 @@ state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(param, I, B); }
 functionList ::= functionList function.
 functionList ::= .
 
-parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(param, B, C, D); }
-parameterList(A) ::= parameter(D).						{ A = collectParameters(param, NULL, NULL, D); }
-parameterList(A) ::= .								{ A = collectParameters(param, NULL, NULL, NULL); }
-parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(param, B, C); }
+parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(B, C, D); }
+parameterList(A) ::= parameter(D).						{ A = collectParameters(NULL, NULL, D); }
+parameterList(A) ::= .								{ A = collectParameters(NULL, NULL, NULL); }
+parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(B, C); }
 // Causes a conflict when it's an empty parameterList with calling the same type of function.
-function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(param, NULL, C, D, E, F, G); }
-function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(param, B, C, D, E, F, G); }
+function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(NULL, C, D, E, F, G); }
+function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(B, C, D, E, F, G); }
 
 // Blocks.
 
