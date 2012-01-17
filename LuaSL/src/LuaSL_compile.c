@@ -257,14 +257,14 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    lType = OT_nothing;
 	else
 	{
-//	    if ((LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
-//	    {
-//		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
+	    if ((LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
+	    {
+		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
 
-//		if (var)
-//		    lType = var->basicType;
-//	    }
-//	    else
+		if (var)
+		    lType = var->basicType;
+	    }
+	    else
 		lType = left->basicType;
 	    if (OT_vector < lType)
 		lType = allowed[lType].result;
@@ -273,7 +273,15 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    rType = OT_nothing;
 	else
 	{
-	    rType = right->basicType;
+	    if ((LSL_IDENTIFIER == right->token->type) && (right->value.identifierValue))
+	    {
+		LSL_Leaf *var = findVariable(compiler, right->value.identifierValue->name);
+
+		if (var)
+		    rType = var->basicType;
+	    }
+	    else
+		rType = right->basicType;
 	    if (OT_vector < rType)
 		rType = allowed[rType].result;
 	}
@@ -317,20 +325,20 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	}
 	if (OT_invalid == lval->basicType)
 	{
-	    const char *leftType = "", *rightType = "";
+	    const char *leftType = "", *rightType = "", *leftToken = "", *rightToken = "";
 
 	    if (left)
 	    {
-printf("left token type %s\n", left->token->token);
+		leftToken = left->token->token;
 		leftType = allowed[left->basicType].name;
 	    }
 	    if (right)
 	    {
-printf("right token type %s\n", right->token->token);
+		rightToken = right->token->token;
 		rightType = allowed[right->basicType].name;
 	    }
 
-	    PE("Invalid operation [%s %s %s] @ line %d column %d", leftType, lval->token->token, rightType, lval->line, lval->column);
+	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d column %d", leftType, leftToken, lval->token->token, rightType, rightToken, lval->line, lval->column);
 	}
     }
 
