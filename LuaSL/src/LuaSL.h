@@ -56,6 +56,7 @@ typedef struct
 } gameGlobals;
 
 
+Eina_Bool compilerSetup();
 Eina_Bool compileLSL(gameGlobals *game, char *script);
 
 void loggingStartup(gameGlobals *game);

@@ -54,13 +54,13 @@ typedef enum
 typedef void (*outputToken) (FILE *file, outputMode mode, LSL_Leaf *content);
 typedef LSL_Leaf * (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
-#ifndef FALSE
-typedef enum
-{
-    FALSE	= 0, 
-    TRUE	= 1
-} boolean;
-#endif
+//#ifndef FALSE
+//typedef enum
+//{
+//    FALSE	= 0, 
+//    TRUE	= 1
+//} boolean;
+//#endif
 
 typedef enum
 {

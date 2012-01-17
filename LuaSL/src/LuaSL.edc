@@ -2,9 +2,9 @@ color_classes {
     color_class { name: "test_colour"; color: 255 255 255 255; }
 }
 
-fonts {
-   font: "Vera.ttf" "default";
-}
+//fonts {
+//   font: "Vera.ttf" "default";
+//}
 
 images {
     image: "bubble.png" COMP;

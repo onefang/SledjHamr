@@ -1,5 +1,6 @@
 %{
 
+#include "LuaSL.h"
 #define excludeLexer
 #include "LuaSL_LSL_tree.h"
 
@@ -127,7 +128,6 @@ int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIg
 	else
 	    param->column++;
     }
-
     lval->token = tokens[type - lowestToken];
     lval->line = param->line;
     lval->column = param->column;

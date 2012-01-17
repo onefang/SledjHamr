@@ -160,13 +160,16 @@ main(int argc, char **argv)
 	ecore_evas_callback_delete_request_set(game.ee, _on_delete);
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
 
-	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
+	// Setup for the compler.
+	compilerSetup();
+//	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
+	snprintf(buf, sizeof(buf), "%s/test2.lsl", PACKAGE_DATA_DIR);
 	if (compileLSL(&game, buf))
 	    PIm("Against all odds, the compile of %s worked!  lol", buf);
 	else
 	    PEm("The compile of %s failed, as expected!", buf);
 
-	ecore_main_loop_begin();
+//	ecore_main_loop_begin();
 
 	ecore_animator_del(ani);
 	ecore_evas_free(game.ee);

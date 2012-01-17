@@ -4,6 +4,7 @@
 export LOCALDIR=`pwd`
 
 cd src
+rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
 
 if [ -d "/opt/e17" ]
 then
@@ -47,43 +48,29 @@ libs="-lecore -levas -ledje -leet -leina"
 #-lrt \
 #-lz
 
-names="LuaSL_main LuaSL_compile LuaSL_utilities"
-
+LFLAGS="-d"
 EDJE_FLAGS="-id images -fd fonts"
 
-rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
-command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
-echo $command
-$command
-
-objects=""
-for i in $names
-do
-    command="gcc $CFLAGS -c -o ../$i.o $i.c"
-    echo $command
-    $command
-    objects="$objects ../$i.o"
-done
-
-command="gcc $CFLAGS -o ../LuaSL $objects $LDFLAGS $libs"
-echo $command
-$command
 
 
-
-names="LuaSL_LSL_tree LuaSL_lexer LuaSL_lemon_yaccer"
-
-LFLAGS="-d"
 
 # Run lemon first, flex depends on it to define the symbol values.
 command="lemon -s LuaSL_lemon_yaccer.y"
 echo $command
 $command
 
+
 command="flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
 
+
+command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
+echo $command
+$command
+
+
+names="LuaSL_main LuaSL_compile LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
 objects=""
 for i in $names
 do
@@ -92,8 +79,7 @@ do
     $command
     objects="$objects ../$i.o"
 done
-
-command="gcc $CFLAGS -o ../LuaSL_parser $objects $LDFLAGS $libs"
+command="gcc $CFLAGS -o ../LuaSL $objects $LDFLAGS $libs"
 echo $command
 $command
 
