@@ -223,9 +223,9 @@ struct _LSL_Statement
 struct _LSL_Block
 {
     LSL_Block		*outerBlock;
-    LSL_Statement	**statements;
-    LSL_Identifier	**variables;	// Those variables in this scope.
-    int			scount, vcount;
+//    Eina_Hash		*statements;	// Probably should be some sort of eina list.
+    Eina_Hash		*variables;	// Those variables in this scope.
+    int			scount;
 };
 
 struct _LSL_Function
@@ -240,16 +240,15 @@ struct _LSL_State
 {
     const char		*name;
     LSL_Leaf		*block;
-    LSL_Function	**handlers;
+    Eina_Hash		*handlers;
 };
 
 struct _LSL_Script
 {
     const char		*name;
-    LSL_Function	**functions;
-    LSL_State		**states;
-    LSL_Identifier	**variables;
-    int			fcount, scount, vcount;
+    Eina_Hash		*functions;
+    Eina_Hash		*states;
+    Eina_Hash		*variables;
 };
 
 // Define the type for flex and lemon.
@@ -277,8 +276,8 @@ typedef struct
 #endif
 
 
-void burnLeaf(LSL_Leaf *leaf);
-LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
+void burnLeaf(void *data);
+LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);

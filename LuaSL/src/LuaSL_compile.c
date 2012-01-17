@@ -196,8 +196,9 @@ static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
     return leaf;
 }
 
-void burnLeaf(LSL_Leaf *leaf)
+void burnLeaf(void *data)
 {
+    LSL_Leaf *leaf = data;
     if (leaf)
     {
 	burnLeaf(leaf->left);
@@ -326,7 +327,7 @@ LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
     return newList;
 }
 
-LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
+LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
 {
     LSL_Function *func = calloc(1, sizeof(LSL_Function));
 
@@ -334,11 +335,9 @@ LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_
     {
 	if (identifier)
 	{
-	    const char *temp = identifier->value.stringValue;
-
+	    func->name = identifier->value.stringValue;
 	    identifier->token = tokens[LSL_FUNCTION - lowestToken];
 	    identifier->value.functionValue = func;
-	    identifier->value.functionValue->name = temp;
 	    identifier->value.functionValue->block = block;
 	    func->type = type;
 	    if (type)
@@ -346,6 +345,7 @@ LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_
 	    else
 		identifier->basicType = OT_nothing;
 	    func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
+	    eina_hash_add(compiler->script.functions, func->name, identifier);
 	}
     }
     return identifier;
@@ -380,9 +380,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *blo
 	result->name = identifier->value.stringValue;
 	result->block = block;
 	identifier->value.stateValue = result;
-	compiler->script.scount++;
-	compiler->script.states = realloc(compiler->script.states, compiler->script.scount * sizeof(LSL_State *));
-	compiler->script.states[compiler->script.scount - 1] = result;
+	eina_hash_add(compiler->script.states, result->name, identifier);
     }
 
     return identifier;
@@ -446,17 +444,9 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    result->value.basicType = type->basicType;
 	}
 	if (compiler->currentBlock)
-	{
-//	    compiler->currentBlock->vcount++;
-//	    compiler->currentBlock->variables = realloc(compiler->currentBlock->variables, compiler->currentBlock->vcount * sizeof(LSL_Identifier *));
-//	    compiler->currentBlock->variables[compiler->currentBlock->vcount - 1] = result;
-	}
+	    eina_hash_add(compiler->currentBlock->variables, result->name, identifier);
 	else
-	{
-	    compiler->script.vcount++;
-	    compiler->script.variables = realloc(compiler->script.variables, compiler->script.vcount * sizeof(LSL_Identifier *));
-	    compiler->script.variables[compiler->script.vcount - 1] = result;
-	}
+	    eina_hash_add(compiler->script.variables, result->name, identifier);
     }
 
     return identifier;
@@ -468,6 +458,7 @@ void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 
     if (blok)
     {
+	blok->variables = eina_hash_string_superfast_new(burnLeaf);
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
 	compiler->currentBlock = blok;
@@ -947,6 +938,9 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 
     memset(&compiler, 0, sizeof(LuaSL_compiler));
     compiler.game = game;
+    compiler.script.functions = eina_hash_string_superfast_new(burnLeaf);
+    compiler.script.states = eina_hash_string_superfast_new(burnLeaf);
+    compiler.script.variables = eina_hash_string_superfast_new(burnLeaf);
     compiler.ignorableText = eina_strbuf_new();
 
     strncpy(compiler.fileName, script, PATH_MAX - 1);

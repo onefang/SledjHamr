@@ -45,8 +45,8 @@ parameterList(A) ::= parameter(D).						{ A = collectParameters(NULL, NULL, D); 
 parameterList(A) ::= .								{ A = collectParameters(NULL, NULL, NULL); }
 parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(B, C); }
 // Causes a conflict when it's an empty parameterList with calling the same type of function.
-function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(NULL, C, D, E, F, G); }
-function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(B, C, D, E, F, G); }
+function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(compiler, NULL, C, D, E, F, G); }
+function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(compiler, B, C, D, E, F, G); }
 
 // Blocks.
 
