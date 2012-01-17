@@ -150,7 +150,7 @@ expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 
 // Variables and dealing with them.
 
-expr ::= identifier.
+expr(A) ::= identifier(B).							{ A = B; }
 
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
 expr ::= identifier LSL_ASSIGNMENT_CONCATENATE expr.
@@ -167,7 +167,7 @@ statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatem
 
 %right LSL_DOT LSL_IDENTIFIER.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
-identifier ::= LSL_IDENTIFIER.
+identifier(A) ::= LSL_IDENTIFIER(B).						{ A = B; }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
 expr ::= identifier LSL_DECREMENT_PRE.
