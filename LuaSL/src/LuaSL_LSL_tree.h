@@ -183,39 +183,20 @@ struct _LSL_Leaf
     opType		basicType;
     union
     {
-	opType		operationValue;
-	LSL_Parenthesis *parenthesis;
-
 	float		floatValue;
-	int		integerValue;
-	char		*keyValue;
-	LSL_Leaf	*listValue;
-	const char	*stringValue;
 	float		vectorValue[3];
 	float		rotationValue[4];
-
+	int		integerValue;
+	LSL_Leaf	*listValue;
+	const char	*stringValue;
+	opType		operationValue;
+	LSL_Parenthesis *parenthesis;
 	LSL_Identifier	*identifierValue;
-	LSL_Identifier	*variableValue;
-
-	const char	*labelValue;
-	LSL_Statement	*doValue;
-	LSL_Statement	*forValue;
-	LSL_Statement	*elseIfValue;
-	LSL_Statement	*elseValue;
-	LSL_Statement	*ifValue;
-	const char	*jumpValue;
-	LSL_Statement	*returnValue;
-	const char	*stateChangeValue;
-	LSL_Statement	*whileValue;
 	LSL_Statement	*statementValue;
-
 	LSL_Block	*blockValue;
-	LSL_Identifier	*parameterValue;
 	LSL_Function	*functionValue;
 	LSL_State	*stateValue;
 	LSL_Script	*scriptValue;
-
-	const char	*unknownValue;
     } value;
 };
 

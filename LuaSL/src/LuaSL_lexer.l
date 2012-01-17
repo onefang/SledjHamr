@@ -109,7 +109,7 @@ STRING      \"(\\.|[^\\"\n])*\"
 <<EOF>>         { return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_SCRIPT); }
 
  /* Everything else */
-.               %{ printf(" unexpected character.\n"); yylval->value.unknownValue = eina_stringshare_add_length(yytext, yyleng); common(yylval, yytext, yyleng, yyextra, TRUE, LSL_UNKNOWN); %}
+.               %{ printf(" unexpected character.\n"); yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); common(yylval, yytext, yyleng, yyextra, TRUE, LSL_UNKNOWN); %}
 
 %%
 

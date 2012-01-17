@@ -298,7 +298,7 @@ LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *identifier)
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
-	identifier->value.variableValue = result;
+	identifier->value.identifierValue = result;
 	identifier->token = tokens[LSL_PARAMETER - lowestToken];
 	identifier->left = type;
 	if (type)
@@ -436,7 +436,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
-	identifier->value.variableValue = result;
+	identifier->value.identifierValue = result;
 	identifier->left = type;
 	identifier->right = assignment;
 	if (assignment)
@@ -822,7 +822,7 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputParameterToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	fprintf(file, "%s", content->value.parameterValue->name);
+	fprintf(file, "%s", content->value.identifierValue->name);
 }
 
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -866,7 +866,7 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	fprintf(file, "%s", content->value.variableValue->name);
+	fprintf(file, "%s", content->value.identifierValue->name);
 }
 
 static void doneParsing(LuaSL_compiler *compiler)
