@@ -23,7 +23,6 @@
                     
 #define YYERRCODE 256
 #define YYDEBUG 1
-extern int yydebug;
 
 
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.

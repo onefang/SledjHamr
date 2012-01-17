@@ -970,18 +970,13 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
     compiler.column = 1;
     compiler.line = 1;
 
-#ifdef LUASL_DEBUG
-//    yydebug= 5;
-#endif
     if (yylex_init_extra(&compiler, &(compiler.scanner)))
 	return result;
 #ifdef LUASL_DEBUG
     yyset_debug(1, compiler.scanner);
-#endif
-    yyset_in(compiler.file, compiler.scanner);
-#ifdef LUASL_DEBUG
     ParseTrace(stdout, "LSL_lemon ");
 #endif
+    yyset_in(compiler.file, compiler.scanner);
     // on EOF yylex will return 0
     while((yv = yylex(compiler.lval, compiler.scanner)) != 0)
     {
@@ -1113,18 +1108,13 @@ int main(int argc, char **argv)
 	    void *pParser = ParseAlloc(malloc);
 	    int yv;
 
-#ifdef LUASL_DEBUG
-//	    yydebug= 5;
-#endif
 	    if (yylex_init_extra(&param, &(param.scanner)))
 		return 1;
 #ifdef LUASL_DEBUG
 	    yyset_debug(1, param.scanner);
-#endif
-	    yyset_in(param.file, param.scanner);
-#ifdef LUASL_DEBUG
 	    ParseTrace(stdout, "LSL_lemon ");
 #endif
+	    yyset_in(param.file, param.scanner);
 	    // on EOF yylex will return 0
 	    while((yv = yylex(param.lval, param.scanner)) != 0)
 	    {
