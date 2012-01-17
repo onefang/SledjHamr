@@ -2,7 +2,7 @@
 #ifndef __LSL_TREE_H__
 #define __LSL_TREE_H__
 
-#define LUASL_DEBUG
+//#define LUASL_DEBUG
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -218,8 +218,9 @@ struct _LSL_Leaf
 struct _LSL_Parenthesis
 {
     LSL_Leaf		*left;
-    LSL_Leaf		*expression;
+    LSL_Leaf		*contents;
     LSL_Leaf		*right;
+    LSL_Type		type;
 };
 
 struct _LSL_Identifier	// For variables and function parameters.
@@ -237,30 +238,32 @@ struct _LSL_Statement
 struct _LSL_Block
 {
     LSL_Block		*outerBlock;
-    LSL_Statement	*statements;
-    LSL_Identifier	*scopeVariables;
+    LSL_Statement	**statements;
+    LSL_Identifier	**variables;	// Those variables in this scope.
+    int			scount, vcount;
 };
 
 struct _LSL_Function
 {
-    char		*name;
-    LSL_Block		block;
-    LSL_Identifier	*parameters;
-    LSL_Type		type;	// Return type.
+    char	*name;
+    LSL_Leaf	*type;
+    LSL_Leaf	*params;
+    LSL_Leaf	*block;
 };
 
 struct _LSL_State
 {
     char		*name;
-    LSL_Function	*handlers;
+    LSL_Function	**handlers;
 };
 
 struct _LSL_Script
 {
     char		*name;
-    LSL_Function	*functions;
-    LSL_State		*states;
-    LSL_Identifier	*variables;
+    LSL_Function	**functions;
+    LSL_State		**states;
+    LSL_Identifier	**variables;
+    int			fcount, scount, vcount;
 };
 
 // Define the type for flex and lemon.
@@ -268,15 +271,18 @@ struct _LSL_Script
 
 typedef struct
 {
-    void *scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
-    int argc;
-    char **argv;
-    char fileName[PATH_MAX];
-    FILE *file;
-    LSL_Leaf *ast;
-    char *ignorableText;
-    LSL_Leaf *lval;
-    int column, line;
+    void	*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
+    int		argc;
+    char	**argv;
+    char	fileName[PATH_MAX];
+    FILE	*file;
+    LSL_Leaf	*ast;
+    LSL_Script	script;
+    char	*ignorableText;
+    LSL_Leaf	*lval;
+    int		column, line;
+    LSL_Block	*currentBlock;
+    LSL_Leaf	*currentFunction;
 } LuaSL_yyparseParam;
 
 
@@ -286,11 +292,18 @@ typedef struct
 
 
 void burnLeaf(LSL_Leaf *leaf);
-LSL_Leaf *addExpression(LSL_Leaf *exp);
+LSL_Leaf *addFunction(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
 LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
-LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval);
+LSL_Leaf *addParameter(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *newParam);
+LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
+LSL_Leaf *addState(LuaSL_yyparseParam *param, char *name, LSL_Leaf *state);
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr);
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr);
+LSL_Leaf *addVariable(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
+
+void beginBlock(LuaSL_yyparseParam *param, LSL_Leaf *block);
+LSL_Leaf *collectParameters(LuaSL_yyparseParam *param, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
+void endBlock(LuaSL_yyparseParam *param, LSL_Leaf *block);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);

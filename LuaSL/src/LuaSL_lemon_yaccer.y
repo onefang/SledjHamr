@@ -12,8 +12,8 @@
 %default_destructor {burnLeaf($$);}
 
 // The start symbol, just coz we need one.
-// Lemon does not like the start symbol to be on the RHS, so give it a dummy start symbol.
 
+// Lemon does not like the start symbol to be on the RHS, so give it a dummy start symbol.
 program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 
 // Various forms of "space".  The lexer takes care of them for us.
@@ -24,7 +24,7 @@ program ::= script LSL_SCRIPT(A).						{ if (NULL != A) A->left = param->ast;  p
 
 %nonassoc LSL_SCRIPT.
 script ::= script state.
-script ::= script function.
+script ::= script function(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= script statement(A).							{ if (NULL != A) A->left = param->ast;  param->ast = A; }
 script ::= .
 
@@ -32,25 +32,26 @@ script ::= .
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
 stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
-state ::= LSL_IDENTIFIER stateBlock.
+state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(param, I->value.stringValue, B); }
 
 // Function definitions.
 
-%nonassoc LSL_PARAMETER LSL_FUNCTION.
+%nonassoc LSL_PARAMETER LSL_PARAMETER_LIST LSL_FUNCTION.
 functionList ::= functionList function.
 functionList ::= .
 
-parameter ::= type LSL_IDENTIFIER.
-parameterList ::= parameterList LSL_COMMA parameter.
-parameterList ::= parameter.
-parameterList ::= .
-function ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE funcBlock.		// Causes a conflict when it's an empty parameterList with calling the same type of function.
-function ::= type LSL_IDENTIFIER LSL_PARENTHESIS_OPEN parameterList LSL_PARENTHESIS_CLOSE funcBlock.
+parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(param, B, C, D); }
+parameterList(A) ::= parameter(D).						{ A = collectParameters(param, NULL, NULL, D); }
+parameterList(A) ::= .								{ A = collectParameters(param, NULL, NULL, NULL); }
+parameter(A) ::= type(B) LSL_IDENTIFIER(C).					{ A = addParameter(param, B, C); }
+// Causes a conflict when it's an empty parameterList with calling the same type of function.
+function(A) ::= LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).		{ A = addFunction(param, NULL, C, D, E, F, G); }
+function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(E) LSL_PARENTHESIS_CLOSE(F) funcBlock(G).	{ A = addFunction(param, B, C, D, E, F, G); }
 
 // Blocks.
 
-block ::= funcBlock.
-block ::= statement.
+block(A) ::= funcBlock(B).							{ A = B; }
+block(A) ::= statement(B).							{ A = B; }
 funcBlock ::= LSL_BLOCK_OPEN statementList LSL_BLOCK_CLOSE.
 
 // Various forms of statement.
@@ -66,7 +67,8 @@ statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_STATEMENT expr LSL_STATEMENT
 
 ifBlock ::= ifBlock LSL_ELSE block.
 ifBlock ::= block.
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	[LSL_ELSE]	// The [LSL_ELSE] part causes a conflict.
+// The [LSL_ELSE] part causes a conflict.
+statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	[LSL_ELSE]
 
 statement ::= LSL_JUMP LSL_IDENTIFIER LSL_STATEMENT.
 statement ::= LSL_RETURN expr LSL_STATEMENT.
@@ -126,24 +128,25 @@ expr(A) ::= LSL_SUBTRACT(B)			expr(C).	[LSL_NEGATION]	{ A = addOperation(NULL, B
 
 %right  LSL_TYPECAST_OPEN LSL_TYPECAST_CLOSE.
 %nonassoc LSL_TYPE_FLOAT LSL_TYPE_INTEGER LSL_TYPE_KEY LSL_TYPE_LIST LSL_TYPE_ROTATION LSL_TYPE_STRING LSL_TYPE_VECTOR.
-type ::= LSL_TYPE_FLOAT.
-type ::= LSL_TYPE_INTEGER.
-type ::= LSL_TYPE_KEY.
-type ::= LSL_TYPE_LIST.
-type ::= LSL_TYPE_ROTATION.
-type ::= LSL_TYPE_STRING.
-type ::= LSL_TYPE_VECTOR.
+type(A) ::= LSL_TYPE_FLOAT(B).							{ B->basicType = OT_float;	A = B; }
+type(A) ::= LSL_TYPE_INTEGER(B).						{ B->basicType = OT_integer;	A = B; }
+type(A) ::= LSL_TYPE_KEY(B).							{ B->basicType = OT_key;	A = B; }
+type(A) ::= LSL_TYPE_LIST(B).							{ B->basicType = OT_list;	A = B; }
+type(A) ::= LSL_TYPE_ROTATION(B).						{ B->basicType = OT_rotation;	A = B; }
+type(A) ::= LSL_TYPE_STRING(B).							{ B->basicType = OT_string;	A = B; }
+type(A) ::= LSL_TYPE_VECTOR(B).							{ B->basicType = OT_vector;	A = B; }
 
 %left  LSL_ANGLE_OPEN LSL_ANGLE_CLOSE.
 %nonassoc LSL_BRACKET_OPEN LSL_BRACKET_CLOSE.
 %nonassoc LSL_PARENTHESIS_OPEN LSL_PARENTHESIS_CLOSE LSL_EXPRESSION.
 
-expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).	{ A = addParenthesis(B, C, D); }
+expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).		{ A = addParenthesis(B, C, LSL_EXPRESSION, D); }
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D) expr(E).	{ A = addTypecast(B, C, D, E); }
 
 // Function call.
 
-expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.		// Casuses a conflict when exprList is empty with a function definition with no type and no parameters.
+// Causes a conflict when exprList is empty with a function definition with no type and no parameters.
+expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 
 // Variables and dealing with them.
 
@@ -159,8 +162,8 @@ expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
 expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
 
 // Hmm think this can have commas seperating the assignment parts.
-statement ::= type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr LSL_STATEMENT.
-statement ::= type LSL_IDENTIFIER LSL_STATEMENT.
+statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(param, B, C, D, E)); }
+statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(param, B, C, NULL, NULL)); }
 
 %right LSL_DOT LSL_IDENTIFIER.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.

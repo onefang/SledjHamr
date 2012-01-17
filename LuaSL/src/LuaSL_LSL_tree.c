@@ -10,9 +10,13 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_
 static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static void outputFloatToken(FILE *file, LSL_Leaf *content);
+static void outputFunctionToken(FILE *file, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, LSL_Leaf *content);
+static void outputParameterToken(FILE *file, LSL_Leaf *content);
+static void outputParameterListToken(FILE *file, LSL_Leaf *content);
 static void outputParenthesisToken(FILE *file, LSL_Leaf *content);
 static void outputStatementToken(FILE *file, LSL_Leaf *content);
+static void outputVariableToken(FILE *file, LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -95,7 +99,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL, NULL},
 
     // Then the rest of the syntax tokens.
-    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputVariableToken, NULL, NULL},
 
     {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL, NULL},
 
@@ -112,8 +116,9 @@ LSL_Token LSL_Tokens[] =
 
     {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL, NULL},
     {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL, NULL},
-    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				NULL, NULL, NULL},
-    {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				NULL, NULL, NULL},
+    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputParameterToken, NULL, NULL},
+    {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL, NULL},
+    {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL, NULL},
     {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				NULL, NULL, NULL},
     {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL, NULL, NULL},
 
@@ -179,7 +184,6 @@ LSL_Token **tokens = NULL;
 int lowestToken = 999999;
 
 
-/*  Not actually used, but it might be some day.
 static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 {
     LSL_Leaf *leaf = calloc(1, sizeof(LSL_Leaf));
@@ -193,7 +197,6 @@ static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 
     return leaf;
 }
-*/
 
 void burnLeaf(LSL_Leaf *leaf)
 {
@@ -278,14 +281,76 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
     return lval;
 }
 
-LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval)
+LSL_Leaf *addParameter(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier)
+{
+    LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));
+
+    if ( (identifier) && (result))
+    {
+	result->name = identifier->value.stringValue;
+	identifier->value.variableValue = result;
+	identifier->token = tokens[LSL_PARAMETER - lowestToken];
+	identifier->left = type;
+	if (type)
+	{
+	    identifier->basicType = type->basicType;
+	    result->value.basicType = type->basicType;
+	}
+    }
+    return identifier;
+}
+
+LSL_Leaf *collectParameters(LuaSL_yyparseParam *param, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
+{
+    LSL_Leaf *newList = newLeaf(LSL_PARAMETER_LIST, NULL, NULL);
+
+    if (newList)
+    {
+	newList->left = list;
+	newList->value.listValue = newParam;
+	if ((list) && (list->value.listValue))
+	{
+	    list->value.listValue->right = comma;
+	}
+    }
+
+    return newList;
+}
+
+LSL_Leaf *addFunction(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block)
+{
+    LSL_Function *func = calloc(1, sizeof(LSL_Function));
+
+    if (func)
+    {
+	if (identifier)
+	{
+	    char *temp = identifier->value.stringValue;
+
+	    identifier->token = tokens[LSL_FUNCTION - lowestToken];
+	    identifier->value.functionValue = func;
+	    identifier->value.functionValue->name = temp;
+	    identifier->value.functionValue->block = block;
+	    func->type = type;
+	    if (type)
+		identifier->basicType = type->basicType;
+	    else
+		identifier->basicType = OT_nothing;
+	    func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
+	}
+    }
+    return identifier;
+}
+
+LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
 {
     LSL_Parenthesis *parens = malloc(sizeof(LSL_Parenthesis));
 
     if (parens)
     {
 	parens->left = lval;
-	parens->expression = expr;
+	parens->contents = expr;
+	parens->type = type;
 	parens->right = rval;
 	if (lval)
 	{
@@ -295,6 +360,21 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Leaf *rval)
 	}
     }
     return lval;
+}
+
+LSL_Leaf *addState(LuaSL_yyparseParam *param, char *name, LSL_Leaf *state)
+{
+    LSL_State *result = calloc(1, sizeof(LSL_State));
+
+    if (result)
+    {
+	result->name = name;
+	param->script.scount++;
+	param->script.states = realloc(param->script.states, param->script.scount * sizeof(LSL_State *));
+	param->script.states[param->script.scount - 1] = result;
+    }
+
+    return state;
 }
 
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
@@ -319,7 +399,8 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
     if (parens)
     {
 	parens->left = lval;
-	parens->expression = expr;
+	parens->contents = expr;
+	parens->type = LSL_TYPECAST_OPEN;
 	parens->right = rval;
 	if (lval)
 	{
@@ -334,6 +415,57 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
 	}
     }
     return lval;
+}
+
+LSL_Leaf *addVariable(LuaSL_yyparseParam *param, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr)
+{
+    LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));
+
+    if ( (identifier) && (result))
+    {
+	result->name = identifier->value.stringValue;
+	identifier->value.variableValue = result;
+	identifier->left = type;
+	identifier->right = assignment;
+	if (assignment)
+	    assignment->right = expr;
+	if (type)
+	{
+	    identifier->basicType = type->basicType;
+	    result->value.basicType = type->basicType;
+	}
+	if (param->currentBlock)
+	{
+	    param->currentBlock->vcount++;
+	    param->currentBlock->variables = realloc(param->currentBlock->variables, param->currentBlock->vcount * sizeof(LSL_Identifier *));
+	    param->currentBlock->variables[param->currentBlock->vcount - 1] = result;
+	}
+	else
+	{
+	    param->script.vcount++;
+	    param->script.variables = realloc(param->script.variables, param->script.vcount * sizeof(LSL_Identifier *));
+	    param->script.variables[param->script.vcount - 1] = result;
+	}
+    }
+
+    return identifier;
+}
+
+void beginBlock(LuaSL_yyparseParam *param, LSL_Leaf *block)
+{
+    LSL_Block *blok = malloc(sizeof(LSL_Block));
+
+    if (blok)
+    {
+	block->value.blockValue = blok;
+	blok->outerBlock = param->currentBlock;
+	param->currentBlock = blok;
+    }
+}
+
+void endBlock(LuaSL_yyparseParam *param, LSL_Leaf *block)
+{
+    param->currentBlock = param->currentBlock->outerBlock;
 }
 
 static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
@@ -601,7 +733,10 @@ static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL
     LSL_Leaf *result = NULL;
 
     if (content)
-	result = evaluateLeaf(content->value.parenthesis->expression, left, right);
+    {
+	if (LSL_PARAMETER_LIST != content->value.parenthesis->type)
+	    result = evaluateLeaf(content->value.parenthesis->contents, left, right);
+    }
     return result;
 }
 
@@ -653,10 +788,35 @@ static void outputFloatToken(FILE *file, LSL_Leaf *content)
 	fprintf(file, "%g", content->value.floatValue);
 }
 
+static void outputFunctionToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_Function *func = content->value.functionValue;
+
+	outputLeaf(file, func->type);
+	fprintf(file, "%s", func->name);
+	outputLeaf(file, func->params);
+	outputLeaf(file, func->block);
+    }
+}
+
 static void outputIntegerToken(FILE *file, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%d", content->value.integerValue);
+}
+
+static void outputParameterToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+	fprintf(file, "%s", content->value.parameterValue->name);
+}
+
+static void outputParameterListToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+	outputLeaf(file, content->value.listValue);
 }
 
 static void outputParenthesisToken(FILE *file, LSL_Leaf *content)
@@ -664,7 +824,7 @@ static void outputParenthesisToken(FILE *file, LSL_Leaf *content)
     if (content)
     {
 	fprintf(file, "%s", content->token->token);
-	outputLeaf(file, content->value.parenthesis->expression);
+	outputLeaf(file, content->value.parenthesis->contents);
 	outputLeaf(file, content->value.parenthesis->right);
     }
 }
@@ -679,6 +839,13 @@ static void outputStatementToken(FILE *file, LSL_Leaf *content)
 	fprintf(file, "%s", content->token->token);
     }
 }
+
+static void outputVariableToken(FILE *file, LSL_Leaf *content)
+{
+    if (content)
+	fprintf(file, "%s", content->value.variableValue->name);
+}
+
 
 static void convertLeaf2Lua(FILE *file, LSL_Leaf *leaf)
 {
@@ -705,7 +872,6 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	char buffer[PATH_MAX];
 	char outName[PATH_MAX];
 	char luaName[PATH_MAX];
-	int count;
 
 	outputLeaf(stdout, param->ast);
 	printf("\n");

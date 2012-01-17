@@ -74,8 +74,8 @@ STRING      \"(\\.|[^\\"\n])*\"
 
  /* Other symbols. */
 "@"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_LABEL); %}
-"{"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_OPEN); %}
-"}"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_CLOSE); %}
+"{"             %{ beginBlock(yyextra, yylval);  return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_OPEN); %}
+"}"             %{ endBlock(yyextra, yylval);    return common(yylval, yytext, yyextra, TRUE, LSL_BLOCK_CLOSE); %}
 ";"             %{ return common(yylval, yytext, yyextra, TRUE, LSL_STATEMENT); %}
 
  /* Type keywords. */
