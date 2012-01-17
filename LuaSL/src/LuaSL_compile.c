@@ -246,7 +246,15 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    lType = OT_nothing;
 	else
 	{
-	    lType = left->basicType;
+//	    if ((LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
+//	    {
+//		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
+
+//		if (var)
+//		    lType = var->basicType;
+//	    }
+//	    else
+		lType = left->basicType;
 	    if (OT_vector < lType)
 		lType = allowed[lType].result;
 	}
@@ -301,9 +309,15 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    const char *leftType = "", *rightType = "";
 
 	    if (left)
+	    {
+printf("left token type %s\n", left->token->token);
 		leftType = allowed[left->basicType].name;
+	    }
 	    if (right)
+	    {
+printf("right token type %s\n", right->token->token);
 		rightType = allowed[right->basicType].name;
+	    }
 
 	    PE("Invalid operation [%s %s %s] @ line %d column %d", leftType, lval->token->token, rightType, lval->line, lval->column);
 	}
