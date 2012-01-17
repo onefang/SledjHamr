@@ -117,6 +117,10 @@ int common(YYSTYPE *lval, char *text, LuaSL_compiler *compiler, boolean checkIgn
 {
     char *p;
 
+    lval->token = tokens[type - lowestToken];
+    lval->line = compiler->line;
+    lval->column = compiler->column;
+
     for (p = text; *p; p++)
     {
 	if ('\n' == *p)
@@ -127,9 +131,6 @@ int common(YYSTYPE *lval, char *text, LuaSL_compiler *compiler, boolean checkIgn
 	else
 	    compiler->column++;
     }
-    lval->token = tokens[type - lowestToken];
-    lval->line = compiler->line;
-    lval->column = compiler->column;
 
     if (checkIgnorable)
     {
