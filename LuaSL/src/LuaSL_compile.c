@@ -518,7 +518,7 @@ void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 
     if (blok)
     {
-	blok->variables = eina_hash_string_superfast_new(burnLeaf);
+	blok->variables = eina_hash_stringshared_new(burnLeaf);
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
 	compiler->currentBlock = blok;
@@ -998,9 +998,9 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 
     memset(&compiler, 0, sizeof(LuaSL_compiler));
     compiler.game = game;
-    compiler.script.functions = eina_hash_string_superfast_new(burnLeaf);
-    compiler.script.states = eina_hash_string_superfast_new(burnLeaf);
-    compiler.script.variables = eina_hash_string_superfast_new(burnLeaf);
+    compiler.script.functions = eina_hash_stringshared_new(burnLeaf);
+    compiler.script.states = eina_hash_stringshared_new(burnLeaf);
+    compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
     compiler.ignorableText = eina_strbuf_new();
 
     strncpy(compiler.fileName, script, PATH_MAX - 1);
