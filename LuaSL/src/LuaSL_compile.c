@@ -230,6 +230,17 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
     return var;
 }
 
+LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
+{
+    gameGlobals *game = compiler->game;
+    LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
+
+    if (NULL == var)
+	PE("NOT Found %s!", identifier->value.stringValue);
+
+    return var;
+}
+
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
     gameGlobals *game = compiler->game;

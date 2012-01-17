@@ -167,7 +167,7 @@ statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatem
 
 %right LSL_DOT LSL_IDENTIFIER.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
-identifier(A) ::= LSL_IDENTIFIER(B).						{ A = B; }
+identifier(A) ::= LSL_IDENTIFIER(B).						{ A = checkVariable(compiler, B); }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
 expr ::= identifier LSL_DECREMENT_PRE.

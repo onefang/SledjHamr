@@ -286,6 +286,7 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
 LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
 
 void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
+LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
 LSL_Leaf *collectParameters(LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 
