@@ -578,7 +578,7 @@ static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
 	    result = leaf->token->evaluate(leaf, lresult, rresult);
 	else
 	{
-	    result = calloc(1, sizeof(LSL_Leaf));
+	    result = newLeaf(LSL_UNKNOWN, NULL, NULL);
 	    if (rresult && result)
 		memcpy(result, rresult, sizeof(LSL_Leaf));
 	}
@@ -594,7 +594,7 @@ static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
-    LSL_Leaf *result = malloc(sizeof(LSL_Leaf));
+    LSL_Leaf *result = newLeaf(LSL_FLOAT, NULL, NULL);
 
     if (content && result)
     {
@@ -609,7 +609,7 @@ static LSL_Leaf *evaluateFloatToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf 
 
 static LSL_Leaf *evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
-    LSL_Leaf *result = malloc(sizeof(LSL_Leaf));
+    LSL_Leaf *result = newLeaf(LSL_INTEGER, NULL, NULL);
 
     if (content && result)
     {
@@ -690,7 +690,7 @@ A vectorFloat          results in a vector value.
 
 static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
-    LSL_Leaf *result = calloc(1, sizeof(LSL_Leaf));
+    LSL_Leaf *result = newLeaf(LSL_UNKNOWN, NULL, NULL);
 
     if (content && result)
     {
@@ -1035,7 +1035,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
     }
     PI("Opened %s.", compiler.fileName);
     compiler.ast = NULL;
-    compiler.lval = calloc(1, sizeof(LSL_Leaf));
+    compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors.
     compiler.column = 1;
     compiler.line = 1;
@@ -1053,7 +1053,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 	Parse(pParser, yv, compiler.lval, &compiler);
 	if (LSL_SCRIPT == yv)
 	    break;
-	compiler.lval = calloc(1, sizeof(LSL_Leaf));
+	compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     }
 
     yylex_destroy(compiler.scanner);
@@ -1101,7 +1101,7 @@ static int nextFile(LuaSL_yyparseParam *param)
 	PE("Opened %s.", param->fileName);
 	burnLeaf(param->ast);
 	param->ast = NULL;
-	param->lval = calloc(1, sizeof(LSL_Leaf));
+	param->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
 	// Text editors usually start counting at 1, even programmers editors.
 	param->column = 1;
 	param->line = 1;
@@ -1191,7 +1191,7 @@ int main(int argc, char **argv)
 		Parse(pParser, yv, param.lval, &param);
 		if (LSL_SCRIPT == yv)
 		    break;
-		param.lval = calloc(1, sizeof(LSL_Leaf));
+		param.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
 	    }
 
 	    yylex_destroy(param.scanner);
