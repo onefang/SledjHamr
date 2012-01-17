@@ -56,11 +56,12 @@ typedef struct
 } gameGlobals;
 
 
-Eina_Bool compilerSetup();
+Eina_Bool compilerSetup(gameGlobals *game);
 Eina_Bool compileLSL(gameGlobals *game, char *script);
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
 float timeDiff(struct timeval *now, struct timeval *then);
 
+#include "LuaSL_LSL_tree.h"
 

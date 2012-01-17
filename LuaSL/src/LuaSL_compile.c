@@ -1,5 +1,4 @@
 #include "LuaSL.h"
-#include "LuaSL_LSL_tree.h"
 
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
@@ -210,8 +209,10 @@ void burnLeaf(LSL_Leaf *leaf)
     }
 }
 
-LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
+LSL_Leaf *addOperation(LuaSL_yyparseParam *param, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
+    gameGlobals *game = param->game;
+
     if (lval)
     {
 	opType lType, rType;
@@ -283,7 +284,7 @@ LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 	    if (right)
 		rightType = allowed[right->basicType].name;
 
-	    fprintf(stderr, "Invalid operation [%s %s %s] @ line %d column %d\n", leftType, lval->token->token, rightType, lval->line, lval->column);
+	    PE("Invalid operation [%s %s %s] @ line %d column %d", leftType, lval->token->token, rightType, lval->line, lval->column);
 	}
     }
 
@@ -870,6 +871,8 @@ static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content)
 
 static void doneParsing(LuaSL_yyparseParam *param)
 {
+    gameGlobals *game = param->game;
+
     if (param->ast)
     {
 	FILE *out;
@@ -894,12 +897,12 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	    fclose(out);
 	    sprintf(buffer, "diff %s %s", param->fileName, outName);
 //	    count = system(buffer);
-//	    printf("Return value of %s is %d\n", buffer, count);
+//	    PI("Return value of %s is %d", buffer, count);
 //	    if (0 != count)
-//	        fprintf(stderr, "%s says they are different!\n", buffer);
+//	        PE("%s says they are different!", buffer);
 	}
 	else
-	    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
+	    PC("Unable to open file %s for writing!", outName);
 	out = fopen(luaName, "w");
 	if (out)
 	{
@@ -907,11 +910,11 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	    fclose(out);
 	}
 	else
-	    fprintf(stderr, "Unable to open file %s for writing!\n", luaName);
+	    PC("Unable to open file %s for writing!", luaName);
     }
 }
 
-Eina_Bool compilerSetup()
+Eina_Bool compilerSetup(gameGlobals *game)
 {
     int i;
 
@@ -934,7 +937,7 @@ Eina_Bool compilerSetup()
 	return EINA_TRUE;
     }
     else
-	fprintf(stderr, "No memory for tokens!");
+	PC("No memory for tokens!");
 
     return EINA_FALSE;
 }
@@ -950,15 +953,18 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 //   Just pass all constants and function names through to Lua, assume they are globals there.
 
     memset(&param, 0, sizeof(LuaSL_yyparseParam));
+    param.game = game;
+
+
     strncpy(param.fileName, script, PATH_MAX - 1);
     param.fileName[PATH_MAX - 1] = '\0';
     param.file = fopen(param.fileName, "r");
     if (NULL == param.file)
     {
-	fprintf(stderr, "Error opening file %s.\n", param.fileName);
+	PE("Error opening file %s.", param.fileName);
 	return FALSE;
     }
-    printf("Opened %s.\n", param.fileName);
+    PI("Opened %s.", param.fileName);
     param.ast = NULL;
     param.lval = calloc(1, sizeof(LSL_Leaf));
     // Text editors usually start counting at 1, even programmers editors.
@@ -1025,10 +1031,10 @@ static int nextFile(LuaSL_yyparseParam *param)
 	param->file = fopen(param->fileName, "r");
 	if (NULL == param->file)
 	{
-	    fprintf(stderr, "Error opening file %s.\n", param->fileName);
+	    PE(stderr, "Error opening file %s.", param->fileName);
 	    return FALSE;
 	}
-	printf("Opened %s.\n", param->fileName);
+	PE("Opened %s.", param->fileName);
 	burnLeaf(param->ast);
 	param->ast = NULL;
 	param->lval = calloc(1, sizeof(LSL_Leaf));

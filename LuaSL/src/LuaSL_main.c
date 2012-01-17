@@ -161,13 +161,13 @@ main(int argc, char **argv)
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
 
 	// Setup for the compler.
-	compilerSetup();
+	compilerSetup(&game);
 //	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
 	snprintf(buf, sizeof(buf), "%s/test2.lsl", PACKAGE_DATA_DIR);
 	if (compileLSL(&game, buf))
 	    PIm("Against all odds, the compile of %s worked!  lol", buf);
 	else
-	    PEm("The compile of %s failed, as expected!", buf);
+	    PEm("The compile of %s failed!", buf);
 
 //	ecore_main_loop_begin();
 

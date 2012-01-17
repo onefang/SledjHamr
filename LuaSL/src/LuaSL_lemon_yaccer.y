@@ -1,5 +1,5 @@
 %include {
-#include "LuaSL_LSL_tree.h"
+#include "LuaSL.h"
 }
 
 %extra_argument {LuaSL_yyparseParam *param}
@@ -89,40 +89,40 @@ exprList ::= expr.
 exprList ::= .
 
 %right  LSL_BOOL_AND.
-expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 %right  LSL_BOOL_OR.
-expr(A) ::= expr(B) LSL_BOOL_OR(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_BOOL_OR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 
 %left  LSL_BIT_AND LSL_BIT_XOR LSL_BIT_OR.
-expr(A) ::= expr(B) LSL_BIT_OR(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_BIT_XOR(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_BIT_AND(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_OR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_XOR(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_BIT_AND(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 
 %right  LSL_EQUAL LSL_NOT_EQUAL.
-expr(A) ::= expr(B) LSL_NOT_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_NOT_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 %right  LSL_LESS_THAN LSL_GREATER_THAN LSL_LESS_EQUAL LSL_GREATER_EQUAL.
-expr(A) ::= expr(B) LSL_GREATER_EQUAL(C)	expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_LESS_EQUAL(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_GREATER_THAN(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_LESS_THAN(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_GREATER_EQUAL(C)	expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_LESS_EQUAL(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_GREATER_THAN(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_LESS_THAN(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 
 %left  LSL_LEFT_SHIFT LSL_RIGHT_SHIFT.
-expr(A) ::= expr(B) LSL_RIGHT_SHIFT(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_LEFT_SHIFT(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_RIGHT_SHIFT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_LEFT_SHIFT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 
 %left  LSL_SUBTRACT LSL_ADD LSL_CONCATENATE.
-expr(A) ::= expr(B) LSL_ADD(C)			expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_SUBTRACT(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_ADD(C)			expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_SUBTRACT(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 %left  LSL_DIVIDE LSL_MODULO LSL_MULTIPLY LSL_DOT_PRODUCT LSL_CROSS_PRODUCT.
-expr(A) ::= expr(B) LSL_MULTIPLY(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_MODULO(C)		expr(D).			{ A = addOperation(B, C, D); }
-expr(A) ::= expr(B) LSL_DIVIDE(C)		expr(D).			{ A = addOperation(B, C, D); }
+expr(A) ::= expr(B) LSL_MULTIPLY(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_MODULO(C)		expr(D).			{ A = addOperation(param, B, C, D); }
+expr(A) ::= expr(B) LSL_DIVIDE(C)		expr(D).			{ A = addOperation(param, B, C, D); }
 
 %right LSL_BIT_NOT LSL_BOOL_NOT LSL_NEGATION.
-expr(A) ::= LSL_BIT_NOT(B)			expr(C).			{ A = addOperation(NULL, B, C); }
-expr(A) ::= LSL_BOOL_NOT(B)			expr(C).			{ A = addOperation(NULL, B, C); }
-expr(A) ::= LSL_SUBTRACT(B)			expr(C).	[LSL_NEGATION]	{ A = addOperation(NULL, B, C); }
+expr(A) ::= LSL_BIT_NOT(B)			expr(C).			{ A = addOperation(param, NULL, B, C); }
+expr(A) ::= LSL_BOOL_NOT(B)			expr(C).			{ A = addOperation(param, NULL, B, C); }
+expr(A) ::= LSL_SUBTRACT(B)			expr(C).	[LSL_NEGATION]	{ A = addOperation(param, NULL, B, C); }
 
 // Types, typecasts, and expression reordering.
 
@@ -198,13 +198,33 @@ expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.			[L
 
 // Parser callbacks.
 
-%parse_accept {printf("Parsing complete.\n");}
+%parse_accept
+{
+    gameGlobals *game = param->game;
 
-%parse_failure {fprintf(stderr,"Giving up.  Parser is hopelessly lost!\n");}
+    PI("Parsing complete.");
+}
 
-%stack_overflow {fprintf(stderr,"*******************************************************************Giving up.  Parser stack overflow @ line %04d column %04d\n", yypMinor->yy0->line, yypMinor->yy0->column);}  // Gotta love consistancy, if it ever happens.
+%parse_failure
+{
+    gameGlobals *game = param->game;
 
-%syntax_error {fprintf(stderr,"*******************************************************************Syntax error @ line %04d column %04d\n", yyminor.yy0->line, yyminor.yy0->column);}
+    PE("Giving up.  Parser is hopelessly lost!");
+}
+
+%stack_overflow
+{
+    gameGlobals *game = param->game;
+
+    PE("Giving up.  Parser stack overflow @ line %04d column %04d.", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
+}
+
+%syntax_error
+{
+    gameGlobals *game = param->game;
+
+    PE("Syntax error @ line %04d column %04d.", yyminor.yy0->line, yyminor.yy0->column);
+}
 
 
 /* Undocumented shit that might be useful later.  Pffft

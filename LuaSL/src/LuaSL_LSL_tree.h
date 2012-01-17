@@ -277,6 +277,7 @@ struct _LSL_Script
 
 typedef struct
 {
+    gameGlobals *game;
     void	*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
     int		argc;
     char	**argv;
@@ -298,7 +299,7 @@ typedef struct
 
 void burnLeaf(LSL_Leaf *leaf);
 LSL_Leaf *addFunction(LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close, LSL_Leaf *block);
-LSL_Leaf *addOperation(LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
+LSL_Leaf *addOperation(LuaSL_yyparseParam *param, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
 LSL_Leaf *addState(LuaSL_yyparseParam *param, LSL_Leaf *identifier, LSL_Leaf *block);
