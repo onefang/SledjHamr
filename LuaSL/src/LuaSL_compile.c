@@ -257,7 +257,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    lType = OT_nothing;
 	else
 	{
-	    if ((LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
+	    if ((left->token) && (LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
 	    {
 		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
 
@@ -273,7 +273,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    rType = OT_nothing;
 	else
 	{
-	    if ((LSL_IDENTIFIER == right->token->type) && (right->value.identifierValue))
+	    if ((right->token) && (LSL_IDENTIFIER == right->token->type) && (right->value.identifierValue))
 	    {
 		LSL_Leaf *var = findVariable(compiler, right->value.identifierValue->name);
 
@@ -329,12 +329,18 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 
 	    if (left)
 	    {
-		leftToken = left->token->token;
+		if (left->token)
+		    leftToken = left->token->token;
+		else
+		    PE("BROKEN LEFT TOKEN!!!!!!!!!!!!!!!!!!");
 		leftType = allowed[left->basicType].name;
 	    }
 	    if (right)
 	    {
-		rightToken = right->token->token;
+		if (right->token)
+		    rightToken = right->token->token;
+		else
+		    PE("BROKEN RIGHT TOKEN!!!!!!!!!!!!!!!!!!");
 		rightType = allowed[right->basicType].name;
 	    }
 
