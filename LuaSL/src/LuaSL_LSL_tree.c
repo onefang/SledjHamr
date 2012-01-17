@@ -719,13 +719,14 @@ static void doneParsing(LuaSL_yyparseParam *param)
 	out = fopen(outName, "w");
 	if (out)
 	{
+//	    int count;
 	    outputLeaf(out, param->ast);
 	    fclose(out);
 	    sprintf(buffer, "diff %s %s", param->fileName, outName);
-	    count = system(buffer);
-	    printf("Return value of %s is %d\n", buffer, count);
-	    if (0 != count)
-	        fprintf(stderr, "%s says they are different!\n", buffer);
+//	    count = system(buffer);
+//	    printf("Return value of %s is %d\n", buffer, count);
+//	    if (0 != count)
+//	        fprintf(stderr, "%s says they are different!\n", buffer);
 	}
 	else
 	    fprintf(stderr, "Unable to open file %s for writing!\n", outName);
