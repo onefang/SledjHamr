@@ -10,12 +10,11 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content);
-static void outputParameterToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content);
-static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -98,7 +97,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Then the rest of the syntax tokens.
-    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputVariableToken, NULL},
+    {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputIdentifierToken, NULL},
 
     {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL},
 
@@ -115,7 +114,7 @@ LSL_Token LSL_Tokens[] =
 
     {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL},
     {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL},
-    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputParameterToken, NULL},
+    {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputIdentifierToken, NULL},
     {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL},
     {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL},
     {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken, NULL},
@@ -819,7 +818,7 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%d", content->value.integerValue);
 }
 
-static void outputParameterToken(FILE *file, outputMode mode, LSL_Leaf *content)
+static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	fprintf(file, "%s", content->value.identifierValue->name);
@@ -861,12 +860,6 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    fprintf(file, "%s", content->ignorableText);
 	fprintf(file, "%s", content->token->token);
     }
-}
-
-static void outputVariableToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	fprintf(file, "%s", content->value.identifierValue->name);
 }
 
 static void doneParsing(LuaSL_compiler *compiler)
