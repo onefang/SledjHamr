@@ -131,8 +131,8 @@ allowedTypes allowed[] =
     {OT_nothing,	"nothing",	(ST_NONE)},																// 
 
     {OT_bool,		"boolean",	(ST_BOOL_NOT)},																// bool				!
-    {OT_integer,	"integer",	(ST_BIT_NOT | ST_NEGATE)},														// int				- ~
-    {OT_float,		"float",	(ST_NONE)},																// float			-
+    {OT_integer,	"integer",	(ST_BOOL_NOT | ST_BIT_NOT | ST_NEGATE)},												// int				! - ~
+    {OT_float,		"float",	(ST_BOOL_NOT)},																// float			! -
     {OT_key,		"key",		(ST_NONE)},																// 
     {OT_list,		"list",		(ST_NONE)},																// 
     {OT_rotation,	"rotation",	(ST_NONE)},																// 
@@ -259,6 +259,10 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 
 	lval->left = left;
 	lval->right = right;
+
+	// Convert subtract to negate if needed.
+	if ((NULL == left) && (LSL_SUBTRACT == lval->token->type))
+	    lval->token = tokens[LSL_NEGATION - lowestToken];
 
 	// Try to figure out what type of operation this is.
 	if (NULL == left)
