@@ -109,35 +109,6 @@ typedef enum
     OT_invalid
 } opType;
 
-/*
-Each op is of a specific type -
-
-bool				!
-int				- ~
-float				-
-
-bool		bool		&& ||     == !=           =
-int		int		* / + - % == != < > <= >= = += -= *= /= %= & | ^ << >>
-int		float		cast to float float
-float		int		cast to float float
-float		float		* / + -   == != < > <= >= = += -= *= /= 
-
-key		string		cast to string string
-string		key		cast to string string
-string		string		+         == !=           = +=
-
-list		list		+         == !=           = +=
-list		integer/float	+               < > <= >= = +=
-integer/float	list		+               < > <= >=
-list		other		+                         = +=
-
-vector		vector		* / + - % == !=           = += -= *= /= %=
-vector		float		* /
-vector		rotation	* /
-
-rotation	rotation	* / + -   == !=           = += -= *= /= 
-*/
-
 typedef enum
 {
     ST_NONE		= 0,
