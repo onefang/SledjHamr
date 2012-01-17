@@ -6,6 +6,8 @@ export LOCALDIR=`pwd`
 cd src
 rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
 
+
+# This assumes you have EFL installed in one of two standard places.
 if [ -d "/opt/e17" ]
 then
     export E17DIR="/opt/e17"

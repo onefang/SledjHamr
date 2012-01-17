@@ -1,8 +1,7 @@
 %{
 
-#include "LuaSL.h"
 #define excludeLexer
-#include "LuaSL_LSL_tree.h"
+#include "LuaSL.h"
 
 int common(YYSTYPE *lval, char *text, LuaSL_yyparseParam *param, boolean checkIgnorable, int type);
 
