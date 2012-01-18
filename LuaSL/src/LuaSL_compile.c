@@ -370,6 +370,7 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
+	result->value.token = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->token = tokens[LSL_PARAMETER - lowestToken];
 	identifier->left = type;
@@ -377,6 +378,7 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
 	{
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
+	    result->value.token = type->token;	// This is the LSL_TYPE_* token instead of the LSL_* token.  Not sure if that's a problem.
 	}
     }
     return identifier;
@@ -444,7 +446,7 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
 
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
 {
-    LSL_Parenthesis *parens = malloc(sizeof(LSL_Parenthesis));
+    LSL_Parenthesis *parens = calloc(1, sizeof(LSL_Parenthesis));
 
     if (parens)
     {
@@ -479,7 +481,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *blo
 
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
 {
-    LSL_Statement *stat = malloc(sizeof(LSL_Statement));
+    LSL_Statement *stat = calloc(1, sizeof(LSL_Statement));
 
     if (stat)
     {
@@ -494,7 +496,7 @@ LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
 
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr)
 {
-    LSL_Parenthesis *parens = malloc(sizeof(LSL_Parenthesis));
+    LSL_Parenthesis *parens = calloc(1, sizeof(LSL_Parenthesis));
 
     if (parens)
     {
@@ -524,6 +526,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
+	result->value.token = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->left = type;
 	identifier->right = assignment;
@@ -533,6 +536,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	{
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
+	    result->value.token = type->token;	// This is the LSL_TYPE_* token instead of the LSL_* token.  Not sure if that's a problem.
 	}
 	if (compiler->currentBlock)
 	    eina_hash_add(compiler->currentBlock->variables, result->name, identifier);
