@@ -671,6 +671,7 @@ QUIRK - I have seen cases where a double explicit typecast was needed in SL, but
 Any binary operation involving a float and an integer implicitly casts the integer to float.
 
 A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
+On the other hand, in Lua, only false and nil are false, everything else is true.
 Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
 
 integer  = integer0   % integer1;  // Apparently only applies to integers, but works fine on floats in OS.
