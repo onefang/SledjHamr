@@ -420,10 +420,10 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    {
 		if (params->value.listValue)
 		{
-		    LSL_Identifier *identifier = params->value.listValue->value.identifierValue;
+		    LSL_Leaf *param = params->value.listValue;
 
 		    if (identifier)
-			eina_hash_add(func->variables, identifier->name, identifier);
+			eina_hash_add(func->variables, param->value.identifierValue->name, param);
 		}
 		params = params->left;
 	    }
@@ -1218,3 +1218,4 @@ int main(int argc, char **argv)
     return 0;
 }
 #endif
+
