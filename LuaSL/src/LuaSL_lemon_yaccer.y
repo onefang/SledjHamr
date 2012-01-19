@@ -163,7 +163,7 @@ expr ::= identifier LSL_ASSIGNMENT_MODULO expr.
 expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
 expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
 
-// Hmm think this can have commas seperating the assignment parts.
+// Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
 
