@@ -225,7 +225,9 @@ void burnLeaf(void *data)
 //	burnLeaf(leaf->left);
 //	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
+#ifdef LUASL_DIFF_CHECK
 //	eina_strbuf_free(leaf->ignorableText);
+#endif
 //	free(leaf);
     }
 }
@@ -468,9 +470,11 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
     {
 	parens->contents = expr;
 	parens->type = type;
+#ifdef LUASL_DIFF_CHECK
 	parens->rightIgnorableText = rval->ignorableText;
 	// Actualy, at this point, rval is no longer needed.
 //	rval->ignorableText = eina_strbuf_new();
+#endif
 	if (lval)
 	{
 	    lval->value.parenthesis = parens;
@@ -878,8 +882,10 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     if (leaf)
     {
 	outputLeaf(file, mode, leaf->left);
+#ifdef LUASL_DIFF_CHECK
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
 	    fwrite(eina_strbuf_string_get(leaf->ignorableText), 1, eina_strbuf_length_get(leaf->ignorableText), file);
+#endif
 	if (leaf->token->output)
 	    leaf->token->output(file, mode, leaf);
 	else
@@ -904,6 +910,9 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s", func->name);
 	outputLeaf(file, mode, func->params);
 	outputLeaf(file, mode, func->block);
+#ifndef LUASL_DIFF_CHECK
+	fprintf(file, "\n");
+#endif
     }
 }
 
@@ -916,7 +925,11 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
+#ifdef LUASL_DIFF_CHECK
 	fprintf(file, "%s", content->value.identifierValue->name);
+#else
+	fprintf(file, " %s", content->value.identifierValue->name);
+#endif
 }
 
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -934,7 +947,11 @@ static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *conten
 	    fprintf(file, "%s", allowed[content->basicType].name);	// TODO - We are missing the type ignorable text here.
 	else
 	    outputLeaf(file, mode, content->value.parenthesis->contents);
+#ifdef LUASL_DIFF_CHECK
 	fprintf(file, "%s)", eina_strbuf_string_get(content->value.parenthesis->rightIgnorableText));
+#else
+	fprintf(file, ")");
+#endif
 	if (LSL_TYPECAST_OPEN == content->value.parenthesis->type)
 	    outputLeaf(file, mode, content->value.parenthesis->contents);
     }
@@ -956,9 +973,14 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
     if (content)
     {
 	outputLeaf(file, mode, content->value.statementValue->expressions);
+#ifdef LUASL_DIFF_CHECK
 	if (content->ignorableText)
 	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
+#endif
 	fprintf(file, "%s", content->token->token);
+#ifndef LUASL_DIFF_CHECK
+	fprintf(file, "\n");
+#endif
     }
 }
 
@@ -985,14 +1007,18 @@ static void doneParsing(LuaSL_compiler *compiler)
 	out = fopen(outName, "w");
 	if (out)
 	{
-//	    int count;
+#ifdef LUASL_DIFF_CHECK
+	    int count;
+#endif
 	    outputLeaf(out, OM_LSL, compiler->ast);
 	    fclose(out);
 	    sprintf(buffer, "diff %s %s", compiler->fileName, outName);
-//	    count = system(buffer);
-//	    PI("Return value of %s is %d", buffer, count);
-//	    if (0 != count)
-//	        PE("%s says they are different!", buffer);
+#ifdef LUASL_DIFF_CHECK
+	    count = system(buffer);
+	    PI("Return value of %s is %d", buffer, count);
+	    if (0 != count)
+	        PE("%s says they are different!", buffer);
+#endif
 	}
 	else
 	    PC("Unable to open file %s for writing!", outName);
@@ -1050,7 +1076,9 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
     compiler.script.functions = eina_hash_stringshared_new(burnLeaf);
     compiler.script.states = eina_hash_stringshared_new(burnLeaf);
     compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
+#ifdef LUASL_DIFF_CHECK
     compiler.ignorableText = eina_strbuf_new();
+#endif
 
     strncpy(compiler.fileName, script, PATH_MAX - 1);
     compiler.fileName[PATH_MAX - 1] = '\0';
