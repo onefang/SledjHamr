@@ -466,10 +466,11 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
 
     if (parens)
     {
-	parens->left = lval;
 	parens->contents = expr;
 	parens->type = type;
-	parens->right = rval;
+	parens->rightIgnorableText = rval->ignorableText;
+	// Actualy, at this point, rval is no longer needed.
+//	rval->ignorableText = eina_strbuf_new();
 	if (lval)
 	{
 	    lval->value.parenthesis = parens;
@@ -512,26 +513,17 @@ LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
 
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr)
 {
-    LSL_Parenthesis *parens = calloc(1, sizeof(LSL_Parenthesis));
-
-    if (parens)
+    addParenthesis(lval, expr, LSL_TYPECAST_OPEN, rval);
+    if (lval)
     {
-	parens->left = lval;
-	parens->contents = expr;
-	parens->type = LSL_TYPECAST_OPEN;
-	parens->right = rval;
-	if (lval)
-	{
-	    lval->value.parenthesis = parens;
-	    if (type)
-		lval->basicType = type->basicType;
-	    lval->token = tokens[LSL_TYPECAST_OPEN - lowestToken];
-	}
-	if (rval)
-	{
-	    rval->token = tokens[LSL_TYPECAST_CLOSE - lowestToken];
-	}
+	if (type)
+	    lval->basicType = type->basicType;
+	// Actualy, at this point, type is no longer needed.
+	lval->token = tokens[LSL_TYPECAST_OPEN - lowestToken];
     }
+//    if (rval)
+//	rval->token = tokens[LSL_TYPECAST_CLOSE - lowestToken];
+
     return lval;
 }
 
@@ -937,9 +929,14 @@ static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *conten
 {
     if (content)
     {
-	fprintf(file, "%s", content->token->token);
-	outputLeaf(file, mode, content->value.parenthesis->contents);
-	outputLeaf(file, mode, content->value.parenthesis->right);
+	fprintf(file, "(");
+	if (LSL_TYPECAST_OPEN == content->value.parenthesis->type)
+	    fprintf(file, "%s", allowed[content->basicType].name);	// TODO - We are missing the type ignorable text here.
+	else
+	    outputLeaf(file, mode, content->value.parenthesis->contents);
+	fprintf(file, "%s)", eina_strbuf_string_get(content->value.parenthesis->rightIgnorableText));
+	if (LSL_TYPECAST_OPEN == content->value.parenthesis->type)
+	    outputLeaf(file, mode, content->value.parenthesis->contents);
     }
 }
 

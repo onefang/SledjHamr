@@ -173,9 +173,8 @@ struct _LSL_Leaf
 
 struct _LSL_Parenthesis
 {
-    LSL_Leaf		*left;
     LSL_Leaf		*contents;
-    LSL_Leaf		*right;
+    Eina_Strbuf		*rightIgnorableText;
     LSL_Type		type;
 };
 
