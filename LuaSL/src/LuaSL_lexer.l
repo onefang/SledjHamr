@@ -133,6 +133,7 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
 	    compiler->column++;
     }
 
+#ifdef LUASL_DIFF_CHECK
     if (checkIgnorable)
     {
 	lval->ignorableText = compiler->ignorableText;
@@ -140,6 +141,7 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
     }
     else
 	eina_strbuf_append_length(compiler->ignorableText, text, len);
+#endif
 
     return type;
 }

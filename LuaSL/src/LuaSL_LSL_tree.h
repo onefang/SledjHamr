@@ -3,6 +3,7 @@
 #define __LUASL_TREE_H__
 
 //#define LUASL_DEBUG
+//#define LUASL_DIFF_CHECK
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -149,7 +150,9 @@ struct _LSL_Leaf
     LSL_Leaf		*left;
     LSL_Leaf		*right;
     LSL_Token		*token;
+#ifdef LUASL_DIFF_CHECK
     Eina_Strbuf		*ignorableText;
+#endif
     int 		line, column, len;
     opType		basicType;
     union
@@ -174,7 +177,9 @@ struct _LSL_Leaf
 struct _LSL_Parenthesis
 {
     LSL_Leaf		*contents;
+#ifdef LUASL_DIFF_CHECK
     Eina_Strbuf		*rightIgnorableText;
+#endif
     LSL_Type		type;
 };
 
@@ -300,7 +305,9 @@ typedef struct
     FILE		*file;
     LSL_Leaf		*ast;
     LSL_Script		script;
+#ifdef LUASL_DIFF_CHECK
     Eina_Strbuf		*ignorableText;
+#endif
     LSL_Leaf		*lval;
     int			column, line;
     LSL_Block		*currentBlock;
