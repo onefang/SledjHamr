@@ -196,15 +196,15 @@ struct _LSL_Block
     LSL_Block		*outerBlock;
 //    Eina_Hash		*statements;	// Probably should be some sort of eina list.
     Eina_Hash		*variables;	// Those variables in this scope.
-    LSL_Function	*function;
+    LSL_Function	*function;	// A pointer to the function if this block is a function.
 };
 
 struct _LSL_Function
 {
     const char	*name;
     LSL_Leaf	*type;
-    LSL_Leaf	*params;
-    Eina_Hash	*variables;
+    LSL_Leaf	*params;	// Probably should be some sort of eina list.
+    Eina_Hash	*variables;	// And this actually duplicates params.
     LSL_Leaf	*block;
 };
 
@@ -222,6 +222,71 @@ struct _LSL_Script
     Eina_Hash		*states;
     Eina_Hash		*variables;
 };
+
+/* Tracking variables.
+
+There are global variables, block local variables, and function parameters.
+
+For outputting Lua, which is the ultimate goal -
+    track order, name, and type.
+
+For looking them up during the compile -
+    quick access from name.
+
+For validating them during compile -
+    track type.
+
+For outputting LSL to double check -
+    track order, name, type, and white space.
+
+For executing directly from the AST -
+    track order, name, type, and value.
+    In this case, order is only important for functions.
+
+We can assume that names are stringshared.  This means we only have to
+compare pointers.  It also means the same name stored at diffferent
+scopes, must be stored in separate structures, coz the pointers are the
+same.
+
+Order is taken care of by the AST anyway, but for somethings we want to
+condense the AST down to something more efficient.
+
+On the other hand, no need to micro optimise it just yet, we should be
+able to try out other data structures at a later date, then benchmark
+them with typical scripts.
+
+Right now I see nothing wrong with the current use of hash for script
+and block variables.  The same for script states and functions, as wall
+as state functions. Though in the near future, they will have similar
+problems to functcions I think - the need to track order and white
+space.
+
+Function params though have gotten unwieldy.  Each param ends up with
+AST nodes for itself, it's type, it's own paramlist node, and the comma. 
+The paramlist nodes are the excessive bits, the rest are needed to track
+the white space.
+
+*/
+
+/* General design.
+
+NOTE We should be able to remove the white space tracking at compile
+time, as it's only a debugging aid.  Will be a performance and memory
+gain for productidon use. Tracking values on the other hand will still
+be useful for constants.
+
+The compile process starts with turning tokens into AST nodes connected
+in a tree.  During that process the parser wants to condense nodes down
+to more efficient data structures.  This is a good idea, as we will
+spend a fair amount of time looking up names, no matter which part of
+the process is important at the time.
+
+Once the parser has condensed things down, it only deals with the
+condensed nodes.  So we can get rid of some of the AST parts at this
+time, so long as we keep the relevant information.  This is what the
+other data structures above are for.
+
+*/
 
 // Define the type for flex and lemon.
 #define YYSTYPE LSL_Leaf
