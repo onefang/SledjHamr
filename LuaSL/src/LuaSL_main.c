@@ -168,6 +168,8 @@ main(int argc, char **argv)
 	    PIm("Against all odds, the compile of %s worked!  lol", buf);
 	else
 	    PEm("The compile of %s failed!", buf);
+	snprintf(buf, sizeof(buf), "%s/test.lsl", PACKAGE_DATA_DIR);
+	compileLSL(&game, buf);
 
 //	ecore_main_loop_begin();
 
