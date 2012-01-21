@@ -114,6 +114,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Then the rest of the syntax tokens.
+    {LSL_FUNCTION_CALL,		ST_NONE,	"funccall",	LSL_NONE,				NULL, NULL},
     {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputIdentifierToken, NULL},
 
     {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL},
@@ -236,6 +237,21 @@ void burnLeaf(void *data)
     }
 }
 
+static LSL_Leaf *findFunction(LuaSL_compiler *compiler, const char *name)
+{
+    LSL_Leaf  *func = NULL;
+
+    if (name)
+    {
+	if (NULL == func)
+	    func = eina_hash_find(constants.functions, name);
+	if (NULL == func)
+	    func = eina_hash_find(compiler->script.functions, name);
+    }
+
+    return func;
+}
+
 static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 {
     LSL_Leaf  *var = NULL;
@@ -273,13 +289,28 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
     return var;
 }
 
+LSL_Leaf *checkFunction(LuaSL_compiler *compiler, LSL_Leaf *identifier)
+{
+    gameGlobals *game = compiler->game;
+    LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
+
+    if (NULL == func)
+	PE("NOT found %s @ line %d column %d!", identifier->value.stringValue, identifier->line, identifier->column);
+#ifdef LUASL_DEBUG
+    else
+	PI("Found %s!", identifier->value.stringValue);
+#endif
+
+    return func;
+}
+
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
     LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
 
     if (NULL == var)
-	PE("NOT found %s!", identifier->value.stringValue);
+	PE("NOT found %s @ line %d column %d!", identifier->value.stringValue, identifier->line, identifier->column);
 #ifdef LUASL_DEBUG
     else
 	PI("Found %s!", identifier->value.stringValue);
@@ -500,6 +531,22 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
 	function->value.functionValue->block = block;
 
     return function;
+}
+
+LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
+{
+    LSL_Leaf *func = checkFunction(compiler, identifier);
+
+    identifier->token = tokens[LSL_UNKNOWN - lowestToken];
+
+    if (func)
+    {
+	// TODO - Add some structure here to hold the params.
+	identifier->token = tokens[LSL_FUNCTION_CALL - lowestToken];
+	identifier->basicType = func->basicType;
+    }
+
+    return identifier;
 }
 
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
