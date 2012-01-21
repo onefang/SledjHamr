@@ -87,6 +87,7 @@ statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESS
 
 // Various forms of expression.
 
+// Used for function call params, and list contents.
 exprList ::= exprList LSL_COMMA expr.
 exprList ::= expr.
 exprList ::= .
@@ -149,7 +150,7 @@ expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D) expr(E).	{ 
 // Function call.
 
 // Causes a conflict when exprList is empty with a function definition with no type and no parameters.
-expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
+expr(A) ::= LSL_IDENTIFIER(B) LSL_PARENTHESIS_OPEN(C) exprList(D) LSL_PARENTHESIS_CLOSE(E).	{ A = addFunctionCall(compiler, B, C, D, E); }
 
 // Variables and dealing with them.
 
@@ -165,10 +166,11 @@ expr(A) ::= identifier LSL_ASSIGNMENT_DIVIDE expr(B).				{ A = B; }
 expr(A) ::= identifier LSL_ASSIGNMENT_PLAIN expr(B).				{ A = B; }
 
 // Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
+// Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
 
-%right LSL_DOT LSL_IDENTIFIER.
+%right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
 identifier(A) ::= LSL_IDENTIFIER(B).						{ A = checkVariable(compiler, B); }
 
