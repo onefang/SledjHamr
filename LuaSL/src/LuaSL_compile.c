@@ -383,9 +383,8 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		switch (lval->token->subType)
 		{
 		    case ST_BOOLEAN :
-			lval->basicType = OT_bool;
-			break;
 		    case ST_COMPARISON :
+		    case ST_EQUALITY :
 			lval->basicType = OT_bool;
 			break;
 		    case ST_MULTIPLY :
