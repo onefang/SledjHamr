@@ -313,7 +313,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
     LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
 
     if (NULL == var)
-	PE("NOT found %s @ line %d column %d!", identifier->value.stringValue, identifier->line, identifier->column);
+	PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
 #ifdef LUASL_DEBUG
     else
 	PI("Found %s!", identifier->value.stringValue);
@@ -428,7 +428,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rightType = allowed[right->basicType].name;
 	    }
 
-	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d column %d", leftType, leftToken, lval->token->token, rightType, rightToken, lval->line, lval->column);
+	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d, column %d!", leftType, leftToken, lval->token->token, rightType, rightToken, lval->line, lval->column);
 	}
     }
 

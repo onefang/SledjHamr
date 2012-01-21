@@ -223,14 +223,14 @@ expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.			[L
 {
     gameGlobals *game = compiler->game;
 
-    PE("Giving up.  Parser stack overflow @ line %d column %d.", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
+    PE("Giving up.  Parser stack overflow @ line %d, column %d!", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
 }
 
 %syntax_error
 {
     gameGlobals *game = compiler->game;
 
-    PE("Syntax error @ line %d column %d.", yyminor.yy0->line, yyminor.yy0->column);
+    PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);
 }
 
 
