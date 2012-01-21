@@ -432,6 +432,16 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
     return lval;
 }
 
+LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement)
+{
+    if ((variable) && (crement))
+    {
+	crement->basicType = variable->basicType;
+    }
+
+    return crement;
+}
+
 LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier)
 {
     LSL_Identifier *result = calloc(1, sizeof(LSL_Identifier));

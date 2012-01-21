@@ -176,10 +176,10 @@ identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
 identifier(A) ::= LSL_IDENTIFIER(B).						{ A = checkVariable(compiler, B); }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
-expr ::= identifier LSL_DECREMENT_PRE.
-expr ::= identifier LSL_INCREMENT_PRE.
-expr ::= LSL_DECREMENT_PRE identifier.
-expr ::= LSL_INCREMENT_PRE identifier.
+expr(A) ::= identifier(B) LSL_DECREMENT_PRE(C).						{ A = addCrement(compiler, B, C); }
+expr(A) ::= identifier(B) LSL_INCREMENT_PRE(C).						{ A = addCrement(compiler, B, C); }
+expr(A) ::= LSL_DECREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C); }
+expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C); }
 
 %nonassoc LSL_COMMA.
 
