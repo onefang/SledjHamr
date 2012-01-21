@@ -338,6 +338,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		lType = left->basicType;
 	    if (OT_undeclared == lType)
 	    {
+		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -359,6 +360,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = right->basicType;
 	    if (OT_undeclared == rType)
 	    {
+		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -705,6 +707,17 @@ void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 {
     compiler->currentBlock = compiler->currentBlock->outerBlock;
+}
+
+static void secondPass(LuaSL_compiler *compiler, LSL_Leaf *leaf)
+{
+    if (leaf)
+    {
+	secondPass(compiler, leaf->left);
+	if (OT_undeclared == leaf->basicType)
+	    leaf = addOperation(compiler, leaf->left, leaf, leaf->right);
+	secondPass(compiler, leaf->right);
+    }
 }
 
 static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
@@ -1291,7 +1304,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
 
     if (compiler.undeclared)
     {
-	PI("A second pass will be needed to check if functions where declared after they where used.  To avoid this second pass, don't do that.");
+	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
 	if (eina_clist_count(&(compiler.danglingCalls)))
 	{
 	    LSL_FunctionCall *call = NULL;
@@ -1311,7 +1324,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		    PE("Undeclared function %s called @ line %d, column %d!", call->call->value.stringValue, call->call->line, call->call->column);
 	    }
 	}
-// TODO - Run through the expressions, cleaning up the function calls.
+	secondPass(&compiler, compiler.ast);
 	PI("Second pass completed.");
     }
 
