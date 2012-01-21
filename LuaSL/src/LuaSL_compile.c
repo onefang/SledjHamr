@@ -291,6 +291,7 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
     return var;
 }
 
+// TODO - Damn, you can reference functions declared later.
 LSL_Leaf *checkFunction(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
