@@ -156,13 +156,13 @@ expr ::= LSL_IDENTIFIER LSL_PARENTHESIS_OPEN exprList LSL_PARENTHESIS_CLOSE.
 expr(A) ::= identifier(B).							{ A = B; }
 
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
-expr ::= identifier LSL_ASSIGNMENT_CONCATENATE expr.
-expr ::= identifier LSL_ASSIGNMENT_ADD expr.
-expr ::= identifier LSL_ASSIGNMENT_SUBTRACT expr.
-expr ::= identifier LSL_ASSIGNMENT_MULTIPLY expr.
-expr ::= identifier LSL_ASSIGNMENT_MODULO expr.
-expr ::= identifier LSL_ASSIGNMENT_DIVIDE expr.
-expr ::= identifier LSL_ASSIGNMENT_PLAIN expr.
+expr(A) ::= identifier LSL_ASSIGNMENT_CONCATENATE expr(B).			{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_ADD expr(B).				{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_SUBTRACT expr(B)	.			{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_MULTIPLY expr(B).				{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_MODULO expr(B).				{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_DIVIDE expr(B).				{ A = B; }
+expr(A) ::= identifier LSL_ASSIGNMENT_PLAIN expr(B).				{ A = B; }
 
 // Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
