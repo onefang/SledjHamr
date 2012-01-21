@@ -166,6 +166,7 @@ allowedTypes allowed[] =
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	int		cast to float float
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	float		* / + -   == != < > <= >= = += -= *= /= 
 
+    {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// key		key		cast to string string
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// key		string		cast to string string
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// string	key		cast to string string
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// string	string		    +     == !=           = +=
@@ -193,7 +194,7 @@ opType opExpr[][10] =
     {OT_bool,     OT_boolBool, OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
     {OT_integer,  OT_invalid,  OT_intInt,   OT_intFloat,    OT_invalid,   OT_intList,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
     {OT_float,    OT_invalid,  OT_floatInt, OT_floatFloat,  OT_invalid,   OT_floatList, OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
-    {OT_key,      OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_keyString,    OT_invalid,      OT_invalid},
+    {OT_key,      OT_invalid,  OT_invalid,  OT_invalid,     OT_keyKey,    OT_invalid,   OT_invalid,          OT_keyString,    OT_invalid,      OT_invalid},
     {OT_list,     OT_invalid,  OT_listInt,  OT_listFloat,   OT_invalid,   OT_listList,  OT_invalid,          OT_invalid,      OT_invalid,      OT_listOther},
     {OT_rotation, OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_rotationRotation, OT_invalid,      OT_invalid,      OT_invalid},
     {OT_string,   OT_invalid,  OT_invalid,  OT_invalid,     OT_stringKey, OT_invalid,   OT_invalid,          OT_stringString, OT_invalid,      OT_invalid},

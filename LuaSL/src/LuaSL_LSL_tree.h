@@ -93,6 +93,7 @@ typedef enum
     OT_intFloat,
     OT_floatInt,
     OT_floatFloat,
+    OT_keyKey,
     OT_keyString,
     OT_stringKey,
     OT_stringString,
