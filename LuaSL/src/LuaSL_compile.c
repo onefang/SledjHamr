@@ -200,6 +200,7 @@ opType opExpr[][10] =
 
 
 LSL_Token **tokens = NULL;
+LSL_Script constants;
 int lowestToken = 999999;
 
 
@@ -262,6 +263,8 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 	    block = block->outerBlock;
 	}
 
+	if (NULL == var)
+	    var = eina_hash_find(constants.variables, name);
 	if (NULL == var)
 	    var = eina_hash_find(compiler->script.variables, name);
     }
@@ -1092,6 +1095,8 @@ Eina_Bool compilerSetup(gameGlobals *game)
     tokens = calloc(i + 1, sizeof(LSL_Token *));
     if (tokens)
     {
+	char buf[PATH_MAX];
+
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].token != NULL; i++)
 	{
@@ -1099,6 +1104,11 @@ Eina_Bool compilerSetup(gameGlobals *game)
 
 	    tokens[j] = &(LSL_Tokens[i]);
 	}
+
+	// Compile the constants.
+	snprintf(buf, sizeof(buf), "%s/src/constants.lsl", PACKAGE_DATA_DIR);
+	compileLSL(game, buf, TRUE);
+
 	return EINA_TRUE;
     }
     else
@@ -1107,7 +1117,7 @@ Eina_Bool compilerSetup(gameGlobals *game)
     return EINA_FALSE;
 }
 
-Eina_Bool compileLSL(gameGlobals *game, char *script)
+Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
 {
     Eina_Bool result = EINA_FALSE;
     LuaSL_compiler compiler;
@@ -1160,7 +1170,14 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
     yylex_destroy(compiler.scanner);
     Parse (pParser, 0, compiler.lval, &compiler);
     ParseFree(pParser, free);
-    doneParsing(&compiler);
+
+    if (doConstants)
+    {
+	memcpy(&constants, &(compiler.script), sizeof(LSL_Script));
+    }
+    else
+    {
+	doneParsing(&compiler);
 
 // Take the result of the parse, and convert it into Lua source.
 //   Each LSL script becomes a Lua state.
@@ -1169,12 +1186,16 @@ Eina_Bool compileLSL(gameGlobals *game, char *script)
 
 // Compile the Lua source by the Lua compiler.
 
+    }
+
     if (NULL != compiler.file)
     {
 	fclose(compiler.file);
 	compiler.file = NULL;
     }
-    burnLeaf(compiler.ast);
+
+    if (!doConstants)
+	burnLeaf(compiler.ast);
 
     return result;
 }

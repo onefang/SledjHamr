@@ -164,12 +164,12 @@ main(int argc, char **argv)
 	compilerSetup(&game);
 //	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
 	snprintf(buf, sizeof(buf), "%s/test2.lsl", PACKAGE_DATA_DIR);
-	if (compileLSL(&game, buf))
+	if (compileLSL(&game, buf, FALSE))
 	    PIm("Against all odds, the compile of %s worked!  lol", buf);
 	else
 	    PEm("The compile of %s failed!", buf);
 	snprintf(buf, sizeof(buf), "%s/test.lsl", PACKAGE_DATA_DIR);
-	compileLSL(&game, buf);
+	compileLSL(&game, buf, FALSE);
 
 //	ecore_main_loop_begin();
 

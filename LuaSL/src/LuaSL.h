@@ -57,7 +57,7 @@ typedef struct
 
 
 Eina_Bool compilerSetup(gameGlobals *game);
-Eina_Bool compileLSL(gameGlobals *game, char *script);
+Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants);
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
