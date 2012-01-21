@@ -185,6 +185,7 @@ allowedTypes allowed[] =
     {OT_rotation,	"rotation",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},							// rotation	rotation	* / + -   == !=           = += -= *= /= 
 
     {OT_other,		"other",	(ST_NONE)},																// 
+    {OT_undeclared,	"undeclared",	(ST_NONE)},																// 
     {OT_invalid,	"invalid",	(ST_NONE)}																// 
 };
 
@@ -291,22 +292,6 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
     return var;
 }
 
-// TODO - Damn, you can reference functions declared later.
-LSL_Leaf *checkFunction(LuaSL_compiler *compiler, LSL_Leaf *identifier)
-{
-    gameGlobals *game = compiler->game;
-    LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
-
-    if (NULL == func)
-	PE("NOT found %s @ line %d column %d!", identifier->value.stringValue, identifier->line, identifier->column);
-#ifdef LUASL_DEBUG
-    else
-	PI("Found %s!", identifier->value.stringValue);
-#endif
-
-    return func;
-}
-
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
@@ -351,6 +336,11 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    }
 	    else
 		lType = left->basicType;
+	    if (OT_undeclared == lType)
+	    {
+		lval->basicType = OT_undeclared;
+		return lval;
+	    }
 	    if (OT_vector < lType)
 		lType = allowed[lType].result;
 	}
@@ -367,6 +357,11 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    }
 	    else
 		rType = right->basicType;
+	    if (OT_undeclared == rType)
+	    {
+		lval->basicType = OT_undeclared;
+		return lval;
+	    }
 	    if (OT_vector < rType)
 		rType = allowed[rType].result;
 	}
@@ -537,15 +532,34 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
 
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
 {
-    LSL_Leaf *func = checkFunction(compiler, identifier);
+    LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
+    LSL_FunctionCall *call = calloc(1, sizeof(LSL_FunctionCall));
 
     identifier->token = tokens[LSL_UNKNOWN - lowestToken];
 
     if (func)
     {
-	// TODO - Add some structure here to hold the params.
+	if (call)
+	{
+	    call->function = func->value.functionValue;
+	    eina_clist_element_init(&(call->functionCall));
+	    call->call = identifier;
+	}
+	identifier->value.functionCallValue = call;
+	// TODO - Put the params in call.
 	identifier->token = tokens[LSL_FUNCTION_CALL - lowestToken];
 	identifier->basicType = func->basicType;
+    }
+    else
+    {
+	// It may be declared later, so store it and check later.
+	if (call)
+	{
+	    eina_clist_add_tail(&(compiler->danglingCalls), &(call->functionCall));
+	    call->call = identifier;
+	}
+	identifier->basicType = OT_undeclared;
+	compiler->undeclared = TRUE;
     }
 
     return identifier;
@@ -1235,6 +1249,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
     compiler.script.functions = eina_hash_stringshared_new(burnLeaf);
     compiler.script.states = eina_hash_stringshared_new(burnLeaf);
     compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
+    eina_clist_init(&(compiler.danglingCalls));
 #ifdef LUASL_DIFF_CHECK
     compiler.ignorableText = eina_strbuf_new();
 #endif
@@ -1273,6 +1288,32 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
     yylex_destroy(compiler.scanner);
     Parse (pParser, 0, compiler.lval, &compiler);
     ParseFree(pParser, free);
+
+    if (compiler.undeclared)
+    {
+	PI("A second pass will be needed to check if functions where declared after they where used.  To avoid this second pass, don't do that.");
+	if (eina_clist_count(&(compiler.danglingCalls)))
+	{
+	    LSL_FunctionCall *call = NULL;
+
+	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler.danglingCalls), LSL_FunctionCall, functionCall)
+	    {
+		LSL_Leaf *func = findFunction(&(compiler), call->call->value.stringValue);
+
+		if (func)
+		{
+		    call->function = func->value.functionValue;
+		    call->call->value.functionCallValue = call;
+		    call->call->token = tokens[LSL_FUNCTION_CALL - lowestToken];
+		    call->call->basicType = func->basicType;
+		}
+		else
+		    PE("Undeclared function %s called @ line %d, column %d!", call->call->value.stringValue, call->call->line, call->call->column);
+	    }
+	}
+// TODO - Run through the expressions, cleaning up the function calls.
+	PI("Second pass completed.");
+    }
 
     if (doConstants)
     {

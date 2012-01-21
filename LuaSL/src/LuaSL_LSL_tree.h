@@ -29,16 +29,17 @@
 // http://w-hat.com/stackdepth is a useful discussion about some aspects of the LL parser.
 
 
-typedef struct _allowedTypes	allowedTypes;
-typedef struct _LSL_Token	LSL_Token;
-typedef struct _LSL_Leaf	LSL_Leaf;
-typedef struct _LSL_Parenthesis LSL_Parenthesis;
-typedef struct _LSL_Identifier	LSL_Identifier;
-typedef struct _LSL_Statement	LSL_Statement;
-typedef struct _LSL_Block	LSL_Block;
-typedef struct _LSL_Function	LSL_Function;
-typedef struct _LSL_State	LSL_State;
-typedef struct _LSL_Script	LSL_Script;
+typedef struct _allowedTypes		allowedTypes;
+typedef struct _LSL_Token		LSL_Token;
+typedef struct _LSL_Leaf		LSL_Leaf;
+typedef struct _LSL_Parenthesis 	LSL_Parenthesis;
+typedef struct _LSL_Identifier		LSL_Identifier;
+typedef struct _LSL_Statement		LSL_Statement;
+typedef struct _LSL_Block		LSL_Block;
+typedef struct _LSL_Function		LSL_Function;
+typedef struct _LSL_FunctionCall	LSL_FunctionCall;
+typedef struct _LSL_State		LSL_State;
+typedef struct _LSL_Script		LSL_Script;
 
 extern LSL_Token **tokens;
 extern int lowestToken;
@@ -108,6 +109,7 @@ typedef enum
     OT_vectorRotation,
     OT_rotationRotation,
     OT_otherOther,
+    OT_undeclared,
     OT_invalid
 } opType;
 
@@ -148,30 +150,31 @@ struct _LSL_Token
 
 struct _LSL_Leaf
 {
-    LSL_Leaf		*left;
-    LSL_Leaf		*right;
-    LSL_Token		*token;
+    LSL_Leaf			*left;
+    LSL_Leaf			*right;
+    LSL_Token			*token;
 #ifdef LUASL_DIFF_CHECK
-    Eina_Strbuf		*ignorableText;
+    Eina_Strbuf			*ignorableText;
 #endif
-    int 		line, column, len;
-    opType		basicType;
+    int 			line, column, len;
+    opType			basicType;
     union
     {
-	float		floatValue;
-	float		vectorValue[3];
-	float		rotationValue[4];
-	int		integerValue;
-	LSL_Leaf	*listValue;
-	const char	*stringValue;
-	opType		operationValue;
-	LSL_Parenthesis *parenthesis;
-	LSL_Identifier	*identifierValue;
-	LSL_Statement	*statementValue;
-	LSL_Block	*blockValue;
-	LSL_Function	*functionValue;
-	LSL_State	*stateValue;
-	LSL_Script	*scriptValue;
+	float			floatValue;
+	float			vectorValue[3];
+	float			rotationValue[4];
+	int			integerValue;
+	LSL_Leaf		*listValue;
+	const char		*stringValue;
+	opType			operationValue;
+	LSL_Parenthesis 	*parenthesis;
+	LSL_Identifier		*identifierValue;
+	LSL_Statement		*statementValue;
+	LSL_Block		*blockValue;
+	LSL_Function		*functionValue;
+	LSL_FunctionCall	*functionCallValue;
+	LSL_State		*stateValue;
+	LSL_Script		*scriptValue;
     } value;
 };
 
@@ -214,6 +217,14 @@ struct _LSL_Function
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
     LSL_Leaf	*block;
+};
+
+struct _LSL_FunctionCall
+{
+    LSL_Function	*function;
+    Eina_Inarray	params;	// Eina Inarray has not been released yet (Eina 1.2).
+    Eina_Clist		functionCall;
+    LSL_Leaf		*call;
 };
 
 struct _LSL_State
@@ -312,8 +323,10 @@ typedef struct
     Eina_Strbuf		*ignorableText;
 #endif
     LSL_Leaf		*lval;
-    int			column, line;
     LSL_Block		*currentBlock;
+    Eina_Clist		danglingCalls;
+    int			column, line;
+    int			undeclared;
 } LuaSL_compiler;
 
 
