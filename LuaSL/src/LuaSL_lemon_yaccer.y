@@ -32,7 +32,8 @@ script ::= .
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
 stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
-state(S) ::= LSL_IDENTIFIER(I) stateBlock(B).					{ S = addState(compiler, I, B); }
+state(S) ::= LSL_DEFAULT(I) stateBlock(B).					{ S = addState(compiler, I, B); }
+state(S) ::= LSL_STATE_CHANGE LSL_IDENTIFIER(I) stateBlock(B).			{ S = addState(compiler, I, B); }
 
 // Function definitions.
 

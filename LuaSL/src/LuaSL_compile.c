@@ -135,6 +135,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputIdentifierToken, NULL},
     {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL},
     {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL},
+    {LSL_DEFAULT,		ST_NONE,	"default",	LSL_NONE,				outputStateToken, NULL},
     {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken, NULL},
     {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL,  NULL},
 
@@ -1105,8 +1106,15 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
     {
 	LSL_State *state = content->value.stateValue;
 
-	fprintf(file, "%s", state->name);
-	outputLeaf(file, mode, state->block);
+	if (state)
+	{
+	    if (0 == strcmp(state->name, "default"))
+		fprintf(file, "%s\n", state->name);
+	    else
+		fprintf(file, "state %s\n", state->name);
+	    outputLeaf(file, mode, state->block);
+	    fprintf(file, "\n");
+	}
     }
 }
 

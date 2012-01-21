@@ -91,6 +91,7 @@ STRING      \"(\\.|[^\\"\n])*\"
 "vector"        %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_TYPE_VECTOR); %}
 
  /* Statement keywords. */
+"default"       %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_DEFAULT); %}
 "do"            %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_DO); %}
 "for"           %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FOR); %}
 "else"          %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_ELSE); %}
