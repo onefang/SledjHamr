@@ -220,8 +220,10 @@ static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 void burnLeaf(void *data)
 {
     LSL_Leaf *leaf = data;
+
     if (leaf)
     {
+// TODO - the problem here is that lemon wants to free these after a reduce, but we might want to keep them around.  Should ref count them or something.
 //	burnLeaf(leaf->left);
 //	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
