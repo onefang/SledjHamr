@@ -262,24 +262,21 @@ able to try out other data structures at a later date, then benchmark
 them with typical scripts.
 
 Right now I see nothing wrong with the current use of hash for script
-and block variables.  The same for script states and functions, as wall
+and block variables.  The same for script states and functions, as well
 as state functions. Though in the near future, they will have similar
-problems to functcions I think - the need to track order and white
+problems to functions I think - the need to track order and white
 space.
 
-Function params though have gotten unwieldy.  Each param ends up with
-AST nodes for itself, it's type, it's own paramlist node, and the comma. 
-The paramlist nodes are the excessive bits, the rest are needed to track
-the white space.
+Function params got unwieldy.  Cleaned that up now.
 
 */
 
 /* General design.
 
-NOTE We should be able to remove the white space tracking at compile
-time, as it's only a debugging aid.  Will be a performance and memory
-gain for productidon use. Tracking values on the other hand will still
-be useful for constants.
+NOTE We can remove the white space tracking at compile time, as it's
+only a debugging aid.  Will be a performance and memory gain for
+productidon use. Tracking values on the other hand will still be useful
+for constants.
 
 The compile process starts with turning tokens into AST nodes connected
 in a tree.  During that process the parser wants to condense nodes down
@@ -290,7 +287,9 @@ the process is important at the time.
 Once the parser has condensed things down, it only deals with the
 condensed nodes.  So we can get rid of some of the AST parts at this
 time, so long as we keep the relevant information.  This is what the
-other data structures above are for.
+other data structures above are for.  Lemon tries to free the no longer
+needed AST nodes itself, even if we are still using them internally. 
+Need to do something about that.
 
 */
 
