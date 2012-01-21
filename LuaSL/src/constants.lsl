@@ -18,6 +18,6 @@ integer		FALSE			= 0;
 string		NULL_KEY		= "00000000-0000-0000-0000-000000000000";
 string		EOF			= "\n\n\n";
 
-rotation	ZERO_ROTATION		= <0.0, 0.0, 0.0, 1.0>;
-vector		ZERO_VECTOR		= <0.0, 0.0, 0.0>;
+//rotation	ZERO_ROTATION		= <0.0, 0.0, 0.0, 1.0>;
+//vector		ZERO_VECTOR		= <0.0, 0.0, 0.0>;
 
