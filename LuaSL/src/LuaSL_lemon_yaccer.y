@@ -190,12 +190,13 @@ expr(A) ::= LSL_KEY(B).								{ B->basicType = OT_key; A = B; }
 %nonassoc  LSL_LIST.
 expr ::= LSL_BRACKET_OPEN exprList LSL_BRACKET_CLOSE.						[LSL_BRACKET_OPEN]
 %nonassoc  LSL_ROTATION.
-expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.	[LSL_ANGLE_OPEN]
+// Uses the same symbol for less than, greater than, and the rotation / vector delimiters.
+expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.	[LSL_ANGLE_OPEN]
 %nonassoc  LSL_STRING.
 expr(A) ::= LSL_STRING(B).							{ B->basicType = OT_string; A = B; }
 %nonassoc  LSL_VECTOR.
 expr ::= LSL_VECTOR.
-expr ::= LSL_ANGLE_OPEN expr LSL_COMMA expr LSL_COMMA expr LSL_ANGLE_CLOSE.			[LSL_ANGLE_OPEN]
+expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.			[LSL_ANGLE_OPEN]
 
 
 // Parser callbacks.
