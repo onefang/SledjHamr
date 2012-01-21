@@ -66,8 +66,93 @@ integer		SCRIPTED		 = 0x08;
 
 integer		OBJECT_UNKNOWN_DETAIL	= -1;
 
+integer		PRIM_BUMP_SHINY		= 19;
+integer		PRIM_COLOR		= 18;
+integer		PRIM_FLEXIBLE		= 21;
+integer		PRIM_FULLBRIGHT		= 20;
+integer		PRIM_GLOW		= 25;
+integer		PRIM_MATERIAL		= 2;
+integer		PRIM_PHANTOM		= 5;
+integer		PRIM_PHYSICS		= 3;
+integer		PRIM_POINT_LIGHT	= 23;
+integer		PRIM_POSITION		= 6;
+integer		PRIM_ROTATION		= 8;
+integer		PRIM_SIZE		= 7;
+integer		PRIM_TEMP_ON_REZ	= 4;
+integer		PRIM_TYPE		= 9;
+integer		PRIM_TYPE_OLD		= 1;
+integer		PRIM_TEXGEN		= 22;
+integer		PRIM_TEXTURE		= 17;
+integer		PRIM_TEXT		= 26;
+
+integer		PRIM_BUMP_NONE		= 0;
+integer		PRIM_BUMP_BRIGHT	= 1;
+integer		PRIM_BUMP_DARK		= 2;
+integer		PRIM_BUMP_WOOD		= 3;
+integer		PRIM_BUMP_BARK		= 4;
+integer		PRIM_BUMP_BRICKS	= 5;
+integer		PRIM_BUMP_CHECKER	= 6;
+integer		PRIM_BUMP_CONCRETE	= 7;
+integer		PRIM_BUMP_TILE		= 8;
+integer		PRIM_BUMP_STONE		= 9;
+integer		PRIM_BUMP_DISKS		= 10;
+integer		PRIM_BUMP_GRAVEL	= 11;
+integer		PRIM_BUMP_BLOBS		= 12;
+integer		PRIM_BUMP_SIDING	= 13;
+integer		PRIM_BUMP_LARGETILE	= 14;
+integer		PRIM_BUMP_STUCCO	= 15;
+integer		PRIM_BUMP_SUCTION	= 16;
+integer		PRIM_BUMP_WEAVE		= 17;
+
+integer		PRIM_HOLE_DEFAULT	= 0;
+integer		PRIM_HOLE_CIRCLE	= 16;
+integer		PRIM_HOLE_SQUARE	= 32;
+integer		PRIM_HOLE_TRIANGLE	= 48;
+
+integer		PRIM_MATERIAL_STONE	= 0;
+integer		PRIM_MATERIAL_METAL	= 1;
+integer		PRIM_MATERIAL_GLASS	= 2;
+integer		PRIM_MATERIAL_WOOD	= 3;
+integer		PRIM_MATERIAL_FLESH	= 4;
+integer		PRIM_MATERIAL_PLASTIC	= 5;
+integer		PRIM_MATERIAL_RUBBER	= 6;
+integer		PRIM_MATERIAL_LIGHT	= 7;
+
+integer		PRIM_SCULPT_TYPE_SPHERE		= 1;
+integer		PRIM_SCULPT_TYPE_TORUS		= 2;
+integer		PRIM_SCULPT_TYPE_PLANE		= 3;
+integer		PRIM_SCULPT_TYPE_CYLINDER	= 4;
+integer		PRIM_SCULPT_TYPE_MESH		= 5;
+integer		PRIM_SCULPT_TYPE_MIMESH		= 6;
+
+integer		PRIM_SHINY_NONE		= 0;
+integer		PRIM_SHINY_LOW		= 1;
+integer		PRIM_SHINY_MEDIUM	= 2;
+integer		PRIM_SHINY_HIGH		= 3;
+
+integer		PRIM_TYPE_BOX		= 0;
+integer		PRIM_TYPE_CYLINDER	= 1;
+integer		PRIM_TYPE_PRISM		= 2;
+integer		PRIM_TYPE_SPHERE	= 3;
+integer		PRIM_TYPE_TORUS		= 4;
+integer		PRIM_TYPE_TUBE		= 5;
+integer		PRIM_TYPE_RING		= 6;
+integer		PRIM_TYPE_SCULPT	= 7;
+
+integer		STRING_TRIM		= 3;
+integer		STRING_TRIM_HEAD	= 1;
+integer		STRING_TRIM_TAIL	= 2;
+
 integer		TRUE			= 1;
 integer		FALSE			= 0;
+
+integer		TYPE_INTEGER		= 1;
+integer		TYPE_FLOAT		= 2;
+integer		TYPE_STRING		= 3;
+integer		TYPE_KEY		= 4;
+integer		TYPE_VECTOR		= 5;
+integer		TYPE_ROTATION		= 6;
+integer		TYPE_INVALID		= 0;
 
 string		NULL_KEY		= "00000000-0000-0000-0000-000000000000";
 string		EOF			= "\n\n\n";
@@ -78,6 +163,7 @@ vector		ZERO_VECTOR		= <0.0, 0.0, 0.0>;
 // Functions.
 
 float		llPow(float number, float places){}
+float		llFrand(float max){}
 integer		llRound(float number){}
 
 key		llDetectedKey(integer index){}
@@ -86,6 +172,13 @@ key		llSameGroup(key avatar){}
 
 float		llGetAlpha(integer side){}
 		llSetAlpha(float alpha, integer side){}
+		llSetColor(vector colour, integer side){}
+		llSetPrimitiveParams(list params){}
+		llSetScale(vector scale){}
+		llSetSitText(string text){}
+		llSetText(string text, vector colour, float alpha){}
+		llSitTarget(vector pos, rotation rot){}
+
 integer		llGetLinkNumber(){}
 string		llGetObjectDesc(){}
 		llSetObjectDesc(string text){}
@@ -97,6 +190,7 @@ integer		llGetInventoryNumber(integer type){}
 integer		llGetInventoryType(string name){}
 key		llGetNotecardLine(string name, integer index){}
 
+		llDie(){}
 integer		llGetFreeMemory(){}
 string		llGetScriptName(){}
 float		llGetTime(){}
@@ -105,23 +199,30 @@ float		llGetTime(){}
 		llResetTime(){}
 		llSetScriptState(string name, integer running){}
 		llSetTimerEvent(float seconds){}
+		llSleep(float seconds){}
 
 		llPlaySound(string name, float volume){}
-		llRezObject(string name, vector position, vector velocity, rotation rot, integer channel);
+		llRezObject(string name, vector position, vector velocity, rotation rot, integer channel){}
+		llRezAtRoot(string name, vector position, vector velocity, rotation rot, integer channel){}
 
 vector		llGetPos(){}
+		llSetPos(vector pos){}
 rotation	llGetRot(){}
+		llSetRot(rotation rot){}
 
 rotation	llEuler2Rot(vector vec){}
 vector		llRot2Euler(rotation rot){}
 
 string		llGetSubString(string text, integer start, integer end){}
+integer		llStringLength(string text){}
+string		llStringTrim(string text, integer type){}
 integer		llSubStringIndex(string text, string sub){}
 list		llParseString2List(string in, list l, list l1){}
 list		llParseStringKeepNulls(string in, list l, list l1){}
 
 list		llCSV2List(string text){}
 list		llDeleteSubList(list l, integer start, integer end){}
+string		llDumpList2String(list l, string separator){}
 string		llList2CSV(list l){}
 float		llList2Float(list l, integer index){}
 integer		llList2Integer(list l, integer index){}
@@ -130,10 +231,13 @@ list		llList2List(list l, integer start, integer end){}
 string		llList2String(list l, integer index){}
 rotation	llList2Rotation(list l, integer index){}
 vector		llList2Vector(list l, integer index){}
+integer		llListFindList(list l, list l1){}
+list		llListInsertList(list l, list l1, integer index){}
 integer		llGetListLength(list l){}
 list		llListReplaceList(list l, list part, integer start, integer end){}
 list		llListSort(list l, integer stride, integer ascending){}
 
+key		llAvatarOnSitTarget(){}
 list		llGetAnimationList(key id){}
 key		llGetKey(){}
 key		llGetOwner(){}
@@ -143,11 +247,12 @@ string		llKey2Name(key avatar){}
 		llRequestPermissions(key avatar, integer perms){}
 		llStartAnimation(string anim){}
 		llStopAnimation(string anim){}
+		llUnSit(key avatar){}
 
-		llSleep(float seconds){}
 
 		llDialog(key avatar, string caption, list arseBackwardsMenu, integer channel){}
-		llListen(integer channel, string name, key id, string msg){}
+integer		llListen(integer channel, string name, key id, string msg){}
+		llListenRemove(integer handle){}
 		llOwnerSay(string text){}
 		llSay(integer channel, string text){}
 		llShout(integer channel, string text){}
