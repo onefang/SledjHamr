@@ -21,3 +21,27 @@ string		EOF			= "\n\n\n";
 rotation	ZERO_ROTATION		= <0.0, 0.0, 0.0, 1.0>;
 vector		ZERO_VECTOR		= <0.0, 0.0, 0.0>;
 
+// Functions.
+
+vector		llGetPos(){}
+rotation	llGetRot(){}
+string		llGetObjectDesc(){}
+		llSetObjectDesc(string text){}
+
+rotation	llEuler2Rot(vector vec){}
+
+
+string		llGetSubString(string text, integer start, integer end){}
+list		llParseString2List(string in, list l, list l1){}
+
+integer		llList2Integer(list l, integer index){}
+string		llList2String(list l, integer index){}
+list		llCSV2List(string text){}
+
+key		llGetKey(){}
+
+		llSay(integer channel, string text){}
+		llOwnerSay(string text){}
+
+		llMessageLinked(integer link, integer num, string text, key aKey){}
+
