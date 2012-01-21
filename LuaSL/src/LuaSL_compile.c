@@ -1015,9 +1015,9 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 	{
 	    switch (result->basicType)
 	    {
-		case OT_float   :  printf("\nResult is the float %g.\n", result->value.floatValue);  break;
-		case OT_integer :  printf("\nResult is the integer %d.\n", result->value.integerValue);  break;
-		default         :  printf("\nResult of an unknown type [%d] %d!\n", result->basicType, result->value.integerValue);  break;
+		case OT_float   :  printf("Result is the float %g.\n", result->value.floatValue);  break;
+		case OT_integer :  printf("Result is the integer %d.\n", result->value.integerValue);  break;
+		default         :  /*printf("\nResult of an unknown type [%d] %d!\n", result->basicType, result->value.integerValue);*/  break;
 	    }
 	    free(result);
 	    result = NULL;
@@ -1184,10 +1184,10 @@ static void doneParsing(LuaSL_compiler *compiler)
 	char outName[PATH_MAX];
 	char luaName[PATH_MAX];
 
-	outputLeaf(stdout, OM_LSL, compiler->ast);
-	printf("\n");
+//	outputLeaf(stdout, OM_LSL, compiler->ast);
+//	printf("\n");
 	evaluateLeaf(compiler->ast, NULL, NULL);
-	printf("\n");
+//	printf("\n");
 
 	strcpy(outName, compiler->fileName);
 	strcat(outName, "2");
@@ -1285,6 +1285,7 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	PE("Error opening file %s.", compiler.fileName);
 	return FALSE;
     }
+    printf("\n");
     PI("Opened %s.", compiler.fileName);
     compiler.ast = NULL;
     compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);

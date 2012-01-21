@@ -66,6 +66,25 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
    ecore_main_loop_quit();
 }
 
+void dirList_cb(const char *name, const char *path, void *data)
+{
+    gameGlobals *game = data;
+    char buf[PATH_MAX];
+    char *ext = rindex(name, '.');
+
+    if (ext)
+    {
+	if (0 == strcmp(ext, ".lsl"))
+	{
+	    snprintf(buf, sizeof(buf), "%s/%s", path, name);
+	    if (compileLSL(game, buf, FALSE))
+		PI("Against all odds, the compile of %s worked!  lol", buf);
+	    else
+		PE("The compile of %s failed!", buf);
+	}
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -160,14 +179,17 @@ main(int argc, char **argv)
 	ecore_evas_callback_delete_request_set(game.ee, _on_delete);
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
 
-	// Setup for the compler.
+	// Setup for the compiler.
 	compilerSetup(&game);
+
+	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
 //	snprintf(buf, sizeof(buf), "%s/Test sim/objects/onefang's test bed/~run", PACKAGE_DATA_DIR);
-	snprintf(buf, sizeof(buf), "%s/test2.lsl", PACKAGE_DATA_DIR);
-	if (compileLSL(&game, buf, FALSE))
-	    PIm("Against all odds, the compile of %s worked!  lol", buf);
-	else
-	    PEm("The compile of %s failed!", buf);
+//	snprintf(buf, sizeof(buf), "%s/test2.lsl", PACKAGE_DATA_DIR);
+//	if (compileLSL(&game, buf, FALSE))
+//	    PIm("Against all odds, the compile of %s worked!  lol", buf);
+//	else
+//	    PEm("The compile of %s failed!", buf);
 	snprintf(buf, sizeof(buf), "%s/test.lsl", PACKAGE_DATA_DIR);
 	compileLSL(&game, buf, FALSE);
 
