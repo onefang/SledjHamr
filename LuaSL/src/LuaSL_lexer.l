@@ -21,7 +21,9 @@ INTEGER     ({DECIMAL}+)|(0[xX]{HEX}+)
 EXPONANT    [eE][+-]?{DECIMAL}+
  /* Floats can be "0." or".0", but "." is not valid.  At least in OpenSim. A single dot should be caught by the LSL_Dot rule first anyway.*/
 FLOAT       {DECIMAL}*"."{DECIMAL}*{EXPONANT}?[fF]?
-IDENTIFIER  [[:alpha:]](_|[[:alpha:]]|[[:digit:]])*
+ /* Variable identifiers can have these extra characters at the end or beginning, they will be ignored- #$`'\?  */
+ /* Function identifiers can start with $ */
+IDENTIFIER  (_|[[:alpha:]])(_|[[:alpha:]]|[[:digit:]])*
 CHAR        '(\\.|[^\\'\n])+'
 KEY         \"{HEX}{8}-{HEX}{4}-{HEX}{4}-{HEX}{4}-{HEX}{12}\"
 STRING      \"(\\.|[^\\"\n])*\"
