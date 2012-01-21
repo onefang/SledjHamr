@@ -7,6 +7,7 @@ static LSL_Leaf *evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *ri
 static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -129,7 +130,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_STATEMENT,		ST_NONE,	";",		LSL_NOIGNORE,				outputStatementToken, evaluateStatementToken},
 
     {LSL_BLOCK_CLOSE,		ST_NONE,	"}",		LSL_NONE,				NULL, NULL},
-    {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				NULL, NULL},
+    {LSL_BLOCK_OPEN,		ST_NONE,	"{",		LSL_NONE,				outputBlockToken, NULL},
     {LSL_PARAMETER,		ST_NONE,	"parameter",	LSL_NONE,				outputIdentifierToken, NULL},
     {LSL_PARAMETER_LIST,	ST_NONE,	"plist",	LSL_NONE,				outputParameterListToken, NULL},
     {LSL_FUNCTION,		ST_NONE,	"function",	LSL_NONE,				outputFunctionToken, NULL},
@@ -547,11 +548,37 @@ LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
     {
 	stat->type = type;
 	stat->expressions = expr;
+	eina_clist_element_init(&(stat->statement));
 	if (lval)
 	    lval->value.statementValue = stat;
     }
 
     return lval;
+}
+
+LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *statement)
+{
+    if (NULL == list)
+    {
+	list = newLeaf(LSL_BLOCK_OPEN, NULL, NULL);
+	if (list)
+	{
+	    list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
+	}
+    }
+
+    if (list)
+    {
+	if (statement)
+	{
+	    if (list->value.blockValue)
+	    {
+		eina_clist_add_tail(&(list->value.blockValue->statements), &(statement->value.statementValue->statement));
+	    }
+	}
+    }
+
+    return list;
 }
 
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr)
@@ -604,6 +631,7 @@ void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 
     if (blok)
     {
+	eina_clist_init(&(blok->statements));
 	blok->variables = eina_hash_stringshared_new(burnLeaf);
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
@@ -930,6 +958,25 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	else
 	    fprintf(file, "%s", leaf->token->token);
 	outputLeaf(file, mode, leaf->right);
+    }
+}
+
+static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	fprintf(file, "\n{\n");
+	if (content->value.blockValue)
+	{
+	    LSL_Statement *statement = NULL;
+
+	    EINA_CLIST_FOR_EACH_ENTRY(statement, &(content->value.blockValue->statements), LSL_Statement, statement)
+	    {
+		outputLeaf(file, mode, statement->expressions);
+		fprintf(file, ";\n");
+	    }
+	}
+	fprintf(file, "}\n");
     }
 }
 

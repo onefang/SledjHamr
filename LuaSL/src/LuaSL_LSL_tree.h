@@ -191,6 +191,7 @@ struct _LSL_Identifier	// For variables and function parameters.
 
 struct _LSL_Statement
 {
+    Eina_Clist		statement;
     LSL_Leaf		*expressions;	// For things like a for statement, might hold three expressions.
     LSL_Type		type;		// Expression type.
 };
@@ -198,7 +199,7 @@ struct _LSL_Statement
 struct _LSL_Block
 {
     LSL_Block		*outerBlock;
-//    Eina_Hash		*statements;	// Probably should be some sort of eina list.
+    Eina_Clist		statements;
     Eina_Hash		*variables;	// Those variables in this scope.
     LSL_Function	*function;	// A pointer to the function if this block is a function.
 };
@@ -334,6 +335,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
+LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);
 void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));

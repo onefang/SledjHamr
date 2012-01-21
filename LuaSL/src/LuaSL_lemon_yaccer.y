@@ -54,13 +54,14 @@ function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(
 
 block(A) ::= funcBlock(B).							{ A = B; }
 block(A) ::= statement(B).							{ A = B; }
-funcBlock ::= LSL_BLOCK_OPEN statementList LSL_BLOCK_CLOSE.
+funcBlock(A) ::= LSL_BLOCK_OPEN statementList(B) LSL_BLOCK_CLOSE.		{ A = B; }
 
 // Various forms of statement.
 
 %nonassoc LSL_STATEMENT.
-statementList ::= statementList statement.
-statementList ::= .
+statementList(A) ::= statementList(B) statement(C).				{ A = collectStatements(compiler, B, C); }
+//statementList(A) ::= statement(C).						{ A = collectStatements(compiler, NULL, C); }
+statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
 %nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
 %nonassoc LSL_ELSE.
