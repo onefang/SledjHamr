@@ -1176,15 +1176,17 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
     }
 }
 
-static void doneParsing(LuaSL_compiler *compiler)
+static boolean doneParsing(LuaSL_compiler *compiler)
 {
     gameGlobals *game = compiler->game;
+    boolean result = FALSE;
 
     if (compiler->ast)
     {
 	FILE *out;
 	char buffer[PATH_MAX];
 	char outName[PATH_MAX];
+	char diffName[PATH_MAX];
 	char luaName[PATH_MAX];
 
 //	outputLeaf(stdout, OM_LSL, compiler->ast);
@@ -1194,6 +1196,8 @@ static void doneParsing(LuaSL_compiler *compiler)
 
 	strcpy(outName, compiler->fileName);
 	strcat(outName, "2");
+	strcpy(diffName, compiler->fileName);
+	strcat(diffName, ".diff");
 	strcpy(luaName, compiler->fileName);
 	strcat(luaName, ".lua");
 	out = fopen(outName, "w");
@@ -1204,12 +1208,13 @@ static void doneParsing(LuaSL_compiler *compiler)
 #endif
 	    outputLeaf(out, OM_LSL, compiler->ast);
 	    fclose(out);
-	    sprintf(buffer, "diff %s %s", compiler->fileName, outName);
+	    sprintf(buffer, "diff \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
 #ifdef LUASL_DIFF_CHECK
 	    count = system(buffer);
-	    PI("Return value of %s is %d", buffer, count);
 	    if (0 != count)
-	        PE("%s says they are different!", buffer);
+	        PE("LSL output file is different - %s!", outName);
+	    else
+		result = TRUE;
 #endif
 	}
 	else
@@ -1223,9 +1228,11 @@ static void doneParsing(LuaSL_compiler *compiler)
 	else
 	    PC("Unable to open file %s for writing!", luaName);
     }
+
+    return result;
 }
 
-Eina_Bool compilerSetup(gameGlobals *game)
+boolean compilerSetup(gameGlobals *game)
 {
     int i;
 
@@ -1252,17 +1259,17 @@ Eina_Bool compilerSetup(gameGlobals *game)
 	snprintf(buf, sizeof(buf), "%s/src/constants.lsl", PACKAGE_DATA_DIR);
 	compileLSL(game, buf, TRUE);
 
-	return EINA_TRUE;
+	return TRUE;
     }
     else
 	PC("No memory for tokens!");
 
-    return EINA_FALSE;
+    return FALSE;
 }
 
-Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
+boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 {
-    Eina_Bool result = EINA_FALSE;
+    boolean result = FALSE;
     LuaSL_compiler compiler;
     void *pParser = ParseAlloc(malloc);
     int yv;
@@ -1345,10 +1352,11 @@ Eina_Bool compileLSL(gameGlobals *game, char *script, boolean doConstants)
     if (doConstants)
     {
 	memcpy(&constants, &(compiler.script), sizeof(LSL_Script));
+	result = TRUE;
     }
     else
     {
-	doneParsing(&compiler);
+	result = doneParsing(&compiler);
 
 // Take the result of the parse, and convert it into Lua source.
 //   Each LSL script becomes a Lua state.

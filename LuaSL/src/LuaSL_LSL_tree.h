@@ -3,7 +3,7 @@
 #define __LUASL_TREE_H__
 
 //#define LUASL_DEBUG
-//#define LUASL_DIFF_CHECK
+#define LUASL_DIFF_CHECK
 
 
 #include <stddef.h>	// So we can have NULL defined.

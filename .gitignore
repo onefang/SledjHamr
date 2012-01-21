@@ -2,6 +2,7 @@
 *.edj
 *.o
 *.output
+*.diff
 *.lsl.lua
 *.lsl2
 LuaSL/LuaSL
