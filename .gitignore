@@ -2,6 +2,8 @@
 *.edj
 *.o
 *.output
+*.lsl.lua
+*.lsl2
 LuaSL/LuaSL
 LuaSL/LuaSL_parser
 LuaSL/src/LuaSL_lemon_yaccer.c
