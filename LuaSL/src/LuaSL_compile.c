@@ -264,7 +264,11 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
     LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
 
     if (NULL == var)
-	PE("NOT Found %s!", identifier->value.stringValue);
+	PE("NOT found %s!", identifier->value.stringValue);
+#ifdef LUASL_DEBUG
+    else
+	PI("Found %s!", identifier->value.stringValue);
+#endif
 
     return var;
 }
