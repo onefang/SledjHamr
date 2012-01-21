@@ -151,11 +151,11 @@ allowedTypes allowed[] =
 
     {OT_bool,		"boolean",	(ST_BOOL_NOT)},																// bool				!
     {OT_integer,	"integer",	(ST_BOOL_NOT | ST_BIT_NOT | ST_NEGATE)},												// int				! - ~
-    {OT_float,		"float",	(ST_BOOL_NOT)},																// float			! -
-    {OT_key,		"key",		(ST_NONE)},																// 
+    {OT_float,		"float",	(ST_BOOL_NOT | ST_NEGATE)},														// float			! -
+    {OT_key,		"key",		(ST_BOOL_NOT)},																// key				!
     {OT_list,		"list",		(ST_NONE)},																// 
     {OT_rotation,	"rotation",	(ST_NONE)},																// 
-    {OT_string,		"string",	(ST_NONE)},																// 
+    {OT_string,		"string",	(ST_BOOL_NOT)},																// string			!
     {OT_vector,		"vector",	(ST_NONE)},																// 
     {OT_other,		"other",	(ST_NONE)},																// 
 
@@ -368,41 +368,44 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = allowed[rType].result;
 	}
 
-	// The basic lookup.
-	lval->basicType = opExpr[lType][rType];
-	if (OT_invalid != lval->basicType)
+	switch (lval->token->subType)
 	{
-	    // Check if it's an allowed operation.
-	    if (0 == (lval->token->subType & allowed[lval->basicType].subTypes))
-	    {
-		lval->basicType = OT_invalid;
-	    }
-	    else
-	    {
-		// Double check the corner cases.
-		switch (lval->token->subType)
+	    case ST_BOOLEAN :
+	    case ST_COMPARISON :
+	    case ST_EQUALITY :
+		lval->basicType = OT_bool;
+		break;
+	    default :
+		// The basic lookup.
+		lval->basicType = opExpr[lType][rType];
+		if (OT_invalid != lval->basicType)
 		{
-		    case ST_BOOLEAN :
-		    case ST_COMPARISON :
-		    case ST_EQUALITY :
-			lval->basicType = OT_bool;
-			break;
-		    case ST_MULTIPLY :
-			if (OT_vectorVector == lval->basicType)
+		    // Check if it's an allowed operation.
+		    if (0 == (lval->token->subType & allowed[lval->basicType].subTypes))
+			lval->basicType = OT_invalid;
+		    else
+		    {
+			// Double check the corner cases.
+			switch (lval->token->subType)
 			{
-			    if (LSL_MULTIPLY == lval->token->type)
-			    {
-				lval->basicType = OT_float;
-			    	lval->token = tokens[LSL_DOT_PRODUCT - lowestToken];
-			    }
-			    else
-				lval->basicType = OT_vector;
+			    case ST_MULTIPLY :
+				if (OT_vectorVector == lval->basicType)
+				{
+				    if (LSL_MULTIPLY == lval->token->type)
+				    {
+					lval->basicType = OT_float;
+				    	lval->token = tokens[LSL_DOT_PRODUCT - lowestToken];
+				    }
+				    else
+					lval->basicType = OT_vector;
+				}
+				break;
+			    default :
+				break;
 			}
-			break;
-		    default :
-			break;
+		    }
 		}
-	    }
+		break;
 	}
 	if (OT_invalid == lval->basicType)
 	{
