@@ -245,7 +245,18 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 	while ((block) && (NULL == var))
 	{
 	    if (block->function)
-		var = eina_hash_find(block->function->variables, name);
+	    {
+		LSL_Leaf *param = NULL;
+		EINA_INARRAY_FOREACH((&(block->function->vars)), param)
+		{
+		    if ((param) && (LSL_PARAMETER == param->token->type))
+		    {
+//			if (name == param->value.identifierValue->name)		// Assuming they are stringshares.
+			if (0 == strcmp(name, param->value.identifierValue->name))	// Not assuming they are stringeshares.
+			    var = param;
+		    }
+		}
+	    }
 	    if ((NULL == var) && block->variables)
 		var = eina_hash_find(block->variables, name);
 	    block = block->outerBlock;
@@ -410,53 +421,72 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
 
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam)
 {
-    LSL_Leaf *newList = newLeaf(LSL_PARAMETER_LIST, NULL, NULL);
+    LSL_Function *func = NULL;
 
-    if (newList)
+    if (NULL == list)
+	list = newLeaf(LSL_FUNCTION, NULL, NULL);
+
+    if (list)
     {
-	newList->left = list;
-	newList->value.listValue = newParam;
-	if ((list) && (list->value.listValue))
-	    list->value.listValue->right = comma;
-    }
+	func = list->value.functionValue;
+	if (NULL == func)
+	{
+	    func = calloc(1, sizeof(LSL_Function));
+	    if (func)
+	    {
+		list->value.functionValue = func;
+		eina_inarray_setup(&(func->vars), sizeof(LSL_Leaf), 3);
+	    }
+	}
 
-    return newList;
+	if (func)
+	{
+	    if (newParam)
+	    {
+#ifdef LUASL_DIFF_CHECK
+		// Stash the comma for diff later.
+		if (comma)
+		    eina_inarray_append(&(func->vars), comma);
+#endif
+		eina_inarray_append(&(func->vars), newParam);
+		// At this point, pointers to newParams are not pointing to the one in func->vars, AND newParam is no longer needed.
+	    }
+	}
+    }
+    return list;
 }
 
 LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
 {
-    LSL_Function *func = calloc(1, sizeof(LSL_Function));
+    LSL_Function *func = NULL;
 
-    if (func)
+    if (params)
     {
-	if (identifier)
+	func = params->value.functionValue;
+	// At this point, params is no longer needed, except if we are doing diff.
+	// open and close are not needed either if we are not doing diff.
+	if (func)
 	{
-	    func->name = identifier->value.stringValue;
-	    identifier->token = tokens[LSL_FUNCTION - lowestToken];
-	    identifier->value.functionValue = func;
-	    func->type = type;
-	    if (type)
-		identifier->basicType = type->basicType;
-	    else
-		identifier->basicType = OT_nothing;
-	    eina_hash_add(compiler->script.functions, func->name, identifier);
-	    func->variables = eina_hash_stringshared_new(burnLeaf);
-	    func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
-	    while (params)
+	    if (identifier)
 	    {
-		if (params->value.listValue)
-		{
-		    LSL_Leaf *param = params->value.listValue;
-
-		    if (identifier)
-			eina_hash_add(func->variables, param->value.identifierValue->name, param);
-		}
-		params = params->left;
+		func->name = identifier->value.stringValue;
+		identifier->token = tokens[LSL_FUNCTION - lowestToken];
+		identifier->value.functionValue = func;
+		func->type = type;
+		if (type)
+		    identifier->basicType = type->basicType;
+		else
+		    identifier->basicType = OT_nothing;
+		eina_hash_add(compiler->script.functions, func->name, identifier);
+#ifdef LUASL_DIFF_CHECK
+		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
+#endif
 	    }
 	    if (compiler->currentBlock)
 		compiler->currentBlock->function = func;
 	}
     }
+
     return identifier;
 }
 
@@ -911,10 +941,20 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
     if (content)
     {
 	LSL_Function *func = content->value.functionValue;
+	LSL_Leaf *param = NULL;
+	int first = TRUE;
 
 	outputLeaf(file, mode, func->type);
-	fprintf(file, "%s", func->name);
-	outputLeaf(file, mode, func->params);
+// TODO - should print comma and parenthesis ignorables.
+	fprintf(file, "%s(", func->name);
+	EINA_INARRAY_FOREACH((&(func->vars)), param)
+	{
+	    if (!first)
+		fprintf(file, ", ");
+	    outputLeaf(file, mode, param);
+	    first = FALSE;
+	}
+	fprintf(file, ")");
 	outputLeaf(file, mode, func->block);
 #ifndef LUASL_DIFF_CHECK
 	fprintf(file, "\n");

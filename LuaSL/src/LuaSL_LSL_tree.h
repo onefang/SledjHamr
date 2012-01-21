@@ -207,8 +207,10 @@ struct _LSL_Function
 {
     const char	*name;
     LSL_Leaf	*type;
-    LSL_Leaf	*params;	// Probably should be some sort of eina list.
-    Eina_Hash	*variables;	// And this actually duplicates params.
+#ifdef LUASL_DIFF_CHECK
+    LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
+#endif
+    Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
     LSL_Leaf	*block;
 };
 
