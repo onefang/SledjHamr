@@ -10,6 +10,7 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -114,7 +115,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Then the rest of the syntax tokens.
-    {LSL_FUNCTION_CALL,		ST_NONE,	"funccall",	LSL_NONE,				NULL, NULL},
+    {LSL_FUNCTION_CALL,		ST_NONE,	"funccall",	LSL_NONE,				outputFunctionCallToken, NULL},
     {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputIdentifierToken, NULL},
 
     {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL},
@@ -1098,6 +1099,18 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 #ifndef LUASL_DIFF_CHECK
 	fprintf(file, "\n");
 #endif
+    }
+}
+
+static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_FunctionCall *call = content->value.functionCallValue;
+	LSL_Function *func = call->function;
+	fprintf(file, "%s(", func->name);
+	// TODO - print params here.
+	fprintf(file, ")");
     }
 }
 
