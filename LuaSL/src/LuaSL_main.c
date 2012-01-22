@@ -116,7 +116,6 @@ main(int argc, char **argv)
 	unsigned int i;
 	struct timeval lastTime2;
 	struct timeval thisTime2;
-	float   diff;
 
 	/* this will give you a window with an Evas canvas under the first engine available */
 	game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
