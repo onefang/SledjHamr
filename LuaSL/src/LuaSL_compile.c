@@ -621,6 +621,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *blo
 	result->name = identifier->value.stringValue;
 	result->block = block;
 	identifier->value.stateValue = result;
+	identifier->token = tokens[LSL_STATE - lowestToken];
 	eina_hash_add(compiler->script.states, result->name, identifier);
     }
 
