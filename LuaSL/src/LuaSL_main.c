@@ -1,5 +1,6 @@
 #include "LuaSL.h"
 
+static int scriptCount;
 
 static const char *names[] =
 {
@@ -76,6 +77,7 @@ void dirList_cb(const char *name, const char *path, void *data)
     {
 	if (0 == strcmp(ext, ".lsl"))
 	{
+	    scriptCount++;
 	    snprintf(buf, sizeof(buf), "%s/%s", path, name);
 	    if (compileLSL(game, buf, FALSE))
 		PD("Against all odds, the compile of %s worked!  lol", buf);
@@ -112,6 +114,9 @@ main(int argc, char **argv)
 	Evas_Object *bub, *sh;
 	Ecore_Animator *ani;
 	unsigned int i;
+	struct timeval lastTime2;
+	struct timeval thisTime2;
+	float   diff;
 
 	/* this will give you a window with an Evas canvas under the first engine available */
 	game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
@@ -180,9 +185,12 @@ main(int argc, char **argv)
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
 
 	// Do the compiles.
+	scriptCount = 0;
+	gettimeofday(&lastTime2, 0);
 	compilerSetup(&game);
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
+	printf("Compiling %d scripts took %f seconds.\n", scriptCount, timeDiff(&thisTime2, &lastTime2));
 
 //	ecore_main_loop_begin();
 
