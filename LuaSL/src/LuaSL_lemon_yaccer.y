@@ -31,15 +31,16 @@ script ::= .
 // State definitions.
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
-stateBlock ::= LSL_BLOCK_OPEN functionList LSL_BLOCK_CLOSE.
+stateBlock(A) ::= LSL_BLOCK_OPEN functionList(B) LSL_BLOCK_CLOSE.		{ A = B; }
 state(S) ::= LSL_DEFAULT(I) stateBlock(B).					{ S = addState(compiler, I, B); }
 state(S) ::= LSL_STATE_CHANGE LSL_IDENTIFIER(I) stateBlock(B).			{ S = addState(compiler, I, B); }
 
 // Function definitions.
 
 %nonassoc LSL_PARAMETER LSL_PARAMETER_LIST LSL_FUNCTION.
-functionList ::= functionList functionBody.
-functionList ::= .
+functionList(A) ::= functionList(B) functionBody(C).				{ A = collectStatements(compiler, B, C); }
+//functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL, C); }
+functionList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
 functionBody(A) ::= function(B) funcBlock(C).					{ A = addFunctionBody(compiler, B, C); }
 
