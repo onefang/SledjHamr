@@ -208,9 +208,9 @@ expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.			[L
 
 %parse_accept
 {
-    gameGlobals *game = compiler->game;
+//    gameGlobals *game = compiler->game;
 
-    PI("Parsing complete.");
+//    PI("Parsing complete.");
 }
 
 %parse_failure

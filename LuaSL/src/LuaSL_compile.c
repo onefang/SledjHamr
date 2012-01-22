@@ -1296,7 +1296,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	return FALSE;
     }
     printf("\n");
-    PI("Opened %s.", compiler.fileName);
+    PD("Compiling %s.", compiler.fileName);
     compiler.ast = NULL;
     compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors.
@@ -1346,7 +1346,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	    }
 	}
 	secondPass(&compiler, compiler.ast);
-	PI("Second pass completed.");
+	PD("Second pass completed.");
     }
 
     if (doConstants)
