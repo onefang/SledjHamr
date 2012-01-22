@@ -116,6 +116,7 @@ main(int argc, char **argv)
 	unsigned int i;
 	struct timeval lastTime2;
 	struct timeval thisTime2;
+	float diff;
 
 	/* this will give you a window with an Evas canvas under the first engine available */
 	game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
@@ -189,7 +190,8 @@ main(int argc, char **argv)
 	compilerSetup(&game);
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
-	printf("Compiling %d scripts took %f seconds.\n", scriptCount, timeDiff(&thisTime2, &lastTime2));
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("Compiling %d scripts took %f seconds, that's %f scripts per second.  B-).\n", scriptCount, diff, scriptCount / diff);
 
 //	ecore_main_loop_begin();
 
