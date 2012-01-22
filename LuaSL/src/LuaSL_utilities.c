@@ -38,12 +38,8 @@ void loggingStartup(gameGlobals *game)
 	EINA_LOG_CRIT("could not register log domain 'LuaSL'");
     }
     // TODO - should unregister this later.
-   eina_log_level_set(EINA_LOG_LEVEL_DBG);
-   eina_log_domain_level_set("LuaSL", EINA_LOG_LEVEL_DBG);
-// TODO - use a different domain for those things we need to log for legal reasons.
-//	Setup a callback that calls both the usual stderr callback AND the file one, 
-//	but sending ggg domain messages to one file, and legal ones to another.
-//	Don't bother sending the ggg ones to the file if we are not embedded, we can see them on the terminal.
+    eina_log_level_set(EINA_LOG_LEVEL_DBG);
+    eina_log_domain_level_set("LuaSL", EINA_LOG_LEVEL_DBG);
     eina_log_print_cb_set(_ggg_log_print_cb, stderr);
 }
 
