@@ -1204,17 +1204,17 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	if (out)
 	{
 #ifdef LUASL_DIFF_CHECK
-	    int count;
+//	    int count;
 #endif
 	    outputLeaf(out, OM_LSL, compiler->ast);
 	    fclose(out);
 	    sprintf(buffer, "diff \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
 #ifdef LUASL_DIFF_CHECK
-	    count = system(buffer);
-	    if (0 != count)
-	        PE("LSL output file is different - %s!", outName);
-	    else
-		result = TRUE;
+//	    count = system(buffer);
+//	    if (0 != count)
+//	        PE("LSL output file is different - %s!", outName);
+//	    else
+//		result = TRUE;
 #endif
 	}
 	else
