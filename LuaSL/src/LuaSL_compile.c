@@ -1016,7 +1016,6 @@ static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL
     return result;
 }
 
-
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right)
 {
     LSL_Leaf *result = NULL;
@@ -1072,7 +1071,8 @@ static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    EINA_CLIST_FOR_EACH_ENTRY(statement, &(content->value.blockValue->statements), LSL_Statement, statement)
 	    {
 		outputLeaf(file, mode, statement->expressions);
-		fprintf(file, ";\n");
+		if (LSL_FUNCTION != statement->type)
+		    fprintf(file, ";\n");
 	    }
 	}
 	fprintf(file, "}\n");
@@ -1173,9 +1173,9 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	if (state)
 	{
 	    if (0 == strcmp(state->name, "default"))
-		fprintf(file, "%s\n", state->name);
+		fprintf(file, "%s", state->name);
 	    else
-		fprintf(file, "state %s\n", state->name);
+		fprintf(file, "state %s", state->name);
 	    outputLeaf(file, mode, state->block);
 	    fprintf(file, "\n");
 	}
@@ -1191,7 +1191,8 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	if (content->ignorableText)
 	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
 #endif
-	fprintf(file, "%s", content->token->token);
+	if (LSL_FUNCTION != content->value.statementValue->type)
+	    fprintf(file, "%s", content->token->token);
 #ifndef LUASL_DIFF_CHECK
 	fprintf(file, "\n");
 #endif
