@@ -540,10 +540,18 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block)
 {
-    if (function)
-	function->value.functionValue->block = block;
+	LSL_Leaf *statement = newLeaf(LSL_STATEMENT, NULL, NULL);
 
-    return function;
+    if (function)
+    {
+	function->value.functionValue->block = block;
+	if (statement)
+	{
+	    addStatement(statement, LSL_FUNCTION, function);
+	}
+    }
+
+    return statement;
 }
 
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
