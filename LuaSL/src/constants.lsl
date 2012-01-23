@@ -168,7 +168,7 @@ integer		llRound(float number){}
 
 key		llDetectedKey(integer index){}
 key		llDetectedGroup(integer index){}
-key		llSameGroup(key avatar){}
+integer		llSameGroup(key avatar){}
 
 float		llGetAlpha(integer side){}
 		llSetAlpha(float alpha, integer side){}
