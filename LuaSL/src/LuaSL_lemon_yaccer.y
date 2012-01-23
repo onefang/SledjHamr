@@ -212,8 +212,8 @@ LSL_lemon Stack: script
 
 
 Results in -
-integer {Checking} =
-integer         {FALSE}                 = 0;       // whether doing consistency check
+integer Checking =
+integer         FALSE                 = 0;       // whether doing consistency check
 
 Instead of -
 integer Checking = FALSE;       // whether doing consistency check
