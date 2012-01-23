@@ -136,7 +136,7 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
 	    compiler->column++;
     }
 
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     if (checkIgnorable)
     {
 	lval->ignorableText = compiler->ignorableText;

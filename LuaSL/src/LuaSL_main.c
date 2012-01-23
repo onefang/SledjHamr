@@ -75,9 +75,7 @@ void dirList_cb(const char *name, const char *path, void *data)
 
     if (ext)
     {
-#ifdef LUASL_DEBUG
-    if (0 == scriptCount)
-#endif
+    if ((!LUASL_DEBUG) || (0 == scriptCount))
 	if (0 == strcmp(ext, ".lsl"))
 	{
 	    scriptCount++;

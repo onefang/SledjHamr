@@ -2,8 +2,8 @@
 #ifndef __LUASL_TREE_H__
 #define __LUASL_TREE_H__
 
-//#define LUASL_DEBUG
-#define LUASL_DIFF_CHECK
+#define LUASL_DEBUG		0
+#define LUASL_DIFF_CHECK	1
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -153,7 +153,7 @@ struct _LSL_Leaf
     LSL_Leaf			*left;
     LSL_Leaf			*right;
     LSL_Token			*token;
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     Eina_Strbuf			*ignorableText;
 #endif
     int 			line, column, len;
@@ -181,7 +181,7 @@ struct _LSL_Leaf
 struct _LSL_Parenthesis
 {
     LSL_Leaf		*contents;
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     Eina_Strbuf		*rightIgnorableText;
 #endif
     LSL_Type		type;
@@ -212,7 +212,7 @@ struct _LSL_Function
 {
     const char	*name;
     LSL_Leaf	*type;
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
@@ -319,7 +319,7 @@ typedef struct
     FILE		*file;
     LSL_Leaf		*ast;
     LSL_Script		script;
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     Eina_Strbuf		*ignorableText;
 #endif
     LSL_Leaf		*lval;

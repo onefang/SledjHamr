@@ -234,9 +234,8 @@ void burnLeaf(void *data)
 //	burnLeaf(leaf->left);
 //	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
-#ifdef LUASL_DIFF_CHECK
-//	eina_strbuf_free(leaf->ignorableText);
-#endif
+//	if (LUASL_DIFF_CHECK)
+//	    eina_strbuf_free(leaf->ignorableText);
 //	free(leaf);
     }
 }
@@ -300,10 +299,8 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 
     if (NULL == var)
 	PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
-#ifdef LUASL_DEBUG
-    else
+    else if (LUASL_DEBUG)
 	PI("Found %s!", identifier->value.stringValue);
-#endif
 
     return var;
 }
@@ -491,11 +488,12 @@ LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *
 	{
 	    if (newParam)
 	    {
-#ifdef LUASL_DIFF_CHECK
-		// Stash the comma for diff later.
-		if (comma)
-		    eina_inarray_append(&(func->vars), comma);
-#endif
+		if (LUASL_DIFF_CHECK)
+		{
+		    // Stash the comma for diff later.
+		    if (comma)
+			eina_inarray_append(&(func->vars), comma);
+		}
 		eina_inarray_append(&(func->vars), newParam);
 		// At this point, pointers to newParams are not pointing to the one in func->vars, AND newParam is no longer needed.
 	    }
@@ -526,7 +524,7 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		else
 		    identifier->basicType = OT_nothing;
 		eina_hash_add(compiler->script.functions, func->name, identifier);
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
 		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
 #endif
 	    }
@@ -597,7 +595,7 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
     {
 	parens->contents = expr;
 	parens->type = type;
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
 	parens->rightIgnorableText = rval->ignorableText;
 	// Actualy, at this point, rval is no longer needed.
 //	rval->ignorableText = eina_strbuf_new();
@@ -789,9 +787,8 @@ static LSL_Leaf *evaluateFloatToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf 
 
     if (content && result)
     {
-#ifdef LUASL_DEBUG
-	printf(" <%g> ", content->value.floatValue);
-#endif
+	if (LUASL_DEBUG)
+	    printf(" <%g> ", content->value.floatValue);
 	memcpy(result, content, sizeof(LSL_Leaf));
 	result->basicType = OT_float;
     }
@@ -804,9 +801,8 @@ static LSL_Leaf *evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Lea
 
     if (content && result)
     {
-#ifdef LUASL_DEBUG
-	printf(" <%d> ", content->value.integerValue);
-#endif
+	if (LUASL_DEBUG)
+	    printf(" <%d> ", content->value.integerValue);
 	memcpy(result, content, sizeof(LSL_Leaf));
 	result->basicType = OT_integer;
     }
@@ -886,9 +882,8 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 
     if (content && result)
     {
-#ifdef LUASL_DEBUG
-	printf(" [%s] ", content->token->token);
-#endif
+	if (LUASL_DEBUG)
+	    printf(" [%s] ", content->token->token);
 
 	memcpy(result, content, sizeof(LSL_Leaf));
 
@@ -940,9 +935,8 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 		    case LSL_EQUAL		:  result->value.floatValue = fleft == fright;	break;
 		    case LSL_NOT_EQUAL		:  result->value.floatValue = fleft != fright;	break;
 		}
-#ifdef LUASL_DEBUG
-		printf(" (=%g) ", result->value.floatValue);
-#endif
+		if (LUASL_DEBUG)
+		    printf(" (=%g) ", result->value.floatValue);
 		break;
 	    }
 
@@ -991,9 +985,8 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 		    case LSL_BOOL_OR		:  result->value.integerValue = left->value.integerValue || right->value.integerValue;	break;
 		    case LSL_BOOL_AND		:  result->value.integerValue = left->value.integerValue && right->value.integerValue;	break;
 		}
-#ifdef LUASL_DEBUG
-		printf(" (=%d) ", result->value.integerValue);
-#endif
+		if (LUASL_DEBUG)
+		    printf(" (=%d) ", result->value.integerValue);
 		break;
 	    }
 
@@ -1047,7 +1040,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     if (leaf)
     {
 	outputLeaf(file, mode, leaf->left);
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
 	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
 	    fwrite(eina_strbuf_string_get(leaf->ignorableText), 1, eina_strbuf_length_get(leaf->ignorableText), file);
 #endif
@@ -1105,9 +1098,8 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	}
 	fprintf(file, ")");
 	outputLeaf(file, mode, func->block);
-#ifndef LUASL_DIFF_CHECK
-	fprintf(file, "\n");
-#endif
+	if (!LUASL_DIFF_CHECK)
+	    fprintf(file, "\n");
     }
 }
 
@@ -1132,11 +1124,12 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-#ifdef LUASL_DIFF_CHECK
-	fprintf(file, "%s", content->value.identifierValue->name);
-#else
-	fprintf(file, " %s", content->value.identifierValue->name);
-#endif
+    {
+	if (LUASL_DIFF_CHECK)
+	    fprintf(file, "%s", content->value.identifierValue->name);
+	else
+	    fprintf(file, " %s", content->value.identifierValue->name);
+    }
 }
 
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1154,7 +1147,7 @@ static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *conten
 	    fprintf(file, "%s", allowed[content->basicType].name);	// TODO - We are missing the type ignorable text here.
 	else
 	    outputLeaf(file, mode, content->value.parenthesis->contents);
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
 	fprintf(file, "%s)", eina_strbuf_string_get(content->value.parenthesis->rightIgnorableText));
 #else
 	fprintf(file, ")");
@@ -1187,15 +1180,14 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
     if (content)
     {
 	outputLeaf(file, mode, content->value.statementValue->expressions);
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
 	if (content->ignorableText)
 	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
 #endif
 	if (LSL_FUNCTION != content->value.statementValue->type)
 	    fprintf(file, "%s", content->token->token);
-#ifndef LUASL_DIFF_CHECK
-	fprintf(file, "\n");
-#endif
+	if (!LUASL_DIFF_CHECK)
+	    fprintf(file, "\n");
     }
 }
 
@@ -1209,7 +1201,6 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	FILE *out;
 	char buffer[PATH_MAX];
 	char outName[PATH_MAX];
-	char diffName[PATH_MAX];
 	char luaName[PATH_MAX];
 
 //	outputLeaf(stdout, OM_LSL, compiler->ast);
@@ -1217,31 +1208,32 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	evaluateLeaf(compiler->ast, NULL, NULL);
 //	printf("\n");
 
-	strcpy(outName, compiler->fileName);
-	strcat(outName, "2");
-	strcpy(diffName, compiler->fileName);
-	strcat(diffName, ".diff");
+	if (LUASL_DIFF_CHECK)
+	{
+	    strcpy(outName, compiler->fileName);
+	    strcat(outName, "2");
+	    out = fopen(outName, "w");
+	    if (out)
+	    {
+		char diffName[PATH_MAX];
+//		int count;
+
+		strcpy(diffName, compiler->fileName);
+		strcat(diffName, ".diff");
+		outputLeaf(out, OM_LSL, compiler->ast);
+		fclose(out);
+		sprintf(buffer, "diff \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
+//		count = system(buffer);
+//		if (0 != count)
+//		    PE("LSL output file is different - %s!", outName);
+//		else
+//		    result = TRUE;
+	    }
+	    else
+		PC("Unable to open file %s for writing!", outName);
+	}
 	strcpy(luaName, compiler->fileName);
 	strcat(luaName, ".lua");
-	out = fopen(outName, "w");
-	if (out)
-	{
-#ifdef LUASL_DIFF_CHECK
-//	    int count;
-#endif
-	    outputLeaf(out, OM_LSL, compiler->ast);
-	    fclose(out);
-	    sprintf(buffer, "diff \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
-#ifdef LUASL_DIFF_CHECK
-//	    count = system(buffer);
-//	    if (0 != count)
-//	        PE("LSL output file is different - %s!", outName);
-//	    else
-//		result = TRUE;
-#endif
-	}
-	else
-	    PC("Unable to open file %s for writing!", outName);
 	out = fopen(luaName, "w");
 	if (out)
 	{
@@ -1306,7 +1298,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
     compiler.script.states = eina_hash_stringshared_new(burnLeaf);
     compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
     eina_clist_init(&(compiler.danglingCalls));
-#ifdef LUASL_DIFF_CHECK
+#if LUASL_DIFF_CHECK
     compiler.ignorableText = eina_strbuf_new();
 #endif
 
@@ -1328,10 +1320,11 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 
     if (yylex_init_extra(&compiler, &(compiler.scanner)))
 	return result;
-#ifdef LUASL_DEBUG
-    yyset_debug(1, compiler.scanner);
-    ParseTrace(stdout, "LSL_lemon ");
-#endif
+    if (LUASL_DEBUG)
+    {
+	yyset_debug(1, compiler.scanner);
+	ParseTrace(stdout, "LSL_lemon ");
+    }
     yyset_in(compiler.file, compiler.scanner);
     // on EOF yylex will return 0
     while((yv = yylex(compiler.lval, compiler.scanner)) != 0)
@@ -1504,10 +1497,11 @@ int main(int argc, char **argv)
 
 	    if (yylex_init_extra(&param, &(param.scanner)))
 		return 1;
-#ifdef LUASL_DEBUG
-	    yyset_debug(1, param.scanner);
-	    ParseTrace(stdout, "LSL_lemon ");
-#endif
+	    if (LUASL_DEBUG)
+	    {
+		yyset_debug(1, param.scanner);
+		ParseTrace(stdout, "LSL_lemon ");
+	    }
 	    yyset_in(param.file, param.scanner);
 	    // on EOF yylex will return 0
 	    while((yv = yylex(param.lval, param.scanner)) != 0)
