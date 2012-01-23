@@ -159,70 +159,6 @@ expr(A) ::= LSL_IDENTIFIER(B) LSL_PARENTHESIS_OPEN(C) exprList(D) LSL_PARENTHESI
 
 expr(A) ::= identifier(B).							{ A = B; }
 
-/*
---accepting rule at line 85 ("integer")
-LSL_lemon Input LSL_TYPE_INTEGER
-LSL_lemon Reduce [script ::=].
-LSL_lemon Shift 1
-LSL_lemon Stack: script
-LSL_lemon Shift 177
-LSL_lemon Stack: script LSL_TYPE_INTEGER
---accepting rule at line 36 (" ")
---accepting rule at line 104 ("Checking")
-LSL_lemon Input LSL_IDENTIFIER
-LSL_lemon Reduce [type ::= LSL_TYPE_INTEGER].
-LSL_lemon Shift 107
-LSL_lemon Stack: script type
-LSL_lemon Shift 97
-LSL_lemon Stack: script type LSL_IDENTIFIER
---accepting rule at line 36 (" ")
---accepting rule at line 71 ("=")
-LSL_lemon Input LSL_ASSIGNMENT_PLAIN
-LSL_lemon Shift 16
-LSL_lemon Stack: script type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN
---accepting rule at line 36 (" ")
---accepting rule at line 104 ("FALSE")
-LSL_lemon Input LSL_IDENTIFIER
-LSL_lemon Shift 127
-LSL_lemon Stack: script type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN LSL_IDENTIFIER
---accepting rule at line 81 (";")
-LSL_lemon Input LSL_STATEMENT
-LSL_lemon Reduce [identifier ::= LSL_IDENTIFIER].
-22/01/2012 15:32:13 INF<15847>:LuaSL LuaSL_compile.c	:305 	checkVariable() Found FALSE!
-LSL_lemon Shift 94
-LSL_lemon Stack: script type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN identifier
-LSL_lemon Reduce [expr ::= identifier].
-LSL_lemon Shift 67
-LSL_lemon Stack: script type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr
-LSL_lemon Shift 142
-LSL_lemon Stack: script type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr LSL_STATEMENT
---accepting rule at line 36 ("       ")
---accepting rule at line 39 ("// whether doing consistency check")
---accepting rule at line 36 ("
-
-")
---accepting rule at line 85 ("integer")
-LSL_lemon Input LSL_TYPE_INTEGER
-LSL_lemon Reduce [statement ::= type LSL_IDENTIFIER LSL_ASSIGNMENT_PLAIN expr LSL_STATEMENT].
-LSL_lemon Shift 194
-LSL_lemon Stack: script statement
-LSL_lemon Reduce [script ::= script statement].
-LSL_lemon Shift 1
-LSL_lemon Stack: script
-
-
-Results in -
-integer Checking =
-integer         FALSE                 = 0;       // whether doing consistency check
-
-Instead of -
-integer Checking = FALSE;       // whether doing consistency check
-
-Coz it replaces the variable with the definition of the variable.
-
-*/
-
-
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
 // Yes, these can be expressions, and can happen in if statements and such.
 expr(A) ::= identifier LSL_ASSIGNMENT_CONCATENATE expr(B).			{ A = B; }
@@ -240,7 +176,7 @@ statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatem
 
 %right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL.
 identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
-identifier(A) ::= LSL_IDENTIFIER(B).						{ A = checkVariable(compiler, B); }
+identifier(A) ::= LSL_IDENTIFIER(B).							{ A = checkVariable(compiler, B); }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
 expr(A) ::= identifier(B) LSL_DECREMENT_PRE(C).						{ A = addCrement(compiler, B, C); }

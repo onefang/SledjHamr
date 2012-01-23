@@ -295,14 +295,23 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
-    LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
 
-    if (NULL == var)
-	PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
-    else if (LUASL_DEBUG)
-	PI("Found %s!", identifier->value.stringValue);
+    if (identifier)
+    {
+	LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
 
-    return var;
+	if (var)
+	{
+	    if (LUASL_DEBUG)
+		PI("Found %s!", identifier->value.stringValue);
+	    identifier->value.identifierValue = var->value.identifierValue;
+	    identifier->basicType = var->basicType;
+	}
+	else 
+	    PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
+    }
+
+    return identifier;
 }
 
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
