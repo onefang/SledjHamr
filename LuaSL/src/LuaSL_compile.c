@@ -1069,7 +1069,10 @@ static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
-	fprintf(file, "\n{\n");
+	if (LUASL_DIFF_CHECK)
+	    fprintf(file, "\n{");
+	else
+	    fprintf(file, "\n{\n");
 	if (content->value.blockValue)
 	{
 	    LSL_Statement *statement = NULL;
@@ -1078,10 +1081,18 @@ static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    {
 		outputLeaf(file, mode, statement->expressions);
 		if (LSL_FUNCTION != statement->type)
-		    fprintf(file, ";\n");
+		{
+		    if (LUASL_DIFF_CHECK)
+			fprintf(file, ";");
+		    else
+			fprintf(file, ";\n");
+		}
 	    }
 	}
-	fprintf(file, "}\n");
+	if (LUASL_DIFF_CHECK)
+	    fprintf(file, "\n}");
+	else
+	    fprintf(file, "}");
     }
 }
 
@@ -1104,8 +1115,11 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s(", func->name);
 	EINA_INARRAY_FOREACH((&(func->vars)), param)
 	{
-	    if (!first)
-		fprintf(file, ", ");
+	    if (!LUASL_DIFF_CHECK)
+	    {
+		if (!first)
+		    fprintf(file, ", ");
+	    }
 	    outputLeaf(file, mode, param);
 	    first = FALSE;
 	}
