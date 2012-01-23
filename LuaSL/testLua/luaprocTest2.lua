@@ -11,37 +11,28 @@ if not result then print(error_msg) end
 
 count = 0
 
-for i = 1, 10 do
-    local proc = [=[
-	require "string"
-	local channel = "channel%d"
-	local message
+proc = [=[
+    require "string"
+    local channel = "channel%d"
+    local message
 
-	result, error_msg = luaproc.newchannel(channel)
-	if not result then print(error_msg) end
-	repeat
-	    message = luaproc.receive(channel)
-	    local x, y = string.find(message, "@")
-	    if not x then
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    x, y = string.find(message, "@")
-	    end
-	until "quit" == message
-    ]=]
-
-    proc = string.format(proc, i)
---    print(proc)
-    result, error_msg = luaproc.newproc(proc)
-    if not result then print(error_msg) else count = count + 1 end
-end
-
-print("Started " .. count .. " Lua threads.")
+    result, error_msg = luaproc.newchannel(channel)
+    if not result then print(error_msg) end
+    repeat
+	message = luaproc.receive(channel)
+	local x, y = string.find(message, "@")
+	if not x then
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	x, y = string.find(message, "@")
+	end
+    until "quit" == message
+]=]
 
 mainProc = [=[
     local count = %d
@@ -72,8 +63,14 @@ mainProc = [=[
     print("Sent " .. messages .. " messages totalling " .. length .. " bytes.  The largest message was " .. #message .. " bytes.")
 ]=]
 
-mainProc = string.format(mainProc, count)
-result, error_msg = luaproc.newproc(mainProc)
+for i = 1, 10 do
+    result, error_msg = luaproc.newproc(string.format(proc, i))
+    if not result then print(error_msg) else count = count + 1 end
+end
+
+print("Started " .. count .. " Lua threads.")
+
+result, error_msg = luaproc.newproc(string.format(mainProc, count))
 if not result then print(error_msg) end
 
 luaproc.exit()
