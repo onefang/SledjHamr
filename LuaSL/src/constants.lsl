@@ -160,6 +160,13 @@ string		EOF			= "\n\n\n";
 rotation	ZERO_ROTATION		= <0.0, 0.0, 0.0, 1.0>;
 vector		ZERO_VECTOR		= <0.0, 0.0, 0.0>;
 
+// Temporary dummy variables to got vector and rotation thingies to work for now.
+
+float		s			= 1.0;
+float		x			= 0.0;
+float		y			= 0.0;
+float		z			= 0.0;
+
 // Functions.
 
 float		llPow(float number, float places){}

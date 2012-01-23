@@ -175,7 +175,7 @@ statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_S
 statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
 
 %right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL.
-identifier ::= identifier LSL_DOT LSL_IDENTIFIER.
+identifier(A) ::= identifier LSL_DOT LSL_IDENTIFIER(B).					{ A = checkVariable(compiler, B); A->basicType = OT_float; }	// Just a stub to get it to work for now.
 identifier(A) ::= LSL_IDENTIFIER(B).							{ A = checkVariable(compiler, B); }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
