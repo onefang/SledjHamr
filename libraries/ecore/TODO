@@ -1,2 +1,0 @@
-* ecore_file - has fd inside. elm_quicklaunch fork fun kills it. store
-pid with fd and detect change of pid and re-init then

@@ -36,10 +36,10 @@ ecore_x_xinerama_screen_count_get(void)
 
 #endif /* ifdef ECORE_XINERAMA */
    return 0;
-} /* ecore_x_xinerama_screen_count_get */
+}
 
 EAPI Eina_Bool
-ecore_x_xinerama_screen_geometry_get(int  screen,
+ecore_x_xinerama_screen_geometry_get(int screen,
                                      int *x,
                                      int *y,
                                      int *w,
@@ -87,5 +87,5 @@ ecore_x_xinerama_screen_geometry_get(int  screen,
 
    return EINA_FALSE;
    screen = 0;
-} /* ecore_x_xinerama_screen_geometry_get */
+}
 

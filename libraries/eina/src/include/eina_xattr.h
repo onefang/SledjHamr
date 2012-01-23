@@ -39,6 +39,14 @@ typedef enum {
   EINA_XATTR_CREATED /**< This will only succeed if the extended attribute wasn't previously set */
 } Eina_Xattr_Flags;
 
+typedef struct _Eina_Xattr Eina_Xattr;
+struct _Eina_Xattr
+{
+   const char *name; /**< The eXtended attribute name @since 1.2 */
+   const char *value; /**< The eXtended attribute value @since 1.2 */
+
+   size_t length; /**< The length of the eXtended attribute value @since 1.2 */
+};
 
 /**
  * @brief Get an iterator that list all extended attribute of a file.
@@ -54,10 +62,49 @@ typedef enum {
 EAPI Eina_Iterator *eina_xattr_ls(const char *file);
 
 /**
+ * @brief Get an iterator that list all extended attribute value related to a fd.
+ *
+ * @param file The filename to retrieve the extended attribute list from.
+ * @return an iterator.
+ *
+ * The iterator will not allocate any data during the iteration step, so you need to copy them yourself
+ * if you need. The iterator will provide an Eina_Xattr structure.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Iterator *eina_xattr_value_ls(const char *file);
+
+/**
+ * @brief Get an iterator that list all extended attribute related to a fd.
+ *
+ * @param fd The file descriptor to retrieve the extended attribute list from.
+ * @return an iterator.
+ *
+ * The iterator will not allocate any data during the iteration step, so you need to copy them yourself
+ * if you need.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Iterator *eina_xattr_fd_ls(int fd);
+
+/**
+ * @brief Get an iterator that list all extended attribute value related to a fd.
+ *
+ * @param fd The file descriptor to retrieve the extended attribute list from.
+ * @return an iterator.
+ *
+ * The iterator will not allocate any data during the iteration step, so you need to copy them yourself
+ * if you need. The iterator will provide an Eina_Xattr structure.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Iterator *eina_xattr_value_fd_ls(int fd);
+
+/**
  * @brief Retrieve an extended attribute from a file.
  *
  * @param file The file to retrieve the extended attribute from.
- * @param atttribute The extended attribute name to retrieve.
+ * @param attribute The extended attribute name to retrieve.
  * @param size The size of the retrieved extended attribute.
  * @return the allocated data that hold the extended attribute value.
  *
@@ -112,7 +159,7 @@ EAPI char *eina_xattr_string_get(const char *file, const char *attribute);
  *
  * @param file The file to set the double to.
  * @param attribute The attribute to set.
- * @param data The NULL terminated double to set.
+ * @param value The NULL terminated double to set.
  * @param flags Define the set policy.
  * @return EINA_TRUE on success, EINA_FALSE otherwise.
  *
@@ -139,7 +186,7 @@ EAPI Eina_Bool eina_xattr_double_get(const char *file, const char *attribute, do
  *
  * @param file The file to set the int to.
  * @param attribute The attribute to set.
- * @param data The NULL terminated int to set.
+ * @param value The NULL terminated int to set.
  * @param flags Define the set policy.
  * @return EINA_TRUE on success, EINA_FALSE otherwise.
  *

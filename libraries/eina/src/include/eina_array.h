@@ -31,7 +31,7 @@
 
 
 /**
- * @page array_01_example_page Basic array usage
+ * @page eina_array_01_example_page Basic array usage
  * @dontinclude eina_array_01.c
  *
  * For this example we add stdlib.h, stdio.h and string.h for some
@@ -94,7 +94,7 @@
  */
 
 /**
- * @page array_02_example_page Removing array elements
+ * @page eina_array_02_example_page Removing array elements
  * @dontinclude eina_array_02.c
  *
  * Just the usual includes:
@@ -169,7 +169,7 @@
  * element, use eina_array_push() and to remove the last element, use
  * eina_array_pop(). To retrieve the element at a given position, use
  * eina_array_data_get(). The number of elements can be retrieved with
- * eina_array_count_get().
+ * eina_array_count().
  *
  * Eina_Array is different from a conventional C array in a number of ways, most
  * importantly they grow and shrink dynamically, this means that if you add an
@@ -191,8 +191,8 @@
  * of void pointers.
  *
  * See here some examples:
- * @li @ref array_01_example_page
- * @li @ref array_02_example_page
+ * @li @ref eina_array_01_example_page
+ * @li @ref eina_array_02_example_page
  */
 
 /**
@@ -351,7 +351,8 @@ static inline void     *eina_array_data_get(const Eina_Array *array,
 static inline void      eina_array_data_set(const Eina_Array *array,
                                             unsigned int      idx,
                                             const void       *data) EINA_ARG_NONNULL(1);
-static inline unsigned int eina_array_count_get(const Eina_Array *array) EINA_ARG_NONNULL(1);
+static inline unsigned int eina_array_count_get(const Eina_Array *array) EINA_ARG_NONNULL(1) EINA_WARN_UNUSED_RESULT EINA_DEPRECATED;
+static inline unsigned int eina_array_count(const Eina_Array *array) EINA_ARG_NONNULL(1) EINA_WARN_UNUSED_RESULT;
 
 /**
  * @brief Returned a new iterator associated to an array.
@@ -394,7 +395,7 @@ EAPI Eina_Accessor        *eina_array_accessor_new(const Eina_Array *array) EINA
  */
 static inline Eina_Bool    eina_array_foreach(Eina_Array  *array,
                                               Eina_Each_Cb cb,
-                                              void        *data);
+                                              void        *fdata);
 /**
  * @def EINA_ARRAY_ITER_NEXT
  * @brief Macro to iterate over an array easily.
@@ -429,7 +430,7 @@ static inline Eina_Bool    eina_array_foreach(Eina_Array  *array,
  */
 #define EINA_ARRAY_ITER_NEXT(array, index, item, iterator)                  \
   for (index = 0, iterator = (array)->data;                                 \
-       (index < eina_array_count_get(array)) && ((item = *((iterator)++))); \
+       (index < eina_array_count(array)) && ((item = *((iterator)++)));     \
                                                   ++(index))
 
 #include "eina_inline_array.x"

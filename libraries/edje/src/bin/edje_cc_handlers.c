@@ -172,6 +172,7 @@ static void st_collections_group_parts_part_description_visible(void);
 static void st_collections_group_parts_part_description_align(void);
 static void st_collections_group_parts_part_description_fixed(void);
 static void st_collections_group_parts_part_description_min(void);
+static void st_collections_group_parts_part_description_minmul(void);
 static void st_collections_group_parts_part_description_max(void);
 static void st_collections_group_parts_part_description_step(void);
 static void st_collections_group_parts_part_description_aspect(void);
@@ -261,12 +262,9 @@ static void st_collections_group_programs_program_after(void);
 static void st_collections_group_programs_program_api(void);
 
 static void ob_collections_group_programs_program_script(void);
-
-#ifdef ENABLE_MULTISENSE
 static void st_collections_group_sound_sample_name(void);
 static void st_collections_group_sound_sample_source(void);
 static void st_collections_group_sound_tone(void);
-#endif
 
 /*****/
 
@@ -305,14 +303,13 @@ New_Statement_Handler statement_handlers[] =
      {"collections.color_classes.color_class.color", st_color_class_color}, /* dup */
      {"collections.color_classes.color_class.color2", st_color_class_color2}, /* dup */
      {"collections.color_classes.color_class.color3", st_color_class_color3}, /* dup */
-#ifdef ENABLE_MULTISENSE
+
      {"collections.sounds.sample.name", st_collections_group_sound_sample_name},
      {"collections.sounds.sample.source", st_collections_group_sound_sample_source},
      {"collections.group.sounds.sample.name", st_collections_group_sound_sample_name}, /* dup */
      {"collections.group.sounds.sample.source", st_collections_group_sound_sample_source}, /* dup */
      {"collections.sounds.tone", st_collections_group_sound_tone},
      {"collections.group.sounds.tone", st_collections_group_sound_tone}, /* dup */
-#endif
      {"collections.group.name", st_collections_group_name},
      {"collections.group.inherit", st_collections_group_inherit},
      {"collections.group.script_only", st_collections_group_script_only},
@@ -438,6 +435,7 @@ New_Statement_Handler statement_handlers[] =
      {"collections.group.parts.part.description.align", st_collections_group_parts_part_description_align},
      {"collections.group.parts.part.description.fixed", st_collections_group_parts_part_description_fixed},
      {"collections.group.parts.part.description.min", st_collections_group_parts_part_description_min},
+     {"collections.group.parts.part.description.minmul", st_collections_group_parts_part_description_minmul},
      {"collections.group.parts.part.description.max", st_collections_group_parts_part_description_max},
      {"collections.group.parts.part.description.step", st_collections_group_parts_part_description_step},
      {"collections.group.parts.part.description.aspect", st_collections_group_parts_part_description_aspect},
@@ -677,14 +675,13 @@ New_Object_Handler object_handlers[] =
      {"collections.styles.style", ob_styles_style}, /* dup */
      {"collections.color_classes", NULL}, /* dup */
      {"collections.color_classes.color_class", ob_color_class}, /* dup */
-#ifdef ENABLE_MULTISENSE
      {"collections.sounds", NULL},
      {"collections.group.sounds", NULL}, /* dup */
      {"collections.sounds.sample", NULL},
      {"collections.group.sounds.sample", NULL}, /* dup */
-#endif
      {"collections.group", ob_collections_group},
      {"collections.group.data", NULL},
+     {"collections.group.limits", NULL},
      {"collections.group.script", ob_collections_group_script},
      {"collections.group.lua_script", ob_collections_group_lua_script},
      {"collections.group.externals", NULL}, /* dup */
@@ -1836,12 +1833,6 @@ st_styles_style_tag(void)
    stl->tags = eina_list_append(stl->tags, tag);
 }
 
-#ifdef ENABLE_MULTISENSE
-/* add to below doc
-sounds { }
- */
-#endif
-
 /**
     @page edcref
     @block
@@ -1851,6 +1842,7 @@ sounds { }
             ..
             group { }
             group { }
+            sounds { }
             ..
         }
     @description
@@ -1866,8 +1858,7 @@ ob_collections(void)
      edje_file->collection = eina_hash_string_small_new(NULL);
 }
 
-#ifdef ENABLE_MULTISENSE
-/* * delete space before *
+/**
     @page edcref
     @block
         sounds
@@ -1980,7 +1971,7 @@ st_collections_group_sound_sample_name(void)
 
 }
 
-/* * delete space before *
+/**
     @page edcref
     @property
         source
@@ -2016,7 +2007,7 @@ st_collections_group_sound_sample_source(void)
    check_arg_count(1);
 }
 
-/* * delete space before *
+/**
     @page edcref
     @property
         tone
@@ -2079,7 +2070,6 @@ st_collections_group_sound_tone(void)
    tone->value = value;
    tone->id = edje_file->sound_dir->tones_count - 1;
 }
-#endif
 
 /**
    @edcsection{group,Group sub blocks}
@@ -2677,14 +2667,14 @@ st_collections_group_orientation(void)
     @block
         limits
     @context
-	group {
+        group {
             limits {
-	        vertical: "limit_name" height_barrier;
-	        horizontal: "limit_name" width_barrier;
-		..
-	    }
-	    ..
-	}
+                vertical: "limit_name" height_barrier;
+                horizontal: "limit_name" width_barrier;
+                ..
+            }
+            ..
+        }
         ..
     @description
         This block is used to trigger some signal when the Edje object is resized.
@@ -2696,10 +2686,10 @@ st_collections_group_orientation(void)
     @parameters
         [name] [height barrier]
     @effect
-	It will send a signal: "limit,name,over" when the object is resized and pass
-	the limit by growing over it. And it will send: "limit,name,below" when
-	it pass below that limit.
-	This limit will be applied on the y absis.
+        It will send a signal: "limit,name,over" when the object is resized and pass
+        the limit by growing over it. And it will send: "limit,name,below" when
+        it pass below that limit.
+        This limit will be applied on the y absis and is expressed in pixels.
     @endproperty
 */
 static void
@@ -2734,10 +2724,10 @@ st_collections_group_limits_vertical(void)
     @parameters
         [name] [width barrier]
     @effect
-	It will send a signal: "limit,name,over" when the object is resized and pass
-	the limit by growing over it. And it will send: "limit,name,below" when
-	it pass below that limit.
-	This limit will be applied on the x absis.
+        It will send a signal: "limit,name,over" when the object is resized and pass
+        the limit by growing over it. And it will send: "limit,name,below" when
+        it pass below that limit.
+        This limit will be applied on the x absis and is expressed in pixels.
     @endproperty
 */
 static void
@@ -3224,6 +3214,7 @@ st_collections_group_parts_part_source(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source = parse_str(0);
+   data_queue_group_lookup(current_part->source, current_part);
 }
 
 /**
@@ -3245,6 +3236,7 @@ st_collections_group_parts_part_source2(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source2 = parse_str(0);
+   data_queue_group_lookup(current_part->source2, current_part);
 }
 
 /**
@@ -3266,6 +3258,7 @@ st_collections_group_parts_part_source3(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source3 = parse_str(0);
+   data_queue_group_lookup(current_part->source3, current_part);
 }
 
 /**
@@ -3287,6 +3280,7 @@ st_collections_group_parts_part_source4(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source4 = parse_str(0);
+   data_queue_group_lookup(current_part->source4, current_part);
 }
 
 /**
@@ -3308,6 +3302,7 @@ st_collections_group_parts_part_source5(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source5 = parse_str(0);
+   data_queue_group_lookup(current_part->source5, current_part);
 }
 
 /**
@@ -3329,6 +3324,7 @@ st_collections_group_parts_part_source6(void)
 
    //FIXME: validate this somehow (need to decide on the format also)
    current_part->source6 = parse_str(0);
+   data_queue_group_lookup(current_part->source6, current_part);
 }
 
 /**
@@ -3439,10 +3435,9 @@ st_collections_group_parts_part_entry_mode(void)
         [MODE]
     @effect
         Sets the selection mode for a textblock part to one of:
-        @li DEFAULT
-        @li EXPLICIT
-        DEFAULT selection mode is what you would expect on any desktop. Press
-        mouse, drag and release to end. EXPLICIT mode requires the application
+        @li DEFAULT selection mode is what you would expect on any desktop. Press
+        mouse, drag and release to end.
+        @li EXPLICITmode requires the application
         controlling the edje object has to explicitly begin and end selection
         modes, and the selection itself is dragable at both ends.
     @endproperty
@@ -3466,11 +3461,9 @@ st_collections_group_parts_part_select_mode(void)
         [MODE]
     @effect
         Sets the cursor mode for a textblock part to one of:
-        @li UNDER
-        @li BEFORE
-        UNDER cursor mode means the cursor will draw below the character pointed
+        @li UNDER cursor mode means the cursor will draw below the character pointed
         at. That's the default.
-        BEFORE cursor mode means the cursor is drawn as a vertical line before
+        @li BEFORE cursor mode means the cursor is drawn as a vertical line before
         the current character, just like many other GUI toolkits handle it.
     @endproperty
 */
@@ -3816,6 +3809,7 @@ static void st_collections_group_parts_part_box_items_item_source(void)
    check_arg_count(1);
 
    current_item->source = parse_str(0);
+   data_queue_group_lookup(current_item->source, current_part);
 }
 
 /**
@@ -4140,6 +4134,9 @@ ob_collections_group_parts_part_description(void)
    ed->map.persp_on = 0;
    ed->persp.zplane = 0;
    ed->persp.focal = 1000;
+   ed->minmul.have = 1;
+   ed->minmul.w = FROM_INT(1);
+   ed->minmul.h = FROM_INT(1);
 }
 
 /**
@@ -4558,6 +4555,27 @@ st_collections_group_parts_part_description_min(void)
 /**
     @page edcref
     @property
+        minmul
+    @parameters
+        [width multipler] [height multiplier]
+    @effect
+        A multiplier FORCIBLY applied to whatever minimum size is only during
+        minimum size calculation.
+    @endproperty
+    @since 1.2
+*/
+static void
+st_collections_group_parts_part_description_minmul(void)
+{
+   check_arg_count(2);
+
+   current_desc->minmul.w = FROM_DOUBLE(parse_float_range(0, 0, 999999));
+   current_desc->minmul.h = FROM_DOUBLE(parse_float_range(1, 0, 999999));
+}
+
+/**
+    @page edcref
+    @property
         max
     @parameters
         [width] [height]
@@ -4605,7 +4623,7 @@ st_collections_group_parts_part_description_step(void)
         Normally width and height can be resized to any values independently.
         The aspect property forces the width to height ratio to be kept between
         the minimum and maximum set. For example, "1.0 1.0" will increase the
-        width a pixel for every pixel added to heigh. The default value is
+        width a pixel for every pixel added to height. The default value is
         "0.0 0.0" disabling aspect.
     @endproperty
 */
@@ -4626,7 +4644,7 @@ st_collections_group_parts_part_description_aspect(void)
         [DIMENSION]
     @effect
         Sets the scope of the "aspect" property to a given dimension. Available
-        options are BOTH, VERTICAL, HORIZONTAL and NONE
+        options are BOTH, VERTICAL, HORIZONTAL, SOURCE and NONE
     @endproperty
 */
 static void
@@ -4639,6 +4657,7 @@ st_collections_group_parts_part_description_aspect_preference(void)
 				   "VERTICAL", EDJE_ASPECT_PREFER_VERTICAL,
 				   "HORIZONTAL", EDJE_ASPECT_PREFER_HORIZONTAL,
 				   "BOTH", EDJE_ASPECT_PREFER_BOTH,
+				   "SOURCE", EDJE_ASPECT_PREFER_SOURCE,
 				   NULL);
 }
 
@@ -7236,15 +7255,6 @@ st_collections_group_programs_program_in(void)
    current_program->in.range = parse_float_range(1, 0.0, 999999999.0);
 }
 
-#ifdef ENABLE_MULTISENSE
-/* add to docs below
-, PLAY_SAMPLE, PLAY_TONE
-
-           action: PLAY_SAMPLE "sample name";\n
-           action: PLAY_TONE "tone name" duration in seconds ( Range 0.1 to 10.0 );\n
-*/
-#endif
-
 /**
     @page edcref
     @property
@@ -7254,7 +7264,7 @@ st_collections_group_programs_program_in(void)
     @effect
         Action to be performed by the program. Valid actions are: STATE_SET,
         ACTION_STOP, SIGNAL_EMIT, DRAG_VAL_SET, DRAG_VAL_STEP, DRAG_VAL_PAGE,
-        FOCUS_SET, PARAM_COPY, PARAM_SET
+        FOCUS_SET, PARAM_COPY, PARAM_SET, PLAY_SAMPLE, PLAY_TONE
         Only one action can be specified per program. Examples:\n
            action: STATE_SET "statename" 0.5;\n
            action: ACTION_STOP;\n
@@ -7266,6 +7276,8 @@ st_collections_group_programs_program_in(void)
            action: FOCUS_OBJECT;\n
            action: PARAM_COPY "src_part" "src_param" "dst_part" "dst_param";\n
            action: PARAM_SET "part" "param" "value";\n
+           action: PLAY_SAMPLE "sample name";\n
+           action: PLAY_TONE "tone name" duration in seconds ( Range 0.1 to 10.0 );\n
     @endproperty
 */
 static void
@@ -7273,6 +7285,7 @@ st_collections_group_programs_program_action(void)
 {
    Edje_Part_Collection *pc;
    Edje_Program *ep;
+   int i;
    
    pc = eina_list_data_get(eina_list_last(edje_collections));
    ep = current_program;
@@ -7288,10 +7301,8 @@ st_collections_group_programs_program_action(void)
                            "FOCUS_OBJECT", EDJE_ACTION_TYPE_FOCUS_OBJECT,
                            "PARAM_COPY", EDJE_ACTION_TYPE_PARAM_COPY,
                            "PARAM_SET", EDJE_ACTION_TYPE_PARAM_SET,
-#ifdef ENABLE_MULTISENSE
                            "PLAY_SAMPLE", EDJE_ACTION_TYPE_SOUND_SAMPLE,
                            "PLAY_TONE", EDJE_ACTION_TYPE_SOUND_TONE,
-#endif
                            NULL);
    if (ep->action == EDJE_ACTION_TYPE_STATE_SET)
      {
@@ -7303,11 +7314,8 @@ st_collections_group_programs_program_action(void)
 	ep->state = parse_str(1);
 	ep->state2 = parse_str(2);
      }
-#ifdef ENABLE_MULTISENSE
    else if (ep->action == EDJE_ACTION_TYPE_SOUND_SAMPLE)
      {
-        int i;
-        
         ep->sample_name = parse_str(1);
         for (i = 0; i < (int)edje_file->sound_dir->samples_count; i++)
           {
@@ -7324,8 +7332,6 @@ st_collections_group_programs_program_action(void)
      }
    else if (ep->action == EDJE_ACTION_TYPE_SOUND_TONE)
      {
-        int i;
-        
         ep->tone_name = parse_str(1);
         for (i = 0; i < (int)edje_file->sound_dir->tones_count; i++)
           {
@@ -7340,7 +7346,6 @@ st_collections_group_programs_program_action(void)
           }
         ep->duration = parse_float_range(2, 0.1, 10.0);
      }
-#endif   
    else if (ep->action == EDJE_ACTION_TYPE_DRAG_VAL_SET)
      {
 	ep->value = parse_float(1);
@@ -7402,14 +7407,12 @@ st_collections_group_programs_program_action(void)
       case EDJE_ACTION_TYPE_PARAM_SET:
         check_arg_count(4);
         break;
-#ifdef ENABLE_MULTISENSE
       case EDJE_ACTION_TYPE_SOUND_SAMPLE:
         check_arg_count(3);
         break;
       case EDJE_ACTION_TYPE_SOUND_TONE:
         check_arg_count(3);
         break;
-#endif        
       default:
 	check_arg_count(3);
      }

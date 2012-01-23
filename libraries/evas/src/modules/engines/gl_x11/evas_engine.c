@@ -584,25 +584,30 @@ _extensions_init(Render_Engine *re)
 
 #if defined (GLES_VARIETY_S3C6410) || defined (GLES_VARIETY_SGX)
    // EGL Extensions
-   evasglexts = glsym_eglQueryString(re->win->egl_disp, EGL_EXTENSIONS);
+   if (glsym_eglQueryString)
+     {
+        evasglexts = glsym_eglQueryString(re->win->egl_disp, EGL_EXTENSIONS);
 #else
-   evasglexts = glXQueryExtensionsString(re->info->info.display, 
-                                         re->info->info.screen);
+   if (glsym_glXQueryExtensionsString)
+     {
+        evasglexts = glXQueryExtensionsString(re->info->info.display, 
+                                              re->info->info.screen);
 #endif
 
-   DBG("--------EvasGL Extensions----------");
-   for (i = 0; _evasgl_ext_entries[i].name != NULL; i++)
-     {
-        if ( (strstr(evasglexts, _evasgl_ext_entries[i].name) != NULL) ||
-             (strstr(evasglexts, _evasgl_ext_entries[i].real_name) != NULL) )
+        DBG("--------EvasGL Extensions----------");
+        for (i = 0; _evasgl_ext_entries[i].name != NULL; i++)
           {
-             _evasgl_ext_entries[i].supported = 1;
-             strcat(_evasgl_ext_string, _evasgl_ext_entries[i].name);
-             strcat(_evasgl_ext_string, " ");
-             DBG("\t%s", _evasgl_ext_entries[i].name);
+             if ( (strstr(evasglexts, _evasgl_ext_entries[i].name) != NULL) ||
+                  (strstr(evasglexts, _evasgl_ext_entries[i].real_name) != NULL) )
+               {
+                  _evasgl_ext_entries[i].supported = 1;
+                  strcat(_evasgl_ext_string, _evasgl_ext_entries[i].name);
+                  strcat(_evasgl_ext_string, " ");
+                  DBG("\t%s", _evasgl_ext_entries[i].name);
+               }
           }
+        DBG(" ");
      }
-   DBG(" ");
 }
 
 int _evas_engine_GL_X11_log_dom = -1;
@@ -1125,12 +1130,12 @@ eng_output_redraws_rect_add(void *data, int x, int y, int w, int h)
    eng_window_use(re->win);
    evas_gl_common_context_resize(re->win->gl_context, re->win->w, re->win->h, re->win->rot);
    evas_common_tilebuf_add_redraw(re->tb, x, y, w, h);
-/*
+
    RECTS_CLIP_TO_RECT(x, y, w, h, 0, 0, re->win->w, re->win->h);
    if ((w <= 0) || (h <= 0)) return;
    if (!re->win->draw.redraw)
      {
-#if 0
+#if 1
 	re->win->draw.x1 = x;
 	re->win->draw.y1 = y;
 	re->win->draw.x2 = x + w - 1;
@@ -1150,11 +1155,10 @@ eng_output_redraws_rect_add(void *data, int x, int y, int w, int h)
 	if ((y + h - 1) > re->win->draw.y2) re->win->draw.y2 = y + h - 1;
      }
    re->win->draw.redraw = 1;
- */
 }
 
 static void
-eng_output_redraws_rect_del(void *data __UNUSED__, int x __UNUSED__, int y __UNUSED__, int w __UNUSED__, int h __UNUSED__)
+eng_output_redraws_rect_del(void *data, int x, int y, int w, int h)
 {
    Render_Engine *re;
 
@@ -1244,10 +1248,10 @@ eng_output_redraws_next_update_get(void *data, int *x, int *y, int *w, int *h, i
 //#define FRAMECOUNT 1
 
 #ifdef FRAMECOUNT
-double
+static double
 get_time(void)
 {
-   struct timeval      timev;
+   struct timeval timev;
 
    gettimeofday(&timev, NULL);
    return (double)timev.tv_sec + (((double)timev.tv_usec) / 1000000);
@@ -1391,44 +1395,46 @@ eng_output_flush(void *data)
      {
         re->info->callback.pre_swap(re->info->callback.data, re->evas);
      }
-/*
-   if ((1)
-//       (re->win->draw.x1 == 0) &&
-//       (re->win->draw.y1 == 0) &&
-//       (re->win->draw.x2 == (re->win->w - 1)) &&
-//       (re->win->draw.y2 == (re->win->h - 1))
-       )
- */
+#if 1
+   if (1)
+#else
+   if ((re->win->draw.x1 == 0) && (re->win->draw.y1 == 0) && (re->win->draw.x2 == (re->win->w - 1)) && (re->win->draw.y2 == (re->win->h - 1)))
+#endif     
      {
+//        double t, t2 = 0.0;
+//        t = get_time();
         glXSwapBuffers(re->win->disp, re->win->win);
-        if (!safe_native) glXWaitGL();
+//        t = get_time() - t;
+//        if (!safe_native)
+//          {
+//             t2 = get_time();
+//             glXWaitGL();
+//             t2 = get_time() - t2;
+//          }
+//        printf("swap: %3.5f (%3.5fms), x wait gl: %3.5f (%3.5fms)\n", 
+//               t, t * 1000.0, t2, t2 * 1000.0);
      }
-/*
    else
      {
 // FIXME: this doesn't work.. why oh why?
         int sx, sy, sw, sh;
-
-        // fimxe - reset when done
-//        glEnable(GL_SCISSOR_TEST);
-        glDrawBuffer(GL_FRONT);
 
         sx = re->win->draw.x1;
         sy = re->win->draw.y1;
         sw = (re->win->draw.x2 - re->win->draw.x1) + 1;
         sh = (re->win->draw.y2 - re->win->draw.y1) + 1;
         sy = re->win->h - sy - sh;
-
-//        glScissor(sx, sy, sw, sh);
-        glRasterPos2i(sx, re->win->h - sy);
+        
+        glBitmap(0, 0, 0, 0, sx, re->win->h - sy, NULL);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(sx, sy, sw, sh);
+        glDrawBuffer(GL_FRONT);
         glCopyPixels(sx, sy, sw, sh, GL_COLOR);
-        glRasterPos2i(0, 0);
-
-//        glDisable(GL_SCISSOR_TEST);
         glDrawBuffer(GL_BACK);
+        glDisable(GL_SCISSOR_TEST);
+        glBitmap(0, 0, 0, 0, 0, 0, NULL);
         glFlush();
      }
- */
    if (re->info->callback.post_swap)
      {
         re->info->callback.post_swap(re->info->callback.data, re->evas);
@@ -3469,7 +3475,10 @@ evgl_evasglCreateImage(int target, void* buffer, int *attrib_list)
                                     attrib_list);
      }
    else
-      ERR("Invalid Engine... (Can't acccess EGL Display)\n");
+     {
+        ERR("Invalid Engine... (Can't acccess EGL Display)\n");
+        return NULL;
+     }
 }
 
 static void
@@ -3826,6 +3835,18 @@ eng_image_animated_frame_set(void *data __UNUSED__, void *image, int frame_index
    return EINA_TRUE;
 }
 
+static Eina_Bool
+eng_image_can_region_get(void *data __UNUSED__, void *image)
+{
+   Evas_GL_Image *gim = image;
+   Image_Entry *im;
+   if (!gim) return EINA_FALSE;
+   im = (Image_Entry *)gim->im;
+   if (!im) return EINA_FALSE;
+   return ((Evas_Image_Load_Func*) im->info.loader)->do_region;
+}
+
+
 static void
 eng_image_max_size_get(void *data, int *maxw, int *maxh)
 {
@@ -3903,6 +3924,7 @@ module_open(Evas_Module *em)
    ORD(image_format_get);
    ORD(image_colorspace_set);
    ORD(image_colorspace_get);
+   ORD(image_can_region_get);
    ORD(image_mask_create);
    ORD(image_native_set);
    ORD(image_native_get);

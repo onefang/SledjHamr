@@ -143,8 +143,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -214,7 +212,7 @@ top_srcdir = @top_srcdir@
 version_info = @version_info@
 MAINTAINERCLEANFILES = Makefile.in eet.dox
 PACKAGE_DOCNAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)-doc
-EXTRA_DIST = $(srcdir)/Doxyfile \
+EXTRA_DIST = $(builddir)/Doxyfile \
 	$(srcdir)/e.css \
 	$(srcdir)/foot.html \
 	$(srcdir)/head.html \
@@ -428,6 +426,7 @@ uninstall-am:
 @EFL_BUILD_DOC_TRUE@	bzip2 -9 $(PACKAGE_DOCNAME).tar
 @EFL_BUILD_DOC_TRUE@	rm -rf $(PACKAGE_DOCNAME)/
 @EFL_BUILD_DOC_TRUE@	mv $(PACKAGE_DOCNAME).tar.bz2 $(top_builddir)
+@EFL_BUILD_DOC_TRUE@	@echo "Documentation Package: $(top_builddir)/$(PACKAGE_DOCNAME).tar.bz2"
 
 @EFL_BUILD_DOC_TRUE@clean-local: doc-clean
 

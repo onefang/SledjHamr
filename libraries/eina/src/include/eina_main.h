@@ -50,7 +50,7 @@
  * @def EINA_VERSION_MINOR
  * @brief Minor version of Eina
  */
-#define EINA_VERSION_MINOR 0
+#define EINA_VERSION_MINOR 2
 
 /**
  * @typedef Eina_Version
@@ -134,6 +134,9 @@ EAPI int eina_threads_shutdown(void);
 
 /**
  * @brief Check if you are calling this function from the same thread Eina was initialized or not
+ *
+ * @return #EINA_TRUE is the calling function is the same thread, #EINA_FALSE otherwise.
+ *
  * @since 1.1.0
  *
  * Most EFL function are not thread safe and all the call need to happen in

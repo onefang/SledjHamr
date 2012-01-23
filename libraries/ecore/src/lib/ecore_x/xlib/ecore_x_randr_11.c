@@ -8,6 +8,10 @@
 
 #include "ecore_x_private.h"
 #include "ecore_x_randr.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #define Ecore_X_Randr_None 0
 #ifdef ECORE_XRANDR
@@ -18,7 +22,8 @@
                             root) ((screen =                         \
                                       XRRRootToScreen(_ecore_x_disp, \
                                                       root)) != -1)
-#define RANDR_CHECK_1_1_RET(ret)  if(_randr_version < RANDR_1_1) return ret
+#define RANDR_CHECK_1_1_RET(ret)  if (_randr_version < RANDR_1_1) \
+    return ret
 
 extern XRRScreenResources *(*_ecore_x_randr_get_screen_resources)(Display *
                                                                   dpy,
@@ -44,7 +49,7 @@ ecore_x_randr_screen_primary_output_orientations_get(Ecore_X_Window root)
 #else /* ifdef ECORE_XRANDR */
    return Ecore_X_Randr_None;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_orientations_get */
+}
 
 /*
  * @param root window which's primary output will be queried
@@ -61,7 +66,7 @@ ecore_x_randr_screen_primary_output_orientation_get(Ecore_X_Window root)
 #else /* ifdef ECORE_XRANDR */
    return Ecore_X_Randr_None;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_orientation_get */
+}
 
 /*
  * @brief sets a given screen's primary output's orientation
@@ -95,7 +100,7 @@ ecore_x_randr_screen_primary_output_orientation_set(
 #else /* ifdef ECORE_XRANDR */
    return EINA_FALSE;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_orientation_set */
+}
 
 /*
  * @brief gets a screen's primary output's possible sizes
@@ -105,7 +110,7 @@ ecore_x_randr_screen_primary_output_orientation_set(
  */
 EAPI Ecore_X_Randr_Screen_Size_MM *
 ecore_x_randr_screen_primary_output_sizes_get(Ecore_X_Window root,
-                                              int           *num)
+                                              int *num)
 {
 #ifdef ECORE_XRANDR
    Ecore_X_Randr_Screen_Size_MM *ret = NULL;
@@ -135,7 +140,7 @@ ecore_x_randr_screen_primary_output_sizes_get(Ecore_X_Window root,
 #else /* ifdef ECORE_XRANDR */
    return NULL;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_sizes_get */
+}
 
 /*
  * @brief get the current set size of a given screen's primary output
@@ -148,11 +153,11 @@ ecore_x_randr_screen_primary_output_sizes_get(Ecore_X_Window root,
  */
 EAPI void
 ecore_x_randr_screen_primary_output_current_size_get(Ecore_X_Window root,
-                                                     int           *w,
-                                                     int           *h,
-                                                     int           *w_mm,
-                                                     int           *h_mm,
-                                                     int           *size_index)
+                                                     int *w,
+                                                     int *h,
+                                                     int *w_mm,
+                                                     int *h_mm,
+                                                     int *size_index)
 {
 #ifdef ECORE_XRANDR
    XRRScreenSize *sizes;
@@ -192,7 +197,7 @@ ecore_x_randr_screen_primary_output_current_size_get(Ecore_X_Window root,
 
    XRRFreeScreenConfigInfo(sc);
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_current_size_get */
+}
 
 /*
  * @brief sets a given screen's primary output size, but disables all other outputs at the same time
@@ -202,18 +207,16 @@ ecore_x_randr_screen_primary_output_current_size_get(Ecore_X_Window root,
  */
 EAPI Eina_Bool
 ecore_x_randr_screen_primary_output_size_set(Ecore_X_Window root,
-                                             int            size_index)
+                                             int size_index)
 {
 #ifdef ECORE_XRANDR
    XRRScreenConfiguration *sc = NULL;
-   XRRScreenSize *sizes;
    Eina_Bool ret = EINA_FALSE;
    int nsizes = 0;
 
    if (size_index >= 0 && _ecore_x_randr_root_validate(root))
      {
-        sizes =
-          XRRSizes(_ecore_x_disp, XRRRootToScreen(_ecore_x_disp,
+        XRRSizes(_ecore_x_disp, XRRRootToScreen(_ecore_x_disp,
                                                   root), &nsizes);
 
         if (size_index < nsizes)
@@ -235,7 +238,7 @@ ecore_x_randr_screen_primary_output_size_set(Ecore_X_Window root,
 #else /* ifdef ECORE_XRANDR */
    return EINA_FALSE;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_size_set */
+}
 
 /*
  * @param root window which's primary output will be queried
@@ -261,7 +264,7 @@ ecore_x_randr_screen_primary_output_current_refresh_rate_get(
 #else /* ifdef ECORE_XRANDR */
    return 0.0;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_current_refresh_rate_get */
+}
 
 /*
  * @param root window which's primary output will be queried
@@ -270,8 +273,8 @@ ecore_x_randr_screen_primary_output_current_refresh_rate_get(
  */
 EAPI Ecore_X_Randr_Refresh_Rate *
 ecore_x_randr_screen_primary_output_refresh_rates_get(Ecore_X_Window root,
-                                                      int            size_index,
-                                                      int           *num)
+                                                      int size_index,
+                                                      int *num)
 {
 #ifdef ECORE_XRANDR
    Ecore_X_Randr_Refresh_Rate *ret = NULL, *rates = NULL;
@@ -293,7 +296,7 @@ ecore_x_randr_screen_primary_output_refresh_rates_get(Ecore_X_Window root,
 #else /* ifdef ECORE_XRANDR */
    return NULL;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_refresh_rates_get */
+}
 
 //>= 1.1
 /*
@@ -306,7 +309,7 @@ ecore_x_randr_screen_primary_output_refresh_rates_get(Ecore_X_Window root,
 EAPI Eina_Bool
 ecore_x_randr_screen_primary_output_refresh_rate_set(
   Ecore_X_Window root,
-  int            size_index,
+  int size_index,
   Ecore_X_Randr_Refresh_Rate
   rate)
 {
@@ -328,5 +331,5 @@ ecore_x_randr_screen_primary_output_refresh_rate_set(
 #else /* ifdef ECORE_XRANDR */
    return EINA_FALSE;
 #endif /* ifdef ECORE_XRANDR */
-} /* ecore_x_randr_screen_primary_output_refresh_rate_set */
+}
 

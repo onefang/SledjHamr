@@ -21,9 +21,9 @@
  */
 EAPI void
 ecore_x_window_prop_card32_set(Ecore_X_Window win,
-                               Ecore_X_Atom   atom,
-                               unsigned int  *val,
-                               unsigned int   num)
+                               Ecore_X_Atom atom,
+                               unsigned int *val,
+                               unsigned int num)
 {
 #if SIZEOF_INT == SIZEOF_LONG
    _ATOM_SET_CARD32(win, atom, val, num);
@@ -41,7 +41,7 @@ ecore_x_window_prop_card32_set(Ecore_X_Window win,
    _ATOM_SET_CARD32(win, atom, v2, num);
    free(v2);
 #endif /* if SIZEOF_INT == SIZEOF_LONG */
-} /* ecore_x_window_prop_card32_set */
+}
 
 /*
  * Get CARD32 (array) property
@@ -53,9 +53,9 @@ ecore_x_window_prop_card32_set(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_card32_get(Ecore_X_Window win,
-                               Ecore_X_Atom   atom,
-                               unsigned int  *val,
-                               unsigned int   len)
+                               Ecore_X_Atom atom,
+                               unsigned int *val,
+                               unsigned int len)
 {
    unsigned char *prop_ret;
    Atom type_ret;
@@ -89,7 +89,7 @@ ecore_x_window_prop_card32_get(Ecore_X_Window win,
      XFree(prop_ret);
 
    return num;
-} /* ecore_x_window_prop_card32_get */
+}
 
 /*
  * Get CARD32 (array) property of any length
@@ -100,7 +100,7 @@ ecore_x_window_prop_card32_get(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_card32_list_get(Ecore_X_Window win,
-                                    Ecore_X_Atom   atom,
+                                    Ecore_X_Atom atom,
                                     unsigned int **plst)
 {
    unsigned char *prop_ret;
@@ -125,7 +125,7 @@ ecore_x_window_prop_card32_list_get(Ecore_X_Window win,
    else
      {
         val = malloc(num_ret * sizeof(unsigned int));
-        if (!val) 
+        if (!val)
           {
              if (prop_ret) XFree(prop_ret);
              return -1;
@@ -140,17 +140,17 @@ ecore_x_window_prop_card32_list_get(Ecore_X_Window win,
      XFree(prop_ret);
 
    return num;
-} /* ecore_x_window_prop_card32_list_get */
+}
 
 /*
  * Set X ID (array) property
  */
 EAPI void
 ecore_x_window_prop_xid_set(Ecore_X_Window win,
-                            Ecore_X_Atom   atom,
-                            Ecore_X_Atom   type,
-                            Ecore_X_ID    *lst,
-                            unsigned int   num)
+                            Ecore_X_Atom atom,
+                            Ecore_X_Atom type,
+                            Ecore_X_ID *lst,
+                            unsigned int num)
 {
 #if SIZEOF_INT == SIZEOF_LONG
    XChangeProperty(_ecore_x_disp, win, atom, type, 32, PropModeReplace,
@@ -170,7 +170,7 @@ ecore_x_window_prop_xid_set(Ecore_X_Window win,
                    (unsigned char *)pl, num);
    free(pl);
 #endif /* if SIZEOF_INT == SIZEOF_LONG */
-} /* ecore_x_window_prop_xid_set */
+}
 
 /*
  * Get X ID (array) property
@@ -182,10 +182,10 @@ ecore_x_window_prop_xid_set(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_xid_get(Ecore_X_Window win,
-                            Ecore_X_Atom   atom,
-                            Ecore_X_Atom   type,
-                            Ecore_X_ID    *lst,
-                            unsigned int   len)
+                            Ecore_X_Atom atom,
+                            Ecore_X_Atom type,
+                            Ecore_X_ID *lst,
+                            unsigned int len)
 {
    unsigned char *prop_ret;
    Atom type_ret;
@@ -219,7 +219,7 @@ ecore_x_window_prop_xid_get(Ecore_X_Window win,
      XFree(prop_ret);
 
    return num;
-} /* ecore_x_window_prop_xid_get */
+}
 
 /*
  * Get X ID (array) property
@@ -231,9 +231,9 @@ ecore_x_window_prop_xid_get(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_xid_list_get(Ecore_X_Window win,
-                                 Ecore_X_Atom   atom,
-                                 Ecore_X_Atom   type,
-                                 Ecore_X_ID   **val)
+                                 Ecore_X_Atom atom,
+                                 Ecore_X_Atom type,
+                                 Ecore_X_ID **val)
 {
    unsigned char *prop_ret;
    Atom type_ret;
@@ -268,17 +268,17 @@ ecore_x_window_prop_xid_list_get(Ecore_X_Window win,
      XFree(prop_ret);
 
    return num;
-} /* ecore_x_window_prop_xid_list_get */
+}
 
 /*
  * Remove/add/toggle X ID list item.
  */
 EAPI void
 ecore_x_window_prop_xid_list_change(Ecore_X_Window win,
-                                    Ecore_X_Atom   atom,
-                                    Ecore_X_Atom   type,
-                                    Ecore_X_ID     item,
-                                    int            op)
+                                    Ecore_X_Atom atom,
+                                    Ecore_X_Atom type,
+                                    Ecore_X_ID item,
+                                    int op)
 {
    Ecore_X_ID *lst;
    int i, num;
@@ -300,22 +300,22 @@ ecore_x_window_prop_xid_list_change(Ecore_X_Window win,
    if (i < num)
      {
         /* Was in list */
-         if (op == ECORE_X_PROP_LIST_ADD)
-           goto done;  /* Remove it */
+        if (op == ECORE_X_PROP_LIST_ADD)
+          goto done;  /* Remove it */
 
-         num--;
-         for (; i < num; i++)
-           lst[i] = lst[i + 1];
+        num--;
+        for (; i < num; i++)
+          lst[i] = lst[i + 1];
      }
    else
      {
         /* Was not in list */
-         if (op == ECORE_X_PROP_LIST_REMOVE)
-           goto done;  /* Add it */
+        if (op == ECORE_X_PROP_LIST_REMOVE)
+          goto done;  /* Add it */
 
-         num++;
-         lst = realloc(lst, num * sizeof(Ecore_X_ID));
-         lst[i] = item;
+        num++;
+        lst = realloc(lst, num * sizeof(Ecore_X_ID));
+        lst[i] = item;
      }
 
    ecore_x_window_prop_xid_set(win, atom, type, lst, num);
@@ -323,20 +323,20 @@ ecore_x_window_prop_xid_list_change(Ecore_X_Window win,
 done:
    if (lst)
      free(lst);
-} /* ecore_x_window_prop_xid_list_change */
+}
 
 /*
  * Set Atom (array) property
  */
 EAPI void
 ecore_x_window_prop_atom_set(Ecore_X_Window win,
-                             Ecore_X_Atom   atom,
-                             Ecore_X_Atom  *lst,
-                             unsigned int   num)
+                             Ecore_X_Atom atom,
+                             Ecore_X_Atom *lst,
+                             unsigned int num)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    ecore_x_window_prop_xid_set(win, atom, XA_ATOM, lst, num);
-} /* ecore_x_window_prop_atom_set */
+}
 
 /*
  * Get Atom (array) property
@@ -348,13 +348,13 @@ ecore_x_window_prop_atom_set(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_atom_get(Ecore_X_Window win,
-                             Ecore_X_Atom   atom,
-                             Ecore_X_Atom  *lst,
-                             unsigned int   len)
+                             Ecore_X_Atom atom,
+                             Ecore_X_Atom *lst,
+                             unsigned int len)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return ecore_x_window_prop_xid_get(win, atom, XA_ATOM, lst, len);
-} /* ecore_x_window_prop_atom_get */
+}
 
 /*
  * Get Atom (array) property
@@ -366,38 +366,38 @@ ecore_x_window_prop_atom_get(Ecore_X_Window win,
  */
 EAPI int
 ecore_x_window_prop_atom_list_get(Ecore_X_Window win,
-                                  Ecore_X_Atom   atom,
+                                  Ecore_X_Atom atom,
                                   Ecore_X_Atom **plst)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return ecore_x_window_prop_xid_list_get(win, atom, XA_ATOM, plst);
-} /* ecore_x_window_prop_atom_list_get */
+}
 
 /*
  * Remove/add/toggle atom list item.
  */
 EAPI void
 ecore_x_window_prop_atom_list_change(Ecore_X_Window win,
-                                     Ecore_X_Atom   atom,
-                                     Ecore_X_Atom   item,
-                                     int            op)
+                                     Ecore_X_Atom atom,
+                                     Ecore_X_Atom item,
+                                     int op)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    ecore_x_window_prop_xid_list_change(win, atom, XA_ATOM, item, op);
-} /* ecore_x_window_prop_atom_list_change */
+}
 
 /*
  * Set Window (array) property
  */
 EAPI void
-ecore_x_window_prop_window_set(Ecore_X_Window  win,
-                               Ecore_X_Atom    atom,
+ecore_x_window_prop_window_set(Ecore_X_Window win,
+                               Ecore_X_Atom atom,
                                Ecore_X_Window *lst,
-                               unsigned int    num)
+                               unsigned int num)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    ecore_x_window_prop_xid_set(win, atom, XA_WINDOW, lst, num);
-} /* ecore_x_window_prop_window_set */
+}
 
 /*
  * Get Window (array) property
@@ -408,14 +408,14 @@ ecore_x_window_prop_window_set(Ecore_X_Window  win,
  * Note: Return value 0 means that the property exists but has no elements.
  */
 EAPI int
-ecore_x_window_prop_window_get(Ecore_X_Window  win,
-                               Ecore_X_Atom    atom,
+ecore_x_window_prop_window_get(Ecore_X_Window win,
+                               Ecore_X_Atom atom,
                                Ecore_X_Window *lst,
-                               unsigned int    len)
+                               unsigned int len)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return ecore_x_window_prop_xid_get(win, atom, XA_WINDOW, lst, len);
-} /* ecore_x_window_prop_window_get */
+}
 
 /*
  * Get Window (array) property
@@ -426,13 +426,13 @@ ecore_x_window_prop_window_get(Ecore_X_Window  win,
  * Note: Return value 0 means that the property exists but has no elements.
  */
 EAPI int
-ecore_x_window_prop_window_list_get(Ecore_X_Window   win,
-                                    Ecore_X_Atom     atom,
+ecore_x_window_prop_window_list_get(Ecore_X_Window win,
+                                    Ecore_X_Atom atom,
                                     Ecore_X_Window **plst)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return ecore_x_window_prop_xid_list_get(win, atom, XA_WINDOW, plst);
-} /* ecore_x_window_prop_window_list_get */
+}
 
 /**
  * To be documented.
@@ -443,7 +443,7 @@ EAPI Ecore_X_Atom
 ecore_x_window_prop_any_type(void)
 {
    return AnyPropertyType;
-} /* ecore_x_window_prop_any_type */
+}
 
 /**
  * To be documented.
@@ -452,11 +452,11 @@ ecore_x_window_prop_any_type(void)
  */
 EAPI void
 ecore_x_window_prop_property_set(Ecore_X_Window win,
-                                 Ecore_X_Atom   property,
-                                 Ecore_X_Atom   type,
-                                 int            size,
-                                 void          *data,
-                                 int            number)
+                                 Ecore_X_Atom property,
+                                 Ecore_X_Atom type,
+                                 int size,
+                                 void *data,
+                                 int number)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    if (win == 0)
@@ -479,13 +479,14 @@ ecore_x_window_prop_property_set(Ecore_X_Window win,
         dat = malloc(sizeof(unsigned long) * number);
         if (dat)
           {
-             for (ptr = (int *)data, i = 0; i < number; i++) dat[i] = ptr[i];
+             for (ptr = (int *)data, i = 0; i < number; i++)
+               dat[i] = ptr[i];
              XChangeProperty(_ecore_x_disp, win, property, type, size,
                              PropModeReplace, (unsigned char *)dat, number);
              free(dat);
           }
      }
-} /* ecore_x_window_prop_property_set */
+}
 
 /**
  * To be documented.
@@ -493,12 +494,12 @@ ecore_x_window_prop_property_set(Ecore_X_Window win,
  * FIXME: To be fixed.
  */
 EAPI int
-ecore_x_window_prop_property_get(Ecore_X_Window  win,
-                                 Ecore_X_Atom    property,
-                                 Ecore_X_Atom    type,
-                                 int             size __UNUSED__,
+ecore_x_window_prop_property_get(Ecore_X_Window win,
+                                 Ecore_X_Atom property,
+                                 Ecore_X_Atom type,
+                                 int size __UNUSED__,
                                  unsigned char **data,
-                                 int            *num)
+                                 int *num)
 {
    Atom type_ret = 0;
    int ret, size_ret = 0;
@@ -552,7 +553,7 @@ ecore_x_window_prop_property_get(Ecore_X_Window  win,
         for (i = 0; i < num_ret; i++)
           ((unsigned int *)*data)[i] = ((unsigned long *)prop_ret)[i];
         break;
-     } /* switch */
+     }
 
    XFree(prop_ret);
 
@@ -560,19 +561,19 @@ ecore_x_window_prop_property_get(Ecore_X_Window  win,
      *num = num_ret;
 
    return size_ret;
-} /* ecore_x_window_prop_property_get */
+}
 
 EAPI void
 ecore_x_window_prop_property_del(Ecore_X_Window win,
-                                 Ecore_X_Atom   property)
+                                 Ecore_X_Atom property)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XDeleteProperty(_ecore_x_disp, win, property);
-} /* ecore_x_window_prop_property_del */
+}
 
 EAPI Ecore_X_Atom *
 ecore_x_window_prop_list(Ecore_X_Window win,
-                         int           *num_ret)
+                         int *num_ret)
 {
    Ecore_X_Atom *atoms;
    Atom *atom_ret;
@@ -589,14 +590,15 @@ ecore_x_window_prop_list(Ecore_X_Window win,
    atoms = malloc(num * sizeof(Ecore_X_Atom));
    if (atoms)
      {
-        for (i = 0; i < num; i++) atoms[i] = atom_ret[i];
+        for (i = 0; i < num; i++)
+          atoms[i] = atom_ret[i];
         if (num_ret)
           *num_ret = num;
      }
 
    XFree(atom_ret);
    return atoms;
-} /* ecore_x_window_prop_list */
+}
 
 /**
  * Set a window string property.
@@ -608,8 +610,8 @@ ecore_x_window_prop_list(Ecore_X_Window win,
  */
 EAPI void
 ecore_x_window_prop_string_set(Ecore_X_Window win,
-                               Ecore_X_Atom   type,
-                               const char    *str)
+                               Ecore_X_Atom type,
+                               const char *str)
 {
    XTextProperty xtp;
 
@@ -622,7 +624,7 @@ ecore_x_window_prop_string_set(Ecore_X_Window win,
    xtp.encoding = ECORE_X_ATOM_UTF8_STRING;
    xtp.nitems = strlen(str);
    XSetTextProperty(_ecore_x_disp, win, &xtp, type);
-} /* ecore_x_window_prop_string_set */
+}
 
 /**
  * Get a window string property.
@@ -633,7 +635,7 @@ ecore_x_window_prop_string_set(Ecore_X_Window win,
  */
 EAPI char *
 ecore_x_window_prop_string_get(Ecore_X_Window win,
-                               Ecore_X_Atom   type)
+                               Ecore_X_Atom type)
 {
    XTextProperty xtp;
    char *str = NULL;
@@ -673,10 +675,10 @@ ecore_x_window_prop_string_get(Ecore_X_Window win,
      }
 
    return str;
-} /* ecore_x_window_prop_string_get */
+}
 
 EAPI Eina_Bool
-ecore_x_window_prop_protocol_isset(Ecore_X_Window      win,
+ecore_x_window_prop_protocol_isset(Ecore_X_Window win,
                                    Ecore_X_WM_Protocol protocol)
 {
    Atom proto, *protos = NULL;
@@ -703,7 +705,7 @@ ecore_x_window_prop_protocol_isset(Ecore_X_Window      win,
    XFree(protos);
 
    return ret;
-} /* ecore_x_window_prop_protocol_isset */
+}
 
 /**
  * To be documented.
@@ -712,7 +714,7 @@ ecore_x_window_prop_protocol_isset(Ecore_X_Window      win,
  */
 EAPI Ecore_X_WM_Protocol *
 ecore_x_window_prop_protocol_list_get(Ecore_X_Window win,
-                                      int           *num_ret)
+                                      int *num_ret)
 {
    Atom *protos = NULL;
    int i, protos_count = 0;
@@ -746,5 +748,5 @@ ecore_x_window_prop_protocol_list_get(Ecore_X_Window win,
    XFree(protos);
    *num_ret = protos_count;
    return prot_ret;
-} /* ecore_x_window_prop_protocol_list_get */
+}
 

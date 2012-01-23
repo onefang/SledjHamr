@@ -81,6 +81,8 @@ extern "C" {
 #define HAVE_ECORE_EVAS_WINCE 1
 #define HAVE_ECORE_EVAS_EWS 1
 #define HAVE_ECORE_EVAS_PSL1GHT 1
+#define HAVE_ECORE_EVAS_WAYLAND_SHM 1
+#define HAVE_ECORE_EVAS_WAYLAND_EGL 1
 
 typedef enum _Ecore_Evas_Engine_Type
 {
@@ -104,7 +106,9 @@ typedef enum _Ecore_Evas_Engine_Type
    ECORE_EVAS_ENGINE_SOFTWARE_16_WINCE,
    ECORE_EVAS_ENGINE_OPENGL_SDL,
    ECORE_EVAS_ENGINE_EWS,
-   ECORE_EVAS_ENGINE_PSL1GHT
+   ECORE_EVAS_ENGINE_PSL1GHT,
+   ECORE_EVAS_ENGINE_WAYLAND_SHM, 
+   ECORE_EVAS_ENGINE_WAYLAND_EGL
 } Ecore_Evas_Engine_Type;
 
 typedef enum _Ecore_Evas_Avoid_Damage_Type
@@ -689,6 +693,11 @@ EAPI Ecore_Evas     *ecore_evas_fb_new(const char *disp_name, int rotation, int 
 EAPI Ecore_Evas     *ecore_evas_directfb_new(const char *disp_name, int windowed, int x, int y, int w, int h);
 EAPI Ecore_DirectFB_Window *ecore_evas_directfb_window_get(const Ecore_Evas *ee);
 
+EAPI Ecore_Evas     *ecore_evas_wayland_shm_new(const char *disp_name, int x, int y, int w, int h, int frame);
+EAPI Ecore_Evas     *ecore_evas_wayland_egl_new(const char *disp_name, int x, int y, int w, int h, int frame);
+EAPI void            ecore_evas_wayland_resize(Ecore_Evas *ee, int location);
+EAPI void            ecore_evas_wayland_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source);
+
 /**
  * @brief Create a new @c Ecore_Evas canvas bound to the Evas
  * @b buffer engine
@@ -818,7 +827,7 @@ EAPI void ecore_evas_ews_delete_request(Ecore_Evas *ee);
 
 /**
  * @brief Create an Evas image object with image data <b>bound to an
- * own, internal @c Ecore_Evas canvas wrapper<b>
+ * own, internal @c Ecore_Evas canvas wrapper</b>
  *
  * @param ee_target @c Ecore_Evas to have the canvas receiving the new
  * image object
@@ -1320,7 +1329,7 @@ EAPI void        ecore_evas_size_base_get(const Ecore_Evas *ee, int *w, int *h);
  * @param h The step height
  *
  * This function sets the size steps of @p ee to be @p w x @p h. This
- * limits the size of this @cEcore_Evas window to be @b always an
+ * limits the size of this @c Ecore_Evas window to be @b always an
  * integer multiple of the step size, for each axis.
  */
 EAPI void        ecore_evas_size_step_set(Ecore_Evas *ee, int w, int h);
@@ -1449,6 +1458,9 @@ EAPI Eina_Bool   ecore_evas_comp_sync_get(const Ecore_Evas *ee);
  * @since 1.1
  */
 EAPI void        ecore_evas_screen_geometry_get(const Ecore_Evas *ee, int *x, int *y, int *w, int *h);
+
+EAPI void        ecore_evas_draw_frame_set(Ecore_Evas *ee, Eina_Bool draw_frame);
+EAPI Eina_Bool   ecore_evas_draw_frame_get(const Ecore_Evas *ee);
 
 /**
  * @brief Associate the given object to this ecore evas.
@@ -1625,29 +1637,238 @@ EAPI void        ecore_evas_ews_manager_set(const void *manager);
  */
 EAPI const void *ecore_evas_ews_manager_get(void);
 
-EAPI extern int ECORE_EVAS_EWS_EVENT_MANAGER_CHANGE; /**< manager was changed */
-EAPI extern int ECORE_EVAS_EWS_EVENT_ADD; /**< window was created */
-EAPI extern int ECORE_EVAS_EWS_EVENT_DEL; /**< window was deleted, pointer is already invalid but may be used as reference for further cleanup work. */
-EAPI extern int ECORE_EVAS_EWS_EVENT_RESIZE; /**< window was resized */
-EAPI extern int ECORE_EVAS_EWS_EVENT_MOVE; /**< window was moved */
-EAPI extern int ECORE_EVAS_EWS_EVENT_SHOW; /**< window become visible */
-EAPI extern int ECORE_EVAS_EWS_EVENT_HIDE; /**< window become hidden */
-EAPI extern int ECORE_EVAS_EWS_EVENT_FOCUS; /**< window was focused */
-EAPI extern int ECORE_EVAS_EWS_EVENT_UNFOCUS; /**< window lost focus */
-EAPI extern int ECORE_EVAS_EWS_EVENT_RAISE; /**< window was raised */
-EAPI extern int ECORE_EVAS_EWS_EVENT_LOWER; /**< window was lowered */
-EAPI extern int ECORE_EVAS_EWS_EVENT_ACTIVATE; /**< window was activated */
+EAPI extern int ECORE_EVAS_EWS_EVENT_MANAGER_CHANGE; /**< manager was changed @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_ADD; /**< window was created @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_DEL; /**< window was deleted, pointer is already invalid but may be used as reference for further cleanup work. @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_RESIZE; /**< window was resized @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_MOVE; /**< window was moved @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_SHOW; /**< window become visible @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_HIDE; /**< window become hidden @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_FOCUS; /**< window was focused @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_UNFOCUS; /**< window lost focus @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_RAISE; /**< window was raised @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_LOWER; /**< window was lowered @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_ACTIVATE; /**< window was activated @since 1.1 */
 
-EAPI extern int ECORE_EVAS_EWS_EVENT_ICONIFIED_CHANGE; /**< window minimized/iconified changed */
-EAPI extern int ECORE_EVAS_EWS_EVENT_MAXIMIZED_CHANGE; /**< window maximized changed */
-EAPI extern int ECORE_EVAS_EWS_EVENT_LAYER_CHANGE; /**< window layer changed */
-EAPI extern int ECORE_EVAS_EWS_EVENT_FULLSCREEN_CHANGE; /**< window fullscreen changed */
-EAPI extern int ECORE_EVAS_EWS_EVENT_CONFIG_CHANGE; /**< some other window property changed (title, name, class, alpha, transparent, shaped...) */
+EAPI extern int ECORE_EVAS_EWS_EVENT_ICONIFIED_CHANGE; /**< window minimized/iconified changed @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_MAXIMIZED_CHANGE; /**< window maximized changed @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_LAYER_CHANGE; /**< window layer changed @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_FULLSCREEN_CHANGE; /**< window fullscreen changed @since 1.1 */
+EAPI extern int ECORE_EVAS_EWS_EVENT_CONFIG_CHANGE; /**< some other window property changed (title, name, class, alpha, transparent, shaped...) @since 1.1 */
 
 /**
  * @}
  */
 
+/**
+ * @defgroup Ecore_Evas_Extn External plug/socket infrastructure to remote canvases
+ *
+ * These functions allow 1 process to create a "socket" was pluged into which another
+ * process can create a "plug" remotely to plug into.
+ * Socket can provides content for several plugs.
+ * This is best for small sized objects (about the size range
+ * of a small icon up to a few large icons). Sine the plug is actually an
+ * image object, you can fetch the pixel data
+ *
+ * @since 1.2
+ * @{
+ */
+
+EAPI extern int ECORE_EVAS_EXTN_CLIENT_ADD; /**< this event is received when a plug has connected to an extn socket @since 1.2 */
+EAPI extern int ECORE_EVAS_EXTN_CLIENT_DEL; /**< this event is received when a plug has disconnected from an extn socket @since 1.2 */
+   
+/**
+ * @brief Create a new Ecore_Evas canvas for the new external ecore evas socket
+ * 
+ * @param w The width of the canvas, in pixels
+ * @param h The height of the canvas, in pixels
+ * @return A new @c Ecore_Evas instance or @c NULL, on failure
+ * 
+ * This creates a new extn_socket canvas wrapper, with image data array
+ * @b bound to the ARGB format, 8 bits per pixel.
+ *
+ * If creation is successful, an Ecore_Evas handle is returned or NULL if creation
+ * fails. Also focus, show, hide etc. callbacks
+ * will also be called if the plug object is shown, or already visible on
+ * connect, or if it is hidden later, focused or unfocused.
+ *
+ * This function has to be flowed by ecore_evas_extn_socket_listen(),
+ * for starting ecore ipc service.
+ *
+ * @code
+ * Eina_Bool res = EINA_FALSE;
+ * Ecore_Evas *ee = ecore_evas_extn_socket_new(1, 1);
+ *
+ * res = ecore_evas_extn_socket_listen("svcname", 1, EINA_FALSE);
+ * if (!res) return;
+ * ecore_evas_resize(ee, 240, 400);
+ * @endcode
+ *
+ * or
+ *
+ * @code
+ * Eina_Bool res = EINA_FALSE;
+ * Ecore_Evas *ee = ecore_evas_extn_socket_new(240, 400);
+ *
+ * res = ecore_evas_extn_socket_listen("svcname", 1, EINA_FALSE);
+ * if (!res) return;
+ * @endcode
+ *
+ * When a client(plug) connects, you will get the ECORE_EVAS_EXTN_CLIENT_ADD event
+ * in the ecore event queue, with event_info being the image object pointer
+ * passed as a void pointer. When a client disconnects you will get the
+ * ECORE_EVAS_EXTN_CLIENT_DEL event.
+ * 
+ * You can set up event handles for these events as follows:
+ * 
+ * @code
+ * static void client_add_cb(void *data, int event, void *event_info)
+ * {
+ *   Evas_Object *obj = event_info;
+ *   printf("client added to image object %p\n", obj);
+ *   evas_object_show(obj);
+ * }
+ * 
+ * static void client_del_cb(void *data, int event, void *event_info)
+ * {
+ *   Evas_Object *obj = event_info;
+ *   printf("client deleted from image object %p\n", obj);
+ *   evas_object_hide(obj);
+ * }
+ * 
+ * void setup(void)
+ * {
+ *   ecore_event_handler_add(ECORE_EVAS_EXTN_CLIENT_ADD,
+ *                           client_add_cb, NULL);
+ *   ecore_event_handler_add(ECORE_EVAS_EXTN_CLIENT_DEL,
+ *                           client_del_cb, NULL);
+ * }
+ * @endcode
+ * 
+ * Note that events come in later after the event happened. You may want to be
+ * careful as data structures you had associated with the image object
+ * may have been freed after deleting, but the object may still be around
+ * awating cleanup and thus still be valid.You can change the size with something like:
+ * 
+ * @see ecore_evas_extn_socket_listen()
+ * @see ecore_evas_extn_plug_new()
+ * @see ecore_evas_extn_plug_object_data_lock()
+ * @see ecore_evas_extn_plug_object_data_unlock()
+ * 
+ * @since 1.2
+ */
+EAPI Ecore_Evas *ecore_evas_extn_socket_new(int w, int h);
+
+/**
+ * @brief Create a socket to provide the service for external ecore evas socket. 
+ *
+ * @param svcname The name of the service to be advertised. ensure that it is unique (when combined with @p svcnum) otherwise creation may fail.
+ * @param svcnum A number (any value, 0 beig the common default) to differentiate multiple instances of services with the same name.
+ * @param svcsys A boolean that if true, specifies to create a system-wide service all users can connect to, otherwise the service is private to the user ide that created the service.
+ * @return EINA_TRUE if creation is successful, EINA_FALSE if it does not.
+ * 
+ * This creates socket specified by @p svcname, @p svcnum and @p svcsys. If creation
+ * is successful, EINA_TRUE is returned or EINA_FALSE if creation
+ * fails. 
+ *
+ * @see ecore_evas_extn_socket_new()
+ * @see ecore_evas_extn_plug_new()
+ * @see ecore_evas_extn_plug_object_data_lock()
+ * @see ecore_evas_extn_plug_object_data_unlock()
+ * 
+ * @since 1.2
+ */
+EAPI Eina_Bool ecore_evas_extn_socket_listen(Ecore_Evas *ee, const char *svcname, int svcnum, Eina_Bool svcsys);
+
+/**
+ * @brief Lock the pixel data so the socket cannot change it
+ *
+ * @param obj The image object returned by ecore_evas_extn_plug_new() to lock
+ * 
+ * You may need to get the image pixel data with evas_object_image_data_get()
+ * from the image object, but need to ensure that it does not change while
+ * you are using the data. This function lets you set an advisory lock on the
+ * image data so the external plug process will not render to it or alter it.
+ * 
+ * You should only hold the lock for just as long as you need to read out the
+ * image data or otherwise deal with it, and then unlokc it with
+ * ecore_evas_extn_plug_object_data_unlock(). Keeping a lock over more than
+ * 1 iteration of the main ecore loop will be problematic, so avoid it. Also
+ * forgetting to unlock may cause the socket process to freeze and thus create
+ * odd behavior.
+ * 
+ * @see ecore_evas_extn_plug_new()
+ * @see ecore_evas_extn_plug_object_data_unlock()
+ * 
+ * @since 1.2
+ */
+EAPI void ecore_evas_extn_plug_object_data_lock(Evas_Object *obj);
+
+/**
+ * @brief Unlock the pixel data so the socket can change it again.
+ *
+ * @param obj The image object returned by ecore_evas_extn_plug_new() to unlock
+ * 
+ * This unlocks after an advisor lock has been taken by 
+ * ecore_evas_extn_plug_object_data_lock().
+ * 
+ * @see ecore_evas_extn_plug_new()
+ * @see ecore_evas_extn_plug_object_data_lock()
+ * 
+ * @since 1.2
+ */
+EAPI void ecore_evas_extn_plug_object_data_unlock(Evas_Object *obj); 
+  
+/**
+ * @brief Create a new external ecore evas plug
+ *
+ * @param ee_target The Ecore_Evas containing the canvas in which the new image object will live.
+ * @return An evas image object that will contain the image output of a socket.
+ * 
+ * This creates an image object that will contain the output of another
+ * processes socket canvas when it connects. All input will be sent back to
+ * this process as well, effectively swallowing or placing the socket process
+ * in the canvas of the plug process in place of the image object. The image
+ * object by default is created to be filled (equivalent of
+ * evas_object_image_filled_add() on creation) so image content will scale
+ * toi fill the image unless otherwise reconfigured. The Ecore_Evas size
+ * of the plug is the master size and determines size in pixels of the
+ * plug canvas. You can change the size with something like:
+ * 
+ * @code
+ * Eina_Bool res = EINA_FALSE;
+ * Evas_Object *obj = ecore_evas_extn_plug_new(ee);
+ *
+ * res = ecore_evas_extn_plug_connect("svcname", 1, EINA_FALSE);
+ * if (!res) return;
+ * ecore_evas_resize(ee, 240, 400);
+ * @endcode
+ * 
+ * @see ecore_evas_extn_socket_new()
+ * @see ecore_evas_extn_plug_connect() 
+ * @since 1.2
+ */
+EAPI Evas_Object *ecore_evas_extn_plug_new(Ecore_Evas *ee_target);
+
+/**
+ * @brief Connect a external ecore evas plug to service provided by external ecore evas socket
+ *
+ * @param obj The Ecore_Evas containing the canvas in which the new image object will live.
+ * @param svcname The service name to connect to set up by the socket.
+ * @param svcnum The service number to connect to (set up by socket).
+ * @param svcsys Booleain to set if the service is a system one or not (set up by socket).
+ * @return EINA_TRUE if creation is successful, EINA_FALSE if it does not.
+ * 
+ *
+ * @see ecore_evas_extn_plug_new()
+ * 
+ * @since 1.2
+ */
+EAPI Eina_Bool ecore_evas_extn_plug_connect(Evas_Object *obj, const char *svcname, int svcnum, Eina_Bool svcsys);
+        
+/**
+ * @}
+ */
 
 /**
  * @}

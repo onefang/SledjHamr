@@ -10,15 +10,15 @@ EAPI Eina_Bool
 ecore_x_cursor_color_supported_get(void)
 {
    return _ecore_x_xcursor;
-} /* ecore_x_cursor_color_supported_get */
+}
 
 EAPI Ecore_X_Cursor
 ecore_x_cursor_new(Ecore_X_Window win,
-                   int           *pixels,
-                   int            w,
-                   int            h,
-                   int            hot_x,
-                   int            hot_y)
+                   int *pixels,
+                   int w,
+                   int h,
+                   int hot_x,
+                   int hot_y)
 {
 #ifdef ECORE_XCURSOR
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
@@ -43,7 +43,7 @@ ecore_x_cursor_new(Ecore_X_Window win,
 //		  r = (((pixels[i] >> 16) & 0xff) * a) / 0xff;
 //		  g = (((pixels[i] >> 8 ) & 0xff) * a) / 0xff;
 //		  b = (((pixels[i]      ) & 0xff) * a) / 0xff;
-                              xci->pixels[i] = pixels[i];
+                  xci->pixels[i] = pixels[i];
 //		    (a << 24) | (r << 16) | (g << 8) | (b);
                }
              c = XcursorImageLoadCursor(_ecore_x_disp, xci);
@@ -200,14 +200,14 @@ ecore_x_cursor_new(Ecore_X_Window win,
    }
 
    return 0;
-} /* ecore_x_cursor_new */
+}
 
 EAPI void
 ecore_x_cursor_free(Ecore_X_Cursor c)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XFreeCursor(_ecore_x_disp, c);
-} /* ecore_x_cursor_free */
+}
 
 /*
  * Returns the cursor for the given shape.
@@ -220,7 +220,7 @@ ecore_x_cursor_shape_get(int shape)
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    /* Shapes are defined in Ecore_X_Cursor.h */
    return XCreateFontCursor(_ecore_x_disp, shape);
-} /* ecore_x_cursor_shape_get */
+}
 
 EAPI void
 ecore_x_cursor_size_set(int size)
@@ -231,7 +231,7 @@ ecore_x_cursor_size_set(int size)
 #else /* ifdef ECORE_XCURSOR */
    size = 0;
 #endif /* ifdef ECORE_XCURSOR */
-} /* ecore_x_cursor_size_set */
+}
 
 EAPI int
 ecore_x_cursor_size_get(void)
@@ -242,5 +242,5 @@ ecore_x_cursor_size_get(void)
 #else /* ifdef ECORE_XCURSOR */
    return 0;
 #endif /* ifdef ECORE_XCURSOR */
-} /* ecore_x_cursor_size_get */
+}
 

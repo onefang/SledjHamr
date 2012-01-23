@@ -244,11 +244,10 @@ ecore_con_info_get(Ecore_Con_Server *svr,
         unsigned char *tosend = NULL;
         int tosend_len;
         int canonname_len = 0;
-        int err;
 
-        eina_convert_itoa(svr->port, service);
+        eina_convert_itoa(svr->ecs ? svr->ecs->port : svr->port, service);
         /* CHILD */
-        if (!getaddrinfo(svr->name, service, hints, &result) && result)
+        if (!getaddrinfo(svr->ecs ? svr->ecs->ip : svr->name, service, hints, &result) && result)
           {
              if (result->ai_canonname)
                canonname_len = strlen(result->ai_canonname) + 1;
@@ -281,13 +280,13 @@ ecore_con_info_get(Ecore_Con_Server *svr,
                   memcpy(container->service, sbuf, sizeof(container->service));
                }
 
-             err = write(fd[1], tosend, tosend_len);
+             if (write(fd[1], tosend, tosend_len) < 0) perror("write");
           }
 
         if (result)
           freeaddrinfo(result);
 
-        err = write(fd[1], "", 1);
+        if (write(fd[1], "", 1) < 0) perror("write");
         close(fd[1]);
 #if defined(__USE_ISOC99) && !defined(__UCLIBC__)
         _Exit(0);

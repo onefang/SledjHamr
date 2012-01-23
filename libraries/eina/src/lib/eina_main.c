@@ -67,6 +67,8 @@
 #include "eina_rectangle.h"
 #include "eina_safety_checks.h"
 #include "eina_inlist.h"
+#include "eina_inarray.h"
+#include "eina_value.h"
 
 /*============================================================================*
 *                                  Local                                     *
@@ -131,6 +133,7 @@ EAPI Eina_Inlist *_eina_tracking = NULL;
    S(magic_string);
    S(iterator);
    S(accessor);
+   S(inarray);
    S(array);
    S(module);
    S(mempool);
@@ -149,6 +152,7 @@ EAPI Eina_Inlist *_eina_tracking = NULL;
    S(simple_xml);
    S(file);
    S(prefix);
+   S(value);
 #undef S
 
 struct eina_desc_setup
@@ -161,17 +165,18 @@ struct eina_desc_setup
 static const struct eina_desc_setup _eina_desc_setup[] = {
 #define S(x) {# x, eina_ ## x ## _init, eina_ ## x ## _shutdown}
    /* log is a special case as it needs printf */
+   S(stringshare),
    S(error),
    S(safety_checks),
    S(magic_string),
    S(iterator),
    S(accessor),
+   S(inarray),
    S(array),
    S(module),
    S(mempool),
    S(list),
    S(binshare),
-   S(stringshare),
    S(ustringshare),
    S(matrixsparse),
    S(convert),
@@ -183,7 +188,8 @@ static const struct eina_desc_setup _eina_desc_setup[] = {
    S(quadtree),
    S(simple_xml),
    S(file),
-   S(prefix)
+   S(prefix),
+   S(value)
 #undef S
 };
 static const size_t _eina_desc_setup_len = sizeof(_eina_desc_setup) /
@@ -236,8 +242,8 @@ eina_init(void)
         _mt_enabled = 1;
         mtrace();
      }
-#endif   
-   
+#endif
+
    if (!eina_log_init())
      {
         fprintf(stderr, "Could not initialize eina logging system.\n");
@@ -304,7 +310,7 @@ eina_shutdown(void)
              muntrace();
              _mt_enabled = 0;
           }
-#endif   
+#endif
      }
 
    return _eina_main_count;

@@ -70,6 +70,9 @@
 /* Set to 1 if ${enable_pass_through} is built */
 #undef EINA_BUILD_PASS_THROUGH
 
+/* Turn on debugging overhead in mempool */
+#undef EINA_DEBUG_MALLOC
+
 /* if set, logging is limited to this amount. */
 #undef EINA_LOG_LEVEL_MAXIMUM
 
@@ -107,11 +110,10 @@
    */
 #undef HAVE_ALLOCA_H
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
+/* Define to 1 if you have a valid <dirent.h> header file. */
 #undef HAVE_DIRENT_H
 
-/* Define to 1 if you have the `dirfd' function. */
+/* Define to 1 if you have the `dirfd' function or macro. */
 #undef HAVE_DIRFD
 
 /* Define to 1 if you have the `dladdr' function. */
@@ -150,6 +152,12 @@
 /* Define to 1 if you have the <libgen.h> header file. */
 #undef HAVE_LIBGEN_H
 
+/* Define to 1 if we log support is on */
+#undef HAVE_LOG
+
+/* We will be able to know the exact amount of wasted memory */
+#undef HAVE_MALLOC_USABLE_SIZE
+
 /* Have mcheck.h */
 #undef HAVE_MCHECK
 
@@ -161,9 +169,6 @@
 
 /* Have mtrace */
 #undef HAVE_MTRACE
-
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
 
 /* Define to 1 if you have the `openat' function. */
 #undef HAVE_OPENAT
@@ -192,13 +197,11 @@
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_DIR_H
+/* Define to 1 if the system has the type `struct dirent'. */
+#undef HAVE_STRUCT_DIRENT
 
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_NDIR_H
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

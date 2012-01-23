@@ -4,7 +4,7 @@
 
 Summary: Complex Graphical Design/Layout Engine
 Name: edje
-Version: 1.1.0
+Version: 1.1.99.67344
 Release: %{_rel}
 License: BSD
 Group: System Environment/Libraries
@@ -81,8 +81,8 @@ test "x$RPM_BUILD_ROOT" != "x/" && rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-, root, root)
-%doc doc/html
 %{_libdir}/*.so
+%{_libdir}/edje/modules/multisense_factory/*/module.*
 %{_libdir}/*.la
 %{_libdir}/*.a
 %{_libdir}/pkgconfig/*

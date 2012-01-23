@@ -6,6 +6,7 @@
 #include "Ecore_Input.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <termios.h>
@@ -29,6 +30,8 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <Ecore_Fb.h>
 
 /* ecore_fb_li.c */
 struct _Ecore_Fb_Input_Device

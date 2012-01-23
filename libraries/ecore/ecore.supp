@@ -1,4 +1,4 @@
-# $Id: ecore.supp 35497 2008-08-17 07:44:18Z raster $
+# $Id: ecore.supp 11909 2004-10-19 16:40:25Z tsauerbeck $
 # valgrind suppression file for Ecore
 #
 {

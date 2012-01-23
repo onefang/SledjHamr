@@ -16,6 +16,7 @@ struct _Ecore_Poller
    Ecore_Task_Cb func;
    void         *data;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Poller);
 
 static Ecore_Timer *timer = NULL;
 static int min_interval = -1;
@@ -109,8 +110,8 @@ _ecore_poller_cb_timer(void *data __UNUSED__)
 
    at_tick++;
    last_tick = ecore_time_get();
-   /* we have 16 counters - each incriments every time the poller counter
-    * "ticks". it incriments by the minimum interval (which can be 1, 2, 4,
+   /* we have 16 counters - each increments every time the poller counter
+    * "ticks". it increments by the minimum interval (which can be 1, 2, 4,
     * 7, 16 etc. up to 32768) */
    for (i = 0; i < 15; i++)
      {
@@ -159,7 +160,7 @@ _ecore_poller_cb_timer(void *data __UNUSED__)
                    if (poller->delete_me)
                      {
                         pollers[i] = (Ecore_Poller *)eina_inlist_remove(EINA_INLIST_GET(pollers[i]), EINA_INLIST_GET(poller));
-                        free(poller);
+                        ecore_poller_mp_free(poller);
                         poller_delete_count--;
                         changes++;
                         if (poller_delete_count <= 0) break;
@@ -179,7 +180,7 @@ _ecore_poller_cb_timer(void *data __UNUSED__)
    at_tick--;
 
    /* if the timer was deleted then there is no point returning 1 - ambiguous
-    * if we do as it im plies "keep running me" but we have been deleted
+    * if we do as it implies keep running me" but we have been deleted
     * anyway */
    if (!timer) return ECORE_CALLBACK_CANCEL;
 
@@ -215,7 +216,7 @@ ecore_poller_poll_interval_set(Ecore_Poller_Type type __UNUSED__,
  * @param   type The ticker type to query
  * @return  The time in seconds between ticks of the ticker clock
  *
- * This will get the time between ticks of the specifider ticker clock.
+ * This will get the time between ticks of the specified ticker clock.
  */
 EAPI double
 ecore_poller_poll_interval_get(Ecore_Poller_Type type __UNUSED__)
@@ -281,7 +282,7 @@ ecore_poller_add(Ecore_Poller_Type type __UNUSED__,
    if (!func) return NULL;
    if (interval < 1) interval = 1;
 
-   poller = calloc(1, sizeof(Ecore_Poller));
+   poller = ecore_poller_calloc(1);
    if (!poller) return NULL;
    ECORE_MAGIC_SET(poller, ECORE_MAGIC_POLLER);
    /* interval MUST be a power of 2, so enforce it */
@@ -413,7 +414,7 @@ ecore_poller_del(Ecore_Poller *poller)
    /* not in loop so safe - delete immediately */
    data = poller->data;
    pollers[poller->ibit] = (Ecore_Poller *)eina_inlist_remove(EINA_INLIST_GET(pollers[poller->ibit]), EINA_INLIST_GET(poller));
-   free(poller);
+   ecore_poller_mp_free(poller);
    _ecore_poller_next_tick_eval();
    return data;
 }
@@ -433,7 +434,7 @@ _ecore_poller_shutdown(void)
         while ((poller = pollers[i]))
           {
              pollers[i] = (Ecore_Poller *)eina_inlist_remove(EINA_INLIST_GET(pollers[i]), EINA_INLIST_GET(pollers[i]));
-             free(poller);
+             ecore_poller_mp_free(poller);
           }
      }
 }

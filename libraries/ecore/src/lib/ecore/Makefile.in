@@ -91,8 +91,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includesdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libecore_la_DEPENDENCIES =
-am__libecore_la_SOURCES_DIST = ecore.c ecore_anim.c ecore_app.c \
-	ecore_events.c ecore_getopt.c ecore_idle_enterer.c \
+am__libecore_la_SOURCES_DIST = ecore.c ecore_alloc.c ecore_anim.c \
+	ecore_app.c ecore_events.c ecore_getopt.c ecore_idle_enterer.c \
 	ecore_idle_exiter.c ecore_idler.c ecore_job.c ecore_main.c \
 	ecore_pipe.c ecore_poll.c ecore_time.c ecore_timer.c \
 	ecore_thread.c ecore_glib.c ecore_throttle.c ecore_exe_win32.c \
@@ -102,13 +102,13 @@ am__libecore_la_SOURCES_DIST = ecore.c ecore_anim.c ecore_app.c \
 @ECORE_HAVE_PS3_TRUE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__objects_3 = ecore_exe_ps3.lo
 @ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__objects_4 = ecore_signal.lo \
 @ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@	ecore_exe.lo
-am_libecore_la_OBJECTS = ecore.lo ecore_anim.lo ecore_app.lo \
-	ecore_events.lo ecore_getopt.lo ecore_idle_enterer.lo \
-	ecore_idle_exiter.lo ecore_idler.lo ecore_job.lo ecore_main.lo \
-	ecore_pipe.lo ecore_poll.lo ecore_time.lo ecore_timer.lo \
-	ecore_thread.lo ecore_glib.lo ecore_throttle.lo \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+am_libecore_la_OBJECTS = ecore.lo ecore_alloc.lo ecore_anim.lo \
+	ecore_app.lo ecore_events.lo ecore_getopt.lo \
+	ecore_idle_enterer.lo ecore_idle_exiter.lo ecore_idler.lo \
+	ecore_job.lo ecore_main.lo ecore_pipe.lo ecore_poll.lo \
+	ecore_time.lo ecore_timer.lo ecore_thread.lo ecore_glib.lo \
+	ecore_throttle.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4)
 libecore_la_OBJECTS = $(am_libecore_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -266,10 +266,10 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SCIM_CFLAGS = @SCIM_CFLAGS@
+SCIM_LIBS = @SCIM_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -288,6 +288,10 @@ TSLIB_LIBS = @TSLIB_LIBS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_CFLAGS = @WAYLAND_CFLAGS@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
+WAYLAND_LIBS = @WAYLAND_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_LIBS = @WIN32_LIBS@
@@ -401,6 +405,8 @@ ecore_imf_cflags = @ecore_imf_cflags@
 ecore_imf_evas_cflags = @ecore_imf_evas_cflags@
 ecore_imf_evas_libs = @ecore_imf_evas_libs@
 ecore_imf_libs = @ecore_imf_libs@
+ecore_imf_scim_cflags = @ecore_imf_scim_cflags@
+ecore_imf_scim_libs = @ecore_imf_scim_libs@
 ecore_imf_xim_cflags = @ecore_imf_xim_cflags@
 ecore_imf_xim_libs = @ecore_imf_xim_libs@
 ecore_input_cflags = @ecore_input_cflags@
@@ -413,6 +419,8 @@ ecore_psl1ght_cflags = @ecore_psl1ght_cflags@
 ecore_psl1ght_libs = @ecore_psl1ght_libs@
 ecore_sdl_cflags = @ecore_sdl_cflags@
 ecore_sdl_libs = @ecore_sdl_libs@
+ecore_wayland_cflags = @ecore_wayland_cflags@
+ecore_wayland_libs = @ecore_wayland_libs@
 ecore_win32_cflags = @ecore_win32_cflags@
 ecore_win32_libs = @ecore_win32_libs@
 ecore_wince_cflags = @ecore_wince_cflags@
@@ -457,12 +465,14 @@ requirements_ecore_fb = @requirements_ecore_fb@
 requirements_ecore_file = @requirements_ecore_file@
 requirements_ecore_imf = @requirements_ecore_imf@
 requirements_ecore_imf_evas = @requirements_ecore_imf_evas@
+requirements_ecore_imf_scim = @requirements_ecore_imf_scim@
 requirements_ecore_imf_xim = @requirements_ecore_imf_xim@
 requirements_ecore_input = @requirements_ecore_input@
 requirements_ecore_input_evas = @requirements_ecore_input_evas@
 requirements_ecore_ipc = @requirements_ecore_ipc@
 requirements_ecore_psl1ght = @requirements_ecore_psl1ght@
 requirements_ecore_sdl = @requirements_ecore_sdl@
+requirements_ecore_wayland = @requirements_ecore_wayland@
 requirements_ecore_win32 = @requirements_ecore_win32@
 requirements_ecore_wince = @requirements_ecore_wince@
 requirements_ecore_x = @requirements_ecore_x@
@@ -488,12 +498,12 @@ Ecore.h \
 Ecore_Getopt.h
 
 includesdir = $(includedir)/ecore-@VMAJ@
-libecore_la_SOURCES = ecore.c ecore_anim.c ecore_app.c ecore_events.c \
-	ecore_getopt.c ecore_idle_enterer.c ecore_idle_exiter.c \
-	ecore_idler.c ecore_job.c ecore_main.c ecore_pipe.c \
-	ecore_poll.c ecore_time.c ecore_timer.c ecore_thread.c \
-	ecore_glib.c ecore_throttle.c $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_4)
+libecore_la_SOURCES = ecore.c ecore_alloc.c ecore_anim.c ecore_app.c \
+	ecore_events.c ecore_getopt.c ecore_idle_enterer.c \
+	ecore_idle_exiter.c ecore_idler.c ecore_job.c ecore_main.c \
+	ecore_pipe.c ecore_poll.c ecore_time.c ecore_timer.c \
+	ecore_thread.c ecore_glib.c ecore_throttle.c $(am__append_1) \
+	$(am__append_2) $(am__append_3) $(am__append_4)
 libecore_la_LIBADD = @dlopen_libs@ @EINA_LIBS@ @EVIL_LIBS@ @GLIB_LIBS@ @WIN32_LIBS@ @LTLIBINTL@ @EFL_PTHREAD_LIBS@ @rt_libs@ -lm
 libecore_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -version-info @version_info@ @release_info@ @EFL_PTHREAD_LIBS@
 EXTRA_DIST = ecore_private.h
@@ -572,6 +582,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_alloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_anim.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_app.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_events.Plo@am__quote@

@@ -2,6 +2,7 @@
 # include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <sys/time.h>
 #include <assert.h>
 #include <sys/types.h>
@@ -388,7 +389,7 @@ static void _ecore_thread_handler(void        *data __UNUSED__,
 static Ecore_Pipe *
 _ecore_thread_pipe_get(void)
 {
-   if (eina_array_count_get(_ecore_thread_pipe) > 0)
+   if (eina_array_count(_ecore_thread_pipe) > 0)
      return eina_array_pop(_ecore_thread_pipe);
 
    return ecore_pipe_add(_ecore_thread_handler, NULL);
@@ -458,7 +459,7 @@ _ecore_thread_pipe_free(void *data __UNUSED__,
 {
    Ecore_Pipe *p = event;
 
-   if (eina_array_count_get(_ecore_thread_pipe) < 50)
+   if (eina_array_count(_ecore_thread_pipe) < 50)
      eina_array_push(_ecore_thread_pipe, p);
    else
      ecore_pipe_del(p);
@@ -544,7 +545,7 @@ _ecore_thread_kill(Ecore_Pthread_Worker *work)
    LKD(work->mutex);
    if (work->hash)
      eina_hash_free(work->hash);
-   free(work);
+   _ecore_thread_worker_free(work);
 }
 
 static void
@@ -594,7 +595,8 @@ _ecore_notify_handler(void        *data,
 }
 
 static void
-_ecore_short_job(Ecore_Pipe *end_pipe)
+_ecore_short_job(Ecore_Pipe *end_pipe,
+		 PH(thread))
 {
    Ecore_Pthread_Worker *work;
 
@@ -614,6 +616,7 @@ _ecore_short_job(Ecore_Pipe *end_pipe)
 
         LKU(_ecore_pending_job_threads_mutex);
 
+        work->self = thread;
         if (!work->cancel)
           work->u.short_run.func_blocking((void *)work->data, (Ecore_Thread *)work);
 
@@ -737,7 +740,7 @@ _ecore_thread_worker(Ecore_Pthread_Data *pth)
    eina_sched_prio_drop();
 
 restart:
-   if (_ecore_pending_job_threads) _ecore_short_job(pth->p);
+   if (_ecore_pending_job_threads) _ecore_short_job(pth->p, pth->thread);
    if (_ecore_pending_job_threads_feedback) _ecore_feedback_job(pth->p, pth->thread);
 
    /* FIXME: Check if there is feedback running task todo, and switch to feedback run handler. */
@@ -929,6 +932,7 @@ ecore_thread_run(Ecore_Thread_Cb func_blocking,
    work->data = data;
 
 #ifdef EFL_HAVE_THREADS
+   work->self = 0;
    work->hash = NULL;
    CDI(work->cond);
    LKI(work->mutex);
@@ -1114,6 +1118,7 @@ ecore_thread_feedback_run(Ecore_Thread_Cb        func_heavy,
    worker->feedback_run = EINA_TRUE;
    worker->kill = EINA_FALSE;
    worker->reschedule = EINA_FALSE;
+   worker->self = 0;
 
    worker->u.feedback_run.send = 0;
    worker->u.feedback_run.received = 0;

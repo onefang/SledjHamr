@@ -19,6 +19,7 @@ struct _Ecore_Event_Handler
    int                    references;
    Eina_Bool              delete_me : 1;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Event_Handler);
 
 struct _Ecore_Event_Filter
 {
@@ -32,6 +33,7 @@ struct _Ecore_Event_Filter
    int             references;
    Eina_Bool       delete_me : 1;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Event_Filter);
 
 struct _Ecore_Event
 {
@@ -44,6 +46,7 @@ struct _Ecore_Event
    int          references;
    Eina_Bool    delete_me : 1;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Event);
 
 static int events_num = 0;
 static Ecore_Event *events = NULL;
@@ -109,7 +112,7 @@ ecore_event_handler_add(int                    type,
 
    if (!func) goto unlock;
    if ((type <= ECORE_EVENT_NONE) || (type >= event_id_max)) goto unlock;
-   eh = calloc(1, sizeof(Ecore_Event_Handler));
+   eh = ecore_event_handler_calloc(1);
    if (!eh) goto unlock;
    ECORE_MAGIC_SET(eh, ECORE_MAGIC_EVENT_HANDLER);
    eh->type = type;
@@ -130,7 +133,7 @@ ecore_event_handler_add(int                    type,
              new_handlers = realloc(event_handlers, event_handlers_alloc_num * sizeof(Ecore_Event_Handler *));
              if (!new_handlers)
                {
-                  free(eh);
+                  ecore_event_handler_mp_free(eh);
                   goto unlock;
                }
              event_handlers = new_handlers;
@@ -234,7 +237,7 @@ unlock:
 static void
 _ecore_event_generic_free(void *data __UNUSED__,
                           void *event)
-{
+{ /* DO NOT MEMPOOL FREE THIS */
    free (event);
 }
 
@@ -358,7 +361,7 @@ ecore_event_filter_add(Ecore_Data_Cb   func_start,
 
    _ecore_lock();
    if (!func_filter) goto unlock;
-   ef = calloc(1, sizeof(Ecore_Event_Filter));
+   ef = ecore_event_filter_calloc(1);
    if (!ef) goto unlock;
    ECORE_MAGIC_SET(ef, ECORE_MAGIC_EVENT_FILTER);
    ef->func_start = func_start;
@@ -469,11 +472,11 @@ _ecore_event_shutdown(void)
           {
              event_handlers[i] = (Ecore_Event_Handler *)eina_inlist_remove(EINA_INLIST_GET(event_handlers[i]), EINA_INLIST_GET(event_handlers[i]));
              ECORE_MAGIC_SET(eh, ECORE_MAGIC_NONE);
-             if (!eh->delete_me) free(eh);
+             if (!eh->delete_me) ecore_event_handler_mp_free(eh);
           }
      }
    EINA_LIST_FREE(event_handlers_delete_list, eh)
-     free(eh);
+     ecore_event_handler_mp_free(eh);
    if (event_handlers) free(event_handlers);
    event_handlers = NULL;
    event_handlers_num = 0;
@@ -482,7 +485,7 @@ _ecore_event_shutdown(void)
      {
         event_filters = (Ecore_Event_Filter *)eina_inlist_remove(EINA_INLIST_GET(event_filters), EINA_INLIST_GET(event_filters));
         ECORE_MAGIC_SET(ef, ECORE_MAGIC_NONE);
-        free(ef);
+        ecore_event_filter_mp_free(ef);
      }
    event_filters_delete_me = 0;
    event_filter_current = NULL;
@@ -506,7 +509,7 @@ _ecore_event_add(int          type,
 {
    Ecore_Event *e;
 
-   e = calloc(1, sizeof(Ecore_Event));
+   e = ecore_event_calloc(1);
    if (!e) return NULL;
    ECORE_MAGIC_SET(e, ECORE_MAGIC_EVENT);
    e->type = type;
@@ -535,7 +538,7 @@ _ecore_event_del(Ecore_Event *event)
    if (event->func_free) _ecore_call_end_cb(event->func_free, event->data, event->event);
    events = (Ecore_Event *)eina_inlist_remove(EINA_INLIST_GET(events), EINA_INLIST_GET(event));
    ECORE_MAGIC_SET(event, ECORE_MAGIC_NONE);
-   free(event);
+   ecore_event_mp_free(event);
    events_num--;
    return data;
 }
@@ -638,7 +641,7 @@ _ecore_event_filters_apply()
 
                   event_filters = (Ecore_Event_Filter *)eina_inlist_remove(EINA_INLIST_GET(event_filters), EINA_INLIST_GET(ef));
                   ECORE_MAGIC_SET(ef, ECORE_MAGIC_NONE);
-                  free(ef);
+                  ecore_event_filter_mp_free(ef);
                }
           }
         if (!deleted_in_use)
@@ -742,7 +745,7 @@ _ecore_event_call(void)
 
         event_handlers[eh->type] = (Ecore_Event_Handler *)eina_inlist_remove(EINA_INLIST_GET(event_handlers[eh->type]), EINA_INLIST_GET(eh));
         ECORE_MAGIC_SET(eh, ECORE_MAGIC_NONE);
-        free(eh);
+        ecore_event_handler_mp_free(eh);
      }
 }
 

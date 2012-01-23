@@ -95,11 +95,15 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 @BUILD_ECORE_COCOA_TRUE@am__DEPENDENCIES_7 = $(top_builddir)/src/lib/ecore_cocoa/libecore_cocoa.la
 @BUILD_ECORE_WINCE_TRUE@am__DEPENDENCIES_8 = $(top_builddir)/src/lib/ecore_wince/libecore_wince.la
 @BUILD_ECORE_PSL1GHT_TRUE@am__DEPENDENCIES_9 = $(top_builddir)/src/lib/ecore_psl1ght/libecore_psl1ght.la
+@BUILD_ECORE_WAYLAND_TRUE@am__DEPENDENCIES_10 = $(top_builddir)/src/lib/ecore_wayland/libecore_wayland.la
+@BUILD_ECORE_WAYLAND_TRUE@am__DEPENDENCIES_11 =  \
+@BUILD_ECORE_WAYLAND_TRUE@	$(am__DEPENDENCIES_10)
 libecore_evas_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5) \
 	$(am__DEPENDENCIES_6) $(am__DEPENDENCIES_7) \
-	$(am__DEPENDENCIES_8) $(am__DEPENDENCIES_9) \
+	$(am__DEPENDENCIES_8) $(ECORE_IPC_LIB) $(am__DEPENDENCIES_9) \
+	$(am__DEPENDENCIES_10) $(am__DEPENDENCIES_11) \
 	$(top_builddir)/src/lib/ecore_input/libecore_input.la \
 	$(top_builddir)/src/lib/ecore_input_evas/libecore_input_evas.la \
 	$(top_builddir)/src/lib/ecore/libecore.la
@@ -107,7 +111,8 @@ am_libecore_evas_la_OBJECTS = ecore_evas.lo ecore_evas_util.lo \
 	ecore_evas_x.lo ecore_evas_fb.lo ecore_evas_buffer.lo \
 	ecore_evas_directfb.lo ecore_evas_win32.lo ecore_evas_sdl.lo \
 	ecore_evas_cocoa.lo ecore_evas_wince.lo ecore_evas_ews.lo \
-	ecore_evas_psl1ght.lo
+	ecore_evas_psl1ght.lo ecore_evas_wayland_shm.lo \
+	ecore_evas_wayland_egl.lo ecore_evas_extn.lo
 libecore_evas_la_OBJECTS = $(am_libecore_evas_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -266,10 +271,10 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SCIM_CFLAGS = @SCIM_CFLAGS@
+SCIM_LIBS = @SCIM_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -288,6 +293,10 @@ TSLIB_LIBS = @TSLIB_LIBS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_CFLAGS = @WAYLAND_CFLAGS@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
+WAYLAND_LIBS = @WAYLAND_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_LIBS = @WIN32_LIBS@
@@ -401,6 +410,8 @@ ecore_imf_cflags = @ecore_imf_cflags@
 ecore_imf_evas_cflags = @ecore_imf_evas_cflags@
 ecore_imf_evas_libs = @ecore_imf_evas_libs@
 ecore_imf_libs = @ecore_imf_libs@
+ecore_imf_scim_cflags = @ecore_imf_scim_cflags@
+ecore_imf_scim_libs = @ecore_imf_scim_libs@
 ecore_imf_xim_cflags = @ecore_imf_xim_cflags@
 ecore_imf_xim_libs = @ecore_imf_xim_libs@
 ecore_input_cflags = @ecore_input_cflags@
@@ -413,6 +424,8 @@ ecore_psl1ght_cflags = @ecore_psl1ght_cflags@
 ecore_psl1ght_libs = @ecore_psl1ght_libs@
 ecore_sdl_cflags = @ecore_sdl_cflags@
 ecore_sdl_libs = @ecore_sdl_libs@
+ecore_wayland_cflags = @ecore_wayland_cflags@
+ecore_wayland_libs = @ecore_wayland_libs@
 ecore_win32_cflags = @ecore_win32_cflags@
 ecore_win32_libs = @ecore_win32_libs@
 ecore_wince_cflags = @ecore_wince_cflags@
@@ -457,12 +470,14 @@ requirements_ecore_fb = @requirements_ecore_fb@
 requirements_ecore_file = @requirements_ecore_file@
 requirements_ecore_imf = @requirements_ecore_imf@
 requirements_ecore_imf_evas = @requirements_ecore_imf_evas@
+requirements_ecore_imf_scim = @requirements_ecore_imf_scim@
 requirements_ecore_imf_xim = @requirements_ecore_imf_xim@
 requirements_ecore_input = @requirements_ecore_input@
 requirements_ecore_input_evas = @requirements_ecore_input_evas@
 requirements_ecore_ipc = @requirements_ecore_ipc@
 requirements_ecore_psl1ght = @requirements_ecore_psl1ght@
 requirements_ecore_sdl = @requirements_ecore_sdl@
+requirements_ecore_wayland = @requirements_ecore_wayland@
 requirements_ecore_win32 = @requirements_ecore_win32@
 requirements_ecore_wince = @requirements_ecore_wince@
 requirements_ecore_x = @requirements_ecore_x@
@@ -481,9 +496,9 @@ x_includes = @x_includes@
 x_libs = @x_libs@
 MAINTAINERCLEANFILES = Makefile.in
 @BUILD_ECORE_X_FALSE@ECORE_X_INC = 
-@BUILD_ECORE_X_TRUE@ECORE_X_INC = -I$(top_srcdir)/src/lib/ecore_x @x_cflags@ @ECORE_XCB_CFLAGS@
+@BUILD_ECORE_X_TRUE@ECORE_X_INC = -I$(top_srcdir)/src/lib/ecore_x @x_cflags@
 @BUILD_ECORE_X_FALSE@ECORE_X_LIB = 
-@BUILD_ECORE_X_TRUE@ECORE_X_LIB = $(top_builddir)/src/lib/ecore_x/libecore_x.la @x_libs@ @ECORE_XCB_LIBS@
+@BUILD_ECORE_X_TRUE@ECORE_X_LIB = $(top_builddir)/src/lib/ecore_x/libecore_x.la @x_libs@
 @BUILD_ECORE_FB_FALSE@ECORE_FB_INC = 
 @BUILD_ECORE_FB_TRUE@ECORE_FB_INC = -I$(top_srcdir)/src/lib/ecore_fb
 @BUILD_ECORE_FB_FALSE@ECORE_FB_LIB = 
@@ -514,6 +529,17 @@ MAINTAINERCLEANFILES = Makefile.in
 @BUILD_ECORE_PSL1GHT_TRUE@ECORE_PSL1GHT_INC = -I$(top_srcdir)/src/lib/ecore_psl1ght
 @BUILD_ECORE_PSL1GHT_FALSE@ECORE_PSL1GHT_LIB = 
 @BUILD_ECORE_PSL1GHT_TRUE@ECORE_PSL1GHT_LIB = $(top_builddir)/src/lib/ecore_psl1ght/libecore_psl1ght.la
+@BUILD_ECORE_WAYLAND_FALSE@ECORE_WAYLAND_INC = 
+@BUILD_ECORE_WAYLAND_TRUE@ECORE_WAYLAND_INC = -I$(top_srcdir)/src/lib/ecore_wayland @WAYLAND_CFLAGS@
+@BUILD_ECORE_WAYLAND_FALSE@ECORE_WAYLAND_LIB = 
+@BUILD_ECORE_WAYLAND_TRUE@ECORE_WAYLAND_LIB = $(top_builddir)/src/lib/ecore_wayland/libecore_wayland.la
+@BUILD_ECORE_WAYLAND_FALSE@ECORE_WAYLAND_LIBADD = 
+@BUILD_ECORE_WAYLAND_TRUE@ECORE_WAYLAND_LIBADD = @WAYLAND_LIBS@ $(ECORE_WAYLAND_LIB)
+@BUILD_ECORE_IPC_TRUE@ECORE_IPC_INC = \
+@BUILD_ECORE_IPC_TRUE@-I$(top_srcdir)/src/lib/ecore_ipc \
+@BUILD_ECORE_IPC_TRUE@-I$(top_builddir)/src/lib/ecore_ipc
+
+@BUILD_ECORE_IPC_TRUE@ECORE_IPC_LIB = $(top_builddir)/src/lib/ecore_ipc/libecore_ipc.la
 AM_CPPFLAGS = \
 -I$(top_srcdir)/src/lib/ecore \
 -I$(top_srcdir)/src/lib/ecore_evas \
@@ -532,9 +558,12 @@ $(ECORE_SDL_INC) \
 $(ECORE_COCOA_INC) \
 $(ECORE_WINCE_INC) \
 $(ECORE_PSL1GHT_INC) \
+$(ECORE_WAYLAND_INC) \
+$(ECORE_IPC_INC) \
 @EVAS_CFLAGS@ \
 @EINA_CFLAGS@ \
-@EVIL_CFLAGS@
+@EVIL_CFLAGS@ \
+@WAYLAND_EGL_CFLAGS@
 
 AM_CFLAGS = @WIN32_CFLAGS@
 lib_LTLIBRARIES = libecore_evas.la
@@ -552,7 +581,10 @@ ecore_evas_sdl.c \
 ecore_evas_cocoa.c \
 ecore_evas_wince.c \
 ecore_evas_ews.c \
-ecore_evas_psl1ght.c
+ecore_evas_psl1ght.c \
+ecore_evas_wayland_shm.c \
+ecore_evas_wayland_egl.c \
+ecore_evas_extn.c
 
 libecore_evas_la_LIBADD = \
 $(ECORE_X_LIB) \
@@ -563,13 +595,17 @@ $(ECORE_SDL_LIB) \
 $(ECORE_SDL_LIBADD) \
 $(ECORE_COCOA_LIB) \
 $(ECORE_WINCE_LIB) \
+$(ECORE_IPC_LIB) \
 $(ECORE_PSL1GHT_LIB) \
+$(ECORE_WAYLAND_LIB) \
+$(ECORE_WAYLAND_LIBADD) \
 $(top_builddir)/src/lib/ecore_input/libecore_input.la \
 $(top_builddir)/src/lib/ecore_input_evas/libecore_input_evas.la \
 $(top_builddir)/src/lib/ecore/libecore.la \
 @EVAS_LIBS@ \
 @EINA_LIBS@ \
-@EVIL_LIBS@
+@EVIL_LIBS@ \
+@WAYLAND_EGL_LIBS@
 
 libecore_evas_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -version-info @version_info@ @release_info@
 EXTRA_DIST = \
@@ -654,10 +690,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_cocoa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_directfb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_ews.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_extn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_fb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_psl1ght.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_sdl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_wayland_egl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_wayland_shm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_win32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_wince.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_evas_x.Plo@am__quote@

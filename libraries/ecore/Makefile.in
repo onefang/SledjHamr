@@ -64,6 +64,7 @@ host_triplet = @host@
 @BUILD_ECORE_SDL_TRUE@am__append_17 = ecore-sdl.pc
 @BUILD_ECORE_COCOA_TRUE@am__append_18 = ecore-cocoa.pc
 @BUILD_ECORE_PSL1GHT_TRUE@am__append_19 = ecore-psl1ght.pc
+@BUILD_ECORE_WAYLAND_TRUE@am__append_20 = ecore-wayland.pc
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -74,12 +75,12 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/ecore-imf.pc.in $(srcdir)/ecore-input-evas.pc.in \
 	$(srcdir)/ecore-input.pc.in $(srcdir)/ecore-ipc.pc.in \
 	$(srcdir)/ecore-psl1ght.pc.in $(srcdir)/ecore-sdl.pc.in \
-	$(srcdir)/ecore-win32.pc.in $(srcdir)/ecore-wince.pc.in \
-	$(srcdir)/ecore-x.pc.in $(srcdir)/ecore.pc.in \
-	$(srcdir)/ecore.spec.in $(top_srcdir)/configure ABOUT-NLS \
-	AUTHORS COPYING ChangeLog INSTALL NEWS TODO config.guess \
-	config.rpath config.sub depcomp install-sh ltmain.sh missing \
-	mkinstalldirs
+	$(srcdir)/ecore-wayland.pc.in $(srcdir)/ecore-win32.pc.in \
+	$(srcdir)/ecore-wince.pc.in $(srcdir)/ecore-x.pc.in \
+	$(srcdir)/ecore.pc.in $(srcdir)/ecore.spec.in \
+	$(top_srcdir)/configure ABOUT-NLS AUTHORS COPYING ChangeLog \
+	INSTALL NEWS config.guess config.rpath config.sub depcomp \
+	install-sh ltmain.sh missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_attribute.m4 \
 	$(top_srcdir)/m4/ac_path_generic.m4 \
@@ -109,7 +110,8 @@ CONFIG_CLEAN_FILES = ecore-con.pc ecore-config.pc ecore-directfb.pc \
 	ecore-evas.pc ecore-fb.pc ecore-file.pc ecore-imf.pc \
 	ecore-imf-evas.pc ecore-ipc.pc ecore-x.pc ecore-input.pc \
 	ecore-input-evas.pc ecore-win32.pc ecore-sdl.pc ecore-cocoa.pc \
-	ecore-psl1ght.pc ecore-wince.pc ecore.pc ecore.spec
+	ecore-psl1ght.pc ecore-wince.pc ecore-wayland.pc ecore.pc \
+	ecore.spec
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -312,10 +314,10 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SCIM_CFLAGS = @SCIM_CFLAGS@
+SCIM_LIBS = @SCIM_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -334,6 +336,10 @@ TSLIB_LIBS = @TSLIB_LIBS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_CFLAGS = @WAYLAND_CFLAGS@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
+WAYLAND_LIBS = @WAYLAND_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_LIBS = @WIN32_LIBS@
@@ -447,6 +453,8 @@ ecore_imf_cflags = @ecore_imf_cflags@
 ecore_imf_evas_cflags = @ecore_imf_evas_cflags@
 ecore_imf_evas_libs = @ecore_imf_evas_libs@
 ecore_imf_libs = @ecore_imf_libs@
+ecore_imf_scim_cflags = @ecore_imf_scim_cflags@
+ecore_imf_scim_libs = @ecore_imf_scim_libs@
 ecore_imf_xim_cflags = @ecore_imf_xim_cflags@
 ecore_imf_xim_libs = @ecore_imf_xim_libs@
 ecore_input_cflags = @ecore_input_cflags@
@@ -459,6 +467,8 @@ ecore_psl1ght_cflags = @ecore_psl1ght_cflags@
 ecore_psl1ght_libs = @ecore_psl1ght_libs@
 ecore_sdl_cflags = @ecore_sdl_cflags@
 ecore_sdl_libs = @ecore_sdl_libs@
+ecore_wayland_cflags = @ecore_wayland_cflags@
+ecore_wayland_libs = @ecore_wayland_libs@
 ecore_win32_cflags = @ecore_win32_cflags@
 ecore_win32_libs = @ecore_win32_libs@
 ecore_wince_cflags = @ecore_wince_cflags@
@@ -503,12 +513,14 @@ requirements_ecore_fb = @requirements_ecore_fb@
 requirements_ecore_file = @requirements_ecore_file@
 requirements_ecore_imf = @requirements_ecore_imf@
 requirements_ecore_imf_evas = @requirements_ecore_imf_evas@
+requirements_ecore_imf_scim = @requirements_ecore_imf_scim@
 requirements_ecore_imf_xim = @requirements_ecore_imf_xim@
 requirements_ecore_input = @requirements_ecore_input@
 requirements_ecore_input_evas = @requirements_ecore_input_evas@
 requirements_ecore_ipc = @requirements_ecore_ipc@
 requirements_ecore_psl1ght = @requirements_ecore_psl1ght@
 requirements_ecore_sdl = @requirements_ecore_sdl@
+requirements_ecore_wayland = @requirements_ecore_wayland@
 requirements_ecore_win32 = @requirements_ecore_win32@
 requirements_ecore_wince = @requirements_ecore_wince@
 requirements_ecore_x = @requirements_ecore_x@
@@ -567,6 +579,7 @@ ecore-cocoa.pc.in \
 ecore-psl1ght.pc.in \
 ecore-input.pc.in \
 ecore-wince.pc.in \
+ecore-wayland.pc.in \
 ecore.spec.in \
 ecore.spec \
 m4/ac_abstract_socket.m4 \
@@ -585,7 +598,8 @@ pkgconfig_DATA = ecore.pc $(am__append_3) $(am__append_4) \
 	$(am__append_8) $(am__append_9) $(am__append_10) \
 	$(am__append_11) $(am__append_12) $(am__append_13) \
 	$(am__append_14) $(am__append_15) $(am__append_16) \
-	$(am__append_17) $(am__append_18) $(am__append_19)
+	$(am__append_17) $(am__append_18) $(am__append_19) \
+	$(am__append_20)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -674,6 +688,8 @@ ecore-cocoa.pc: $(top_builddir)/config.status $(srcdir)/ecore-cocoa.pc.in
 ecore-psl1ght.pc: $(top_builddir)/config.status $(srcdir)/ecore-psl1ght.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ecore-wince.pc: $(top_builddir)/config.status $(srcdir)/ecore-wince.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+ecore-wayland.pc: $(top_builddir)/config.status $(srcdir)/ecore-wayland.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ecore.pc: $(top_builddir)/config.status $(srcdir)/ecore.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

@@ -2,6 +2,7 @@
 # include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -597,11 +598,7 @@ ecore_file_mv(const char *src, const char *dst)
                            dir, ecore_file_file_get(dst));
                   free(dir);
                   fd = mkstemp(buf);
-                  if (fd < 0)
-                    {
-                       perror("mkstemp");
-                       goto FAIL;
-                    }
+                  if (fd < 0) goto FAIL;
                   close(fd);
 
                   // Copy to temp file
@@ -761,7 +758,7 @@ ecore_file_can_write(const char *file)
 }
 
 /**
- * @bbrief Check if the given file can be executed.
+ * @brief Check if the given file can be executed.
  *
  * @param  file The name of the file.
  * @return EINA_TRUE if the file can be executed, EINA_FALSE otherwise.
@@ -859,7 +856,7 @@ ecore_file_app_exe_get(const char *app)
 
    p = (char *)app;
 restart:
-   while ((*p) && (isspace(*p))) p++;
+   while ((*p) && (isspace((unsigned char)*p))) p++;
    exe1 = p;
    while (*p)
      {
@@ -879,7 +876,7 @@ restart:
                in_quot_sing = 1;
              else if (*p == '\"')
                in_quot_dbl = 1;
-             if ((isspace(*p)) && (!((p > app) && (p[-1] != '\\'))))
+             if ((isspace((unsigned char)*p)) && ((p <= app) || (p[-1] == '\\')))
                break;
           }
         p++;
@@ -974,7 +971,7 @@ restart:
                in_quot_sing = 1;
              else if (*p == '\"')
                in_quot_dbl = 1;
-             else if (isspace(*p))
+             else if (isspace((unsigned char)*p))
                {
                   if (restart)
                     goto restart;
@@ -1040,7 +1037,7 @@ ecore_file_escape_name(const char *filename)
 }
 
 /**
- * @bried Remove the extension from the given file name.
+ * @brief Remove the extension from the given file name.
  *
  * @param  path The name of the file.
  * @return A newly allocated string with the extension stripped out or

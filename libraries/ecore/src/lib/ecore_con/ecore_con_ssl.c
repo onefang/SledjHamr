@@ -16,6 +16,7 @@
 # include <ws2tcpip.h>
 #endif
 
+#include <sys/stat.h>
 #include "Ecore.h"
 #include "ecore_con_private.h"
 
@@ -60,12 +61,34 @@ _gnutls_print_errors(void *conn, int type, int ret)
      ecore_con_event_server_error(conn, buf);
 }
 
+static void
+_gnutls_print_session(const gnutls_datum_t *cert_list, unsigned int cert_list_size)
+{
+   char *c = NULL;
+   gnutls_x509_crt_t crt;
+   unsigned int x;
+
+   if (!eina_log_domain_level_check(_ecore_con_log_dom, EINA_LOG_LEVEL_DBG)) return;
+   for (x = 0; x < cert_list_size; x++)
+     {
+        gnutls_x509_crt_init(&crt);
+        gnutls_x509_crt_import(crt, &cert_list[x], GNUTLS_X509_FMT_DER);
+        gnutls_x509_crt_print(crt, GNUTLS_CRT_PRINT_FULL, (gnutls_datum_t*)&c);
+        INF("CERTIFICATE:\n%s", c);
+        gnutls_free(c);
+        gnutls_x509_crt_deinit(crt);
+        crt = NULL;
+     }
+}
+
 #ifdef ISCOMFITOR
 static void
 _gnutls_log_func(int         level,
                  const char *str)
 {
-   DBG("|<%d>| %s", level, str);
+   char buf[128];
+   strncat(buf, str, strlen(str) - 1);
+   DBG("|<%d>| %s", level, buf);
 }
 #endif
 
@@ -116,6 +139,185 @@ SSL_GNUTLS_PRINT_HANDSHAKE_STATUS(gnutls_handshake_description_t status)
 #elif USE_OPENSSL
 
 static void
+_openssl_print_verify_error(int error)
+{
+   switch (error)
+     {
+#define ERROR(X) \
+  case (X): \
+    ERR("%s", #X); \
+    break
+#ifdef X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT
+      ERROR(X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_GET_CRL
+      ERROR(X509_V_ERR_UNABLE_TO_GET_CRL);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE
+      ERROR(X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE
+      ERROR(X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY
+      ERROR(X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY);
+#endif
+#ifdef X509_V_ERR_CERT_SIGNATURE_FAILURE
+      ERROR(X509_V_ERR_CERT_SIGNATURE_FAILURE);
+#endif
+#ifdef X509_V_ERR_CRL_SIGNATURE_FAILURE
+      ERROR(X509_V_ERR_CRL_SIGNATURE_FAILURE);
+#endif
+#ifdef X509_V_ERR_CERT_NOT_YET_VALID
+      ERROR(X509_V_ERR_CERT_NOT_YET_VALID);
+#endif
+#ifdef X509_V_ERR_CERT_HAS_EXPIRED
+      ERROR(X509_V_ERR_CERT_HAS_EXPIRED);
+#endif
+#ifdef X509_V_ERR_CRL_NOT_YET_VALID
+      ERROR(X509_V_ERR_CRL_NOT_YET_VALID);
+#endif
+#ifdef X509_V_ERR_CRL_HAS_EXPIRED
+      ERROR(X509_V_ERR_CRL_HAS_EXPIRED);
+#endif
+#ifdef X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD
+      ERROR(X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD);
+#endif
+#ifdef X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD
+      ERROR(X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD);
+#endif
+#ifdef X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD
+      ERROR(X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD);
+#endif
+#ifdef X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD
+      ERROR(X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD);
+#endif
+#ifdef X509_V_ERR_OUT_OF_MEM
+      ERROR(X509_V_ERR_OUT_OF_MEM);
+#endif
+#ifdef X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT
+      ERROR(X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT);
+#endif
+#ifdef X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN
+      ERROR(X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY
+      ERROR(X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY);
+#endif
+#ifdef X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE
+      ERROR(X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE);
+#endif
+#ifdef X509_V_ERR_CERT_CHAIN_TOO_LONG
+      ERROR(X509_V_ERR_CERT_CHAIN_TOO_LONG);
+#endif
+#ifdef X509_V_ERR_CERT_REVOKED
+      ERROR(X509_V_ERR_CERT_REVOKED);
+#endif
+#ifdef X509_V_ERR_INVALID_CA
+      ERROR(X509_V_ERR_INVALID_CA);
+#endif
+#ifdef X509_V_ERR_PATH_LENGTH_EXCEEDED
+      ERROR(X509_V_ERR_PATH_LENGTH_EXCEEDED);
+#endif
+#ifdef X509_V_ERR_INVALID_PURPOSE
+      ERROR(X509_V_ERR_INVALID_PURPOSE);
+#endif
+#ifdef X509_V_ERR_CERT_UNTRUSTED
+      ERROR(X509_V_ERR_CERT_UNTRUSTED);
+#endif
+#ifdef X509_V_ERR_CERT_REJECTED
+      ERROR(X509_V_ERR_CERT_REJECTED);
+#endif
+      /* These are 'informational' when looking for issuer cert */
+#ifdef X509_V_ERR_SUBJECT_ISSUER_MISMATCH
+      ERROR(X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+#endif
+#ifdef X509_V_ERR_AKID_SKID_MISMATCH
+      ERROR(X509_V_ERR_AKID_SKID_MISMATCH);
+#endif
+#ifdef X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH
+      ERROR(X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH);
+#endif
+#ifdef X509_V_ERR_KEYUSAGE_NO_CERTSIGN
+      ERROR(X509_V_ERR_KEYUSAGE_NO_CERTSIGN);
+#endif
+
+#ifdef X509_V_ERR_UNABLE_TO_GET_CRL_ISSUER
+      ERROR(X509_V_ERR_UNABLE_TO_GET_CRL_ISSUER);
+#endif
+#ifdef X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION
+      ERROR(X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION);
+#endif
+#ifdef X509_V_ERR_KEYUSAGE_NO_CRL_SIGN
+      ERROR(X509_V_ERR_KEYUSAGE_NO_CRL_SIGN);
+#endif
+#ifdef X509_V_ERR_UNHANDLED_CRITICAL_CRL_EXTENSION
+      ERROR(X509_V_ERR_UNHANDLED_CRITICAL_CRL_EXTENSION);
+#endif
+#ifdef X509_V_ERR_INVALID_NON_CA
+      ERROR(X509_V_ERR_INVALID_NON_CA);
+#endif
+#ifdef X509_V_ERR_PROXY_PATH_LENGTH_EXCEEDED
+      ERROR(X509_V_ERR_PROXY_PATH_LENGTH_EXCEEDED);
+#endif
+#ifdef X509_V_ERR_KEYUSAGE_NO_DIGITAL_SIGNATURE
+      ERROR(X509_V_ERR_KEYUSAGE_NO_DIGITAL_SIGNATURE);
+#endif
+#ifdef X509_V_ERR_PROXY_CERTIFICATES_NOT_ALLOWED
+      ERROR(X509_V_ERR_PROXY_CERTIFICATES_NOT_ALLOWED);
+#endif
+
+#ifdef X509_V_ERR_INVALID_EXTENSION
+      ERROR(X509_V_ERR_INVALID_EXTENSION);
+#endif
+#ifdef X509_V_ERR_INVALID_POLICY_EXTENSION
+      ERROR(X509_V_ERR_INVALID_POLICY_EXTENSION);
+#endif
+#ifdef X509_V_ERR_NO_EXPLICIT_POLICY
+      ERROR(X509_V_ERR_NO_EXPLICIT_POLICY);
+#endif
+#ifdef X509_V_ERR_DIFFERENT_CRL_SCOPE
+      ERROR(X509_V_ERR_DIFFERENT_CRL_SCOPE);
+#endif
+#ifdef X509_V_ERR_UNSUPPORTED_EXTENSION_FEATURE
+      ERROR(X509_V_ERR_UNSUPPORTED_EXTENSION_FEATURE);
+#endif
+
+#ifdef X509_V_ERR_UNNESTED_RESOURCE
+      ERROR(X509_V_ERR_UNNESTED_RESOURCE);
+#endif
+
+#ifdef X509_V_ERR_PERMITTED_VIOLATION
+      ERROR(X509_V_ERR_PERMITTED_VIOLATION);
+#endif
+#ifdef X509_V_ERR_EXCLUDED_VIOLATION
+      ERROR(X509_V_ERR_EXCLUDED_VIOLATION);
+#endif
+#ifdef X509_V_ERR_SUBTREE_MINMAX
+      ERROR(X509_V_ERR_SUBTREE_MINMAX);
+#endif
+#ifdef X509_V_ERR_UNSUPPORTED_CONSTRAINT_TYPE
+      ERROR(X509_V_ERR_UNSUPPORTED_CONSTRAINT_TYPE);
+#endif
+#ifdef X509_V_ERR_UNSUPPORTED_CONSTRAINT_SYNTAX
+      ERROR(X509_V_ERR_UNSUPPORTED_CONSTRAINT_SYNTAX);
+#endif
+#ifdef X509_V_ERR_UNSUPPORTED_NAME_SYNTAX
+      ERROR(X509_V_ERR_UNSUPPORTED_NAME_SYNTAX);
+#endif
+#ifdef X509_V_ERR_CRL_PATH_VALIDATION_ERROR
+      ERROR(X509_V_ERR_CRL_PATH_VALIDATION_ERROR);
+#endif
+
+      /* The application is not happy */
+#ifdef X509_V_ERR_APPLICATION_VERIFICATION
+      ERROR(X509_V_ERR_APPLICATION_VERIFICATION);
+#endif
+     }
+#undef ERROR
+}
+
+static void
 _openssl_print_errors(void *conn, int type)
 {
    char buf[1024];
@@ -152,11 +354,55 @@ _openssl_name_verify(const char *name, const char *svrname)
         EINA_SAFETY_ON_TRUE_RETURN_VAL(!s, EINA_FALSE);
         /* same as above for the stored name */
         EINA_SAFETY_ON_TRUE_RETURN_VAL(!strchr(s + 1, '.'), EINA_FALSE);
-        EINA_SAFETY_ON_TRUE_RETURN_VAL(strcasecmp(s, name + 1), EINA_FALSE);
+        if (strcasecmp(s, name + 1))
+          {
+             ERR("%s != %s", s, name + 1);
+             return EINA_FALSE;
+          }
      }
    else
-     EINA_SAFETY_ON_TRUE_RETURN_VAL(strcasecmp(name, svrname), EINA_FALSE);
+     if (strcasecmp(name, svrname))
+       {
+          ERR("%s != %s", name, svrname);
+          return EINA_FALSE;
+       }
    return EINA_TRUE;
+}
+
+static void
+_openssl_print_session(SSL *ssl)
+{
+   /* print session info into DBG */
+   SSL_SESSION *s;
+   STACK_OF(X509) *sk;
+   BIO *b;
+   char log[4096], *p;
+   int x;
+
+   if (!eina_log_domain_level_check(_ecore_con_log_dom, EINA_LOG_LEVEL_DBG)) return;
+
+   memset(log, 0, sizeof(log));
+   b = BIO_new(BIO_s_mem());
+   sk = SSL_get_peer_cert_chain(ssl);
+   if (sk)
+     {
+        DBG("CERTIFICATES:");
+        for (x = 0; x < sk_X509_num(sk); x++)
+          {
+             p = X509_NAME_oneline(X509_get_subject_name(sk_X509_value(sk, x)), log, sizeof(log));
+             DBG("%2d s:%s", x, p);
+             p = X509_NAME_oneline(X509_get_issuer_name(sk_X509_value(sk, x)), log, sizeof(log));
+             DBG("   i:%s", p);
+             PEM_write_X509(stderr, sk_X509_value(sk, x));
+          }
+     }
+   s = SSL_get_session(ssl);
+   SSL_SESSION_print(b, s);
+   fprintf(stderr, "\n");
+   while (BIO_read(b, log, sizeof(log)) > 0)
+     fprintf(stderr, "%s", log);
+
+   BIO_free(b);
 }
 
 #endif
@@ -356,6 +602,51 @@ ecore_con_ssl_server_verify_basic(Ecore_Con_Server *svr)
 }
 
 /**
+ * @brief Set the hostname to verify against in certificate verification
+ *
+ * Sometimes the certificate hostname will not match the hostname that you are
+ * connecting to, and will instead match a different name. An example of this is
+ * that if you connect to talk.google.com to use Google Talk, you receive Google's
+ * certificate for gmail.com. This certificate should be trusted, and so you must call
+ * this function with "gmail.com" as @p name.
+ * See RFC2818 for more details.
+ * @param svr The server object
+ * @param name The hostname to verify against
+ * @since 1.2
+ */
+EAPI void
+ecore_con_ssl_server_verify_name_set(Ecore_Con_Server *svr, const char *name)
+{
+   if (!ECORE_MAGIC_CHECK(svr, ECORE_MAGIC_CON_SERVER))
+     {
+        ECORE_MAGIC_FAIL(svr, ECORE_MAGIC_CON_SERVER, __func__);
+        return;
+     }
+   eina_stringshare_replace(&svr->verify_name, name);
+}
+
+/**
+ * @brief Get the hostname to verify against in certificate verification
+ *
+ * This function returns the name which will be used to validate the SSL certificate
+ * common name (CN) or alt name (subjectAltName). It will default to the @p name
+ * param in ecore_con_server_connect(), but can be changed with ecore_con_ssl_server_verify_name_set().
+ * @param svr The server object
+ * @return The hostname which will be used
+ * @since 1.2
+ */
+EAPI const char *
+ecore_con_ssl_server_verify_name_get(Ecore_Con_Server *svr)
+{
+   if (!ECORE_MAGIC_CHECK(svr, ECORE_MAGIC_CON_SERVER))
+     {
+        ECORE_MAGIC_FAIL(svr, ECORE_MAGIC_CON_SERVER, __func__);
+        return NULL;
+     }
+   return svr->verify_name ?: svr->name;
+}
+
+/**
  * @brief Add an ssl certificate for use in ecore_con functions.
  *
  * Use this function to add a SSL PEM certificate.
@@ -375,6 +666,14 @@ ecore_con_ssl_server_cert_add(Ecore_Con_Server *svr,
         return EINA_FALSE;
      }
 
+   if (!svr->ssl_prepared)
+     {
+        svr->use_cert = EINA_TRUE;
+        svr->type |= ECORE_CON_USE_MIXED | ECORE_CON_LOAD_CERT;
+        if (ecore_con_ssl_server_prepare(svr, svr->type & ECORE_CON_SSL))
+          return EINA_FALSE;
+     }
+
    return SSL_SUFFIX(_ecore_con_ssl_server_cert_add) (svr, cert);
 }
 
@@ -386,6 +685,7 @@ ecore_con_ssl_server_cert_add(Ecore_Con_Server *svr,
  * If there is an error loading the CAs, an error will automatically be logged.
  * @param ca_file The path to the CA file.
  * @return EINA_FALSE if the file cannot be loaded, otherwise EINA_TRUE.
+ * @note since 1.2, this function can load directores
  */
 
 EAPI Eina_Bool
@@ -396,6 +696,14 @@ ecore_con_ssl_server_cafile_add(Ecore_Con_Server *svr,
      {
         ECORE_MAGIC_FAIL(svr, ECORE_MAGIC_CON_SERVER, "ecore_con_ssl_server_cafile_add");
         return EINA_FALSE;
+     }
+
+   if (!svr->ssl_prepared)
+     {
+        svr->use_cert = EINA_TRUE;
+        svr->type |= ECORE_CON_USE_MIXED | ECORE_CON_LOAD_CERT;
+        if (ecore_con_ssl_server_prepare(svr, svr->type & ECORE_CON_SSL))
+          return EINA_FALSE;
      }
 
    return SSL_SUFFIX(_ecore_con_ssl_server_cafile_add) (svr, ca_file);
@@ -422,6 +730,14 @@ ecore_con_ssl_server_privkey_add(Ecore_Con_Server *svr,
         return EINA_FALSE;
      }
 
+   if (!svr->ssl_prepared)
+     {
+        svr->use_cert = EINA_TRUE;
+        svr->type |= ECORE_CON_USE_MIXED | ECORE_CON_LOAD_CERT;
+        if (ecore_con_ssl_server_prepare(svr, svr->type & ECORE_CON_SSL))
+          return EINA_FALSE;
+     }
+
    return SSL_SUFFIX(_ecore_con_ssl_server_privkey_add) (svr, key_file);
 }
 
@@ -444,6 +760,14 @@ ecore_con_ssl_server_crl_add(Ecore_Con_Server *svr,
      {
         ECORE_MAGIC_FAIL(svr, ECORE_MAGIC_CON_SERVER, "ecore_con_ssl_server_crl_add");
         return EINA_FALSE;
+     }
+
+   if (!svr->ssl_prepared)
+     {
+        svr->use_cert = EINA_TRUE;
+        svr->type |= ECORE_CON_USE_MIXED | ECORE_CON_LOAD_CERT;
+        if (ecore_con_ssl_server_prepare(svr, svr->type & ECORE_CON_SSL))
+          return EINA_FALSE;
      }
 
    return SSL_SUFFIX(_ecore_con_ssl_server_crl_add) (svr, crl_file);
@@ -480,7 +804,8 @@ ecore_con_ssl_server_upgrade(Ecore_Con_Server *svr, Ecore_Con_Type ssl_type)
         if (ecore_con_ssl_server_prepare(svr, ssl_type))
           return EINA_FALSE;
      }
-   svr->type |= ssl_type;
+   if (!svr->use_cert)
+     svr->type |= ssl_type;
    svr->upgrade = EINA_TRUE;
    svr->handshaking = EINA_TRUE;
    svr->ssl_state = ECORE_CON_SSL_STATE_INIT;
@@ -494,7 +819,7 @@ ecore_con_ssl_server_upgrade(Ecore_Con_Server *svr, Ecore_Con_Type ssl_type)
  * Once the upgrade has been completed, an ECORE_CON_EVENT_CLIENT_UPGRADE event will be emitted.
  * The connection should be treated as disconnected until the next event.
  * @param cl The client object
- * @param compl_type The SSL connection type (ONLY).
+ * @param ssl_type The SSL connection type (ONLY).
  * @return EINA_FALSE if the connection cannot be upgraded, otherwise EINA_TRUE.
  * @warning Setting a wrong value for @p compl_type WILL mess up your program.
  * @since 1.1
@@ -517,7 +842,8 @@ ecore_con_ssl_client_upgrade(Ecore_Con_Client *cl, Ecore_Con_Type ssl_type)
         if (ecore_con_ssl_server_prepare(cl->host_server, ssl_type))
           return EINA_FALSE;
      }
-   cl->host_server->type |= ssl_type;
+   if (!cl->host_server->use_cert)
+     cl->host_server->type |= ssl_type;
    cl->upgrade = EINA_TRUE;
    cl->host_server->upgrade = EINA_TRUE;
    cl->handshaking = EINA_TRUE;
@@ -546,8 +872,11 @@ _ecore_con_ssl_init_gnutls(void)
      return ECORE_CON_SSL_ERROR_INIT_FAILED;
 
 #ifdef ISCOMFITOR
-   gnutls_global_set_log_level(9);
-   gnutls_global_set_log_function(_gnutls_log_func);
+   if (eina_log_domain_level_check(_ecore_con_log_dom, EINA_LOG_LEVEL_DBG))
+     {
+        gnutls_global_set_log_level(9);
+        gnutls_global_set_log_function(_gnutls_log_func);
+     }
 #endif
    return ECORE_CON_SSL_ERROR_NONE;
 }
@@ -728,10 +1057,12 @@ _ecore_con_ssl_server_init_gnutls(Ecore_Con_Server *svr)
    SSL_ERROR_CHECK_GOTO_ERROR(!(cert_list = gnutls_certificate_get_peers(svr->session, &cert_list_size)));
    SSL_ERROR_CHECK_GOTO_ERROR(!cert_list_size);
 
+   _gnutls_print_session(cert_list, cert_list_size);
+
    SSL_ERROR_CHECK_GOTO_ERROR(gnutls_x509_crt_init(&cert));
    SSL_ERROR_CHECK_GOTO_ERROR(gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER));
 
-   SSL_ERROR_CHECK_GOTO_ERROR(!gnutls_x509_crt_check_hostname(cert, svr->name));
+   SSL_ERROR_CHECK_GOTO_ERROR(!gnutls_x509_crt_check_hostname(cert, svr->verify_name ?: svr->name));
    gnutls_x509_crt_deinit(cert);
    DBG("SSL certificate verification succeeded!");
    return ECORE_CON_SSL_ERROR_NONE;
@@ -755,10 +1086,32 @@ static Eina_Bool
 _ecore_con_ssl_server_cafile_add_gnutls(Ecore_Con_Server *svr,
                                         const char       *ca_file)
 {
-   SSL_ERROR_CHECK_GOTO_ERROR(gnutls_certificate_set_x509_trust_file(svr->cert, ca_file,
-                                                                     GNUTLS_X509_FMT_PEM) < 1);
+   struct stat st;
+   Eina_Iterator *it;
+   const char *file;
+   Eina_Bool error = EINA_FALSE;
 
-   return EINA_TRUE;
+   if (stat(ca_file, &st)) return EINA_FALSE;
+   if (S_ISDIR(st.st_mode))
+     {
+        it = eina_file_ls(ca_file);
+        SSL_ERROR_CHECK_GOTO_ERROR(!it);
+        EINA_ITERATOR_FOREACH(it, file)
+          {
+             if (!error)
+               {
+                  if (gnutls_certificate_set_x509_trust_file(svr->cert, file, GNUTLS_X509_FMT_PEM) < 1)
+                    error++;
+               }
+             eina_stringshare_del(file);
+          }
+        eina_iterator_free(it);
+     }
+   else
+     SSL_ERROR_CHECK_GOTO_ERROR(gnutls_certificate_set_x509_trust_file(svr->cert, ca_file,
+                                                                       GNUTLS_X509_FMT_PEM) < 1);
+
+   return !error;
 error:
    ERR("Could not load CA file!");
    return EINA_FALSE;
@@ -1026,6 +1379,7 @@ _ecore_con_ssl_client_init_gnutls(Ecore_Con_Client *cl)
    SSL_ERROR_CHECK_GOTO_ERROR(!(cert_list = gnutls_certificate_get_peers(cl->session, &cert_list_size)));
    SSL_ERROR_CHECK_GOTO_ERROR(!cert_list_size);
 
+   _gnutls_print_session(cert_list, cert_list_size);
 /*
    gnutls_x509_crt_t cert = NULL;
    SSL_ERROR_CHECK_GOTO_ERROR(gnutls_x509_crt_init(&cert));
@@ -1282,23 +1636,7 @@ _ecore_con_ssl_server_init_openssl(Ecore_Con_Server *svr)
         break;
      }
 
-#ifdef ISCOMFITOR
-   {
-      /* print session info into DBG */
-       SSL_SESSION *s;
-       BIO *b;
-       char log[4096];
-
-       memset(log, 0, sizeof(log));
-       s = SSL_get_session(svr->ssl);
-       b = BIO_new(BIO_s_mem());
-       SSL_SESSION_print(b, s);
-       while (BIO_read(b, log, sizeof(log)) > 0)
-         DBG("%s", log);
-
-       BIO_free(b);
-   }
-#endif
+   _openssl_print_session(svr->ssl);
    if ((!svr->verify) && (!svr->verify_basic))
      /* not verifying certificates, so we're done! */
      return ECORE_CON_SSL_ERROR_NONE;
@@ -1310,17 +1648,29 @@ _ecore_con_ssl_server_init_openssl(Ecore_Con_Server *svr)
       cert = SSL_get_peer_certificate(svr->ssl);
       if (cert)
         {
-           char buf[256] = {0};
+           char *c;
+           int clen;
+           int name = 0;
+
            if (svr->verify)
-             SSL_ERROR_CHECK_GOTO_ERROR(SSL_get_verify_result(svr->ssl));
-           X509_NAME_get_text_by_NID(X509_get_subject_name(cert), NID_subject_alt_name, buf, sizeof(buf));
-           if (buf[0])
-             SSL_ERROR_CHECK_GOTO_ERROR(!_openssl_name_verify(buf, svr->name));
-           else
              {
-                X509_NAME_get_text_by_NID(X509_get_subject_name(cert), NID_commonName, buf, sizeof(buf));
-                SSL_ERROR_CHECK_GOTO_ERROR(!_openssl_name_verify(buf, svr->name));
+               int err;
+
+               err = SSL_get_verify_result(svr->ssl);
+               _openssl_print_verify_error(err);
+               SSL_ERROR_CHECK_GOTO_ERROR(err);
              }
+           clen = X509_NAME_get_text_by_NID(X509_get_subject_name(cert), NID_subject_alt_name, NULL, 0);
+           if (clen > 0)
+             name = NID_subject_alt_name;
+           else
+             clen = X509_NAME_get_text_by_NID(X509_get_subject_name(cert), NID_commonName, NULL, 0);
+           SSL_ERROR_CHECK_GOTO_ERROR(clen < 1);
+           if (!name) name = NID_commonName;
+           c = alloca(++clen);
+           X509_NAME_get_text_by_NID(X509_get_subject_name(cert), name, c, clen);
+           INF("CERT NAME: %s\n", c);
+           SSL_ERROR_CHECK_GOTO_ERROR(!_openssl_name_verify(c, svr->verify_name ?: svr->name));
         }
    }
 
@@ -1338,7 +1688,13 @@ static Eina_Bool
 _ecore_con_ssl_server_cafile_add_openssl(Ecore_Con_Server *svr,
                                          const char       *ca_file)
 {
-   SSL_ERROR_CHECK_GOTO_ERROR(!SSL_CTX_load_verify_locations(svr->ssl_ctx, ca_file, NULL));
+   struct stat st;
+
+   if (stat(ca_file, &st)) return EINA_FALSE;
+   if (S_ISDIR(st.st_mode))
+     SSL_ERROR_CHECK_GOTO_ERROR(!SSL_CTX_load_verify_locations(svr->ssl_ctx, NULL, ca_file));
+   else
+     SSL_ERROR_CHECK_GOTO_ERROR(!SSL_CTX_load_verify_locations(svr->ssl_ctx, ca_file, NULL));
    return EINA_TRUE;
 
 error:
@@ -1543,31 +1899,20 @@ _ecore_con_ssl_client_init_openssl(Ecore_Con_Client *cl)
         break;
      }
 
-#ifdef ISCOMFITOR
-   {
-      /* print session info into DBG */
-       SSL_SESSION *s;
-       BIO *b;
-       char log[4096];
-
-       memset(log, 0, sizeof(log));
-       s = SSL_get_session(cl->ssl);
-       b = BIO_new(BIO_s_mem());
-       SSL_SESSION_print(b, s);
-       while (BIO_read(b, log, sizeof(log)) > 0)
-         DBG("%s", log);
-
-       BIO_free(b);
-   }
-#endif
-
+   _openssl_print_session(cl->ssl);
    if (!cl->host_server->verify)
      /* not verifying certificates, so we're done! */
      return ECORE_CON_SSL_ERROR_NONE;
    SSL_set_verify(cl->ssl, SSL_VERIFY_PEER, NULL);
    /* use CRL/CA lists to verify */
    if (SSL_get_peer_certificate(cl->ssl))
-     SSL_ERROR_CHECK_GOTO_ERROR(SSL_get_verify_result(cl->ssl));
+     {
+        int err;
+
+        err = SSL_get_verify_result(cl->ssl);
+        _openssl_print_verify_error(err);
+        SSL_ERROR_CHECK_GOTO_ERROR(err);
+     }
 
    return ECORE_CON_SSL_ERROR_NONE;
 
@@ -1679,12 +2024,6 @@ _ecore_con_ssl_server_prepare_none(Ecore_Con_Server *svr __UNUSED__,
 }
 
 static Ecore_Con_Ssl_Error
-_ecore_con_ssl_server_upgrade_none(Ecore_Con_Server *svr __UNUSED__)
-{
-   return ECORE_CON_SSL_ERROR_NOT_SUPPORTED;
-}
-
-static Ecore_Con_Ssl_Error
 _ecore_con_ssl_server_init_none(Ecore_Con_Server *svr __UNUSED__)
 {
    return ECORE_CON_SSL_ERROR_NOT_SUPPORTED;
@@ -1738,12 +2077,6 @@ _ecore_con_ssl_server_write_none(Ecore_Con_Server *svr __UNUSED__,
                                  int size              __UNUSED__)
 {
    return -1;
-}
-
-static Ecore_Con_Ssl_Error
-_ecore_con_ssl_client_upgrade_none(Ecore_Con_Client *cl __UNUSED__)
-{
-   return ECORE_CON_SSL_ERROR_NOT_SUPPORTED;
 }
 
 static Ecore_Con_Ssl_Error

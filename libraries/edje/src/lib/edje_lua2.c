@@ -376,7 +376,7 @@ _elua_gc(lua_State *L)  // Stack usage [-0, +0, e]
 //  nil      ~
 
 static char *
-_elua_push_name(lua_State *L, char *q, int index)  // Stack usage [-0, +1, e or m]
+_elua_push_name(lua_State *L, char *q, int idx)  // Stack usage [-0, +1, e or m]
 {
    char *p = q;
    char temp = '\0';
@@ -387,8 +387,8 @@ _elua_push_name(lua_State *L, char *q, int index)  // Stack usage [-0, +1, e or 
       q++;
    temp = *q;
    *q = '\0';
-   if (index > 0)
-      lua_getfield(L, index, p);  // Stack usage [-0, +1, e]
+   if (idx > 0)
+      lua_getfield(L, idx, p);  // Stack usage [-0, +1, e]
    else
       lua_pushstring(L, p);       // Stack usage [-0, +1, m]
    *q = temp;
@@ -614,6 +614,7 @@ static int _elua_echo(lua_State *L);
 static int _elua_date(lua_State *L);
 static int _elua_looptime(lua_State *L);
 static int _elua_seconds(lua_State *L);
+static int _elua_version(lua_State *L);
 
 static int _elua_objgeom(lua_State *L);
 static int _elua_objpos(lua_State *L);
@@ -649,6 +650,7 @@ static const struct luaL_reg _elua_edje_funcs [] =
      {"date",         _elua_date}, // get date in a table
      {"looptime",     _elua_looptime}, // get loop time
      {"seconds",      _elua_seconds}, // get seconds
+     {"version",      _elua_version}, // edje version
 
    // query edje - size, pos
      {"geom",         _elua_objgeom}, // get while edje object geometry in canvas
@@ -799,6 +801,25 @@ _elua_seconds(lua_State *L)  // Stack usage [-0, +1, -]
    double t = ecore_time_get();
    lua_pushnumber(L, t);     // Stack usage [-0, +1, -]
    return 1;
+}
+
+/**
+@page luaref
+@subsubsection edje_version edje:version()
+
+Retrieves the current edje version number.
+
+@returns A table with these fields:
+    - integer major: The edje version major number.
+    - integer minor: The edje version minor number.
+
+@since 1.2.0
+*/
+static int
+_elua_version(lua_State *L)                                                // Stack usage [-4, +5, em]
+{
+   _elua_ret(L, "%major %minor", EDJE_VERSION_MAJOR, EDJE_VERSION_MINOR);  // Stack usage [-4, +5, em]
+    return 1;
 }
 
 //-------------
@@ -2936,7 +2957,9 @@ static int _elua_line_xy(lua_State *L)                          // Stack usage [
 
 The lua evas map class includes functions for dealing with evas map objects.
 The evas map objects must have been previously created by lua using the lua
-map object creation function edje:map().
+map object creation function edje:map().  The evas map system is complex, rather
+than repeat the copious documentation here, please refer to the evas map
+documentation.  It has pictures and everything.  B-)
 
 In the following, "map_object" is a place holder for any lua variable that
 holds a reference to an evas map object.
@@ -2980,8 +3003,18 @@ static const struct luaL_reg _elua_evas_map_funcs [] =
 
 /**
 @page luaref
-@subsubsection map_alpha map_object:alpha()
+@subsubsection map_alpha map_object:alpha(alpha)
 
+Get (and optionally set) the maps alpha mode.
+
+Wraps evas_map_alpha_set().
+
+@param alpha The alpha mode.
+
+Note that the argument is optional, without it this function just queries the
+current value.
+
+@return A boolean reflecting the alpha mode.
 
 @since 1.1.0
 */
@@ -3008,6 +3041,11 @@ _elua_map_alpha(lua_State *L)                                   // Stack usage [
 @page luaref
 @subsubsection map_clockwise map_object:clockwise()
 
+Get the maps clockwise state.
+
+Wraps evas_map_util_clockwise_get().
+
+@return A boolean reflecting if the map is clockwise or not.
 
 @since 1.1.0
 */
@@ -3025,8 +3063,30 @@ _elua_map_clockwise(lua_State *L)                               // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_colour map_object:colour()
+@subsubsection map_colour map_object:colour(index, r, g, b, a)
 
+Gets or sets colour information for the map.  There are two variations, with or
+without the index.  With the index parameter it gets (and optionally sets) the
+colour of the point the index refers to, without it sets the colour for the
+entire map.
+
+Wraps evas_map_point_color_set() or evas_map_util_points_color_set()
+
+@param index Which point to change the colour of.
+@param r The new red value.
+@param g The new green value.
+@param b The new blue value.
+@param a The new alpha value.
+
+Note that the arguments are optional, without them this function just queries
+the current values.  The colour arguments can be separate values, or named
+fields in a table.
+
+@return A table with these fields:
+   - integer r: The red value.
+   - integer g: The green value.
+   - integer b: The blue value.
+   - integer a: The alpha value.
 
 @since 1.1.0
 */
@@ -3073,8 +3133,24 @@ _elua_map_colour(lua_State *L)                                  // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_coord map_object:coord()
+@subsubsection map_coord map_object:coord(index, x, y, z)
 
+Gets (and optionally sets) the 3D coordinates of a point on the map.
+
+Wraps evas_map_point_coord_set().
+
+@param x The x coordinate of the point.
+@param y The y coordinate of the point.
+@param z The z coordinate of the point.
+
+Note that the arguments are optional, without them this function just queries
+the current values.  The coordinate arguments can be separate values, or named
+fields in a table.
+
+@return A table with these fields:
+   - integer x: The x coordinate of the point.
+   - integer y: The y coordinate of the point.
+   - integer z: The z coordinate of the point.
 
 @since 1.1.0
 */
@@ -3104,8 +3180,21 @@ _elua_map_coord(lua_State *L)                                   // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_lighting map_object:lighting()
+@subsubsection map_lighting map_object:lighting(x, y, z, r, g, b, ar, ag, ab)
 
+Set the 3D lights for the map.  The three triplets can be tables.
+
+Wraps evas_map_util_3d_lighting().
+
+@param x The x coordinate of the light point.
+@param y The y coordinate of the light point.
+@param z The z coordinate of the light point.
+@param r The new red value of the light point.
+@param g The new green value of the light point.
+@param b The new blue value of the light point.
+@param ar The new red value of the ambient light.
+@param ag The new green value of the ambient light.
+@param ab The new blue value of the ambient light.
 
 @since 1.1.0
 */
@@ -3133,8 +3222,18 @@ _elua_map_lighting(lua_State *L)                                // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_perspective map_object:perspective()
+@subsubsection map_perspective map_object:perspective(x, y, z, f)
 
+Apply a perspective transform to the map.
+
+Wraps evas_map_util_3d_perspective().
+
+The arguments can be separate values, or named fields in a table.
+
+@param x The perspective distance X coordinate
+@param y The perspective distance Y coordinate
+@param z The "0" z plane value
+@param f The focal distance
 
 @since 1.1.0
 */
@@ -3156,8 +3255,28 @@ _elua_map_perspective(lua_State *L)                             // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_populate map_object:populate()
+@subsubsection map_populate map_object:populate(...)
 
+Populate the points in a map, in one of three different methods.
+
+1) Wraps evas_map_util_points_populate_from_object().
+
+@param source An evas object to copy points from.
+
+2) Wraps evas_map_util_paints_populate_from_object_full().
+
+@param source An evas object to copy points from.
+@param z Common Z coordinate hint for all four points.
+
+3) Wraps evas_map_util_points_populate_from_geometry().
+
+The first four arguments can be separate values, or named fields in a table.
+
+@param x Point X coordinate
+@param y Point Y coordinate
+@param w Width to use to calculate second and third points.
+@param h Height to use to calculate third and fourth points.
+@param z Common Z coordinate hint for all four points.
 
 @since 1.1.0
 */
@@ -3210,8 +3329,17 @@ _elua_map_populate(lua_State *L)                                // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_rotate map_object:rotate()
+@subsubsection map_rotate map_object:rotate(degrees, x, y)
 
+Rotate the maps coordinates in 2D.
+
+Wraps evas_map_util_rotate().
+
+The coordinates can be separate values, or named fields in a table.
+
+@param degrees Amount of degrees from 0.0 to 360.0 to rotate.
+@param x Rotation's centre horizontal position.
+@param y Rotation's centre vertical position.
 
 @since 1.1.0
 */
@@ -3238,8 +3366,21 @@ _elua_map_rotate(lua_State *L)                                  // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_rotate3d map_object:rotate3d()
+@subsubsection map_rotate3d map_object:rotate3d(dx, dy, dz, x, y, z)
 
+Rotate the maps coordinates in 3D.
+
+Wraps evas_map_util_3d_rotate().
+
+The coordinates can be separate values, or named fields in a table.  The same
+with the rotation.
+
+@param dx Amount of degrees from 0.0 to 360.0 to rotate around X axis.
+@param dy Amount of degrees from 0.0 to 360.0 to rotate around Y axis.
+@param dz Amount of degrees from 0.0 to 360.0 to rotate around Z axis.
+@param x Rotation's centre horizontal position.
+@param y Rotation's centre vertical position.
+@param z Rotation's centre vertical position.
 
 @since 1.1.0
 */
@@ -3265,8 +3406,18 @@ _elua_map_rotate3d(lua_State *L)                                // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_smooth map_object:smooth()
+@subsubsection map_smooth map_object:smooth(smooth)
 
+Get (and optionally set) the maps smooth mode.
+
+Wraps evas_map_smooth_set().
+
+@param smooth The smooth mode.
+
+Note that the argument is optional, without it this function just queries the
+current value.
+
+@return A boolean reflecting the smooth mode.
 
 @since 1.1.0
 */
@@ -3291,8 +3442,23 @@ _elua_map_smooth(lua_State *L)                                  // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_uv map_object:uv()
+@subsubsection map_uv map_object:uv(index, u, v)
 
+Gets (and optionally sets) the texture U and V texture coordinates for this map.
+
+Wraps evas_map_point_image_uv_set().
+
+@param index Index of the point to change. Must be smaller than map size.
+@param u The X coordinate within the image/texture source.
+@param v The Y coordinate within the image/texture source.
+
+Note that the U,V arguments are optional, without them this function just queries
+the current values.  The coordinate arguments can be separate values, or named
+fields in a table.
+
+@return A table with these fields:
+  - number u: The X coordinate within the image/texture source.
+  - number v: The Y coordinate within the image/texture source.
 
 @since 1.1.0
 */
@@ -3322,8 +3488,18 @@ _elua_map_uv(lua_State *L)                                      // Stack usage [
 
 /**
 @page luaref
-@subsubsection map_zoom map_object:zoom()
+@subsubsection map_zoom map_object:zoom(x, y, x, y)
 
+Apply a zoom to the map.
+
+Wraps evas_map_util_zoom().
+
+The arguments can be two separate values, or named fields in a table.
+
+@param x The horizontal zoom amount.
+@param y The vertical zoom amount.
+@param x The X coordinate of the centre of the zoom.
+@param y The Y coordinate of the centre of the zoom.
 
 @since 1.1.0
 */
@@ -3530,7 +3706,7 @@ _elua_text_font(lua_State *L)                                   // Stack usage [
 @page luaref
 @subsubsection text_text text_object:text(text)
 
-Get (and optionally set) the actual tetx for this text object.
+Get (and optionally set) the actual text for this text object.
 
 Wraps evas_object_text_text_set().
 
@@ -3569,25 +3745,80 @@ _elua_text_text(lua_State *L)                                   // Stack usage [
 
 
 //--------------------------------------------------------------------------//
+
+// A metatable and functions so that calling non existant API does not crash Lua scripts.
+
+static int _elua_bogan_nilfunc(lua_State *L);
+static int _elua_bogan_index(lua_State *L);
+
+static const struct luaL_reg _elua_bogan_funcs [] =
+{
+     {"nilfunc",         _elua_bogan_nilfunc}, // Just return a nil.
+     {"__index",         _elua_bogan_index},   // Return the above func.
+
+     {NULL, NULL} // end
+};
+
+static int
+_elua_bogan_nilfunc(lua_State *L)
+{
+   lua_getglobal(L, "nil");
+   return 1;
+}
+
+static int
+_elua_bogan_index(lua_State *L)
+{
+   const char *key;
+
+   key = lua_tostring(L, 2);
+   LE("%s does not exist!", key);
+   lua_pushcfunction(L, _elua_bogan_nilfunc);
+   return 1;
+}
+
+static void
+_elua_bogan_protect(lua_State *L)                    // Stack usage [-3, +3, m]
+{
+   lua_pushnil(L);                                   // Stack usage [-0, +1, -]
+   luaL_newmetatable(L, "bogan");                    // Stack usage [-0, +1, m]
+   luaL_register(L, 0, _elua_bogan_funcs);           // Stack usage [-1, +1, m]
+   lua_setmetatable(L, -2);                          // Stack usage [-1, +0, -]
+   lua_pop(L, 1);                                    // Stack usage [-1, +0, -]
+}
+
+//--------------------------------------------------------------------------//
+
 // Brain dead inheritance thingy, built for speed.  Kinda.  Part 1.
 static void
 _elua_add_functions(lua_State *L, const char *api, const luaL_Reg *funcs, const char *meta, const char *parent, const char *base)  // Stack usage [-3, +5, m]  if inheriting [-6, +11, em]
 {
+   // Create an api table, fill it full of the methods.
    luaL_register(L, api, funcs);              // Stack usage [-0, +1, m]
+   // Set the api metatable to the bogan metatable.
+   luaL_getmetatable(L, "bogan");             // Stack usage [-0, +1, -]
+   lua_setmetatable(L, -2);                   // Stack usage [-1, +0, -]
+   // Creat a meta metatable.
    luaL_newmetatable(L, meta);                // Stack usage [-0, +1, m]
+   // Put the gc functions in the metatable.
    luaL_register(L, 0, _elua_edje_gc_funcs);  // Stack usage [-1, +1, m]
+   // Create an __index entry in the metatable, make it point to the api table.
    lua_pushliteral(L, "__index");             // Stack usage [-0, +1, m]
    lua_pushvalue(L, -3);                      // Stack usage [-0, +1, -]
    lua_rawset(L, -3);                         // Stack usage [-2, +0, m]
+   // Later this metatable is used as the metatable for newly created objects of this class.
 
    if (base && parent)
      {
         // Inherit from base
         lua_getglobal(L, base);               // Stack usage [-0, +1, e]
+        // Create a new parent metatable.
         luaL_newmetatable(L, parent);         // Stack usage [-0, +1, m]
+        // Create an __index entry in the metatable, make it point to the base table.
         lua_pushliteral(L, "__index");        // Stack usage [-0, +1, m]
         lua_pushvalue(L, -3);                 // Stack usage [-0, +1, -]
         lua_rawset(L, -3);                    // Stack usage [-2, +0, m]
+        // Set the metatable for the api table to the parent metatable.
         lua_getglobal(L, api);                // Stack usage [-0, +1, e]
         luaL_getmetatable(L, parent);         // Stack usage [-0, +1, -]
         lua_setmetatable(L, -2);              // Stack usage [-1, +0, -]
@@ -3695,7 +3926,11 @@ _edje_lua2_script_init(Edje *ed)                                  // Stack usage
         lua_call(L, 1, 0);                                        // Stack usage [-2, +0, m]
      }
 
+   _elua_bogan_protect(L);                                        // Stack usage [+3, -3, m]
+
    luaL_register(L, _elua_edje_api, _elua_edje_funcs);            // Stack usage [-0, +1, m]
+   luaL_getmetatable(L, "bogan");                                 // Stack usage [-0, +1, -]
+   lua_setmetatable(L, -2);                                       // Stack usage [-1, +0, -]
    luaL_newmetatable(L, _elua_edje_meta);                         // Stack usage [-0, +1, m]
    luaL_register(L, 0, _elua_edje_gc_funcs);                      // Stack usage [-1, +1, m]
 
@@ -3737,6 +3972,8 @@ _edje_lua2_script_init(Edje *ed)                                  // Stack usage
      {
         int err;
 
+        /* This ends up pushing a function onto the stack for the lua_pcall() below to use.
+         * The function is the compiled code. */
         err = luaL_loadbuffer(L, data, size, "edje_lua_script");  // Stack usage [-0, +1, m]
         if (err)
           {

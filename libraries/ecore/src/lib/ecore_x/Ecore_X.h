@@ -1181,6 +1181,8 @@ EAPI int
  ecore_x_error_request_get(void);
 EAPI int
  ecore_x_error_code_get(void);
+EAPI Ecore_X_ID
+ecore_x_error_resource_id_get(void);
 
 EAPI void
 ecore_x_event_mask_set(Ecore_X_Window w,
@@ -3114,7 +3116,10 @@ EAPI Ecore_X_Randr_Edid_Display_Interface_Type
 ecore_x_randr_edid_display_interface_type_get(unsigned char *edid,
                                               unsigned long edid_length);
 
-/* ecore_x_randr_13.c */
+/* ecore_x_randr_12.c */
+
+EAPI Eina_Bool
+ecore_x_randr_output_backlight_available(void);
 EAPI void
 ecore_x_randr_screen_backlight_level_set(Ecore_X_Window root,
                                          double level);

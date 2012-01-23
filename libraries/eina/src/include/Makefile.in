@@ -78,23 +78,24 @@ am__dist_installed_headers_DATA_DIST = eina_safety_checks.h \
 	eina_error.h eina_log.h eina_inline_log.x eina_fp.h \
 	eina_inline_f32p32.x eina_inline_f16p16.x eina_inline_f8p24.x \
 	eina_inline_fp.x eina_hash.h eina_inline_hash.x eina_lalloc.h \
-	eina_clist.h eina_inlist.h eina_list.h eina_file.h \
-	eina_mempool.h eina_module.h eina_rectangle.h eina_types.h \
-	eina_array.h eina_counter.h eina_inline_array.x eina_magic.h \
-	eina_stringshare.h eina_binshare.h eina_binbuf.h \
-	eina_ustringshare.h eina_inline_stringshare.x \
-	eina_inline_ustringshare.x eina_inline_list.x eina_accessor.h \
-	eina_convert.h eina_rbtree.h eina_benchmark.h \
-	eina_inline_rbtree.x eina_inline_mempool.x \
-	eina_inline_rectangle.x eina_inline_trash.x eina_trash.h \
-	eina_iterator.h eina_main.h eina_cpu.h eina_sched.h \
-	eina_tiler.h eina_hamster.h eina_matrixsparse.h \
-	eina_inline_tiler.x eina_str.h eina_inline_str.x eina_strbuf.h \
-	eina_ustrbuf.h eina_unicode.h eina_quadtree.h \
-	eina_simple_xml_parser.h eina_lock.h eina_prefix.h \
-	eina_refcount.h eina_mmap.h eina_xattr.h \
-	eina_inline_lock_wince.x eina_inline_lock_win32.x \
-	eina_inline_lock_posix.x eina_inline_lock_void.x
+	eina_clist.h eina_inline_clist.x eina_inarray.h eina_inlist.h \
+	eina_list.h eina_file.h eina_mempool.h eina_module.h \
+	eina_rectangle.h eina_types.h eina_array.h eina_counter.h \
+	eina_inline_array.x eina_magic.h eina_stringshare.h \
+	eina_binshare.h eina_binbuf.h eina_ustringshare.h \
+	eina_inline_stringshare.x eina_inline_ustringshare.x \
+	eina_inline_list.x eina_accessor.h eina_convert.h \
+	eina_rbtree.h eina_benchmark.h eina_inline_rbtree.x \
+	eina_inline_mempool.x eina_inline_rectangle.x \
+	eina_inline_trash.x eina_trash.h eina_iterator.h eina_main.h \
+	eina_cpu.h eina_sched.h eina_tiler.h eina_hamster.h \
+	eina_matrixsparse.h eina_inline_tiler.x eina_str.h \
+	eina_inline_str.x eina_strbuf.h eina_ustrbuf.h eina_unicode.h \
+	eina_quadtree.h eina_simple_xml_parser.h eina_lock.h \
+	eina_prefix.h eina_refcount.h eina_mmap.h eina_xattr.h \
+	eina_value.h eina_inline_value.x eina_inline_lock_wince.x \
+	eina_inline_lock_win32.x eina_inline_lock_posix.x \
+	eina_inline_lock_void.x
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -163,7 +164,9 @@ EFL_SIMD_FLAGS = @EFL_SIMD_FLAGS@
 EGREP = @EGREP@
 EINA_CFLAGS = @EINA_CFLAGS@
 EINA_CONFIGURE_DEFAULT_MEMPOOL = @EINA_CONFIGURE_DEFAULT_MEMPOOL@
+EINA_CONFIGURE_ENABLE_LOG = @EINA_CONFIGURE_ENABLE_LOG@
 EINA_CONFIGURE_HAVE_DEBUG_THREADS = @EINA_CONFIGURE_HAVE_DEBUG_THREADS@
+EINA_CONFIGURE_HAVE_DIRENT_H = @EINA_CONFIGURE_HAVE_DIRENT_H@
 EINA_CONFIGURE_HAVE_INTTYPES_H = @EINA_CONFIGURE_HAVE_INTTYPES_H@
 EINA_CONFIGURE_HAVE_ON_OFF_THREADS = @EINA_CONFIGURE_HAVE_ON_OFF_THREADS@
 EINA_CONFIGURE_HAVE_STDINT_H = @EINA_CONFIGURE_HAVE_STDINT_H@
@@ -215,8 +218,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -295,10 +296,10 @@ EINAHEADERS = eina_safety_checks.h eina_error.h eina_log.h \
 	eina_inline_log.x eina_fp.h eina_inline_f32p32.x \
 	eina_inline_f16p16.x eina_inline_f8p24.x eina_inline_fp.x \
 	eina_hash.h eina_inline_hash.x eina_lalloc.h eina_clist.h \
-	eina_inlist.h eina_list.h eina_file.h eina_mempool.h \
-	eina_module.h eina_rectangle.h eina_types.h eina_array.h \
-	eina_counter.h eina_inline_array.x eina_magic.h \
-	eina_stringshare.h eina_binshare.h eina_binbuf.h \
+	eina_inline_clist.x eina_inarray.h eina_inlist.h eina_list.h \
+	eina_file.h eina_mempool.h eina_module.h eina_rectangle.h \
+	eina_types.h eina_array.h eina_counter.h eina_inline_array.x \
+	eina_magic.h eina_stringshare.h eina_binshare.h eina_binbuf.h \
 	eina_ustringshare.h eina_inline_stringshare.x \
 	eina_inline_ustringshare.x eina_inline_list.x eina_accessor.h \
 	eina_convert.h eina_rbtree.h eina_benchmark.h \
@@ -309,8 +310,9 @@ EINAHEADERS = eina_safety_checks.h eina_error.h eina_log.h \
 	eina_inline_tiler.x eina_str.h eina_inline_str.x eina_strbuf.h \
 	eina_ustrbuf.h eina_unicode.h eina_quadtree.h \
 	eina_simple_xml_parser.h eina_lock.h eina_prefix.h \
-	eina_refcount.h eina_mmap.h eina_xattr.h $(am__append_1) \
-	$(am__append_2) $(am__append_3) $(am__append_4)
+	eina_refcount.h eina_mmap.h eina_xattr.h eina_value.h \
+	eina_inline_value.x $(am__append_1) $(am__append_2) \
+	$(am__append_3) $(am__append_4)
 installed_mainheaderdir = $(includedir)/eina-@VMAJ@
 dist_installed_mainheader_DATA = Eina.h eina_config.h
 installed_headersdir = $(includedir)/eina-@VMAJ@/eina

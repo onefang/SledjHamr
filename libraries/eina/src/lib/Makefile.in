@@ -96,15 +96,16 @@ libeina_la_DEPENDENCIES =
 am__libeina_la_SOURCES_DIST = eina_accessor.c eina_array.c \
 	eina_benchmark.c eina_binbuf.c eina_binshare.c eina_convert.c \
 	eina_counter.c eina_cpu.c eina_error.c eina_fp.c \
-	eina_hamster.c eina_hash.c eina_inlist.c eina_iterator.c \
-	eina_lalloc.c eina_list.c eina_log.c eina_magic.c eina_main.c \
-	eina_matrixsparse.c eina_mempool.c eina_mmap.c eina_module.c \
-	eina_prefix.c eina_quadtree.c eina_rbtree.c eina_rectangle.c \
-	eina_safety_checks.c eina_sched.c eina_share_common.c \
-	eina_simple_xml_parser.c eina_str.c eina_strbuf.c \
-	eina_strbuf_common.c eina_stringshare.c eina_tiler.c \
-	eina_unicode.c eina_ustrbuf.c eina_ustringshare.c eina_value.c \
-	eina_xattr.c eina_file_win32.c eina_file.c \
+	eina_hamster.c eina_hash.c eina_inarray.c eina_inlist.c \
+	eina_iterator.c eina_lalloc.c eina_list.c eina_log.c \
+	eina_magic.c eina_main.c eina_matrixsparse.c eina_mempool.c \
+	eina_mmap.c eina_module.c eina_prefix.c eina_quadtree.c \
+	eina_rbtree.c eina_rectangle.c eina_safety_checks.c \
+	eina_sched.c eina_share_common.c eina_simple_xml_parser.c \
+	eina_str.c eina_strbuf.c eina_strbuf_common.c \
+	eina_stringshare.c eina_tiler.c eina_unicode.c eina_ustrbuf.c \
+	eina_ustringshare.c eina_value.c eina_xattr.c \
+	eina_file_win32.c eina_file.c \
 	$(top_srcdir)/src/modules/mp/buddy/eina_buddy.c \
 	$(top_srcdir)/src/modules/mp/chained_pool/eina_chained_mempool.c \
 	$(top_srcdir)/src/modules/mp/ememoa_fixed/eina_ememoa_fixed.c \
@@ -129,15 +130,16 @@ am__objects_10 = libeina_la-eina_accessor.lo libeina_la-eina_array.lo \
 	libeina_la-eina_counter.lo libeina_la-eina_cpu.lo \
 	libeina_la-eina_error.lo libeina_la-eina_fp.lo \
 	libeina_la-eina_hamster.lo libeina_la-eina_hash.lo \
-	libeina_la-eina_inlist.lo libeina_la-eina_iterator.lo \
-	libeina_la-eina_lalloc.lo libeina_la-eina_list.lo \
-	libeina_la-eina_log.lo libeina_la-eina_magic.lo \
-	libeina_la-eina_main.lo libeina_la-eina_matrixsparse.lo \
-	libeina_la-eina_mempool.lo libeina_la-eina_mmap.lo \
-	libeina_la-eina_module.lo libeina_la-eina_prefix.lo \
-	libeina_la-eina_quadtree.lo libeina_la-eina_rbtree.lo \
-	libeina_la-eina_rectangle.lo libeina_la-eina_safety_checks.lo \
-	libeina_la-eina_sched.lo libeina_la-eina_share_common.lo \
+	libeina_la-eina_inarray.lo libeina_la-eina_inlist.lo \
+	libeina_la-eina_iterator.lo libeina_la-eina_lalloc.lo \
+	libeina_la-eina_list.lo libeina_la-eina_log.lo \
+	libeina_la-eina_magic.lo libeina_la-eina_main.lo \
+	libeina_la-eina_matrixsparse.lo libeina_la-eina_mempool.lo \
+	libeina_la-eina_mmap.lo libeina_la-eina_module.lo \
+	libeina_la-eina_prefix.lo libeina_la-eina_quadtree.lo \
+	libeina_la-eina_rbtree.lo libeina_la-eina_rectangle.lo \
+	libeina_la-eina_safety_checks.lo libeina_la-eina_sched.lo \
+	libeina_la-eina_share_common.lo \
 	libeina_la-eina_simple_xml_parser.lo libeina_la-eina_str.lo \
 	libeina_la-eina_strbuf.lo libeina_la-eina_strbuf_common.lo \
 	libeina_la-eina_stringshare.lo libeina_la-eina_tiler.lo \
@@ -231,7 +233,9 @@ EFL_SIMD_FLAGS = @EFL_SIMD_FLAGS@
 EGREP = @EGREP@
 EINA_CFLAGS = @EINA_CFLAGS@
 EINA_CONFIGURE_DEFAULT_MEMPOOL = @EINA_CONFIGURE_DEFAULT_MEMPOOL@
+EINA_CONFIGURE_ENABLE_LOG = @EINA_CONFIGURE_ENABLE_LOG@
 EINA_CONFIGURE_HAVE_DEBUG_THREADS = @EINA_CONFIGURE_HAVE_DEBUG_THREADS@
+EINA_CONFIGURE_HAVE_DIRENT_H = @EINA_CONFIGURE_HAVE_DIRENT_H@
 EINA_CONFIGURE_HAVE_INTTYPES_H = @EINA_CONFIGURE_HAVE_INTTYPES_H@
 EINA_CONFIGURE_HAVE_ON_OFF_THREADS = @EINA_CONFIGURE_HAVE_ON_OFF_THREADS@
 EINA_CONFIGURE_HAVE_STDINT_H = @EINA_CONFIGURE_HAVE_STDINT_H@
@@ -283,8 +287,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -371,10 +373,10 @@ AM_CPPFLAGS = \
 base_sources = eina_accessor.c eina_array.c eina_benchmark.c \
 	eina_binbuf.c eina_binshare.c eina_convert.c eina_counter.c \
 	eina_cpu.c eina_error.c eina_fp.c eina_hamster.c eina_hash.c \
-	eina_inlist.c eina_iterator.c eina_lalloc.c eina_list.c \
-	eina_log.c eina_magic.c eina_main.c eina_matrixsparse.c \
-	eina_mempool.c eina_mmap.c eina_module.c eina_prefix.c \
-	eina_quadtree.c eina_rbtree.c eina_rectangle.c \
+	eina_inarray.c eina_inlist.c eina_iterator.c eina_lalloc.c \
+	eina_list.c eina_log.c eina_magic.c eina_main.c \
+	eina_matrixsparse.c eina_mempool.c eina_mmap.c eina_module.c \
+	eina_prefix.c eina_quadtree.c eina_rbtree.c eina_rectangle.c \
 	eina_safety_checks.c eina_sched.c eina_share_common.c \
 	eina_simple_xml_parser.c eina_str.c eina_strbuf.c \
 	eina_strbuf_common.c eina_stringshare.c eina_tiler.c \
@@ -489,6 +491,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_fp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_hamster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_hash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_inarray.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_inlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_iterator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libeina_la-eina_lalloc.Plo@am__quote@
@@ -640,6 +643,14 @@ libeina_la-eina_hash.lo: eina_hash.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eina_hash.c' object='libeina_la-eina_hash.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libeina_la_CFLAGS) $(CFLAGS) -c -o libeina_la-eina_hash.lo `test -f 'eina_hash.c' || echo '$(srcdir)/'`eina_hash.c
+
+libeina_la-eina_inarray.lo: eina_inarray.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libeina_la_CFLAGS) $(CFLAGS) -MT libeina_la-eina_inarray.lo -MD -MP -MF $(DEPDIR)/libeina_la-eina_inarray.Tpo -c -o libeina_la-eina_inarray.lo `test -f 'eina_inarray.c' || echo '$(srcdir)/'`eina_inarray.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libeina_la-eina_inarray.Tpo $(DEPDIR)/libeina_la-eina_inarray.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eina_inarray.c' object='libeina_la-eina_inarray.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libeina_la_CFLAGS) $(CFLAGS) -c -o libeina_la-eina_inarray.lo `test -f 'eina_inarray.c' || echo '$(srcdir)/'`eina_inarray.c
 
 libeina_la-eina_inlist.lo: eina_inlist.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libeina_la_CFLAGS) $(CFLAGS) -MT libeina_la-eina_inlist.lo -MD -MP -MF $(DEPDIR)/libeina_la-eina_inlist.Tpo -c -o libeina_la-eina_inlist.lo `test -f 'eina_inlist.c' || echo '$(srcdir)/'`eina_inlist.c
@@ -1189,12 +1200,17 @@ uninstall-am: uninstall-libLTLIBRARIES
 @EINA_AMALGAMATION_TRUE@	@echo "#include <stdio.h>" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <stdlib.h>" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <string.h>" >> eina_amalgamation.c
-@EINA_AMALGAMATION_TRUE@	@echo "#include <dlfcn.h>" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "#ifdef HAVE_DLOPEN" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "# include <dlfcn.h>" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "#endif" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <sys/types.h>" >> eina_amalgamation.c
-@EINA_AMALGAMATION_TRUE@	@echo "#include <dirent.h>" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "#ifdef HAVE_DIRENT_H" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "# include <dirent.h>" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "#endif" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <assert.h>" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <errno.h>" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "#include <fnmatch.h>" >> eina_amalgamation.c
+@EINA_AMALGAMATION_TRUE@	@echo "#include <fcntl.h>" >> eina_amalgamation.c
 
 @EINA_AMALGAMATION_TRUE@	@echo "#ifdef HAVE_EVIL" >> eina_amalgamation.c
 @EINA_AMALGAMATION_TRUE@	@echo "# include <Evil.h>" >> eina_amalgamation.c

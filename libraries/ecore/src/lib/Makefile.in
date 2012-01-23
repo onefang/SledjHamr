@@ -44,12 +44,13 @@ host_triplet = @host@
 @BUILD_ECORE_SDL_TRUE@am__append_9 = ecore_sdl
 @BUILD_ECORE_PSL1GHT_TRUE@am__append_10 = ecore_psl1ght
 @BUILD_ECORE_COCOA_TRUE@am__append_11 = ecore_cocoa
-@BUILD_ECORE_IPC_TRUE@am__append_12 = ecore_ipc
-@BUILD_ECORE_EVAS_TRUE@am__append_13 = ecore_evas
-@BUILD_ECORE_CONFIG_TRUE@am__append_14 = ecore_config
-@BUILD_ECORE_FILE_TRUE@am__append_15 = ecore_file
-@BUILD_ECORE_IMF_TRUE@am__append_16 = ecore_imf
-@BUILD_ECORE_IMF_EVAS_TRUE@am__append_17 = ecore_imf_evas
+@BUILD_ECORE_WAYLAND_TRUE@am__append_12 = ecore_wayland
+@BUILD_ECORE_IPC_TRUE@am__append_13 = ecore_ipc
+@BUILD_ECORE_EVAS_TRUE@am__append_14 = ecore_evas
+@BUILD_ECORE_CONFIG_TRUE@am__append_15 = ecore_config
+@BUILD_ECORE_FILE_TRUE@am__append_16 = ecore_file
+@BUILD_ECORE_IMF_TRUE@am__append_17 = ecore_imf
+@BUILD_ECORE_IMF_EVAS_TRUE@am__append_18 = ecore_imf_evas
 subdir = src/lib
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -101,8 +102,8 @@ ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = ecore ecore_input ecore_input_evas ecore_fb \
 	ecore_directfb ecore_con ecore_x ecore_win32 ecore_wince \
-	ecore_sdl ecore_psl1ght ecore_cocoa ecore_ipc ecore_evas \
-	ecore_config ecore_file ecore_imf ecore_imf_evas
+	ecore_sdl ecore_psl1ght ecore_cocoa ecore_wayland ecore_ipc \
+	ecore_evas ecore_config ecore_file ecore_imf ecore_imf_evas
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -247,10 +248,10 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SCIM_CFLAGS = @SCIM_CFLAGS@
+SCIM_LIBS = @SCIM_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -269,6 +270,10 @@ TSLIB_LIBS = @TSLIB_LIBS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_CFLAGS = @WAYLAND_CFLAGS@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
+WAYLAND_LIBS = @WAYLAND_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_LIBS = @WIN32_LIBS@
@@ -382,6 +387,8 @@ ecore_imf_cflags = @ecore_imf_cflags@
 ecore_imf_evas_cflags = @ecore_imf_evas_cflags@
 ecore_imf_evas_libs = @ecore_imf_evas_libs@
 ecore_imf_libs = @ecore_imf_libs@
+ecore_imf_scim_cflags = @ecore_imf_scim_cflags@
+ecore_imf_scim_libs = @ecore_imf_scim_libs@
 ecore_imf_xim_cflags = @ecore_imf_xim_cflags@
 ecore_imf_xim_libs = @ecore_imf_xim_libs@
 ecore_input_cflags = @ecore_input_cflags@
@@ -394,6 +401,8 @@ ecore_psl1ght_cflags = @ecore_psl1ght_cflags@
 ecore_psl1ght_libs = @ecore_psl1ght_libs@
 ecore_sdl_cflags = @ecore_sdl_cflags@
 ecore_sdl_libs = @ecore_sdl_libs@
+ecore_wayland_cflags = @ecore_wayland_cflags@
+ecore_wayland_libs = @ecore_wayland_libs@
 ecore_win32_cflags = @ecore_win32_cflags@
 ecore_win32_libs = @ecore_win32_libs@
 ecore_wince_cflags = @ecore_wince_cflags@
@@ -438,12 +447,14 @@ requirements_ecore_fb = @requirements_ecore_fb@
 requirements_ecore_file = @requirements_ecore_file@
 requirements_ecore_imf = @requirements_ecore_imf@
 requirements_ecore_imf_evas = @requirements_ecore_imf_evas@
+requirements_ecore_imf_scim = @requirements_ecore_imf_scim@
 requirements_ecore_imf_xim = @requirements_ecore_imf_xim@
 requirements_ecore_input = @requirements_ecore_input@
 requirements_ecore_input_evas = @requirements_ecore_input_evas@
 requirements_ecore_ipc = @requirements_ecore_ipc@
 requirements_ecore_psl1ght = @requirements_ecore_psl1ght@
 requirements_ecore_sdl = @requirements_ecore_sdl@
+requirements_ecore_wayland = @requirements_ecore_wayland@
 requirements_ecore_win32 = @requirements_ecore_win32@
 requirements_ecore_wince = @requirements_ecore_wince@
 requirements_ecore_x = @requirements_ecore_x@
@@ -466,7 +477,7 @@ SUBDIRS = ecore $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_7) $(am__append_8) $(am__append_9) \
 	$(am__append_10) $(am__append_11) $(am__append_12) \
 	$(am__append_13) $(am__append_14) $(am__append_15) \
-	$(am__append_16) $(am__append_17)
+	$(am__append_16) $(am__append_17) $(am__append_18)
 all: all-recursive
 
 .SUFFIXES:

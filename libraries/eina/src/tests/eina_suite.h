@@ -24,6 +24,7 @@
 void eina_test_stringshare(TCase *tc);
 void eina_test_ustringshare(TCase *tc);
 void eina_test_binshare(TCase *tc);
+void eina_test_inarray(TCase *tc);
 void eina_test_array(TCase *tc);
 void eina_test_log(TCase *tc);
 void eina_test_error(TCase *tc);
@@ -54,5 +55,6 @@ void eina_test_quadtree(TCase *tc);
 void eina_test_fp(TCase *tc);
 void eina_test_sched(TCase *tc);
 void eina_test_simple_xml_parser(TCase *tc);
+void eina_test_value(TCase *tc);
 
 #endif /* EINA_SUITE_H_ */

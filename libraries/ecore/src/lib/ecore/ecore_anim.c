@@ -22,7 +22,10 @@ struct _Ecore_Animator
 
    Eina_Bool         delete_me : 1;
    Eina_Bool         suspended : 1;
+   Eina_Bool         just_added : 1;
 };
+
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Animator);
 
 static Eina_Bool _ecore_animator_run(void *data);
 static Eina_Bool _ecore_animator(void *data);
@@ -99,7 +102,13 @@ _do_tick(void)
 
    EINA_INLIST_FOREACH(animators, animator)
      {
-        if (!animator->delete_me && !animator->suspended)
+        animator->just_added = EINA_FALSE;
+     }
+   EINA_INLIST_FOREACH(animators, animator)
+     {
+        if ((!animator->delete_me) && 
+            (!animator->suspended) && 
+            (!animator->just_added))
           {
              if (!_ecore_call_task_cb(animator->func, animator->data))
                {
@@ -107,6 +116,7 @@ _do_tick(void)
                   animators_delete_me++;
                }
           }
+        else animator->just_added = EINA_FALSE;
      }
    if (animators_delete_me)
      {
@@ -121,7 +131,7 @@ _do_tick(void)
                     eina_inlist_remove(EINA_INLIST_GET(animators),
                                        EINA_INLIST_GET(animator));
                   ECORE_MAGIC_SET(animator, ECORE_MAGIC_NONE);
-                  free(animator);
+                  ecore_animator_mp_free(animator);
                   animators_delete_me--;
                   if (animators_delete_me == 0) break;
                }
@@ -142,11 +152,12 @@ _ecore_animator_add(Ecore_Task_Cb func,
    Ecore_Animator *animator = NULL;
 
    if (!func) return animator;
-   animator = calloc(1, sizeof(Ecore_Animator));
+   animator = ecore_animator_calloc(1);
    if (!animator) return animator;
    ECORE_MAGIC_SET(animator, ECORE_MAGIC_ANIMATOR);
    animator->func = func;
    animator->data = (void *)data;
+   animator->just_added = EINA_TRUE;
    animators = (Ecore_Animator *)eina_inlist_append(EINA_INLIST_GET(animators), EINA_INLIST_GET(animator));
    _begin_tick();
    return animator;
@@ -443,7 +454,7 @@ _ecore_animator_shutdown(void)
         animator = animators;
         animators = (Ecore_Animator *)eina_inlist_remove(EINA_INLIST_GET(animators), EINA_INLIST_GET(animators));
         ECORE_MAGIC_SET(animator, ECORE_MAGIC_NONE);
-        free(animator);
+        ecore_animator_mp_free(animator);
      }
 }
 

@@ -438,6 +438,7 @@ edje_color_class_set(const char *color_class, int r, int g, int b, int a, int r2
 
 	ed = eina_list_data_get(members);
 	ed->dirty = 1;
+        ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
 	ed->all_part_change = 1;
 #endif
@@ -504,6 +505,7 @@ edje_color_class_del(const char *color_class)
 
 	ed = eina_list_data_get(members);
 	ed->dirty = 1;
+        ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
 	ed->all_part_change = 1;
 #endif
@@ -583,6 +585,7 @@ edje_object_color_class_set(Evas_Object *obj, const char *color_class, int r, in
 	     cc->b3 = b3;
 	     cc->a3 = a3;
 	     ed->dirty = 1;
+             ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
 	     ed->all_part_change = 1;
 #endif
@@ -611,6 +614,7 @@ edje_object_color_class_set(Evas_Object *obj, const char *color_class, int r, in
    cc->a3 = a3;
    ed->color_classes = eina_list_append(ed->color_classes, cc);
    ed->dirty = 1;
+   ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    ed->all_part_change = 1;
 #endif
@@ -693,6 +697,7 @@ edje_object_color_class_del(Evas_Object *obj, const char *color_class)
      }
 
    ed->dirty = 1;
+   ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    ed->all_part_change = 1;
 #endif
@@ -752,6 +757,7 @@ edje_text_class_set(const char *text_class, const char *font, Evas_Font_Size siz
 
 	ed = eina_list_data_get(members);
 	ed->dirty = 1;
+        ed->recalc_call = 1;
 	_edje_textblock_style_all_update(ed);
 #ifdef EDJE_CALC_CACHE
 	ed->text_part_change = 1;
@@ -847,6 +853,7 @@ edje_object_text_class_set(Evas_Object *obj, const char *text_class, const char 
 
 	     /* Update edje */
 	     ed->dirty = 1;
+             ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
 	     ed->text_part_change = 1;
 #endif
@@ -881,6 +888,7 @@ edje_object_text_class_set(Evas_Object *obj, const char *text_class, const char 
    /* Add to edje's text class list */
    ed->text_classes = eina_list_append(ed->text_classes, tc);
    ed->dirty = 1;
+   ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    ed->text_part_change = 1;
 #endif
@@ -1005,6 +1013,7 @@ _edje_object_part_text_raw_set(Evas_Object *obj, Edje_Real_Part *rp, const char 
    else
      if (text) rp->text.text = eina_stringshare_add(text);
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -1039,6 +1048,7 @@ _edje_object_part_text_raw_append(Evas_Object *obj, Edje_Real_Part *rp, const ch
           }
      }
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -1307,6 +1317,7 @@ edje_object_part_text_insert(Evas_Object *obj, const char *part, const char *tex
    if (rp->part->entry_mode <= EDJE_ENTRY_EDIT_MODE_NONE) return;
    _edje_entry_text_markup_insert(rp, text);
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -1328,6 +1339,7 @@ edje_object_part_text_append(Evas_Object *obj, const char *part, const char *tex
    if ((rp->part->type != EDJE_PART_TYPE_TEXTBLOCK)) return;
    _edje_object_part_text_raw_append(obj, rp, part, text);
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -1675,7 +1687,7 @@ edje_object_part_text_cursor_is_visible_format_get(const Evas_Object *obj, const
    return 0;
 }
 
-EAPI const char *
+EAPI char *
 edje_object_part_text_cursor_content_get(const Evas_Object *obj, const char *part, Edje_Cursor cur)
 {
    Edje *ed;
@@ -1908,6 +1920,13 @@ edje_object_part_swallow(Evas_Object *obj, const char *part, Evas_Object *obj_sw
    // XXX: by Sachiel, January 21th 2009, 19:30 UTC
    _edje_recalc_do(ed);
 
+   rp = evas_object_data_get(obj_swallow, "\377 edje.swallowing_part");
+   if (rp)
+     {
+        /* The object is already swallowed somewhere, unswallow it first */
+        edje_object_part_unswallow(rp->edje->obj, obj_swallow);
+     }
+
    rp = _edje_real_part_recursive_get(ed, (char *)part);
    if (!rp) return EINA_FALSE;
    if (rp->part->type != EDJE_PART_TYPE_SWALLOW)
@@ -1929,6 +1948,7 @@ _recalc_extern_parent(Evas_Object *obj)
    ed = _edje_fetch(parent);
 
    ed->dirty = 1;
+   ed->recalc_call = 1; // ZZZ: ???
    _edje_recalc(ed);
 }
 
@@ -2110,11 +2130,7 @@ _edje_box_layout_external_new(const char *name, Evas_Object_Box_Layout func, voi
 
    name_len = strlen(name) + 1;
    l = malloc(sizeof(Edje_Box_Layout) + name_len);
-   if (!l)
-     {
-	perror("malloc");
-	return NULL;
-     }
+   if (!l) return NULL;
 
    l->func = func;
    l->layout_data_get = layout_data_get;
@@ -2224,6 +2240,7 @@ edje_object_part_unswallow(Evas_Object *obj __UNUSED__, Evas_Object *obj_swallow
 	rp->swallow_params.max.w = 0;
 	rp->swallow_params.max.h = 0;
 	rp->edje->dirty = 1;
+        rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
 	rp->invalidate = 1;
 #endif
@@ -2684,6 +2701,7 @@ edje_object_part_drag_size_set(Evas_Object *obj, const char *part, double dw, do
    rp->drag->size.x = FROM_DOUBLE(dw);
    rp->drag->size.y = FROM_DOUBLE(dh);
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3018,6 +3036,7 @@ _edje_box_child_del_cb(void *data, Evas *e __UNUSED__, Evas_Object *child __UNUS
    Edje_Real_Part *rp = data;
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3031,6 +3050,7 @@ _edje_box_child_add(Edje_Real_Part *rp, Evas_Object *child)
      (child, EVAS_CALLBACK_DEL, _edje_box_child_del_cb, rp);
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3044,6 +3064,7 @@ _edje_box_child_remove(Edje_Real_Part *rp, Evas_Object *child)
      (child, EVAS_CALLBACK_DEL, _edje_box_child_del_cb, rp);
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3186,6 +3207,7 @@ _edje_table_child_del_cb(void *data, Evas *e __UNUSED__, Evas_Object *child __UN
    Edje_Real_Part *rp = data;
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3199,6 +3221,7 @@ _edje_table_child_add(Edje_Real_Part *rp, Evas_Object *child)
      (child, EVAS_CALLBACK_DEL, _edje_table_child_del_cb, rp);
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3212,6 +3235,7 @@ _edje_table_child_remove(Edje_Real_Part *rp, Evas_Object *child)
      (child, EVAS_CALLBACK_DEL, _edje_table_child_del_cb, rp);
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
    rp->invalidate = 1;
 #endif
@@ -3314,6 +3338,7 @@ _edje_perspective_obj_del(void *data, __UNUSED__ Evas *e, __UNUSED__ Evas_Object
         if (!ed) continue;
         ed->persp = NULL;
         ed->dirty = 1;
+        ed->recalc_call = 1;
         _edje_recalc_do(ed);
      }
    free(ps);
@@ -3367,6 +3392,7 @@ edje_perspective_set(Edje_Perspective *ps, Evas_Coord px, Evas_Coord py, Evas_Co
         if (!ed->persp)
           {
              ed->dirty = 1;
+             ed->recalc_call = 1;
              _edje_recalc_do(ed);
           }
      }
@@ -3381,6 +3407,7 @@ edje_perspective_set(Edje_Perspective *ps, Evas_Coord px, Evas_Coord py, Evas_Co
              if (!ed->persp)
                {
                   ed->dirty = 1;
+                  ed->recalc_call = 1;
                   _edje_recalc_do(ed);
                }
           }
@@ -3414,6 +3441,7 @@ edje_perspective_global_set(Edje_Perspective *ps, Eina_Bool global)
         if (!ed->persp)
           {
              ed->dirty = 1;
+             ed->recalc_call = 1;
              _edje_recalc_do(ed);
           }
      }
@@ -3453,6 +3481,7 @@ edje_object_perspective_set(Evas_Object *obj, Edje_Perspective *ps)
    ed->persp = ps;
    if (ps) ps->users = eina_list_append(ps->users, obj);
    ed->dirty = 1;
+   ed->recalc_call = 1;
    _edje_recalc_do(ed);
 }
 
@@ -4075,6 +4104,7 @@ _edje_object_part_swallow_changed_hints_cb(void *data, __UNUSED__ Evas *e, __UNU
    rp = data;
    _edje_real_part_swallow_hints_update(rp);
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
    _edje_recalc(rp->edje);
    return;
 }
@@ -4096,6 +4126,7 @@ _edje_real_part_swallow(Edje_Real_Part *rp,
              if (hints_update)
                _edje_real_part_swallow_hints_update(rp);
              rp->edje->dirty = 1;
+             rp->edje->recalc_call = 1;
              _edje_recalc(rp->edje);
              return;
           }
@@ -4139,6 +4170,7 @@ _edje_real_part_swallow(Edje_Real_Part *rp,
      evas_object_precise_is_inside_set(obj_swallow, 1);
 
    rp->edje->dirty = 1;
+   rp->edje->recalc_call = 1;
    _edje_recalc(rp->edje);
 }
 

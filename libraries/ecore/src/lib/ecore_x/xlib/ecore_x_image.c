@@ -1,26 +1,28 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif /* ifdef HAVE_CONFIG_H */
+#endif
+
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #include "ecore_x_private.h"
 #include "Ecore_X.h"
 
 #include <X11/extensions/XShm.h>
 #include <X11/Xutil.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <string.h>
 
 static int _ecore_x_image_shm_can = -1;
 static int _ecore_x_image_err = 0;
 
 static int
-_ecore_x_image_error_handler(Display     *d __UNUSED__,
+_ecore_x_image_error_handler(Display *d __UNUSED__,
                              XErrorEvent *ev __UNUSED__)
 {
    _ecore_x_image_err = 1;
    return 0;
-} /* _ecore_x_image_error_handler */
+}
 
 static void
 _ecore_x_image_shm_check(void)
@@ -90,7 +92,7 @@ _ecore_x_image_shm_check(void)
    shmctl(shminfo.shmid, IPC_RMID, 0);
 
    _ecore_x_image_shm_can = 1;
-} /* _ecore_x_image_shm_check */
+}
 
 struct _Ecore_X_Image
 {
@@ -105,10 +107,10 @@ struct _Ecore_X_Image
 };
 
 EAPI Ecore_X_Image *
-ecore_x_image_new(int            w,
-                  int            h,
+ecore_x_image_new(int w,
+                  int h,
                   Ecore_X_Visual vis,
-                  int            depth)
+                  int depth)
 {
    Ecore_X_Image *im;
 
@@ -124,7 +126,7 @@ ecore_x_image_new(int            w,
    _ecore_x_image_shm_check();
    im->shm = _ecore_x_image_shm_can;
    return im;
-} /* ecore_x_image_new */
+}
 
 EAPI void
 ecore_x_image_free(Ecore_X_Image *im)
@@ -148,7 +150,7 @@ ecore_x_image_free(Ecore_X_Image *im)
      }
 
    free(im);
-} /* ecore_x_image_free */
+}
 
 static void
 _ecore_x_image_shm_create(Ecore_X_Image *im)
@@ -192,17 +194,17 @@ _ecore_x_image_shm_create(Ecore_X_Image *im)
      im->bpp = 2;
    else
      im->bpp = 4;
-} /* _ecore_x_image_shm_create */
+}
 
 EAPI Eina_Bool
-ecore_x_image_get(Ecore_X_Image   *im,
+ecore_x_image_get(Ecore_X_Image *im,
                   Ecore_X_Drawable draw,
-                  int              x,
-                  int              y,
-                  int              sx,
-                  int              sy,
-                  int              w,
-                  int              h)
+                  int x,
+                  int y,
+                  int sx,
+                  int sy,
+                  int w,
+                  int h)
 {
    Eina_Bool ret = EINA_TRUE;
    XErrorHandler ph;
@@ -278,18 +280,18 @@ ecore_x_image_get(Ecore_X_Image   *im,
      }
 
    return ret;
-} /* ecore_x_image_get */
+}
 
 EAPI void
-ecore_x_image_put(Ecore_X_Image   *im,
+ecore_x_image_put(Ecore_X_Image *im,
                   Ecore_X_Drawable draw,
-                  Ecore_X_GC       gc,
-                  int              x,
-                  int              y,
-                  int              sx,
-                  int              sy,
-                  int              w,
-                  int              h)
+                  Ecore_X_GC gc,
+                  int x,
+                  int y,
+                  int sx,
+                  int sy,
+                  int w,
+                  int h)
 {
    Ecore_X_GC tgc = 0;
 
@@ -306,13 +308,13 @@ ecore_x_image_put(Ecore_X_Image   *im,
    if (im->xim)
      XShmPutImage(_ecore_x_disp, draw, gc, im->xim, sx, sy, x, y, w, h, False);
    if (tgc) ecore_x_gc_free(tgc);
-} /* ecore_x_image_put */
+}
 
 EAPI void *
 ecore_x_image_data_get(Ecore_X_Image *im,
-                       int           *bpl,
-                       int           *rows,
-                       int           *bpp)
+                       int *bpl,
+                       int *rows,
+                       int *bpp)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    if (!im->xim) _ecore_x_image_shm_create(im);
@@ -321,7 +323,7 @@ ecore_x_image_data_get(Ecore_X_Image *im,
    if (rows) *rows = im->rows;
    if (bpp) *bpp = im->bpp;
    return im->data;
-} /* ecore_x_image_data_get */
+}
 
 EAPI Eina_Bool
 ecore_x_image_is_argb32_get(Ecore_X_Image *im)
@@ -345,19 +347,19 @@ ecore_x_image_is_argb32_get(Ecore_X_Image *im)
 }
 
 EAPI Eina_Bool
-ecore_x_image_to_argb_convert(void            *src,
-                              int              sbpp,
-                              int              sbpl,
+ecore_x_image_to_argb_convert(void *src,
+                              int sbpp,
+                              int sbpl,
                               Ecore_X_Colormap c,
-                              Ecore_X_Visual   v,
-                              int              x,
-                              int              y,
-                              int              w,
-                              int              h,
-                              unsigned int    *dst,
-                              int              dbpl,
-                              int              dx,
-                              int              dy)
+                              Ecore_X_Visual v,
+                              int x,
+                              int y,
+                              int w,
+                              int h,
+                              unsigned int *dst,
+                              int dbpl,
+                              int dx,
+                              int dy)
 {
    Visual *vis = v;
    XColor *cols = NULL;
@@ -411,9 +413,9 @@ ecore_x_image_to_argb_convert(void            *src,
    else if ((vis->class == TrueColor) ||
             (vis->class == DirectColor))
      {
-        if      ((vis->red_mask == 0x00ff0000) &&
-                 (vis->green_mask == 0x0000ff00) &&
-                 (vis->blue_mask == 0x000000ff))
+        if ((vis->red_mask == 0x00ff0000) &&
+            (vis->green_mask == 0x0000ff00) &&
+            (vis->blue_mask == 0x000000ff))
           mode = argbx888;
         else if ((vis->red_mask == 0x000000ff) &&
                  (vis->green_mask == 0x0000ff00) &&

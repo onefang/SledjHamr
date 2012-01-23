@@ -3,7 +3,7 @@
 
 Summary: Library for speedy data storage, retrieval, and compression.
 Name: eet
-Version: 1.5.0
+Version: 1.5.99.67344
 Release: %{_rel}
 License: BSD
 Group: System Environment/Libraries
@@ -70,6 +70,7 @@ test "x$RPM_BUILD_ROOT" != "x/" && rm -rf $RPM_BUILD_ROOT
 %{_includedir}/*
 %{_libdir}/*.a
 %{_libdir}/*.so
+%{_datadir}/eet
 %{_libdir}/*.la
 
 %changelog

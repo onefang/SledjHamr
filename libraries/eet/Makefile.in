@@ -223,8 +223,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -867,7 +865,7 @@ uninstall-am: uninstall-pkgconfigDATA
 
 doc:
 	@echo "entering doc/"
-	make -C doc doc
+	$(MAKE) -C doc doc
 
 # Unit tests
 
@@ -894,9 +892,9 @@ doc:
 @EFL_ENABLE_COVERAGE_TRUE@	@genhtml -t "$(PACKAGE_STRING)" -o coverage coverage/coverage.info
 
 @EFL_ENABLE_COVERAGE_TRUE@coverage:
-@EFL_ENABLE_COVERAGE_TRUE@	@make lcov-reset
-@EFL_ENABLE_COVERAGE_TRUE@	@make check
-@EFL_ENABLE_COVERAGE_TRUE@	@make lcov-report
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) lcov-reset
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) check
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) lcov-report
 
 @EFL_ENABLE_COVERAGE_TRUE@clean-local:
 @EFL_ENABLE_COVERAGE_TRUE@	@rm -rf coverage

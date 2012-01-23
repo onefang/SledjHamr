@@ -19,6 +19,7 @@
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
 pkglibexecdir = $(libexecdir)/@PACKAGE@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -34,7 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_EXAMPLES_TRUE@pkglib_PROGRAMS = edje-basic$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@am__append_1 = $(EDJS)
+@BUILD_EXAMPLES_TRUE@examples_PROGRAMS = edje-basic$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-swallow$(EXEEXT) edje-text$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-table$(EXEEXT) edje-box$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-box2$(EXEEXT) edje-drag$(EXEEXT) \
@@ -42,24 +44,6 @@ host_triplet = @host@
 @BUILD_EXAMPLES_TRUE@	edje-color-class$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-perspective$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-animations$(EXEEXT) sigtest$(EXEEXT)
-@BUILD_EXAMPLES_TRUE@am__append_1 = $(EDJS)
-
-#put here additional data when installing examples
-@INSTALL_EXAMPLES_TRUE@am__append_2 = $(srcdir)/bubble.png \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/red.png $(srcdir)/test.png \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/Vera.ttf $(EDCS) \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-basic.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-swallow.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-text.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-table.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-box.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-box2.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-drag.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-signals-messages.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-color-class.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-perspective.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/edje-animations.c \
-@INSTALL_EXAMPLES_TRUE@	$(srcdir)/sigtest.c
 subdir = src/examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -77,8 +61,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(filesdir)"
-PROGRAMS = $(pkglib_PROGRAMS)
+am__installdirs = "$(DESTDIR)$(examplesdir)" "$(DESTDIR)$(filesdir)"
+PROGRAMS = $(examples_PROGRAMS)
 edje_animations_SOURCES = edje-animations.c
 edje_animations_OBJECTS = edje-animations.$(OBJEXT)
 edje_animations_LDADD = $(LDADD)
@@ -201,7 +185,6 @@ DATA = $(files_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-pkglibdir = $(datadir)/$(PACKAGE)/examples
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 ALSA_CFLAGS = @ALSA_CFLAGS@
@@ -296,8 +279,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PYTHON = @PYTHON@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
@@ -385,10 +366,13 @@ top_srcdir = @top_srcdir@
 version_info = @version_info@
 vimdir = @vimdir@
 MAINTAINERCLEANFILES = Makefile.in
+examplesdir = $(datadir)/$(PACKAGE)/examples
 @ENABLE_MULTISENSE_TRUE@MULTISENSE_EDC_FILE = multisense.edc
 @ENABLE_MULTISENSE_TRUE@SND_DIR = -sd $(srcdir)
+
 #put here all EDCs one needs to the examples
-EDCS = basic.edc \
+EDCS = \
+        basic.edc \
 	swallow.edc \
 	text.edc \
 	table.edc \
@@ -402,36 +386,24 @@ EDCS = basic.edc \
 	sigtest.edc \
 	$(MULTISENSE_EDC_FILE)
 
+EDJS = $(EDCS:%.edc=%.edj)
 filesdir = $(datadir)/$(PACKAGE)/examples
-files_DATA = $(am__append_1) $(am__append_2)
+files_DATA = $(EDCS) bubble.png red.png test.png Vera.ttf edje-basic.c \
+	edje-swallow.c edje-text.c edje-table.c edje-box.c edje-box2.c \
+	edje-drag.c edje-signals-messages.c edje-color-class.c \
+	edje-perspective.c edje-animations.c sigtest.c $(am__append_1)
+EXTRA_DIST = $(files_DATA)
+@BUILD_EXAMPLES_TRUE@AM_CPPFLAGS = \
+@BUILD_EXAMPLES_TRUE@        -I. \
+@BUILD_EXAMPLES_TRUE@        -I$(top_srcdir)/src/lib \
+@BUILD_EXAMPLES_TRUE@        -I$(top_srcdir)/src/lib/include \
+@BUILD_EXAMPLES_TRUE@        -DPACKAGE_BIN_DIR=\"$(bindir)\" \
+@BUILD_EXAMPLES_TRUE@        -DPACKAGE_LIB_DIR=\"$(libdir)\" \
+@BUILD_EXAMPLES_TRUE@        -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
+@BUILD_EXAMPLES_TRUE@        -DPACKAGE_EXAMPLES_DIR=\"$(datadir)/$(PACKAGE)/examples\" \
+@BUILD_EXAMPLES_TRUE@        @EDJE_CFLAGS@
 
-#the ones using ecore_evas follow
-@BUILD_EXAMPLES_TRUE@AM_CPPFLAGS = -I. -I$(top_srcdir)/src/lib \
-@BUILD_EXAMPLES_TRUE@	-I$(top_srcdir)/src/lib/include \
-@BUILD_EXAMPLES_TRUE@	-DPACKAGE_BIN_DIR=\"$(bindir)\" \
-@BUILD_EXAMPLES_TRUE@	-DPACKAGE_LIB_DIR=\"$(libdir)\" \
-@BUILD_EXAMPLES_TRUE@	-DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
-@BUILD_EXAMPLES_TRUE@	-DPACKAGE_EXAMPLES_DIR=\"$(datadir)/$(PACKAGE)/examples\" \
-@BUILD_EXAMPLES_TRUE@	@EDJE_CFLAGS@ $(am__empty)
 @BUILD_EXAMPLES_TRUE@LDADD = $(top_builddir)/src/lib/libedje.la @EDJE_LIBS@
-@BUILD_EXAMPLES_TRUE@EDJS = $(EDCS:%.edc=%.edj)
-EXTRA_DIST = $(EDCS) \
-	$(srcdir)/bubble.png \
-	$(srcdir)/red.png \
-	$(srcdir)/test.png \
-	$(srcdir)/edje-basic.c \
-	$(srcdir)/edje-swallow.c \
-	$(srcdir)/edje-text.c \
-	$(srcdir)/edje-table.c \
-	$(srcdir)/edje-box.c \
-	$(srcdir)/edje-box2.c \
-	$(srcdir)/edje-drag.c \
-	$(srcdir)/edje-signals-messages.c \
-	$(srcdir)/edje-color-class.c \
-	$(srcdir)/edje-perspective.c \
-	$(srcdir)/edje-animations.c \
-	$(srcdir)/sigtest.c
-
 all: all-am
 
 .SUFFIXES:
@@ -466,10 +438,10 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-pkglibPROGRAMS: $(pkglib_PROGRAMS)
+install-examplesPROGRAMS: $(examples_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	test -z "$(pkglibdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibdir)"
-	@list='$(pkglib_PROGRAMS)'; test -n "$(pkglibdir)" || list=; \
+	test -z "$(examplesdir)" || $(MKDIR_P) "$(DESTDIR)$(examplesdir)"
+	@list='$(examples_PROGRAMS)'; test -n "$(examplesdir)" || list=; \
 	for p in $$list; do echo "$$p $$p"; done | \
 	sed 's/$(EXEEXT)$$//' | \
 	while read p p1; do if test -f $$p || test -f $$p1; \
@@ -486,23 +458,23 @@ install-pkglibPROGRAMS: $(pkglib_PROGRAMS)
 	while read type dir files; do \
 	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
 	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(pkglibdir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(pkglibdir)$$dir" || exit $$?; \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(examplesdir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(examplesdir)$$dir" || exit $$?; \
 	    } \
 	; done
 
-uninstall-pkglibPROGRAMS:
+uninstall-examplesPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(pkglib_PROGRAMS)'; test -n "$(pkglibdir)" || list=; \
+	@list='$(examples_PROGRAMS)'; test -n "$(examplesdir)" || list=; \
 	files=`for p in $$list; do echo "$$p"; done | \
 	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
 	      -e 's/$$/$(EXEEXT)/' `; \
 	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(pkglibdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(pkglibdir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(examplesdir)" && rm -f $$files
 
-clean-pkglibPROGRAMS:
-	@list='$(pkglib_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-examplesPROGRAMS:
+	@list='$(examples_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -701,7 +673,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(filesdir)"; do \
+	for dir in "$(DESTDIR)$(examplesdir)" "$(DESTDIR)$(filesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -732,7 +704,7 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-pkglibPROGRAMS \
+clean-am: clean-examplesPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -753,13 +725,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-filesDATA
+install-data-am: install-examplesPROGRAMS install-filesDATA
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-pkglibPROGRAMS
+install-exec-am:
 
 install-html: install-html-am
 
@@ -799,28 +771,29 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-filesDATA uninstall-pkglibPROGRAMS
+uninstall-am: uninstall-examplesPROGRAMS uninstall-filesDATA
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-pkglibPROGRAMS ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-filesDATA \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-pkglibPROGRAMS \
+.PHONY: CTAGS GTAGS all all-am check check-am clean \
+	clean-examplesPROGRAMS clean-generic clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am \
+	install-examplesPROGRAMS install-exec install-exec-am \
+	install-filesDATA install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-filesDATA \
-	uninstall-pkglibPROGRAMS
+	tags uninstall uninstall-am uninstall-examplesPROGRAMS \
+	uninstall-filesDATA
 
 
-@BUILD_EXAMPLES_TRUE@.edc.edj:
-@BUILD_EXAMPLES_TRUE@	$(edje_cc) -v -id $(srcdir) $(SND_DIR) $< $(builddir)/$(@F)
+.edc.edj:
+	$(edje_cc) -v -fd $(srcdir) -id $(srcdir) $(SND_DIR) $< $(builddir)/$(@F)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

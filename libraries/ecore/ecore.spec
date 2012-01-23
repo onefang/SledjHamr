@@ -39,7 +39,7 @@
 
 Summary: Enlightened Core X interface library
 Name: ecore
-Version: 1.1.0
+Version: 1.1.99.67344
 Release: %{_rel}
 License: BSD
 Group: User Interface/X
@@ -176,7 +176,6 @@ test "x$RPM_BUILD_ROOT" != "x/" && rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(-, root, root)
 %doc AUTHORS COPYING* README*
-%{_bindir}/ecore_test
 %{_libdir}/libecore*.so.*
 
 %files devel

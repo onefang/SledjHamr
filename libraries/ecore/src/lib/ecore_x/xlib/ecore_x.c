@@ -19,9 +19,9 @@
 #include "Ecore_X_Atoms.h"
 #include "Ecore_Input.h"
 
-static Eina_Bool _ecore_x_fd_handler(void             *data,
+static Eina_Bool _ecore_x_fd_handler(void *data,
                                      Ecore_Fd_Handler *fd_handler);
-static Eina_Bool _ecore_x_fd_handler_buf(void             *data,
+static Eina_Bool _ecore_x_fd_handler_buf(void *data,
                                          Ecore_Fd_Handler *fd_handler);
 static int       _ecore_x_key_mask_get(KeySym sym);
 static int       _ecore_x_event_modifier(unsigned int state);
@@ -139,9 +139,9 @@ EAPI int ECORE_X_LOCK_SHIFT = 0;
 #ifdef LOGRT
 static double t0 = 0.0;
 static Status (*_logrt_real_reply)(Display *disp,
-                                   void    *rep,
-                                   int      extra,
-                                   Bool     discard) = NULL;
+                                   void *rep,
+                                   int extra,
+                                   Bool discard) = NULL;
 static void
 _logrt_init(void)
 {
@@ -159,13 +159,13 @@ _logrt_init(void)
 
    _logrt_real_reply = dlsym(lib, "_XReply");
    t0 = ecore_time_get();
-} /* _logrt_init */
+}
 
 Status
 _XReply(Display *disp,
-        void    *rep,
-        int      extra,
-        Bool     discard)
+        void *rep,
+        int extra,
+        Bool discard)
 {
    void *bt[128];
    int i, n;
@@ -207,7 +207,7 @@ _XReply(Display *disp,
 
    // fixme: logme
    return _logrt_real_reply(disp, rep, extra, discard);
-} /* _XReply */
+}
 
 #endif /* ifdef LOGRT */
 
@@ -215,35 +215,35 @@ void
 _ecore_x_modifiers_get(void)
 {
    /* everything has these... unless its like a pda... :) */
-    ECORE_X_MODIFIER_SHIFT = _ecore_x_key_mask_get(XK_Shift_L);
-    ECORE_X_MODIFIER_CTRL = _ecore_x_key_mask_get(XK_Control_L);
+   ECORE_X_MODIFIER_SHIFT = _ecore_x_key_mask_get(XK_Shift_L);
+   ECORE_X_MODIFIER_CTRL = _ecore_x_key_mask_get(XK_Control_L);
 
-    /* apple's xdarwin has no alt!!!! */
-    ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Alt_L);
-    if (!ECORE_X_MODIFIER_ALT)
-      ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Meta_L);
+   /* apple's xdarwin has no alt!!!! */
+   ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Alt_L);
+   if (!ECORE_X_MODIFIER_ALT)
+     ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Meta_L);
 
-    if (!ECORE_X_MODIFIER_ALT)
-      ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Super_L);
+   if (!ECORE_X_MODIFIER_ALT)
+     ECORE_X_MODIFIER_ALT = _ecore_x_key_mask_get(XK_Super_L);
 
-    /* the windows key... a valid modifier :) */
-    ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Super_L);
-    if (!ECORE_X_MODIFIER_WIN)
-      ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Mode_switch);
+   /* the windows key... a valid modifier :) */
+   ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Super_L);
+   if (!ECORE_X_MODIFIER_WIN)
+     ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Mode_switch);
 
-    if (!ECORE_X_MODIFIER_WIN)
-      ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Meta_L);
+   if (!ECORE_X_MODIFIER_WIN)
+     ECORE_X_MODIFIER_WIN = _ecore_x_key_mask_get(XK_Meta_L);
 
-    if (ECORE_X_MODIFIER_WIN == ECORE_X_MODIFIER_ALT)
-      ECORE_X_MODIFIER_WIN = 0;
+   if (ECORE_X_MODIFIER_WIN == ECORE_X_MODIFIER_ALT)
+     ECORE_X_MODIFIER_WIN = 0;
 
-    if (ECORE_X_MODIFIER_ALT == ECORE_X_MODIFIER_CTRL)
-      ECORE_X_MODIFIER_ALT = 0;
+   if (ECORE_X_MODIFIER_ALT == ECORE_X_MODIFIER_CTRL)
+     ECORE_X_MODIFIER_ALT = 0;
 
-    ECORE_X_LOCK_SCROLL = _ecore_x_key_mask_get(XK_Scroll_Lock);
-    ECORE_X_LOCK_NUM = _ecore_x_key_mask_get(XK_Num_Lock);
-    ECORE_X_LOCK_CAPS = _ecore_x_key_mask_get(XK_Caps_Lock);
-    ECORE_X_LOCK_SHIFT = _ecore_x_key_mask_get(XK_Shift_Lock);
+   ECORE_X_LOCK_SCROLL = _ecore_x_key_mask_get(XK_Scroll_Lock);
+   ECORE_X_LOCK_NUM = _ecore_x_key_mask_get(XK_Num_Lock);
+   ECORE_X_LOCK_CAPS = _ecore_x_key_mask_get(XK_Caps_Lock);
+   ECORE_X_LOCK_SHIFT = _ecore_x_key_mask_get(XK_Shift_Lock);
 }
 
 /**
@@ -300,7 +300,7 @@ ecore_x_init(const char *name)
    eina_init();
    _ecore_xlib_log_dom = eina_log_domain_register
        ("ecore_x", ECORE_XLIB_DEFAULT_LOG_COLOR);
-   if(_ecore_xlib_log_dom < 0)
+   if (_ecore_xlib_log_dom < 0)
      {
         EINA_LOG_ERR(
           "Impossible to create a log domain for the Ecore Xlib module.");
@@ -375,7 +375,7 @@ ecore_x_init(const char *name)
 
 #ifdef ECORE_XGESTURE
    if (XGestureQueryExtension(_ecore_x_disp, &gesture_base, &gesture_err_base))
-      _ecore_x_event_gesture_id = gesture_base;
+     _ecore_x_event_gesture_id = gesture_base;
 
    ECORE_X_EVENT_HANDLERS_GROW(gesture_base, GestureNumberEvents);
 #endif /* ifdef ECORE_XGESTURE */
@@ -497,20 +497,20 @@ ecore_x_init(const char *name)
 #ifdef ECORE_XGESTURE
    if (_ecore_x_event_gesture_id)
      {
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyFlick] =
-         _ecore_x_event_handle_gesture_notify_flick;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyPan] =
-         _ecore_x_event_handle_gesture_notify_pan;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyPinchRotation] =
-         _ecore_x_event_handle_gesture_notify_pinchrotation;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyTap] =
-         _ecore_x_event_handle_gesture_notify_tap;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyTapNHold] =
-         _ecore_x_event_handle_gesture_notify_tapnhold;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyHold] =
-         _ecore_x_event_handle_gesture_notify_hold;
-      _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyGroup] =
-         _ecore_x_event_handle_gesture_notify_group;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyFlick] =
+          _ecore_x_event_handle_gesture_notify_flick;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyPan] =
+          _ecore_x_event_handle_gesture_notify_pan;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyPinchRotation] =
+          _ecore_x_event_handle_gesture_notify_pinchrotation;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyTap] =
+          _ecore_x_event_handle_gesture_notify_tap;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyTapNHold] =
+          _ecore_x_event_handle_gesture_notify_tapnhold;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyHold] =
+          _ecore_x_event_handle_gesture_notify_hold;
+        _ecore_x_event_handlers[_ecore_x_event_gesture_id + GestureNotifyGroup] =
+          _ecore_x_event_handle_gesture_notify_group;
      }
 
 #endif /* ifdef ECORE_XGESTURE */
@@ -641,7 +641,7 @@ shutdown_eina:
    eina_shutdown();
 
    return --_ecore_x_init_count;
-} /* ecore_x_init */
+}
 
 static int
 _ecore_x_shutdown(int close_display)
@@ -683,7 +683,7 @@ _ecore_x_shutdown(int close_display)
    eina_shutdown();
 
    return _ecore_x_init_count;
-} /* _ecore_x_shutdown */
+}
 
 /**
  * Shuts down the Ecore X library.
@@ -699,7 +699,7 @@ EAPI int
 ecore_x_shutdown(void)
 {
    return _ecore_x_shutdown(1);
-} /* ecore_x_shutdown */
+}
 
 /**
  * Shuts down the Ecore X library.
@@ -712,7 +712,7 @@ EAPI int
 ecore_x_disconnect(void)
 {
    return _ecore_x_shutdown(0);
-} /* ecore_x_disconnect */
+}
 
 /**
  * @defgroup Ecore_X_Display_Attr_Group X Display Attributes
@@ -729,7 +729,7 @@ EAPI Ecore_X_Display *
 ecore_x_display_get(void)
 {
    return (Ecore_X_Display *)_ecore_x_disp;
-} /* ecore_x_display_get */
+}
 
 /**
  * Retrieves the X display file descriptor.
@@ -741,7 +741,7 @@ ecore_x_fd_get(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return ConnectionNumber(_ecore_x_disp);
-} /* ecore_x_fd_get */
+}
 
 /**
  * Retrieves the Ecore_X_Screen handle used for the current X connection.
@@ -753,7 +753,7 @@ ecore_x_default_screen_get(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return (Ecore_X_Screen *)DefaultScreenOfDisplay(_ecore_x_disp);
-} /* ecore_x_default_screen_get */
+}
 
 /**
  * Retrieves the size of an Ecore_X_Screen.
@@ -767,8 +767,8 @@ ecore_x_default_screen_get(void)
  */
 EAPI void
 ecore_x_screen_size_get(const Ecore_X_Screen *screen,
-                        int                  *w,
-                        int                  *h)
+                        int *w,
+                        int *h)
 {
    Screen *s = (Screen *)screen;
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
@@ -840,7 +840,7 @@ ecore_x_double_click_time_set(double t)
      t = 0.0;
 
    _ecore_x_double_click_time = t;
-} /* ecore_x_double_click_time_set */
+}
 
 /**
  * Retrieves the double and triple click flag timeout.
@@ -854,7 +854,7 @@ EAPI double
 ecore_x_double_click_time_get(void)
 {
    return _ecore_x_double_click_time;
-} /* ecore_x_double_click_time_get */
+}
 
 /**
  * @defgroup Ecore_X_Flush_Group X Synchronization Functions
@@ -872,7 +872,7 @@ ecore_x_flush(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XFlush(_ecore_x_disp);
-} /* ecore_x_flush */
+}
 
 /**
  * Flushes the command buffer and waits until all requests have been
@@ -884,7 +884,7 @@ ecore_x_sync(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XSync(_ecore_x_disp, False);
-} /* ecore_x_sync */
+}
 
 /**
  * Kill all clients with subwindows under a given window.
@@ -920,7 +920,7 @@ ecore_x_killall(Ecore_X_Window root)
      }
    XUngrabServer(_ecore_x_disp);
    XSync(_ecore_x_disp, False);
-} /* ecore_x_killall */
+}
 
 /**
  * Kill a specific client
@@ -934,7 +934,7 @@ ecore_x_kill(Ecore_X_Window win)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XKillClient(_ecore_x_disp, win);
-} /* ecore_x_kill */
+}
 
 /**
  * Return the last event time
@@ -943,7 +943,7 @@ EAPI Ecore_X_Time
 ecore_x_current_time_get(void)
 {
    return _ecore_x_event_last_time;
-} /* ecore_x_current_time_get */
+}
 
 /**
  * Return the screen DPI
@@ -965,7 +965,7 @@ ecore_x_dpi_get(void)
      return 75;
 
    return (((s->width * 254) / s->mwidth) + 5) / 10;
-} /* ecore_x_dpi_get */
+}
 
 /**
  * Invoke the standard system beep to alert users
@@ -989,10 +989,10 @@ ecore_x_bell(int percent)
      return EINA_FALSE;
 
    return EINA_TRUE;
-} /* ecore_x_bell */
+}
 
 static Eina_Bool
-_ecore_x_fd_handler(void             *data,
+_ecore_x_fd_handler(void *data,
                     Ecore_Fd_Handler *fd_handler __UNUSED__)
 {
    Display *d;
@@ -1021,10 +1021,10 @@ _ecore_x_fd_handler(void             *data,
           }
      }
    return ECORE_CALLBACK_RENEW;
-} /* _ecore_x_fd_handler */
+}
 
 static Eina_Bool
-_ecore_x_fd_handler_buf(void             *data,
+_ecore_x_fd_handler_buf(void *data,
                         Ecore_Fd_Handler *fd_handler __UNUSED__)
 {
    Display *d;
@@ -1034,7 +1034,7 @@ _ecore_x_fd_handler_buf(void             *data,
      return ECORE_CALLBACK_RENEW;
 
    return ECORE_CALLBACK_CANCEL;
-} /* _ecore_x_fd_handler_buf */
+}
 
 static int
 _ecore_x_key_mask_get(KeySym sym)
@@ -1080,7 +1080,7 @@ _ecore_x_key_mask_get(KeySym sym)
      }
 
    return 0;
-} /* _ecore_x_key_mask_get */
+}
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -1132,7 +1132,7 @@ ecore_x_window_root_list(int *num_ret)
                          overlap++;
                     }
                }
-             roots = malloc((num - overlap) * sizeof(Window));
+             roots = malloc(MAX((num - overlap) * sizeof(Window), 1));
              if (roots)
                {
                   int k;
@@ -1195,7 +1195,7 @@ ecore_x_window_root_list(int *num_ret)
      roots[i] = RootWindow(_ecore_x_disp, i);
 #endif /* ifdef ECORE_XPRINT */
    return roots;
-} /* ecore_x_window_root_list */
+}
 
 EAPI Ecore_X_Window
 ecore_x_window_root_first_get(void)
@@ -1217,7 +1217,7 @@ ecore_x_window_root_first_get(void)
    free(roots);
    return root;
  */
-} /* ecore_x_window_root_first_get */
+}
 
 static void _ecore_x_window_manage_error(void *data);
 
@@ -1228,7 +1228,7 @@ _ecore_x_window_manage_error(void *data __UNUSED__)
    if ((ecore_x_error_request_get() == X_ChangeWindowAttributes) &&
        (ecore_x_error_code_get() == BadAccess))
      _ecore_x_window_manage_failed = 1;
-} /* _ecore_x_window_manage_error */
+}
 
 EAPI Eina_Bool
 ecore_x_window_manage(Ecore_X_Window win)
@@ -1262,7 +1262,7 @@ ecore_x_window_manage(Ecore_X_Window win)
      }
 
    return EINA_TRUE;
-} /* ecore_x_window_manage */
+}
 
 EAPI void
 ecore_x_window_container_manage(Ecore_X_Window win)
@@ -1271,7 +1271,7 @@ ecore_x_window_container_manage(Ecore_X_Window win)
    XSelectInput(_ecore_x_disp, win,
                 SubstructureRedirectMask |
                 SubstructureNotifyMask);
-} /* ecore_x_window_container_manage */
+}
 
 EAPI void
 ecore_x_window_client_manage(Ecore_X_Window win)
@@ -1287,7 +1287,7 @@ ecore_x_window_client_manage(Ecore_X_Window win)
                 SubstructureNotifyMask
                 );
    XShapeSelectInput(_ecore_x_disp, win, ShapeNotifyMask);
-} /* ecore_x_window_client_manage */
+}
 
 EAPI void
 ecore_x_window_sniff(Ecore_X_Window win)
@@ -1296,7 +1296,7 @@ ecore_x_window_sniff(Ecore_X_Window win)
    XSelectInput(_ecore_x_disp, win,
                 PropertyChangeMask |
                 SubstructureNotifyMask);
-} /* ecore_x_window_sniff */
+}
 
 EAPI void
 ecore_x_window_client_sniff(Ecore_X_Window win)
@@ -1310,10 +1310,10 @@ ecore_x_window_client_sniff(Ecore_X_Window win)
                 StructureNotifyMask |
                 SubstructureNotifyMask);
    XShapeSelectInput(_ecore_x_disp, win, ShapeNotifyMask);
-} /* ecore_x_window_client_sniff */
+}
 
 EAPI Eina_Bool
-ecore_x_window_attributes_get(Ecore_X_Window             win,
+ecore_x_window_attributes_get(Ecore_X_Window win,
                               Ecore_X_Window_Attributes *att_ret)
 {
    XWindowAttributes att;
@@ -1353,25 +1353,25 @@ ecore_x_window_attributes_get(Ecore_X_Window             win,
    att_ret->colormap = att.colormap;
    att_ret->visual = att.visual;
    return EINA_TRUE;
-} /* ecore_x_window_attributes_get */
+}
 
 EAPI void
 ecore_x_window_save_set_add(Ecore_X_Window win)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XAddToSaveSet(_ecore_x_disp, win);
-} /* ecore_x_window_save_set_add */
+}
 
 EAPI void
 ecore_x_window_save_set_del(Ecore_X_Window win)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XRemoveFromSaveSet(_ecore_x_disp, win);
-} /* ecore_x_window_save_set_del */
+}
 
 EAPI Ecore_X_Window *
 ecore_x_window_children_get(Ecore_X_Window win,
-                            int           *num)
+                            int *num)
 {
    Ecore_X_Window *windows = NULL;
    Window root_ret = 0, parent_ret = 0, *children_ret = NULL;
@@ -1398,7 +1398,7 @@ ecore_x_window_children_get(Ecore_X_Window win,
      }
 
    return windows;
-} /* ecore_x_window_children_get */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_control_set(int accel_num,
@@ -1408,7 +1408,7 @@ ecore_x_pointer_control_set(int accel_num,
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return XChangePointerControl(_ecore_x_disp, 1, 1,
                                 accel_num, accel_denom, threshold) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_pointer_control_set */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_control_get(int *accel_num,
@@ -1418,23 +1418,23 @@ ecore_x_pointer_control_get(int *accel_num,
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return XGetPointerControl(_ecore_x_disp,
                              accel_num, accel_denom, threshold) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_pointer_control_get */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_mapping_set(unsigned char *map,
-                            int            nmap)
+                            int nmap)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return XSetPointerMapping(_ecore_x_disp, map, nmap) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_pointer_mapping_set */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_mapping_get(unsigned char *map,
-                            int            nmap)
+                            int nmap)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return XGetPointerMapping(_ecore_x_disp, map, nmap) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_pointer_mapping_get */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_grab(Ecore_X_Window win)
@@ -1448,7 +1448,7 @@ ecore_x_pointer_grab(Ecore_X_Window win)
      return EINA_TRUE;
 
    return EINA_FALSE;
-} /* ecore_x_pointer_grab */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_confine_grab(Ecore_X_Window win)
@@ -1462,23 +1462,23 @@ ecore_x_pointer_confine_grab(Ecore_X_Window win)
      return EINA_TRUE;
 
    return EINA_FALSE;
-} /* ecore_x_pointer_confine_grab */
+}
 
 EAPI void
 ecore_x_pointer_ungrab(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XUngrabPointer(_ecore_x_disp, CurrentTime);
-} /* ecore_x_pointer_ungrab */
+}
 
 EAPI Eina_Bool
 ecore_x_pointer_warp(Ecore_X_Window win,
-                     int            x,
-                     int            y)
+                     int x,
+                     int y)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return XWarpPointer(_ecore_x_disp, None, win, 0, 0, 0, 0, x, y) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_pointer_warp */
+}
 
 EAPI Eina_Bool
 ecore_x_keyboard_grab(Ecore_X_Window win)
@@ -1490,14 +1490,14 @@ ecore_x_keyboard_grab(Ecore_X_Window win)
      return EINA_TRUE;
 
    return EINA_FALSE;
-} /* ecore_x_keyboard_grab */
+}
 
 EAPI void
 ecore_x_keyboard_ungrab(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XUngrabKeyboard(_ecore_x_disp, CurrentTime);
-} /* ecore_x_keyboard_ungrab */
+}
 
 EAPI void
 ecore_x_grab(void)
@@ -1506,7 +1506,7 @@ ecore_x_grab(void)
    _ecore_x_grab_count++;
    if (_ecore_x_grab_count == 1)
      XGrabServer(_ecore_x_disp);
-} /* ecore_x_grab */
+}
 
 EAPI void
 ecore_x_ungrab(void)
@@ -1518,32 +1518,32 @@ ecore_x_ungrab(void)
 
    if (_ecore_x_grab_count == 0)
      XUngrabServer(_ecore_x_disp);
-} /* ecore_x_ungrab */
+}
 
 int _ecore_window_grabs_num = 0;
 Window *_ecore_window_grabs = NULL;
 Eina_Bool (*_ecore_window_grab_replay_func)(void *data,
-                                            int   event_type,
+                                            int event_type,
                                             void *event);
 void *_ecore_window_grab_replay_data;
 
 EAPI void
-ecore_x_passive_grab_replay_func_set(Eina_Bool                             (*func)(void *data,
-                                                                     int   event_type,
-                                                                     void *event),
-                                     void                                 *data)
+ecore_x_passive_grab_replay_func_set(Eina_Bool (*func)(void *data,
+                                                       int event_type,
+                                                       void *event),
+                                     void *data)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    _ecore_window_grab_replay_func = func;
    _ecore_window_grab_replay_data = data;
-} /* ecore_x_passive_grab_replay_func_set */
+}
 
 EAPI void
-ecore_x_window_button_grab(Ecore_X_Window     win,
-                           int                button,
+ecore_x_window_button_grab(Ecore_X_Window win,
+                           int button,
                            Ecore_X_Event_Mask event_mask,
-                           int                mod,
-                           int                any_mod)
+                           int mod,
+                           int any_mod)
 {
    unsigned int b;
    unsigned int m;
@@ -1578,10 +1578,10 @@ ecore_x_window_button_grab(Ecore_X_Window     win,
    if (!t) return;
    _ecore_window_grabs = t;
    _ecore_window_grabs[_ecore_window_grabs_num - 1] = win;
-} /* ecore_x_window_button_grab */
+}
 
 void
-_ecore_x_sync_magic_send(int            val,
+_ecore_x_sync_magic_send(int val,
                          Ecore_X_Window swin)
 {
    XEvent xev;
@@ -1597,7 +1597,7 @@ _ecore_x_sync_magic_send(int            val,
    xev.xclient.data.l[1] = 0x10000000 + val;
    xev.xclient.data.l[2] = swin;
    XSendEvent(_ecore_x_disp, _ecore_x_private_win, False, NoEventMask, &xev);
-} /* _ecore_x_sync_magic_send */
+}
 
 void
 _ecore_x_window_grab_remove(Ecore_X_Window win)
@@ -1631,13 +1631,13 @@ _ecore_x_window_grab_remove(Ecore_X_Window win)
              _ecore_window_grabs = t;
           }
      }
-} /* _ecore_x_window_grab_remove */
+}
 
 EAPI void
 ecore_x_window_button_ungrab(Ecore_X_Window win,
-                             int            button,
-                             int            mod,
-                             int            any_mod)
+                             int button,
+                             int mod,
+                             int any_mod)
 {
    unsigned int b;
    unsigned int m;
@@ -1664,16 +1664,16 @@ ecore_x_window_button_ungrab(Ecore_X_Window win,
    for (i = 0; i < 8; i++)
      XUngrabButton(_ecore_x_disp, b, m | locks[i], win);
    _ecore_x_sync_magic_send(1, win);
-} /* ecore_x_window_button_ungrab */
+}
 
 int _ecore_key_grabs_num = 0;
 Window *_ecore_key_grabs = NULL;
 
 EAPI void
 ecore_x_window_key_grab(Ecore_X_Window win,
-                        const char    *key,
-                        int            mod,
-                        int            any_mod)
+                        const char *key,
+                        int mod,
+                        int any_mod)
 {
    KeyCode keycode = 0;
    KeySym keysym;
@@ -1718,7 +1718,7 @@ ecore_x_window_key_grab(Ecore_X_Window win,
    if (!t) return;
    _ecore_key_grabs = t;
    _ecore_key_grabs[_ecore_key_grabs_num - 1] = win;
-} /* ecore_x_window_key_grab */
+}
 
 void
 _ecore_x_key_grab_remove(Ecore_X_Window win)
@@ -1751,13 +1751,13 @@ _ecore_x_key_grab_remove(Ecore_X_Window win)
              _ecore_key_grabs = t;
           }
      }
-} /* _ecore_x_key_grab_remove */
+}
 
 EAPI void
 ecore_x_window_key_ungrab(Ecore_X_Window win,
-                          const char    *key,
-                          int            mod,
-                          int            any_mod)
+                          const char *key,
+                          int mod,
+                          int any_mod)
 {
    KeyCode keycode = 0;
    KeySym keysym;
@@ -1795,7 +1795,7 @@ ecore_x_window_key_ungrab(Ecore_X_Window win,
    for (i = 0; i < 8; i++)
      XUngrabKey(_ecore_x_disp, keycode, m | locks[i], win);
    _ecore_x_sync_magic_send(2, win);
-} /* ecore_x_window_key_ungrab */
+}
 
 /**
  * Send client message with given type and format 32.
@@ -1811,14 +1811,14 @@ ecore_x_window_key_ungrab(Ecore_X_Window win,
  * @return EINA_TRUE on success EINA_FALSE otherwise.
  */
 EAPI Eina_Bool
-ecore_x_client_message32_send(Ecore_X_Window     win,
-                              Ecore_X_Atom       type,
+ecore_x_client_message32_send(Ecore_X_Window win,
+                              Ecore_X_Atom type,
                               Ecore_X_Event_Mask mask,
-                              long               d0,
-                              long               d1,
-                              long               d2,
-                              long               d3,
-                              long               d4)
+                              long d0,
+                              long d1,
+                              long d2,
+                              long d3,
+                              long d4)
 {
    XEvent xev;
 
@@ -1834,7 +1834,7 @@ ecore_x_client_message32_send(Ecore_X_Window     win,
    xev.xclient.data.l[4] = d4;
 
    return XSendEvent(_ecore_x_disp, win, False, mask, &xev) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_client_message32_send */
+}
 
 /**
  * Send client message with given type and format 8.
@@ -1848,9 +1848,9 @@ ecore_x_client_message32_send(Ecore_X_Window     win,
  */
 EAPI Eina_Bool
 ecore_x_client_message8_send(Ecore_X_Window win,
-                             Ecore_X_Atom   type,
-                             const void    *data,
-                             int            len)
+                             Ecore_X_Atom type,
+                             const void *data,
+                             int len)
 {
    XEvent xev;
 
@@ -1866,12 +1866,12 @@ ecore_x_client_message8_send(Ecore_X_Window win,
    memset(xev.xclient.data.b + len, 0, 20 - len);
 
    return XSendEvent(_ecore_x_disp, win, False, NoEventMask, &xev) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_client_message8_send */
+}
 
 EAPI Eina_Bool
 ecore_x_mouse_move_send(Ecore_X_Window win,
-                        int            x,
-                        int            y)
+                        int x,
+                        int y)
 {
    XEvent xev;
    XWindowAttributes att;
@@ -1894,13 +1894,13 @@ ecore_x_mouse_move_send(Ecore_X_Window win,
    xev.xmotion.is_hint = 0;
    xev.xmotion.same_screen = 1;
    return XSendEvent(_ecore_x_disp, win, True, PointerMotionMask, &xev) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_mouse_move_send */
+}
 
 EAPI Eina_Bool
 ecore_x_mouse_down_send(Ecore_X_Window win,
-                        int            x,
-                        int            y,
-                        int            b)
+                        int x,
+                        int y,
+                        int b)
 {
    XEvent xev;
    XWindowAttributes att;
@@ -1923,13 +1923,13 @@ ecore_x_mouse_down_send(Ecore_X_Window win,
    xev.xbutton.button = b;
    xev.xbutton.same_screen = 1;
    return XSendEvent(_ecore_x_disp, win, True, ButtonPressMask, &xev) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_mouse_down_send */
+}
 
 EAPI Eina_Bool
 ecore_x_mouse_up_send(Ecore_X_Window win,
-                      int            x,
-                      int            y,
-                      int            b)
+                      int x,
+                      int y,
+                      int b)
 {
    XEvent xev;
    XWindowAttributes att;
@@ -1952,21 +1952,21 @@ ecore_x_mouse_up_send(Ecore_X_Window win,
    xev.xbutton.button = b;
    xev.xbutton.same_screen = 1;
    return XSendEvent(_ecore_x_disp, win, True, ButtonReleaseMask, &xev) ? EINA_TRUE : EINA_FALSE;
-} /* ecore_x_mouse_up_send */
+}
 
 EAPI void
 ecore_x_focus_reset(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XSetInputFocus(_ecore_x_disp, PointerRoot, RevertToPointerRoot, CurrentTime);
-} /* ecore_x_focus_reset */
+}
 
 EAPI void
 ecore_x_events_allow_all(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XAllowEvents(_ecore_x_disp, AsyncBoth, CurrentTime);
-} /* ecore_x_events_allow_all */
+}
 
 EAPI void
 ecore_x_pointer_last_xy_get(int *x,
@@ -1977,12 +1977,12 @@ ecore_x_pointer_last_xy_get(int *x,
 
    if (y)
      *y = _ecore_x_event_last_root_y;
-} /* ecore_x_pointer_last_xy_get */
+}
 
 EAPI void
 ecore_x_pointer_xy_get(Ecore_X_Window win,
-                       int           *x,
-                       int           *y)
+                       int *x,
+                       int *y)
 {
    Window rwin, cwin;
    int rx, ry, wx, wy, ret;
@@ -1996,7 +1996,7 @@ ecore_x_pointer_xy_get(Ecore_X_Window win,
 
    if (x) *x = wx;
    if (y) *y = wy;
-} /* ecore_x_pointer_xy_get */
+}
 
 /**
  * Retrieve the Visual ID from a given Visual.
@@ -2023,7 +2023,7 @@ ecore_x_visual_id_get(Ecore_X_Visual visual)
  */
 EAPI Ecore_X_Visual
 ecore_x_default_visual_get(Ecore_X_Display *disp,
-                           Ecore_X_Screen  *screen)
+                           Ecore_X_Screen *screen)
 {
    return DefaultVisual(disp, ecore_x_screen_index_get(screen));
 }
@@ -2039,7 +2039,7 @@ ecore_x_default_visual_get(Ecore_X_Display *disp,
  */
 EAPI Ecore_X_Colormap
 ecore_x_default_colormap_get(Ecore_X_Display *disp,
-                             Ecore_X_Screen  *screen)
+                             Ecore_X_Screen *screen)
 {
    return DefaultColormap(disp, ecore_x_screen_index_get(screen));
 }
@@ -2055,7 +2055,7 @@ ecore_x_default_colormap_get(Ecore_X_Display *disp,
  */
 EAPI int
 ecore_x_default_depth_get(Ecore_X_Display *disp,
-                          Ecore_X_Screen  *screen)
+                          Ecore_X_Screen *screen)
 {
    return DefaultDepth(disp, ecore_x_screen_index_get(screen));
 }
@@ -2094,5 +2094,5 @@ _ecore_x_event_modifier(unsigned int state)
      xmodifiers |= ECORE_X_LOCK_SHIFT;
 
    return xmodifiers;
-} /* _ecore_x_event_modifier */
+}
 

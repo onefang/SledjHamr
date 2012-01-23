@@ -1,3 +1,37 @@
+Ecore 1.2.0
+
+Changes since Ecore 1.1.0:
+--------------------------
+
+Additions:
+    * ecore
+     - ecore_timer_reset()
+    * ecore_con
+     - ecore_con_socks api
+     - ecore_con_ssl_server_verify_name_set/get
+     - ecore_con_ssl_server_cafile_add() now accepts directories
+     - ECORE_CON_REMOTE_CORK
+     - ecore_con_url_proxy_set()
+     - ecore_con_url_timeout_set()
+     - ecore_con_url_proxy_username_set
+     - ecore_con_url_proxy_password_set()
+    * ecore_x:
+     - ecore_x_randr_output_backlight_available()
+    * ecore_evas:
+     - Add Shm and Egl engines for ecore_evas to draw in Wayland.
+     - Add Socket and Plug to draw other process area.
+    * ecore_wayland
+     - Add Ecore_Wayland (backend to support Wayland).
+
+Improvements:
+    * ecore:
+     - most allocations moved to mempools
+    * ecore_con:
+     - certificates can now be added for STARTTTLS
+    * ecore_win32:
+     - fix modifiers value on Windows XP
+
+
 Ecore 1.1.0
 
 Changes since Ecore 1.0.0:
@@ -75,7 +109,7 @@ Fixes:
     * NULL pointer dereference in ecore_x selection notification code
     * sync GNUTLS thread activation with eina changes
     * ecore_ipc compilation on Windows
-    * fix Shift, Control and Alt keys detection on Windows
+    * fix Shift, Control, Alt and AltGr keys detection on Windows XP
     * "mouse-down inside and mouse-up outside" issue on Windows
     * ecore_x shadow tree search fixed to respect shape input of windows
     * fd handlers fixed when idler callbacks add jobs or events

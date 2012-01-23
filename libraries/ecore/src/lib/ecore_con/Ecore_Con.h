@@ -234,6 +234,14 @@ typedef struct _Ecore_Con_Server Ecore_Con_Server;
 typedef struct _Ecore_Con_Client Ecore_Con_Client;
 
 /**
+ * @typedef Ecore_Con_Socks
+ * An object representing a SOCKS proxy
+ * @ingroup Ecore_Con_Socks_Group
+ * @since 1.2
+ */
+typedef struct Ecore_Con_Socks Ecore_Con_Socks;
+
+/**
  * @typedef Ecore_Con_Url
  * A handle to an http upload/download object
  * @ingroup Ecore_Con_Url_Group
@@ -323,6 +331,13 @@ typedef struct _Ecore_Con_Event_Client_Write Ecore_Con_Event_Client_Write;
  * @since 1.1
  */
 typedef struct _Ecore_Con_Event_Server_Write Ecore_Con_Event_Server_Write;
+
+/**
+ * @typedef Ecore_Con_Event_Proxy_Bind
+ * Used as the @p data param for the corresponding event
+ * @since 1.2
+ */
+typedef struct _Ecore_Con_Event_Proxy_Bind Ecore_Con_Event_Proxy_Bind;
 
 /**
  * @typedef Ecore_Con_Event_Url_Data
@@ -464,6 +479,19 @@ struct _Ecore_Con_Event_Server_Write
 };
 
 /**
+ * @struct _Ecore_Con_Event_Proxy_Bind
+ * Used as the @p data param for the @ref ECORE_CON_EVENT_PROXY_BIND event
+ * @ingroup Ecore_Con_Socks_Group
+ * @since 1.2
+ */
+struct _Ecore_Con_Event_Proxy_Bind
+{
+   Ecore_Con_Server *server; /**< the server object connected to the proxy */
+   const char *ip;           /**< the proxy-bound ip address */
+   int port;                 /**< the proxy-bound port */
+};
+
+/**
  * @struct _Ecore_Con_Event_Url_Data
  * Used as the @p data param for the @ref ECORE_CON_EVENT_URL_DATA event
  * @ingroup Ecore_Con_Url_Group
@@ -542,6 +570,10 @@ EAPI extern int ECORE_CON_EVENT_SERVER_WRITE;
 EAPI extern int ECORE_CON_EVENT_CLIENT_DATA;
 /** A server connection object has data */
 EAPI extern int ECORE_CON_EVENT_SERVER_DATA;
+/** A server connection has successfully negotiated an ip:port binding
+ * @since 1.2
+ */
+EAPI extern int ECORE_CON_EVENT_PROXY_BIND;
 /** A URL object has data */
 EAPI extern int ECORE_CON_EVENT_URL_DATA;
 /** A URL object has completed its transfer to and from the server and can be reused */
@@ -605,7 +637,13 @@ typedef enum _Ecore_Con_Type
    ECORE_CON_REMOTE_UDP = 5,
    /** Remote broadcast using UDP */
    ECORE_CON_REMOTE_BROADCAST = 6,
+   /** Remote connection sending packets immediately */
    ECORE_CON_REMOTE_NODELAY = 7,
+   /** Remote connection sending data in large chunks
+    * @note Only available on Linux
+    * @since 1.2
+    */
+   ECORE_CON_REMOTE_CORK = 8,
    /** Use SSL2: UNSUPPORTED. **/
    ECORE_CON_USE_SSL2 = (1 << 4),
    /** Use SSL3 */
@@ -675,12 +713,26 @@ EAPI Eina_Bool         ecore_con_ssl_server_crl_add(Ecore_Con_Server *svr, const
 EAPI Eina_Bool         ecore_con_ssl_server_cafile_add(Ecore_Con_Server *svr, const char *ca_file);
 EAPI void              ecore_con_ssl_server_verify(Ecore_Con_Server *svr);
 EAPI void              ecore_con_ssl_server_verify_basic(Ecore_Con_Server *svr);
+EAPI void              ecore_con_ssl_server_verify_name_set(Ecore_Con_Server *svr, const char *name);
+EAPI const char       *ecore_con_ssl_server_verify_name_get(Ecore_Con_Server *svr);
 EAPI Eina_Bool         ecore_con_ssl_server_upgrade(Ecore_Con_Server *svr, Ecore_Con_Type compl_type);
 EAPI Eina_Bool         ecore_con_ssl_client_upgrade(Ecore_Con_Client *cl, Ecore_Con_Type compl_type);
 
 /**
  * @}
  */
+
+EAPI Ecore_Con_Socks *ecore_con_socks4_remote_add(const char *ip, int port, const char *username);
+EAPI void             ecore_con_socks4_lookup_set(Ecore_Con_Socks *ecs, Eina_Bool enable);
+EAPI Eina_Bool        ecore_con_socks4_lookup_get(Ecore_Con_Socks *ecs);
+EAPI Eina_Bool        ecore_con_socks4_remote_exists(const char *ip, int port, const char *username);
+EAPI void             ecore_con_socks4_remote_del(const char *ip, int port, const char *username);
+EAPI void             ecore_con_socks_bind_set(Ecore_Con_Socks *ecs, Eina_Bool is_bind);
+EAPI Eina_Bool        ecore_con_socks_bind_get(Ecore_Con_Socks *ecs);
+EAPI unsigned int     ecore_con_socks_version_get(Ecore_Con_Socks *ecs);
+EAPI void             ecore_con_socks_remote_del(Ecore_Con_Socks *ecs);
+EAPI void             ecore_con_socks_apply_once(Ecore_Con_Socks *ecs);
+EAPI void             ecore_con_socks_apply_always(Ecore_Con_Socks *ecs);
 
 /**
  * @defgroup Ecore_Con_Server_Group Ecore Connection Server Functions
@@ -1185,6 +1237,8 @@ EAPI Eina_Bool         ecore_con_client_connected_get(Ecore_Con_Client *cl);
  */
 EAPI int               ecore_con_client_port_get(Ecore_Con_Client *cl);
 
+
+
 /**
  * @}
  */
@@ -1583,7 +1637,7 @@ EAPI Eina_Bool         ecore_con_url_post(Ecore_Con_Url *url_con,
  * modification time.
  *
  * @param url_con   Ecore_Con_Url to act upon.
- * @param condition Condition to use for HTTP requests.
+ * @param time_condition Condition to use for HTTP requests.
  * @param timestamp Time since 1 Jan 1970 to use in the condition.
  *
  * This function may set the header "If-Modified-Since" or
@@ -1789,6 +1843,74 @@ EAPI void              ecore_con_url_ssl_verify_peer_set(Ecore_Con_Url *url_con,
                                                          Eina_Bool verify);
 EAPI int               ecore_con_url_ssl_ca_set(Ecore_Con_Url *url_con,
                                                 const char *ca_path);
+
+/**
+ * Set HTTP proxy to use.
+ *
+ * The parameter should be a char * to a zero terminated string holding
+ * the host name or dotted IP address. To specify port number in this string,
+ * append :[port] to the end of the host name.
+ * The proxy string may be prefixed with [protocol]:// since any such prefix
+ * will be ignored.
+ * The proxy's port number may optionally be specified with the separate option.
+ * If not specified, libcurl will default to using port 1080 for proxies.
+ *
+ * @param url_con Connection object that will use the proxy.
+ * @param proxy Porxy string or @c NULL to disable
+ *
+ * @return #EINA_TRUE on success, #EINA_FALSE on error.
+ * @since 1.2
+ */
+EAPI Eina_Bool ecore_con_url_proxy_set(Ecore_Con_Url *url_con, const char *proxy);
+
+/**
+ * Set zero terminated username to use for proxy.
+ *
+ * if socks protocol is used for proxy, protocol should be socks5 and above.
+ *
+ * @param url_con Connection object that will use the proxy.
+ * @param username Username string.
+ *
+ * @return #EINA_TRUE on success, #EINA_FALSE on error.
+ *
+ * @see ecore_con_url_proxy_set()
+ *
+ * @since 1.2
+ */
+EAPI Eina_Bool ecore_con_url_proxy_username_set(Ecore_Con_Url *url_con, const char *username);
+
+/**
+ * Set zero terminated password to use for proxy.
+ *
+ * if socks protocol is used for proxy, protocol should be socks5 and above.
+ *
+ * @param url_con Connection object that will use the proxy.
+ * @param password Password string.
+ *
+ * @return #EINA_TRUE on success, #EINA_FALSE on error.
+ *
+ * @see ecore_con_url_proxy_set()
+ *
+ * @since 1.2
+ */
+EAPI Eina_Bool ecore_con_url_proxy_password_set(Ecore_Con_Url *url_con, const char *password);
+
+/**
+ * Set timeout in seconds.
+ *
+ * the maximum time in seconds that you allow the ecore con url transfer
+ * operation to take. Normally, name lookups can take a considerable time
+ * and limiting operations to less than a few minutes risk aborting perfectly
+ * normal operations.
+ *
+ * @param url_con Connection object that will use the timeout.
+ * @param timeout time in seconds.
+ *
+ * @see ecore_con_url_cookies_jar_file_set()
+ *
+ * @since 1.2
+ */
+EAPI void ecore_con_url_timeout_set(Ecore_Con_Url *url_con, double timeout);
 
 /**
  * @}

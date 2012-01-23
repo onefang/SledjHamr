@@ -2,12 +2,19 @@
 # include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifndef _MSC_VER
 # include <unistd.h>
+#endif
+
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
 #endif
 
 #ifdef HAVE_EVIL
@@ -194,6 +201,18 @@ ecore_evas_engine_type_supported_get(Ecore_Evas_Engine_Type engine)
 #else
         return EINA_FALSE;
 #endif
+     case ECORE_EVAS_ENGINE_WAYLAND_SHM:
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+        return EINA_TRUE;
+#else
+        return EINA_FALSE;
+#endif
+     case ECORE_EVAS_ENGINE_WAYLAND_EGL:
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+        return EINA_TRUE;
+#else
+        return EINA_FALSE;
+#endif
       default:
         return EINA_FALSE;
      };
@@ -237,6 +256,8 @@ ecore_evas_init(void)
    _ecore_evas_ews_events_init();
 #endif
 
+   _ecore_evas_extn_init();
+   
    if (getenv("ECORE_EVAS_COMP_NOSYNC"))
       _ecore_evas_app_comp_sync = 0;
    return _ecore_evas_init_count;
@@ -257,6 +278,8 @@ ecore_evas_shutdown(void)
 
    while (ecore_evases) _ecore_evas_free(ecore_evases);
 
+   _ecore_evas_extn_shutdown();
+   
    if (_ecore_evas_fps_debug) _ecore_evas_fps_debug_shutdown();
    ecore_idle_enterer_del(ecore_evas_idle_enterer);
    ecore_evas_idle_enterer = NULL;
@@ -282,6 +305,7 @@ ecore_evas_shutdown(void)
 #ifdef BUILD_ECORE_EVAS_SOFTWARE_16_WINCE
    while (_ecore_evas_wince_shutdown());
 #endif
+
    if (_ecore_evas_async_events_fd)
      ecore_main_fd_handler_del(_ecore_evas_async_events_fd);
 
@@ -577,6 +601,40 @@ _ecore_evas_constructor_psl1ght(int x __UNUSED__, int y __UNUSED__, int w, int h
 }
 #endif
 
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+static Ecore_Evas *
+_ecore_evas_constructor_wayland_shm(int x, int y, int w, int h, const char *extra_options)
+{
+   char *disp_name = NULL;
+   unsigned int frame = 0;
+   Ecore_Evas *ee;
+
+   _ecore_evas_parse_extra_options_str(extra_options, "display=", &disp_name);
+   _ecore_evas_parse_extra_options_uint(extra_options, "frame=", &frame);
+   ee = ecore_evas_wayland_shm_new(disp_name, x, y, w, h, frame);
+   free(disp_name);
+
+   return ee;
+}
+#endif
+
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+static Ecore_Evas *
+_ecore_evas_constructor_wayland_egl(int x, int y, int w, int h, const char *extra_options)
+{
+   char *disp_name = NULL;
+   unsigned int frame = 0;
+   Ecore_Evas *ee;
+
+   _ecore_evas_parse_extra_options_str(extra_options, "display=", &disp_name);
+   _ecore_evas_parse_extra_options_uint(extra_options, "frame=", &frame);
+   ee = ecore_evas_wayland_egl_new(disp_name, x, y, w, h, frame);
+   free(disp_name);
+
+   return ee;
+}
+#endif
+
 #ifdef BUILD_ECORE_EVAS_SOFTWARE_GDI
 static Ecore_Evas *
 _ecore_evas_constructor_software_gdi(int x, int y, int w, int h, const char *extra_options)
@@ -714,7 +772,16 @@ static const struct ecore_evas_engine _engines[] = {
   {"psl1ght", _ecore_evas_constructor_psl1ght},
 #endif
 
-  /* Last chance to have a window */
+   /* Wayland */
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+  {"wayland_shm", _ecore_evas_constructor_wayland_shm},
+#endif
+
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+  {"wayland_egl", _ecore_evas_constructor_wayland_egl},
+#endif
+
+   /* Last chance to have a window */
 #ifdef BUILD_ECORE_EVAS_OPENGL_SDL
   {"opengl_sdl", _ecore_evas_constructor_opengl_sdl},
 #endif
@@ -1938,7 +2005,7 @@ ecore_evas_fullscreen_get(const Ecore_Evas *ee)
  * Set whether or not an Ecore_Evas' window should avoid damage
  *
  * @param ee The Ecore_Evas
- * @param The type of the damage management
+ * @param on The type of the damage management
  *
  * This function causes @p ee to be drawn to a pixmap to avoid recalculations.
  * On expose events it will copy from the pixmap to the window.
@@ -2008,8 +2075,8 @@ ecore_evas_withdrawn_get(const Ecore_Evas *ee)
         ECORE_MAGIC_FAIL(ee, ECORE_MAGIC_EVAS,
                          "ecore_evas_withdrawn_get");
         return EINA_FALSE;
-     } else
-     return ee->prop.withdrawn ? EINA_TRUE : EINA_FALSE;
+     }
+   return ee->prop.withdrawn ? EINA_TRUE : EINA_FALSE;
 }
 
 /**
@@ -2048,8 +2115,8 @@ ecore_evas_sticky_get(const Ecore_Evas *ee)
         ECORE_MAGIC_FAIL(ee, ECORE_MAGIC_EVAS,
                          "ecore_evas_sticky_get");
         return EINA_FALSE;
-     } else
-     return ee->prop.sticky ? EINA_TRUE : EINA_FALSE;
+     }
+   return ee->prop.sticky ? EINA_TRUE : EINA_FALSE;
 }
 
 EAPI void
@@ -2168,6 +2235,28 @@ ecore_evas_screen_geometry_get(const Ecore_Evas *ee, int *x, int *y, int *w, int
 
    IFC(ee, fn_screen_geometry_get) (ee, x, y, w, h);
    IFE;
+}
+
+EAPI void 
+ecore_evas_draw_frame_set(Ecore_Evas *ee, Eina_Bool draw_frame) 
+{
+   if (!ECORE_MAGIC_CHECK(ee, ECORE_MAGIC_EVAS))
+     {
+        ECORE_MAGIC_FAIL(ee, ECORE_MAGIC_EVAS, "ecore_evas_draw_frame_set");
+        return;
+     }
+   ee->prop.draw_frame = draw_frame;
+}
+
+EAPI Eina_Bool 
+ecore_evas_draw_frame_get(const Ecore_Evas *ee) 
+{
+   if (!ECORE_MAGIC_CHECK(ee, ECORE_MAGIC_EVAS))
+     {
+        ECORE_MAGIC_FAIL(ee, ECORE_MAGIC_EVAS, "ecore_evas_draw_frame_get");
+        return EINA_FALSE;
+     }
+   return ee->prop.draw_frame;
 }
 
 /* fps debug calls - for debugging how much time your app actually spends */
@@ -2586,3 +2675,55 @@ ecore_evas_input_event_unregister(Ecore_Evas *ee)
 {
    ecore_event_window_unregister((Ecore_Window)ee);
 }
+
+#if defined(BUILD_ECORE_EVAS_WAYLAND_SHM) || defined (BUILD_ECORE_EVAS_WAYLAND_EGL)
+EAPI void 
+ecore_evas_wayland_resize(Ecore_Evas *ee, int location)
+{
+   if (!ee) return;
+   if (!strcmp(ee->driver, "wayland_shm"))
+     {
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+        _ecore_evas_wayland_shm_resize(ee, location);
+#endif
+     }
+   else if (!strcmp(ee->driver, "wayland_egl"))
+     {
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+        _ecore_evas_wayland_egl_resize(ee, location);
+#endif
+     }
+}
+
+EAPI void 
+ecore_evas_wayland_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source)
+{
+   if ((!ee) || (!source)) return;
+   if (!ee->engine.wl.surface) return;
+
+   if (!strcmp(ee->driver, "wayland_shm"))
+     {
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+        _ecore_evas_wayland_shm_drag_start(ee, drag_ee, source);
+#endif
+     }
+   else if (!strcmp(ee->driver, "wayland_egl"))
+     {
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+        _ecore_evas_wayland_egl_drag_start(ee, drag_ee, source);
+#endif
+     }
+}
+#else
+EAPI void 
+ecore_evas_wayland_resize(Ecore_Evas *ee __UNUSED__, int location __UNUSED__)
+{
+
+}
+
+EAPI void 
+ecore_evas_wayland_drag_start(Ecore_Evas *ee __UNUSED__, Ecore_Evas *drag_ee __UNUSED__, void *source __UNUSED__)
+{
+
+}
+#endif

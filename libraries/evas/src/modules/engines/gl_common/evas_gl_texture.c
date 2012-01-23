@@ -109,7 +109,9 @@ _tex_format_index(GLuint format)
 static void
 _tex_2d(int intfmt, int w, int h, int fmt, int type)
 {
+#ifdef GL_TEXTURE_INTERNAL_FORMAT
    int intfmtret = -1;
+#endif   
    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, w, h, 0, fmt, type, NULL);
    GLERR(__FUNCTION__, __FILE__, __LINE__, "");
 #ifdef GL_TEXTURE_INTERNAL_FORMAT
@@ -479,7 +481,6 @@ _pool_tex_dynamic_new(Evas_Engine_GL_Context *gc, int w, int h, int intformat, i
 #if defined (GLES_VARIETY_S3C6410) || defined (GLES_VARIETY_SGX)
    int fmt; // EGL_MAP_GL_TEXTURE_RGBA_SEC or EGL_MAP_GL_TEXTURE_RGB_SEC or bust
    int pixtype; // EGL_MAP_GL_TEXTURE_UNSIGNED_BYTE_SEC or bust
-   int glformat;
    int attr[] =
      {
         EGL_MAP_GL_TEXTURE_WIDTH_SEC, 32,
@@ -914,7 +915,7 @@ evas_gl_common_texture_update(Evas_GL_Texture *tex, RGBA_Image *im)
         tpix = alloca(im->cache_entry.h * sizeof(DATA32));
         pd = tpix;
         ps = im->image.data;
-        for (i = 0; i < im->cache_entry.h; i++)
+        for (i = 0; i < (int)im->cache_entry.h; i++)
           {
              *pd = *ps;
              pd++;
@@ -929,7 +930,7 @@ evas_gl_common_texture_update(Evas_GL_Texture *tex, RGBA_Image *im)
                     tpix);
         pd = tpix;
         ps = im->image.data + (im->cache_entry.w - 1);
-        for (i = 0; i < im->cache_entry.h; i++)
+        for (i = 0; i < (int)im->cache_entry.h; i++)
           {
              *pd = *ps;
              pd++;

@@ -918,12 +918,8 @@ evas_cache_image_drop(Image_Entry *im)
 EAPI void
 evas_cache_image_data_not_needed(Image_Entry *im)
 {
-   Evas_Cache_Image *cache;
    int references;
 
-   /* FIXME: no one uses this api... well evas_cache_engine_parent_not_needed()
-    * does, but nothing uses that! */
-   cache = im->cache;
 #ifdef EVAS_FRAME_QUEUING
    LKL(im->lock_references);
 #endif
@@ -941,11 +937,12 @@ evas_cache_image_dirty(Image_Entry *im, unsigned int x, unsigned int y, unsigned
 {
    Image_Entry *im_dirty = im;
    Evas_Cache_Image *cache;
-   int references;
 
    cache = im->cache;
    if (!(im->flags.dirty))
      {
+#ifndef EVAS_CSERVE
+        int references;
 #ifdef EVAS_FRAME_QUEUING
         LKL(im->lock_references);
 #endif
@@ -953,21 +950,18 @@ evas_cache_image_dirty(Image_Entry *im, unsigned int x, unsigned int y, unsigned
 #ifdef EVAS_FRAME_QUEUING
         LKU(im->lock_references);
 #endif
-#ifndef EVAS_CSERVE
         // if ref 1 also copy if using shared cache as its read-only
         if (references == 1) im_dirty = im;
         else
 #endif
           {
-             int error;
-             
              im_dirty = 
                 evas_cache_image_copied_data(cache, im->w, im->h, 
                                              evas_cache_image_pixels(im), 
                                              im->flags.alpha, im->space);
              if (!im_dirty) goto on_error;
              if (cache->func.debug) cache->func.debug("dirty-src", im);
-             error = cache->func.dirty(im_dirty, im);
+             cache->func.dirty(im_dirty, im);
              if (cache->func.debug) cache->func.debug("dirty-out", im_dirty);
 #ifdef EVAS_FRAME_QUEUING
              LKL(im_dirty->lock_references);
@@ -1014,15 +1008,13 @@ evas_cache_image_alone(Image_Entry *im)
      }
    else
      {
-        int error;
-
         im_dirty = evas_cache_image_copied_data(cache, im->w, im->h, 
                                                 evas_cache_image_pixels(im), 
                                                 im->flags.alpha, 
                                                 im->space);
         if (!im_dirty) goto on_error;
         if (cache->func.debug) cache->func.debug("dirty-src", im);
-        error = cache->func.dirty(im_dirty, im);
+        cache->func.dirty(im_dirty, im);
         if (cache->func.debug) cache->func.debug("dirty-out", im_dirty);
 #ifdef EVAS_FRAME_QUEUING
         LKL(im_dirty->lock_references);
@@ -1296,6 +1288,7 @@ evas_cache_image_preload_cancel(Image_Entry *im, const void *target)
    _evas_cache_image_entry_preload_remove(im, target);
 #else
    (void)im;
+   (void)target;
 #endif
 }
 

@@ -29,7 +29,7 @@
 #include "eina_magic.h"
 
 /**
- * @page list_01_example_page Adding elements to Eina_List
+ * @page eina_list_01_example_page Adding elements to Eina_List
  * @dontinclude eina_list_01.c
  *
  * Creating an @ref Eina_List and adding elements to it is very easy and can be
@@ -99,11 +99,11 @@
  */
 
 /**
- * @page list_02_example_page Sorting Eina_List elements
+ * @page eina_list_02_example_page Sorting Eina_List elements
  * @dontinclude eina_list_02.c
  * 
  * If you don't know how to create lists see
- * @ref list_01_example_page.
+ * @ref eina_list_01_example_page.
  * 
  * @skip #include
  * @until boomer
@@ -151,11 +151,11 @@
  */
 
 /**
- * @page list_03_example_page Reordering Eina_List elments
+ * @page eina_list_03_example_page Reordering Eina_List elments
  * @dontinclude eina_list_03.c
  * 
  * If you don't know how to create lists see
- * @ref list_01_example_page.
+ * @ref eina_list_01_example_page.
  * 
  * We start out with code that should be familiar by now:
  * @skip #include
@@ -197,12 +197,12 @@
  */
 
 /**
- * @page list_04_example_page Eina_List and memory allocation
+ * @page eina_list_04_example_page Eina_List and memory allocation
  * @dontinclude eina_list_04.c
  *
  * If you don't know how to create lists see
- * @ref list_01_example_page. In this example we also use
- * @ref eina_stringshare, however it should be possible to understand the code
+ * @ref eina_list_01_example_page. In this example we also use
+ * @ref Eina_Stringshare_Group, however it should be possible to understand the code
  * regardless of previous knowledge about it.
  *
  * Here we have the usual list creation code with a twist, now we are using as
@@ -276,10 +276,10 @@
  * list as the list!
  *
  * Here are some examples of @ref Eina_List usage:
- * @li @ref list_01_example_page
- * @li @ref list_02_example_page
- * @li @ref list_03_example_page
- * @li @ref list_04_example_page
+ * @li @ref eina_list_01_example_page
+ * @li @ref eina_list_02_example_page
+ * @li @ref eina_list_03_example_page
+ * @li @ref eina_list_04_example_page
  */
 
 /**
@@ -582,7 +582,7 @@ EAPI Eina_List            *eina_list_remove(Eina_List *list, const void *data) E
 
 
 /**
- * @brief Remove the specified data.
+ * @brief Remove the specified list node.
  *
  * @param list The given linked list.
  * @param remove_list The list node which is to be removed.

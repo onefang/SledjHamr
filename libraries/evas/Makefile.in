@@ -51,6 +51,8 @@ host_triplet = @host@
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@am__append_14 = evas-software-16-wince.pc
 @BUILD_ENGINE_SOFTWARE_SDL_TRUE@am__append_15 = evas-software-sdl.pc
 @BUILD_ENGINE_PSL1GHT_TRUE@am__append_16 = evas-psl1ght.pc
+@BUILD_ENGINE_WAYLAND_SHM_TRUE@am__append_17 = evas-wayland-shm.pc
+@BUILD_ENGINE_WAYLAND_EGL_TRUE@am__append_18 = evas-wayland-egl.pc
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -66,10 +68,12 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/evas-software-ddraw.pc.in \
 	$(srcdir)/evas-software-gdi.pc.in \
 	$(srcdir)/evas-software-sdl.pc.in \
-	$(srcdir)/evas-software-x11.pc.in $(srcdir)/evas.pc.in \
+	$(srcdir)/evas-software-x11.pc.in \
+	$(srcdir)/evas-wayland-egl.pc.in \
+	$(srcdir)/evas-wayland-shm.pc.in $(srcdir)/evas.pc.in \
 	$(srcdir)/evas.spec.in $(top_srcdir)/configure ABOUT-NLS \
-	AUTHORS COPYING ChangeLog INSTALL NEWS compile config.guess \
-	config.sub depcomp install-sh ltmain.sh missing
+	AUTHORS COPYING ChangeLog INSTALL NEWS config.guess config.sub \
+	depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/efl_attribute.m4 \
 	$(top_srcdir)/m4/efl_coverage.m4 \
@@ -97,7 +101,7 @@ CONFIG_CLEAN_FILES = evas-directfb.pc evas-fb.pc evas-opengl-x11.pc \
 	evas-software-gdi.pc evas-software-ddraw.pc \
 	evas-software-16-ddraw.pc evas-direct3d.pc \
 	evas-software-16-wince.pc evas-software-sdl.pc evas-psl1ght.pc \
-	evas.pc evas.spec
+	evas-wayland-shm.pc evas-wayland-egl.pc evas.pc evas.spec
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -284,8 +288,6 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -302,6 +304,8 @@ VALGRIND_CFLAGS = @VALGRIND_CFLAGS@
 VALGRIND_LIBS = @VALGRIND_LIBS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
@@ -383,6 +387,10 @@ evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
 evas_engine_software_xlib_libs = @evas_engine_software_xlib_libs@
+evas_engine_wayland_egl_cflags = @evas_engine_wayland_egl_cflags@
+evas_engine_wayland_egl_libs = @evas_engine_wayland_egl_libs@
+evas_engine_wayland_shm_cflags = @evas_engine_wayland_shm_cflags@
+evas_engine_wayland_shm_libs = @evas_engine_wayland_shm_libs@
 evas_image_loader_bmp_cflags = @evas_image_loader_bmp_cflags@
 evas_image_loader_bmp_libs = @evas_image_loader_bmp_libs@
 evas_image_loader_edb_cflags = @evas_image_loader_edb_cflags@
@@ -501,6 +509,8 @@ evas-direct3d.pc.in \
 evas-software-16-wince.pc.in \
 evas-software-sdl.pc.in \
 evas-psl1ght.pc.in \
+evas-wayland-shm.pc.in \
+evas-wayland-egl.pc.in \
 evas.spec.in \
 evas.spec \
 m4/efl_attribute.m4 \
@@ -522,7 +532,8 @@ pkgconfig_DATA = evas.pc $(am__append_1) $(am__append_2) \
 	$(am__append_6) $(am__append_7) $(am__append_8) \
 	$(am__append_9) $(am__append_10) $(am__append_11) \
 	$(am__append_12) $(am__append_13) $(am__append_14) \
-	$(am__append_15) $(am__append_16)
+	$(am__append_15) $(am__append_16) $(am__append_17) \
+	$(am__append_18)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -609,6 +620,10 @@ evas-software-16-wince.pc: $(top_builddir)/config.status $(srcdir)/evas-software
 evas-software-sdl.pc: $(top_builddir)/config.status $(srcdir)/evas-software-sdl.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 evas-psl1ght.pc: $(top_builddir)/config.status $(srcdir)/evas-psl1ght.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+evas-wayland-shm.pc: $(top_builddir)/config.status $(srcdir)/evas-wayland-shm.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+evas-wayland-egl.pc: $(top_builddir)/config.status $(srcdir)/evas-wayland-egl.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 evas.pc: $(top_builddir)/config.status $(srcdir)/evas.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

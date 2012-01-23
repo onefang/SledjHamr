@@ -16,6 +16,7 @@ struct _Ecore_Idler
    int           references;
    Eina_Bool     delete_me : 1;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Idler);
 
 static Ecore_Idler *idlers = NULL;
 static Ecore_Idler *idler_current = NULL;
@@ -32,7 +33,7 @@ ecore_idler_add(Ecore_Task_Cb func,
 
    _ecore_lock();
    if (!func) goto unlock;
-   ie = calloc(1, sizeof(Ecore_Idler));
+   ie = ecore_idler_calloc(1);
    if (!ie) goto unlock;
    ECORE_MAGIC_SET(ie, ECORE_MAGIC_IDLER);
    ie->func = func;
@@ -86,7 +87,7 @@ _ecore_idler_shutdown(void)
      {
         idlers = (Ecore_Idler *)eina_inlist_remove(EINA_INLIST_GET(idlers), EINA_INLIST_GET(idlers));
         ECORE_MAGIC_SET(ie, ECORE_MAGIC_NONE);
-        free(ie);
+        ecore_idler_mp_free(ie);
      }
    idlers_delete_me = 0;
    idler_current = NULL;
@@ -139,7 +140,7 @@ _ecore_idler_all_call(void)
 
                   idlers = (Ecore_Idler *)eina_inlist_remove(EINA_INLIST_GET(idlers), EINA_INLIST_GET(ie));
                   ECORE_MAGIC_SET(ie, ECORE_MAGIC_NONE);
-                  free(ie);
+                  ecore_idler_mp_free(ie);
                }
           }
         if (!deleted_idlers_in_use)

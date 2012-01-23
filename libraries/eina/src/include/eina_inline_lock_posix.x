@@ -19,6 +19,15 @@
 #ifndef EINA_INLINE_LOCK_POSIX_X_
 #define EINA_INLINE_LOCK_POSIX_X_
 
+#ifdef EINA_UNUSED
+# undef EINA_UNUSED
+#endif
+#ifdef __GNUC__
+# define EINA_UNUSED __attribute__((unused))
+#else
+# define EINA_UNUSED
+#endif
+
 #include <errno.h>
 #ifndef __USE_UNIX98
 # define __USE_UNIX98
@@ -28,7 +37,10 @@
 # include <pthread.h>
 #endif
 
+#include <semaphore.h>
+
 #include <sys/time.h>
+#include <stdio.h>
 
 #ifdef EINA_HAVE_DEBUG_THREADS
 #include <stdlib.h>
@@ -45,6 +57,7 @@ typedef struct _Eina_Lock Eina_Lock;
 typedef struct _Eina_RWLock Eina_RWLock;
 typedef struct _Eina_Condition Eina_Condition;
 typedef pthread_key_t Eina_TLS;
+typedef sem_t Eina_Semaphore;
 
 struct _Eina_Lock
 {
@@ -77,8 +90,6 @@ struct _Eina_RWLock
 EAPI extern Eina_Bool _eina_threads_activated;
 
 #ifdef EINA_HAVE_DEBUG_THREADS
-# include <sys/time.h>
-
 EAPI extern int _eina_threads_debug;
 EAPI extern pthread_t _eina_main_loop;
 EAPI extern pthread_mutex_t _eina_tracking_lock;
@@ -504,6 +515,42 @@ eina_tls_set(Eina_TLS key, const void *data)
    if (pthread_setspecific(key, data) != 0)
       return EINA_FALSE;
    return EINA_TRUE;
+}
+
+static inline Eina_Bool
+eina_semaphore_new(Eina_Semaphore *sem, int count_init)
+{
+   if (!sem || (count_init <= 0))
+     return EINA_FALSE;
+
+   return (sem_init(sem, count_init, 1) == 0) ? EINA_TRUE : EINA_FALSE;
+}
+
+static inline Eina_Bool
+eina_semaphore_free(Eina_Semaphore *sem)
+{
+   if (!sem)
+     return EINA_FALSE;
+
+   return (sem_destroy(sem) == 0) ? EINA_TRUE : EINA_FALSE;
+}
+
+static inline Eina_Bool
+eina_semaphore_lock(Eina_Semaphore *sem)
+{
+   if (!sem)
+     return EINA_FALSE;
+
+   return (sem_wait(sem) == 0) ? EINA_TRUE : EINA_FALSE;
+}
+
+static inline Eina_Bool
+eina_semaphore_release(Eina_Semaphore *sem, int count_release EINA_UNUSED)
+{
+   if (!sem)
+     return EINA_FALSE;
+
+   return (sem_post(sem) == 0) ? EINA_TRUE : EINA_FALSE;
 }
 
 #endif

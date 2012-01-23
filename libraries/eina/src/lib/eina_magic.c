@@ -79,7 +79,7 @@ _eina_magic_strings_sort_cmp(const void *p1, const void *p2)
 static int
 _eina_magic_strings_find_cmp(const void *p1, const void *p2)
 {
-   Eina_Magic a = (Eina_Magic)p1;
+   Eina_Magic a = (Eina_Magic)(size_t)p1;
    const Eina_Magic_String *b = p2;
    return a - b->magic;
 }
@@ -129,6 +129,10 @@ _eina_magic_strings_alloc(void)
 *                                 Global                                     *
 *============================================================================*/
 
+EAPI Eina_Error EINA_ERROR_MAGIC_FAILED = 0;
+
+static const char EINA_ERROR_MAGIC_FAILED_STR[] = "Magic check failed.";
+
 /**
  * @internal
  * @brief Initialize the magic string module.
@@ -150,6 +154,8 @@ eina_magic_string_init(void)
         EINA_LOG_ERR("Could not register log domain: eina_magic_string");
         return EINA_FALSE;
      }
+   EINA_ERROR_MAGIC_FAILED = eina_error_msg_static_register(
+         EINA_ERROR_MAGIC_FAILED_STR);
 
    return EINA_TRUE;
 }
@@ -206,7 +212,7 @@ eina_magic_string_get(Eina_Magic magic)
         _eina_magic_strings_dirty = 0;
      }
 
-   ems = bsearch((void *)magic, _eina_magic_strings,
+   ems = bsearch((void *)(size_t)magic, _eina_magic_strings,
                  _eina_magic_strings_count, sizeof(Eina_Magic_String),
                  _eina_magic_strings_find_cmp);
    if (ems)
@@ -271,6 +277,7 @@ eina_magic_fail(void *d,
                 const char *fnc,
                 int line)
 {
+   eina_error_set(EINA_ERROR_MAGIC_FAILED);
    if (!d)
       eina_log_print(EINA_LOG_DOMAIN_GLOBAL, EINA_LOG_LEVEL_CRITICAL,
                      file, fnc, line,

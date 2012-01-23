@@ -2,11 +2,11 @@
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 m4_define([v_maj], [1])
 m4_define([v_min], [1])
-m4_define([v_mic], [0])
-m4_define([v_rev], m4_esyscmd([(svnversion "${SVN_REPO_PATH:-.}" | grep -v export || echo 0) | awk -F : '{printf("%s\n", $1);}' | tr -d ' :MSP\n']))
+m4_define([v_mic], [99])
+m4_define([v_rev], m4_esyscmd([(svnversion "${SVN_REPO_PATH:-.}" | grep -v '\(export\|Unversioned directory\)' || echo 0) | awk -F : '{printf("%s\n", $1);}' | tr -d ' :MSP\n']))
 m4_if(v_rev, [0], [m4_define([v_rev], m4_esyscmd([git log 2> /dev/null | (grep -m1 git-svn-id || echo 0) | sed -e 's/.*@\([0-9]*\).*/\1/' | tr -d '\n']))])
 ##--   When released, remove the dnl on the below line
-m4_undefine([v_rev])
+dnl m4_undefine([v_rev])
 ##--   When doing snapshots - change soname. remove dnl on below line
 dnl m4_define([relname], [ver-pre-svn-07])
 dnl m4_define([v_rel], [-release relname])
@@ -352,41 +352,6 @@ PKG_CHECK_MODULES([ECORE_EVAS],
 
 AM_CONDITIONAL([BUILD_TILER_EXAMPLE], [test "x${build_tiler_example}" = "xyes"])
 
-
-### Checks for header files
-AC_HEADER_ASSERT
-AC_HEADER_DIRENT
-AC_HEADER_TIME
-EFL_CHECK_PATH_MAX
-AC_CHECK_HEADERS([unistd.h libgen.h inttypes.h stdint.h sys/types.h siginfo.h])
-
-if test "x${ac_cv_header_inttypes_h}" = "xyes" ; then
-   EINA_CONFIGURE_HAVE_INTTYPES_H="#define EINA_HAVE_INTTYPES_H"
-   AC_DEFINE([HAVE_INTTYPES_H], [1], [Define to 1 if you have the <inttypes.h> header file.])
-fi
-AC_SUBST([EINA_CONFIGURE_HAVE_INTTYPES_H])
-
-if test "x${ac_cv_header_inttypes_h}" = "xyes" ; then
-    EINA_CONFIGURE_HAVE_STDINT_H="#define EINA_HAVE_STDINT_H"
-    AC_DEFINE([HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
-fi
-AC_SUBST([EINA_CONFIGURE_HAVE_STDINT_H])
-
-### Checks for types
-
-AC_CHECK_SIZEOF([wchar_t])
-EINA_SIZEOF_WCHAR_T=$ac_cv_sizeof_wchar_t
-AC_SUBST([EINA_SIZEOF_WCHAR_T])
-AC_CHECK_TYPES([siginfo_t], [], [],
-   [[#include <signal.h>
-     #if HAVE_SIGINFO_H
-     # include <siginfo.h>
-     #endif
-   ]])
-
-### Checks for structures
-
-
 ### Checks for compiler characteristics
 AC_C_CONST
 AC_C_BIGENDIAN
@@ -422,6 +387,15 @@ m4_ifdef([v_mic],
 
 EFL_COMPILER_FLAG([-Wshadow])
 
+case "$host_vendor" in
+  ps3*)
+      PKG_CHECK_MODULES([ESCAPE], [escape])
+      AC_DEFINE(HAVE_ESCAPE, 1, [Set to 1 if evil package is installed])
+      requirement_eina="escape"
+      EINA_CFLAGS="${ESCAPE_CFLAGS} ${EINA_CFLAGS}"
+    ;;
+esac
+
 AC_SUBST([EINA_CPPFLAGS])
 AC_SUBST([EINA_CFLAGS])
 
@@ -450,26 +424,112 @@ case "${host_os}" in
       EINA_LIBS="-ldl -lrt -lm"
    ;;
 esac
+case "$host_vendor" in
+  ps3*)
+      # Escape had already been checked to exist
+      EINA_LIBS="${ESCAPE_LIBS}"
+    ;;
+esac
 AC_SUBST([EINA_LIBS])
 AC_SUBST([lt_enable_auto_import])
 
-case "$host_vendor" in
-  ps3*)
-      PKG_CHECK_MODULES([ESCAPE], [escape])
-      AC_DEFINE(HAVE_ESCAPE, 1, [Set to 1 if evil package is installed])
-      requirement_eina="escape"
-      EINA_LIBS="${ESCAPE_LIBS}"
-      EINA_CFLAGS="${ESCAPE_CFLAGS} ${EINA_CFLAGS}"
-    ;;
-esac
-
 EFL_LINKER_FLAG([-fno-strict-aliasing])
 
+CFLAGS="${CFLAGS} ${EINA_CFLAGS}"
+LDFLAGS="${LDFLAGS} ${EINA_LDFLAGS}"
+LIBS="${LIBS} ${EINA_LIBS}"
+
+### Checks for header files
+AC_HEADER_ASSERT
+AC_HEADER_TIME
+EFL_CHECK_PATH_MAX
+AC_CHECK_HEADERS([unistd.h libgen.h inttypes.h stdint.h sys/types.h siginfo.h strings.h sys/mman.h])
+
+if test "x${ac_cv_header_inttypes_h}" = "xyes" ; then
+   EINA_CONFIGURE_HAVE_INTTYPES_H="#define EINA_HAVE_INTTYPES_H"
+   AC_DEFINE([HAVE_INTTYPES_H], [1], [Define to 1 if you have the <inttypes.h> header file.])
+fi
+AC_SUBST([EINA_CONFIGURE_HAVE_INTTYPES_H])
+
+if test "x${ac_cv_header_inttypes_h}" = "xyes" ; then
+    EINA_CONFIGURE_HAVE_STDINT_H="#define EINA_HAVE_STDINT_H"
+    AC_DEFINE([HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
+fi
+AC_SUBST([EINA_CONFIGURE_HAVE_STDINT_H])
+
+### Checks for types
+
+AC_CHECK_SIZEOF([wchar_t])
+EINA_SIZEOF_WCHAR_T=$ac_cv_sizeof_wchar_t
+AC_SUBST([EINA_SIZEOF_WCHAR_T])
+AC_CHECK_TYPES([siginfo_t], [], [],
+   [[#include <signal.h>
+     #if HAVE_SIGINFO_H
+     # include <siginfo.h>
+     #endif
+   ]])
+
+### Check if dirent.h is usable
+
+AC_CHECK_TYPES([struct dirent], [have_dirent="yes"], [have_dirent="no"],
+   [[#include <dirent.h>
+   ]])
+
+if test "x${have_dirent}" = "xyes" ; then
+    EINA_CONFIGURE_HAVE_DIRENT_H="#define EINA_HAVE_DIRENT_H"
+    AC_DEFINE([HAVE_DIRENT_H], [1], [Define to 1 if you have a valid <dirent.h> header file.])
+fi
+AC_SUBST([EINA_CONFIGURE_HAVE_DIRENT_H])
 
 ### Checks for library functions
 AC_ISC_POSIX
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS([strlcpy dirfd openat fstatat fpathconf execvp])
+AC_CHECK_FUNCS([strlcpy openat fstatat fpathconf execvp])
+
+AC_MSG_CHECKING([for dirfd])
+AC_LINK_IFELSE(
+   [
+    AC_LANG_PROGRAM(
+       [[
+#include <dirent.h>
+       ]],
+       [[
+int main(void)
+{
+  DIR *dirp;
+  return dirfd(dirp);
+}
+       ]])
+   ],
+   [have_dirfd="yes"],
+   [have_dirfd="no"])
+
+AC_MSG_RESULT([${have_dirfd}])
+
+if test "x${have_dirfd}" = "xyes" ; then
+   AC_DEFINE([HAVE_DIRFD], [1], [ Define to 1 if you have the `dirfd' function or macro.])
+fi
+
+# check debug information for malloc
+AC_CHECK_FUNCS([malloc_usable_size], [malloc_true_size="yes"], [malloc_true_size="no"])
+if test "x${malloc_true_size}" = "xyes" ; then
+   AC_DEFINE([HAVE_MALLOC_USABLE_SIZE], [1], [We will be able to know the exact amount of wasted memory])
+fi
+
+want_debug_malloc="no"
+AC_ARG_ENABLE([debug-malloc],
+   [AC_HELP_STRING([--enable-debug-malloc], [enable debugging of malloc usage overhead in our allocator @<:@default=enabled@:>@])],
+   [
+     if test "x${enableval}" = "xyes" ; then
+     	want_debug_malloc="yes"
+     else
+	want_debug_malloc="no"
+     fi
+   ], [want_debug_malloc="no"])
+
+if test "x${malloc_true_size}" = "xyes" -a "x${want_debug_malloc}" = "xyes"; then
+   AC_DEFINE([EINA_DEBUG_MALLOC], [1], [Turn on debugging overhead in mempool])
+fi
 
 # dlopen and dladdr
 dlopen_libs=""
@@ -496,7 +556,34 @@ case "$host_os" in
 esac
 AC_SUBST([dlopen_libs])
 
-EFL_CHECK_FNMATCH([], [AC_MSG_ERROR([Cannot find fnmatch()])])
+have_log="yes"
+EFL_CHECK_FNMATCH([have_log="yes"], [have_log="no"])
+
+want_log="yes"
+AC_ARG_ENABLE([log],
+   [AC_HELP_STRING([--disable-log], [disable Eina_Log infrastructure completly @<:@default=enabled@:>@])],
+   [
+    if test "x${enableval}" = "xyes" ; then
+       want_log="yes"
+    else
+       want_log="no"
+    fi
+   ],
+   [want_log="yes"])
+
+enable_log="no"
+if test "x${have_log}" = xyes -a "x${want_log}" = xyes; then
+   enable_log="yes"
+fi
+
+AC_MSG_CHECKING([wether to build Eina_Log infrastructure])
+AC_MSG_RESULT([${enable_log}])
+
+if test "x${enable_log}" = "xyes"; then
+    EINA_CONFIGURE_ENABLE_LOG="#define EINA_ENABLE_LOG"
+    AC_DEFINE([HAVE_LOG], [1], [Define to 1 if we log support is on])
+fi
+AC_SUBST([EINA_CONFIGURE_ENABLE_LOG])
 
 AC_CHECK_HEADERS([mcheck.h], [AC_DEFINE([HAVE_MCHECK], [1], [Have mcheck.h])])
 AC_CHECK_FUNCS([mtrace], [AC_DEFINE([HAVE_MTRACE], [1], [Have mtrace])])
@@ -748,6 +835,7 @@ echo "  Maximum log level....: ${with_max_log_level}"
 echo "  Report string usage..: ${have_stringshare_usage}"
 echo "  Valgrind support.....: ${have_valgrind}"
 echo "  Default mempool......: ${have_default_mempool}"
+echo "  Log support..........: ${enable_log}"
 echo "  Thread Support.......: ${have_threads}"
 if test "${have_threads}" = "POSIX" ; then
 echo "    spinlock...........: ${have_posix_threads_spinlock}"
@@ -756,7 +844,7 @@ echo "    on/off support.....: ${have_on_off_threads}"
 fi
 echo "  Amalgamation.........: ${do_amalgamation}"
 echo "  Iconv support........: ${have_iconv}"
-echo "  File dirfd...........: ${ac_cv_func_dirfd}"
+echo "  File dirfd...........: ${have_dirfd}"
 echo "  File xattr...........: ${have_xattr}"
 echo
 echo "  Documentation........: ${build_doc}"

@@ -147,3 +147,54 @@
 
 	* Add new hash function eina_hash_murmur3 that should be better at
 	hashing strings.
+
+2011-12-02 Carsten Haitzler (The Rasterman)
+
+        1.1.0 release
+
+2011-12-02  Mike Blumenkrantz (discomfitor/zmike)
+
+        * Add eina_mempool_calloc for returning zeroed memory
+
+2011-12-07  Mike Blumenkrantz (discomfitor/zmike)
+
+        * eina_log*level_check() functions now return the correct value
+
+2011-12-08  Tom Hacohen
+
+	* Binbuf + Strbuf + Ustrbuf: Added eina_*buf_manage_new_length.
+	Same as eina_(u)strbuf_manage_new except that it accepts a length
+	parameter.
+
+2011-12-20  Cedric Bail
+
+	* Fix bug on eina_shutdown when using eina_error.
+
+2011-12-28  Cedric Bail
+
+	* Fix NONNULL argument for eina_hash_find.
+
+2011-12-30  Vincent Torri
+
+	* Add Eina_Semaphore abstraction API.
+
+2011-12-30  Cedric Bail
+
+	* Let eina_hash_free behave like free.
+
+2012-01-03  Cedric Bail
+
+	* Add eina_xattr_fd_ls, eina_xattr_value_fd_ls and eina_xattr_value_ls.
+	* Detect fault during access to Eina_File mmap memory, use eina_file_map_faulted
+	to learn if it happens.
+	* Add eina_file_xattr_get and eina_file_xattr_value_get.
+
+2012-01-09  Gustavo Barbieri
+
+	* Deprecated eina_array_count_get(), use eina_array_count() instead.
+	* Add eina_inarray data type.
+	* Add eina_value data type (generic value storage).
+
+2012-01-19  Shinwoo Kim
+
+	* Fix compilation of eina_semaphore_lock() (Windows port)

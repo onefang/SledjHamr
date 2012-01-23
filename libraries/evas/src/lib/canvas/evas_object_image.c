@@ -1,7 +1,13 @@
+#ifdef HAVE_CONFIG_H
+# include "config.h"  /* so that EAPI in Evas.h is correctly defined */
+#endif
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+#endif
 #include <math.h>
 
 #include "evas_common.h"
@@ -192,8 +198,9 @@ evas_object_image_filled_add(Evas *e)
 static void
 _cleanup_tmpf(Evas_Object *obj)
 {
+#ifdef HAVE_SYS_MMAN_H
    Evas_Object_Image *o;
-   
+
    o = (Evas_Object_Image *)(obj->object_data);
    if (!o->tmpf) return;
 #ifdef __linux__
@@ -204,11 +211,15 @@ _cleanup_tmpf(Evas_Object *obj)
    eina_stringshare_del(o->tmpf);
    o->tmpf_fd = -1;
    o->tmpf = NULL;
+#else
+   (void) obj;
+#endif
 }
 
 static void
 _create_tmpf(Evas_Object *obj, void *data, int size, char *format __UNUSED__)
 {
+#ifdef HAVE_SYS_MMAN_H
    Evas_Object_Image *o;
    char buf[4096];
    void *dst;
@@ -253,6 +264,12 @@ _create_tmpf(Evas_Object *obj, void *data, int size, char *format __UNUSED__)
    o->tmpf = eina_stringshare_add(buf);
    memcpy(dst, data, size);
    munmap(dst, size);
+#else
+   (void) obj;
+   (void) data;
+   (void) size;
+   (void) format;
+#endif
 }
 
 EAPI void
@@ -1915,6 +1932,24 @@ evas_object_image_content_hint_get(const Evas_Object *obj)
    return EVAS_IMAGE_CONTENT_HINT_NONE;
    MAGIC_CHECK_END();
    return o->content_hint;
+}
+
+EAPI Eina_Bool
+evas_object_image_region_support_get(const Evas_Object *obj)
+{
+   Evas_Object_Image *o;
+
+   MAGIC_CHECK(obj, Evas_Object, MAGIC_OBJ);
+   return EINA_FALSE;
+   MAGIC_CHECK_END();
+   o = (Evas_Object_Image *) (obj->object_data);
+   MAGIC_CHECK(o, Evas_Object_Image, MAGIC_OBJ_IMAGE);
+   return EINA_FALSE;
+   MAGIC_CHECK_END();
+
+   return obj->layer->evas->engine.func->image_can_region_get(
+      obj->layer->evas->engine.data.output,
+      o->engine_data);
 }
 
 /* animated feature */
@@ -3770,8 +3805,7 @@ evas_object_image_data_convert_internal(Evas_Object_Image *o, void *data, Evas_C
 						  to_cspace);
 	  break;
         case EVAS_COLORSPACE_YCBCR422601_PL:
-           fprintf(stderr, "EVAS_COLORSPACE_YCBCR422601_PL:\n");
-          out = evas_common_convert_yuv_422_601_to(data,
+           out = evas_common_convert_yuv_422_601_to(data,
                                                    o->cur.image.w,
                                                    o->cur.image.h,
                                                    to_cspace);
@@ -3795,7 +3829,7 @@ evas_object_image_data_convert_internal(Evas_Object_Image *o, void *data, Evas_C
 						    to_cspace);
           break;
 	default:
-           fprintf(stderr, "unknow colorspace: %i\n", o->cur.cspace);
+          WRN("unknow colorspace: %i\n", o->cur.cspace);
 	  break;
      }
 
@@ -3806,9 +3840,7 @@ static void
 evas_object_image_filled_resize_listener(void *data __UNUSED__, Evas *e __UNUSED__, Evas_Object *obj, void *einfo __UNUSED__)
 {
    Evas_Coord w, h;
-   Evas_Object_Image *o;
 
-   o = obj->object_data;
    evas_object_geometry_get(obj, NULL, NULL, &w, &h);
    evas_object_image_fill_set(obj, 0, 0, w, h);
 }

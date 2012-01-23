@@ -14,6 +14,8 @@ eina_hash.h \
 eina_inline_hash.x \
 eina_lalloc.h \
 eina_clist.h \
+eina_inline_clist.x \
+eina_inarray.h \
 eina_inlist.h \
 eina_list.h \
 eina_file.h \
@@ -60,7 +62,9 @@ eina_lock.h \
 eina_prefix.h \
 eina_refcount.h \
 eina_mmap.h \
-eina_xattr.h
+eina_xattr.h \
+eina_value.h \
+eina_inline_value.x
 
 # Will be back for developper after 1.1.
 # eina_object.h

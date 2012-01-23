@@ -1528,9 +1528,9 @@ ecore_x_randr_crtc_geometry_get(Ecore_X_Window     root,
 
 /**
  * @brief sets a CRTC relative to another one.
- * @param crtc_r1 the CRTC to be positioned.
- * @param crtc_r2 the CRTC the position should be relative to
- * @param position the relation between the crtcs
+ * @param crtc1 the CRTC to be positioned.
+ * @param crtc2 the CRTC the position should be relative to
+ * @param policy the relation between the crtcs
  * @param alignment in case CRTCs size differ, aligns CRTC1 accordingly at CRTC2's
  * borders
  * @return EINA_TRUE if crtc could be successfully positioned. EINA_FALSE if
@@ -2443,6 +2443,45 @@ ecore_x_randr_output_backlight_level_set(Ecore_X_Window       root,
           }
 
         free(qreply);
+        return EINA_TRUE;
+     }
+#endif
+   return EINA_FALSE;
+}
+
+/*
+ * @brief check if a backlight is available
+ * @return whether a blacklight is available
+ */
+EAPI Eina_Bool 
+ecore_x_randr_output_backlight_available(void) 
+{
+#ifdef ECORE_XCB_RANDR
+   Ecore_X_Atom _backlight;
+   xcb_intern_atom_cookie_t acookie;
+   xcb_intern_atom_reply_t *areply;
+#endif
+
+   LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
+
+#ifdef ECORE_XCB_RANDR
+   RANDR_CHECK_1_2_RET(EINA_FALSE);
+
+   acookie =
+     xcb_intern_atom_unchecked(_ecore_xcb_conn, 1,
+                               strlen("Backlight"), "Backlight");
+   areply = xcb_intern_atom_reply(_ecore_xcb_conn, acookie, NULL);
+
+   if (!areply)
+     {
+        ERR("Backlight property is not suppported on this server or driver");
+        return EINA_FALSE;
+     }
+   else
+     {
+        _backlight = areply->atom;
+        free(areply);
         return EINA_TRUE;
      }
 #endif

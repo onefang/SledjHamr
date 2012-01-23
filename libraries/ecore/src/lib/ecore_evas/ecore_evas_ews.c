@@ -2,6 +2,11 @@
 # include <config.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+
+#include <Eina.h>
 #include <Ecore.h>
 #include "ecore_private.h"
 #include <Ecore_Input.h>

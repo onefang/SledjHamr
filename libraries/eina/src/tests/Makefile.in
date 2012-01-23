@@ -37,7 +37,8 @@ build_triplet = @build@
 host_triplet = @host@
 @EINA_HAVE_GLIB_TRUE@am__append_1 = -DEINA_BENCH_HAVE_GLIB
 @EINA_ENABLE_BENCHMARK_E17_TRUE@am__append_2 = -DEINA_ENABLE_BENCH_E17
-@EFL_ENABLE_TESTS_TRUE@check_PROGRAMS = eina_suite$(EXEEXT)
+@EFL_ENABLE_TESTS_TRUE@check_PROGRAMS = eina_suite$(EXEEXT) \
+@EFL_ENABLE_TESTS_TRUE@	cxx_compile_test$(EXEEXT)
 @EFL_ENABLE_BENCHMARK_TRUE@bench_PROGRAMS = eina_bench$(EXEEXT)
 subdir = src/tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -107,6 +108,12 @@ module_dummy_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 @EFL_ENABLE_TESTS_TRUE@am_module_dummy_la_rpath = -rpath \
 @EFL_ENABLE_TESTS_TRUE@	$(module_dummydir)
 PROGRAMS = $(bench_PROGRAMS)
+am__cxx_compile_test_SOURCES_DIST = cxx_compile_test.cxx
+@EFL_ENABLE_TESTS_TRUE@am_cxx_compile_test_OBJECTS =  \
+@EFL_ENABLE_TESTS_TRUE@	cxx_compile_test.$(OBJEXT)
+cxx_compile_test_OBJECTS = $(am_cxx_compile_test_OBJECTS)
+@EFL_ENABLE_TESTS_TRUE@cxx_compile_test_DEPENDENCIES =  \
+@EFL_ENABLE_TESTS_TRUE@	$(top_builddir)/src/lib/libeina.la
 am__eina_bench_SOURCES_DIST = eina_bench.c eina_bench_sort.c \
 	eina_bench_hash.c eina_bench_stringshare.c \
 	eina_bench_convert.c eina_bench_mempool.c \
@@ -142,16 +149,17 @@ eina_bench_OBJECTS = $(am_eina_bench_OBJECTS)
 am__eina_suite_SOURCES_DIST = eina_suite.c eina_test_fp.c \
 	eina_test_stringshare.c eina_test_ustringshare.c \
 	eina_test_ustr.c eina_test_binshare.c eina_test_binbuf.c \
-	eina_test_array.c eina_test_clist.c eina_test_error.c \
-	eina_test_sched.c eina_test_log.c eina_test_magic.c \
-	eina_test_inlist.c eina_test_main.c eina_test_counter.c \
-	eina_test_lalloc.c eina_test_hash.c eina_test_iterator.c \
-	eina_test_accessor.c eina_test_module.c eina_test_convert.c \
-	eina_test_rbtree.c eina_test_file.c eina_test_benchmark.c \
-	eina_test_mempool.c eina_test_rectangle.c eina_test_list.c \
+	eina_test_inarray.c eina_test_array.c eina_test_clist.c \
+	eina_test_error.c eina_test_sched.c eina_test_log.c \
+	eina_test_magic.c eina_test_inlist.c eina_test_main.c \
+	eina_test_counter.c eina_test_lalloc.c eina_test_hash.c \
+	eina_test_iterator.c eina_test_accessor.c eina_test_module.c \
+	eina_test_convert.c eina_test_rbtree.c eina_test_file.c \
+	eina_test_benchmark.c eina_test_mempool.c \
+	eina_test_rectangle.c eina_test_list.c \
 	eina_test_matrixsparse.c eina_test_tiler.c eina_test_strbuf.c \
 	eina_test_str.c eina_test_quadtree.c \
-	eina_test_simple_xml_parser.c
+	eina_test_simple_xml_parser.c eina_test_value.c
 @EFL_ENABLE_TESTS_TRUE@am_eina_suite_OBJECTS = eina_suite.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_fp.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_stringshare.$(OBJEXT) \
@@ -159,6 +167,7 @@ am__eina_suite_SOURCES_DIST = eina_suite.c eina_test_fp.c \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_ustr.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_binshare.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_binbuf.$(OBJEXT) \
+@EFL_ENABLE_TESTS_TRUE@	eina_test_inarray.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_array.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_clist.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_error.$(OBJEXT) \
@@ -185,7 +194,8 @@ am__eina_suite_SOURCES_DIST = eina_suite.c eina_test_fp.c \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_strbuf.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_str.$(OBJEXT) \
 @EFL_ENABLE_TESTS_TRUE@	eina_test_quadtree.$(OBJEXT) \
-@EFL_ENABLE_TESTS_TRUE@	eina_test_simple_xml_parser.$(OBJEXT)
+@EFL_ENABLE_TESTS_TRUE@	eina_test_simple_xml_parser.$(OBJEXT) \
+@EFL_ENABLE_TESTS_TRUE@	eina_test_value.$(OBJEXT)
 eina_suite_OBJECTS = $(am_eina_suite_OBJECTS)
 @EFL_ENABLE_TESTS_TRUE@eina_suite_DEPENDENCIES =  \
 @EFL_ENABLE_TESTS_TRUE@	$(top_builddir)/src/lib/libeina.la
@@ -232,10 +242,11 @@ AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(libcity_la_SOURCES) $(module_dummy_la_SOURCES) \
-	$(eina_bench_SOURCES) $(nodist_EXTRA_eina_bench_SOURCES) \
-	$(eina_suite_SOURCES)
+	$(cxx_compile_test_SOURCES) $(eina_bench_SOURCES) \
+	$(nodist_EXTRA_eina_bench_SOURCES) $(eina_suite_SOURCES)
 DIST_SOURCES = $(am__libcity_la_SOURCES_DIST) \
 	$(am__module_dummy_la_SOURCES_DIST) \
+	$(am__cxx_compile_test_SOURCES_DIST) \
 	$(am__eina_bench_SOURCES_DIST) $(am__eina_suite_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
@@ -282,7 +293,9 @@ EFL_SIMD_FLAGS = @EFL_SIMD_FLAGS@
 EGREP = @EGREP@
 EINA_CFLAGS = @EINA_CFLAGS@
 EINA_CONFIGURE_DEFAULT_MEMPOOL = @EINA_CONFIGURE_DEFAULT_MEMPOOL@
+EINA_CONFIGURE_ENABLE_LOG = @EINA_CONFIGURE_ENABLE_LOG@
 EINA_CONFIGURE_HAVE_DEBUG_THREADS = @EINA_CONFIGURE_HAVE_DEBUG_THREADS@
+EINA_CONFIGURE_HAVE_DIRENT_H = @EINA_CONFIGURE_HAVE_DIRENT_H@
 EINA_CONFIGURE_HAVE_INTTYPES_H = @EINA_CONFIGURE_HAVE_INTTYPES_H@
 EINA_CONFIGURE_HAVE_ON_OFF_THREADS = @EINA_CONFIGURE_HAVE_ON_OFF_THREADS@
 EINA_CONFIGURE_HAVE_STDINT_H = @EINA_CONFIGURE_HAVE_STDINT_H@
@@ -334,8 +347,6 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -426,6 +437,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/lib -I$(top_srcdir)/src/include \
 @EFL_ENABLE_TESTS_TRUE@eina_test_ustr.c	\
 @EFL_ENABLE_TESTS_TRUE@eina_test_binshare.c    \
 @EFL_ENABLE_TESTS_TRUE@eina_test_binbuf.c	\
+@EFL_ENABLE_TESTS_TRUE@eina_test_inarray.c 	\
 @EFL_ENABLE_TESTS_TRUE@eina_test_array.c 	\
 @EFL_ENABLE_TESTS_TRUE@eina_test_clist.c	\
 @EFL_ENABLE_TESTS_TRUE@eina_test_error.c	\
@@ -452,9 +464,12 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/lib -I$(top_srcdir)/src/include \
 @EFL_ENABLE_TESTS_TRUE@eina_test_strbuf.c	\
 @EFL_ENABLE_TESTS_TRUE@eina_test_str.c		\
 @EFL_ENABLE_TESTS_TRUE@eina_test_quadtree.c	\
-@EFL_ENABLE_TESTS_TRUE@eina_test_simple_xml_parser.c
+@EFL_ENABLE_TESTS_TRUE@eina_test_simple_xml_parser.c \
+@EFL_ENABLE_TESTS_TRUE@eina_test_value.c
 
 @EFL_ENABLE_TESTS_TRUE@eina_suite_LDADD = @CHECK_LIBS@ $(top_builddir)/src/lib/libeina.la -lm
+@EFL_ENABLE_TESTS_TRUE@cxx_compile_test_SOURCES = cxx_compile_test.cxx
+@EFL_ENABLE_TESTS_TRUE@cxx_compile_test_LDADD = $(top_builddir)/src/lib/libeina.la
 @EFL_ENABLE_TESTS_TRUE@module_dummydir = $(libdir)/eina/test
 @EFL_ENABLE_TESTS_TRUE@module_dummy_LTLIBRARIES = module_dummy.la
 @EFL_ENABLE_TESTS_TRUE@module_dummy_la_SOURCES = \
@@ -506,7 +521,7 @@ EXTRA_DIST = eina_bench.h \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .lo .o .obj
+.SUFFIXES: .c .cc .cxx .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -633,6 +648,9 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+cxx_compile_test$(EXEEXT): $(cxx_compile_test_OBJECTS) $(cxx_compile_test_DEPENDENCIES) 
+	@rm -f cxx_compile_test$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(cxx_compile_test_OBJECTS) $(cxx_compile_test_LDADD) $(LIBS)
 eina_bench$(EXEEXT): $(eina_bench_OBJECTS) $(eina_bench_DEPENDENCIES) 
 	@rm -f eina_bench$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(eina_bench_OBJECTS) $(eina_bench_LDADD) $(LIBS)
@@ -647,6 +665,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/city.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cxx_compile_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecore_list.Po@am__quote@
@@ -675,6 +694,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_fp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_hash.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_inarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_inlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_iterator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_lalloc.Po@am__quote@
@@ -696,6 +716,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_tiler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_ustr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_ustringshare.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_test_value.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evas_hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evas_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evas_mempool.Po@am__quote@
@@ -752,6 +773,30 @@ module_dummy_la-eina_test_module_dummy.lo: eina_test_module_dummy.c
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cc.lo:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+.cxx.o:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cxx.obj:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cxx.lo:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@

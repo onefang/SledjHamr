@@ -101,57 +101,60 @@ host_triplet = @host@
 @EVAS_STATIC_BUILD_SOFTWARE_X11_TRUE@am__append_48 = ../modules/engines/software_x11/
 @EVAS_STATIC_BUILD_SOFTWARE_X11_TRUE@am__append_49 = ../modules/engines/software_x11/libevas_engine_software_x11.la
 @EVAS_STATIC_BUILD_SOFTWARE_X11_TRUE@am__append_50 = @evas_engine_software_xlib_libs@ @evas_engine_software_xcb_libs@
-@EVAS_STATIC_BUILD_BMP_TRUE@am__append_51 = ../modules/loaders/bmp
-@EVAS_STATIC_BUILD_BMP_TRUE@am__append_52 = ../modules/loaders/bmp/libevas_loader_bmp.la
-@EVAS_STATIC_BUILD_BMP_TRUE@am__append_53 = @evas_image_loader_bmp_libs@
-@EVAS_STATIC_BUILD_EDB_TRUE@am__append_54 = ../modules/savers/edb ../modules/loaders/edb
-@EVAS_STATIC_BUILD_EDB_TRUE@am__append_55 = ../modules/savers/edb/libevas_saver_edb.la ../modules/loaders/edb/libevas_loader_edb.la
-@EVAS_STATIC_BUILD_EDB_TRUE@am__append_56 = @evas_image_loader_edb_libs@
-@EVAS_STATIC_BUILD_EET_TRUE@am__append_57 = ../modules/savers/eet ../modules/loaders/eet
-@EVAS_STATIC_BUILD_EET_TRUE@am__append_58 = ../modules/savers/eet/libevas_saver_eet.la ../modules/loaders/eet/libevas_loader_eet.la
-@EVAS_STATIC_BUILD_EET_TRUE@am__append_59 = @evas_image_loader_eet_libs@
-@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_60 = ../modules/loaders/generic
-@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_61 = ../modules/loaders/generic/libevas_loader_generic.la
-@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_62 = @evas_image_loader_generic_libs@
-@EVAS_STATIC_BUILD_GIF_TRUE@am__append_63 = ../modules/loaders/gif
-@EVAS_STATIC_BUILD_GIF_TRUE@am__append_64 = ../modules/loaders/gif/libevas_loader_gif.la
-@EVAS_STATIC_BUILD_GIF_TRUE@am__append_65 = @evas_image_loader_gif_libs@
-@EVAS_STATIC_BUILD_ICO_TRUE@am__append_66 = ../modules/loaders/ico
-@EVAS_STATIC_BUILD_ICO_TRUE@am__append_67 = ../modules/loaders/ico/libevas_loader_ico.la
-@EVAS_STATIC_BUILD_ICO_TRUE@am__append_68 = @evas_image_loader_ico_libs@
-@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_69 = ../modules/loaders/jpeg
-@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_70 = ../modules/loaders/jpeg/libevas_loader_jpeg.la
-@BUILD_SAVER_JPEG_TRUE@@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_71 = ../modules/savers/jpeg
-@BUILD_SAVER_JPEG_TRUE@@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_72 = ../modules/savers/jpeg/libevas_saver_jpeg.la
-@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_73 = @evas_image_loader_jpeg_libs@
-@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_74 = ../modules/loaders/pmaps
-@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_75 = ../modules/loaders/pmaps/libevas_loader_pmaps.la
-@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_76 = @evas_image_loader_pmaps_libs@
-@EVAS_STATIC_BUILD_PNG_TRUE@am__append_77 = ../modules/savers/png ../modules/loaders/png
-@EVAS_STATIC_BUILD_PNG_TRUE@am__append_78 = ../modules/savers/png/libevas_saver_png.la ../modules/loaders/png/libevas_loader_png.la
-@EVAS_STATIC_BUILD_PNG_TRUE@am__append_79 = @evas_image_loader_png_libs@
-@EVAS_STATIC_BUILD_PSD_TRUE@am__append_80 = ../modules/loaders/psd
-@EVAS_STATIC_BUILD_PSD_TRUE@am__append_81 = ../modules/loaders/psd/libevas_loader_psd.la
-@EVAS_STATIC_BUILD_PSD_TRUE@am__append_82 = @evas_image_loader_psd_libs@
-@EVAS_STATIC_BUILD_SVG_TRUE@am__append_83 = ../modules/loaders/svg
-@EVAS_STATIC_BUILD_SVG_TRUE@am__append_84 = ../modules/loaders/svg/libevas_loader_svg.la
-@EVAS_STATIC_BUILD_SVG_TRUE@am__append_85 = @evas_image_loader_svg_libs@
-@EVAS_STATIC_BUILD_TGA_TRUE@am__append_86 = ../modules/loaders/tga
-@EVAS_STATIC_BUILD_TGA_TRUE@am__append_87 = ../modules/loaders/tga/libevas_loader_tga.la
-@EVAS_STATIC_BUILD_TGA_TRUE@am__append_88 = @evas_image_loader_tga_libs@
-@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_89 = ../modules/savers/tiff ../modules/loaders/tiff
-@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_90 = ../modules/savers/tiff/libevas_saver_tiff.la ../modules/loaders/tiff/libevas_loader_tiff.la
-@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_91 = @evas_image_loader_tiff_libs@
-@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_92 = ../modules/loaders/wbmp
-@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_93 = ../modules/loaders/wbmp/libevas_loader_wbmp.la
-@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_94 = @evas_image_loader_wbmp_libs@
-@EVAS_STATIC_BUILD_XPM_TRUE@am__append_95 = ../modules/loaders/xpm
-@EVAS_STATIC_BUILD_XPM_TRUE@am__append_96 = ../modules/loaders/xpm/libevas_loader_xpm.la
-@EVAS_STATIC_BUILD_XPM_TRUE@am__append_97 = @evas_image_loader_xpm_libs@
-@BUILD_ENGINE_SOFTWARE_16_TRUE@am__append_98 = engines/common_16/libevas_engine_common_16.la
-@BUILD_ENGINE_SOFTWARE_16_TRUE@am__append_99 = engines/common_16/libevas_engine_common_16.la
-@BUILD_ENGINE_SOFTWARE_8_TRUE@am__append_100 = engines/common_8/libevas_engine_common_8.la
-@BUILD_ENGINE_SOFTWARE_8_TRUE@am__append_101 = engines/common_8/libevas_engine_common_8.la
+@EVAS_STATIC_BUILD_WAYLAND_SHM_TRUE@am__append_51 = ../modules/engines/wayland_shm/
+@EVAS_STATIC_BUILD_WAYLAND_SHM_TRUE@am__append_52 = ../modules/engines/wayland_shm/libevas_engine_wayland_shm.la
+@EVAS_STATIC_BUILD_WAYLAND_SHM_TRUE@am__append_53 = @evas_engine_wayland_shm_libs@
+@EVAS_STATIC_BUILD_BMP_TRUE@am__append_54 = ../modules/loaders/bmp
+@EVAS_STATIC_BUILD_BMP_TRUE@am__append_55 = ../modules/loaders/bmp/libevas_loader_bmp.la
+@EVAS_STATIC_BUILD_BMP_TRUE@am__append_56 = @evas_image_loader_bmp_libs@
+@EVAS_STATIC_BUILD_EDB_TRUE@am__append_57 = ../modules/savers/edb ../modules/loaders/edb
+@EVAS_STATIC_BUILD_EDB_TRUE@am__append_58 = ../modules/savers/edb/libevas_saver_edb.la ../modules/loaders/edb/libevas_loader_edb.la
+@EVAS_STATIC_BUILD_EDB_TRUE@am__append_59 = @evas_image_loader_edb_libs@
+@EVAS_STATIC_BUILD_EET_TRUE@am__append_60 = ../modules/savers/eet ../modules/loaders/eet
+@EVAS_STATIC_BUILD_EET_TRUE@am__append_61 = ../modules/savers/eet/libevas_saver_eet.la ../modules/loaders/eet/libevas_loader_eet.la
+@EVAS_STATIC_BUILD_EET_TRUE@am__append_62 = @evas_image_loader_eet_libs@
+@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_63 = ../modules/loaders/generic
+@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_64 = ../modules/loaders/generic/libevas_loader_generic.la
+@EVAS_STATIC_BUILD_GENERIC_TRUE@am__append_65 = @evas_image_loader_generic_libs@
+@EVAS_STATIC_BUILD_GIF_TRUE@am__append_66 = ../modules/loaders/gif
+@EVAS_STATIC_BUILD_GIF_TRUE@am__append_67 = ../modules/loaders/gif/libevas_loader_gif.la
+@EVAS_STATIC_BUILD_GIF_TRUE@am__append_68 = @evas_image_loader_gif_libs@
+@EVAS_STATIC_BUILD_ICO_TRUE@am__append_69 = ../modules/loaders/ico
+@EVAS_STATIC_BUILD_ICO_TRUE@am__append_70 = ../modules/loaders/ico/libevas_loader_ico.la
+@EVAS_STATIC_BUILD_ICO_TRUE@am__append_71 = @evas_image_loader_ico_libs@
+@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_72 = ../modules/loaders/jpeg
+@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_73 = ../modules/loaders/jpeg/libevas_loader_jpeg.la
+@BUILD_SAVER_JPEG_TRUE@@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_74 = ../modules/savers/jpeg
+@BUILD_SAVER_JPEG_TRUE@@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_75 = ../modules/savers/jpeg/libevas_saver_jpeg.la
+@EVAS_STATIC_BUILD_JPEG_TRUE@am__append_76 = @evas_image_loader_jpeg_libs@
+@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_77 = ../modules/loaders/pmaps
+@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_78 = ../modules/loaders/pmaps/libevas_loader_pmaps.la
+@EVAS_STATIC_BUILD_PMAPS_TRUE@am__append_79 = @evas_image_loader_pmaps_libs@
+@EVAS_STATIC_BUILD_PNG_TRUE@am__append_80 = ../modules/savers/png ../modules/loaders/png
+@EVAS_STATIC_BUILD_PNG_TRUE@am__append_81 = ../modules/savers/png/libevas_saver_png.la ../modules/loaders/png/libevas_loader_png.la
+@EVAS_STATIC_BUILD_PNG_TRUE@am__append_82 = @evas_image_loader_png_libs@
+@EVAS_STATIC_BUILD_PSD_TRUE@am__append_83 = ../modules/loaders/psd
+@EVAS_STATIC_BUILD_PSD_TRUE@am__append_84 = ../modules/loaders/psd/libevas_loader_psd.la
+@EVAS_STATIC_BUILD_PSD_TRUE@am__append_85 = @evas_image_loader_psd_libs@
+@EVAS_STATIC_BUILD_SVG_TRUE@am__append_86 = ../modules/loaders/svg
+@EVAS_STATIC_BUILD_SVG_TRUE@am__append_87 = ../modules/loaders/svg/libevas_loader_svg.la
+@EVAS_STATIC_BUILD_SVG_TRUE@am__append_88 = @evas_image_loader_svg_libs@
+@EVAS_STATIC_BUILD_TGA_TRUE@am__append_89 = ../modules/loaders/tga
+@EVAS_STATIC_BUILD_TGA_TRUE@am__append_90 = ../modules/loaders/tga/libevas_loader_tga.la
+@EVAS_STATIC_BUILD_TGA_TRUE@am__append_91 = @evas_image_loader_tga_libs@
+@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_92 = ../modules/savers/tiff ../modules/loaders/tiff
+@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_93 = ../modules/savers/tiff/libevas_saver_tiff.la ../modules/loaders/tiff/libevas_loader_tiff.la
+@EVAS_STATIC_BUILD_TIFF_TRUE@am__append_94 = @evas_image_loader_tiff_libs@
+@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_95 = ../modules/loaders/wbmp
+@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_96 = ../modules/loaders/wbmp/libevas_loader_wbmp.la
+@EVAS_STATIC_BUILD_WBMP_TRUE@am__append_97 = @evas_image_loader_wbmp_libs@
+@EVAS_STATIC_BUILD_XPM_TRUE@am__append_98 = ../modules/loaders/xpm
+@EVAS_STATIC_BUILD_XPM_TRUE@am__append_99 = ../modules/loaders/xpm/libevas_loader_xpm.la
+@EVAS_STATIC_BUILD_XPM_TRUE@am__append_100 = @evas_image_loader_xpm_libs@
+@BUILD_ENGINE_SOFTWARE_16_TRUE@am__append_101 = engines/common_16/libevas_engine_common_16.la
+@BUILD_ENGINE_SOFTWARE_16_TRUE@am__append_102 = engines/common_16/libevas_engine_common_16.la
+@BUILD_ENGINE_SOFTWARE_8_TRUE@am__append_103 = engines/common_8/libevas_engine_common_8.la
+@BUILD_ENGINE_SOFTWARE_8_TRUE@am__append_104 = engines/common_8/libevas_engine_common_8.la
 subdir = src/lib
 DIST_COMMON = $(includes_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -213,7 +216,7 @@ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libevas_la_OBJECTS = main.lo
 libevas_la_OBJECTS = $(am_libevas_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -393,8 +396,6 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -411,6 +412,8 @@ VALGRIND_CFLAGS = @VALGRIND_CFLAGS@
 VALGRIND_LIBS = @VALGRIND_LIBS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
@@ -492,6 +495,10 @@ evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
 evas_engine_software_xlib_libs = @evas_engine_software_xlib_libs@
+evas_engine_wayland_egl_cflags = @evas_engine_wayland_egl_cflags@
+evas_engine_wayland_egl_libs = @evas_engine_wayland_egl_libs@
+evas_engine_wayland_shm_cflags = @evas_engine_wayland_shm_cflags@
+evas_engine_wayland_shm_libs = @evas_engine_wayland_shm_libs@
 evas_image_loader_bmp_cflags = @evas_image_loader_bmp_cflags@
 evas_image_loader_bmp_libs = @evas_image_loader_bmp_libs@
 evas_image_loader_edb_cflags = @evas_image_loader_edb_cflags@
@@ -576,9 +583,10 @@ SUBDIRS = canvas cache cserve file engines include $(am__append_1) \
 	$(am__append_45) $(am__append_48) $(am__append_51) \
 	$(am__append_54) $(am__append_57) $(am__append_60) \
 	$(am__append_63) $(am__append_66) $(am__append_69) \
-	$(am__append_71) $(am__append_74) $(am__append_77) \
+	$(am__append_72) $(am__append_74) $(am__append_77) \
 	$(am__append_80) $(am__append_83) $(am__append_86) \
-	$(am__append_89) $(am__append_92) $(am__append_95)
+	$(am__append_89) $(am__append_92) $(am__append_95) \
+	$(am__append_98)
 EVAS_STATIC_MODULE = $(am__append_2) $(am__append_4) $(am__append_6) \
 	$(am__append_9) $(am__append_12) $(am__append_15) \
 	$(am__append_18) $(am__append_21) $(am__append_24) \
@@ -587,20 +595,20 @@ EVAS_STATIC_MODULE = $(am__append_2) $(am__append_4) $(am__append_6) \
 	$(am__append_43) $(am__append_46) $(am__append_49) \
 	$(am__append_52) $(am__append_55) $(am__append_58) \
 	$(am__append_61) $(am__append_64) $(am__append_67) \
-	$(am__append_70) $(am__append_72) $(am__append_75) \
+	$(am__append_70) $(am__append_73) $(am__append_75) \
 	$(am__append_78) $(am__append_81) $(am__append_84) \
 	$(am__append_87) $(am__append_90) $(am__append_93) \
-	$(am__append_96)
+	$(am__append_96) $(am__append_99)
 EVAS_STATIC_LIBADD = $(am__append_7) $(am__append_10) $(am__append_13) \
 	$(am__append_16) $(am__append_19) $(am__append_22) \
 	$(am__append_27) $(am__append_30) $(am__append_33) \
 	$(am__append_38) $(am__append_41) $(am__append_44) \
 	$(am__append_47) $(am__append_50) $(am__append_53) \
 	$(am__append_56) $(am__append_59) $(am__append_62) \
-	$(am__append_65) $(am__append_68) $(am__append_73) \
+	$(am__append_65) $(am__append_68) $(am__append_71) \
 	$(am__append_76) $(am__append_79) $(am__append_82) \
 	$(am__append_85) $(am__append_88) $(am__append_91) \
-	$(am__append_94) $(am__append_97)
+	$(am__append_94) $(am__append_97) $(am__append_100)
 AM_CPPFLAGS = \
 -I. \
 -I$(top_srcdir)/src/lib \
@@ -619,10 +627,7 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS = @WIN32_CFLAGS@
 lib_LTLIBRARIES = libevas.la
-
-### Evas_GL disabled for 1.1
-#includes_HEADERS = Evas.h Evas_GL.h
-includes_HEADERS = Evas.h
+includes_HEADERS = Evas.h Evas_GL.h
 includesdir = $(includedir)/evas-@VMAJ@
 libevas_la_SOURCES = main.c
 @EVAS_CSERVE_TRUE@libevas_cserve_la = cserve/libevas_cserve.la
@@ -631,12 +636,12 @@ libevas_la_LIBADD = canvas/libevas_canvas.la file/libevas_file.la \
 	engines/common/libevas_engine_common.la @FREETYPE_LIBS@ \
 	@FRIBIDI_LIBS@ @HARFBUZZ_LIBS@ @EET_LIBS@ @FONTCONFIG_LIBS@ \
 	@pthread_libs@ @EINA_LIBS@ $(EVAS_STATIC_MODULE) \
-	$(EVAS_STATIC_LIBADD) @PIXMAN_LIBS@ -lm $(am__append_98) \
-	$(am__append_100)
+	$(EVAS_STATIC_LIBADD) @PIXMAN_LIBS@ -lm $(am__append_101) \
+	$(am__append_103)
 libevas_la_DEPENDENCIES = canvas/libevas_canvas.la \
 	file/libevas_file.la cache/libevas_cache.la \
 	$(libevas_cserve_la) engines/common/libevas_engine_common.la \
-	$(EVAS_STATIC_MODULE) $(am__append_99) $(am__append_101)
+	$(EVAS_STATIC_MODULE) $(am__append_102) $(am__append_104)
 libevas_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -version-info @version_info@ @release_info@
 
 ### Evas_GL we are still using it in our code, so just don't install it.

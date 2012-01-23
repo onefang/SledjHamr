@@ -90,6 +90,12 @@
 /* Evas Software Xlib Engine Support */
 #undef BUILD_ECORE_EVAS_SOFTWARE_XLIB
 
+/* Support for Wayland Egl Engine in Ecore_Evas */
+#undef BUILD_ECORE_EVAS_WAYLAND_EGL
+
+/* Support for Wayland Shm Engine in Ecore_Evas */
+#undef BUILD_ECORE_EVAS_WAYLAND_SHM
+
 /* Support for Win32 Engine in Ecore_Evas */
 #undef BUILD_ECORE_EVAS_WIN32
 
@@ -108,6 +114,9 @@
 /* Build Ecore_Imf_Evas Module */
 #undef BUILD_ECORE_IMF_EVAS
 
+/* Build Ecore_Imf_SCIM Module */
+#undef BUILD_ECORE_IMF_SCIM
+
 /* Build Ecore_Imf_XIM Module */
 #undef BUILD_ECORE_IMF_XIM
 
@@ -125,6 +134,9 @@
 
 /* Build Ecore_Sdl Module */
 #undef BUILD_ECORE_SDL
+
+/* Build Ecore_Wayland Module */
+#undef BUILD_ECORE_WAYLAND
 
 /* Build Ecore_Win32 Module */
 #undef BUILD_ECORE_WIN32
@@ -378,6 +390,9 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
+
+/* Define to 1 if you have the <net/if.h> header file. */
+#undef HAVE_NET_IF_H
 
 /* File monitoring with Windows notification */
 #undef HAVE_NOTIFY_WIN32

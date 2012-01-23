@@ -95,6 +95,7 @@ struct _Ecore_Pipe
    int               message;
    Eina_Bool         delete_me : 1;
 };
+GENERIC_ALLOC_SIZE_DECLARE(Ecore_Pipe);
 
 static Eina_Bool _ecore_pipe_read(void             *data,
                                   Ecore_Fd_Handler *fd_handler);
@@ -125,12 +126,12 @@ ecore_pipe_add(Ecore_Pipe_Cb handler,
 
    if (!handler) return NULL;
 
-   p = (Ecore_Pipe *)calloc(1, sizeof(Ecore_Pipe));
+   p = ecore_pipe_calloc(1);
    if (!p) return NULL;
 
    if (pipe(fds))
      {
-        free(p);
+        ecore_pipe_mp_free(p);
         return NULL;
      }
 
@@ -171,7 +172,7 @@ ecore_pipe_del(Ecore_Pipe *p)
    if (p->fd_read != PIPE_FD_INVALID) pipe_close(p->fd_read);
    if (p->fd_write != PIPE_FD_INVALID) pipe_close(p->fd_write);
    data = (void *)p->data;
-   free(p);
+   ecore_pipe_mp_free(p);
    return data;
 }
 
@@ -535,7 +536,6 @@ _ecore_pipe_read(void             *data,
               else if ((ret == PIPE_FD_ERROR) &&
                        ((errno == EINTR) || (errno == EAGAIN)))
                 {
-                   _ecore_pipe_unhandle(p);
                    return ECORE_CALLBACK_RENEW;
                 }
               else
@@ -543,7 +543,6 @@ _ecore_pipe_read(void             *data,
                    ERR("An unhandled error (ret: %i errno: %i [%s])"
                        "occurred while reading from the pipe the length",
                        (int)ret, errno, strerror(errno));
-                   _ecore_pipe_unhandle(p);
                    return ECORE_CALLBACK_RENEW;
                 }
 #else

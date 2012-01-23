@@ -91,6 +91,10 @@
 #define EINA_MAGIC_SIMPLE_XML_DATA 0x98761261
 #define EINA_MAGIC_SIMPLE_XML_ATTRIBUTE 0x98761262
 
+#define EINA_MAGIC_INARRAY 0x98761270
+#define EINA_MAGIC_INARRAY_ITERATOR 0x98761271
+#define EINA_MAGIC_INARRAY_ACCESSOR 0x98761272
+
 #define EINA_MAGIC_CLASS 0x9877CB30
 
 /* undef the following, we want out version */
@@ -135,6 +139,8 @@ void eina_share_common_threads_shutdown(void);
 void eina_log_threads_init(void);
 void eina_log_threads_shutdown(void);
 #endif
+
+void eina_file_mmap_faulty(void *addr, long page_size);
 
 #endif /* EINA_PRIVATE_H_ */
 

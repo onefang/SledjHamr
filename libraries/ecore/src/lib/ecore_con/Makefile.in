@@ -92,15 +92,17 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includesdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libecore_con_la_DEPENDENCIES =  \
 	$(top_builddir)/src/lib/ecore/libecore.la
-am__libecore_con_la_SOURCES_DIST = ecore_con.c ecore_con_ssl.c \
-	ecore_con_url.c ecore_con_alloc.c ecore_con_local_win32.c \
-	ecore_con_local.c ecore_con_ares.c ecore_con_info.c
+am__libecore_con_la_SOURCES_DIST = ecore_con.c ecore_con_socks.c \
+	ecore_con_ssl.c ecore_con_url.c ecore_con_alloc.c \
+	ecore_con_local_win32.c ecore_con_local.c ecore_con_ares.c \
+	ecore_con_info.c
 @ECORE_HAVE_WIN32_TRUE@am__objects_1 = libecore_con_la-ecore_con_local_win32.lo
 @ECORE_HAVE_WIN32_FALSE@am__objects_2 =  \
 @ECORE_HAVE_WIN32_FALSE@	libecore_con_la-ecore_con_local.lo
 @HAVE_CARES_TRUE@am__objects_3 = libecore_con_la-ecore_con_ares.lo
 @HAVE_CARES_FALSE@am__objects_4 = libecore_con_la-ecore_con_info.lo
 am_libecore_con_la_OBJECTS = libecore_con_la-ecore_con.lo \
+	libecore_con_la-ecore_con_socks.lo \
 	libecore_con_la-ecore_con_ssl.lo \
 	libecore_con_la-ecore_con_url.lo \
 	libecore_con_la-ecore_con_alloc.lo $(am__objects_1) \
@@ -263,10 +265,10 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SCIM_CFLAGS = @SCIM_CFLAGS@
+SCIM_LIBS = @SCIM_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -285,6 +287,10 @@ TSLIB_LIBS = @TSLIB_LIBS@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VMAJ = @VMAJ@
+WAYLAND_CFLAGS = @WAYLAND_CFLAGS@
+WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
+WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
+WAYLAND_LIBS = @WAYLAND_LIBS@
 WIN32_CFLAGS = @WIN32_CFLAGS@
 WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 WIN32_LIBS = @WIN32_LIBS@
@@ -398,6 +404,8 @@ ecore_imf_cflags = @ecore_imf_cflags@
 ecore_imf_evas_cflags = @ecore_imf_evas_cflags@
 ecore_imf_evas_libs = @ecore_imf_evas_libs@
 ecore_imf_libs = @ecore_imf_libs@
+ecore_imf_scim_cflags = @ecore_imf_scim_cflags@
+ecore_imf_scim_libs = @ecore_imf_scim_libs@
 ecore_imf_xim_cflags = @ecore_imf_xim_cflags@
 ecore_imf_xim_libs = @ecore_imf_xim_libs@
 ecore_input_cflags = @ecore_input_cflags@
@@ -410,6 +418,8 @@ ecore_psl1ght_cflags = @ecore_psl1ght_cflags@
 ecore_psl1ght_libs = @ecore_psl1ght_libs@
 ecore_sdl_cflags = @ecore_sdl_cflags@
 ecore_sdl_libs = @ecore_sdl_libs@
+ecore_wayland_cflags = @ecore_wayland_cflags@
+ecore_wayland_libs = @ecore_wayland_libs@
 ecore_win32_cflags = @ecore_win32_cflags@
 ecore_win32_libs = @ecore_win32_libs@
 ecore_wince_cflags = @ecore_wince_cflags@
@@ -454,12 +464,14 @@ requirements_ecore_fb = @requirements_ecore_fb@
 requirements_ecore_file = @requirements_ecore_file@
 requirements_ecore_imf = @requirements_ecore_imf@
 requirements_ecore_imf_evas = @requirements_ecore_imf_evas@
+requirements_ecore_imf_scim = @requirements_ecore_imf_scim@
 requirements_ecore_imf_xim = @requirements_ecore_imf_xim@
 requirements_ecore_input = @requirements_ecore_input@
 requirements_ecore_input_evas = @requirements_ecore_input_evas@
 requirements_ecore_ipc = @requirements_ecore_ipc@
 requirements_ecore_psl1ght = @requirements_ecore_psl1ght@
 requirements_ecore_sdl = @requirements_ecore_sdl@
+requirements_ecore_wayland = @requirements_ecore_wayland@
 requirements_ecore_win32 = @requirements_ecore_win32@
 requirements_ecore_wince = @requirements_ecore_wince@
 requirements_ecore_x = @requirements_ecore_x@
@@ -493,9 +505,10 @@ AM_CPPFLAGS = \
 lib_LTLIBRARIES = libecore_con.la
 includes_HEADERS = Ecore_Con.h
 includesdir = $(includedir)/ecore-@VMAJ@
-libecore_con_la_SOURCES = ecore_con.c ecore_con_ssl.c ecore_con_url.c \
-	ecore_con_alloc.c $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_4)
+libecore_con_la_SOURCES = ecore_con.c ecore_con_socks.c \
+	ecore_con_ssl.c ecore_con_url.c ecore_con_alloc.c \
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4)
 libecore_con_la_CFLAGS = @WIN32_CFLAGS@
 libecore_con_la_LIBADD = \
 $(top_builddir)/src/lib/ecore/libecore.la \
@@ -583,6 +596,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_local.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_local_win32.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_socks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_ssl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libecore_con_la-ecore_con_url.Plo@am__quote@
 
@@ -617,6 +631,14 @@ libecore_con_la-ecore_con.lo: ecore_con.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ecore_con.c' object='libecore_con_la-ecore_con.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libecore_con_la_CFLAGS) $(CFLAGS) -c -o libecore_con_la-ecore_con.lo `test -f 'ecore_con.c' || echo '$(srcdir)/'`ecore_con.c
+
+libecore_con_la-ecore_con_socks.lo: ecore_con_socks.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libecore_con_la_CFLAGS) $(CFLAGS) -MT libecore_con_la-ecore_con_socks.lo -MD -MP -MF $(DEPDIR)/libecore_con_la-ecore_con_socks.Tpo -c -o libecore_con_la-ecore_con_socks.lo `test -f 'ecore_con_socks.c' || echo '$(srcdir)/'`ecore_con_socks.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libecore_con_la-ecore_con_socks.Tpo $(DEPDIR)/libecore_con_la-ecore_con_socks.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ecore_con_socks.c' object='libecore_con_la-ecore_con_socks.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libecore_con_la_CFLAGS) $(CFLAGS) -c -o libecore_con_la-ecore_con_socks.lo `test -f 'ecore_con_socks.c' || echo '$(srcdir)/'`ecore_con_socks.c
 
 libecore_con_la-ecore_con_ssl.lo: ecore_con_ssl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libecore_con_la_CFLAGS) $(CFLAGS) -MT libecore_con_la-ecore_con_ssl.lo -MD -MP -MF $(DEPDIR)/libecore_con_la-ecore_con_ssl.Tpo -c -o libecore_con_la-ecore_con_ssl.lo `test -f 'ecore_con_ssl.c' || echo '$(srcdir)/'`ecore_con_ssl.c

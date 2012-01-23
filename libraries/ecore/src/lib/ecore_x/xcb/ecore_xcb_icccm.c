@@ -396,7 +396,7 @@ ecore_x_icccm_transient_for_set(Ecore_X_Window win,
 
 /**
  * Remove the transient_for setting from a window.
- * @param The window
+ * @param win The window
  */
 EAPI void
 ecore_x_icccm_transient_for_unset(Ecore_X_Window win)
@@ -1452,6 +1452,7 @@ ecore_x_icccm_take_focus_send(Ecore_X_Window win,
                               Ecore_X_Time   t)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
 
    ecore_x_client_message32_send(win, ECORE_X_ATOM_WM_PROTOCOLS,
                                  XCB_EVENT_MASK_NO_EVENT,

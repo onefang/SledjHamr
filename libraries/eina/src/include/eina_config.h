@@ -64,4 +64,14 @@
 #endif
 
 
+#ifdef EINA_CONFIGURE_HAVE_DIRENT_H
+# undef EINA_CONFIGURE_HAVE_DIRENT_H
+#endif
+#define EINA_HAVE_DIRENT_H
+
+#ifdef EINA_CONFIGURE_ENABLE_LOG
+# undef EINA_CONFIGURE_ENABLE_LOG
+#endif
+#define EINA_ENABLE_LOG
+
 #endif /* EINA_CONFIG_H_ */

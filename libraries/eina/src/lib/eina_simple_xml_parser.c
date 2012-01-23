@@ -38,7 +38,10 @@ extern "C"
 void *alloca (size_t);
 #endif
 
-#include <strings.h>
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -121,7 +124,7 @@ static inline const char *
 _eina_simple_xml_whitespace_find(const char *itr, const char *itr_end)
 {
    for (; itr < itr_end; itr++)
-     if (isspace(*itr)) break;
+     if (isspace((unsigned char)*itr)) break;
    return itr;
 }
 
@@ -129,7 +132,7 @@ static inline const char *
 _eina_simple_xml_whitespace_skip(const char *itr, const char *itr_end)
 {
    for (; itr < itr_end; itr++)
-     if (!isspace(*itr)) break;
+     if (!isspace((unsigned char)*itr)) break;
    return itr;
 }
 
@@ -137,7 +140,7 @@ static inline const char *
 _eina_simple_xml_whitespace_unskip(const char *itr, const char *itr_start)
 {
    for (itr--; itr > itr_start; itr--)
-     if (!isspace(*itr)) break;
+     if (!isspace((unsigned char)*itr)) break;
    return itr + 1;
 }
 
@@ -309,7 +312,7 @@ eina_simple_xml_parse(const char *buf, unsigned buflen, Eina_Bool strip, Eina_Si
                            (!memcmp(itr + 2, "DOCTYPE",
                                     sizeof("DOCTYPE") - 1)) &&
                            ((itr[2 + sizeof("DOCTYPE") - 1] == '>') ||
-                            (isspace(itr[2 + sizeof("DOCTYPE") - 1]))))
+                            (isspace((unsigned char)itr[2 + sizeof("DOCTYPE") - 1]))))
                          {
                             type = EINA_SIMPLE_XML_DOCTYPE;
                             toff = sizeof("!DOCTYPE") - 1;
@@ -455,7 +458,7 @@ eina_simple_xml_tag_attributes_find(const char *buf, unsigned buflen)
 
    for (; itr < itr_end; itr++)
      {
-        if (!isspace(*itr))
+        if (!isspace((unsigned char)*itr))
           {
              /* user skip tagname and already gave it the attributes */
              if (*itr == '=')
@@ -492,7 +495,7 @@ eina_simple_xml_attributes_parse(const char *buf, unsigned buflen, Eina_Simple_X
 
         key = p;
         for (key_end = key; key_end < itr_end; key_end++)
-          if ((*key_end == '=') || (isspace(*key_end))) break;
+          if ((*key_end == '=') || (isspace((unsigned char)*key_end))) break;
         if (key_end == itr_end) return EINA_FALSE;
         if (key_end == key) continue;
 
@@ -504,7 +507,7 @@ eina_simple_xml_attributes_parse(const char *buf, unsigned buflen, Eina_Simple_X
              value++;
           }
         for (; value < itr_end; value++)
-          if (!isspace(*value)) break;
+          if (!isspace((unsigned char)*value)) break;
         if (value == itr_end) return EINA_FALSE;
 
         if ((*value == '"') || (*value == '\''))

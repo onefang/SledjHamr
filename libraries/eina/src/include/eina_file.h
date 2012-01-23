@@ -94,6 +94,9 @@ typedef struct _Eina_File_Direct_Info Eina_File_Direct_Info;
  * @typedef Eina_File_Dir_List_Cb
  * Type for a callback to be called when iterating over the files of a
  * directory.
+ * @param The file name EXCLUDING the path
+ * @param path The path passed to eina_file_dir_list()
+ * @param data The data passed to eina_file_dir_list()
  */
 typedef void (*Eina_File_Dir_List_Cb)(const char *name, const char *path, void *data);
 
@@ -345,6 +348,33 @@ EAPI time_t eina_file_mtime_get(Eina_File *file);
 EAPI const char *eina_file_filename_get(Eina_File *file);
 
 /**
+ * @brief Get the eXtended attribute of an open file.
+ *
+ * @param file The file handler to request the eXtended attribute from.
+ * @return an iterator.
+ *
+ * The iterator will list all eXtended attribute name without allocating
+ * them, so you need to copy them yourself if needed.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Iterator *eina_file_xattr_get(Eina_File *file);
+
+/**
+ * @brief Get the eXtended attribute of an open file.
+ *
+ * @param file The file handler to request the eXtended attribute from.
+ * @return an iterator.
+ *
+ * The iterator will list all eXtended attribute without allocating
+ * them, so you need to copy them yourself if needed. It is returning
+ * Eina_Xattr structure.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Iterator *eina_file_xattr_value_get(Eina_File *file);
+
+/**
  * @brief Map all the file to a buffer.
  *
  * @param file The file handler to map in memory
@@ -380,6 +410,16 @@ EAPI void *eina_file_map_new(Eina_File *file, Eina_File_Populate rule,
  * @since 1.1
  */
 EAPI void eina_file_map_free(Eina_File *file, void *map);
+
+/**
+ * @brief Tell if their was an IO error during the life of a mmaped file
+ *
+ * @param file The file handler to the mmaped file.
+ * @param map Memory map to check if an error occured on it.
+ *
+ * @since 1.2
+ */
+EAPI Eina_Bool eina_file_map_faulted(Eina_File *file, void *map);
 
 /**
  * @}

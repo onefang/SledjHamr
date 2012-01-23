@@ -30,24 +30,24 @@ _ecore_x_composite_init(void)
 # endif
      }
 #endif
-} /* _ecore_x_composite_init */
+}
 
 EAPI Eina_Bool
 ecore_x_composite_query(void)
 {
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    return _composite_available;
-} /* ecore_x_composite_query */
+}
 
 EAPI void
-ecore_x_composite_redirect_window(Ecore_X_Window                win,
+ecore_x_composite_redirect_window(Ecore_X_Window win,
                                   Ecore_X_Composite_Update_Type type)
 {
 #ifdef ECORE_XCOMPOSITE
    int update = CompositeRedirectAutomatic;
 
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
-   switch(type)
+   switch (type)
      {
       case ECORE_X_COMPOSITE_UPDATE_AUTOMATIC:
         update = CompositeRedirectAutomatic;
@@ -56,20 +56,20 @@ ecore_x_composite_redirect_window(Ecore_X_Window                win,
       case ECORE_X_COMPOSITE_UPDATE_MANUAL:
         update = CompositeRedirectManual;
         break;
-     } /* switch */
+     }
    XCompositeRedirectWindow(_ecore_x_disp, win, update);
 #endif /* ifdef ECORE_XCOMPOSITE */
-} /* ecore_x_composite_redirect_window */
+}
 
 EAPI void
-ecore_x_composite_redirect_subwindows(Ecore_X_Window                win,
+ecore_x_composite_redirect_subwindows(Ecore_X_Window win,
                                       Ecore_X_Composite_Update_Type type)
 {
 #ifdef ECORE_XCOMPOSITE
    int update = CompositeRedirectAutomatic;
 
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
-   switch(type)
+   switch (type)
      {
       case ECORE_X_COMPOSITE_UPDATE_AUTOMATIC:
         update = CompositeRedirectAutomatic;
@@ -78,20 +78,20 @@ ecore_x_composite_redirect_subwindows(Ecore_X_Window                win,
       case ECORE_X_COMPOSITE_UPDATE_MANUAL:
         update = CompositeRedirectManual;
         break;
-     } /* switch */
+     }
    XCompositeRedirectSubwindows(_ecore_x_disp, win, update);
 #endif /* ifdef ECORE_XCOMPOSITE */
-} /* ecore_x_composite_redirect_subwindows */
+}
 
 EAPI void
-ecore_x_composite_unredirect_window(Ecore_X_Window                win,
+ecore_x_composite_unredirect_window(Ecore_X_Window win,
                                     Ecore_X_Composite_Update_Type type)
 {
 #ifdef ECORE_XCOMPOSITE
    int update = CompositeRedirectAutomatic;
 
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
-   switch(type)
+   switch (type)
      {
       case ECORE_X_COMPOSITE_UPDATE_AUTOMATIC:
         update = CompositeRedirectAutomatic;
@@ -100,20 +100,20 @@ ecore_x_composite_unredirect_window(Ecore_X_Window                win,
       case ECORE_X_COMPOSITE_UPDATE_MANUAL:
         update = CompositeRedirectManual;
         break;
-     } /* switch */
+     }
    XCompositeUnredirectWindow(_ecore_x_disp, win, update);
 #endif /* ifdef ECORE_XCOMPOSITE */
-} /* ecore_x_composite_unredirect_window */
+}
 
 EAPI void
-ecore_x_composite_unredirect_subwindows(Ecore_X_Window                win,
+ecore_x_composite_unredirect_subwindows(Ecore_X_Window win,
                                         Ecore_X_Composite_Update_Type type)
 {
 #ifdef ECORE_XCOMPOSITE
    int update = CompositeRedirectAutomatic;
 
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
-   switch(type)
+   switch (type)
      {
       case ECORE_X_COMPOSITE_UPDATE_AUTOMATIC:
         update = CompositeRedirectAutomatic;
@@ -122,10 +122,10 @@ ecore_x_composite_unredirect_subwindows(Ecore_X_Window                win,
       case ECORE_X_COMPOSITE_UPDATE_MANUAL:
         update = CompositeRedirectManual;
         break;
-     } /* switch */
+     }
    XCompositeUnredirectSubwindows(_ecore_x_disp, win, update);
 #endif /* ifdef ECORE_XCOMPOSITE */
-} /* ecore_x_composite_unredirect_subwindows */
+}
 
 EAPI Ecore_X_Pixmap
 ecore_x_composite_name_window_pixmap_get(Ecore_X_Window win)
@@ -136,7 +136,7 @@ ecore_x_composite_name_window_pixmap_get(Ecore_X_Window win)
    pixmap = XCompositeNameWindowPixmap(_ecore_x_disp, win);
 #endif /* ifdef ECORE_XCOMPOSITE */
    return pixmap;
-} /* ecore_x_composite_name_window_pixmap_get */
+}
 
 EAPI void
 ecore_x_composite_window_events_disable(Ecore_X_Window win)
@@ -163,7 +163,7 @@ ecore_x_composite_render_window_enable(Ecore_X_Window root)
    ecore_x_composite_window_events_disable(win);
 #endif /* ifdef ECORE_XCOMPOSITE */
    return win;
-} /* ecore_x_composite_render_window_enable */
+}
 
 EAPI void
 ecore_x_composite_render_window_disable(Ecore_X_Window root)
@@ -172,5 +172,5 @@ ecore_x_composite_render_window_disable(Ecore_X_Window root)
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
    XCompositeReleaseOverlayWindow(_ecore_x_disp, root);
 #endif /* ifdef ECORE_XCOMPOSITE */
-} /* ecore_x_composite_render_window_disable */
+}
 

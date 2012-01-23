@@ -1,8 +1,8 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 if BUILD_ECORE_X
-ECORE_X_INC = -I$(top_srcdir)/src/lib/ecore_x @x_cflags@ @ECORE_XCB_CFLAGS@
-ECORE_X_LIB = $(top_builddir)/src/lib/ecore_x/libecore_x.la @x_libs@ @ECORE_XCB_LIBS@
+ECORE_X_INC = -I$(top_srcdir)/src/lib/ecore_x @x_cflags@
+ECORE_X_LIB = $(top_builddir)/src/lib/ecore_x/libecore_x.la @x_libs@
 else
 ECORE_X_INC =
 ECORE_X_LIB =
@@ -66,6 +66,24 @@ ECORE_PSL1GHT_INC =
 ECORE_PSL1GHT_LIB =
 endif
 
+if BUILD_ECORE_WAYLAND
+ECORE_WAYLAND_INC = -I$(top_srcdir)/src/lib/ecore_wayland @WAYLAND_CFLAGS@
+ECORE_WAYLAND_LIB = $(top_builddir)/src/lib/ecore_wayland/libecore_wayland.la
+ECORE_WAYLAND_LIBADD = @WAYLAND_LIBS@ $(ECORE_WAYLAND_LIB)
+else
+ECORE_WAYLAND_INC =
+ECORE_WAYLAND_LIB =
+ECORE_WAYLAND_LIBADD =
+endif
+
+if BUILD_ECORE_IPC
+ECORE_IPC_INC= \
+-I$(top_srcdir)/src/lib/ecore_ipc \
+-I$(top_builddir)/src/lib/ecore_ipc
+
+ECORE_IPC_LIB=$(top_builddir)/src/lib/ecore_ipc/libecore_ipc.la
+endif
+
 AM_CPPFLAGS = \
 -I$(top_srcdir)/src/lib/ecore \
 -I$(top_srcdir)/src/lib/ecore_evas \
@@ -84,9 +102,12 @@ $(ECORE_SDL_INC) \
 $(ECORE_COCOA_INC) \
 $(ECORE_WINCE_INC) \
 $(ECORE_PSL1GHT_INC) \
+$(ECORE_WAYLAND_INC) \
+$(ECORE_IPC_INC) \
 @EVAS_CFLAGS@ \
 @EINA_CFLAGS@ \
-@EVIL_CFLAGS@
+@EVIL_CFLAGS@ \
+@WAYLAND_EGL_CFLAGS@
 
 AM_CFLAGS = @WIN32_CFLAGS@
 
@@ -106,7 +127,10 @@ ecore_evas_sdl.c \
 ecore_evas_cocoa.c \
 ecore_evas_wince.c \
 ecore_evas_ews.c \
-ecore_evas_psl1ght.c
+ecore_evas_psl1ght.c \
+ecore_evas_wayland_shm.c \
+ecore_evas_wayland_egl.c \
+ecore_evas_extn.c
 
 libecore_evas_la_LIBADD = \
 $(ECORE_X_LIB) \
@@ -117,13 +141,17 @@ $(ECORE_SDL_LIB) \
 $(ECORE_SDL_LIBADD) \
 $(ECORE_COCOA_LIB) \
 $(ECORE_WINCE_LIB) \
+$(ECORE_IPC_LIB) \
 $(ECORE_PSL1GHT_LIB) \
+$(ECORE_WAYLAND_LIB) \
+$(ECORE_WAYLAND_LIBADD) \
 $(top_builddir)/src/lib/ecore_input/libecore_input.la \
 $(top_builddir)/src/lib/ecore_input_evas/libecore_input_evas.la \
 $(top_builddir)/src/lib/ecore/libecore.la \
 @EVAS_LIBS@ \
 @EINA_LIBS@ \
-@EVIL_LIBS@
+@EVIL_LIBS@ \
+@WAYLAND_EGL_LIBS@
 
 libecore_evas_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -version-info @version_info@ @release_info@
 

@@ -1,18 +1,6 @@
 #ifndef _ECORE_EVAS_PRIVATE_H
 #define _ECORE_EVAS_PRIVATE_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#ifdef HAVE_SYS_MMAN_H
-# include <sys/mman.h>
-#endif
-
 #include <Evas.h>
 #include <Ecore.h>
 #include <ecore_private.h>
@@ -91,9 +79,17 @@
 # include <Evas_Engine_Gl_Cocoa.h>
 #endif
 
-/**
-   Log domain macros and variable
- **/
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+# include "Ecore_Wayland.h"
+# include <Evas_Engine_Wayland_Shm.h>
+#endif
+
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+# include "Ecore_Wayland.h"
+# include <Evas_Engine_Wayland_Egl.h>
+#endif
+
+/** Log domain macros and variables **/
 
 extern int _ecore_evas_log_dom;
 
@@ -272,6 +268,17 @@ struct _Ecore_Evas_Engine
    } ews;
 #endif
 
+#if defined(BUILD_ECORE_EVAS_WAYLAND_SHM) || defined(BUILD_ECORE_EVAS_WAYLAND_EGL)
+   struct 
+     {
+        Evas_Object *frame;
+
+        struct wl_shell_surface *shell_surface;
+        struct wl_surface *surface;
+        struct wl_buffer *buffer;
+     } wl;
+#endif
+
    Ecore_Timer *idle_flush_timer;
 };
 
@@ -290,6 +297,7 @@ struct _Ecore_Evas
    Eina_Bool   should_be_visible : 1;
    Eina_Bool   alpha  : 1;
    Eina_Bool   transparent  : 1;
+   Eina_Bool   in  : 1;
 
    Eina_Hash  *data;
 
@@ -334,6 +342,7 @@ struct _Ecore_Evas
       char            withdrawn    : 1;
       char            sticky       : 1;
       char            request_pos  : 1;
+      char            draw_frame   : 1;
    } prop;
 
    struct {
@@ -394,6 +403,16 @@ void _ecore_evas_ews_events_init(void);
 int _ecore_evas_ews_shutdown(void);
 #endif
 
+#ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
+void _ecore_evas_wayland_shm_resize(Ecore_Evas *ee, int location);
+void _ecore_evas_wayland_shm_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source);
+#endif
+
+#ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
+void _ecore_evas_wayland_egl_resize(Ecore_Evas *ee, int location);
+void _ecore_evas_wayland_egl_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source);
+#endif
+
 void _ecore_evas_fps_debug_init(void);
 void _ecore_evas_fps_debug_shutdown(void);
 void _ecore_evas_fps_debug_rendertime_add(double t);
@@ -429,5 +448,8 @@ void _ecore_evas_mouse_multi_up_process(Ecore_Evas *ee, int device,
                                         unsigned int timestamp);
 
 extern Eina_Bool _ecore_evas_app_comp_sync;
+
+void _ecore_evas_extn_init(void);
+void _ecore_evas_extn_shutdown(void);
 
 #endif

@@ -9,7 +9,7 @@
 #include "ecore_x_private.h"
 #include "Ecore_X.h"
 
-static int _ecore_x_error_handle(Display     *d,
+static int _ecore_x_error_handle(Display *d,
                                  XErrorEvent *ev);
 static int _ecore_x_io_error_handle(Display *d);
 
@@ -19,6 +19,7 @@ static void (*_io_error_func)(void *data) = NULL;
 static void *_io_error_data = NULL;
 static int _error_request_code = 0;
 static int _error_code = 0;
+static Ecore_X_ID _error_resource_id = 0;
 
 /**
  * Set the error handler.
@@ -28,12 +29,12 @@ static int _error_code = 0;
  * Set the X error handler function
  */
 EAPI void
-ecore_x_error_handler_set(void        (*func)(void *data),
+ecore_x_error_handler_set(void (*func)(void *data),
                           const void *data)
 {
    _error_func = func;
    _error_data = (void *)data;
-} /* ecore_x_error_handler_set */
+}
 
 /**
  * Set the I/O error handler.
@@ -43,12 +44,12 @@ ecore_x_error_handler_set(void        (*func)(void *data),
  * Set the X I/O error handler function
  */
 EAPI void
-ecore_x_io_error_handler_set(void        (*func)(void *data),
+ecore_x_io_error_handler_set(void (*func)(void *data),
                              const void *data)
 {
    _io_error_func = func;
    _io_error_data = (void *)data;
-} /* ecore_x_io_error_handler_set */
+}
 
 /**
  * Get the request code that caused the error.
@@ -60,7 +61,7 @@ EAPI int
 ecore_x_error_request_get(void)
 {
    return _error_request_code;
-} /* ecore_x_error_request_get */
+}
 
 /**
  * Get the error code from the error.
@@ -72,28 +73,41 @@ EAPI int
 ecore_x_error_code_get(void)
 {
    return _error_code;
-} /* ecore_x_error_code_get */
+}
+
+/**
+ * Get the resource id that caused the error.
+ * @return The resource id causing the X error
+ *
+ * Return the X resource id that caused the last X error
+ */
+EAPI Ecore_X_ID
+ecore_x_error_resource_id_get(void)
+{
+   return _error_resource_id;
+}
 
 void
 _ecore_x_error_handler_init(void)
 {
    XSetErrorHandler((XErrorHandler)_ecore_x_error_handle);
    XSetIOErrorHandler((XIOErrorHandler)_ecore_x_io_error_handle);
-} /* _ecore_x_error_handler_init */
+}
 
 static int
-_ecore_x_error_handle(Display     *d,
+_ecore_x_error_handle(Display *d,
                       XErrorEvent *ev)
 {
    if (d == _ecore_x_disp)
      {
         _error_request_code = ev->request_code;
         _error_code = ev->error_code;
+        _error_resource_id = ev->resourceid;
         if (_error_func)
           _error_func(_error_data);
      }
    return 0;
-} /* _ecore_x_error_handle */
+}
 
 static int
 _ecore_x_io_error_handle(Display *d)
@@ -107,5 +121,5 @@ _ecore_x_io_error_handle(Display *d)
      }
 
    return 0;
-} /* _ecore_x_io_error_handle */
+}
 
