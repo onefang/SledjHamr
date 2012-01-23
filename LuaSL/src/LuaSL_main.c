@@ -2,6 +2,7 @@
 
 static int scriptCount;
 
+#if 0
 static const char *names[] =
 {
      "bub1", "sh1",
@@ -66,6 +67,7 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
 {
    ecore_main_loop_quit();
 }
+#endif
 
 void dirList_cb(const char *name, const char *path, void *data)
 {
@@ -88,6 +90,22 @@ void dirList_cb(const char *name, const char *path, void *data)
     }
 }
 
+void dirListLua_cb(const char *name, const char *path, void *data)
+{
+    char buf[PATH_MAX];
+    char *ext = rindex(name, '.');
+
+    if (ext)
+    {
+	if (0 == strcmp(ext, ".lua"))
+	{
+	    scriptCount++;
+	    snprintf(buf, sizeof(buf), "luac %s/%s 2>/dev/null", path, name);
+	    system(buf);
+	}
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -104,20 +122,21 @@ main(int argc, char **argv)
     }
 
     memset(&game, 0, sizeof(gameGlobals));
-    // Since we increment at the begining, we need to pre decrement this so it starts at 0.
 
     loggingStartup(&game);
 
 //    else if ((game.config) && (game.data))
     {
 	char buf[PATH_MAX];
+	unsigned int lslCount;
+	struct timeval lastTime2;
+	struct timeval thisTime2;
+	float diff0, diff;
+#if 0
+	unsigned int i;
 	char *group = "main";
 	Evas_Object *bub, *sh;
 	Ecore_Animator *ani;
-	unsigned int i;
-	struct timeval lastTime2;
-	struct timeval thisTime2;
-	float diff;
 
 	/* this will give you a window with an Evas canvas under the first engine available */
 	game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
@@ -184,6 +203,7 @@ main(int argc, char **argv)
 	// Setup our callbacks.
 	ecore_evas_callback_delete_request_set(game.ee, _on_delete);
 	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
+#endif
 
 	// Do the compiles.
 	scriptCount = 0;
@@ -192,12 +212,25 @@ main(int argc, char **argv)
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
 	diff = timeDiff(&thisTime2, &lastTime2);
-	printf("Compiling %d scripts took %f seconds, that's %f scripts per second.  B-).\n", scriptCount, diff, scriptCount / diff);
+	printf("Compiling %d scripts took %f seconds, that's %f scripts per second.\n", scriptCount, diff, scriptCount / diff);
+
+	lslCount = scriptCount;
+	diff0 = diff;
+	scriptCount = 0;
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "%s/testLua", PACKAGE_DATA_DIR);
+	eina_file_dir_list(buf, EINA_TRUE, dirListLua_cb, &game);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("Compiling %d Lua scripts took %f seconds, that's %f scripts per second.  B-).\n", scriptCount, diff, scriptCount / diff);
+
+	printf("Combined estimate of compiling speed is %f scripts per second.\n", 1 / ((diff0 / lslCount) + (diff / scriptCount)));
 
 //	ecore_main_loop_begin();
 
+#if 0
 	ecore_animator_del(ani);
 	ecore_evas_free(game.ee);
+#endif
 	edje_shutdown();
 	ecore_evas_shutdown();
     }

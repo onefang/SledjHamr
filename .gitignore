@@ -1,6 +1,7 @@
 *.backup
 *.edj
 *.o
+*.out
 *.output
 *.diff
 *.lsl.lua
