@@ -196,8 +196,6 @@ expr(A) ::= LSL_INTEGER(B).							{ B->basicType = OT_integer; A = B; }
 expr(A) ::= LSL_KEY(B).								{ B->basicType = OT_key; A = B; }
 %nonassoc  LSL_LIST.
 expr(A) ::= LSL_BRACKET_OPEN(B) exprList LSL_BRACKET_CLOSE.	[LSL_BRACKET_OPEN]	{ B->basicType = OT_list; A = B; }	// Probably need a specific addList().
-// This causes a parsing conflict.  How?
-expr(A) ::= LSL_BRACKET_OPEN(B) LSL_BRACKET_CLOSE.		[LSL_BRACKET_OPEN]	{ B->basicType = OT_list; A = B; }
 %nonassoc  LSL_ROTATION.
 // Uses the same symbol for less than, greater than, and the rotation / vector delimiters.
 expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.	[LSL_ANGLE_OPEN]
