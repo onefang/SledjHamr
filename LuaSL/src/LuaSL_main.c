@@ -1,8 +1,11 @@
 #include "LuaSL.h"
 
+#define HARNESS		0
+#define LUA_TEST	0
+
 static int scriptCount;
 
-#if 0
+#if HARNESS
 static const char *names[] =
 {
      "bub1", "sh1",
@@ -69,7 +72,7 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
 }
 #endif
 
-void dirList_cb(const char *name, const char *path, void *data)
+static void dirList_cb(const char *name, const char *path, void *data)
 {
     gameGlobals *game = data;
     char buf[PATH_MAX];
@@ -90,7 +93,8 @@ void dirList_cb(const char *name, const char *path, void *data)
     }
 }
 
-void dirListLua_cb(const char *name, const char *path, void *data)
+#if LUA_TEST
+static void dirListLua_cb(const char *name, const char *path, void *data)
 {
     char buf[PATH_MAX];
     char *ext = rindex(name, '.');
@@ -105,6 +109,7 @@ void dirListLua_cb(const char *name, const char *path, void *data)
 	}
     }
 }
+#endif
 
 int
 main(int argc, char **argv)
@@ -128,11 +133,14 @@ main(int argc, char **argv)
 //    else if ((game.config) && (game.data))
     {
 	char buf[PATH_MAX];
-	unsigned int lslCount;
 	struct timeval lastTime2;
 	struct timeval thisTime2;
-	float diff0, diff;
-#if 0
+	float diff;
+#if LUA_TEST
+	unsigned int lslCount;
+	float diff0;
+#endif
+#if HARNESS
 	unsigned int i;
 	char *group = "main";
 	Evas_Object *bub, *sh;
@@ -214,6 +222,7 @@ main(int argc, char **argv)
 	diff = timeDiff(&thisTime2, &lastTime2);
 	printf("Compiling %d LSL scripts took %f seconds, that's %f scripts per second.\n", scriptCount, diff, scriptCount / diff);
 
+#if LUA_TEST
 	lslCount = scriptCount;
 	diff0 = diff;
 	scriptCount = 0;
@@ -224,10 +233,11 @@ main(int argc, char **argv)
 	printf("Compiling %d Lua scripts took %f seconds, that's %f scripts per second.\n\n", scriptCount, diff, scriptCount / diff);
 
 	printf("Combined estimate of compiling speed is %f scripts per second.\n", 1 / ((diff0 / lslCount) + (diff / scriptCount)));
+#endif
 
 //	ecore_main_loop_begin();
 
-#if 0
+#if HARNESS
 	ecore_animator_del(ani);
 	ecore_evas_free(game.ee);
 #endif
