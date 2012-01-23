@@ -212,7 +212,7 @@ main(int argc, char **argv)
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
 	diff = timeDiff(&thisTime2, &lastTime2);
-	printf("Compiling %d scripts took %f seconds, that's %f scripts per second.\n", scriptCount, diff, scriptCount / diff);
+	printf("Compiling %d LSL scripts took %f seconds, that's %f scripts per second.\n", scriptCount, diff, scriptCount / diff);
 
 	lslCount = scriptCount;
 	diff0 = diff;
@@ -221,7 +221,7 @@ main(int argc, char **argv)
 	snprintf(buf, sizeof(buf), "%s/testLua", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirListLua_cb, &game);
 	diff = timeDiff(&thisTime2, &lastTime2);
-	printf("Compiling %d Lua scripts took %f seconds, that's %f scripts per second.  B-).\n", scriptCount, diff, scriptCount / diff);
+	printf("Compiling %d Lua scripts took %f seconds, that's %f scripts per second.\n\n", scriptCount, diff, scriptCount / diff);
 
 	printf("Combined estimate of compiling speed is %f scripts per second.\n", 1 / ((diff0 / lslCount) + (diff / scriptCount)));
 
