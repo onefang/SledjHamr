@@ -100,7 +100,7 @@ XCFLAGS=
 # Enable some upwards-compatible features from Lua 5.2 that are unlikely
 # to break existing code (e.g. __pairs). Note that this does not provide
 # full compatibility with Lua 5.2 at this time.
-#XCFLAGS+= -DLUAJIT_ENABLE_LUA52COMPAT
+XCFLAGS+= -DLUAJIT_ENABLE_LUA52COMPAT
 #
 # Disable the JIT compiler, i.e. turn LuaJIT into a pure interpreter.
 #XCFLAGS+= -DLUAJIT_DISABLE_JIT
@@ -123,7 +123,7 @@ XCFLAGS=
 # dual-number (2) mode. Uncomment one of these lines to override the
 # default mode. Please see LJ_ARCH_NUMMODE in lj_arch.h for details.
 #XCFLAGS+= -DLUAJIT_NUMMODE=1
-#XCFLAGS+= -DLUAJIT_NUMMODE=2
+XCFLAGS+= -DLUAJIT_NUMMODE=2
 #
 ##############################################################################
 
