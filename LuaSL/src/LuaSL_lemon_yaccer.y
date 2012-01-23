@@ -161,13 +161,13 @@ expr(A) ::= identifier(B).							{ A = B; }
 
 %right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
 // Yes, these can be expressions, and can happen in if statements and such.
-expr(A) ::= identifier LSL_ASSIGNMENT_CONCATENATE expr(B).			{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_ADD expr(B).				{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_SUBTRACT expr(B)	.			{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_MULTIPLY expr(B).				{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_MODULO expr(B).				{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_DIVIDE expr(B).				{ A = B; }
-expr(A) ::= identifier LSL_ASSIGNMENT_PLAIN expr(B).				{ A = B; }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_CONCATENATE(C)	expr(D).		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_ADD(C)		expr(D).		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_SUBTRACT(C)	expr(D)	.		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_MULTIPLY(C)	expr(D).		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_MODULO(C)	expr(D).		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_DIVIDE(C)	expr(D).		{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).		{ A = addOperation(compiler, B, C, D); }
 
 // Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
 // Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
