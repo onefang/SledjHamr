@@ -146,6 +146,7 @@ LSL_Token LSL_Tokens[] =
     {999999, ST_NONE, NULL, LSL_NONE, NULL, NULL}
 };
 
+// VERY IMPORTANT to keep this in sync with enum opType from LuaSL_LSL_tree.h!
 allowedTypes allowed[] = 
 {
     {OT_nothing,	"nothing",	(ST_NONE)},																// 
@@ -162,6 +163,7 @@ allowedTypes allowed[] =
 
     {OT_bool,		"boolean",	(ST_BOOLEAN | ST_EQUALITY)},														// bool		bool		          == !=           =                            && ||
 
+    {OT_integer,	"integer",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},	// int		boolean		* / + - % == != < > <= >= = += -= *= /= %= & | ^ << >>
     {OT_integer,	"integer",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},	// int		int		* / + - % == != < > <= >= = += -= *= /= %= & | ^ << >>
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// int		float		cast to float float
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	int		cast to float float
@@ -172,15 +174,17 @@ allowedTypes allowed[] =
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// string	key		cast to string string
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// string	string		    +     == !=           = +=
 
-    {OT_list,		"list",		(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// list		list		    +     == !=           = +=
-    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},												// list		integer		    +           < > <= >= = +=
-    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION)},												// list		float		    +           < > <= >= = +=
+    {OT_list,		"list",		(ST_ADD | ST_EQUALITY   | ST_CONCATENATION | ST_ASSIGNMENT )},										// list		list		    +     == !=           = +=
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT )},										// list		boolean		    +           < > <= >= = +=
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT )},										// list		integer		    +           < > <= >= = +=
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT )},										// list		float		    +           < > <= >= = +=
+    {OT_list,		"list",		(ST_ADD | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT )},										// list		string		    +           < > <= >= = +=
     {OT_integer,	"integer",	(ST_ADD | ST_COMPARISON)},														// integer	list		    +           < > <= >=
     {OT_float,		"float",	(ST_ADD | ST_COMPARISON)},														// float	list		    +           < > <= >=
     {OT_list,		"list",		(ST_ADD | ST_CONCATENATION)},														// list		other		    +                     = +=
 
     {OT_vector,		"vector",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO)},					// vector	vector		* / + - % == !=           = += -= *= /= %=
-    {OT_vector,		"vector",	(ST_MULTIPLY)},																// vector	float		* /
+    {OT_vector,		"vector",	(ST_MULTIPLY | ST_ASSIGNMENT)},														// vector	float		* /                               *= /=
     {OT_vector,		"vector",	(ST_MULTIPLY)},																// vector	rotation	* /
 
     {OT_rotation,	"rotation",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},							// rotation	rotation	* / + -   == !=           = += -= *= /= 
@@ -194,10 +198,10 @@ opType opExpr[][10] =
 {
     {OT_nothing,  OT_bool,     OT_integer,  OT_float,       OT_key,       OT_list,      OT_rotation,         OT_string,       OT_vector,       OT_other},
     {OT_bool,     OT_boolBool, OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
-    {OT_integer,  OT_invalid,  OT_intInt,   OT_intFloat,    OT_invalid,   OT_intList,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
+    {OT_integer,  OT_intBool,  OT_intInt,   OT_intFloat,    OT_invalid,   OT_intList,   OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
     {OT_float,    OT_invalid,  OT_floatInt, OT_floatFloat,  OT_invalid,   OT_floatList, OT_invalid,          OT_invalid,      OT_invalid,      OT_invalid},
     {OT_key,      OT_invalid,  OT_invalid,  OT_invalid,     OT_keyKey,    OT_invalid,   OT_invalid,          OT_keyString,    OT_invalid,      OT_invalid},
-    {OT_list,     OT_invalid,  OT_listInt,  OT_listFloat,   OT_invalid,   OT_listList,  OT_invalid,          OT_invalid,      OT_invalid,      OT_listOther},
+    {OT_list,     OT_listBool, OT_listInt,  OT_listFloat,   OT_invalid,   OT_listList,  OT_invalid,          OT_listString,   OT_invalid,      OT_listOther},
     {OT_rotation, OT_invalid,  OT_invalid,  OT_invalid,     OT_invalid,   OT_invalid,   OT_rotationRotation, OT_invalid,      OT_invalid,      OT_invalid},
     {OT_string,   OT_invalid,  OT_invalid,  OT_invalid,     OT_stringKey, OT_invalid,   OT_invalid,          OT_stringString, OT_invalid,      OT_invalid},
     {OT_vector,   OT_invalid,  OT_invalid,  OT_vectorFloat, OT_invalid,   OT_invalid,   OT_vectorRotation,   OT_invalid,      OT_vectorVector, OT_invalid},

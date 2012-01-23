@@ -75,6 +75,8 @@ typedef enum
     LSL_NOIGNORE	= 64
 } LSL_Flags;
 
+
+// VERY IMPORTANT to keep this in sync with allowedTypes allowed[] from LuaSL_compile.c!
 typedef enum
 {
     OT_nothing,
@@ -90,6 +92,7 @@ typedef enum
     OT_other,
 
     OT_boolBool,
+    OT_intBool,
     OT_intInt,
     OT_intFloat,
     OT_floatInt,
@@ -99,8 +102,10 @@ typedef enum
     OT_stringKey,
     OT_stringString,
     OT_listList,
+    OT_listBool,
     OT_listInt,
     OT_listFloat,
+    OT_listString,
     OT_intList,
     OT_floatList,
     OT_listOther,
