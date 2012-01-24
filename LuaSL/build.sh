@@ -54,23 +54,18 @@ LFLAGS="-d"
 EDJE_FLAGS="-id images -fd fonts"
 
 
-
-
 # Run lemon first, flex depends on it to define the symbol values.
-command="lemon -s LuaSL_lemon_yaccer.y"
+command="../../libraries/lemon/lemon -s -T../../libraries/lemon/lempar.c LuaSL_lemon_yaccer.y"
 echo $command
 $command
-
 
 command="flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l"
 echo $command
 $command
 
-
 command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
 echo $command
 $command
-
 
 names="LuaSL_main LuaSL_compile LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
 objects=""

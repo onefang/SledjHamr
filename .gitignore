@@ -6,6 +6,10 @@
 *.diff
 *.lsl.lua
 *.lsl2
+libraries/LuaJIT-1.1.7/src/liblua.a
+libraries/LuaJIT-1.1.7/src/luajit
+libraries/luaproc/luaproc.so
+libraries/lemon/lemon
 LuaSL/LuaSL
 LuaSL/LuaSL_parser
 LuaSL/src/LuaSL_lemon_yaccer.c
@@ -16,6 +20,4 @@ LuaSL/src/LuaSL_lexer.c
 LuaSL/src/LuaSL_lexer.h
 LuaSL/src/LuaSL_LSL_lexer.c
 LuaSL/src/LuaSL_LSL_lexer.h
-libraries/LuaJIT-1.1.7/src/liblua.a
-libraries/LuaJIT-1.1.7/src/luajit
-libraries/luaproc/luaproc.so
+
