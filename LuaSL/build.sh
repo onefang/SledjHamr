@@ -4,7 +4,7 @@
 export LOCALDIR=`pwd`
 
 cd src
-rm -f ../LuaSL ../LuaSL_parser ../*.o *.output *.backup ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
+rm -f ../LuaSL *.o *.output *.backup ../luac.out ../*.edj LuaSL_lexer.h LuaSL_lexer.c LuaSL_lemon_yaccer.h LuaSL_lemon_yaccer.c LuaSL_lemon_yaccer.out
 
 
 # This assumes you have EFL installed in one of two standard places.
@@ -21,29 +21,20 @@ CFLAGS="-g -Wall -I include -I $LOCALDIR/src"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1/eina"
 CFLAGS="$CFLAGS -I $E17DIR/include/eet-1"
+CFLAGS="$CFLAGS -I $E17DIR/include/embryo-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/edje-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/evas-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/ecore-1"
 CFLAGS="$CFLAGS -I $E17DIR/include"
 CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
 
-LDFLAGS="-L lib -L /usr/lib -L /lib -L $E17DIR/lib"
-libs="-lecore -levas -ledje -leet -leina"
-# These need to be added to libs if linking staticaly, though some part of EFL don't like that.
+LDFLAGS="-L lib -L /usr/lib -L /lib -L $E17DIR/lib -L ../../libraries/luajit-2.0/src"
+libs="-lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread"
+# These need to be added to libs if linking staticaly, though some parts of EFL don't like that.
 #-lecore_evas \
-#-lecore_fb \
 #-lecore_file \
-#-lecore \
-#-ledje \
-#-levas \
-#-lembryo \
-#-leet \
-#-leina \
-#-llua \
 #-lm \
 #-ldl \
-#-lglib-2.0 \
-#-lpthread \
 #-lfontconfig \
 #-lfreetype \
 #-lexpat \
@@ -71,10 +62,10 @@ names="LuaSL_main LuaSL_compile LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
 objects=""
 for i in $names
 do
-    command="gcc $CFLAGS -c -o ../$i.o $i.c"
+    command="gcc $CFLAGS -c -o $i.o $i.c"
     echo $command
     $command
-    objects="$objects ../$i.o"
+    objects="$objects $i.o"
 done
 command="gcc $CFLAGS -o ../LuaSL $objects $LDFLAGS $libs"
 echo $command
