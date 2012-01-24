@@ -24,10 +24,10 @@ names="lemon"
 objects=""
 for i in $names
 do
-    command="gcc $CFLAGS -c -o ../$i.o $i.c"
+    command="gcc $CFLAGS -c -o $i.o $i.c"
     echo $command
     $command
-    objects="$objects ../$i.o"
+    objects="$objects $i.o"
 done
 command="gcc $CFLAGS -o lemon $objects $LDFLAGS $libs"
 echo $command
