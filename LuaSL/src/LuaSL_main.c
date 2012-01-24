@@ -254,6 +254,7 @@ static void runLuaFile(gameGlobals *game, const char *filename)
 //    lua_setallocf(L, _elua_alloc, &ela);  // LuaJIT uses a heavily hacked up dlmalloc.  Seems that standard realloc is not so thread safe?
     lua_atpanic(L, _elua_custom_panic);
 // TODO - Sandbox out what this opens.  See lib_init.c  from LuaJIT.
+// Just noticed this in the LuaJIT docs - "To change or extend the list of standard libraries to load, copy src/lib_init.c to your project and modify it accordingly. Make sure the jit library is loaded or the JIT compiler will not be activated."
     luaL_openlibs(L);
 
     lua_pushcfunction(L, errFunc);
