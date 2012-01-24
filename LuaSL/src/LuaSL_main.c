@@ -1,11 +1,9 @@
 #include "LuaSL.h"
 
-#define HARNESS		0
 #define LUA_TEST	0
 
 static int scriptCount;
 
-#if HARNESS
 static const char *names[] =
 {
      "bub1", "sh1",
@@ -70,7 +68,6 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
 {
    ecore_main_loop_quit();
 }
-#endif
 
 static void dirList_cb(const char *name, const char *path, void *data)
 {
@@ -116,6 +113,8 @@ main(int argc, char **argv)
 {
     /* put here any init specific to this app like parsing args etc. */
     gameGlobals game;
+    char *programName = argv[0];
+    boolean badArgs = FALSE;
 
     if (!ecore_evas_init())
 	return EXIT_FAILURE;
@@ -130,8 +129,43 @@ main(int argc, char **argv)
 
     loggingStartup(&game);
 
+    // get the arguments passed in
+    while (--argc > 0 && *++argv != '\0')
+    {
+	if (*argv[0] == '-')
+	{
+	    // point to the characters after the '-' sign
+	    char *s = argv[0] + 1;
+
+	    switch (*s)
+	    {
+		case 'u':
+		{
+		    game.ui = TRUE;
+		    break;
+		}
+		default:
+		    badArgs = TRUE;
+	    }
+	}
+	else
+	    badArgs = TRUE;
+    }
+
+
+    if (badArgs)
+    {
+	// display the program usage to the user as they have it wrong 
+	printf("Usage: %s [-u]\n", programName);
+	printf("   -u: Show the test UI.\n");
+    }
+    else
 //    else if ((game.config) && (game.data))
     {
+	unsigned int i;
+	Evas_Object *bub, *sh;
+	Ecore_Animator *ani;
+	char *group = "main";
 	char buf[PATH_MAX];
 	struct timeval lastTime2;
 	struct timeval thisTime2;
@@ -140,78 +174,75 @@ main(int argc, char **argv)
 	unsigned int lslCount;
 	float diff0;
 #endif
-#if HARNESS
-	unsigned int i;
-	char *group = "main";
-	Evas_Object *bub, *sh;
-	Ecore_Animator *ani;
 
-	/* this will give you a window with an Evas canvas under the first engine available */
-	game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
-	if (!game.ee)
+	if (game.ui)
 	{
-	    PEm("You got to have at least one evas engine built and linked up to ecore-evas for this example to run properly.");
-	    edje_shutdown();
-	    ecore_evas_shutdown();
-	    return -1;
+	    /* this will give you a window with an Evas canvas under the first engine available */
+	    game.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
+	    if (!game.ee)
+	    {
+		PEm("You got to have at least one evas engine built and linked up to ecore-evas for this example to run properly.");
+		edje_shutdown();
+		ecore_evas_shutdown();
+		return -1;
+	    }
+	    game.canvas = ecore_evas_get(game.ee);
+	    ecore_evas_title_set(game.ee, "LuaSL test harness");
+	    ecore_evas_show(game.ee);
+
+	    game.bg = evas_object_rectangle_add(game.canvas);
+	    evas_object_color_set(game.bg, 255, 255, 255, 255); /* white bg */
+	    evas_object_move(game.bg, 0, 0); /* at canvas' origin */
+	    evas_object_size_hint_weight_set(game.bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	    evas_object_resize(game.bg, WIDTH, HEIGHT); /* covers full canvas */
+	    evas_object_show(game.bg);
+	    ecore_evas_object_associate(game.ee, game.bg, ECORE_EVAS_OBJECT_ASSOCIATE_BASE);
+	    evas_object_focus_set(game.bg, EINA_TRUE);
+
+	    game.edje = edje_object_add(game.canvas);
+	    snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+	    if (!edje_object_file_set(game.edje, buf, group))
+	    {
+		int err = edje_object_load_error_get(game.edje);
+		const char *errmsg = edje_load_error_str(err);
+		PEm("Could not load '%s' from %s: %s\n", group, buf, errmsg);
+
+		evas_object_del(game.edje);
+		ecore_evas_free(game.ee);
+		edje_shutdown();
+		ecore_evas_shutdown();
+		return -2;
+	    }
+	    evas_object_move(game.edje, 0, 0);
+	    evas_object_resize(game.edje, WIDTH, HEIGHT);
+	    evas_object_show(game.edje);
+
+	    snprintf(buf, sizeof(buf), "%s/images/bubble_sh.png", PACKAGE_DATA_DIR);
+	    for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
+	    {
+		sh = evas_object_image_filled_add(game.canvas);
+		evas_object_image_file_set(sh, buf, NULL);
+		evas_object_resize(sh, 64, 64);
+		evas_object_show(sh);
+		evas_object_data_set(game.bg, names[(i * 2) + 1], sh);
+	    }
+
+	    snprintf(buf, sizeof(buf), "%s/images/bubble.png", PACKAGE_DATA_DIR);
+	    for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
+	    {
+		bub = evas_object_image_filled_add(game.canvas);
+		evas_object_image_file_set(bub, buf, NULL);
+		evas_object_resize(bub, 64, 64);
+		evas_object_show(bub);
+		evas_object_data_set(game.bg, names[(i * 2)], bub);
+	    }
+	    ani = ecore_animator_add(anim, &game);
+	    evas_object_data_set(game.bg, "animator", ani);
+
+	    // Setup our callbacks.
+	    ecore_evas_callback_delete_request_set(game.ee, _on_delete);
+	    edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
 	}
-	game.canvas = ecore_evas_get(game.ee);
-	ecore_evas_title_set(game.ee, "LuaSL test harness");
-	ecore_evas_show(game.ee);
-
-	game.bg = evas_object_rectangle_add(game.canvas);
-	evas_object_color_set(game.bg, 255, 255, 255, 255); /* white bg */
-	evas_object_move(game.bg, 0, 0); /* at canvas' origin */
-	evas_object_size_hint_weight_set(game.bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	evas_object_resize(game.bg, WIDTH, HEIGHT); /* covers full canvas */
-	evas_object_show(game.bg);
-	ecore_evas_object_associate(game.ee, game.bg, ECORE_EVAS_OBJECT_ASSOCIATE_BASE);
-	evas_object_focus_set(game.bg, EINA_TRUE);
-
-	game.edje = edje_object_add(game.canvas);
-	snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
-	if (!edje_object_file_set(game.edje, buf, group))
-	{
-	    int err = edje_object_load_error_get(game.edje);
-	    const char *errmsg = edje_load_error_str(err);
-	    PEm("Could not load '%s' from %s: %s\n", group, buf, errmsg);
-
-	    evas_object_del(game.edje);
-	    ecore_evas_free(game.ee);
-	    edje_shutdown();
-	    ecore_evas_shutdown();
-	    return -2;
-	}
-	evas_object_move(game.edje, 0, 0);
-	evas_object_resize(game.edje, WIDTH, HEIGHT);
-	evas_object_show(game.edje);
-
-	snprintf(buf, sizeof(buf), "%s/images/bubble_sh.png", PACKAGE_DATA_DIR);
-	for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
-	{
-	    sh = evas_object_image_filled_add(game.canvas);
-	    evas_object_image_file_set(sh, buf, NULL);
-	    evas_object_resize(sh, 64, 64);
-	    evas_object_show(sh);
-	    evas_object_data_set(game.bg, names[(i * 2) + 1], sh);
-	}
-
-	snprintf(buf, sizeof(buf), "%s/images/bubble.png", PACKAGE_DATA_DIR);
-	for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
-	{
-	    bub = evas_object_image_filled_add(game.canvas);
-	    evas_object_image_file_set(bub, buf, NULL);
-	    evas_object_resize(bub, 64, 64);
-	    evas_object_show(bub);
-	    evas_object_data_set(game.bg, names[(i * 2)], bub);
-	}
-	ani = ecore_animator_add(anim, &game);
-	evas_object_data_set(game.bg, "animator", ani);
-
-	// Setup our callbacks.
-	ecore_evas_callback_delete_request_set(game.ee, _on_delete);
-	edje_object_signal_callback_add(game.edje, "*", "game_*", _edje_signal_cb, &game);
-#endif
 
 	// Do the compiles.
 	scriptCount = 0;
@@ -235,12 +266,12 @@ main(int argc, char **argv)
 	printf("Combined estimate of compiling speed is %f scripts per second.\n", 1 / ((diff0 / lslCount) + (diff / scriptCount)));
 #endif
 
-//	ecore_main_loop_begin();
-
-#if HARNESS
-	ecore_animator_del(ani);
-	ecore_evas_free(game.ee);
-#endif
+	if (game.ui)
+	{
+	    ecore_main_loop_begin();
+	    ecore_animator_del(ani);
+	    ecore_evas_free(game.ee);
+	}
 	edje_shutdown();
 	ecore_evas_shutdown();
     }

@@ -48,11 +48,12 @@ typedef enum
 
 typedef struct
 {
-    Ecore_Evas  *ee;		// Our window.
-    Evas        *canvas;	// The canvas for drawing directly onto.
-    Evas_Object *bg;		// Our background edje, also the game specific stuff.
-    Evas_Object *edje;		// The edje of the background.
+    Ecore_Evas	*ee;		// Our window.
+    Evas	*canvas;	// The canvas for drawing directly onto.
+    Evas_Object	*bg;		// Our background edje, also the game specific stuff.
+    Evas_Object	*edje;		// The edje of the background.
     int logDom;
+    boolean	ui;		// Wether we actually start up the UI.
 } gameGlobals;
 
 
