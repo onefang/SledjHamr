@@ -7,7 +7,9 @@ client side scripting engine.
 
 To compile this, you will need Enlightenment Foundation Libraries (EFL)
 installed in either /opt/e17 or /usr.  These are typical places it get's
-installed in.
+installed in.  You will also need flex.  The rest of the dependencies
+are in the ../libraries directory, including the source code for the
+version of EFL this is tested with.
 
 
 Design.
@@ -24,9 +26,9 @@ A parser parses an LSL script, validating it and reporting errors.
 A preprocessor takes the result of the parse, and converts it into Lua
 source.  Each LSL script becomes a Lua state.  LSL states are handled as
 Lua tables, with each LSL state function being a table function in a
-common metatable.  LL and OS functions are likely to be C functions. 
-Careful testing should be done with LuaJIT FFI, sandboxing, and
-performance testing.
+common metatable.  LL and OS functions are likely to be C or Lua
+functions.  Careful testing should be done with LuaJIT FFI, sandboxing,
+and performance testing.
 
 The Lua source is compiled by the Lua compiler.
 
@@ -39,6 +41,13 @@ Nails is used to pump commands in and out of the LuaSL system.  Incoming
 commands invoke LSL events via the LuaSL state metatable.  LL and OS
 functions that impact the world will be converted to nails commands sent
 to the command pump.
+
+Initialy, since this is the first thing being written, a nails command
+pump client needs to be installed into OpenSim's C# stuff.  Though it
+might be possible to talk directly to ROBUST instead.  Think I'll try
+the ROBUST route, see hov far I can get.  That's the general principle
+applying in all of this - try to avoid C# and see how for we can get. 
+lol
 
 A watchdog thread is used to make sure no LuaSL script spends forever
 processing any event.
@@ -57,11 +66,15 @@ buttons for triggering LSL events, SL style dialogs, and other goodies.
 The initial goal will be to run standard MLP scripts.  They have minimal
 interface to the world, and exercise quite a bit of the rest of LSL. 
 They are also quite common, and sometimes responsible for a lot of the
-script running load.  Gotta start somewhere, so start with the ~run
-script.
+script running load.
+
+Later I should add stock standard OpenCollar scripts from SL.  They are
+a bitch to get working under OpenSim, so would be good compatability
+tests.
 
 Various eina logging domains will be used to handle whisper, say, shout,
 etc.
 
 Performance testing will have to be done on 5000 scripts, to see how
 that compares against XEngine.
+

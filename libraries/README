@@ -1,4 +1,8 @@
 There are some base libraries that should be used in common.  Notable
-the Enlightenment Foundation Libraries.  Other external open source
-projects that we just use directly should go here to.  Makes it easy to
-compile it all.
+the Enlightenment Foundation Libraries (EFL), LuaJIT, luaproc, and
+lemon.  Other external open source projects that we just use directly
+should go here to.  Makes it easy to compile it all.
+
+Note that in some cases, there might be changes.  Such changes should be
+documented.
+
