@@ -18,6 +18,9 @@ fi
 # No need for a make file, or dependencies, the entire thing takes only a few seconds to build.
 
 CFLAGS="-g -Wall -I include -I $LOCALDIR/src"
+CFLAGS="$CFLAGS -I ../../libraries"
+CFLAGS="$CFLAGS -I ../../libraries/luajit-2.0/src"
+#CFLAGS="$CFLAGS -I /usr/include/lua5.1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1/eina"
 CFLAGS="$CFLAGS -I $E17DIR/include/eet-1"
@@ -28,12 +31,13 @@ CFLAGS="$CFLAGS -I $E17DIR/include/ecore-1"
 CFLAGS="$CFLAGS -I $E17DIR/include"
 CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
 
-LDFLAGS="-L lib -L /usr/lib -L /lib -L $E17DIR/lib -L ../../libraries/luajit-2.0/src"
-libs="-lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread"
+LDFLAGS="-L ../../libraries/luajit-2.0/src -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+libs="-lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
+#LDFLAGS="-L /usr/lib/lua/5.1 -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+#libs="-lecore -levas -ledje -lembryo -leet -leina -llua5.1 -lpthread -lm"
 # These need to be added to libs if linking staticaly, though some parts of EFL don't like that.
 #-lecore_evas \
 #-lecore_file \
-#-lm \
 #-ldl \
 #-lfontconfig \
 #-lfreetype \
@@ -43,6 +47,7 @@ libs="-lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread"
 
 LFLAGS="-d"
 EDJE_FLAGS="-id images -fd fonts"
+LD_RUN_PATH="../../libraries/luajit-2.0/src:"
 
 
 # Run lemon first, flex depends on it to define the symbol values.
@@ -59,7 +64,7 @@ echo $command
 $command
 
 names="LuaSL_main LuaSL_compile LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
-objects=""
+objects="../../libraries/luaproc/channel.o ../../libraries/luaproc/list.o ../../libraries/luaproc/luaproc.o ../../libraries/luaproc/sched.o "
 for i in $names
 do
     command="gcc $CFLAGS -c -o $i.o $i.c"

@@ -83,9 +83,11 @@ void *workermain( void *args ) {
 	/* detach thread so resources are freed as soon as thread exits (no further joining) */
 	pthread_detach( pthread_self( ));
 
+//printf("NEW WORKER\n");
 	/* main worker loop */
 	while ( 1 ) {
 
+//printf("a\n");
 		/* get exclusive access to the ready process queue */
 		pthread_mutex_lock( &mutex_queue_access );
 
@@ -94,62 +96,83 @@ void *workermain( void *args ) {
 			pthread_cond_wait( &cond_wakeup_worker, &mutex_queue_access );
 		}
 
+////printf("b\n");
 		/* pop the first node from the ready process queue */
 		n = list_pop_head( lpready );
 
+////printf("c\n");
 		/* ensure list pop succeeded before proceeding */
 		if ( n != NULL ) {
+//printf("c.0\n");
 			/* get the popped node's data content (ie, the lua process struct) */
 			lp = (luaproc )list_data( n );
 		}
 		else {
+////printf("c.1\n");
 			/* free access to the process ready queue */
 			pthread_mutex_unlock( &mutex_queue_access );
 			/* finished thread */
+//printf("c.2 pthread_exit\n");
 			pthread_exit( NULL );
+//printf("c.3\n");
 		}
 
+////printf("d\n");
 		/* free access to the process ready queue */
 		pthread_mutex_unlock( &mutex_queue_access );
 
+//printf("e lua_resum\n");
 		/* execute the lua code specified in the lua process struct */
 		procstat = lua_resume( luaproc_get_state( lp ), luaproc_get_args( lp ));
 
+//printf("f\n");
 		/* reset the process argument count */
 		luaproc_set_args( lp, 0 );
 
+////printf("g\n");
 		/* check if process finished its whole execution */
 		if ( procstat == 0 ) {
 
+//printf("g.0\n");
 			/* destroy the corresponding list node */
 			list_destroy_node( n );
 
+////printf("g.1\n");
 			/* check if worker thread should be destroyed */
 			destroyworker = luaproc_get_destroyworker( lp );
 
+////printf("g.2 proc finished\n");
 			/* set process status to finished */
 			luaproc_set_status( lp, LUAPROC_STAT_FINISHED );
 
+////printf("g.3\n");
 			/* check if lua process should be recycled and, if not, destroy it */
 			if ( luaproc_recycle_push( lp ) == FALSE ) {
+//printf("g.3.0 lua_close\n");
 				lua_close( luaproc_get_state( lp ));
 			}
 
+////printf("g.4\n");
 			/* decrease active lua process count */
 			sched_lpcount_dec();
 
+////printf("g.5\n");
 			/* check if thread should be finished after lua process conclusion */
 			if ( destroyworker ) {
+//printf("g.5.0 pthread_exit\n");
 				/* if so, finish thread */
 				pthread_exit( NULL );
 			}
+//printf("g.6\n");
 		}
 
 		/* check if process yielded */
 		else if ( procstat == LUA_YIELD ) {
 
+//printf("??????????????h.0\n");
 			/* if so, further check if yield originated from an unmatched send/recv operation */
 			if ( luaproc_get_status( lp ) == LUAPROC_STAT_BLOCKED_SEND ) {
+//printf("??????????????h.1\n");
 				/* queue blocked lua process on corresponding channel */
 				luaproc_queue_sender( lp );
 				/* unlock channel access */
@@ -159,6 +182,7 @@ void *workermain( void *args ) {
 			}
 
 			else if ( luaproc_get_status( lp ) == LUAPROC_STAT_BLOCKED_RECV ) {
+//printf("??????????????h.2\n");
 				/* queue blocked lua process on corresponding channel */
 				luaproc_queue_receiver( lp );
 				/* unlock channel access */
@@ -169,6 +193,7 @@ void *workermain( void *args ) {
 
 			/* or if yield resulted from an explicit call to coroutine.yield in the lua code being executed */
 			else {
+//printf("??????????????h.3\n");
 				/* get exclusive access to the ready process queue */
 				pthread_mutex_lock( &mutex_queue_access );
 				/* re-insert the job at the end of the ready process queue */
@@ -180,6 +205,7 @@ void *workermain( void *args ) {
 
 		/* check if there was any execution error (LUA_ERRRUN, LUA_ERRSYNTAX, LUA_ERRMEM or LUA_ERRERR) */
 		else {
+//printf("??????????????i.0\n");
 			/* destroy the corresponding node */
 			list_destroy_node( n );
 			/* print error message */
@@ -189,6 +215,7 @@ void *workermain( void *args ) {
 			/* decrease active lua process count */
 			sched_lpcount_dec();
 		}
+//printf("END\n");
 	}
 }
 
@@ -260,29 +287,42 @@ int sched_queue_proc( luaproc lp ) {
 /* synchronize worker threads */
 void sched_join_workerthreads( void ) {
 
+////printf("   0\n");
 	pthread_mutex_lock( &mutex_lp_count );
 
+//printf("   1 wait for procs to end\n");
 	/* wait until there is no more active lua processes */
 	while( lpcount != 0 ) {
+//printf("   1.0\n");
 		pthread_cond_wait( &cond_no_active_lp, &mutex_lp_count );
 	}
 	/* get exclusive access to the ready process queue */
+////printf("   2\n");
 	pthread_mutex_lock( &mutex_queue_access );
 	/* set the no more active lua processes flag to true */
+////printf("   3\n");
 	no_more_processes = TRUE;
 	/* wake ALL workers up */
+//printf("   4 wake up all workers.\n");
 	pthread_cond_broadcast( &cond_wakeup_worker );
 	/* free access to the process ready queue */
+////printf("   5\n");
 	pthread_mutex_unlock( &mutex_queue_access );
-	/* wait for (join) worker threads */
-	pthread_exit( NULL );
 
+// We don't need this, as we only get here during shutdown.  Linking this to EFL results in a hang otherwise anyway.
+	/* wait for (join) worker threads */
+//printf("   6 pthread_exit, waiting for workers to end\n");
+//	pthread_exit( NULL );
+
+//printf("7\n");
 	pthread_mutex_unlock( &mutex_lp_count );
 
+//printf("8\n");
 }
 
 /* increase active lua process count */
 void sched_lpcount_inc( void ) {
+//printf("inc procs++++++++++++++++++++++++++++++++++++++++\n");
 	pthread_mutex_lock( &mutex_lp_count );
 	lpcount++;
 	pthread_mutex_unlock( &mutex_lp_count );
@@ -290,10 +330,12 @@ void sched_lpcount_inc( void ) {
 
 /* decrease active lua process count */
 void sched_lpcount_dec( void ) {
+//printf("dec procs----------------------------------------\n");
 	pthread_mutex_lock( &mutex_lp_count );
 	lpcount--;
 	/* if count reaches zero, signal there are no more active processes */
 	if ( lpcount == 0 ) {
+//printf("dec procs AND NONE LEFT000000000000000000000000000\n");
 		pthread_cond_signal( &cond_no_active_lp );
 	}
 	pthread_mutex_unlock( &mutex_lp_count );

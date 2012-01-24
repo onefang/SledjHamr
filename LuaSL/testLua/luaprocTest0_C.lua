@@ -26,10 +26,6 @@
 --
 -----------------------------------------------------
 
-require "luaproc"
-
-luaproc.createworker()
-
 luaproc.newproc( [=[
 	luaproc.newchannel( "testchannel" )
 	luaproc.newproc( "luaproc.send( 'testchannel', 'luaproc is working fine!' )" )
@@ -37,8 +33,5 @@ luaproc.newproc( [=[
     print("End of parent proc")
 ]=] )
 
-print("About to luaproc.exit()!");
-luaproc.exit()
-print("Should have exited after the luaproc.exit()!");
-
+print("About to exit.");
 

@@ -44,6 +44,11 @@ THE SOFTWARE.
 /* lua process pointer type */
 typedef struct stluaproc *luaproc;
 
+void luaprocInit(void);
+void luaprocRegister(lua_State *L);
+int newProc(const char *code, int file);
+
+
 /* return a process' status */
 int luaproc_get_status( luaproc lp );
 

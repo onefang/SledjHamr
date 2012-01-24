@@ -3,8 +3,8 @@
 wd=$(pwd)
 
 echo "_______________ BUILDING LuaJIT _______________"
-cd libraries/luajit-2.0
-make
+cd $wd/libraries/luajit-2.0
+make amalg PREFIX=$()/src
 
 
 echo "_______________ BUILDING luaproc _______________"

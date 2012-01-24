@@ -114,6 +114,7 @@ static const struct luaL_reg luaproc_funcs_child[] = {
 	{ NULL, NULL }
 };
 
+/*
 static void registerlib( lua_State *L, const char *name, lua_CFunction f ) {
 	lua_getglobal( L, "package" );
 	lua_getfield( L, -1, "preload" );
@@ -121,8 +122,9 @@ static void registerlib( lua_State *L, const char *name, lua_CFunction f ) {
 	lua_setfield( L, -2, name );
 	lua_pop( L, 2 );
 }
-
+*/
 static void openlibs( lua_State *L ) {
+/*
 	lua_cpcall( L, luaopen_base, NULL );
 	lua_cpcall( L, luaopen_package, NULL );
 	registerlib( L, "io", luaopen_io );
@@ -131,6 +133,8 @@ static void openlibs( lua_State *L ) {
 	registerlib( L, "string", luaopen_string );
 	registerlib( L, "math", luaopen_math );
 	registerlib( L, "debug", luaopen_debug );
+*/
+    luaL_openlibs(L);
 }
 
 /* return status (boolean) indicating if lua process should be recycled */
@@ -195,7 +199,7 @@ int luaproc_recycle_push( luaproc lp ) {
 }
 
 /* create new luaproc */
-luaproc luaproc_new( const char *code, int destroyflag ) {
+static luaproc luaproc_new( const char *code, int destroyflag, int file) {
 
 	luaproc lp;
 	int ret;
@@ -218,7 +222,10 @@ luaproc luaproc_new( const char *code, int destroyflag ) {
 	luaL_register( lpst, "luaproc", luaproc_funcs_child );
 
 	/* load process' code */
-	ret = luaL_loadstring( lpst, code );
+	if (file)
+	    ret = luaL_loadfile( lpst, code );
+	else
+	    ret = luaL_loadstring( lpst, code );
 	/* in case of errors, destroy recently created lua process */
 	if ( ret != 0 ) {
 		lua_close( lpst );
@@ -231,7 +238,7 @@ luaproc luaproc_new( const char *code, int destroyflag ) {
 
 /* synchronize worker threads and exit */
 static int luaproc_exit( lua_State *L ) {
-	sched_join_workerthreads( );
+	sched_join_workerthreads();
 	return 0;
 }
 
@@ -297,7 +304,7 @@ static int luaproc_destroy_worker( lua_State *L ) {
 
 	/* create new lua process with empty code and destroy worker flag set to true
 	   (ie, conclusion of lua process WILL result in worker thread destruction */
-	lp = luaproc_new( "", TRUE );
+	lp = luaproc_new( "", TRUE, FALSE );
 
 	/* ensure process creation was successfull */
 	if ( lp == NULL ) {
@@ -328,7 +335,7 @@ static int luaproc_destroy_worker( lua_State *L ) {
 }
 
 /* recycle a lua process */
-luaproc luaproc_recycle( luaproc lp, const char *code ) {
+static luaproc luaproc_recycle( luaproc lp, const char *code, int file ) {
 
 	int ret;
 
@@ -351,12 +358,9 @@ luaproc luaproc_recycle( luaproc lp, const char *code ) {
 	return lp;
 }
 
-/* create and schedule a new lua process (luaproc.newproc) */
-static int luaproc_create_newproc( lua_State *L ) {
 
-	/* check if first argument is a string (lua code) */
-	const char *code = luaL_checkstring( L, 1 );
-
+int newProc(const char *code, int file)
+{
 	/* new lua process pointer */
 	luaproc lp;
 
@@ -365,21 +369,18 @@ static int luaproc_create_newproc( lua_State *L ) {
 
 	/* if there is a lua process available on the recycle queue, recycle it */
 	if ( lp != NULL ) {
-		lp = luaproc_recycle( lp, code );
+		lp = luaproc_recycle( lp, code, file );
 	}
 	/* otherwise create a new one from scratch */
 	else {
 		/* create new lua process with destroy worker flag set to false
 		   (ie, conclusion of lua process will NOT result in worker thread destruction */
-		lp = luaproc_new( code, FALSE );
+		lp = luaproc_new( code, FALSE, file );
 	}
 
 	/* ensure process creation was successfull */
 	if ( lp == NULL ) {
-		/* in case of errors return nil + error msg */
-		lua_pushnil( L );
-		lua_pushstring( L, "error loading code string" );
-		return 2;
+		return 1;
 	}
 
 	/* increase active luaproc count */
@@ -392,6 +393,26 @@ static int luaproc_create_newproc( lua_State *L ) {
 		sched_lpcount_dec();
 		/* close lua_State */
 		lua_close( lp->lstate );
+		return 2;
+	}
+
+	return 0;
+}
+
+/* create and schedule a new lua process (luaproc.newproc) */
+static int luaproc_create_newproc( lua_State *L ) {
+
+	/* check if first argument is a string (lua code) */
+	const char *code = luaL_checkstring( L, 1 );
+
+	switch (newProc(code, FALSE))
+	{
+	    case 1 :
+		/* in case of errors return nil + error msg */
+		lua_pushnil( L );
+		lua_pushstring( L, "error loading code string" );
+		return 2;
+	    case 2 :
 		/* return nil + error msg */
 		lua_pushnil( L );
 		lua_pushstring( L, "error queuing process" );
@@ -635,17 +656,24 @@ static int luaproc_receive( lua_State *L ) {
 	}
 }
 
-LUALIB_API int luaopen_luaproc( lua_State *L ) {
-
-	/* register luaproc functions */
-	luaL_register( L, "luaproc", luaproc_funcs_parent );
-
+void luaprocInit(void)
+{
 	/* initialize recycle list */
 	recyclelp = list_new();
 
 	/* initialize local scheduler */
 	sched_init_local( LUAPROC_SCHED_DEFAULT_WORKER_THREADS );
+}
 
+void luaprocRegister(lua_State *L)
+{
+	/* register luaproc functions */
+	luaL_register( L, "luaproc", luaproc_funcs_parent );
+}
+
+LUALIB_API int luaopen_luaproc( lua_State *L ) {
+	luaprocRegister(L);
+	luaprocInit();
 	return 0;
 }
 
