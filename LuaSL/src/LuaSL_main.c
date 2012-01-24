@@ -1,6 +1,6 @@
 #include "LuaSL.h"
 
-#define LUA_TEST	0
+#define LUA_TEST	1
 
 static int scriptCount;
 
@@ -264,6 +264,37 @@ main(int argc, char **argv)
 	printf("Compiling %d Lua scripts took %f seconds, that's %f scripts per second.\n\n", scriptCount, diff, scriptCount / diff);
 
 	printf("Combined estimate of compiling speed is %f scripts per second.\n", 1 / ((diff0 / lslCount) + (diff / scriptCount)));
+
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "cd %s/testLua; LUA_SOPATH='../../libraries/luaproc/' lua luaprocTest0.lua", PACKAGE_DATA_DIR);
+	system(buf);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("%s TOOK %f seconds.\n", buf, diff);
+
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "cd %s/testLua; LUA_SOPATH='../../libraries/luaproc/' lua luaprocTest1.lua", PACKAGE_DATA_DIR);
+	system(buf);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("%s TOOK %f seconds.\n", buf, diff);
+
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "cd %s/testLua; LUA_SOPATH='../../libraries/luaproc/' luajit luaprocTest1.lua", PACKAGE_DATA_DIR);
+	system(buf);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("%s TOOK %f seconds.\n", buf, diff);
+
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "cd %s/testLua; LUA_SOPATH='../../libraries/luaproc/' lua luaprocTest2.lua", PACKAGE_DATA_DIR);
+	system(buf);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("%s TOOK %f seconds.\n", buf, diff);
+
+	gettimeofday(&lastTime2, 0);
+	snprintf(buf, sizeof(buf), "cd %s/testLua; LUA_SOPATH='../../libraries/luaproc/' luajit luaprocTest2.lua", PACKAGE_DATA_DIR);
+	system(buf);
+	diff = timeDiff(&thisTime2, &lastTime2);
+	printf("%s TOOK %f seconds.\n", buf, diff);
+
 #endif
 
 	if (game.ui)
