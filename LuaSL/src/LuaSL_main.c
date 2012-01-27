@@ -1,6 +1,6 @@
 #include "LuaSL.h"
 
-#define LUA_TEST	1
+#define LUA_TEST	0
 
 static int scriptCount;
 
@@ -406,7 +406,9 @@ main(int argc, char **argv)
 	scriptCount = 0;
 	gettimeofday(&lastTime2, 0);
 	compilerSetup(&game);
+#if LUA_TEST
 	runnerSetup(&game);
+#endif
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
 	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
 	diff = timeDiff(&thisTime2, &lastTime2);
@@ -474,9 +476,11 @@ main(int argc, char **argv)
 	    ecore_evas_free(game.ee);
 	}
 
+#if LUA_TEST
 	runnerTearDown(&game);
 	diff = timeDiff(&thisTime2, &lastTime2);
 	printf("Running that last one locally TOOK %f seconds.\n",diff);
+#endif
 	edje_shutdown();
 	ecore_evas_shutdown();
     }
