@@ -179,7 +179,7 @@ struct _LSL_Leaf
 	LSL_Leaf		*listValue;
 	const char		*stringValue;
 	opType			operationValue;
-	LSL_Parenthesis 	*parenthesis;
+	LSL_Parenthesis	*parenthesis;
 	LSL_Identifier		*identifierValue;
 	LSL_Statement		*statementValue;
 	LSL_Block		*blockValue;
@@ -207,15 +207,35 @@ struct _LSL_Identifier	// For variables and function parameters.
 
 struct _LSL_Statement
 {
-    Eina_Clist		statement;
-    LSL_Leaf		*expressions;	// For things like a for statement, might hold three expressions.
+    Eina_Clist		statement;	// For statement lists, perhaps this is just duplicating the one in LSL_Block?  Not actually being used at the moment, except to collect them.  On the other hand, I might have been half way through that part.  lol
+    union
+    {
+	LSL_Identifier	*identifier;
+	LSL_Parenthesis	*parenthesis;
+    } stuff;				// Nothing has an identifier AND parenthesis, and there will be LOTS of statements, so save some space.
+    LSL_Leaf		*expressions;	// A for statement will have three expressions, everything else has zero or one.
+    LSL_Block		*block;
     LSL_Type		type;		// Expression type.
+/*
+expr						expr
+Variable defines	identifier, optional	expr
+state change		identifier
+Labels			identifier
+goto			identifier
+return				    optional	expr
+do						expr,	block,	parens
+for						exprx3,	block,	parens
+if						expr,	block,	parens
+else							block
+else if						expr,	block,	parens
+while						expr,	block,	parens
+*/
 };
 
 struct _LSL_Block
 {
     LSL_Block		*outerBlock;
-    Eina_Clist		statements;
+    Eina_Clist		statements;	// For statement lists.
     Eina_Hash		*variables;	// Those variables in this scope.
     LSL_Function	*function;	// A pointer to the function if this block is a function.
 };
