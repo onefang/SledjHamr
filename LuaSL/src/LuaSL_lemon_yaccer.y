@@ -85,7 +85,7 @@ statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CL
 %nonassoc LSL_LABEL.
 statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->token->type, NULL, NULL, NULL, NULL, I); }
 
-// This might be bogus, or might be valid LSL, but it let us test the expression parser by evaluating them.
+// This might be bogus, or might be valid LSL, but it lets us test the expression parser by evaluating them.
 statement(A) ::= expr(E) LSL_STATEMENT(S).														{ A = addStatement(compiler, S, LSL_EXPRESSION, NULL, E, NULL, NULL, NULL); }
 
 // Various forms of expression.
