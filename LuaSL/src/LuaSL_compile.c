@@ -577,7 +577,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	if (call)
 	{
 	    call->function = func->value.functionValue;
-	    eina_clist_element_init(&(call->functionCall));
+	    eina_clist_element_init(&(call->dangler));
 	    call->call = identifier;
 	}
 	identifier->value.functionCallValue = call;
@@ -590,7 +590,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	// It may be declared later, so store it and check later.
 	if (call)
 	{
-	    eina_clist_add_tail(&(compiler->danglingCalls), &(call->functionCall));
+	    eina_clist_add_tail(&(compiler->danglingCalls), &(call->dangler));
 	    call->call = identifier;
 	}
 	identifier->basicType = OT_undeclared;
@@ -1373,7 +1373,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	{
 	    LSL_FunctionCall *call = NULL;
 
-	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler.danglingCalls), LSL_FunctionCall, functionCall)
+	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler.danglingCalls), LSL_FunctionCall, dangler)
 	    {
 		LSL_Leaf *func = findFunction(&(compiler), call->call->value.stringValue);
 

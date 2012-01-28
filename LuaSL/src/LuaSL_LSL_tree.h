@@ -254,8 +254,8 @@ struct _LSL_Function
 struct _LSL_FunctionCall
 {
     LSL_Function	*function;
-    Eina_Inarray	params;	// Eina Inarray has not been released yet (Eina 1.2).
-    Eina_Clist		functionCall;
+    Eina_Inarray	params;		// Eina Inarray has not been released yet (Eina 1.2).
+    Eina_Clist		dangler;	// Entry for function calls used before the function is defined.
     LSL_Leaf		*call;
 };
 
@@ -356,7 +356,7 @@ typedef struct
 #endif
     LSL_Leaf		*lval;
     LSL_Block		*currentBlock;
-    Eina_Clist		danglingCalls;
+    Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
     int			column, line;
     int			undeclared;
 } LuaSL_compiler;
