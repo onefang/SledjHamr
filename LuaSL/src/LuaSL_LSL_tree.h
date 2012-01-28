@@ -207,7 +207,7 @@ struct _LSL_Identifier	// For variables and function parameters.
 
 struct _LSL_Statement
 {
-    Eina_Clist		statement;	// For statement lists, perhaps this is just duplicating the one in LSL_Block?  Not actually being used at the moment, except to collect them.  On the other hand, I might have been half way through that part.  lol
+    Eina_Clist		statement;	// For block statement lists, this is the entry.
     union
     {
 	LSL_Identifier	*identifier;
@@ -235,7 +235,7 @@ while						expr,	block,	parens
 struct _LSL_Block
 {
     LSL_Block		*outerBlock;
-    Eina_Clist		statements;	// For statement lists.
+    Eina_Clist		statements;	// For statement lists, this is the HEAD.
     Eina_Hash		*variables;	// Those variables in this scope.
     LSL_Function	*function;	// A pointer to the function if this block is a function.
 };
