@@ -42,7 +42,7 @@ functionList(A) ::= functionList(B) functionBody(C).				{ A = collectStatements(
 //functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL, C); }
 functionList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
-functionBody(A) ::= function(B) funcBlock(C).					{ A = addFunctionBody(compiler, B, C); }
+functionBody(A) ::= function(F) funcBlock(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody has an implied addStatement(compiler, NULL, LSL_FUNCTION, NULL, B, NULL, NULL);
 
 parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(compiler, B, C, D); }
 parameterList(A) ::= parameter(D).						{ A = collectParameters(compiler, NULL, NULL, D); }
@@ -67,26 +67,26 @@ statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
 %nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
 %nonassoc LSL_ELSE.
-statement ::= LSL_DO block LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE LSL_STATEMENT.
-statement ::= LSL_FOR LSL_PARENTHESIS_OPEN expr LSL_STATEMENT expr LSL_STATEMENT expr LSL_PARENTHESIS_CLOSE block.
+statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F->token->type, L, E, R, B, W); }
+statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F->token->type, L, NULL, R, B, NULL); }	// three expressions, two semi colons
 
 ifBlock ::= ifBlock LSL_ELSE block.
 ifBlock ::= block.
 // The [LSL_ELSE] part causes a conflict.
-statement ::= LSL_IF LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE ifBlock.	[LSL_ELSE]
+statement(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) ifBlock(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F->token->type, L, E, R, B, NULL); }		// optional else, optional else if
 
-statement ::= LSL_JUMP LSL_IDENTIFIER LSL_STATEMENT.
-statement ::= LSL_RETURN expr LSL_STATEMENT.
-statement ::= LSL_RETURN LSL_STATEMENT.
-statement ::= LSL_STATE_CHANGE LSL_DEFAULT LSL_STATEMENT.
-statement ::= LSL_STATE_CHANGE LSL_IDENTIFIER LSL_STATEMENT.
-statement ::= LSL_WHILE LSL_PARENTHESIS_OPEN expr LSL_PARENTHESIS_CLOSE block.
+statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F->token->type, NULL, E, NULL, NULL, NULL); }
+statement(A) ::= LSL_RETURN(F) LSL_STATEMENT(S).													{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, NULL); }
+statement(A) ::= LSL_STATE_CHANGE(F) LSL_DEFAULT(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_STATE_CHANGE(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).										{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).							{ A = addStatement(compiler, NULL, F->token->type, L, E, R, B, NULL); }
 
 %nonassoc LSL_LABEL.
-statement ::= LSL_LABEL LSL_IDENTIFIER LSL_STATEMENT.
+statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->token->type, NULL, NULL, NULL, NULL, I); }
 
 // This might be bogus, or might be valid LSL, but it let us test the expression parser by evaluating them.
-statement(A) ::= expr(B) LSL_STATEMENT(D).					{ A = addStatement(D, LSL_EXPRESSION, B); }
+statement(A) ::= expr(E) LSL_STATEMENT(S).														{ A = addStatement(compiler, S, LSL_EXPRESSION, NULL, E, NULL, NULL, NULL); }
 
 // Various forms of expression.
 
@@ -171,8 +171,8 @@ expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).		{ A = addOperation(c
 
 // Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
 // Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
-statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(F).	{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, D, E)); }
-statement(A) ::= type(B) LSL_IDENTIFIER(C) LSL_STATEMENT(F).					{ A = addStatement(F, LSL_IDENTIFIER, addVariable(compiler, B, C, NULL, NULL)); }
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, LSL_IDENTIFIER, NULL, addVariable(compiler, T, I, D,    E),    NULL, NULL, I); }
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, LSL_IDENTIFIER, NULL, addVariable(compiler, T, I, NULL, NULL), NULL, NULL, I); }
 
 %right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL.
 identifier(A) ::= identifier LSL_DOT LSL_IDENTIFIER(B).					{ A = checkVariable(compiler, B); A->basicType = OT_float; }	// Just a stub to get it to work for now.

@@ -551,15 +551,12 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block)
 {
-	LSL_Leaf *statement = newLeaf(LSL_STATEMENT, NULL, NULL);
+	LSL_Leaf *statement = NULL;
 
     if (function)
     {
 	function->value.functionValue->block = block;
-	if (statement)
-	{
-	    addStatement(statement, LSL_FUNCTION, function);
-	}
+	statement = addStatement(compiler, NULL, LSL_FUNCTION, NULL, function, NULL, NULL, NULL);
     }
 
     return statement;
@@ -639,18 +636,89 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *blo
     return identifier;
 }
 
-LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *expr)
+LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
+    gameGlobals *game = compiler->game;
     LSL_Statement *stat = calloc(1, sizeof(LSL_Statement));
+
+    if (NULL == lval)
+	lval = newLeaf(LSL_STATEMENT, NULL, NULL);
 
     if (stat)
     {
 	stat->type = type;
 	stat->expressions = expr;
+	stat->block = block;
 	eina_clist_element_init(&(stat->statement));
+	if (identifier)
+	    stat->identifier = identifier->value.identifierValue;
+	if (left)
+	{
+	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_TYPECAST_OPEN, right);
+
+	    if (parens)
+		stat->parenthesis = parens->value.parenthesis;
+	}
+
+	switch (type)
+	{
+	    case LSL_EXPRESSION :
+	    {
+		break;
+	    }
+	    case LSL_FUNCTION :
+	    {
+		break;
+	    }
+	    case LSL_DO :
+	    {
+		break;
+	    }
+	    case LSL_FOR :
+	    {
+		break;
+	    }
+	    case LSL_IF :
+	    {
+		break;
+	    }
+	    case LSL_ELSE :
+	    {
+		break;
+	    }
+	    case LSL_JUMP :
+	    {
+		break;
+	    }
+	    case LSL_RETURN :
+	    {
+		break;
+	    }
+	    case LSL_STATE_CHANGE :
+	    {
+		break;
+	    }
+	    case LSL_WHILE :
+	    {
+		stat->identifier = NULL;
+		// TODO - need to stash the while's white space somewhere.
+		break;
+	    }
+	    case LSL_IDENTIFIER :
+	    {
+		break;
+	    }
+	    default :
+	    {
+		PE("Should not be here %d.", type);
+		break;
+	    }
+	}
+
 	if (lval)
 	    lval->value.statementValue = stat;
     }
+
 
     return lval;
 }
@@ -1028,7 +1096,60 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 
     if (content)
     {
-	result = evaluateLeaf(content->value.statementValue->expressions, left, right);
+	switch (content->value.statementValue->type)
+	{
+	    case LSL_EXPRESSION :
+	    {
+		result = evaluateLeaf(content->value.statementValue->expressions, left, right);
+		break;
+	    }
+	    case LSL_FUNCTION :
+	    {
+		break;
+	    }
+	    case LSL_DO :
+	    {
+		break;
+	    }
+	    case LSL_FOR :
+	    {
+		break;
+	    }
+	    case LSL_IF :
+	    {
+		break;
+	    }
+	    case LSL_ELSE :
+	    {
+		    break;
+	    }
+	    case LSL_JUMP :
+	    {
+		break;
+	    }
+	    case LSL_RETURN :
+	    {
+		break;
+	    }
+	    case LSL_STATE_CHANGE :
+	    {
+		break;
+	    }
+	    case LSL_WHILE :
+	    {
+		break;
+	    }
+	    case LSL_IDENTIFIER :
+	    {
+		break;
+	    }
+	    default :
+	    {
+//		PE("Should not be here %d.", type);
+		break;
+	    }
+	}
+
 	if (result)
 	{
 	    switch (result->basicType)
@@ -1062,37 +1183,6 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	else
 	    fprintf(file, "%s", leaf->token->token);
 	outputLeaf(file, mode, leaf->right);
-    }
-}
-
-static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-    {
-	if (LUASL_DIFF_CHECK)
-	    fprintf(file, "\n{");
-	else
-	    fprintf(file, "\n{\n");
-	if (content->value.blockValue)
-	{
-	    LSL_Statement *statement = NULL;
-
-	    EINA_CLIST_FOR_EACH_ENTRY(statement, &(content->value.blockValue->statements), LSL_Statement, statement)
-	    {
-		outputLeaf(file, mode, statement->expressions);
-		if (LSL_FUNCTION != statement->type)
-		{
-		    if (LUASL_DIFF_CHECK)
-			fprintf(file, ";");
-		    else
-			fprintf(file, ";\n");
-		}
-	    }
-	}
-	if (LUASL_DIFF_CHECK)
-	    fprintf(file, "\n}");
-	else
-	    fprintf(file, "}");
     }
 }
 
@@ -1165,23 +1255,26 @@ static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *cont
 	outputLeaf(file, mode, content->value.listValue);
 }
 
-static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
+static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
 {
-    if (content)
-    {
 	fprintf(file, "(");
-	if (LSL_TYPECAST_OPEN == content->value.parenthesis->type)
-	    fprintf(file, "%s", allowed[content->basicType].name);	// TODO - We are missing the type ignorable text here.
+	if (LSL_TYPECAST_OPEN == parenthesis->type)
+	    fprintf(file, "%s", typeName);	// TODO - We are missing the type ignorable text here.
 	else
-	    outputLeaf(file, mode, content->value.parenthesis->contents);
+	    outputLeaf(file, mode, parenthesis->contents);
 #if LUASL_DIFF_CHECK
-	fprintf(file, "%s)", eina_strbuf_string_get(content->value.parenthesis->rightIgnorableText));
+	fprintf(file, "%s)", eina_strbuf_string_get(parenthesis->rightIgnorableText));
 #else
 	fprintf(file, ")");
 #endif
-	if (LSL_TYPECAST_OPEN == content->value.parenthesis->type)
-	    outputLeaf(file, mode, content->value.parenthesis->contents);
-    }
+	if (LSL_TYPECAST_OPEN == parenthesis->type)
+	    outputLeaf(file, mode, parenthesis->contents);
+}
+
+static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	outputRawParenthesisToken(file, mode, content->value.parenthesis, allowed[content->basicType].name);
 }
 
 static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1202,19 +1295,126 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
     }
 }
 
+// Circular references, so declare this one first.
+static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
+
+static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *statement)
+{
+    boolean isBlock = FALSE;
+
+    switch (statement->type)
+    {
+	    case LSL_EXPRESSION :
+	    {
+		break;
+	    }
+	    case LSL_FUNCTION :
+	    {
+		isBlock = TRUE;
+		break;
+	    }
+	    case LSL_DO :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_FOR :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_IF :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_ELSE :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_JUMP :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_RETURN :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_STATE_CHANGE :
+	    {
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_WHILE :
+	    {
+		isBlock = TRUE;
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	    case LSL_IDENTIFIER :
+	    {
+		break;
+	    }
+	    default :
+	    {
+		fprintf(file, "@@Should not be here %s.@@", tokens[statement->type - lowestToken]->token);
+		break;
+	    }
+	}
+
+	if (statement->parenthesis)
+	    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
+	else
+	    outputLeaf(file, mode, statement->expressions);
+
+	if (statement->block)
+	    outputBlockToken(file, mode, statement->block);
+
+	if (!isBlock)
+	{
+	    fprintf(file, ";");
+	    if (!LUASL_DIFF_CHECK)
+		fprintf(file, "\n");
+	}
+
+}
+
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
-	outputLeaf(file, mode, content->value.statementValue->expressions);
+	outputRawStatement(file, mode, content->value.statementValue);
 #if LUASL_DIFF_CHECK
 	if (content->ignorableText)
 	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
 #endif
-	if (LSL_FUNCTION != content->value.statementValue->type)
-	    fprintf(file, "%s", content->token->token);
-	if (!LUASL_DIFF_CHECK)
-	    fprintf(file, "\n");
+    }
+}
+
+static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	if (LUASL_DIFF_CHECK)
+	    fprintf(file, "\n{");
+	else
+	    fprintf(file, "\n{\n");
+	if (content->value.blockValue)
+	{
+	    LSL_Statement *statement = NULL;
+
+	    EINA_CLIST_FOR_EACH_ENTRY(statement, &(content->value.blockValue->statements), LSL_Statement, statement)
+	    {
+		outputRawStatement(file, mode, statement);
+	    }
+	}
+	if (LUASL_DIFF_CHECK)
+	    fprintf(file, "\n}");
+	else
+	    fprintf(file, "}");
     }
 }
 
