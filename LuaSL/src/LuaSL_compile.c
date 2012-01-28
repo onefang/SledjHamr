@@ -654,7 +654,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    stat->identifier = identifier->value.identifierValue;
 	if (left)
 	{
-	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_TYPECAST_OPEN, right);
+	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_PARENTHESIS_OPEN, right);
 
 	    if (parens)
 		stat->parenthesis = parens->value.parenthesis;
