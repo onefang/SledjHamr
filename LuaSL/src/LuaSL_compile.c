@@ -1320,11 +1320,13 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    }
 	    case LSL_FOR :
 	    {
+		isBlock = TRUE;
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
 		break;
 	    }
 	    case LSL_IF :
 	    {
+		isBlock = TRUE;
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
 		break;
 	    }
