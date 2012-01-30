@@ -746,7 +746,11 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	}
 
 	if (lval)
+	{
+	    stat->ignorableText = lval->ignorableText;
+	    lval->ignorableText = NULL;
 	    lval->value.statementValue = stat;
+	}
     }
 
 
@@ -756,13 +760,11 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *statement)
 {
     boolean wasNull = FALSE;
+
     if (NULL == list)
     {
 	list = newLeaf(LSL_BLOCK_OPEN, NULL, NULL);
-	if (list)
-	{
-	    wasNull = TRUE;
-	}
+	wasNull = TRUE;
     }
 
     if (list)
@@ -1356,6 +1358,11 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	if (statement->block)
 	    outputRawBlock(file, mode, statement->block);
 
+#if LUASL_DIFF_CHECK
+	if (statement->ignorableText)
+	    fwrite(eina_strbuf_string_get(statement->ignorableText), 1, eina_strbuf_length_get(statement->ignorableText), file);
+#endif
+
 	if (!isBlock)
 	{
 	    fprintf(file, ";");
@@ -1474,13 +1481,7 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-    {
 	outputRawStatement(file, mode, content->value.statementValue);
-#if LUASL_DIFF_CHECK
-	if (content->ignorableText)
-	    fwrite(eina_strbuf_string_get(content->ignorableText), 1, eina_strbuf_length_get(content->ignorableText), file);
-#endif
-    }
 }
 
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)

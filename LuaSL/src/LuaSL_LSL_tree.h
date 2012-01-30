@@ -226,6 +226,9 @@ struct _LSL_Statement
     LSL_Leaf		*expressions;	// A for statement will have three expressions, everything else has zero or one.
     LSL_Block		*block;
     LSL_Type		type;		// Expression type.
+#if LUASL_DIFF_CHECK
+    Eina_Strbuf		*ignorableText;
+#endif
 /*
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);
 
