@@ -275,8 +275,8 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 		{
 		    if ((param) && (LSL_PARAMETER == param->toKen->type))
 		    {
-//			if (name == param->value.identifierValue->name)		// Assuming they are stringshares.
-			if (0 == strcmp(name, param->value.identifierValue->name))	// Not assuming they are stringeshares.
+//			if (name == param->value.identifierValue->name.text)		// Assuming they are stringshares.
+			if (0 == strcmp(name, param->value.identifierValue->name.text))	// Not assuming they are stringeshares.  They should be.
 			    var = param;
 		    }
 		}
@@ -339,7 +339,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	{
 	    if ((left->toKen) && (LSL_IDENTIFIER == left->toKen->type) && (left->value.identifierValue))
 	    {
-		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
+		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name.text);
 
 		if (var)
 		    lType = var->basicType;
@@ -361,7 +361,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	{
 	    if ((right->toKen) && (LSL_IDENTIFIER == right->toKen->type) && (right->value.identifierValue))
 	    {
-		LSL_Leaf *var = findVariable(compiler, right->value.identifierValue->name);
+		LSL_Leaf *var = findVariable(compiler, right->value.identifierValue->name.text);
 
 		if (var)
 		    rType = var->basicType;
@@ -468,7 +468,8 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
 
     if ( (identifier) && (result))
     {
-	result->name = identifier->value.stringValue;
+	result->name.text = identifier->value.stringValue;
+	result->name.ignorableText = identifier->ignorableText;
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->toKen = tokens[LSL_PARAMETER - lowestToken];
@@ -534,7 +535,8 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	{
 	    if (identifier)
 	    {
-		func->name = identifier->value.stringValue;
+		func->name.text = identifier->value.stringValue;
+		func->name.ignorableText = identifier->ignorableText;
 		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
 		func->type = type;
@@ -542,9 +544,9 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		    identifier->basicType = type->basicType;
 		else
 		    identifier->basicType = OT_nothing;
-		eina_hash_add(compiler->script.functions, func->name, identifier);
+		eina_hash_add(compiler->script.functions, func->name.text, identifier);
 #if LUASL_DIFF_CHECK
-		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
+//		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
 #endif
 	    }
 	    compiler->currentFunction = func;
@@ -584,6 +586,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	}
 	identifier->value.functionCallValue = call;
 	// TODO - Put the params in call.
+//	eina_inarray_setup(&(cal->vars), sizeof(LSL_Text), 3);
 	identifier->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
 	identifier->basicType = func->basicType;
     }
@@ -625,17 +628,23 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
     return lval;
 }
 
-LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *block)
+LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifier, LSL_Leaf *block)
 {
     LSL_State *result = calloc(1, sizeof(LSL_State));
 
     if ((identifier) && (result))
     {
-	result->name = identifier->value.stringValue;
+	result->name.text = identifier->value.stringValue;
+	result->name.ignorableText = identifier->ignorableText;
 	result->block = block;
+	if (state)
+	{
+	    result->state.text = state->toKen->toKen;
+	    result->state.ignorableText = state->ignorableText;
+	}
 	identifier->value.stateValue = result;
 	identifier->toKen = tokens[LSL_STATE - lowestToken];
-	eina_hash_add(compiler->script.states, result->name, identifier);
+	eina_hash_add(compiler->script.states, result->name.text, identifier);
     }
 
     return identifier;
@@ -778,7 +787,8 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
     if ( (identifier) && (result))
     {
-	result->name = identifier->value.stringValue;
+	result->name.text = identifier->value.stringValue;
+	result->name.ignorableText = identifier->ignorableText;
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->left = type;
@@ -792,9 +802,9 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    result->value.toKen = type->toKen;	// This is the LSL_TYPE_* toKen instead of the LSL_* toKen.  Not sure if that's a problem.
 	}
 	if (compiler->currentBlock)
-	    eina_hash_add(compiler->currentBlock->variables, result->name, identifier);
+	    eina_hash_add(compiler->currentBlock->variables, result->name.text, identifier);
 	else
-	    eina_hash_add(compiler->script.variables, result->name, identifier);
+	    eina_hash_add(compiler->script.variables, result->name.text, identifier);
     }
 
     return identifier;
@@ -1175,6 +1185,18 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
     return result;
 }
 
+static void outputText(FILE *file, LSL_Text *text, boolean ignore)
+{
+	    if (text->text)
+	    {
+#if LUASL_DIFF_CHECK
+		if (ignore && (text->ignorableText))
+		    fwrite(eina_strbuf_string_get(text->ignorableText), 1, eina_strbuf_length_get(text->ignorableText), file);
+#endif
+		fprintf(file, "%s", text->text);
+	    }
+}
+
 static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
@@ -1207,8 +1229,10 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	int first = TRUE;
 
 	outputLeaf(file, mode, func->type);
+	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+//	fprintf(file, "%s(", func->name);
 // TODO - should print comma and parenthesis ignorables.
-	fprintf(file, "%s(", func->name);
+	fprintf(file, "(");
 	EINA_INARRAY_FOREACH((&(func->vars)), param)
 	{
 	    if (!LUASL_DIFF_CHECK)
@@ -1232,7 +1256,9 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
     {
 	LSL_FunctionCall *call = content->value.functionCallValue;
 	LSL_Function *func = call->function;
-	fprintf(file, "%s(", func->name);
+	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+//	fprintf(file, "%s(", func->name);
+	fprintf(file, "(");
 	// TODO - print params here.
 	fprintf(file, ")");
     }
@@ -1247,12 +1273,7 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-    {
-	if (LUASL_DIFF_CHECK)
-	    fprintf(file, "%s", content->value.identifierValue->name);
-	else
-	    fprintf(file, " %s", content->value.identifierValue->name);
-    }
+	outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
 }
 
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1292,10 +1313,8 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 
 	if (state)
 	{
-	    if (0 == strcmp(state->name, "default"))
-		fprintf(file, "%s", state->name);
-	    else
-		fprintf(file, "state %s", state->name);
+	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
+	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
 	    outputLeaf(file, mode, state->block);
 	    fprintf(file, "\n");
 	}

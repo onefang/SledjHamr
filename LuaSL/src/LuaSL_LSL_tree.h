@@ -38,6 +38,7 @@
 
 typedef struct _allowedTypes		allowedTypes;
 typedef struct _LSL_Token		LSL_Token;
+typedef struct _LSL_Text		LSL_Text;
 typedef struct _LSL_Leaf		LSL_Leaf;
 typedef struct _LSL_Parenthesis 	LSL_Parenthesis;
 typedef struct _LSL_Identifier		LSL_Identifier;
@@ -160,6 +161,14 @@ struct _LSL_Token
     evaluateToken	evaluate;
 };
 
+struct _LSL_Text
+{
+    const char		*text;
+#if LUASL_DIFF_CHECK
+    Eina_Strbuf		*ignorableText;
+#endif
+};
+
 struct _LSL_Leaf
 {
     LSL_Leaf			*left;
@@ -201,8 +210,8 @@ struct _LSL_Parenthesis
 
 struct _LSL_Identifier	// For variables and function parameters.
 {
-    const char		*name;
-    LSL_Leaf		value;
+    LSL_Text	name;
+    LSL_Leaf	value;
 };
 
 struct _LSL_Statement
@@ -246,10 +255,10 @@ struct _LSL_Block
 
 struct _LSL_Function
 {
-    const char	*name;
+    LSL_Text	name;
     LSL_Leaf	*type;
 #if LUASL_DIFF_CHECK
-    LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
+//    LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
 				// This points to the params leaf, which is a function, pointing to this structure.  The actual params are in vars.
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
@@ -266,7 +275,8 @@ struct _LSL_FunctionCall
 
 struct _LSL_State
 {
-    const char		*name;
+    LSL_Text		name;
+    LSL_Text		state;
     LSL_Leaf		*block;
     Eina_Hash		*handlers;
 };
@@ -382,7 +392,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
-LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *block);
+LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifier, LSL_Leaf *block);
 LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier);
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr);
 LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
