@@ -42,7 +42,7 @@ functionList(A) ::= functionList(B) functionBody(C).				{ A = collectStatements(
 functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL, C); }
 functionList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
-functionBody(A) ::= function(F) funcBlock(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody has an implied addStatement(compiler, NULL, LSL_FUNCTION, NULL, B, NULL, NULL);
+functionBody(A) ::= function(F) block(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody has an implied addStatement(compiler, NULL, LSL_FUNCTION, NULL, B, NULL, NULL);
 
 parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(compiler, B, C, D); }
 parameterList(A) ::= parameter(D).						{ A = collectParameters(compiler, NULL, NULL, D); }
@@ -54,10 +54,7 @@ function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(
 
 // Blocks.
 
-block(A) ::= funcBlock(B).							{ A = B; }
-block(A) ::= statementList(B).							{ A = B; }
-// Perhaps change this to block?  No ,this is what differentiates it from a single statement, which functions can't handle.
-funcBlock(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
+block(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
 
 // Various forms of statement.
 
@@ -71,10 +68,11 @@ statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 %nonassoc LSL_ELSE.
 statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F->toKen->type, L, E, R, B, W); }
 statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F->toKen->type, L, E1, R, B, NULL); }	// three expressions, two semi colons
+statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) statement(S).	{ A = addStatement(compiler, S, F->toKen->type, L, E1, R, NULL, NULL); }	// three expressions, two semi colons
 
 statement(A) ::= ifBlock(B).								{ A = B; }
-//ifBlock ::= ifBlock LSL_ELSE block.
-statement ::= LSL_ELSE block.
+ifBlock ::= ifBlock LSL_ELSE block.
+ifBlock ::= ifBlock LSL_ELSE statement.
 ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	/*[LSL_ELSE]*/						{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }		// optional else, optional else if
 ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	/*[LSL_ELSE]*/						{ A = addStatement(compiler, S, F->toKen->type, L, E, R, NULL, NULL); }		// optional else, optional else if
 
@@ -84,6 +82,7 @@ statement(A) ::= LSL_RETURN(F) LSL_STATEMENT(S).													{ A = addStatement(
 statement(A) ::= LSL_STATE_CHANGE(F) LSL_DEFAULT(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_STATE_CHANGE(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).										{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).							{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }
+statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).							{ A = addStatement(compiler, S,    F->toKen->type, L, E, R, NULL, NULL); }
 
 %nonassoc LSL_LABEL.
 statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->toKen->type, NULL, NULL, NULL, NULL, I); }
