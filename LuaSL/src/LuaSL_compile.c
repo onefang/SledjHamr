@@ -117,6 +117,7 @@ LSL_Token LSL_Tokens[] =
     // Then the rest of the syntax tokens.
     {LSL_FUNCTION_CALL,		ST_NONE,	"funccall",	LSL_NONE,				outputFunctionCallToken, NULL},
     {LSL_IDENTIFIER,		ST_NONE,	"identifier",	LSL_NONE,				outputIdentifierToken, NULL},
+    {LSL_VARIABLE,		ST_NONE,	"variable",	LSL_NONE,				outputIdentifierToken, NULL},
 
     {LSL_LABEL,			ST_NONE,	"@",		LSL_NONE,				NULL, NULL},
 
@@ -470,6 +471,7 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
     {
 	result->name.text = identifier->value.stringValue;
 	result->name.ignorableText = identifier->ignorableText;
+	identifier->ignorableText = NULL;
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->toKen = tokens[LSL_PARAMETER - lowestToken];
@@ -537,12 +539,14 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    {
 		func->name.text = identifier->value.stringValue;
 		func->name.ignorableText = identifier->ignorableText;
+		identifier->ignorableText = NULL;
 		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
 		if (type)
 		{
 		    func->type.text = type->toKen->toKen;
 		    func->type.ignorableText = type->ignorableText;
+		    type->ignorableText = NULL;
 		    identifier->basicType = type->basicType;
 		}
 		else
@@ -638,6 +642,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     {
 	result->name.text = identifier->value.stringValue;
 	result->name.ignorableText = identifier->ignorableText;
+	identifier->ignorableText = NULL;
 	result->block = block->value.blockValue;
 	if (state)
 	{
@@ -725,6 +730,10 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    {
 		break;
 	    }
+	    case LSL_VARIABLE :
+	    {
+		break;
+	    }
 	    default :
 	    {
 		PE("Should not be here %d.", type);
@@ -792,8 +801,10 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     {
 	result->name.text = identifier->value.stringValue;
 	result->name.ignorableText = identifier->ignorableText;
+	identifier->ignorableText = NULL;
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
+	identifier->toKen = tokens[LSL_VARIABLE - lowestToken];
 	identifier->left = type;
 	identifier->right = assignment;
 	if (assignment)
@@ -1162,6 +1173,10 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 	    {
 		break;
 	    }
+	    case LSL_VARIABLE :
+	    {
+		break;
+	    }
 	    default :
 	    {
 //		PE("Should not be here %d.", type);
@@ -1310,6 +1325,10 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    {
 		break;
 	    }
+	    case LSL_VARIABLE :
+	    {
+		break;
+	    }
 	    default :
 	    {
 		fprintf(file, "@@Should not be here %s.@@", tokens[statement->type - lowestToken]->toKen);
@@ -1386,8 +1405,9 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
     if (content)
     {
 	LSL_FunctionCall *call = content->value.functionCallValue;
-	LSL_Function *func = call->function;
-	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+
+	// TODO - should output it's own ignorable here.
+	outputText(file, &(call->function->name), FALSE);	// Don't output the function definitions ignorable.
 	fprintf(file, "(");
 	// TODO - print params here.
 	fprintf(file, ")");
@@ -1403,7 +1423,12 @@ static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+    {
+	if (LSL_IDENTIFIER == content->toKen->type)
+	    outputText(file, &(content->value.identifierValue->name), FALSE);
+	else
+	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+    }
 }
 
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1433,7 +1458,6 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	}
     }
 }
-
 
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {

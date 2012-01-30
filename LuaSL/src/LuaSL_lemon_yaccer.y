@@ -180,7 +180,7 @@ expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).		{ A = addOperation(c
 statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, LSL_IDENTIFIER, NULL, addVariable(compiler, T, I, D,    E),    NULL, NULL, I); }
 statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, LSL_IDENTIFIER, NULL, addVariable(compiler, T, I, NULL, NULL), NULL, NULL, I); }
 
-%right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL.
+%right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL LSL_VARIABLE.
 identifier(A) ::= identifier LSL_DOT LSL_IDENTIFIER(B).					{ A = checkVariable(compiler, B); A->basicType = OT_float; }	// Just a stub to get it to work for now.
 identifier(A) ::= LSL_IDENTIFIER(B).							{ A = checkVariable(compiler, B); }
 
