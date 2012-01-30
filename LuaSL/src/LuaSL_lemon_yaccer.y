@@ -39,7 +39,7 @@ state(S) ::= LSL_STATE_CHANGE LSL_IDENTIFIER(I) stateBlock(B).			{ S = addState(
 
 %nonassoc LSL_PARAMETER LSL_PARAMETER_LIST LSL_FUNCTION.
 functionList(A) ::= functionList(B) functionBody(C).				{ A = collectStatements(compiler, B, C); }
-//functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL, C); }
+functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL, C); }
 functionList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
 functionBody(A) ::= function(F) funcBlock(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody has an implied addStatement(compiler, NULL, LSL_FUNCTION, NULL, B, NULL, NULL);
@@ -55,8 +55,7 @@ function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(
 // Blocks.
 
 block(A) ::= funcBlock(B).							{ A = B; }
-block(A) ::= statement(B).							{ A = B; }
-funcBlock(A) ::= LSL_BLOCK_OPEN statementList(B) LSL_BLOCK_CLOSE.		{ A = B; }
+block(A) ::= statementList(B).							{ A = B; }
 // Perhaps change this to block?  No ,this is what differentiates it from a single statement, which functions can't handle.
 funcBlock(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
 
@@ -64,6 +63,7 @@ funcBlock(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBl
 
 %nonassoc LSL_STATEMENT.
 statementList(A) ::= statementList(B) statement(C).				{ A = collectStatements(compiler, B, C); }
+// This causes infinite loops (and about 150 conflicts) with - if () single statement;
 //statementList(A) ::= statement(C).						{ A = collectStatements(compiler, NULL, C); }
 statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
@@ -72,10 +72,11 @@ statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F->toKen->type, L, E, R, B, W); }
 statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F->toKen->type, L, E1, R, B, NULL); }	// three expressions, two semi colons
 
-ifBlock ::= ifBlock LSL_ELSE block.
-ifBlock ::= block.
-// The [LSL_ELSE] part causes a conflict.
-statement(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) ifBlock(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F->token->type, L, E, R, B, NULL); }		// optional else, optional else if
+statement(A) ::= ifBlock(B).								{ A = B; }
+//ifBlock ::= ifBlock LSL_ELSE block.
+statement ::= LSL_ELSE block.
+ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	/*[LSL_ELSE]*/						{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }		// optional else, optional else if
+ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	/*[LSL_ELSE]*/						{ A = addStatement(compiler, S, F->toKen->type, L, E, R, NULL, NULL); }		// optional else, optional else if
 
 statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F->toKen->type, NULL, E, NULL, NULL, NULL); }

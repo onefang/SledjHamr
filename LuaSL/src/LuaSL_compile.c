@@ -660,7 +660,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    stat->identifier = identifier->value.identifierValue;
 	if (left)
 	{
-	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_PARENTHESIS_OPEN, right);
+	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_EXPRESSION, right);
 
 	    if (parens)
 		stat->parenthesis = parens->value.parenthesis;
@@ -1310,8 +1310,10 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 {
     boolean isBlock = FALSE;
 
-    switch (statement->type)
+    if (statement)
     {
+	switch (statement->type)
+	{
 	    case LSL_EXPRESSION :
 	    {
 		break;
@@ -1389,7 +1391,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    if (!LUASL_DIFF_CHECK)
 		fprintf(file, "\n");
 	}
-
+    }
 }
 
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1414,11 +1416,11 @@ static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    fprintf(file, "\n{\n");
 	if (content->value.blockValue)
 	{
-	    LSL_Statement *statement = NULL;
+	    LSL_Statement *stat = NULL;
 
-	    EINA_CLIST_FOR_EACH_ENTRY(statement, &(content->value.blockValue->statements), LSL_Statement, statement)
+	    EINA_CLIST_FOR_EACH_ENTRY(stat, &(content->value.blockValue->statements), LSL_Statement, statement)
 	    {
-		outputRawStatement(file, mode, statement);
+		outputRawStatement(file, mode, stat);
 	    }
 	}
 	if (LUASL_DIFF_CHECK)
