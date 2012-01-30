@@ -539,9 +539,12 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		func->name.ignorableText = identifier->ignorableText;
 		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
-		func->type = type;
 		if (type)
+		{
+		    func->type.text = type->toKen->toKen;
+		    func->type.ignorableText = type->ignorableText;
 		    identifier->basicType = type->basicType;
+		}
 		else
 		    identifier->basicType = OT_nothing;
 		eina_hash_add(compiler->script.functions, func->name.text, identifier);
@@ -1227,9 +1230,8 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	LSL_Leaf *param = NULL;
 	int first = TRUE;
 
-	outputLeaf(file, mode, func->type);
+	outputText(file, &(func->type), !(LSL_NOIGNORE & content->toKen->flags));
 	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
-//	fprintf(file, "%s(", func->name);
 // TODO - should print comma and parenthesis ignorables.
 	fprintf(file, "(");
 	EINA_INARRAY_FOREACH((&(func->vars)), param)
