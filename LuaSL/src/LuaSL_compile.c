@@ -222,7 +222,7 @@ static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
     {
 	leaf->left = left;
 	leaf->right = right;
-	leaf->token = tokens[type - lowestToken];
+	leaf->toKen = tokens[type - lowestToken];
     }
 
     return leaf;
@@ -274,7 +274,7 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 		LSL_Leaf *param = NULL;
 		EINA_INARRAY_FOREACH((&(block->function->vars)), param)
 		{
-		    if ((param) && (LSL_PARAMETER == param->token->type))
+		    if ((param) && (LSL_PARAMETER == param->toKen->type))
 		    {
 //			if (name == param->value.identifierValue->name)		// Assuming they are stringshares.
 			if (0 == strcmp(name, param->value.identifierValue->name))	// Not assuming they are stringeshares.
@@ -330,15 +330,15 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	lval->right = right;
 
 	// Convert subtract to negate if needed.
-	if ((NULL == left) && (LSL_SUBTRACT == lval->token->type))
-	    lval->token = tokens[LSL_NEGATION - lowestToken];
+	if ((NULL == left) && (LSL_SUBTRACT == lval->toKen->type))
+	    lval->toKen = tokens[LSL_NEGATION - lowestToken];
 
 	// Try to figure out what type of operation this is.
 	if (NULL == left)
 	    lType = OT_nothing;
 	else
 	{
-	    if ((left->token) && (LSL_IDENTIFIER == left->token->type) && (left->value.identifierValue))
+	    if ((left->toKen) && (LSL_IDENTIFIER == left->toKen->type) && (left->value.identifierValue))
 	    {
 		LSL_Leaf *var = findVariable(compiler, left->value.identifierValue->name);
 
@@ -360,7 +360,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    rType = OT_nothing;
 	else
 	{
-	    if ((right->token) && (LSL_IDENTIFIER == right->token->type) && (right->value.identifierValue))
+	    if ((right->toKen) && (LSL_IDENTIFIER == right->toKen->type) && (right->value.identifierValue))
 	    {
 		LSL_Leaf *var = findVariable(compiler, right->value.identifierValue->name);
 
@@ -379,7 +379,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = allowed[rType].result;
 	}
 
-	switch (lval->token->subType)
+	switch (lval->toKen->subType)
 	{
 	    case ST_BOOLEAN :
 	    case ST_COMPARISON :
@@ -392,20 +392,20 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		if (OT_invalid != lval->basicType)
 		{
 		    // Check if it's an allowed operation.
-		    if (0 == (lval->token->subType & allowed[lval->basicType].subTypes))
+		    if (0 == (lval->toKen->subType & allowed[lval->basicType].subTypes))
 			lval->basicType = OT_invalid;
 		    else
 		    {
 			// Double check the corner cases.
-			switch (lval->token->subType)
+			switch (lval->toKen->subType)
 			{
 			    case ST_MULTIPLY :
 				if (OT_vectorVector == lval->basicType)
 				{
-				    if (LSL_MULTIPLY == lval->token->type)
+				    if (LSL_MULTIPLY == lval->toKen->type)
 				    {
 					lval->basicType = OT_float;
-				    	lval->token = tokens[LSL_DOT_PRODUCT - lowestToken];
+				    	lval->toKen = tokens[LSL_DOT_PRODUCT - lowestToken];
 				    }
 				    else
 					lval->basicType = OT_vector;
@@ -424,22 +424,22 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 
 	    if (left)
 	    {
-		if (left->token)
-		    leftToken = left->token->token;
+		if (left->toKen)
+		    leftToken = left->toKen->toKen;
 		else
 		    PE("BROKEN LEFT TOKEN!!!!!!!!!!!!!!!!!!");
 		leftType = allowed[left->basicType].name;
 	    }
 	    if (right)
 	    {
-		if (right->token)
-		    rightToken = right->token->token;
+		if (right->toKen)
+		    rightToken = right->toKen->toKen;
 		else
 		    PE("BROKEN RIGHT TOKEN!!!!!!!!!!!!!!!!!!");
 		rightType = allowed[right->basicType].name;
 	    }
 
-	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d, column %d!", leftType, leftToken, lval->token->token, rightType, rightToken, lval->line, lval->column);
+	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d, column %d!", leftType, leftToken, lval->toKen->toKen, rightType, rightToken, lval->line, lval->column);
 	}
     }
 
@@ -463,15 +463,15 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
-	result->value.token = tokens[LSL_UNKNOWN - lowestToken];
+	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
-	identifier->token = tokens[LSL_PARAMETER - lowestToken];
+	identifier->toKen = tokens[LSL_PARAMETER - lowestToken];
 	identifier->left = type;
 	if (type)
 	{
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
-	    result->value.token = type->token;	// This is the LSL_TYPE_* token instead of the LSL_* token.  Not sure if that's a problem.
+	    result->value.toKen = type->toKen;	// This is the LSL_TYPE_* toKen instead of the LSL_* toKen.  Not sure if that's a problem.
 	}
     }
     return identifier;
@@ -529,7 +529,7 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    if (identifier)
 	    {
 		func->name = identifier->value.stringValue;
-		identifier->token = tokens[LSL_FUNCTION - lowestToken];
+		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
 		func->type = type;
 		if (type)
@@ -567,7 +567,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
     LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
     LSL_FunctionCall *call = calloc(1, sizeof(LSL_FunctionCall));
 
-    identifier->token = tokens[LSL_UNKNOWN - lowestToken];
+    identifier->toKen = tokens[LSL_UNKNOWN - lowestToken];
 
     if (func)
     {
@@ -579,7 +579,7 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	}
 	identifier->value.functionCallValue = call;
 	// TODO - Put the params in call.
-	identifier->token = tokens[LSL_FUNCTION_CALL - lowestToken];
+	identifier->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
 	identifier->basicType = func->basicType;
     }
     else
@@ -629,7 +629,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *blo
 	result->name = identifier->value.stringValue;
 	result->block = block;
 	identifier->value.stateValue = result;
-	identifier->token = tokens[LSL_STATE - lowestToken];
+	identifier->toKen = tokens[LSL_STATE - lowestToken];
 	eina_hash_add(compiler->script.states, result->name, identifier);
     }
 
@@ -756,10 +756,10 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
 	if (type)
 	    lval->basicType = type->basicType;
 	// Actualy, at this point, type is no longer needed.
-	lval->token = tokens[LSL_TYPECAST_OPEN - lowestToken];
+	lval->toKen = tokens[LSL_TYPECAST_OPEN - lowestToken];
     }
 //    if (rval)
-//	rval->token = tokens[LSL_TYPECAST_CLOSE - lowestToken];
+//	rval->toKen = tokens[LSL_TYPECAST_CLOSE - lowestToken];
 
     return lval;
 }
@@ -771,7 +771,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     if ( (identifier) && (result))
     {
 	result->name = identifier->value.stringValue;
-	result->value.token = tokens[LSL_UNKNOWN - lowestToken];
+	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->left = type;
 	identifier->right = assignment;
@@ -781,7 +781,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	{
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
-	    result->value.token = type->token;	// This is the LSL_TYPE_* token instead of the LSL_* token.  Not sure if that's a problem.
+	    result->value.toKen = type->toKen;	// This is the LSL_TYPE_* toKen instead of the LSL_* toKen.  Not sure if that's a problem.
 	}
 	if (compiler->currentBlock)
 	    eina_hash_add(compiler->currentBlock->variables, result->name, identifier);
@@ -831,21 +831,21 @@ static LSL_Leaf *evaluateLeaf(LSL_Leaf *leaf, LSL_Leaf *left, LSL_Leaf *right)
 	LSL_Leaf *lresult = NULL;
 	LSL_Leaf *rresult = NULL;
 
-	if (LSL_RIGHT2LEFT & leaf->token->flags)
+	if (LSL_RIGHT2LEFT & leaf->toKen->flags)
 	{
 	    rresult = evaluateLeaf(leaf->right, left, right);
-	    if (!(LSL_UNARY & leaf->token->flags))
+	    if (!(LSL_UNARY & leaf->toKen->flags))
 		lresult = evaluateLeaf(leaf->left, left, right);
 	}
 	else // Assume left to right.
 	{
 	    lresult = evaluateLeaf(leaf->left, left, right);
-	    if (!(LSL_UNARY & leaf->token->flags))
+	    if (!(LSL_UNARY & leaf->toKen->flags))
 		rresult = evaluateLeaf(leaf->right, left, right);
 	}
 
-	if (leaf->token->evaluate)
-	    result = leaf->token->evaluate(leaf, lresult, rresult);
+	if (leaf->toKen->evaluate)
+	    result = leaf->toKen->evaluate(leaf, lresult, rresult);
 	else
 	{
 	    result = newLeaf(LSL_UNKNOWN, NULL, NULL);
@@ -964,7 +964,7 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
     if (content && result)
     {
 	if (LUASL_DEBUG)
-	    printf(" [%s] ", content->token->token);
+	    printf(" [%s] ", content->toKen->toKen);
 
 	memcpy(result, content, sizeof(LSL_Leaf));
 
@@ -984,7 +984,7 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 		    fright = right->value.integerValue;
 		if (OT_intFloat == content->basicType)
 		    fleft = left->value.integerValue;
-		switch (result->token->type)
+		switch (result->toKen->type)
 		{
 		    case LSL_COMMA			:
 		    case LSL_INCREMENT_PRE		:
@@ -1023,7 +1023,7 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 
 	    case OT_integer :
 	    {
-		switch (result->token->type)
+		switch (result->toKen->type)
 		{
 		    case LSL_COMMA			:
 		    case LSL_INCREMENT_PRE		:
@@ -1175,13 +1175,13 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     {
 	outputLeaf(file, mode, leaf->left);
 #if LUASL_DIFF_CHECK
-	if ((!(LSL_NOIGNORE & leaf->token->flags)) && (leaf->ignorableText))
+	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorableText))
 	    fwrite(eina_strbuf_string_get(leaf->ignorableText), 1, eina_strbuf_length_get(leaf->ignorableText), file);
 #endif
-	if (leaf->token->output)
-	    leaf->token->output(file, mode, leaf);
+	if (leaf->toKen->output)
+	    leaf->toKen->output(file, mode, leaf);
 	else
-	    fprintf(file, "%s", leaf->token->token);
+	    fprintf(file, "%s", leaf->toKen->toKen);
 	outputLeaf(file, mode, leaf->right);
     }
 }
@@ -1315,45 +1315,45 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    }
 	    case LSL_DO :
 	    {
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_FOR :
 	    {
 		isBlock = TRUE;
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_IF :
 	    {
 		isBlock = TRUE;
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_ELSE :
 	    {
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_JUMP :
 	    {
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_RETURN :
 	    {
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_STATE_CHANGE :
 	    {
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_WHILE :
 	    {
 		isBlock = TRUE;
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_IDENTIFIER :
@@ -1362,7 +1362,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    }
 	    default :
 	    {
-		fprintf(file, "@@Should not be here %s.@@", tokens[statement->type - lowestToken]->token);
+		fprintf(file, "@@Should not be here %s.@@", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	}
@@ -1481,7 +1481,7 @@ boolean compilerSetup(gameGlobals *game)
     int i;
 
     // Figure out what numbers lemon gave to our tokens.
-    for (i = 0; LSL_Tokens[i].token != NULL; i++)
+    for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
     {
 	if (lowestToken > LSL_Tokens[i].type)
 	    lowestToken = LSL_Tokens[i].type;
@@ -1492,7 +1492,7 @@ boolean compilerSetup(gameGlobals *game)
 	char buf[PATH_MAX];
 
 	// Sort the token table.
-	for (i = 0; LSL_Tokens[i].token != NULL; i++)
+	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
 	{
 	    int j = LSL_Tokens[i].type - lowestToken;
 
@@ -1583,7 +1583,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		{
 		    call->function = func->value.functionValue;
 		    call->call->value.functionCallValue = call;
-		    call->call->token = tokens[LSL_FUNCTION_CALL - lowestToken];
+		    call->call->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
 		    call->call->basicType = func->basicType;
 		}
 		else
@@ -1689,7 +1689,7 @@ int main(int argc, char **argv)
     int i;
 
     // Figure out what numbers yacc gave to our tokens.
-    for (i = 0; LSL_Tokens[i].token != NULL; i++)
+    for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
     {
 	if (lowestToken > LSL_Tokens[i].type)
 	    lowestToken = LSL_Tokens[i].type;
@@ -1700,7 +1700,7 @@ int main(int argc, char **argv)
 	LuaSL_yyparseParam param;
 
 	// Sort the token table.
-	for (i = 0; LSL_Tokens[i].token != NULL; i++)
+	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
 	{
 	    int j = LSL_Tokens[i].type - lowestToken;
 

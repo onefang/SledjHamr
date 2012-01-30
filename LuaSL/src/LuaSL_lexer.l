@@ -120,7 +120,7 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
 {
     char *p;
 
-    lval->token = tokens[type - lowestToken];
+    lval->toKen = tokens[type - lowestToken];
     lval->line = compiler->line;
     lval->column = compiler->column;
     lval->len = len;

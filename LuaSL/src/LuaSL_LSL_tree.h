@@ -154,7 +154,7 @@ struct _LSL_Token
 {
     LSL_Type		type;
     opSubType		subType;
-    const char 		*token;
+    const char 		*toKen;
     LSL_Flags		flags;
     outputToken		output;
     evaluateToken	evaluate;
@@ -164,7 +164,7 @@ struct _LSL_Leaf
 {
     LSL_Leaf			*left;
     LSL_Leaf			*right;
-    LSL_Token			*token;
+    LSL_Token			*toKen;
 #if LUASL_DIFF_CHECK
     Eina_Strbuf			*ignorableText;
 #endif

@@ -67,23 +67,23 @@ statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
 %nonassoc LSL_DO LSL_FOR LSL_ELSE_IF LSL_IF LSL_JUMP LSL_RETURN LSL_STATE_CHANGE LSL_WHILE.
 %nonassoc LSL_ELSE.
-statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F->token->type, L, E, R, B, W); }
-statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F->token->type, L, NULL, R, B, NULL); }	// three expressions, two semi colons
+statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F->toKen->type, L, E, R, B, W); }
+statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F->toKen->type, L, E1, R, B, NULL); }	// three expressions, two semi colons
 
 ifBlock ::= ifBlock LSL_ELSE block.
 ifBlock ::= block.
 // The [LSL_ELSE] part causes a conflict.
 statement(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) ifBlock(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F->token->type, L, E, R, B, NULL); }		// optional else, optional else if
 
-statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
-statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F->token->type, NULL, E, NULL, NULL, NULL); }
-statement(A) ::= LSL_RETURN(F) LSL_STATEMENT(S).													{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, NULL); }
-statement(A) ::= LSL_STATE_CHANGE(F) LSL_DEFAULT(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
-statement(A) ::= LSL_STATE_CHANGE(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).										{ A = addStatement(compiler, S,    F->token->type, NULL, NULL, NULL, NULL, I); }
-statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).							{ A = addStatement(compiler, NULL, F->token->type, L, E, R, B, NULL); }
+statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F->toKen->type, NULL, E, NULL, NULL, NULL); }
+statement(A) ::= LSL_RETURN(F) LSL_STATEMENT(S).													{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, NULL); }
+statement(A) ::= LSL_STATE_CHANGE(F) LSL_DEFAULT(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_STATE_CHANGE(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).										{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).							{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }
 
 %nonassoc LSL_LABEL.
-statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->token->type, NULL, NULL, NULL, NULL, I); }
+statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->toKen->type, NULL, NULL, NULL, NULL, I); }
 
 // This might be bogus, or might be valid LSL, but it lets us test the expression parser by evaluating them.
 statement(A) ::= expr(E) LSL_STATEMENT(S).														{ A = addStatement(compiler, S, LSL_EXPRESSION, NULL, E, NULL, NULL, NULL); }
