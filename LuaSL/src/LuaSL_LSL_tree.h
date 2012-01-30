@@ -251,6 +251,10 @@ struct _LSL_Block
     Eina_Clist		statements;	// For statement lists, this is the HEAD.
     Eina_Hash		*variables;	// Those variables in this scope.
     LSL_Function	*function;	// A pointer to the function if this block is a function.
+#if LUASL_DIFF_CHECK
+    Eina_Strbuf		*openIgnorableText;
+    Eina_Strbuf		*closeIgnorableText;
+#endif
 };
 
 struct _LSL_Function

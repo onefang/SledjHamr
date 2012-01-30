@@ -450,6 +450,10 @@ LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL
 {
     // Damn, look ahead.  The } symbol is getting read (and thus endBlock called) before the last statement in the block is reduced (which actually calls the add*() functions).
     compiler->currentBlock = compiler->currentBlock->outerBlock;
+#if LUASL_DIFF_CHECK
+	left->value.blockValue->closeIgnorableText = right->ignorableText;
+	right->ignorableText = NULL;
+#endif
     return lval;
 }
 
@@ -834,6 +838,10 @@ LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 	blok->variables = eina_hash_stringshared_new(burnLeaf);
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
+#if LUASL_DIFF_CHECK
+	blok->openIgnorableText = block->ignorableText;
+	block->ignorableText = NULL;
+#endif
 	compiler->currentBlock = blok;
 	blok->function = compiler->currentFunction;
 	compiler->currentFunction = NULL;
@@ -1225,23 +1233,27 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 
 static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 {
-    if (LUASL_DIFF_CHECK)
-	fprintf(file, "\n{");
-    else
-	fprintf(file, "\n{\n");
     if (block)
     {
 	LSL_Statement *stat = NULL;
 
+#if LUASL_DIFF_CHECK
+	if (block->openIgnorableText)
+	    fwrite(eina_strbuf_string_get(block->openIgnorableText), 1, eina_strbuf_length_get(block->openIgnorableText), file);
+	fprintf(file, "{");
+#else
+	fprintf(file, "\n{\n");
+#endif
 	EINA_CLIST_FOR_EACH_ENTRY(stat, &(block->statements), LSL_Statement, statement)
 	{
 		outputRawStatement(file, mode, stat);
 	}
-    }
-    if (LUASL_DIFF_CHECK)
-	fprintf(file, "\n}");
-    else
+#if LUASL_DIFF_CHECK
+	if (block->closeIgnorableText)
+	    fwrite(eina_strbuf_string_get(block->closeIgnorableText), 1, eina_strbuf_length_get(block->closeIgnorableText), file);
+#endif
 	fprintf(file, "}");
+    }
 }
 
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
