@@ -238,8 +238,9 @@ void burnLeaf(void *data)
 //	burnLeaf(leaf->left);
 //	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
-//	if (LUASL_DIFF_CHECK)
-//	    eina_strbuf_free(leaf->ignorableText);
+//#if LUASL_DIFF_CHECK
+//	   eina_strbuf_free(leaf->ignorableText);
+//#endif
 //	free(leaf);
     }
 }
@@ -451,8 +452,11 @@ LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL
     // Damn, look ahead.  The } symbol is getting read (and thus endBlock called) before the last statement in the block is reduced (which actually calls the add*() functions).
     compiler->currentBlock = compiler->currentBlock->outerBlock;
 #if LUASL_DIFF_CHECK
+    if ((left) && (right))
+    {
 	left->value.blockValue->closeIgnorableText = right->ignorableText;
 	right->ignorableText = NULL;
+    }
 #endif
     return lval;
 }
@@ -474,8 +478,10 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
     if ( (identifier) && (result))
     {
 	result->name.text = identifier->value.stringValue;
+#if LUASL_DIFF_CHECK
 	result->name.ignorableText = identifier->ignorableText;
 	identifier->ignorableText = NULL;
+#endif
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->toKen = tokens[LSL_PARAMETER - lowestToken];
@@ -542,15 +548,19 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    if (identifier)
 	    {
 		func->name.text = identifier->value.stringValue;
+#if LUASL_DIFF_CHECK
 		func->name.ignorableText = identifier->ignorableText;
 		identifier->ignorableText = NULL;
+#endif
 		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
 		if (type)
 		{
 		    func->type.text = type->toKen->toKen;
+#if LUASL_DIFF_CHECK
 		    func->type.ignorableText = type->ignorableText;
 		    type->ignorableText = NULL;
+#endif
 		    identifier->basicType = type->basicType;
 		}
 		else
@@ -626,7 +636,7 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
 #if LUASL_DIFF_CHECK
 	parens->rightIgnorableText = rval->ignorableText;
 	// Actualy, at this point, rval is no longer needed.
-//	rval->ignorableText = eina_strbuf_new();
+	rval->ignorableText = NULL;
 #endif
 	if (lval)
 	{
@@ -645,13 +655,17 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     if ((identifier) && (result))
     {
 	result->name.text = identifier->value.stringValue;
+#if LUASL_DIFF_CHECK
 	result->name.ignorableText = identifier->ignorableText;
 	identifier->ignorableText = NULL;
+#endif
 	result->block = block->value.blockValue;
 	if (state)
 	{
 	    result->state.text = state->toKen->toKen;
+#if LUASL_DIFF_CHECK
 	    result->state.ignorableText = state->ignorableText;
+#endif
 	}
 	identifier->value.stateValue = result;
 	identifier->toKen = tokens[LSL_STATE - lowestToken];
@@ -747,12 +761,13 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 
 	if (lval)
 	{
+#if LUASL_DIFF_CHECK
 	    stat->ignorableText = lval->ignorableText;
 	    lval->ignorableText = NULL;
+#endif
 	    lval->value.statementValue = stat;
 	}
     }
-
 
     return lval;
 }
@@ -806,8 +821,10 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     if ( (identifier) && (result))
     {
 	result->name.text = identifier->value.stringValue;
+#if LUASL_DIFF_CHECK
 	result->name.ignorableText = identifier->ignorableText;
 	identifier->ignorableText = NULL;
+#endif
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
 	identifier->toKen = tokens[LSL_VARIABLE - lowestToken];
