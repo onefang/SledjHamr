@@ -582,7 +582,6 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	{
 	    call->function = func->value.functionValue;
 	    eina_clist_element_init(&(call->dangler));
-	    call->call = identifier;
 	}
 	identifier->value.functionCallValue = call;
 	// TODO - Put the params in call.
@@ -1257,7 +1256,6 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
 	LSL_FunctionCall *call = content->value.functionCallValue;
 	LSL_Function *func = call->function;
 	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
-//	fprintf(file, "%s(", func->name);
 	fprintf(file, "(");
 	// TODO - print params here.
 	fprintf(file, ")");
@@ -1608,12 +1606,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		LSL_Leaf *func = findFunction(&(compiler), call->call->value.stringValue);
 
 		if (func)
-		{
 		    call->function = func->value.functionValue;
-		    call->call->value.functionCallValue = call;
-		    call->call->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
-		    call->call->basicType = func->basicType;
-		}
 		else
 		    PE("Undeclared function %s called @ line %d, column %d!", call->call->value.stringValue, call->call->line, call->call->column);
 	    }
