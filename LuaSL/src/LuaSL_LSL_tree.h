@@ -250,6 +250,7 @@ struct _LSL_Function
     LSL_Leaf	*type;
 #if LUASL_DIFF_CHECK
     LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
+				// This points to the params leaf, which is a function, pointing to this structure.  The actual params are in vars.
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
     LSL_Leaf	*block;
