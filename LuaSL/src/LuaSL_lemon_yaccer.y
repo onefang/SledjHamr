@@ -31,7 +31,7 @@ script ::= .
 // State definitions.
 
 %nonassoc LSL_BLOCK_OPEN LSL_BLOCK_CLOSE LSL_STATE.
-stateBlock(A) ::= LSL_BLOCK_OPEN functionList(B) LSL_BLOCK_CLOSE.		{ A = B; }
+stateBlock(A) ::= beginBlock(L) functionList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
 state(S) ::= LSL_DEFAULT(I) stateBlock(B).					{ S = addState(compiler, I, B); }
 state(S) ::= LSL_STATE_CHANGE LSL_IDENTIFIER(I) stateBlock(B).			{ S = addState(compiler, I, B); }
 
@@ -57,6 +57,8 @@ function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(
 block(A) ::= funcBlock(B).							{ A = B; }
 block(A) ::= statement(B).							{ A = B; }
 funcBlock(A) ::= LSL_BLOCK_OPEN statementList(B) LSL_BLOCK_CLOSE.		{ A = B; }
+// Perhaps change this to block?  No ,this is what differentiates it from a single statement, which functions can't handle.
+funcBlock(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
 
 // Various forms of statement.
 
@@ -84,6 +86,8 @@ statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CL
 
 %nonassoc LSL_LABEL.
 statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S, F->toKen->type, NULL, NULL, NULL, NULL, I); }
+
+beginBlock(A) ::= LSL_BLOCK_OPEN(B).															{ A = beginBlock(compiler, B); }
 
 // This might be bogus, or might be valid LSL, but it lets us test the expression parser by evaluating them.
 statement(A) ::= expr(E) LSL_STATEMENT(S).														{ A = addStatement(compiler, S, LSL_EXPRESSION, NULL, E, NULL, NULL, NULL); }

@@ -360,6 +360,7 @@ typedef struct
 #endif
     LSL_Leaf		*lval;
     LSL_Block		*currentBlock;
+    LSL_Function	*currentFunction;
     Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
     int			column, line;
     int			undeclared;
@@ -372,6 +373,7 @@ typedef struct
 
 
 void burnLeaf(void *data);
+LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement);
 LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block);
@@ -384,11 +386,10 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *expr);
 LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
 
-void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
+LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);
-void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);

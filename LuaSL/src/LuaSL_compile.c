@@ -446,6 +446,13 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
     return lval;
 }
 
+LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
+{
+    // Damn, look ahead.  The } symbol is getting read (and thus endBlock called) before the last statement in the block is reduced (which actually calls the add*() functions).
+    compiler->currentBlock = compiler->currentBlock->outerBlock;
+    return lval;
+}
+
 LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement)
 {
     if ((variable) && (crement))
@@ -541,8 +548,7 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
 #endif
 	    }
-	    if (compiler->currentBlock)
-		compiler->currentBlock->function = func;
+	    compiler->currentFunction = func;
 	}
     }
 
@@ -725,12 +731,13 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *statement)
 {
+    boolean wasNull = FALSE;
     if (NULL == list)
     {
 	list = newLeaf(LSL_BLOCK_OPEN, NULL, NULL);
 	if (list)
 	{
-	    list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
+	    wasNull = TRUE;
 	}
     }
 
@@ -738,6 +745,8 @@ LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *
     {
 	if (statement)
 	{
+	    if (!wasNull)
+	    list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
 	    if (list->value.blockValue)
 	    {
 		eina_clist_add_tail(&(list->value.blockValue->statements), &(statement->value.statementValue->statement));
@@ -792,7 +801,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     return identifier;
 }
 
-void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
+LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 {
     LSL_Block *blok = calloc(1, sizeof(LSL_Block));
 
@@ -803,12 +812,10 @@ void beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
 	compiler->currentBlock = blok;
+	blok->function = compiler->currentFunction;
+	compiler->currentFunction = NULL;
     }
-}
-
-void endBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
-{
-    compiler->currentBlock = compiler->currentBlock->outerBlock;
+    return block;
 }
 
 static void secondPass(LuaSL_compiler *compiler, LSL_Leaf *leaf)
