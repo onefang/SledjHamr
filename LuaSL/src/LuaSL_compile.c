@@ -122,7 +122,6 @@ LSL_Token LSL_Tokens[] =
 
     {LSL_DO,			ST_NONE,	"do",		LSL_NONE,				NULL, NULL},
     {LSL_FOR,			ST_NONE,	"for",		LSL_NONE,				NULL, NULL},
-    {LSL_ELSE_IF,		ST_NONE,	"else if",	LSL_NONE,				NULL, NULL},
     {LSL_ELSE,			ST_NONE,	"else",		LSL_NONE,				NULL, NULL},
     {LSL_IF,			ST_NONE,	"if",		LSL_NONE,				NULL, NULL},
     {LSL_JUMP,			ST_NONE,	"jump",		LSL_NONE,				NULL, NULL},
