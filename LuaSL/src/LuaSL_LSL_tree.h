@@ -224,7 +224,7 @@ struct _LSL_Statement
 //    } stuff;				// Nothing has an identifier AND parenthesis, and there will be LOTS of statements, so save some space.
 					// Damn, function identifiers do.
     LSL_Leaf		*expressions;	// A for statement will have three expressions, everything else has zero or one.
-    LSL_Leaf		*block;
+    LSL_Block		*block;
     LSL_Type		type;		// Expression type.
 /*
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);
@@ -262,7 +262,7 @@ struct _LSL_Function
 				// This points to the params leaf, which is a function, pointing to this structure.  The actual params are in vars.
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
-    LSL_Leaf	*block;
+    LSL_Block	*block;
 };
 
 struct _LSL_FunctionCall
@@ -277,7 +277,7 @@ struct _LSL_State
 {
     LSL_Text		name;
     LSL_Text		state;
-    LSL_Leaf		*block;
+    LSL_Block		*block;
     Eina_Hash		*handlers;
 };
 

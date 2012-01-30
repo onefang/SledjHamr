@@ -565,7 +565,7 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
 
     if (function)
     {
-	function->value.functionValue->block = block;
+	function->value.functionValue->block = block->value.blockValue;
 	statement = addStatement(compiler, NULL, LSL_FUNCTION, NULL, function, NULL, NULL, NULL);
     }
 
@@ -638,7 +638,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     {
 	result->name.text = identifier->value.stringValue;
 	result->name.ignorableText = identifier->ignorableText;
-	result->block = block;
+	result->block = block->value.blockValue;
 	if (state)
 	{
 	    result->state.text = state->toKen->toKen;
@@ -664,7 +664,8 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
     {
 	stat->type = type;
 	stat->expressions = expr;
-	stat->block = block;
+	if (block)
+	    stat->block = block->value.blockValue;
 	eina_clist_element_init(&(stat->statement));
 	if (identifier)
 	    stat->identifier = identifier->value.identifierValue;
@@ -1187,18 +1188,6 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
     return result;
 }
 
-static void outputText(FILE *file, LSL_Text *text, boolean ignore)
-{
-	    if (text->text)
-	    {
-#if LUASL_DIFF_CHECK
-		if (ignore && (text->ignorableText))
-		    fwrite(eina_strbuf_string_get(text->ignorableText), 1, eina_strbuf_length_get(text->ignorableText), file);
-#endif
-		fprintf(file, "%s", text->text);
-	    }
-}
-
 static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
@@ -1216,70 +1205,28 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     }
 }
 
-static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	fprintf(file, "%g", content->value.floatValue);
-}
+// Circular references, so declare this one first.
+static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *statement);
 
-static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
+static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 {
-    if (content)
+    if (LUASL_DIFF_CHECK)
+	fprintf(file, "\n{");
+    else
+	fprintf(file, "\n{\n");
+    if (block)
     {
-	LSL_Function *func = content->value.functionValue;
-	LSL_Leaf *param = NULL;
-	int first = TRUE;
+	LSL_Statement *stat = NULL;
 
-	outputText(file, &(func->type), !(LSL_NOIGNORE & content->toKen->flags));
-	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
-// TODO - should print comma and parenthesis ignorables.
-	fprintf(file, "(");
-	EINA_INARRAY_FOREACH((&(func->vars)), param)
+	EINA_CLIST_FOR_EACH_ENTRY(stat, &(block->statements), LSL_Statement, statement)
 	{
-	    if (!LUASL_DIFF_CHECK)
-	    {
-		if (!first)
-		    fprintf(file, ", ");
-	    }
-	    outputLeaf(file, mode, param);
-	    first = FALSE;
+		outputRawStatement(file, mode, stat);
 	}
-	fprintf(file, ")");
-	outputLeaf(file, mode, func->block);
-	if (!LUASL_DIFF_CHECK)
-	    fprintf(file, "\n");
     }
-}
-
-static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-    {
-	LSL_FunctionCall *call = content->value.functionCallValue;
-	LSL_Function *func = call->function;
-	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
-	fprintf(file, "(");
-	// TODO - print params here.
-	fprintf(file, ")");
-    }
-}
-
-static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	fprintf(file, "%d", content->value.integerValue);
-}
-
-static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
-}
-
-static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	outputLeaf(file, mode, content->value.listValue);
+    if (LUASL_DIFF_CHECK)
+	fprintf(file, "\n}");
+    else
+	fprintf(file, "}");
 }
 
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
@@ -1298,31 +1245,6 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
 	if (LSL_TYPECAST_OPEN == parenthesis->type)
 	    outputLeaf(file, mode, parenthesis->contents);
 }
-
-static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-	outputRawParenthesisToken(file, mode, content->value.parenthesis, allowed[content->basicType].name);
-}
-
-static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
-{
-    if (content)
-    {
-	LSL_State *state = content->value.stateValue;
-
-	if (state)
-	{
-	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
-	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
-	    outputLeaf(file, mode, state->block);
-	    fprintf(file, "\n");
-	}
-    }
-}
-
-// Circular references, so declare this one first.
-static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
 
 static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *statement)
 {
@@ -1401,7 +1323,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    outputLeaf(file, mode, statement->expressions);
 
 	if (statement->block)
-	    outputBlockToken(file, mode, statement->block);
+	    outputRawBlock(file, mode, statement->block);
 
 	if (!isBlock)
 	{
@@ -1411,6 +1333,107 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	}
     }
 }
+
+static void outputText(FILE *file, LSL_Text *text, boolean ignore)
+{
+	    if (text->text)
+	    {
+#if LUASL_DIFF_CHECK
+		if (ignore && (text->ignorableText))
+		    fwrite(eina_strbuf_string_get(text->ignorableText), 1, eina_strbuf_length_get(text->ignorableText), file);
+#endif
+		fprintf(file, "%s", text->text);
+	    }
+}
+
+static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	fprintf(file, "%g", content->value.floatValue);
+}
+
+static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_Function *func = content->value.functionValue;
+	LSL_Leaf *param = NULL;
+	int first = TRUE;
+
+	outputText(file, &(func->type), !(LSL_NOIGNORE & content->toKen->flags));
+	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+// TODO - should print comma and parenthesis ignorables.
+	fprintf(file, "(");
+	EINA_INARRAY_FOREACH((&(func->vars)), param)
+	{
+	    if (!LUASL_DIFF_CHECK)
+	    {
+		if (!first)
+		    fprintf(file, ", ");
+	    }
+	    outputLeaf(file, mode, param);
+	    first = FALSE;
+	}
+	fprintf(file, ")");
+	outputRawBlock(file, mode, func->block);
+	if (!LUASL_DIFF_CHECK)
+	    fprintf(file, "\n");
+    }
+}
+
+static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_FunctionCall *call = content->value.functionCallValue;
+	LSL_Function *func = call->function;
+	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+	fprintf(file, "(");
+	// TODO - print params here.
+	fprintf(file, ")");
+    }
+}
+
+static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	fprintf(file, "%d", content->value.integerValue);
+}
+
+static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+}
+
+static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	outputLeaf(file, mode, content->value.listValue);
+}
+
+static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	outputRawParenthesisToken(file, mode, content->value.parenthesis, allowed[content->basicType].name);
+}
+
+static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_State *state = content->value.stateValue;
+
+	if (state)
+	{
+	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
+	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
+	    outputRawBlock(file, mode, state->block);
+	    fprintf(file, "\n");
+	}
+    }
+}
+
 
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
@@ -1427,25 +1450,7 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-    {
-	if (LUASL_DIFF_CHECK)
-	    fprintf(file, "\n{");
-	else
-	    fprintf(file, "\n{\n");
-	if (content->value.blockValue)
-	{
-	    LSL_Statement *stat = NULL;
-
-	    EINA_CLIST_FOR_EACH_ENTRY(stat, &(content->value.blockValue->statements), LSL_Statement, statement)
-	    {
-		outputRawStatement(file, mode, stat);
-	    }
-	}
-	if (LUASL_DIFF_CHECK)
-	    fprintf(file, "\n}");
-	else
-	    fprintf(file, "}");
-    }
+	outputRawBlock(file, mode, content->value.blockValue);
 }
 
 static boolean doneParsing(LuaSL_compiler *compiler)
