@@ -17,6 +17,7 @@ static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *cont
 static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content);
 
 LSL_Token LSL_Tokens[] =
 {
@@ -99,10 +100,10 @@ LSL_Token LSL_Tokens[] =
     // Types.
     {LSL_FLOAT,			ST_NONE,	"float",	LSL_NONE,				outputFloatToken, evaluateFloatToken},
     {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, evaluateIntegerToken},
-    {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				NULL, NULL},
+    {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				outputStringToken, NULL},
     {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				NULL, NULL},
     {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
-    {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL},
+    {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				outputStringToken, NULL},
     {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
 
     // Types names.
@@ -1460,6 +1461,12 @@ static void outputText(FILE *file, LSL_Text *text, boolean ignore)
 	    }
 }
 
+static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+	outputRawBlock(file, mode, content->value.blockValue);
+}
+
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
@@ -1560,10 +1567,10 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	outputRawStatement(file, mode, content->value.statementValue);
 }
 
-static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
+static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	outputRawBlock(file, mode, content->value.blockValue);
+	fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
 }
 
 static boolean doneParsing(LuaSL_compiler *compiler)
