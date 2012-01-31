@@ -584,7 +584,7 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
     if (function)
     {
 	function->value.functionValue->block = block->value.blockValue;
-	statement = addStatement(compiler, NULL, LSL_FUNCTION, NULL, function, NULL, NULL, NULL);
+	statement = addStatement(compiler, NULL, function, NULL, function, NULL, NULL, NULL);
     }
 
     return statement;
@@ -676,17 +676,18 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     return identifier;
 }
 
-LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
+LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
     LSL_Statement *stat = calloc(1, sizeof(LSL_Statement));
+    boolean justOne = FALSE;
 
     if (NULL == lval)
 	lval = newLeaf(LSL_STATEMENT, NULL, NULL);
 
     if (stat)
     {
-	stat->type = type;
+	stat->type = flow->toKen->type;
 	stat->expressions = expr;
 	if (block)
 	    stat->block = block->value.blockValue;
@@ -701,17 +702,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 		stat->parenthesis = parens->value.parenthesis;
 	}
 
-	if (lval)
-	{
-#if LUASL_DIFF_CHECK
-	    stat->ignorable = calloc(1, sizeof(Eina_Strbuf *));
-	    stat->ignorable[0] = lval->ignorable;
-	    lval->ignorable = NULL;
-#endif
-	    lval->value.statementValue = stat;
-	}
-
-	switch (type)
+	switch (stat->type)
 	{
 	    case LSL_EXPRESSION :
 	    {
@@ -731,28 +722,37 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    }
 	    case LSL_IF :
 	    {
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_ELSE :
 	    {
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_JUMP :
 	    {
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_RETURN :
 	    {
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_STATE_CHANGE :
+	    {
+		justOne = TRUE;
+		break;
+	    }
+	    case LSL_STATEMENT :
 	    {
 		break;
 	    }
 	    case LSL_WHILE :
 	    {
 		stat->identifier = NULL;
-		// TODO - need to stash the while's white space somewhere.
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_IDENTIFIER :
@@ -765,11 +765,34 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    }
 	    default :
 	    {
-		PE("Should not be here %d.", type);
+		PE("Should not be here %d.", stat->type);
 		break;
 	    }
 	}
 
+	if (justOne && (flow))
+	{
+	    stat->ignorable = calloc(2, sizeof(Eina_Strbuf *));
+	    if (stat->ignorable)
+	    {
+		stat->ignorable[1] = flow->ignorable;
+		flow->ignorable = NULL;
+	    }
+	}
+
+	if (lval)
+	{
+#if LUASL_DIFF_CHECK
+	    if (NULL == stat->ignorable)
+		stat->ignorable = calloc(1, sizeof(Eina_Strbuf *));
+	    if (stat->ignorable)
+	    {
+		stat->ignorable[0] = lval->ignorable;
+		lval->ignorable = NULL;
+	    }
+#endif
+	    lval->value.statementValue = stat;
+	}
     }
 
     return lval;
@@ -1195,6 +1218,11 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 	    {
 		break;
 	    }
+	    case LSL_STATEMENT :
+	    {
+		result = evaluateLeaf(content->value.statementValue->expressions, left, right);
+		break;
+	    }
 	    case LSL_WHILE :
 	    {
 		break;
@@ -1326,32 +1354,60 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    case LSL_IF :
 	    {
 		isBlock = TRUE;
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_ELSE :
 	    {
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_JUMP :
 	    {
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_RETURN :
 	    {
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
 	    case LSL_STATE_CHANGE :
 	    {
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
+		break;
+	    }
+	    case LSL_STATEMENT :
+	    {
 		break;
 	    }
 	    case LSL_WHILE :
 	    {
 		isBlock = TRUE;
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
