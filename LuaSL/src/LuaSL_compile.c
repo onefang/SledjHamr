@@ -596,8 +596,6 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
     LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
     LSL_FunctionCall *call = calloc(1, sizeof(LSL_FunctionCall));
 
-    identifier->toKen = tokens[LSL_UNKNOWN - lowestToken];
-
     if (func)
     {
 	if (call)
@@ -619,6 +617,8 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	    eina_clist_add_tail(&(compiler->danglingCalls), &(call->dangler));
 	    call->call = identifier;
 	}
+	// Here the identifier stringValue needs to be kept for later searching.
+	identifier->toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->basicType = OT_undeclared;
 	compiler->undeclared = TRUE;
     }
@@ -1733,7 +1733,13 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		LSL_Leaf *func = findFunction(&(compiler), call->call->value.stringValue);
 
 		if (func)
+		{
 		    call->function = func->value.functionValue;
+		    // Coz the leaf still had the stringValue from before.
+		    call->call->value.functionCallValue = call;
+		    call->call->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
+		    call->call->basicType = func->basicType;
+		}
 		else
 		    PE("Undeclared function %s called @ line %d, column %d!", call->call->value.stringValue, call->call->line, call->call->column);
 	    }
