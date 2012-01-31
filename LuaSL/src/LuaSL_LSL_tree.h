@@ -273,7 +273,10 @@ struct _LSL_FunctionCall
     LSL_Function	*function;
     Eina_Inarray	params;		// Eina Inarray has not been released yet (Eina 1.2).
     Eina_Clist		dangler;	// Entry for function calls used before the function is defined.
-    LSL_Leaf		*call;		// This is to stash the details for dangling ones, to search later.  The line and column details are needed for bitching, so we need the leaf.  Also need the stringValue for the search.
+    LSL_Leaf		*call;		// This is to stash the details for dangling ones, to search later.
+					// The line and column details are needed for bitching, so we need the leaf.
+					// Also need the stringValue for the search.
+					// On top of all that, the leaf is still used in expressions, so need to keep it around and update it when resolving danglers.
 };
 
 struct _LSL_State
