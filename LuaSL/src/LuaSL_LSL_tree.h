@@ -405,6 +405,7 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
+LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *arg);
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);
 

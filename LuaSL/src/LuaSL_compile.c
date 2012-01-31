@@ -580,7 +580,7 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block)
 {
-	LSL_Leaf *statement = NULL;
+    LSL_Leaf *statement = NULL;
 
     if (function)
     {
@@ -591,10 +591,55 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
     return statement;
 }
 
+LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *arg)
+{
+    LSL_FunctionCall *call = NULL;
+
+    if (NULL == list)
+	list = newLeaf(LSL_FUNCTION_CALL, NULL, NULL);
+
+    if (list)
+    {
+	call = list->value.functionCallValue;
+	if (NULL == call)
+	{
+	    call = calloc(1, sizeof(LSL_FunctionCall));
+	    if (call)
+	    {
+		list->value.functionCallValue = call;
+		eina_inarray_setup(&(call->params), sizeof(LSL_Leaf), 3);
+	    }
+	}
+
+	if (call)
+	{
+	    if (arg)
+	    {
+		if (LUASL_DIFF_CHECK)
+		{
+		    // Stash the comma for diff later.
+		    if (comma)
+			eina_inarray_append(&(call->params), comma);
+		}
+		eina_inarray_append(&(call->params), arg);
+		// At this point, pointers to arg are not pointing to the one in call->params, AND arg is no longer needed.
+	    }
+	}
+    }
+    return list;
+}
+
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close)
 {
     LSL_Leaf *func = findFunction(compiler, identifier->value.stringValue);
-    LSL_FunctionCall *call = calloc(1, sizeof(LSL_FunctionCall));
+    LSL_FunctionCall *call = NULL;
+
+    if (params)
+    {
+	call = params->value.functionCallValue;
+    }
+    else
+	call = calloc(1, sizeof(LSL_FunctionCall));
 
     if (func)
     {
@@ -604,8 +649,6 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
 	    eina_clist_element_init(&(call->dangler));
 	}
 	identifier->value.functionCallValue = call;
-	// TODO - Put the params in call.
-//	eina_inarray_setup(&(cal->vars), sizeof(LSL_Text), 3);
 	identifier->toKen = tokens[LSL_FUNCTION_CALL - lowestToken];
 	identifier->basicType = func->basicType;
     }
@@ -1507,11 +1550,15 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
     if (content)
     {
 	LSL_FunctionCall *call = content->value.functionCallValue;
+	LSL_Leaf *param = NULL;
 
 	// TODO - should output it's own ignorable here.
 	outputText(file, &(call->function->name), FALSE);	// Don't output the function definitions ignorable.
 	fprintf(file, "(");
-	// TODO - print params here.
+	EINA_INARRAY_FOREACH((&(call->params)), param)
+	{
+	    outputLeaf(file, mode, param);
+	}
 	fprintf(file, ")");
     }
 }

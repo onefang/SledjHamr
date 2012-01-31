@@ -96,9 +96,9 @@ statement(A) ::= expr(E) LSL_STATEMENT(S).														{ A = addStatement(compi
 // Various forms of expression.
 
 // Used for function call params, and list contents.
-exprList ::= exprList LSL_COMMA expr.
-exprList ::= expr.
-exprList ::= .
+exprList(A) ::= exprList(B) LSL_COMMA(C) expr(D).				{ A = collectArguments(compiler, B, C, D); }
+exprList(A) ::= expr(D).							{ A = collectArguments(compiler, NULL, NULL, D); }
+exprList(A) ::= .								{ A = collectArguments(compiler, NULL, NULL, NULL); }
 
 %right  LSL_BOOL_AND.
 expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).			{ A = addOperation(compiler, B, C, D); }
