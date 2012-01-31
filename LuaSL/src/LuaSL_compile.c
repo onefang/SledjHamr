@@ -239,7 +239,7 @@ void burnLeaf(void *data)
 //	burnLeaf(leaf->right);
 	// TODO - Should free up the value to.
 //#if LUASL_DIFF_CHECK
-//	   eina_strbuf_free(leaf->ignorableText);
+//	   eina_strbuf_free(leaf->ignorable);
 //#endif
 //	free(leaf);
     }
@@ -454,8 +454,8 @@ LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL
 #if LUASL_DIFF_CHECK
     if ((left) && (right))
     {
-	left->value.blockValue->closeIgnorableText = right->ignorableText;
-	right->ignorableText = NULL;
+	left->value.blockValue->closeIgnorable = right->ignorable;
+	right->ignorable = NULL;
     }
 #endif
     return lval;
@@ -479,8 +479,8 @@ LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *ident
     {
 	result->name.text = identifier->value.stringValue;
 #if LUASL_DIFF_CHECK
-	result->name.ignorableText = identifier->ignorableText;
-	identifier->ignorableText = NULL;
+	result->name.ignorable = identifier->ignorable;
+	identifier->ignorable = NULL;
 #endif
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
@@ -549,8 +549,8 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    {
 		func->name.text = identifier->value.stringValue;
 #if LUASL_DIFF_CHECK
-		func->name.ignorableText = identifier->ignorableText;
-		identifier->ignorableText = NULL;
+		func->name.ignorable = identifier->ignorable;
+		identifier->ignorable = NULL;
 #endif
 		identifier->toKen = tokens[LSL_FUNCTION - lowestToken];
 		identifier->value.functionValue = func;
@@ -558,8 +558,8 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		{
 		    func->type.text = type->toKen->toKen;
 #if LUASL_DIFF_CHECK
-		    func->type.ignorableText = type->ignorableText;
-		    type->ignorableText = NULL;
+		    func->type.ignorable = type->ignorable;
+		    type->ignorable = NULL;
 #endif
 		    identifier->basicType = type->basicType;
 		}
@@ -634,9 +634,9 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
 	parens->contents = expr;
 	parens->type = type;
 #if LUASL_DIFF_CHECK
-	parens->rightIgnorableText = rval->ignorableText;
+	parens->rightIgnorable = rval->ignorable;
 	// Actualy, at this point, rval is no longer needed.
-	rval->ignorableText = NULL;
+	rval->ignorable = NULL;
 #endif
 	if (lval)
 	{
@@ -656,15 +656,16 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     {
 	result->name.text = identifier->value.stringValue;
 #if LUASL_DIFF_CHECK
-	result->name.ignorableText = identifier->ignorableText;
-	identifier->ignorableText = NULL;
+	result->name.ignorable = identifier->ignorable;
+	identifier->ignorable = NULL;
 #endif
 	result->block = block->value.blockValue;
 	if (state)
 	{
 	    result->state.text = state->toKen->toKen;
 #if LUASL_DIFF_CHECK
-	    result->state.ignorableText = state->ignorableText;
+	    result->state.ignorable = state->ignorable;
+	    state->ignorable = NULL;
 #endif
 	}
 	identifier->value.stateValue = result;
@@ -824,8 +825,8 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
     {
 	result->name.text = identifier->value.stringValue;
 #if LUASL_DIFF_CHECK
-	result->name.ignorableText = identifier->ignorableText;
-	identifier->ignorableText = NULL;
+	result->name.ignorable = identifier->ignorable;
+	identifier->ignorable = NULL;
 #endif
 	result->value.toKen = tokens[LSL_UNKNOWN - lowestToken];
 	identifier->value.identifierValue = result;
@@ -860,8 +861,8 @@ LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
 #if LUASL_DIFF_CHECK
-	blok->openIgnorableText = block->ignorableText;
-	block->ignorableText = NULL;
+	blok->openIgnorable = block->ignorable;
+	block->ignorable = NULL;
 #endif
 	compiler->currentBlock = blok;
 	blok->function = compiler->currentFunction;
@@ -1238,8 +1239,8 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
     {
 	outputLeaf(file, mode, leaf->left);
 #if LUASL_DIFF_CHECK
-	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorableText))
-	    fwrite(eina_strbuf_string_get(leaf->ignorableText), 1, eina_strbuf_length_get(leaf->ignorableText), file);
+	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorable))
+	    fwrite(eina_strbuf_string_get(leaf->ignorable), 1, eina_strbuf_length_get(leaf->ignorable), file);
 #endif
 	if (leaf->toKen->output)
 	    leaf->toKen->output(file, mode, leaf);
@@ -1259,8 +1260,8 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 	LSL_Statement *stat = NULL;
 
 #if LUASL_DIFF_CHECK
-	if (block->openIgnorableText)
-	    fwrite(eina_strbuf_string_get(block->openIgnorableText), 1, eina_strbuf_length_get(block->openIgnorableText), file);
+	if (block->openIgnorable)
+	    fwrite(eina_strbuf_string_get(block->openIgnorable), 1, eina_strbuf_length_get(block->openIgnorable), file);
 	fprintf(file, "{");
 #else
 	fprintf(file, "\n{\n");
@@ -1270,8 +1271,8 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 		outputRawStatement(file, mode, stat);
 	}
 #if LUASL_DIFF_CHECK
-	if (block->closeIgnorableText)
-	    fwrite(eina_strbuf_string_get(block->closeIgnorableText), 1, eina_strbuf_length_get(block->closeIgnorableText), file);
+	if (block->closeIgnorable)
+	    fwrite(eina_strbuf_string_get(block->closeIgnorable), 1, eina_strbuf_length_get(block->closeIgnorable), file);
 #endif
 	fprintf(file, "}");
     }
@@ -1286,7 +1287,7 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
 	else
 	    outputLeaf(file, mode, parenthesis->contents);
 #if LUASL_DIFF_CHECK
-	fprintf(file, "%s)", eina_strbuf_string_get(parenthesis->rightIgnorableText));
+	fprintf(file, "%s)", eina_strbuf_string_get(parenthesis->rightIgnorable));
 #else
 	fprintf(file, ")");
 #endif
@@ -1396,8 +1397,8 @@ static void outputText(FILE *file, LSL_Text *text, boolean ignore)
 	    if (text->text)
 	    {
 #if LUASL_DIFF_CHECK
-		if (ignore && (text->ignorableText))
-		    fwrite(eina_strbuf_string_get(text->ignorableText), 1, eina_strbuf_length_get(text->ignorableText), file);
+		if (ignore && (text->ignorable))
+		    fwrite(eina_strbuf_string_get(text->ignorable), 1, eina_strbuf_length_get(text->ignorable), file);
 #endif
 		fprintf(file, "%s", text->text);
 	    }
@@ -1617,7 +1618,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
     compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
     eina_clist_init(&(compiler.danglingCalls));
 #if LUASL_DIFF_CHECK
-    compiler.ignorableText = eina_strbuf_new();
+    compiler.ignorable = eina_strbuf_new();
 #endif
 
     strncpy(compiler.fileName, script, PATH_MAX - 1);

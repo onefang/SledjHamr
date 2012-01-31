@@ -139,11 +139,11 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
 #if LUASL_DIFF_CHECK
     if (checkIgnorable)
     {
-	lval->ignorableText = compiler->ignorableText;
-	compiler->ignorableText = eina_strbuf_new();
+	lval->ignorable = compiler->ignorable;
+	compiler->ignorable = eina_strbuf_new();
     }
     else
-	eina_strbuf_append_length(compiler->ignorableText, text, len);
+	eina_strbuf_append_length(compiler->ignorable, text, len);
 #endif
 
     return type;

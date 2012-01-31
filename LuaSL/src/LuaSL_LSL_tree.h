@@ -165,7 +165,7 @@ struct _LSL_Text
 {
     const char		*text;
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf		*ignorableText;
+    Eina_Strbuf		*ignorable;
 #endif
 };
 
@@ -175,7 +175,7 @@ struct _LSL_Leaf
     LSL_Leaf			*right;
     LSL_Token			*toKen;
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf			*ignorableText;
+    Eina_Strbuf			*ignorable;
 #endif
     int 			line, column, len;
     opType			basicType;
@@ -203,7 +203,7 @@ struct _LSL_Parenthesis
 {
     LSL_Leaf		*contents;
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf		*rightIgnorableText;
+    Eina_Strbuf		*rightIgnorable;
 #endif
     LSL_Type		type;
 };
@@ -251,8 +251,8 @@ struct _LSL_Block
     Eina_Hash		*variables;	// Those variables in this scope.
     LSL_Function	*function;	// A pointer to the function if this block is a function.
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf		*openIgnorableText;
-    Eina_Strbuf		*closeIgnorableText;
+    Eina_Strbuf		*openIgnorable;
+    Eina_Strbuf		*closeIgnorable;
 #endif
 };
 
@@ -370,7 +370,7 @@ typedef struct
     LSL_Leaf		*ast;
     LSL_Script		script;
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf		*ignorableText;
+    Eina_Strbuf		*ignorable;
 #endif
     LSL_Leaf		*lval;
     LSL_Block		*currentBlock;
