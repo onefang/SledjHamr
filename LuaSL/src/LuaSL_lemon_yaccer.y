@@ -74,8 +74,8 @@ statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) e
 statement(A) ::= ifBlock(B).								{ A = B; }
 ifBlock ::= ifBlock LSL_ELSE block.
 ifBlock ::= ifBlock LSL_ELSE statement.
-ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }		// optional else, optional else if
-ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	[LSL_ELSE]						{ A = addStatement(compiler, S, F->toKen->type, L, E, R, NULL, NULL); }		// optional else, optional else if
+ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F->toKen->type, L, E, R, B, NULL); }
+ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	[LSL_ELSE]						{ A = addStatement(compiler, S, F->toKen->type, L, E, R, NULL, NULL); }
 
 statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F->toKen->type, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F->toKen->type, NULL, E, NULL, NULL, NULL); }
