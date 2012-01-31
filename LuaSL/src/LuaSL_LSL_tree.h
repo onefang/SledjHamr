@@ -223,7 +223,7 @@ struct _LSL_Statement
     LSL_Block		*block;
     LSL_Type		type;		// Expression type.
 #if LUASL_DIFF_CHECK
-    Eina_Strbuf		*ignorableText;
+    Eina_Strbuf		**ignorable;	// Can be up to five of these I think.
 #endif
 /*
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);

@@ -700,6 +700,16 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 		stat->parenthesis = parens->value.parenthesis;
 	}
 
+	if (lval)
+	{
+#if LUASL_DIFF_CHECK
+	    stat->ignorable = calloc(1, sizeof(Eina_Strbuf *));
+	    stat->ignorable[0] = lval->ignorable;
+	    lval->ignorable = NULL;
+#endif
+	    lval->value.statementValue = stat;
+	}
+
 	switch (type)
 	{
 	    case LSL_EXPRESSION :
@@ -759,14 +769,6 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Type type, 
 	    }
 	}
 
-	if (lval)
-	{
-#if LUASL_DIFF_CHECK
-	    stat->ignorableText = lval->ignorableText;
-	    lval->ignorableText = NULL;
-#endif
-	    lval->value.statementValue = stat;
-	}
     }
 
     return lval;
@@ -1376,8 +1378,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    outputRawBlock(file, mode, statement->block);
 
 #if LUASL_DIFF_CHECK
-	if (statement->ignorableText)
-	    fwrite(eina_strbuf_string_get(statement->ignorableText), 1, eina_strbuf_length_get(statement->ignorableText), file);
+	if ((statement->ignorable) && (statement->ignorable[0]))
+	    fwrite(eina_strbuf_string_get(statement->ignorable[0]), 1, eina_strbuf_length_get(statement->ignorable[0]), file);
 #endif
 
 	if (!isBlock)
