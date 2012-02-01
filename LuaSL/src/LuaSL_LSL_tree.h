@@ -218,7 +218,7 @@ struct _LSL_Identifier	// For variables and function parameters.
 struct _LSL_Statement
 {
     Eina_Clist		statement;	// For block statement lists, this is the entry.
-    LSL_Identifier	*identifier;
+    LSL_Text		 identifier;
     LSL_Parenthesis	*parenthesis;
     LSL_Leaf		*expressions;	// A for statement will have three expressions, and two semicolons, everything else has zero or one.
     LSL_Block		*block;

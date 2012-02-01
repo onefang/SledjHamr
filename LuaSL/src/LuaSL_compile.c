@@ -810,7 +810,13 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	}
 	eina_clist_element_init(&(stat->statement));
 	if (identifier)
-	    stat->identifier = identifier->value.identifierValue;
+	{
+	    stat->identifier.text = identifier->value.stringValue;
+#if LUASL_DIFF_CHECK
+	    stat->identifier.ignorable = identifier->ignorable;
+	    identifier->ignorable = NULL;
+#endif
+	}
 	if (left)
 	{
 	    LSL_Leaf *parens = addParenthesis(left, expr, LSL_EXPRESSION, right);
@@ -869,7 +875,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	    case LSL_WHILE :
 	    {
-		stat->identifier = NULL;
+		stat->identifier.text = NULL;
 		justOne = TRUE;
 		break;
 	    }
@@ -1469,6 +1475,18 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
 	    outputLeaf(file, mode, parenthesis->contents);
 }
 
+static void outputText(FILE *file, LSL_Text *text, boolean ignore)
+{
+	    if (text->text)
+	    {
+#if LUASL_DIFF_CHECK
+		if (ignore && (text->ignorable))
+		    fwrite(eina_strbuf_string_get(text->ignorable), 1, eina_strbuf_length_get(text->ignorable), file);
+#endif
+		fprintf(file, "%s", text->text);
+	    }
+}
+
 static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *statement)
 {
     boolean isBlock = FALSE;
@@ -1546,8 +1564,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
 #endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
-		if (statement->identifier)
-		    outputText(file, &(statement->identifier->name), FALSE);
+		if (statement->identifier.text)
+		    outputText(file, &(statement->identifier), TRUE);
 		break;
 	    }
 	    case LSL_STATEMENT :
@@ -1626,18 +1644,6 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	if (statement->elseBlock)
 	    outputRawStatement(file, mode, statement->elseBlock);
     }
-}
-
-static void outputText(FILE *file, LSL_Text *text, boolean ignore)
-{
-	    if (text->text)
-	    {
-#if LUASL_DIFF_CHECK
-		if (ignore && (text->ignorable))
-		    fwrite(eina_strbuf_string_get(text->ignorable), 1, eina_strbuf_length_get(text->ignorable), file);
-#endif
-		fprintf(file, "%s", text->text);
-	    }
 }
 
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1843,7 +1849,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 		strcat(diffName, ".diff");
 		outputLeaf(out, OM_LSL, compiler->ast);
 		fclose(out);
-		sprintf(buffer, "diff -wu \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
+		sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
 		count = system(buffer);
 		if (0 != count)
 		    PE("LSL output file is different - %s!", outName);
