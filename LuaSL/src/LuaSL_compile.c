@@ -566,7 +566,10 @@ LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 		}
 		else
 		    identifier->basicType = OT_nothing;
-		eina_hash_add(compiler->script.functions, func->name.text, identifier);
+		if (compiler->inState)
+		    eina_hash_add(compiler->state.handlers, func->name.text, func);
+		else
+		    eina_hash_add(compiler->script.functions, func->name.text, identifier);
 #if LUASL_DIFF_CHECK
 //		func->params = addParenthesis(open, params, LSL_PARAMETER_LIST, close);
 #endif
@@ -698,6 +701,9 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 
     if ((identifier) && (result))
     {
+	memcpy(result, &(compiler->state), sizeof(LSL_State));
+	compiler->state.block = NULL;
+	compiler->state.handlers = NULL;
 	result->name.text = identifier->value.stringValue;
 #if LUASL_DIFF_CHECK
 	result->name.ignorable = identifier->ignorable;
@@ -715,6 +721,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 	identifier->value.stateValue = result;
 	identifier->toKen = tokens[LSL_STATE - lowestToken];
 	eina_hash_add(compiler->script.states, result->name.text, identifier);
+	compiler->inState = FALSE;
     }
 
     return identifier;
@@ -859,8 +866,13 @@ LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *
 	if (statement)
 	{
 	    if (!wasNull)
-	    list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
-	    if (list->value.blockValue)
+		list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
+
+	    if ((compiler->inState) && (LSL_FUNCTION == statement->value.statementValue->type))
+	    {
+		    eina_clist_add_tail(&(compiler->state.block->statements), &(statement->value.statementValue->statement));
+	    }
+	    else if (list->value.blockValue)
 	    {
 		eina_clist_add_tail(&(list->value.blockValue->statements), &(statement->value.statementValue->statement));
 	    }
@@ -928,6 +940,12 @@ LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 	eina_clist_init(&(blok->statements));
 	blok->variables = eina_hash_stringshared_new(burnLeaf);
 	block->value.blockValue = blok;
+	if ((NULL == compiler->currentBlock) && (NULL == compiler->currentFunction))
+	{
+	    compiler->inState = TRUE;
+	    compiler->state.block=blok;
+	    compiler->state.handlers = eina_hash_stringshared_new(free);
+	}
 	blok->outerBlock = compiler->currentBlock;
 	compiler->currentBlock = blok;
 	blok->function = compiler->currentFunction;

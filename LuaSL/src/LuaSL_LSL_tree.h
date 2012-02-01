@@ -372,6 +372,7 @@ typedef struct
     FILE		*file;
     LSL_Leaf		*ast;
     LSL_Script		script;
+    LSL_State		state;
 #if LUASL_DIFF_CHECK
     Eina_Strbuf		*ignorable;
 #endif
@@ -381,6 +382,7 @@ typedef struct
     Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
     int			column, line;
     int			undeclared;
+    boolean		inState;
 } LuaSL_compiler;
 
 
