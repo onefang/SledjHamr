@@ -219,7 +219,7 @@ struct _LSL_Statement
     Eina_Clist		statement;	// For block statement lists, this is the entry.
     LSL_Identifier	*identifier;
     LSL_Parenthesis	*parenthesis;
-    LSL_Leaf		*expressions;	// A for statement will have three expressions, everything else has zero or one.
+    LSL_Leaf		*expressions;	// A for statement will have three expressions, and two semicolons, everything else has zero or one.
     LSL_Block		*block;
     LSL_Statement	*elseBlock;
     LSL_Type		type;		// Expression type.
@@ -395,6 +395,7 @@ typedef struct
 void burnLeaf(void *data);
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement);
+LSL_Leaf *addFor(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr0, LSL_Leaf *stat0, LSL_Leaf *expr1, LSL_Leaf *stat1, LSL_Leaf *expr2, LSL_Leaf *right, LSL_Leaf *block);
 LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block);
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);

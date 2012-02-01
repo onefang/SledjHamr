@@ -742,6 +742,23 @@ LSL_Leaf *addIfElse(LuaSL_compiler *compiler, LSL_Leaf *ifBlock, LSL_Leaf *elseB
     return ifBlock;
 }
 
+LSL_Leaf *addFor(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr0, LSL_Leaf *stat0, LSL_Leaf *expr1, LSL_Leaf *stat1, LSL_Leaf *expr2, LSL_Leaf *right, LSL_Leaf *block)
+{
+    LSL_Leaf **exprs = calloc(5, sizeof(LSL_Leaf *));
+
+    if (exprs)
+    {
+	lval = addStatement(compiler, lval, flow, left, expr0, right, block, NULL);
+	exprs[0] = expr0;
+	exprs[1] = stat0;
+	exprs[2] = expr1;
+	exprs[3] = stat1;
+	exprs[4] = expr2;
+	lval->value.statementValue->expressions = (LSL_Leaf *) exprs;
+    }
+    return lval;
+}
+
 LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
@@ -784,6 +801,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	    case LSL_FOR :
 	    {
+		justOne = TRUE;
 		break;
 	    }
 	    case LSL_IF :
@@ -861,6 +879,21 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 #endif
 	    lval->value.statementValue = stat;
 	}
+
+#if LUASL_DIFF_CHECK
+	if (left)
+	{
+	    if (NULL == stat->ignorable)
+		stat->ignorable = calloc(3, sizeof(Eina_Strbuf *));
+	    else
+		stat->ignorable = realloc(stat->ignorable, 3 * sizeof(Eina_Strbuf *));
+	    if (stat->ignorable)
+	    {
+		stat->ignorable[2] = left->ignorable;
+		left->ignorable = NULL;
+	    }
+	}
+#endif
     }
 
     return lval;
@@ -1427,6 +1460,10 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    case LSL_FOR :
 	    {
 		isBlock = TRUE;
+#if LUASL_DIFF_CHECK
+	    if ((statement->ignorable) && (statement->ignorable[1]))
+		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
 	    }
@@ -1506,7 +1543,29 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    }
 	}
 
-	if (statement->parenthesis)
+#if LUASL_DIFF_CHECK
+	if ((statement->ignorable) && (statement->ignorable[2]))
+	    fwrite(eina_strbuf_string_get(statement->ignorable[2]), 1, eina_strbuf_length_get(statement->ignorable[2]), file);
+#endif
+	if (LSL_FOR == statement->type)
+	{
+	    LSL_Leaf **exprs = (LSL_Leaf **) statement->expressions;
+	    int i;
+
+	    fprintf(file, "(");
+	    for (i = 0; i < 5; i++)
+	    {
+		outputLeaf(file, mode, exprs[i]);
+		if (i % 2)
+		    fprintf(file, ";");
+	    }
+#if LUASL_DIFF_CHECK
+	    fprintf(file, "%s)", eina_strbuf_string_get(statement->parenthesis->rightIgnorable));
+#else
+	    fprintf(file, ")");
+#endif
+	}
+	else if (statement->parenthesis)
 	    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
 	else
 	    outputLeaf(file, mode, statement->expressions);
