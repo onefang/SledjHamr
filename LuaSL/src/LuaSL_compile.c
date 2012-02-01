@@ -776,7 +776,12 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	stat->type = flow->toKen->type;
 	stat->expressions = expr;
 	if (block)
-	    stat->block = block->value.blockValue;
+	{
+	    if (LSL_BLOCK_OPEN == block->toKen->type)
+		stat->block = block->value.blockValue;
+	    else
+		stat->single = block->value.statementValue;
+	}
 	eina_clist_element_init(&(stat->statement));
 	if (identifier)
 	    stat->identifier = identifier->value.identifierValue;
@@ -1575,6 +1580,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 
 	if (statement->block)
 	    outputRawBlock(file, mode, statement->block);
+	if (statement->single)
+	    outputRawStatement(file, mode, statement->single);
 
 #if LUASL_DIFF_CHECK
 	if ((statement->ignorable) && (statement->ignorable[0]))

@@ -69,14 +69,14 @@ statementList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 %nonassoc LSL_ELSE.
 statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) LSL_STATEMENT(S).				{ A = addStatement(compiler, S,    F, L,    E,    R, B,    W); }
 statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).		{ A = addFor(compiler, NULL, F, L, E0, S0, E1, S1, E2, R, B); }
-statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) statement(S).	{ A = addFor(compiler, S,    F, L, E0, S0, E1, S1, E2, R, NULL); }
+statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) statement(S).	{ A = addFor(compiler, NULL, F, L, E0, S0, E1, S1, E2, R, S); }
 
 statement(A) ::= ifBlock(B).																{ A = B; }
 ifBlock(A) ::= ifBlock(B) elseBlock(E).															{ A = addIfElse(compiler, B, E); }
 ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F, L,    E,    R,    B,    NULL); }
-ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	[LSL_ELSE]						{ A = addStatement(compiler, S,    F, L,    E,    R,    NULL, NULL); }
+ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F, L,    E,    R,    S,    NULL); }
 elseBlock(A) ::= LSL_ELSE(F) block(B).															{ A = addStatement(compiler, NULL, F, NULL, NULL, NULL, B,    NULL); }
-elseBlock(A) ::= LSL_ELSE(F) statement(S).														{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, NULL); }
+elseBlock(A) ::= LSL_ELSE(F) statement(S).														{ A = addStatement(compiler, NULL, F, NULL, NULL, NULL, S,    NULL); }
 
 statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F, NULL, E,    NULL, NULL, NULL); }
@@ -84,7 +84,7 @@ statement(A) ::= LSL_RETURN(F) LSL_STATEMENT(S).													{ A = addStatement(
 statement(A) ::= LSL_STATE_CHANGE(F) LSL_DEFAULT(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_STATE_CHANGE(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).										{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).							{ A = addStatement(compiler, NULL, F, L,    E,    R,    B,    NULL); }
-statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).							{ A = addStatement(compiler, S,    F, L,    E,    R,    NULL, NULL); }
+statement(A) ::= LSL_WHILE(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).							{ A = addStatement(compiler, NULL, F, L,    E,    R,    S,    NULL); }
 
 %nonassoc LSL_LABEL.
 statement(A) ::= LSL_LABEL(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, I); }

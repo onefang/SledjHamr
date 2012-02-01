@@ -221,6 +221,7 @@ struct _LSL_Statement
     LSL_Parenthesis	*parenthesis;
     LSL_Leaf		*expressions;	// A for statement will have three expressions, and two semicolons, everything else has zero or one.
     LSL_Block		*block;
+    LSL_Statement	*single;	// For single statement "blocks".
     LSL_Statement	*elseBlock;
     LSL_Type		type;		// Expression type.
 #if LUASL_DIFF_CHECK
