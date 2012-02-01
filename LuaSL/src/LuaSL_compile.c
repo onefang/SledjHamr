@@ -814,6 +814,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	}
 
+#if LUASL_DIFF_CHECK
 	if (justOne && (flow))
 	{
 	    stat->ignorable = calloc(2, sizeof(Eina_Strbuf *));
@@ -823,6 +824,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 		flow->ignorable = NULL;
 	    }
 	}
+#endif
 
 	if (lval)
 	{
@@ -927,13 +929,13 @@ LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block)
 	blok->variables = eina_hash_stringshared_new(burnLeaf);
 	block->value.blockValue = blok;
 	blok->outerBlock = compiler->currentBlock;
+	compiler->currentBlock = blok;
+	blok->function = compiler->currentFunction;
+	compiler->currentFunction = NULL;
 #if LUASL_DIFF_CHECK
 	blok->openIgnorable = block->ignorable;
 	block->ignorable = NULL;
 #endif
-	compiler->currentBlock = blok;
-	blok->function = compiler->currentFunction;
-	compiler->currentFunction = NULL;
     }
     return block;
 }

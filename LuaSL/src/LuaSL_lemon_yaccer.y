@@ -43,7 +43,7 @@ functionList(A) ::= functionBody(C).						{ A = collectStatements(compiler, NULL
 // No such thing as a function list with no functions.
 //functionList(A) ::= .								{ A = collectStatements(compiler, NULL, NULL); }
 
-functionBody(A) ::= function(F) block(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody has an implied addStatement(compiler, NULL, F, NULL, B, NULL, NULL);
+functionBody(A) ::= function(F) block(B).					{ A = addFunctionBody(compiler, F, B); }	// addFunctionBody returns an implied addStatement(compiler, NULL, F, NULL, F, NULL, NULL);
 
 parameterList(A) ::= parameterList(B) LSL_COMMA(C) parameter(D).		{ A = collectParameters(compiler, B, C, D); }
 parameterList(A) ::= parameter(D).						{ A = collectParameters(compiler, NULL, NULL, D); }
@@ -54,7 +54,7 @@ function(A) ::= type(B) LSL_IDENTIFIER(C) LSL_PARENTHESIS_OPEN(D) parameterList(
 
 // Blocks.
 
-block(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).		{ A = addBlock(compiler, L, B, R); }
+block(A) ::= beginBlock(L) statementList(B) LSL_BLOCK_CLOSE(R).			{ A = addBlock(compiler, L, B, R); }
 
 // Various forms of statement.
 
