@@ -8,6 +8,7 @@ static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_
 static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -90,10 +91,10 @@ LSL_Token LSL_Tokens[] =
     {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
     {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
     {LSL_DOT,			ST_NONE,		".",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
-    {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
-    {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
-    {LSL_INCREMENT_POST,	ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
-    {LSL_INCREMENT_PRE,		ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},
+    {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},
+    {LSL_INCREMENT_POST,	ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},
+    {LSL_INCREMENT_PRE,		ST_NONE,		"++",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},
     {LSL_COMMA,			ST_NONE,		",",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
 
     {LSL_EXPRESSION,		ST_NONE,	"expression",	LSL_NONE	,			NULL, NULL},
@@ -463,11 +464,13 @@ LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL
     return lval;
 }
 
-LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement)
+LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement, LSL_Type type)
 {
     if ((variable) && (crement))
     {
+	crement->value.identifierValue = variable->value.identifierValue;
 	crement->basicType = variable->basicType;
+	crement->toKen = tokens[type - lowestToken];
     }
 
     return crement;
@@ -1606,6 +1609,32 @@ static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
 	outputRawBlock(file, mode, content->value.blockValue);
+}
+
+static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	switch (content->toKen->type)
+	{
+	    case LSL_DECREMENT_PRE :
+	    case LSL_INCREMENT_PRE :
+	    {
+		fprintf(file, "%s", content->toKen->toKen);
+		outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+		break;
+	    }
+	    case LSL_DECREMENT_POST :
+	    case LSL_INCREMENT_POST :
+	    {
+		outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+		fprintf(file, "%s", content->toKen->toKen);
+		break;
+	    }
+	    default :
+		break;
+	}
+    }
 }
 
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)

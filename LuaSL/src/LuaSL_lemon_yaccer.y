@@ -186,10 +186,10 @@ identifier(A) ::= identifier LSL_DOT LSL_IDENTIFIER(B).					{ A = checkVariable(
 identifier(A) ::= LSL_IDENTIFIER(B).							{ A = checkVariable(compiler, B); }
 
 %right LSL_DECREMENT_PRE LSL_INCREMENT_PRE LSL_DECREMENT_POST LSL_INCREMENT_POST.
-expr(A) ::= identifier(B) LSL_DECREMENT_PRE(C).						{ A = addCrement(compiler, B, C); }
-expr(A) ::= identifier(B) LSL_INCREMENT_PRE(C).						{ A = addCrement(compiler, B, C); }
-expr(A) ::= LSL_DECREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C); }
-expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C); }
+expr(A) ::= identifier(B) LSL_DECREMENT_PRE(C).						{ A = addCrement(compiler, B, C, LSL_DECREMENT_POST); }
+expr(A) ::= identifier(B) LSL_INCREMENT_PRE(C).						{ A = addCrement(compiler, B, C, LSL_INCREMENT_POST); }
+expr(A) ::= LSL_DECREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C, LSL_DECREMENT_PRE); }
+expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, B, C, LSL_INCREMENT_PRE); }
 
 %nonassoc LSL_COMMA.
 
