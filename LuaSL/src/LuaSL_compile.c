@@ -1662,13 +1662,13 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    case LSL_INCREMENT_PRE :
 	    {
 		fprintf(file, "%s", content->toKen->toKen);
-		outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+		outputText(file, &(content->value.identifierValue->name), FALSE);
 		break;
 	    }
 	    case LSL_DECREMENT_POST :
 	    case LSL_INCREMENT_POST :
 	    {
-		outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+		outputText(file, &(content->value.identifierValue->name), FALSE);
 		fprintf(file, "%s", content->toKen->toKen);
 		break;
 	    }
@@ -1801,7 +1801,6 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
 	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
 	    outputRawBlock(file, mode, state->block);
-	    fprintf(file, "\n");
 	}
     }
 }
