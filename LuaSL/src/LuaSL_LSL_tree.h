@@ -211,6 +211,7 @@ struct _LSL_Parenthesis
 struct _LSL_Identifier	// For variables and function parameters.
 {
     LSL_Text	name;
+    const char  *sub;
     LSL_Leaf	value;
 };
 
@@ -411,7 +412,7 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
 LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *assignment, LSL_Leaf *expr);
 
 LSL_Leaf *beginBlock(LuaSL_compiler *compiler, LSL_Leaf *block);
-LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier);
+LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *dot, LSL_Leaf *sub);
 LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *arg);
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);

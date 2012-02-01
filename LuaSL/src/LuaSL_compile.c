@@ -300,13 +300,19 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
     return var;
 }
 
-LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
+LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *dot, LSL_Leaf *sub)
 {
     gameGlobals *game = compiler->game;
+    const char *search;
+
+    if (dot)
+	search = identifier->value.identifierValue->name.text;
+    else
+	search = identifier->value.stringValue;
 
     if (identifier)
     {
-	LSL_Leaf *var = findVariable(compiler, identifier->value.stringValue);
+	LSL_Leaf *var = findVariable(compiler, search);
 
 	if (var)
 	{
@@ -314,6 +320,26 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier)
 		PI("Found %s!", identifier->value.stringValue);
 	    identifier->value.identifierValue = var->value.identifierValue;
 	    identifier->basicType = var->basicType;
+	    if ((dot) && (sub))
+	    {
+		LSL_Identifier *id = calloc(1, sizeof(LSL_Identifier));
+
+		if (id)
+		{
+		    memcpy(id, var->value.identifierValue, sizeof(LSL_Identifier));
+		    identifier->value.identifierValue = id;
+		    if (LSL_ROTATION == var->toKen->type)
+		    {
+			// TODO - check if it's one of x, y, z, or s.
+		    }
+		    if (LSL_VECTOR == var->toKen->type)
+		    {
+			// TODO - check if it's one of x, y, or z.
+		    }
+		    identifier->value.identifierValue->sub = sub->value.stringValue;
+		    identifier->basicType = OT_float;
+		}
+	    }
 	}
 	else 
 	    PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
@@ -1520,6 +1546,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
 #endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
+		if (statement->identifier)
+		    outputText(file, &(statement->identifier->name), FALSE);
 		break;
 	    }
 	    case LSL_STATEMENT :
@@ -1708,7 +1736,11 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
     if (content)
     {
 	if (LSL_IDENTIFIER == content->toKen->type)
+	{
 	    outputText(file, &(content->value.identifierValue->name), FALSE);
+	    if (content->value.identifierValue->sub)
+		fprintf(file, ".%s", content->value.identifierValue->sub);
+	}
 	else
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
     }
