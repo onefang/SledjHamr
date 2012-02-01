@@ -13,6 +13,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content);
+static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -101,7 +102,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_FLOAT,			ST_NONE,	"float",	LSL_NONE,				outputFloatToken, evaluateFloatToken},
     {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, evaluateIntegerToken},
     {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				outputStringToken, NULL},
-    {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				NULL, NULL},
+    {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				outputListToken, NULL},
     {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
     {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				outputStringToken, NULL},
     {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
@@ -672,6 +673,14 @@ LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Le
     return identifier;
 }
 
+LSL_Leaf *addList(LSL_Leaf *left, LSL_Leaf *list, LSL_Leaf *right)
+{
+    left = addParenthesis(left, list, LSL_LIST, right);
+    left->toKen = tokens[LSL_LIST - lowestToken];
+    left->basicType = OT_list;
+    return left;
+}
+
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
 {
     LSL_Parenthesis *parens = calloc(1, sizeof(LSL_Parenthesis));
@@ -1237,7 +1246,7 @@ static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL
 
     if (content)
     {
-	if (LSL_PARAMETER_LIST != content->value.parenthesis->type)
+	if ((LSL_PARAMETER_LIST != content->value.parenthesis->type) && (LSL_LIST != content->value.parenthesis->type))
 	    result = evaluateLeaf(content->value.parenthesis->contents, left, right);
     }
     return result;
@@ -1607,6 +1616,32 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
 	    outputText(file, &(content->value.identifierValue->name), FALSE);
 	else
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+    }
+}
+
+static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
+{
+    if (content)
+    {
+	LSL_Parenthesis *parens = content->value.parenthesis;
+
+	if (parens->contents)
+	{
+	    LSL_FunctionCall *call = parens->contents->value.functionCallValue;
+	    LSL_Leaf *param = NULL;
+
+	    // TODO - should output it's own ignorable here.
+	    fprintf(file, "[");
+	    EINA_INARRAY_FOREACH((&(call->params)), param)
+	    {
+		outputLeaf(file, mode, param);
+	    }
+#if LUASL_DIFF_CHECK
+	    fprintf(file, "%s]", eina_strbuf_string_get(parens->rightIgnorable));
+#else
+	    fprintf(file, "]");
+#endif
+	}
     }
 }
 
