@@ -1775,7 +1775,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 		strcat(diffName, ".diff");
 		outputLeaf(out, OM_LSL, compiler->ast);
 		fclose(out);
-		sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
+		sprintf(buffer, "diff -wu \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
 		count = system(buffer);
 		if (0 != count)
 		    PE("LSL output file is different - %s!", outName);
