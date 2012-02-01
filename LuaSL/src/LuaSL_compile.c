@@ -710,6 +710,40 @@ LSL_Leaf *addList(LSL_Leaf *left, LSL_Leaf *list, LSL_Leaf *right)
     return left;
 }
 
+LSL_Leaf *addNumby(LSL_Leaf *numby)
+{
+    LSL_Numby *num = calloc(1, sizeof(LSL_Numby));
+
+    if ((numby) && (num))
+    {
+	num->text.text = numby->value.stringValue;
+#if LUASL_DIFF_CHECK
+	num->text.ignorable = numby->ignorable;
+	numby->ignorable = NULL;
+#endif
+	switch (numby->toKen->type)
+	{
+	    case LSL_FLOAT :
+	    {
+		num->value.floatValue = atof(num->text.text);
+		numby->basicType = OT_float; 
+		break;
+	    }
+	    case LSL_INTEGER :
+	    {
+		num->value.integerValue = atoi(num->text.text);
+		numby->basicType = OT_integer; 
+		break;
+	    }
+	    default:
+		break;
+	}
+	numby->value.numbyValue = num;
+	num->type = numby->basicType;
+    }
+    return numby;
+}
+
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval)
 {
     LSL_Parenthesis *parens = calloc(1, sizeof(LSL_Parenthesis));
@@ -1103,10 +1137,11 @@ static LSL_Leaf *evaluateFloatToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf 
 
     if (content && result)
     {
+	memcpy(result, content, sizeof(LSL_Leaf));
+	result->value.floatValue = content->value.numbyValue->value.floatValue;
+	result->basicType = OT_float;
 	if (LUASL_DEBUG)
 	    printf(" <%g> ", content->value.floatValue);
-	memcpy(result, content, sizeof(LSL_Leaf));
-	result->basicType = OT_float;
     }
     return result;
 }
@@ -1117,10 +1152,11 @@ static LSL_Leaf *evaluateIntegerToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Lea
 
     if (content && result)
     {
-	if (LUASL_DEBUG)
-	    printf(" <%d> ", content->value.integerValue);
 	memcpy(result, content, sizeof(LSL_Leaf));
+	result->value.integerValue = content->value.numbyValue->value.integerValue;
 	result->basicType = OT_integer;
+	if (LUASL_DEBUG)
+	    printf(" <%d> ", result->value.integerValue);
     }
     return result;
 }
@@ -1681,7 +1717,7 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	fprintf(file, "%g", content->value.floatValue);
+	outputText(file, &(content->value.numbyValue->text), !(LSL_NOIGNORE & content->toKen->flags));
 }
 
 static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1734,7 +1770,7 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
 static void outputIntegerToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	fprintf(file, "%d", content->value.integerValue);
+	outputText(file, &(content->value.numbyValue->text), !(LSL_NOIGNORE & content->toKen->flags));
 }
 
 static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content)

@@ -104,8 +104,8 @@ STRING      \"(\\.|[^\\"\n])*\"
 {IDENTIFIER}    %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_IDENTIFIER); %}
 
  /* Types. */
-{INTEGER}       %{ yylval->value.integerValue = atoi(yytext);  return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_INTEGER); %}
-{FLOAT}         %{ yylval->value.floatValue = atof(yytext);    return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FLOAT); %}
+{INTEGER}       %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng);  return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_INTEGER); %}
+{FLOAT}         %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng);  return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FLOAT); %}
 {KEY}           %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_KEY); %}
 {STRING}        %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STRING); %}
 

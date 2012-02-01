@@ -196,9 +196,9 @@ expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, 
 // Values.
 
 %nonassoc  LSL_FLOAT.
-expr(A) ::= LSL_FLOAT(B).							{ B->basicType = OT_float; A = B; }
+expr(A) ::= LSL_FLOAT(B).							{ A = addNumby(B); }
 %nonassoc LSL_INTEGER.
-expr(A) ::= LSL_INTEGER(B).							{ B->basicType = OT_integer; A = B; }
+expr(A) ::= LSL_INTEGER(B).							{ A = addNumby(B); }
 %nonassoc  LSL_KEY.
 expr(A) ::= LSL_KEY(B).								{ B->basicType = OT_key; A = B; }
 %nonassoc  LSL_LIST.

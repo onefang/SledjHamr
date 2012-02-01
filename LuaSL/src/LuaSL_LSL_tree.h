@@ -40,6 +40,7 @@ typedef struct _allowedTypes		allowedTypes;
 typedef struct _LSL_Token		LSL_Token;
 typedef struct _LSL_Text		LSL_Text;
 typedef struct _LSL_Leaf		LSL_Leaf;
+typedef struct _LSL_Numby		LSL_Numby;
 typedef struct _LSL_Parenthesis 	LSL_Parenthesis;
 typedef struct _LSL_Identifier		LSL_Identifier;
 typedef struct _LSL_Statement		LSL_Statement;
@@ -185,6 +186,7 @@ struct _LSL_Leaf
 	float			vectorValue[3];
 	float			rotationValue[4];
 	int			integerValue;
+	LSL_Numby		*numbyValue;
 	LSL_Leaf		*listValue;
 	const char		*stringValue;
 	opType			operationValue;
@@ -196,6 +198,17 @@ struct _LSL_Leaf
 	LSL_FunctionCall	*functionCallValue;
 	LSL_State		*stateValue;
 	LSL_Script		*scriptValue;
+    } value;
+};
+
+struct _LSL_Numby
+{
+    LSL_Text	text;
+    LSL_Type	type;
+    union
+    {
+	float	floatValue;
+	int	integerValue;
     } value;
 };
 
@@ -403,6 +416,7 @@ LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
 LSL_Leaf *addIfElse(LuaSL_compiler *compiler, LSL_Leaf *ifBlock, LSL_Leaf *elseBlock);
 LSL_Leaf *addList(LSL_Leaf *left, LSL_Leaf *list, LSL_Leaf *right);
+LSL_Leaf *addNumby(LSL_Leaf *numby);
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);
