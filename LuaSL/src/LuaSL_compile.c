@@ -495,6 +495,10 @@ LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *cre
     if ((variable) && (crement))
     {
 	crement->value.identifierValue = variable->value.identifierValue;
+#if LUASL_DIFF_CHECK
+	crement->value.identifierValue->ignorable = variable->ignorable;
+	variable->ignorable = NULL;
+#endif
 	crement->basicType = variable->basicType;
 	crement->toKen = tokens[type - lowestToken];
     }
@@ -1698,12 +1702,20 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    case LSL_INCREMENT_PRE :
 	    {
 		fprintf(file, "%s", content->toKen->toKen);
+#if LUASL_DIFF_CHECK
+		if (content->value.identifierValue->ignorable)
+		    fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+#endif
 		outputText(file, &(content->value.identifierValue->name), FALSE);
 		break;
 	    }
 	    case LSL_DECREMENT_POST :
 	    case LSL_INCREMENT_POST :
 	    {
+#if LUASL_DIFF_CHECK
+		if (content->value.identifierValue->ignorable)
+		    fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+#endif
 		outputText(file, &(content->value.identifierValue->name), FALSE);
 		fprintf(file, "%s", content->toKen->toKen);
 		break;

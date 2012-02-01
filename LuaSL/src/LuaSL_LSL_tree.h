@@ -224,7 +224,8 @@ struct _LSL_Parenthesis
 struct _LSL_Identifier	// For variables and function parameters.
 {
     LSL_Text	name;
-    const char  *sub;
+    Eina_Strbuf	*ignorable;
+    const char	*sub;
     LSL_Leaf	value;
 };
 
