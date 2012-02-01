@@ -221,6 +221,7 @@ struct _LSL_Statement
     LSL_Parenthesis	*parenthesis;
     LSL_Leaf		*expressions;	// A for statement will have three expressions, everything else has zero or one.
     LSL_Block		*block;
+    LSL_Statement	*elseBlock;
     LSL_Type		type;		// Expression type.
 #if LUASL_DIFF_CHECK
     Eina_Strbuf		**ignorable;	// Can be up to five of these I think.
@@ -397,6 +398,7 @@ LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *cre
 LSL_Leaf *addFunction(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
 LSL_Leaf *addFunctionBody(LuaSL_compiler *compiler, LSL_Leaf *function, LSL_Leaf *block);
 LSL_Leaf *addFunctionCall(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *open, LSL_Leaf *params, LSL_Leaf *close);
+LSL_Leaf *addIfElse(LuaSL_compiler *compiler, LSL_Leaf *ifBlock, LSL_Leaf *elseBlock);
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addParameter(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *newParam);
 LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf *rval);

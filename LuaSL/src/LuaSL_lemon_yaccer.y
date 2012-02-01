@@ -71,11 +71,12 @@ statement(A) ::= LSL_DO(F) block(B) LSL_WHILE(W) LSL_PARENTHESIS_OPEN(L) expr(E)
 statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) block(B).	{ A = addStatement(compiler, NULL, F, L,    E1,   R, B,    NULL); }	// three expressions, two semi colons
 statement(A) ::= LSL_FOR(F) LSL_PARENTHESIS_OPEN(L) expr(E0) LSL_STATEMENT(S0) expr(E1) LSL_STATEMENT(S1) expr(E2) LSL_PARENTHESIS_CLOSE(R) statement(S).	{ A = addStatement(compiler, S, F, L, E1, R, NULL, NULL); }	// three expressions, two semi colons
 
-statement(A) ::= ifBlock(B).								{ A = B; }
-ifBlock ::= ifBlock LSL_ELSE block.
-ifBlock ::= ifBlock LSL_ELSE statement.
+statement(A) ::= ifBlock(B).																{ A = B; }
+ifBlock(A) ::= ifBlock(B) elseBlock(E).															{ A = addIfElse(compiler, B, E); }
 ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) block(B).	[LSL_ELSE]						{ A = addStatement(compiler, NULL, F, L,    E,    R,    B,    NULL); }
 ifBlock(A) ::= LSL_IF(F) LSL_PARENTHESIS_OPEN(L) expr(E) LSL_PARENTHESIS_CLOSE(R) statement(S).	[LSL_ELSE]						{ A = addStatement(compiler, S,    F, L,    E,    R,    NULL, NULL); }
+elseBlock(A) ::= LSL_ELSE(F) block(B).															{ A = addStatement(compiler, NULL, F, NULL, NULL, NULL, B,    NULL); }
+elseBlock(A) ::= LSL_ELSE(F) statement(S).														{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, NULL); }
 
 statement(A) ::= LSL_JUMP(F) LSL_IDENTIFIER(I) LSL_STATEMENT(S).											{ A = addStatement(compiler, S,    F, NULL, NULL, NULL, NULL, I); }
 statement(A) ::= LSL_RETURN(F) expr(E) LSL_STATEMENT(S).												{ A = addStatement(compiler, S,    F, NULL, E,    NULL, NULL, NULL); }

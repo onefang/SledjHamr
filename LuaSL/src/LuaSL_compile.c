@@ -727,6 +727,12 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
     return identifier;
 }
 
+LSL_Leaf *addIfElse(LuaSL_compiler *compiler, LSL_Leaf *ifBlock, LSL_Leaf *elseBlock)
+{
+    ifBlock->value.statementValue->elseBlock = elseBlock->value.statementValue;
+    return ifBlock;
+}
+
 LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
     gameGlobals *game = compiler->game;
@@ -1427,6 +1433,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    }
 	    case LSL_ELSE :
 	    {
+		isBlock = TRUE;
 #if LUASL_DIFF_CHECK
 	    if ((statement->ignorable) && (statement->ignorable[1]))
 		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
@@ -1509,6 +1516,9 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    if (!LUASL_DIFF_CHECK)
 		fprintf(file, "\n");
 	}
+
+	if (statement->elseBlock)
+	    outputRawStatement(file, mode, statement->elseBlock);
     }
 }
 
