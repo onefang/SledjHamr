@@ -1769,18 +1769,18 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    if (out)
 	    {
 		char diffName[PATH_MAX];
-//		int count;
+		int count;
 
 		strcpy(diffName, compiler->fileName);
 		strcat(diffName, ".diff");
 		outputLeaf(out, OM_LSL, compiler->ast);
 		fclose(out);
-		sprintf(buffer, "diff \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
-//		count = system(buffer);
-//		if (0 != count)
-//		    PE("LSL output file is different - %s!", outName);
-//		else
-//		    result = TRUE;
+		sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
+		count = system(buffer);
+		if (0 != count)
+		    PE("LSL output file is different - %s!", outName);
+		else
+		    result = TRUE;
 	    }
 	    else
 		PC("Unable to open file %s for writing!", outName);
