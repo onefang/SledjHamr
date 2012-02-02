@@ -109,13 +109,13 @@ LSL_Token LSL_Tokens[] =
     {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				outputListToken, NULL},
 
     // Types names.
-    {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_KEY,		ST_NONE,	"key",		LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_LIST,		ST_NONE,	"list",		LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_STRING,		ST_NONE,	"string",	LSL_NONE,				NULL, NULL},
-    {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
+    {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_INTEGER,		ST_NONE,	"integer",	LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_KEY,		ST_NONE,	"key",		LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_LIST,		ST_NONE,	"list",		LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_ROTATION,		ST_NONE,	"rotation",	LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_STRING,		ST_NONE,	"string",	LSL_TYPE,				NULL, NULL},
+    {LSL_TYPE_VECTOR,		ST_NONE,	"vector",	LSL_TYPE,				NULL, NULL},
 
     // Then the rest of the syntax tokens.
     {LSL_FUNCTION_CALL,		ST_NONE,	"funccall",	LSL_NONE,				outputFunctionCallToken, NULL},
@@ -1495,7 +1495,12 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	if (leaf->toKen->output)
 	    leaf->toKen->output(file, mode, leaf);
 	else
-	    fprintf(file, "%s", leaf->toKen->toKen);
+	{
+	    if ((OM_LUA == mode) && (LSL_TYPE & leaf->toKen->flags))
+		fprintf(file, "--[[%s]] ", leaf->toKen->toKen);
+	    else
+		fprintf(file, "%s", leaf->toKen->toKen);
+	}
 	outputLeaf(file, mode, leaf->right);
     }
 }
@@ -1512,9 +1517,13 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 #if LUASL_DIFF_CHECK
 	if (block->openIgnorable)
 	    fwrite(eina_strbuf_string_get(block->openIgnorable), 1, eina_strbuf_length_get(block->openIgnorable), file);
-	fprintf(file, "{");
+	if (OM_LSL == mode)
+	    fprintf(file, "{");
 #else
-	fprintf(file, "\n{\n");
+	if (OM_LSL == mode)
+	    fprintf(file, "\n{\n");
+	else if (OM_LUA == mode)
+	    fprintf(file, "\n");
 #endif
 	EINA_CLIST_FOR_EACH_ENTRY(stat, &(block->statements), LSL_Statement, statement)
 	{
@@ -1524,12 +1533,22 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 	if (block->closeIgnorable)
 	    fwrite(eina_strbuf_string_get(block->closeIgnorable), 1, eina_strbuf_length_get(block->closeIgnorable), file);
 #endif
-	fprintf(file, "}");
+	if (OM_LSL == mode)
+	    fprintf(file, "}");
+	else if (OM_LUA == mode)
+	    fprintf(file, "end ");
     }
 }
 
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
 {
+	if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
+	{
+	    fprintf(file, "--[[(%s)]] ", typeName);
+	    outputLeaf(file, mode, parenthesis->contents);
+	    return;
+	}
+
 	fprintf(file, "(");
 	if (LSL_TYPECAST_OPEN == parenthesis->type)
 	    fprintf(file, "%s", typeName);	// TODO - We are missing the type ignorable text here.
@@ -1769,24 +1788,44 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	LSL_Leaf *param = NULL;
 	int first = TRUE;
 
-	outputText(file, &(func->type), !(LSL_NOIGNORE & content->toKen->flags));
-	outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
-// TODO - should print comma and parenthesis ignorables.
-	fprintf(file, "(");
-	EINA_INARRAY_FOREACH((&(func->vars)), param)
+	if (OM_LSL == mode)
 	{
-	    if (!LUASL_DIFF_CHECK)
+	    outputText(file, &(func->type), !(LSL_NOIGNORE & content->toKen->flags));
+	    outputText(file, &(func->name), !(LSL_NOIGNORE & content->toKen->flags));
+	    // TODO - should print comma and parenthesis ignorables.
+	    fprintf(file, "(");
+	    EINA_INARRAY_FOREACH((&(func->vars)), param)
 	    {
-		if (!first)
-		    fprintf(file, ", ");
+		if (!LUASL_DIFF_CHECK)
+		{
+		    if (!first)
+			fprintf(file, ", ");
+		}
+		outputLeaf(file, mode, param);
+		first = FALSE;
 	    }
-	    outputLeaf(file, mode, param);
-	    first = FALSE;
+	    fprintf(file, ")");
+	    outputRawBlock(file, mode, func->block);
+	    if (!LUASL_DIFF_CHECK)
+		fprintf(file, "\n");
 	}
-	fprintf(file, ")");
-	outputRawBlock(file, mode, func->block);
-	if (!LUASL_DIFF_CHECK)
-	    fprintf(file, "\n");
+	else if (OM_LUA == mode)
+	{
+	    fprintf(file, "\n\nfunction ");
+	    if (func->type.text)
+		fprintf(file, "--[[%s]] ", func->type.text);
+	    fprintf(file, "%s(", func->name.text);
+	    EINA_INARRAY_FOREACH((&(func->vars)), param)
+	    {
+		// TODO - comment out param types.
+//		if (!first)
+//		    fprintf(file, ", ");
+		outputLeaf(file, mode, param);
+		first = FALSE;
+	    }
+	    fprintf(file, ")");
+	    outputRawBlock(file, mode, func->block);
+	}
     }
 }
 
@@ -1842,12 +1881,25 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    const char *ig = "";
 
 	    // TODO - should output it's own ignorable here.
-	    switch (parens->type)
+	    if (OM_LSL == mode)
 	    {
-		case LSL_LIST     :  fprintf(file, "[");  break;
-		case LSL_ROTATION :
-		case LSL_VECTOR   :  fprintf(file, "<");
-		default           :  break;
+		switch (parens->type)
+		{
+		    case LSL_LIST     :  fprintf(file, "[");  break;
+		    case LSL_ROTATION :
+		    case LSL_VECTOR   :  fprintf(file, "<");
+		    default           :  break;
+		}
+	    }
+	    else if (OM_LUA == mode)
+	    {
+		switch (parens->type)
+		{
+		    case LSL_LIST     :  fprintf(file, "{");  break;
+		    case LSL_ROTATION :
+		    case LSL_VECTOR   :  fprintf(file, "{");
+		    default           :  break;
+		}
 	    }
 	    EINA_INARRAY_FOREACH((&(call->params)), param)
 	    {
@@ -1856,12 +1908,25 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 #if LUASL_DIFF_CHECK
 	    ig = eina_strbuf_string_get(parens->rightIgnorable);
 #endif
-	    switch (parens->type)
+	    if (OM_LSL == mode)
 	    {
-		case LSL_LIST     :  fprintf(file, "%s]", ig);  break;
-		case LSL_ROTATION :
-		case LSL_VECTOR   :  fprintf(file, "%s>", ig);
-		default           :  break;
+		switch (parens->type)
+		{
+		    case LSL_LIST     :  fprintf(file, "%s]", ig);  break;
+		    case LSL_ROTATION :
+		    case LSL_VECTOR   :  fprintf(file, "%s>", ig);
+		    default           :  break;
+		}
+	    }
+	    else if (OM_LUA == mode)
+	    {
+		switch (parens->type)
+		{
+		    case LSL_LIST     :  fprintf(file, "%s}", ig);  break;
+		    case LSL_ROTATION :
+		    case LSL_VECTOR   :  fprintf(file, "%s}", ig);
+		    default           :  break;
+		}
 	    }
 	}
     }

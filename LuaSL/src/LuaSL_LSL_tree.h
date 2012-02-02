@@ -81,7 +81,8 @@ typedef enum
     LSL_UNARY		= 8,
     LSL_ASSIGNMENT	= 16,
     LSL_CREATION	= 32,
-    LSL_NOIGNORE	= 64
+    LSL_NOIGNORE	= 64,
+    LSL_TYPE		= 128
 } LSL_Flags;
 
 
