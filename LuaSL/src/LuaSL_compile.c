@@ -1001,19 +1001,20 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *statement)
 {
-    boolean wasNull = FALSE;
+// Guess this is not needed after all, and seemed to cause the "states with only one function get dropped" bug.
+//    boolean wasNull = FALSE;
 
     if (NULL == list)
     {
 	list = newLeaf(LSL_BLOCK_OPEN, NULL, NULL);
-	wasNull = TRUE;
+//	wasNull = TRUE;
     }
 
     if (list)
     {
 	if (statement)
 	{
-	    if (!wasNull)
+//	    if (!wasNull)
 		list->value.blockValue = compiler->currentBlock;	// Maybe NULL.
 
 	    if ((compiler->inState) && (LSL_FUNCTION == statement->value.statementValue->type))
