@@ -1531,7 +1531,6 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
 {
 	fprintf(file, "(");
-// TODO, if it's a parameter list, deal with it via the leaf -> function -> vars.
 	if (LSL_TYPECAST_OPEN == parenthesis->type)
 	    fprintf(file, "%s", typeName);	// TODO - We are missing the type ignorable text here.
 	else
