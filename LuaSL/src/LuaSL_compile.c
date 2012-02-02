@@ -341,8 +341,11 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 		}
 	    }
 	}
-	else 
+	else
+	{
+	    compiler->script.bugCount++;
 	    PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
+	}
     }
 
     return identifier;
@@ -384,6 +387,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		lType = left->basicType;
 	    if (OT_undeclared == lType)
 	    {
+		compiler->script.warningCount++;
 		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
@@ -411,6 +415,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = right->basicType;
 	    if (OT_undeclared == rType)
 	    {
+		compiler->script.warningCount++;
 		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
@@ -479,6 +484,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rightType = allowed[right->basicType].name;
 	    }
 
+	    compiler->script.bugCount++;
 	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d, column %d!", leftType, leftToken, lval->toKen->toKen, rightType, rightToken, lval->line, lval->column);
 	}
     }
@@ -949,6 +955,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	    default :
 	    {
+		compiler->script.bugCount++;
 		PE("Should not be here %d.", stat->type);
 		break;
 	    }
@@ -1925,18 +1932,18 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    if (out)
 	    {
 		char diffName[PATH_MAX];
-		int count;
+//		int count;
 
 		strcpy(diffName, compiler->fileName);
 		strcat(diffName, ".diff");
 		outputLeaf(out, OM_LSL, compiler->ast);
 		fclose(out);
 		sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
-		count = system(buffer);
-		if (0 != count)
-		    PE("LSL output file is different - %s!", outName);
-		else
-		    result = TRUE;
+//		count = system(buffer);
+//		if (0 != count)
+//		    PE("LSL output file is different - %s!", outName);
+//		else
+//		    result = TRUE;
 	    }
 	    else
 		PC("Unable to open file %s for writing!", outName);
@@ -1951,6 +1958,17 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	}
 	else
 	    PC("Unable to open file %s for writing!", luaName);
+    }
+
+    if (compiler->script.bugCount)
+	PE("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
+    else
+    {
+	if (compiler->script.warningCount)
+	    PW("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
+	else
+	    PI("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
+	result = TRUE;
     }
 
     return result;

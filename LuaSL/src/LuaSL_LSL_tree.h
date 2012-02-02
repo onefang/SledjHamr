@@ -310,6 +310,7 @@ struct _LSL_Script
     Eina_Hash		*functions;
     Eina_Hash		*states;
     Eina_Hash		*variables;
+    int			bugCount, warningCount;
 };
 
 /* Tracking variables.
