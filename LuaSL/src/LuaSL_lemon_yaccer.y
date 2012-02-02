@@ -196,21 +196,18 @@ expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).						{ A = addCrement(compiler, 
 // Values.
 
 %nonassoc  LSL_FLOAT.
-expr(A) ::= LSL_FLOAT(B).							{ A = addNumby(B); }
+expr(A) ::= LSL_FLOAT(B).									{ A = addNumby(B); }
 %nonassoc LSL_INTEGER.
-expr(A) ::= LSL_INTEGER(B).							{ A = addNumby(B); }
+expr(A) ::= LSL_INTEGER(B).									{ A = addNumby(B); }
 %nonassoc  LSL_KEY.
-expr(A) ::= LSL_KEY(B).								{ B->basicType = OT_key; A = B; }
+expr(A) ::= LSL_KEY(B).										{ B->basicType = OT_key; A = B; }
 %nonassoc  LSL_LIST.
 expr(A) ::= LSL_BRACKET_OPEN(L) exprList(E) LSL_BRACKET_CLOSE(R).	[LSL_BRACKET_OPEN]	{ A = addList(L, E, R); }
-%nonassoc  LSL_ROTATION.
+%nonassoc  LSL_ROTATION LSL_VECTOR.
 // Uses the same symbol for less than, greater than, and the rotation / vector delimiters.
-expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.	[LSL_ANGLE_OPEN]
+expr(A) ::= LSL_LESS_THAN(L) exprList(E) LSL_GREATER_THAN(R).		[LSL_ANGLE_OPEN]	{ A = addRotVec(L, E, R); }
 %nonassoc  LSL_STRING.
-expr(A) ::= LSL_STRING(B).							{ B->basicType = OT_string; A = B; }
-%nonassoc  LSL_VECTOR.
-expr ::= LSL_VECTOR.
-expr ::= LSL_LESS_THAN expr LSL_COMMA expr LSL_COMMA expr LSL_GREATER_THAN.			[LSL_ANGLE_OPEN]
+expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 
 // Parser callbacks.

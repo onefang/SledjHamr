@@ -104,9 +104,9 @@ LSL_Token LSL_Tokens[] =
     {LSL_INTEGER,		ST_NONE,	"integer",	LSL_NONE,				outputIntegerToken, evaluateIntegerToken},
     {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				outputStringToken, NULL},
     {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				outputListToken, NULL},
-    {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				NULL, NULL},
+    {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				outputListToken, NULL},
     {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				outputStringToken, NULL},
-    {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				NULL, NULL},
+    {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				outputListToken, NULL},
 
     // Types names.
     {LSL_TYPE_FLOAT,		ST_NONE,	"float",	LSL_NONE,				NULL, NULL},
@@ -721,6 +721,18 @@ LSL_Leaf *addList(LSL_Leaf *left, LSL_Leaf *list, LSL_Leaf *right)
     left = addParenthesis(left, list, LSL_LIST, right);
     left->toKen = tokens[LSL_LIST - lowestToken];
     left->basicType = OT_list;
+    return left;
+}
+
+LSL_Leaf *addRotVec(LSL_Leaf *left, LSL_Leaf *list, LSL_Leaf *right)
+{
+    LSL_Type type = LSL_ROTATION;
+    opType  otype = OT_rotation;
+
+    // TODO - count the members of list to see if it's a vector.
+    left = addParenthesis(left, list, type, right);
+    left->toKen = tokens[type - lowestToken];
+    left->basicType = otype;
     return left;
 }
 
@@ -1820,18 +1832,30 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	{
 	    LSL_FunctionCall *call = parens->contents->value.functionCallValue;
 	    LSL_Leaf *param = NULL;
+	    const char *ig = "";
 
 	    // TODO - should output it's own ignorable here.
-	    fprintf(file, "[");
+	    switch (parens->type)
+	    {
+		case LSL_LIST     :  fprintf(file, "[");  break;
+		case LSL_ROTATION :
+		case LSL_VECTOR   :  fprintf(file, "<");
+		default           :  break;
+	    }
 	    EINA_INARRAY_FOREACH((&(call->params)), param)
 	    {
 		outputLeaf(file, mode, param);
 	    }
 #if LUASL_DIFF_CHECK
-	    fprintf(file, "%s]", eina_strbuf_string_get(parens->rightIgnorable));
-#else
-	    fprintf(file, "]");
+	    ig = eina_strbuf_string_get(parens->rightIgnorable);
 #endif
+	    switch (parens->type)
+	    {
+		case LSL_LIST     :  fprintf(file, "%s]", ig);  break;
+		case LSL_ROTATION :
+		case LSL_VECTOR   :  fprintf(file, "%s>", ig);
+		default           :  break;
+	    }
 	}
     }
 }
