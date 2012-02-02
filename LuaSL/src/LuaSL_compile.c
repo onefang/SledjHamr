@@ -424,6 +424,10 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = allowed[rType].result;
 	}
 
+	// Convert add to concatenate if needed.
+	if ((LSL_ADD == lval->toKen->type) && (OT_string == lType) && (OT_string == rType))
+	    lval->toKen = tokens[LSL_CONCATENATE - lowestToken];
+
 	switch (lval->toKen->subType)
 	{
 	    case ST_BOOLEAN :
@@ -1496,8 +1500,15 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	    leaf->toKen->output(file, mode, leaf);
 	else
 	{
-	    if ((OM_LUA == mode) && (LSL_TYPE & leaf->toKen->flags))
-		fprintf(file, "--[[%s]] ", leaf->toKen->toKen);
+	    if (OM_LUA == mode)
+	    {
+		if (LSL_TYPE & leaf->toKen->flags)
+		    fprintf(file, " --[[%s]] ", leaf->toKen->toKen);
+		else if (LSL_CONCATENATE == leaf->toKen->type)
+		    fprintf(file, " .. ");
+		else
+		    fprintf(file, "%s", leaf->toKen->toKen);
+	    }
 	    else
 		fprintf(file, "%s", leaf->toKen->toKen);
 	}
@@ -1544,7 +1555,7 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
 {
 	if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
 	{
-	    fprintf(file, "--[[(%s)]] ", typeName);
+	    fprintf(file, " --[[(%s)]] ", typeName);
 	    outputLeaf(file, mode, parenthesis->contents);
 	    return;
 	}
@@ -1688,6 +1699,9 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 #if LUASL_DIFF_CHECK
 	if ((statement->ignorable) && (statement->ignorable[2]))
 	    fwrite(eina_strbuf_string_get(statement->ignorable[2]), 1, eina_strbuf_length_get(statement->ignorable[2]), file);
+#else
+	if (OM_LUA == mode)
+	    fprintf(file, " ");
 #endif
 	if (LSL_FOR == statement->type)
 	{
@@ -1813,13 +1827,16 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	{
 	    fprintf(file, "\n\nfunction ");
 	    if (func->type.text)
-		fprintf(file, "--[[%s]] ", func->type.text);
+		fprintf(file, " --[[%s]] ", func->type.text);
 	    fprintf(file, "%s(", func->name.text);
 	    EINA_INARRAY_FOREACH((&(func->vars)), param)
 	    {
 		// TODO - comment out param types.
-//		if (!first)
-//		    fprintf(file, ", ");
+		if (!LUASL_DIFF_CHECK)
+		{
+		    if (!first)
+			fprintf(file, ", ");
+		}
 		outputLeaf(file, mode, param);
 		first = FALSE;
 	    }
@@ -1842,6 +1859,8 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
 	EINA_INARRAY_FOREACH((&(call->params)), param)
 	{
 	    outputLeaf(file, mode, param);
+	    if (OM_LUA == mode)
+		fprintf(file, ", ");
 	}
 	fprintf(file, ")");
     }
@@ -1904,6 +1923,8 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    EINA_INARRAY_FOREACH((&(call->params)), param)
 	    {
 		outputLeaf(file, mode, param);
+		if (OM_LUA == mode)
+		    fprintf(file, ", ");
 	    }
 #if LUASL_DIFF_CHECK
 	    ig = eina_strbuf_string_get(parens->rightIgnorable);
