@@ -374,6 +374,11 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 
 		if (var)
 		    lType = var->basicType;
+		if (left->value.identifierValue->sub)
+		{
+		    // TODO - keep an eye on this, but I think all the sub types are floats.
+		    lType = OT_float;
+		}
 	    }
 	    else
 		lType = left->basicType;
@@ -396,6 +401,11 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 
 		if (var)
 		    rType = var->basicType;
+		if (right->value.identifierValue->sub)
+		{
+		    // TODO - keep an eye on this, but I think all the sub types are floats.
+		    rType = OT_float;
+		}
 	    }
 	    else
 		rType = right->basicType;
