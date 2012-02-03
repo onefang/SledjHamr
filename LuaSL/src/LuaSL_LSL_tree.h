@@ -150,7 +150,11 @@ typedef enum
 {
     MF_NONE		= 0,
     MF_LOCAL		= 1,
-    MF_NOASSIGN		= 2
+    MF_NOASSIGN		= 2,
+    MF_PREDEC		= 4,
+    MF_PREINC		= 8,
+    MF_POSTDEC		= 16,
+    MF_POSTINC		= 32
 } miscFlags;
 
 struct _allowedTypes
@@ -236,6 +240,7 @@ struct _LSL_Identifier	// For variables and function parameters.
     Eina_Strbuf	*ignorable;
     const char	*sub;
     LSL_Leaf	value;
+    miscFlags	flags;
 };
 
 struct _LSL_Statement

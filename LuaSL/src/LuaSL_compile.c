@@ -523,6 +523,13 @@ LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *cre
 #endif
 	crement->basicType = variable->basicType;
 	crement->toKen = tokens[type - lowestToken];
+	switch (crement->toKen->type)
+	{
+	    case LSL_DECREMENT_PRE  :  variable->value.identifierValue->flags |= MF_PREDEC;  break;
+	    case LSL_INCREMENT_PRE  :  variable->value.identifierValue->flags |= MF_PREINC;  break;
+	    case LSL_DECREMENT_POST :  variable->value.identifierValue->flags |= MF_POSTDEC;  break;
+	    case LSL_INCREMENT_POST :  variable->value.identifierValue->flags |= MF_POSTINC;  break;
+	}
     }
 
     return crement;
@@ -1098,7 +1105,11 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	if (type)
 	{
 	    if (compiler->currentBlock)
+	    {
+		identifier->flags |= MF_LOCAL;
+		result->flags |= MF_LOCAL;
 		type->flags |= MF_LOCAL;
+	    }
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
 	    result->value.toKen = type->toKen;	// This is the LSL_TYPE_* toKen instead of the LSL_* toKen.  Not sure if that's a problem.
@@ -1934,60 +1945,29 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	}
 	else if (OM_LUA == mode)
 	{
-	    /*
-		This gets tricky, coz crements can be embedded inside other expressions.
-		Even worse, assignment in Lua is a statement, NOT an expression.
-		Tend to be used in for statements, but we convert those to whiles with seperate statements anyway.
-		Tend to be used in conditionals to.
-		For later - Lua does not have assignment shortcuts like +=, which can't help here either.
-	    */ 
 	    switch (content->toKen->type)
 	    {
-		case LSL_DECREMENT_PRE :
-		case LSL_INCREMENT_PRE :
-		{
-		    /* TODO -
-			Damn, gotta put the function call out BEFORE the statment, which has already been put out.
-			Trickier case - while (++i)
-		    */
-//		    outputText(file, &(content->value.identifierValue->name), FALSE);
-		    if (LSL_DECREMENT_PRE == content->toKen->type)
-			fprintf(file, " preDecrement(");
-		    else
-			fprintf(file, " preIncrement(");
-#if LUASL_DIFF_CHECK
-		    if (content->value.identifierValue->ignorable)
-			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
-#endif
-		    outputText(file, &(content->value.identifierValue->name), FALSE);
-		    fprintf(file, ")");
-		    break;
-		}
-		case LSL_DECREMENT_POST :
-		case LSL_INCREMENT_POST :
-		{
-		    /* TODO -
-			Find the end of the statement and put it there.
-			Bound to be a trickier case as above.  lol
-		    */
-//		    outputText(file, &(content->value.identifierValue->name), FALSE);
-		    if (LSL_DECREMENT_POST == content->toKen->type)
-			fprintf(file, " postDecrement(");
-		    else
-			fprintf(file, " postIncrement(");
-#if LUASL_DIFF_CHECK
-		    if (content->value.identifierValue->ignorable)
-			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
-#endif
-		    outputText(file, &(content->value.identifierValue->name), FALSE);
-		    fprintf(file, ")");
-		    break;
-		}
+		case LSL_DECREMENT_PRE :	fprintf(file, " preDecrement");		break;
+		case LSL_INCREMENT_PRE :	fprintf(file, " preIncrement");		break;
+		case LSL_DECREMENT_POST :	fprintf(file, " postDecrement");	break;
+		case LSL_INCREMENT_POST :	fprintf(file, " postIncrement");	break;
 		default :
 		    break;
 	    }
+	    if (MF_LOCAL & content->value.identifierValue->flags)
+		fprintf(file, "_");
+	    else
+		fprintf(file, "(\"");
+#if LUASL_DIFF_CHECK
+	    if (content->value.identifierValue->ignorable)
+		fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+#endif
+	    outputText(file, &(content->value.identifierValue->name), FALSE);
+	    if (MF_LOCAL & content->value.identifierValue->flags)
+		fprintf(file, "()");
+	    else
+		fprintf(file, "\")");
 	}
-
     }
 }
 
@@ -2091,10 +2071,29 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
 	if ((LSL_VARIABLE == content->toKen->type) && (MF_NOASSIGN & content->flags))
 	{
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
-	    fprintf(file, " = nil");
+	    if (OM_LUA == mode)
+	    {
+		// TODO - should output a default value depending on type.
+		fprintf(file, " = nil");
+	    }
 	}
 	else
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+
+	if (OM_LUA == mode)
+	{
+	    if ((LSL_VARIABLE == content->toKen->type) && (MF_LOCAL & content->flags))
+	    {
+		const char *name = content->value.identifierValue->name.text;
+
+		if ((MF_PREDEC | MF_PREINC | MF_POSTDEC | MF_POSTINC)  & content->value.identifierValue->flags)
+		    fprintf(file, "\n");
+		if (MF_PREDEC  & content->value.identifierValue->flags)	fprintf(file, "local function preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
+		if (MF_PREINC  & content->value.identifierValue->flags)	fprintf(file, "local function preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
+		if (MF_POSTDEC & content->value.identifierValue->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s - 1;  return temp;  end\n", name, name, name, name);
+		if (MF_POSTDEC & content->value.identifierValue->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s + 1;  return temp;  end\n", name, name, name, name);
+	    }
+	}
     }
 }
 
@@ -2168,6 +2167,7 @@ static void outputParameterListToken(FILE *file, outputMode mode, LSL_Leaf *cont
 {
     if (content)
 	outputLeaf(file, mode, content->value.listValue);
+    // TODO - Should go through the list, and output any crements functions we need at the top of the block.
 }
 
 static void outputParenthesisToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -2261,10 +2261,10 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	{
 	    fprintf(out, "--// Pre declared helper stuff.\n");
 	    fprintf(out, "local bit = require(\"bit\")\n");
-	    fprintf(out, "function preDecrement(x)  x = x - 1; return x; end;\n");
-	    fprintf(out, "function preIncrement(x)  x = x + 1; return x; end;\n");
-	    fprintf(out, "function postDecrement(x) x = x - 1; return x; end;\n");
-	    fprintf(out, "function postIncrement(x) x = x + 1; return x; end;\n");
+	    fprintf(out, "function preDecrement(name)  _G[name] = _G[name] - 1; return _G[name]; end;\n");
+	    fprintf(out, "function preIncrement(name)  _G[name] = _G[name] + 1; return _G[name]; end;\n");
+	    fprintf(out, "function postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;\n");
+	    fprintf(out, "function postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;\n");
 	    fprintf(out, "function stateChange(x) end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
