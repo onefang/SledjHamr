@@ -1094,6 +1094,8 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	    assignment->right = expr;
 	if (type)
 	{
+	    if (compiler->currentBlock)
+		type->flags |= MF_LOCAL;
 	    identifier->basicType = type->basicType;
 	    result->value.basicType = type->basicType;
 	    result->value.toKen = type->toKen;	// This is the LSL_TYPE_* toKen instead of the LSL_* toKen.  Not sure if that's a problem.
@@ -1523,7 +1525,11 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	    if (OM_LUA == mode)
 	    {
 		if (LSL_TYPE & leaf->toKen->flags)
+		{
+		    if (MF_LOCAL & leaf->flags)
+			fprintf(file, "  local ");
 		    fprintf(file, " --[[%s]] ", leaf->toKen->toKen);
+		}
 		else if (LSL_CONCATENATE == leaf->toKen->type)
 		    fprintf(file, " .. ");
 		else

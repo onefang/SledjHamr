@@ -146,6 +146,12 @@ typedef enum
     ST_MODULO		= 8192	// % %=
 } opSubType;
 
+typedef enum
+{
+    MF_NONE		= 0,
+    MF_LOCAL		= 1
+} miscFlags;
+
 struct _allowedTypes
 {
     opType	result;
@@ -181,6 +187,7 @@ struct _LSL_Leaf
 #endif
     int 			line, column, len;
     opType			basicType;
+    miscFlags			flags;
     union
     {
 	float			floatValue;
