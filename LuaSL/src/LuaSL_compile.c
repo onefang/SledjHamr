@@ -1950,11 +1950,11 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 			Damn, gotta put the function call out BEFORE the statment, which has already been put out.
 			Trickier case - while (++i)
 		    */
-		    outputText(file, &(content->value.identifierValue->name), FALSE);
+//		    outputText(file, &(content->value.identifierValue->name), FALSE);
 		    if (LSL_DECREMENT_PRE == content->toKen->type)
-			fprintf(file, " = preDecrement(");
+			fprintf(file, " preDecrement(");
 		    else
-			fprintf(file, " = preIncrement(");
+			fprintf(file, " preIncrement(");
 #if LUASL_DIFF_CHECK
 		    if (content->value.identifierValue->ignorable)
 			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
@@ -1970,11 +1970,11 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 			Find the end of the statement and put it there.
 			Bound to be a trickier case as above.  lol
 		    */
-		    outputText(file, &(content->value.identifierValue->name), FALSE);
+//		    outputText(file, &(content->value.identifierValue->name), FALSE);
 		    if (LSL_DECREMENT_POST == content->toKen->type)
-			fprintf(file, " = postDecrement(");
+			fprintf(file, " postDecrement(");
 		    else
-			fprintf(file, " = postIncrement(");
+			fprintf(file, " postIncrement(");
 #if LUASL_DIFF_CHECK
 		    if (content->value.identifierValue->ignorable)
 			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
