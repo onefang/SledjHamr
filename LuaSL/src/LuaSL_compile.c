@@ -1536,6 +1536,12 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 			fprintf(file, "  local ");
 		    fprintf(file, " --[[%s]] ", leaf->toKen->toKen);
 		}
+		else if (LSL_BOOL_AND == leaf->toKen->type)
+		    fprintf(file, " and ");
+		else if (LSL_BOOL_OR == leaf->toKen->type)
+		    fprintf(file, " or ");
+		else if (LSL_BOOL_NOT == leaf->toKen->type)
+		    fprintf(file, " not ");
 		else if (LSL_CONCATENATE == leaf->toKen->type)
 		    fprintf(file, " .. ");
 		else if (LSL_NOT_EQUAL == leaf->toKen->type)
