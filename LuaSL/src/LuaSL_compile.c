@@ -7,6 +7,7 @@ static LSL_Leaf *evaluateNoToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *ri
 static LSL_Leaf *evaluateOperationToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *eveluateParenthesisToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_Leaf *right);
+static void outputBitOp(FILE *file, outputMode mode, LSL_Leaf *leaf);
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content);
 static void outputFloatToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -39,9 +40,9 @@ LSL_Token LSL_Tokens[] =
 // LUA   - "and" returns its first argument if it is false, otherwise, it returns its second argument. "or" returns its first argument if it is not false, otherwise it returns its second argument.
 //           Note that the above means that "and/or" can return any type.
     {LSL_BOOL_OR,		ST_BOOLEAN,		"||",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
-    {LSL_BIT_OR,		ST_BITWISE,		"|",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
-    {LSL_BIT_XOR,		ST_BITWISE,		"^",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
-    {LSL_BIT_AND,		ST_BITWISE,		"&",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_BIT_OR,		ST_BITWISE,		"|",	LSL_LEFT2RIGHT,				outputBitOp, evaluateOperationToken},
+    {LSL_BIT_XOR,		ST_BITWISE,		"^",	LSL_LEFT2RIGHT,				outputBitOp, evaluateOperationToken},
+    {LSL_BIT_AND,		ST_BITWISE,		"&",	LSL_LEFT2RIGHT,				outputBitOp, evaluateOperationToken},
 // QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
     {LSL_NOT_EQUAL,		ST_EQUALITY,		"!=",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
     {LSL_EQUAL,			ST_EQUALITY,		"==",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
@@ -51,8 +52,8 @@ LSL_Token LSL_Tokens[] =
     {LSL_LESS_THAN,		ST_COMPARISON,		"<",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
 // LUA   - comparisons are always false if they are different types.  Tables, userdata, and functions are compared by reference.  Strings campare in alphabetical order, depending on current locale.
 // LUA   - really only has three conditionals, as it translates a ~= b to not (a == b), a > b to b < a, and a >= b to b <= a.
-    {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
-    {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
+    {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				outputBitOp, evaluateOperationToken},
+    {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				outputBitOp, evaluateOperationToken},
     {LSL_CONCATENATE,		ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
     {LSL_ADD,			ST_ADD,			"+",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
     {LSL_SUBTRACT,		ST_SUBTRACT,		"-",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
@@ -63,7 +64,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_DIVIDE,		ST_MULTIPLY,		"/",	LSL_LEFT2RIGHT,				NULL, evaluateOperationToken},
     {LSL_NEGATION,		ST_NEGATE,		"-",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
     {LSL_BOOL_NOT,		ST_BOOL_NOT,		"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
-    {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL, evaluateOperationToken},
+    {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		outputBitOp, evaluateOperationToken},
 
 // LUA precedence - (it has no bit operators, at least not until 5.2, but LuaJIT has them.)
 // or
@@ -1515,7 +1516,8 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	outputLeaf(file, mode, leaf->left);
+	if ((OM_LUA == mode) &&(ST_BITWISE != leaf->toKen->subType))
+	    outputLeaf(file, mode, leaf->left);
 #if LUASL_DIFF_CHECK
 	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorable))
 	    fwrite(eina_strbuf_string_get(leaf->ignorable), 1, eina_strbuf_length_get(leaf->ignorable), file);
@@ -1552,7 +1554,8 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	    else
 		fprintf(file, "%s", leaf->toKen->toKen);
 	}
-	outputLeaf(file, mode, leaf->right);
+	if ((OM_LUA == mode) &&(ST_BITWISE != leaf->toKen->subType))
+	    outputLeaf(file, mode, leaf->right);
     }
 }
 
@@ -1854,6 +1857,37 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 
 	if (statement->elseBlock)
 	    outputRawStatement(file, mode, statement->elseBlock);
+    }
+}
+
+static void outputBitOp(FILE *file, outputMode mode, LSL_Leaf *leaf)
+{
+    if (OM_LSL == mode)
+	outputLeaf(file, mode, leaf);
+    else if (OM_LUA == mode)
+    {
+/*
+swap = (integer)((string)pkey) & 1;
+bit.band(swap= --[[(integer)]] ( --[[(string)]] pkey), 1) ;
+*/
+
+	switch (leaf->toKen->type)
+	{
+	    case LSL_BIT_AND :		fprintf(file, " bit.band(");	break;
+	    case LSL_BIT_OR  :		fprintf(file, " bit.bor(");	break;
+	    case LSL_BIT_XOR :		fprintf(file, " bit.xor(");	break;
+	    case LSL_BIT_NOT :		fprintf(file, " bit.bnot(");	break;
+	    case LSL_LEFT_SHIFT :	fprintf(file, " bit.lshift(");	break;
+	    case LSL_RIGHT_SHIFT :	fprintf(file, " bit.rshift(");	break;
+	    default : break;
+	}
+	outputLeaf(file, mode, leaf->left);
+	if (LSL_BIT_NOT != leaf->toKen->type)
+	{
+	    fprintf(file, ", ");
+	    outputLeaf(file, mode, leaf->right);
+	}
+	fprintf(file, ") ");
     }
 }
 
@@ -2223,6 +2257,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	if (out)
 	{
 	    fprintf(out, "--// Pre declared helper stuff.\n");
+	    fprintf(out, "local bit = require(\"bit\")\n");
 	    fprintf(out, "function preDecrement(x)  x = x - 1; return x; end;\n");
 	    fprintf(out, "function preIncrement(x)  x = x + 1; return x; end;\n");
 	    fprintf(out, "function postDecrement(x) x = x - 1; return x; end;\n");
