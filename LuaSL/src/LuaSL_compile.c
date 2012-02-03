@@ -2155,6 +2155,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	char buffer[PATH_MAX];
 	char outName[PATH_MAX];
 	char luaName[PATH_MAX];
+	int count;
 
 //	outputLeaf(stdout, OM_LSL, compiler->ast);
 //	printf("\n");
@@ -2169,7 +2170,6 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    if (out)
 	    {
 		char diffName[PATH_MAX];
-//		int count;
 
 		strcpy(diffName, compiler->fileName);
 		strcat(diffName, ".diff");
@@ -2198,6 +2198,13 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
 	    fclose(out);
+	    sprintf(buffer, "luac \"%s\"", luaName);
+	    count = system(buffer);
+	    if (0 != count)
+	    {
+		compiler->script.bugCount++;
+		PE("Lua compile stage failed for %s!", compiler->fileName);
+	    }
 	}
 	else
 	    PC("Unable to open file %s for writing!", luaName);
