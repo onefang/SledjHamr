@@ -123,8 +123,8 @@ expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).				{ A = addOperation
 // Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
 // Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
 // On the other hand, it might be legal to have comma separated bits in a for loop - for ((i = 1), (j=1); ...
-statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, D,    E, S),    NULL, NULL, I); }
-statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, NULL, NULL, S), NULL, NULL, I); }
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, D,    E),    NULL, NULL, I); }
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, NULL, NULL), NULL, NULL, I); }
 
 // Basic operators.
 
