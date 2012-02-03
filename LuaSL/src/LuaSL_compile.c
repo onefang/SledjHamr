@@ -1526,7 +1526,11 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	{
 	    if (OM_LUA == mode)
 	    {
-		if (LSL_TYPE & leaf->toKen->flags)
+		if ((LSL_ASSIGNMENT & leaf->toKen->flags) && (LSL_ASSIGNMENT_PLAIN != leaf->toKen->type))
+		{
+		    fprintf(file, " --[[%s]] = %s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->toKen->toKen);
+		}
+		else if (LSL_TYPE & leaf->toKen->flags)
 		{
 		    if (MF_LOCAL & leaf->flags)
 			fprintf(file, "  local ");
@@ -1534,6 +1538,8 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 		}
 		else if (LSL_CONCATENATE == leaf->toKen->type)
 		    fprintf(file, " .. ");
+		else if (LSL_NOT_EQUAL == leaf->toKen->type)
+		    fprintf(file, " ~= ");
 		else
 		    fprintf(file, "%s", leaf->toKen->toKen);
 	    }
