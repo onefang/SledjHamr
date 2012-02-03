@@ -31,7 +31,16 @@ LSL_Token LSL_Tokens[] =
 
     // Operators, in order of precedence, low to high
     // Left to right, unless otherwise stated.
-    // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators
+    // According to http://wiki.secondlife.com/wiki/Category:LSL_Operators, which was obsoleted by http://wiki.secondlife.com/wiki/LSL_Operators but that has less info.
+
+    {LSL_ASSIGNMENT_CONCATENATE,ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_ADD,	ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_SUBTRACT,	ST_ASSIGNMENT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MULTIPLY,	ST_ASSIGNMENT,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_MODULO,	ST_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+    {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
+
     {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
@@ -84,13 +93,6 @@ LSL_Token LSL_Tokens[] =
     {LSL_BRACKET_OPEN,		ST_NONE,		"[",	LSL_INNER2OUTER | LSL_CREATION,		NULL, evaluateOperationToken},
     {LSL_PARENTHESIS_CLOSE,	ST_NONE,		")",	LSL_INNER2OUTER,			NULL, evaluateNoToken},
     {LSL_PARENTHESIS_OPEN,	ST_NONE,		"(",	LSL_INNER2OUTER,			outputParenthesisToken, eveluateParenthesisToken},
-    {LSL_ASSIGNMENT_CONCATENATE,ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_ADD,	ST_CONCATENATION,	"+=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_SUBTRACT,	ST_ASSIGNMENT,		"-=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MULTIPLY,	ST_ASSIGNMENT,		"*=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_MODULO,	ST_MODULO,		"%=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_DIVIDE,	ST_ASSIGNMENT,		"/=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
-    {LSL_ASSIGNMENT_PLAIN,	ST_CONCATENATION,	"=",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL, evaluateOperationToken},
     {LSL_DOT,			ST_NONE,		".",	LSL_RIGHT2LEFT,				NULL, evaluateOperationToken},
     {LSL_DECREMENT_POST,	ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},
     {LSL_DECREMENT_PRE,		ST_NONE,		"--",	LSL_RIGHT2LEFT | LSL_UNARY,		outputCrementsToken, evaluateOperationToken},

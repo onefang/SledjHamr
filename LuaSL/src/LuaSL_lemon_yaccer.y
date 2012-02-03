@@ -104,6 +104,30 @@ exprList(A) ::= exprList(B) LSL_COMMA(C) expr(D).					{ A = collectArguments(com
 exprList(A) ::= expr(D).								{ A = collectArguments(compiler, NULL, NULL, D); }
 exprList(A) ::= .									{ A = collectArguments(compiler, NULL, NULL, NULL); }
 
+// Assignments and variable declarations.
+
+%right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
+// Variables and dealing with them.
+
+expr(A) ::= identifier(B).									{ A = B; }
+
+// Yes, these can be expressions, and can happen in if statements and such.  In Lua they are NOT expressions.  sigh
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_CONCATENATE(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_ADD(C)		expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_SUBTRACT(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_MULTIPLY(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_MODULO(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_DIVIDE(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
+
+// Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
+// Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
+// On the other hand, it might be legal to have comma separated bits in a for loop - for ((i = 1), (j=1); ...
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, D,    E, S),    NULL, NULL, I); }
+statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, NULL, NULL, S), NULL, NULL, I); }
+
+// Basic operators.
+
 %right  LSL_BOOL_AND.
 expr(A) ::= expr(B) LSL_BOOL_AND(C)		expr(D).				{ A = addOperation(compiler, B, C, D); }
 %right  LSL_BOOL_OR.
@@ -159,31 +183,6 @@ type(A) ::= LSL_TYPE_VECTOR(B).								{ B->basicType = OT_vector;	A = B; }
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	expr(C) LSL_PARENTHESIS_CLOSE(D).			{ A = addParenthesis(B, C, LSL_EXPRESSION, D); }
 expr(A) ::= LSL_PARENTHESIS_OPEN(B)	type(C)	LSL_PARENTHESIS_CLOSE(D) expr(E).		{ A = addTypecast(B, C, D, E); }
 
-// Function call.
-
-// Causes a conflict when exprList is empty with a function definition with no type and no parameters.
-expr(A) ::= LSL_IDENTIFIER(B) LSL_PARENTHESIS_OPEN(C) exprList(D) LSL_PARENTHESIS_CLOSE(E).	{ A = addFunctionCall(compiler, B, C, D, E); }
-
-// Variables and dealing with them.
-
-expr(A) ::= identifier(B).									{ A = B; }
-
-%right LSL_ASSIGNMENT_CONCATENATE LSL_ASSIGNMENT_ADD LSL_ASSIGNMENT_SUBTRACT LSL_ASSIGNMENT_MULTIPLY LSL_ASSIGNMENT_MODULO LSL_ASSIGNMENT_DIVIDE LSL_ASSIGNMENT_PLAIN.
-// Yes, these can be expressions, and can happen in if statements and such.
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_CONCATENATE(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_ADD(C)		expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_SUBTRACT(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_MULTIPLY(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_MODULO(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_DIVIDE(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-expr(A) ::= identifier(B) LSL_ASSIGNMENT_PLAIN(C)	expr(D).				{ A = addOperation(compiler, B, C, D); }
-
-// Hmm think this can have commas seperating the assignment parts, or is that only in C?.  If so, best to separate them when converting to Lua, as it uses that syntax for something else.
-// Well, not in OpenSim at least, nor in SL.  So we are safe.  B-)
-// On the other hand, it might be legal to have comma separated bits in a for loop - for ((i = 1), (j=1); ...
-statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_ASSIGNMENT_PLAIN(D) expr(E) LSL_STATEMENT(S).	{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, D,    E),    NULL, NULL, I); }
-statement(A) ::= type(T) LSL_IDENTIFIER(I) LSL_STATEMENT(S).					{ A = addStatement(compiler, S, I, NULL, addVariable(compiler, T, I, NULL, NULL), NULL, NULL, I); }
-
 %right LSL_DOT LSL_IDENTIFIER LSL_FUNCTION_CALL LSL_VARIABLE.
 identifier(A) ::= identifier(I) LSL_DOT(D) LSL_IDENTIFIER(B).					{ A = checkVariable(compiler, I, D,    B); }
 identifier(A) ::= LSL_IDENTIFIER(B).								{ A = checkVariable(compiler, B, NULL, NULL); }
@@ -193,6 +192,11 @@ expr(A) ::= identifier(B) LSL_DECREMENT_PRE(C).							{ A = addCrement(compiler,
 expr(A) ::= identifier(B) LSL_INCREMENT_PRE(C).							{ A = addCrement(compiler, B, C, LSL_INCREMENT_POST); }
 expr(A) ::= LSL_DECREMENT_PRE(C) identifier(B).							{ A = addCrement(compiler, B, C, LSL_DECREMENT_PRE); }
 expr(A) ::= LSL_INCREMENT_PRE(C) identifier(B).							{ A = addCrement(compiler, B, C, LSL_INCREMENT_PRE); }
+
+// Function call.
+
+// Causes a conflict when exprList is empty with a function definition with no type and no parameters.
+expr(A) ::= LSL_IDENTIFIER(B) LSL_PARENTHESIS_OPEN(C) exprList(D) LSL_PARENTHESIS_CLOSE(E).	{ A = addFunctionCall(compiler, B, C, D, E); }
 
 %nonassoc LSL_COMMA.
 
