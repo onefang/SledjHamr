@@ -1,5 +1,40 @@
 #include "LuaSL.h"
 
+/* TODO - 
+
+Assignments in the middle of expressions is legal in LSL, but not in Lua.
+The big complication is that they often happen in the conditionals of flow control statements.  That's a big bitch.
+
+So things like -
+
+    while ((x = doSomething()) == foo)
+    {
+	buggerAround();
+    }
+
+Turns into - 
+
+    x = doSomething();
+    while (x == foo)
+    {
+	buggerAround();
+	x = doSomething();
+    }
+
+http://lua-users.org/wiki/StatementsInExpressions might be helpful.  Which suggests something like this -
+
+    while ( (function() x = doSomething(); return x; end)() == foo)
+    {
+	buggerAround();
+    }
+
+The remaining problem is when to recognise the need to do that.
+Note that assignments are really low precedence.
+    While adding operations
+	Flag the assignment expressions
+    If there is an assignment expression (not operation) on the RHS of an operation, we need to do this?
+*/
+
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
