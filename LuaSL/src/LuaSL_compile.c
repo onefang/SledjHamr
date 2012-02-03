@@ -955,6 +955,11 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 		justOne = TRUE;
 		break;
 	    }
+	    case LSL_LABEL :
+	    {
+		justOne = TRUE;
+		break;
+	    }
 	    case LSL_RETURN :
 	    {
 		justOne = TRUE;
@@ -1471,6 +1476,10 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 		    break;
 	    }
 	    case LSL_JUMP :
+	    {
+		break;
+	    }
+	    case LSL_LABEL :
 	    {
 		break;
 	    }
