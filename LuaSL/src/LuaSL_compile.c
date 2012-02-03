@@ -1740,9 +1740,19 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    if ((statement->ignorable) && (statement->ignorable[1]))
 		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
 #endif
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
-		if (statement->identifier.text)
-		    outputText(file, &(statement->identifier), TRUE);
+		if (OM_LSL == mode)
+		{
+		    fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
+		    if (statement->identifier.text)
+			outputText(file, &(statement->identifier), TRUE);
+		}
+		else if (OM_LUA == mode)
+		{
+		    fprintf(file, "stateChange(");
+		    if (statement->identifier.text)
+			outputText(file, &(statement->identifier), TRUE);
+		    fprintf(file, ")");
+		}
 		break;
 	    }
 	    case LSL_STATEMENT :
@@ -2131,8 +2141,18 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 
 	if (state)
 	{
-	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
-	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
+	    if (OM_LSL == mode)
+	    {
+		outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
+		outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
+		outputRawBlock(file, mode, state->block, TRUE);
+	    }
+	    else if (OM_LUA == mode)
+	    {
+		fprintf(file, "\n\n--[[state]] ");
+		outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
+		fprintf(file, " = nil;");
+	    }
 	    outputRawBlock(file, mode, state->block, TRUE);
 	}
     }
@@ -2201,6 +2221,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    fprintf(out, "function preIncrement(x)  x = x + 1; return x; end;\n");
 	    fprintf(out, "function postDecrement(x) x = x - 1; return x; end;\n");
 	    fprintf(out, "function postIncrement(x) x = x + 1; return x; end;\n");
+	    fprintf(out, "function stateChange(x) end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
 	    fclose(out);
