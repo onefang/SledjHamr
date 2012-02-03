@@ -149,7 +149,8 @@ typedef enum
 typedef enum
 {
     MF_NONE		= 0,
-    MF_LOCAL		= 1
+    MF_LOCAL		= 1,
+    MF_NOASSIGN		= 2
 } miscFlags;
 
 struct _allowedTypes

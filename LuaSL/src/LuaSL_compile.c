@@ -1092,6 +1092,8 @@ LSL_Leaf *addVariable(LuaSL_compiler *compiler, LSL_Leaf *type, LSL_Leaf *identi
 	identifier->right = assignment;
 	if (assignment)
 	    assignment->right = expr;
+	else
+	    identifier->flags |= MF_NOASSIGN;
 	if (type)
 	{
 	    if (compiler->currentBlock)
@@ -2023,6 +2025,12 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
 	    outputText(file, &(content->value.identifierValue->name), FALSE);
 	    if (content->value.identifierValue->sub)
 		fprintf(file, ".%s", content->value.identifierValue->sub);
+	}
+	else
+	if ((LSL_VARIABLE == content->toKen->type) && (MF_NOASSIGN & content->flags))
+	{
+	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
+	    fprintf(file, " = nil");
 	}
 	else
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
