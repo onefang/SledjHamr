@@ -2230,6 +2230,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    fprintf(out, "function stateChange(x) end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
+	    fprintf(out, "\n\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "luac \"%s\"", luaName);
 	    count = system(buffer);
