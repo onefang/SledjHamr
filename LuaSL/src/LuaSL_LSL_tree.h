@@ -293,6 +293,7 @@ struct _LSL_Function
 {
     LSL_Text	name;
     LSL_Text	type;
+    const char *state;
 #if LUASL_DIFF_CHECK
 //    LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
 				// This points to the params leaf, which is a function, pointing to this structure.  The actual params are in vars.

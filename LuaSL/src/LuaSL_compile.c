@@ -856,6 +856,9 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 
     if ((identifier) && (result))
     {
+	Eina_Iterator *handlers;
+	LSL_Function *func;
+
 	memcpy(result, &(compiler->state), sizeof(LSL_State));
 	compiler->state.block = NULL;
 	compiler->state.handlers = NULL;
@@ -864,6 +867,11 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 	result->name.ignorable = identifier->ignorable;
 	identifier->ignorable = NULL;
 #endif
+	handlers = eina_hash_iterator_data_new(result->handlers);
+	while(eina_iterator_next(handlers, (void **) &func))
+	{
+	    func->state = result->name.text;
+	}
 	result->block = block->value.blockValue;
 	if (state)
 	{
@@ -2085,10 +2093,15 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	}
 	else if (OM_LUA == mode)
 	{
-	    fprintf(file, "\n\nfunction ");
-	    if (func->type.text)
-		fprintf(file, " --[[%s]] ", func->type.text);
-	    fprintf(file, "%s(", func->name.text);
+	    if (func->state)
+		fprintf(file, "\n\n%s.%s = function(", func->state, func->name.text);
+	    else
+	    {
+		fprintf(file, "\n\nfunction ");
+		if (func->type.text)
+		    fprintf(file, " --[[%s]] ", func->type.text);
+		fprintf(file, "%s(", func->name.text);
+	    }
 	    EINA_INARRAY_FOREACH((&(func->vars)), param)
 	    {
 		// TODO - comment out param types.
@@ -2323,14 +2336,16 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	{
 	    fprintf(out, "--// Pre declared helper stuff.\n");
 	    fprintf(out, "local bit = require(\"bit\")\n");
+	    fprintf(out, "currentState = { state_exit = function() end }\n");
 	    fprintf(out, "function preDecrement(name)  _G[name] = _G[name] - 1; return _G[name]; end;\n");
 	    fprintf(out, "function preIncrement(name)  _G[name] = _G[name] + 1; return _G[name]; end;\n");
 	    fprintf(out, "function postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;\n");
 	    fprintf(out, "function postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;\n");
-	    fprintf(out, "function stateChange(x) end;\n");
+	    fprintf(out, "function stateChange(x) currentState.state_exit(); curruntState = x; currentState.state_entry(); end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
-	    fprintf(out, "\n\n--// End of generated code.\n\n");
+//	    fprintf(out, "\n\nstateChange(default)\n");
+	    fprintf(out, "\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
 	    count = system(buffer);
