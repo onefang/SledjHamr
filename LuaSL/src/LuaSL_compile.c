@@ -1743,13 +1743,16 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 			outputRawStatement(file, mode, statement->elseBlock);
 		    if (LSL_IF == statement->type)
 		    {
+#if 1
 			fprintf(file, " end\n");
-//			fprintf(file, " end --[[");
-//			if (statement->parenthesis)
-//			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
-//			else
-//			    outputLeaf(file, mode, statement->expressions);
-//			fprintf(file, "]]\n");
+#else
+			fprintf(file, " end --[[");
+			if (statement->parenthesis)
+			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
+			else
+			    outputLeaf(file, mode, statement->expressions);
+			fprintf(file, "]]\n");
+#endif
 		    }
 		    return;
 		}
