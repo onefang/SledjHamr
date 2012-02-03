@@ -2151,9 +2151,9 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    {
 		fprintf(file, "\n\n--[[state]] ");
 		outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
-		fprintf(file, " = nil;");
+		fprintf(file, " = {};");
+		outputRawBlock(file, mode, state->block, FALSE);
 	    }
-	    outputRawBlock(file, mode, state->block, TRUE);
 	}
     }
 }
