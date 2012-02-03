@@ -1726,9 +1726,9 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		if (OM_LUA == mode)
 		{
+		    fprintf(file, " ");
 		    if (LSL_ELSE != statement->type)
 		    {
-			fprintf(file, " ");
 			if (statement->parenthesis)
 			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
 			else
