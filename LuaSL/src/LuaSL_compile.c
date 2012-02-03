@@ -2232,7 +2232,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    outputLeaf(out, OM_LUA, compiler->ast);
 	    fprintf(out, "\n\n--// End of generated code.\n\n");
 	    fclose(out);
-	    sprintf(buffer, "luac \"%s\"", luaName);
+	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
 	    count = system(buffer);
 	    if (0 != count)
 	    {
