@@ -127,6 +127,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_DO,			ST_NONE,	"do",		LSL_NONE,				NULL, NULL},
     {LSL_FOR,			ST_NONE,	"for",		LSL_NONE,				NULL, NULL},
     {LSL_ELSE,			ST_NONE,	"else",		LSL_NONE,				NULL, NULL},
+    {LSL_ELSEIF,		ST_NONE,	"elseif",	LSL_NONE,				NULL, NULL},
     {LSL_IF,			ST_NONE,	"if",		LSL_NONE,				NULL, NULL},
     {LSL_JUMP,			ST_NONE,	"jump",		LSL_NONE,				NULL, NULL},
     {LSL_RETURN,		ST_NONE,	"return",	LSL_NONE,				NULL, NULL},
@@ -837,7 +838,17 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 
 LSL_Leaf *addIfElse(LuaSL_compiler *compiler, LSL_Leaf *ifBlock, LSL_Leaf *elseBlock)
 {
-    ifBlock->value.statementValue->elseBlock = elseBlock->value.statementValue;
+    if (ifBlock->value.statementValue->elseBlock)
+    {
+	LSL_Statement *oldElseIf = ifBlock->value.statementValue->elseBlock;
+
+	while (oldElseIf->elseBlock)
+	    oldElseIf = oldElseIf->elseBlock;
+
+	oldElseIf->elseBlock = elseBlock->value.statementValue;
+    }
+    else
+	ifBlock->value.statementValue->elseBlock = elseBlock->value.statementValue;
     return ifBlock;
 }
 
@@ -920,6 +931,11 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 		break;
 	    }
 	    case LSL_ELSE :
+	    {
+		justOne = TRUE;
+		break;
+	    }
+	    case LSL_ELSEIF :
 	    {
 		justOne = TRUE;
 		break;
@@ -1432,6 +1448,10 @@ static LSL_Leaf *evaluateStatementToken(LSL_Leaf *content, LSL_Leaf *left, LSL_L
 	    {
 		    break;
 	    }
+	    case LSL_ELSEIF :
+	    {
+		    break;
+	    }
 	    case LSL_JUMP :
 	    {
 		break;
@@ -1519,7 +1539,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 // Circular references, so declare this one first.
 static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *statement);
 
-static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
+static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block, boolean doEnd)
 {
     if (block)
     {
@@ -1533,7 +1553,7 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 #else
 	if (OM_LSL == mode)
 	    fprintf(file, "\n{\n");
-	else if (OM_LUA == mode)
+	else if (doEnd && (OM_LUA == mode))
 	    fprintf(file, "\n");
 #endif
 	EINA_CLIST_FOR_EACH_ENTRY(stat, &(block->statements), LSL_Statement, statement)
@@ -1546,7 +1566,7 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block)
 #endif
 	if (OM_LSL == mode)
 	    fprintf(file, "}");
-	else if (OM_LUA == mode)
+	else if (doEnd && (OM_LUA == mode))
 	    fprintf(file, "end ");
     }
 }
@@ -1611,8 +1631,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    case LSL_FOR :
 	    {
 #if LUASL_DIFF_CHECK
-	    if ((statement->ignorable) && (statement->ignorable[1]))
-		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+		if ((statement->ignorable) && (statement->ignorable[1]))
+		    fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
 #endif
 		if (OM_LSL == mode)
 		{
@@ -1632,22 +1652,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		    fprintf(file, ") do\n");
 #endif
 		    if (statement->block)
-		    {
-			LSL_Statement *stat = NULL;
-
-#if LUASL_DIFF_CHECK
-			if (statement->block->openIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->openIgnorable), 1, eina_strbuf_length_get(statement->block->openIgnorable), file);
-#endif
-			EINA_CLIST_FOR_EACH_ENTRY(stat, &(statement->block->statements), LSL_Statement, statement)
-			{
-				outputRawStatement(file, mode, stat);
-			}
-#if LUASL_DIFF_CHECK
-			if (statement->block->closeIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->closeIgnorable), 1, eina_strbuf_length_get(statement->block->closeIgnorable), file);
-#endif
-		    }
+			outputRawBlock(file, mode, statement->block, FALSE);
 		    if (statement->single)
 			outputRawStatement(file, mode, statement->single);
 		    fprintf(file, "\n");
@@ -1658,47 +1663,8 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		break;
 	    }
 	    case LSL_IF :
-	    {
-		isBlock = TRUE;
-#if LUASL_DIFF_CHECK
-	    if ((statement->ignorable) && (statement->ignorable[1]))
-		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
-#endif
-		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
-		if (OM_LUA == mode)
-		{
-		    if (statement->parenthesis)
-			outputRawParenthesisToken(file, mode, statement->parenthesis, "");
-		    else
-			outputLeaf(file, mode, statement->expressions);
-		    fprintf(file, " then\n");
-		    if (statement->block)
-		    {
-			LSL_Statement *stat = NULL;
-
-#if LUASL_DIFF_CHECK
-			if (statement->block->openIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->openIgnorable), 1, eina_strbuf_length_get(statement->block->openIgnorable), file);
-#endif
-			EINA_CLIST_FOR_EACH_ENTRY(stat, &(statement->block->statements), LSL_Statement, statement)
-			{
-				outputRawStatement(file, mode, stat);
-			}
-#if LUASL_DIFF_CHECK
-			if (statement->block->closeIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->closeIgnorable), 1, eina_strbuf_length_get(statement->block->closeIgnorable), file);
-#endif
-		    }
-		    if (statement->single)
-			outputRawStatement(file, mode, statement->single);
-		    if (statement->elseBlock)
-			outputRawStatement(file, mode, statement->elseBlock);
-		    fprintf(file, "\nend\n");
-		    return;
-		}
-		break;
-	    }
 	    case LSL_ELSE :
+	    case LSL_ELSEIF :
 	    {
 		isBlock = TRUE;
 #if LUASL_DIFF_CHECK
@@ -1708,27 +1674,30 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		if (OM_LUA == mode)
 		{
-		    // TODO - look ahead to se if it's an elseif.
-		    // Or not, seems to have happened by accident. lol
-		    if (statement->block)
+		    if (LSL_ELSE != statement->type)
 		    {
-			LSL_Statement *stat = NULL;
-
-#if LUASL_DIFF_CHECK
-			if (statement->block->openIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->openIgnorable), 1, eina_strbuf_length_get(statement->block->openIgnorable), file);
-#endif
-			EINA_CLIST_FOR_EACH_ENTRY(stat, &(statement->block->statements), LSL_Statement, statement)
-			{
-				outputRawStatement(file, mode, stat);
-			}
-#if LUASL_DIFF_CHECK
-			if (statement->block->closeIgnorable)
-	    		    fwrite(eina_strbuf_string_get(statement->block->closeIgnorable), 1, eina_strbuf_length_get(statement->block->closeIgnorable), file);
-#endif
+			fprintf(file, " ");
+			if (statement->parenthesis)
+			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
+			else
+			    outputLeaf(file, mode, statement->expressions);
+			fprintf(file, " then\n");
 		    }
+		    if (statement->block)
+			outputRawBlock(file, mode, statement->block, FALSE);
 		    if (statement->single)
 			outputRawStatement(file, mode, statement->single);
+		    if (statement->elseBlock)
+			outputRawStatement(file, mode, statement->elseBlock);
+		    if (LSL_IF == statement->type)
+		    {
+			fprintf(file, " end --[[");
+			if (statement->parenthesis)
+			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
+			else
+			    outputLeaf(file, mode, statement->expressions);
+			fprintf(file, "]]\n");
+		    }
 		    return;
 		}
 		break;
@@ -1783,7 +1752,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 			outputRawParenthesisToken(file, mode, statement->parenthesis, "");
 		    fprintf(file, " do ");
 		    if (statement->block)
-			outputRawBlock(file, mode, statement->block);
+			outputRawBlock(file, mode, statement->block, TRUE);
 		    if (statement->single)
 			outputRawStatement(file, mode, statement->single);
 		    fprintf(file, "\n");
@@ -1837,7 +1806,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    outputLeaf(file, mode, statement->expressions);
 
 	if (statement->block)
-	    outputRawBlock(file, mode, statement->block);
+	    outputRawBlock(file, mode, statement->block, TRUE);
 	if (statement->single)
 	    outputRawStatement(file, mode, statement->single);
 
@@ -1861,7 +1830,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	outputRawBlock(file, mode, content->value.blockValue);
+	outputRawBlock(file, mode, content->value.blockValue, TRUE);
 }
 
 static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
@@ -1929,7 +1898,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 		first = FALSE;
 	    }
 	    fprintf(file, ")");
-	    outputRawBlock(file, mode, func->block);
+	    outputRawBlock(file, mode, func->block, TRUE);
 	    if (!LUASL_DIFF_CHECK)
 		fprintf(file, "\n");
 	}
@@ -1951,7 +1920,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 		first = FALSE;
 	    }
 	    fprintf(file, ")");
-	    outputRawBlock(file, mode, func->block);
+	    outputRawBlock(file, mode, func->block, TRUE);
 	}
     }
 }
@@ -2085,7 +2054,7 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	{
 	    outputText(file, &(state->state), !(LSL_NOIGNORE & content->toKen->flags));
 	    outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
-	    outputRawBlock(file, mode, state->block);
+	    outputRawBlock(file, mode, state->block, TRUE);
 	}
     }
 }

@@ -96,6 +96,7 @@ STRING      \"(\\.|[^\\"\n])*\"
 "for"           %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FOR); %}
 "else"          %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_ELSE); %}
 "if"            %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_IF); %}
+"else"[[:space:]]+"if" %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_ELSEIF); %}  /* TODO - deal with people that slap a comment in between them. */
 "jump"          %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_JUMP); %}
 "return"        %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_RETURN); %}
 "state"         %{ return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STATE_CHANGE); %}
