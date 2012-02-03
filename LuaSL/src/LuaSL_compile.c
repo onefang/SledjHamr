@@ -1996,15 +1996,17 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
     {
 	LSL_FunctionCall *call = content->value.functionCallValue;
 	LSL_Leaf *param = NULL;
+	boolean first = TRUE;
 
 	// TODO - should output it's own ignorable here.
 	outputText(file, &(call->function->name), FALSE);	// Don't output the function definitions ignorable.
 	fprintf(file, "(");
 	EINA_INARRAY_FOREACH((&(call->params)), param)
 	{
-	    outputLeaf(file, mode, param);
-	    if (OM_LUA == mode)
+	    if ((OM_LUA == mode) && (!first))
 		fprintf(file, ", ");
+	    outputLeaf(file, mode, param);
+	    first = FALSE;
 	}
 	fprintf(file, ")");
     }
