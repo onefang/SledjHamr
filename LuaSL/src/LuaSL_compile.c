@@ -1947,7 +1947,8 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 		case LSL_INCREMENT_PRE :
 		{
 		    /* TODO -
-			Damn, gotta put the function call out BEFORE the statment, which has alreadf been put out.
+			Damn, gotta put the function call out BEFORE the statment, which has already been put out.
+			Trickier case - while (++i)
 		    */
 		    outputText(file, &(content->value.identifierValue->name), FALSE);
 		    if (LSL_DECREMENT_PRE == content->toKen->type)
@@ -1967,6 +1968,7 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 		{
 		    /* TODO -
 			Find the end of the statement and put it there.
+			Bound to be a trickier case as above.  lol
 		    */
 		    outputText(file, &(content->value.identifierValue->name), FALSE);
 		    if (LSL_DECREMENT_POST == content->toKen->type)
