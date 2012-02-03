@@ -236,11 +236,12 @@ struct _LSL_Parenthesis
 
 struct _LSL_Identifier	// For variables and function parameters.
 {
-    LSL_Text	name;
-    Eina_Strbuf	*ignorable;
-    const char	*sub;
-    LSL_Leaf	value;
-    miscFlags	flags;
+    LSL_Text		name;
+    LSL_Statement	*definition;
+    Eina_Strbuf		*ignorable;
+    const char		*sub;
+    LSL_Leaf		value;
+    miscFlags		flags;
 };
 
 struct _LSL_Statement
@@ -256,6 +257,7 @@ struct _LSL_Statement
 #if LUASL_DIFF_CHECK
     Eina_Strbuf		**ignorable;	// Can be up to five of these I think.
 #endif
+    miscFlags		flags;
 /*
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);
 

@@ -532,6 +532,7 @@ LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *cre
 	    case LSL_DECREMENT_POST :  variable->value.identifierValue->flags |= MF_POSTDEC;  break;
 	    case LSL_INCREMENT_POST :  variable->value.identifierValue->flags |= MF_POSTINC;  break;
 	}
+	variable->value.identifierValue->definition->flags = variable->value.identifierValue->flags;
     }
 
     return crement;
@@ -986,6 +987,12 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	    case LSL_VARIABLE :
 	    {
+		if (identifier)
+		{
+		    stat->identifier.text = identifier->value.identifierValue->name.text;
+		    identifier->value.identifierValue->definition = stat;
+		    stat->flags = identifier->value.identifierValue->flags;
+		}
 		break;
 	    }
 	    default :
@@ -1751,8 +1758,17 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    case LSL_JUMP :
 	    {
 #if LUASL_DIFF_CHECK
-	    if ((statement->ignorable) && (statement->ignorable[1]))
-		fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+		if ((statement->ignorable) && (statement->ignorable[1]))
+		    fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
+#endif
+		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
+		break;
+	    }
+	    case LSL_LABEL :
+	    {
+#if LUASL_DIFF_CHECK
+		if ((statement->ignorable) && (statement->ignorable[1]))
+		    fwrite(eina_strbuf_string_get(statement->ignorable[1]), 1, eina_strbuf_length_get(statement->ignorable[1]), file);
 #endif
 		fprintf(file, "%s", tokens[statement->type - lowestToken]->toKen);
 		break;
@@ -1876,6 +1892,18 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    fprintf(file, ";");
 	    if (!LUASL_DIFF_CHECK)
 		fprintf(file, "\n");
+	}
+
+	if ((LSL_VARIABLE == statement->type) && (OM_LUA == mode) && (MF_LOCAL & statement->flags))
+	{
+	    const char *name = statement->identifier.text;
+
+//	    if ((MF_PREDEC | MF_PREINC | MF_POSTDEC | MF_POSTINC)  & statement->flags)
+//		fprintf(file, "\n");
+	    if (MF_PREDEC  & statement->flags)	fprintf(file, "local function preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
+	    if (MF_PREINC  & statement->flags)	fprintf(file, "local function preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
+	    if (MF_POSTDEC & statement->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s - 1;  return temp;  end\n", name, name, name, name);
+	    if (MF_POSTINC & statement->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s + 1;  return temp;  end\n", name, name, name, name);
 	}
 
 	if (statement->elseBlock)
@@ -2090,21 +2118,6 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
 	}
 	else
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
-
-	if (OM_LUA == mode)
-	{
-	    if ((LSL_VARIABLE == content->toKen->type) && (MF_LOCAL & content->flags))
-	    {
-		const char *name = content->value.identifierValue->name.text;
-
-		if ((MF_PREDEC | MF_PREINC | MF_POSTDEC | MF_POSTINC)  & content->value.identifierValue->flags)
-		    fprintf(file, "\n");
-		if (MF_PREDEC  & content->value.identifierValue->flags)	fprintf(file, "local function preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
-		if (MF_PREINC  & content->value.identifierValue->flags)	fprintf(file, "local function preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
-		if (MF_POSTDEC & content->value.identifierValue->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s - 1;  return temp;  end\n", name, name, name, name);
-		if (MF_POSTDEC & content->value.identifierValue->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s + 1;  return temp;  end\n", name, name, name, name);
-	    }
-	}
     }
 }
 
