@@ -1837,33 +1837,90 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
     {
-	switch (content->toKen->type)
+	if (OM_LSL == mode)
 	{
-	    case LSL_DECREMENT_PRE :
-	    case LSL_INCREMENT_PRE :
+	    switch (content->toKen->type)
 	    {
-		fprintf(file, "%s", content->toKen->toKen);
+		case LSL_DECREMENT_PRE :
+		case LSL_INCREMENT_PRE :
+		{
+		    fprintf(file, "%s", content->toKen->toKen);
 #if LUASL_DIFF_CHECK
-		if (content->value.identifierValue->ignorable)
-		    fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+		    if (content->value.identifierValue->ignorable)
+			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
 #endif
-		outputText(file, &(content->value.identifierValue->name), FALSE);
-		break;
-	    }
-	    case LSL_DECREMENT_POST :
-	    case LSL_INCREMENT_POST :
-	    {
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    break;
+		}
+		case LSL_DECREMENT_POST :
+		case LSL_INCREMENT_POST :
+		{
 #if LUASL_DIFF_CHECK
-		if (content->value.identifierValue->ignorable)
-		    fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+		    if (content->value.identifierValue->ignorable)
+			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
 #endif
-		outputText(file, &(content->value.identifierValue->name), FALSE);
-		fprintf(file, "%s", content->toKen->toKen);
-		break;
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    fprintf(file, "%s", content->toKen->toKen);
+		    break;
+		}
+		default :
+		    break;
 	    }
-	    default :
-		break;
 	}
+	else if (OM_LUA == mode)
+	{
+	    /*
+		This gets tricky, coz crements can be embedded inside other expressions.
+		Even worse, assignment in Lua is a statement, NOT an expression.
+		Tend to be used in for statements, but we convert those to whiles with seperate statements anyway.
+		Tend to be used in conditionals to.
+		For later - Lua does not have assignment shortcuts like +=, which can't help here either.
+	    */ 
+	    switch (content->toKen->type)
+	    {
+		case LSL_DECREMENT_PRE :
+		case LSL_INCREMENT_PRE :
+		{
+		    /* TODO -
+			Damn, gotta put the function call out BEFORE the statment, which has alreadf been put out.
+		    */
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    if (LSL_DECREMENT_PRE == content->toKen->type)
+			fprintf(file, " = preDecrement(");
+		    else
+			fprintf(file, " = preIncrement(");
+#if LUASL_DIFF_CHECK
+		    if (content->value.identifierValue->ignorable)
+			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+#endif
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    fprintf(file, ")");
+		    break;
+		}
+		case LSL_DECREMENT_POST :
+		case LSL_INCREMENT_POST :
+		{
+		    /* TODO -
+			Find the end of the statement and put it there.
+		    */
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    if (LSL_DECREMENT_POST == content->toKen->type)
+			fprintf(file, " = postDecrement(");
+		    else
+			fprintf(file, " = postIncrement(");
+#if LUASL_DIFF_CHECK
+		    if (content->value.identifierValue->ignorable)
+			fwrite(eina_strbuf_string_get(content->value.identifierValue->ignorable), 1, eina_strbuf_length_get(content->value.identifierValue->ignorable), file);
+#endif
+		    outputText(file, &(content->value.identifierValue->name), FALSE);
+		    fprintf(file, ")");
+		    break;
+		}
+		default :
+		    break;
+	    }
+	}
+
     }
 }
 
@@ -2117,6 +2174,12 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	out = fopen(luaName, "w");
 	if (out)
 	{
+	    fprintf(out, "--// Pre declared helper stuff.\n");
+	    fprintf(out, "function preDecrement(x)  x = x - 1; return x; end;\n");
+	    fprintf(out, "function preIncrement(x)  x = x + 1; return x; end;\n");
+	    fprintf(out, "function postDecrement(x) x = x - 1; return x; end;\n");
+	    fprintf(out, "function postIncrement(x) x = x + 1; return x; end;\n");
+	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
 	    fclose(out);
 	}
