@@ -289,9 +289,9 @@ function 		LSL.llDialog(--[[key]] avatar, --[[string]] caption, --[[list]] arseB
 function --[[integer]] 	LSL.llListen(--[[integer]] channel, --[[string]] name, --[[key]] id, --[[string]] msg) return 0 end;
 function 		LSL.llListenRemove(--[[integer]] handle) end;
 function 		LSL.llOwnerSay(--[[string]] text) print("Owner say: " .. text); end;
-function 		LSL.llSay(--[[integer]] channel, --[[string]] text) print("Channel say" .. channel .. ": " .. text); end;
-function 		LSL.llShout(--[[integer]] channel, --[[string]] text) print("Channel shout" .. channel .. ": " .. text); end;
-function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) print("Channel whisper" .. channel .. ": " .. text); end;
+function 		LSL.llSay(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " say: " .. text); end;
+function 		LSL.llShout(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " shout: " .. text); end;
+function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " whisper: " .. text); end;
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
 
