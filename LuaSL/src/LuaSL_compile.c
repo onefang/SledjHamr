@@ -2280,8 +2280,18 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
 	    outputText(file, &(content->value.identifierValue->name), !(LSL_NOIGNORE & content->toKen->flags));
 	    if (OM_LUA == mode)
 	    {
-		// TODO - should output a default value depending on type.
-		fprintf(file, " = nil");
+		switch (content->basicType)
+		{
+		    case OT_bool	:  fprintf(file, " = false");			break;
+		    case OT_integer	:  fprintf(file, " = 0");			break;
+		    case OT_float	:  fprintf(file, " = 0.0");			break;
+		    case OT_key		:  fprintf(file, " = _LSL.NULL_KEY");		break;
+		    case OT_list	:  fprintf(file, " = {}");			break;
+		    case OT_rotation	:  fprintf(file, " = _LSL.ZERO_ROTATION");	break;
+		    case OT_string	:  fprintf(file, " = \"\"");			break;
+		    case OT_vector	:  fprintf(file, " = _LSL.ZERO_VECTOR");	break;
+		    default		:  fprintf(file, " = nil");			break;
+		}
 	    }
 	}
 	else
