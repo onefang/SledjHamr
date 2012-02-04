@@ -1,13 +1,6 @@
 #include "LuaSL.h"
 
-/* TODO - problem dejour
-
-    RefPos.z += (float) Zoffset / 100.;
-
-Gets converted to -
-
-    RefPos.z --[[+=]] = RefPos +  --[[float]] Zoffset/100.;
-
+/* TODO - problem de jour
 */
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
@@ -1696,7 +1689,10 @@ else
 		}
 		if ((LSL_ASSIGNMENT & leaf->toKen->flags) && (LSL_ASSIGNMENT_PLAIN != leaf->toKen->type))
 		{
-		    fprintf(file, " --[[%s]] = %s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->toKen->toKen);
+		    if (leaf->left->value.identifierValue->sub)
+			fprintf(file, " --[[%s]] = %s.%s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->left->value.identifierValue->sub, leaf->toKen->toKen);
+		    else
+			fprintf(file, " --[[%s]] = %s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->toKen->toKen);
 		}
 		else if (LSL_TYPE & leaf->toKen->flags)
 		{

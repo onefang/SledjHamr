@@ -186,8 +186,8 @@ LSL.TYPE_INVALID			= 0;
 LSL.NULL_KEY				= "00000000-0000-0000-0000-000000000000";
 LSL.EOF					= "\n\n\n";
 
-LSL.ZERO_ROTATION			= {0.0, 0.0, 0.0, 1.0};
-LSL.ZERO_VECTOR				= {0.0, 0.0, 0.0};
+LSL.ZERO_ROTATION			= {x=0.0, y=0.0, z=0.0, s=1.0};
+LSL.ZERO_VECTOR				= {x=0.0, y=0.0, z=0.0};
 
 -- TODO - Temporary dummy variables to got vector and rotation thingies to work for now.
 
