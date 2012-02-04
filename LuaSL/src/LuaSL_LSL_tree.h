@@ -156,7 +156,8 @@ typedef enum
     MF_PREDEC		= 16,
     MF_PREINC		= 32,
     MF_POSTDEC		= 64,
-    MF_POSTINC		= 128
+    MF_POSTINC		= 128,
+    MF_LSLCONST		= 256
 } miscFlags;
 
 struct _allowedTypes
@@ -303,6 +304,7 @@ struct _LSL_Function
 #endif
     Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
     LSL_Block	*block;
+    miscFlags	flags;
 };
 
 struct _LSL_FunctionCall

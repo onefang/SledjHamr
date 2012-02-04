@@ -261,8 +261,14 @@ static LSL_Leaf *findFunction(LuaSL_compiler *compiler, const char *name)
     {
 	if (NULL == func)
 	    func = eina_hash_find(constants.functions, name);
-	if (NULL == func)
+	if (NULL != func)
+	{
+	    func->flags |= MF_LSLCONST;
+	    func->value.functionValue->flags |= MF_LSLCONST;
+	}
+	else
 	    func = eina_hash_find(compiler->script.functions, name);
+	
     }
 
     return func;
@@ -298,7 +304,12 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 
 	if (NULL == var)
 	    var = eina_hash_find(constants.variables, name);
-	if (NULL == var)
+	if (NULL != var)
+	{
+	    var->flags |= MF_LSLCONST;
+	    var->value.identifierValue->flags |= MF_LSLCONST;
+	}
+	else
 	    var = eina_hash_find(compiler->script.variables, name);
     }
 
