@@ -254,12 +254,10 @@ state load {
 
         integer ix;
         integer count;
-        ix = myListFind(buttons, "-");
-        while (ix != -1) {
+        while ((ix = myListFind(buttons, "-")) != -1) {
             ++count;
             buttons = llDeleteSubList(buttons, ix, ix);
             commands = llDeleteSubList(commands, ix, ix);
-            ix = myListFind(buttons, "-");
         }
         if (count) {
             for (ix = 1; ix < llGetListLength(buttonindex); ++ix) {
