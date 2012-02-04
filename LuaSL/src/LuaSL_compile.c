@@ -303,13 +303,15 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 	}
 
 	if (NULL == var)
-	    var = eina_hash_find(constants.variables, name);
-	if (NULL != var)
 	{
-	    var->flags |= MF_LSLCONST;
-	    var->value.identifierValue->flags |= MF_LSLCONST;
+	    var = eina_hash_find(constants.variables, name);
+	    if (var)
+	    {
+		var->flags |= MF_LSLCONST;
+		var->value.identifierValue->flags |= MF_LSLCONST;
+	    }
 	}
-	else
+	if (NULL == var)
 	    var = eina_hash_find(compiler->script.variables, name);
     }
 
@@ -2119,12 +2121,16 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	}
 	else if (OM_LUA == mode)
 	{
+	    if (MF_LOCAL & content->value.identifierValue->flags)
+		fprintf(file, " _");
+	    else
+		fprintf(file, " _LSL.");
 	    switch (content->toKen->type)
 	    {
-		case LSL_DECREMENT_PRE :	fprintf(file, " _LSL.preDecrement");		break;
-		case LSL_INCREMENT_PRE :	fprintf(file, " _LSL.preIncrement");		break;
-		case LSL_DECREMENT_POST :	fprintf(file, " _LSL.postDecrement");	break;
-		case LSL_INCREMENT_POST :	fprintf(file, " _LSL.postIncrement");	break;
+		case LSL_DECREMENT_PRE :	fprintf(file, "preDecrement");		break;
+		case LSL_INCREMENT_PRE :	fprintf(file, "preIncrement");		break;
+		case LSL_DECREMENT_POST :	fprintf(file, "postDecrement");	break;
+		case LSL_INCREMENT_POST :	fprintf(file, "postIncrement");	break;
 		default :
 		    break;
 	    }
@@ -2217,6 +2223,8 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
 	boolean first = TRUE;
 
 	// TODO - should output it's own ignorable here.
+	if ((OM_LUA == mode) && (MF_LSLCONST & call->function->flags))
+	    fprintf(file, "_LSL.");
 	outputText(file, &(call->function->name), FALSE);	// Don't output the function definitions ignorable.
 	fprintf(file, "(");
 	EINA_INARRAY_FOREACH((&(call->params)), param)
@@ -2242,6 +2250,8 @@ static void outputIdentifierToken(FILE *file, outputMode mode, LSL_Leaf *content
     {
 	if (LSL_IDENTIFIER == content->toKen->type)
 	{
+	    if ((OM_LUA == mode) && (MF_LSLCONST & content->value.identifierValue->flags))
+		fprintf(file, "_LSL.");
 	    outputText(file, &(content->value.identifierValue->name), FALSE);
 	    if (content->value.identifierValue->sub)
 		fprintf(file, ".%s", content->value.identifierValue->sub);
@@ -2427,7 +2437,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    fprintf(out, "local _bit = require(\"bit\")\n");
 	    fprintf(out, "local _LSL = require(\"LSL\")\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
-	    fprintf(out, "\n\n--_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
+	    fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
 	    fprintf(out, "\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
