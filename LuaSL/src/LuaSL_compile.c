@@ -1,24 +1,14 @@
 #include "LuaSL.h"
 
-/* TODO -
-Bit of a problem, but I think it will go away once llGetSubString() is implemented.
-The problem is that Lua can't convert the string "0x" to a number, though it's fine with "0x0".
-In LSL any string that does not represent a number gets converted to 0 by a typecast.
+/* TODO - problem dejour
 
-In other cases the LSL code is typecasting a string to an integer, but Lua can't coz it's not a real number in the string.
+    RefPos.z += (float) Zoffset / 100.;
 
-Sooo, should actually implement that typecast.
+Gets converted to -
 
-function  --[[integer]] channel()
-  return  --[[(integer)]] ("0x" .. _LSL.llGetSubString( --[[(string)]] _LSL.llGetKey(), -4, -1));
-end 
+    RefPos.z --[[+=]] = RefPos +  --[[float]] Zoffset/100.;
 
-function setBalls( --[[string]] cmd)
-  local  --[[integer]] ch=channel();
-  _LSL.llSay(ch+ix, cmd);
-end  
 */
-
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
