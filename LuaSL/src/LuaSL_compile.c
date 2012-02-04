@@ -1845,7 +1845,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		    fprintf(file, "stateChange(");
 		    if (statement->identifier.text)
 			outputText(file, &(statement->identifier), TRUE);
-		    fprintf(file, ")");
+		    fprintf(file, "State)");
 		}
 		break;
 	    }
@@ -2094,7 +2094,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	else if (OM_LUA == mode)
 	{
 	    if (func->state)
-		fprintf(file, "\n\n%s.%s = function(", func->state, func->name.text);
+		fprintf(file, "\n\n%sState.%s = function(", func->state, func->name.text);
 	    else
 	    {
 		fprintf(file, "\n\nfunction ");
@@ -2269,7 +2269,7 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    {
 		fprintf(file, "\n\n--[[state]] ");
 		outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
-		fprintf(file, " = {};");
+		fprintf(file, "State = {};");
 		outputRawBlock(file, mode, state->block, FALSE);
 	    }
 	}
@@ -2336,15 +2336,15 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	{
 	    fprintf(out, "--// Pre declared helper stuff.\n");
 	    fprintf(out, "local bit = require(\"bit\")\n");
-	    fprintf(out, "currentState = { state_exit = function() end }\n");
+	    fprintf(out, "currentState = {}\n");
 	    fprintf(out, "function preDecrement(name)  _G[name] = _G[name] - 1; return _G[name]; end;\n");
 	    fprintf(out, "function preIncrement(name)  _G[name] = _G[name] + 1; return _G[name]; end;\n");
 	    fprintf(out, "function postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;\n");
 	    fprintf(out, "function postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;\n");
-	    fprintf(out, "function stateChange(x) currentState.state_exit(); curruntState = x; currentState.state_entry(); end;\n");
+	    fprintf(out, "function stateChange(x) if nil ~= currentState.state_exit then currentState.state_exit(); end currentState = x; if nil ~= currentState.state_entry then currentState.state_entry(); end end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
-//	    fprintf(out, "\n\nstateChange(default)\n");
+	    fprintf(out, "\n\n--stateChange(defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
 	    fprintf(out, "\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
