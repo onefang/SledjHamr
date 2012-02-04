@@ -1,12 +1,15 @@
 -- A module of LSL stuffs.
 -- TODO - currently there is a constants.lsl file.  Move it into here.
 --   It contains LSL constants and ll*() functions stubs.
---   The compiler compiles this into a LSL_Scripts structure at startup, 
+--   The compiler compiles that into a LSL_Scripts structure at startup, 
 --   then uses that for function and variable lookups, as well as looking up in the current script.
---   Using a module means it gets compiled each time?  Maybe not if I can use bytecode files.  Perhaps LuaJIT caches these?
+--   I can run this at compiler startup time, then iterate through the LSL table from C to generate that LSL_Script structure.
+
+-- Using a module means it gets compiled each time?  Maybe not if I can use bytecode files.  Perhaps LuaJIT caches these?
+--   Does not seem to be slowing it down noticably, but that might change once the stubs are filled out.
 
 -- Use it like this -
--- local lsl = require 'lsl'
+-- local _LSL = require 'LSL'
 
 --[[ From http://lua-users.org/wiki/LuaModuleFunctionCritiqued
 A related note on C code: The luaL_register [9] function in C is
@@ -291,6 +294,22 @@ function 		LSL.llShout(--[[integer]] channel, --[[string]] text) end;
 function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) end;
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
+
+function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
+function LSL.preIncrement(name) _G[name] = _G[name] + 1; return _G[name]; end;
+function LSL.postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;
+function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;
+
+local currentState = {}
+function LSL.stateChange(x)
+    if nil ~= currentState.state_exit then
+	currentState.state_exit(); 
+    end
+    currentState = x;
+    if nil ~= currentState.state_entry then 
+	currentState.state_entry(); 
+    end
+end;
 
 
 return LSL;
