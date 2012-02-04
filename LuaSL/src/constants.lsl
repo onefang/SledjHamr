@@ -267,4 +267,3 @@ integer		llListen(integer channel, string name, key id, string msg){}
 
 		llMessageLinked(integer link, integer num, string text, key aKey){}
 
-
