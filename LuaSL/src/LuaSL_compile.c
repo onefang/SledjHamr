@@ -1842,7 +1842,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		}
 		else if (OM_LUA == mode)
 		{
-		    fprintf(file, "stateChange(");
+		    fprintf(file, "stateChange(_");
 		    if (statement->identifier.text)
 			outputText(file, &(statement->identifier), TRUE);
 		    fprintf(file, "State)");
@@ -1946,10 +1946,10 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 
 //	    if ((MF_PREDEC | MF_PREINC | MF_POSTDEC | MF_POSTINC)  & statement->flags)
 //		fprintf(file, "\n");
-	    if (MF_PREDEC  & statement->flags)	fprintf(file, "local function preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
-	    if (MF_PREINC  & statement->flags)	fprintf(file, "local function preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
-	    if (MF_POSTDEC & statement->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s - 1;  return temp;  end\n", name, name, name, name);
-	    if (MF_POSTINC & statement->flags)	fprintf(file, "local function postDecrement_%s() local temp = %s; %s = %s + 1;  return temp;  end\n", name, name, name, name);
+	    if (MF_PREDEC  & statement->flags)	fprintf(file, "local function _preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
+	    if (MF_PREINC  & statement->flags)	fprintf(file, "local function _preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
+	    if (MF_POSTDEC & statement->flags)	fprintf(file, "local function _postDecrement_%s() local _temp = %s; %s = %s - 1;  return _temp;  end\n", name, name, name, name);
+	    if (MF_POSTINC & statement->flags)	fprintf(file, "local function _postDecrement_%s() local _temp = %s; %s = %s + 1;  return _temp;  end\n", name, name, name, name);
 	}
 
 	if (statement->elseBlock)
@@ -1970,12 +1970,12 @@ bit.band(swap= --[[(integer)]] ( --[[(string)]] pkey), 1) ;
 
 	switch (leaf->toKen->type)
 	{
-	    case LSL_BIT_AND :		fprintf(file, " bit.band(");	break;
-	    case LSL_BIT_OR  :		fprintf(file, " bit.bor(");	break;
-	    case LSL_BIT_XOR :		fprintf(file, " bit.xor(");	break;
-	    case LSL_BIT_NOT :		fprintf(file, " bit.bnot(");	break;
-	    case LSL_LEFT_SHIFT :	fprintf(file, " bit.lshift(");	break;
-	    case LSL_RIGHT_SHIFT :	fprintf(file, " bit.rshift(");	break;
+	    case LSL_BIT_AND :		fprintf(file, " _bit.band(");	break;
+	    case LSL_BIT_OR  :		fprintf(file, " _bit.bor(");	break;
+	    case LSL_BIT_XOR :		fprintf(file, " _bit.xor(");	break;
+	    case LSL_BIT_NOT :		fprintf(file, " _bit.bnot(");	break;
+	    case LSL_LEFT_SHIFT :	fprintf(file, " _bit.lshift(");	break;
+	    case LSL_RIGHT_SHIFT :	fprintf(file, " _bit.rshift(");	break;
 	    default : break;
 	}
 	outputLeaf(file, mode, leaf->left);
@@ -2032,10 +2032,10 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	{
 	    switch (content->toKen->type)
 	    {
-		case LSL_DECREMENT_PRE :	fprintf(file, " preDecrement");		break;
-		case LSL_INCREMENT_PRE :	fprintf(file, " preIncrement");		break;
-		case LSL_DECREMENT_POST :	fprintf(file, " postDecrement");	break;
-		case LSL_INCREMENT_POST :	fprintf(file, " postIncrement");	break;
+		case LSL_DECREMENT_PRE :	fprintf(file, " _preDecrement");		break;
+		case LSL_INCREMENT_PRE :	fprintf(file, " _preIncrement");		break;
+		case LSL_DECREMENT_POST :	fprintf(file, " _postDecrement");	break;
+		case LSL_INCREMENT_POST :	fprintf(file, " _postIncrement");	break;
 		default :
 		    break;
 	    }
@@ -2094,7 +2094,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	else if (OM_LUA == mode)
 	{
 	    if (func->state)
-		fprintf(file, "\n\n%sState.%s = function(", func->state, func->name.text);
+		fprintf(file, "\n\n_%sState.%s = function(", func->state, func->name.text);
 	    else
 	    {
 		fprintf(file, "\n\nfunction ");
@@ -2267,7 +2267,7 @@ static void outputStateToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    }
 	    else if (OM_LUA == mode)
 	    {
-		fprintf(file, "\n\n--[[state]] ");
+		fprintf(file, "\n\n--[[state]] _");
 		outputText(file, &(state->name), !(LSL_NOIGNORE & content->toKen->flags));
 		fprintf(file, "State = {};");
 		outputRawBlock(file, mode, state->block, FALSE);
@@ -2335,16 +2335,16 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	if (out)
 	{
 	    fprintf(out, "--// Pre declared helper stuff.\n");
-	    fprintf(out, "local bit = require(\"bit\")\n");
-	    fprintf(out, "currentState = {}\n");
-	    fprintf(out, "function preDecrement(name)  _G[name] = _G[name] - 1; return _G[name]; end;\n");
-	    fprintf(out, "function preIncrement(name)  _G[name] = _G[name] + 1; return _G[name]; end;\n");
-	    fprintf(out, "function postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;\n");
-	    fprintf(out, "function postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;\n");
-	    fprintf(out, "function stateChange(x) if nil ~= currentState.state_exit then currentState.state_exit(); end currentState = x; if nil ~= currentState.state_entry then currentState.state_entry(); end end;\n");
+	    fprintf(out, "local _bit = require(\"bit\")\n");
+	    fprintf(out, "_currentState = {}\n");
+	    fprintf(out, "function _preDecrement(name)  _G[name] = _G[name] - 1; return _G[name]; end;\n");
+	    fprintf(out, "function _preIncrement(name)  _G[name] = _G[name] + 1; return _G[name]; end;\n");
+	    fprintf(out, "function _postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;\n");
+	    fprintf(out, "function _postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;\n");
+	    fprintf(out, "function _stateChange(x) if nil ~= _currentState.state_exit then _currentState.state_exit(); end _currentState = x; if nil ~= _currentState.state_entry then _currentState.state_entry(); end end;\n");
 	    fprintf(out, "--// Generated code goes here.\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
-	    fprintf(out, "\n\n--stateChange(defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
+	    fprintf(out, "\n\n--_stateChange(_defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
 	    fprintf(out, "\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
