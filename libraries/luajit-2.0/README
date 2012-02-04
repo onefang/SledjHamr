@@ -1,4 +1,5 @@
 README for LuaJIT 2.0.0-beta9
+Patched with http://luajit.org/download/beta9_hotfix1.patch
 -----------------------------
 
 LuaJIT is a Just-In-Time (JIT) compiler for the Lua programming language.
