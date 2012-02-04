@@ -1,39 +1,5 @@
 #include "LuaSL.h"
 
-/* TODO - 
-
-Assignments in the middle of expressions is legal in LSL, but not in Lua.
-The big complication is that they often happen in the conditionals of flow control statements.  That's a big bitch.
-
-So things like -
-
-    while ((x = doSomething()) == foo)
-    {
-	buggerAround();
-    }
-
-Turns into - 
-
-    x = doSomething();
-    while (x == foo)
-    {
-	buggerAround();
-	x = doSomething();
-    }
-
-http://lua-users.org/wiki/StatementsInExpressions might be helpful.  Which suggests something like this -
-
-    while ( (function() x = doSomething(); return x; end)() == foo)
-    {
-	buggerAround();
-    }
-
-The remaining problem is when to recognise the need to do that.
-Note that assignments are really low precedence.
-    While adding operations
-	Flag the assignment expressions
-    If there is an assignment expression (not operation) on the RHS of an operation, we need to do this?
-*/
 
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
@@ -506,6 +472,90 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		}
 		break;
 	}
+
+	/* Flag assignments for the "assignments are statements, which can't happen inside expressions" test.
+	 *
+	 * Assignments in the middle of expressions are legal in LSL, but not in Lua.
+	 * The big complication is that they often happen in the conditionals of flow control statements.  That's a big bitch.
+	 *
+	 * So things like -
+	 *
+	 *    while ((x = doSomething()) == foo)
+	 *    {
+	 *	buggerAround();
+	 *    }
+	 *
+	 * Turns into - 
+	 *
+	 *    x = doSomething();
+	 *    while (x == foo)
+	 *    {
+	 *	buggerAround();
+	 *	x = doSomething();
+	 *    }
+	 *
+	 * http://lua-users.org/wiki/StatementsInExpressions was helpful.  Which suggests something like this -
+	 *
+	 *    while ( (function() x = doSomething(); return x; end)() == foo)
+	 *    {
+	 *	buggerAround();
+	 *    }
+	 *
+	 * The remaining problem is when to recognise the need to do that.
+	 * That's what this code and the matching code in addParenthesis() does.
+	 */
+	// TODO - Only got one of these in my test scripts, so leave all this debugging shit in until it's been tested more.
+	if (left)
+	{
+	    if (left->flags & MF_ASSIGNEXP)
+	    {
+//if ((left) && (right))
+//    printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
+//else if (left)
+//    printf("%s %s NORIGHT\n", left->toKen->toKen, lval->toKen->toKen);
+//else if (right)
+//    printf("NOLEFT %s %s\n", lval->toKen->toKen, right->toKen->toKen);
+//else
+//    printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
+//		printf("############################################################################## left\n");
+		left->flags |= MF_WRAPFUNC;
+		if (LSL_PARENTHESIS_OPEN == left->toKen->type)
+		    left->value.parenthesis->flags |= MF_WRAPFUNC;
+	    }
+	}
+	if (lval)
+	{
+//	    if (lval->flags & MF_ASSIGNEXP)
+//		printf("############################################################################## lval %s %s\n", left->toKen->toKen, right->toKen->toKen);
+	    if (LSL_ASSIGNMENT & lval->toKen->flags)
+	    {
+		lval->flags |= MF_ASSIGNEXP;
+////		printf("******************* lval %s %s\n", left->toKen->toKen, right->toKen->toKen);
+		if (LSL_IDENTIFIER == left->toKen->type)  // It always should be.
+		{
+		    left->flags |= MF_ASSIGNEXP;
+////		    printf("$$$$$$$$$$$$$$$$$ lval\n");
+		}
+	    }
+	}
+	// TODO - Don't think I have to do this on the right.
+	if (right)
+	{
+	    if (right->flags & MF_ASSIGNEXP)
+	    {
+if ((left) && (right))
+    printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
+else if (left)
+    printf("%s %s NORIGHT\n", left->toKen->toKen, lval->toKen->toKen);
+else if (right)
+    printf("NOLEFT %s %s\n", lval->toKen->toKen, right->toKen->toKen);
+else
+    printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
+		printf("############################################################################## right\n");
+		right->flags |= MF_WRAPFUNC;
+	    }
+	}
+
 	if (OT_invalid == lval->basicType)
 	{
 	    const char *leftType = "", *rightType = "", *leftToken = "", *rightToken = "";
@@ -844,7 +894,14 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
 	{
 	    lval->value.parenthesis = parens;
 	    if (expr)
+	    {
 		lval->basicType = expr->basicType;
+		// Propagate these flag inwards and outwards.
+		if (MF_ASSIGNEXP & expr->flags)
+		    lval->flags |= MF_ASSIGNEXP;
+		if (MF_WRAPFUNC & expr->flags)
+		    parens->flags |= MF_WRAPFUNC;
+	    }
 	}
     }
     return lval;
@@ -1600,6 +1657,18 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	{
 	    if (OM_LUA == mode)
 	    {
+		if (MF_WRAPFUNC & leaf->flags)
+		{
+// TODO - Leaving this here in case we trip over one.
+if ((leaf->left) && (leaf->right))
+    printf("%s %s %s\n", leaf->left->toKen->toKen, leaf->toKen->toKen, leaf->right->toKen->toKen);
+else if (leaf->left)
+    printf("%s %s NORIGHT\n", leaf->left->toKen->toKen, leaf->toKen->toKen);
+else if (leaf->right)
+    printf("NOLEFT %s %s\n", leaf->toKen->toKen, leaf->right->toKen->toKen);
+else
+    printf("NOLEFT %s NORIGHT\n", leaf->toKen->toKen);
+		}
 		if ((LSL_ASSIGNMENT & leaf->toKen->flags) && (LSL_ASSIGNMENT_PLAIN != leaf->toKen->type))
 		{
 		    fprintf(file, " --[[%s]] = %s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->toKen->toKen);
@@ -1668,25 +1737,34 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block, boolea
 
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
 {
-	if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
-	{
-	    fprintf(file, " --[[(%s)]] ", typeName);
-	    outputLeaf(file, mode, parenthesis->contents);
-	    return;
-	}
+    if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
+    {
+	fprintf(file, " --[[(%s)]] ", typeName);
+	outputLeaf(file, mode, parenthesis->contents);
+	return;
+    }
 
+    if ((OM_LUA == mode) && (MF_WRAPFUNC & parenthesis->flags))
+	fprintf(file, " (function() ");
+    else
 	fprintf(file, "(");
-	if (LSL_TYPECAST_OPEN == parenthesis->type)
-	    fprintf(file, "%s", typeName);	// TODO - We are missing the type ignorable text here.
-	else
-	    outputLeaf(file, mode, parenthesis->contents);
+    if (LSL_TYPECAST_OPEN == parenthesis->type)
+	fprintf(file, "%s", typeName);	// TODO - We are missing the type ignorable text here.
+    else
+	outputLeaf(file, mode, parenthesis->contents);
+    if ((OM_LUA == mode) && (MF_WRAPFUNC & parenthesis->flags))
+	fprintf(file, "; return x; end)() ");
+    else
+    {
 #if LUASL_DIFF_CHECK
 	fprintf(file, "%s)", eina_strbuf_string_get(parenthesis->rightIgnorable));
 #else
 	fprintf(file, ")");
 #endif
-	if (LSL_TYPECAST_OPEN == parenthesis->type)
-	    outputLeaf(file, mode, parenthesis->contents);
+    }
+
+    if (LSL_TYPECAST_OPEN == parenthesis->type)
+	outputLeaf(file, mode, parenthesis->contents);
 }
 
 static void outputText(FILE *file, LSL_Text *text, boolean ignore)

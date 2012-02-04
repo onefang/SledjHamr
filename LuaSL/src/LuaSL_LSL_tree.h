@@ -150,11 +150,13 @@ typedef enum
 {
     MF_NONE		= 0,
     MF_LOCAL		= 1,
-    MF_NOASSIGN		= 2,
-    MF_PREDEC		= 4,
-    MF_PREINC		= 8,
-    MF_POSTDEC		= 16,
-    MF_POSTINC		= 32
+    MF_NOASSIGN		= 2,	// These two are for completely different purposes.  This one is for variable definitions with no assignment.
+    MF_ASSIGNEXP	= 4,	// These two are for completely different purposes.  This one is for assignments being used as expressions.
+    MF_WRAPFUNC		= 8,
+    MF_PREDEC		= 16,
+    MF_PREINC		= 32,
+    MF_POSTDEC		= 64,
+    MF_POSTINC		= 128
 } miscFlags;
 
 struct _allowedTypes
@@ -232,6 +234,7 @@ struct _LSL_Parenthesis
     Eina_Strbuf		*rightIgnorable;
 #endif
     LSL_Type		type;
+    miscFlags		flags;
 };
 
 struct _LSL_Identifier	// For variables and function parameters.
