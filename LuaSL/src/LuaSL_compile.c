@@ -1217,7 +1217,11 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
     if (lval)
     {
 	if (type)
+	{
 	    lval->basicType = type->basicType;
+	    if ((expr) && (OT_integer == type->basicType))  // TODO - Should be from string, but I guess I'm not propagating basic types up from function calls and parenthesis?
+		lval->value.parenthesis->flags |= MF_TYPECAST;
+	}
 	// Actualy, at this point, type is no longer needed.
 	lval->toKen = tokens[LSL_TYPECAST_OPEN - lowestToken];
     }
@@ -1401,7 +1405,7 @@ Explicit type casting -
 			    Leading spaces are ignored, as are any characters after the run of digits.
 			    All other strings convert to 0.
 			    Which means "" and " " convert to 0.
-			    Strings in hexadecimal format will work.
+			    Strings in hexadecimal format will work, same in Lua (though Lua can't handle "0x", but "0x0" is fine).
 			keys <-> string
 			    No other typecasting can be done with keys.
 			float -> string
@@ -1770,8 +1774,13 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
 {
     if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
     {
-	fprintf(file, " --[[(%s)]] ", typeName);
+	if (MF_TYPECAST & parenthesis->flags)
+	    fprintf(file, " _LSL.%sTypecast(", typeName);
+	else
+	    fprintf(file, " --[[%s]] ", typeName);
 	outputLeaf(file, mode, parenthesis->contents);
+	if (MF_TYPECAST & parenthesis->flags)
+	    fprintf(file, ") ");
 	return;
     }
 

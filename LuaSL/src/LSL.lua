@@ -311,6 +311,38 @@ function LSL.stateChange(x)
     end
 end;
 
+function LSL.floatTypecast(x)
+    local temp = tonumber(x)
+    if nil == temp then temp = 0 end
+    return temp;
+end
+
+function LSL.integerTypecast(x)
+    local temp = tonumber(x)
+    if nil == temp then temp = 0 end
+    return temp;
+end
+
+function LSL.keyTypecast(x)
+    return "" .. x;
+end
+
+function LSL.listTypecast(x)
+    return {x};
+end
+
+function LSL.rotationTypecast(x)
+    return x;
+end
+
+function LSL.stringTypecast(x)
+    return "" .. x;
+end
+
+function LSL.vectorTypecast(x)
+    return x;
+end
+
 
 return LSL;
 
