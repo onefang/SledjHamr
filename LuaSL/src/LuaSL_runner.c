@@ -134,6 +134,7 @@ void runnerSetup(gameGlobals *game)
 
 void runLuaFile(gameGlobals *game, const char *filename)
 {
+//    PD("Starting %s", filename);
     newProc(filename, TRUE);
 
 // TODO, should set up our panic and errfunc as below.  Plus the other TODO stuff.
