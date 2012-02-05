@@ -109,6 +109,27 @@ static void dirList_run(const char *name, const char *path, void *data)
     }
 }
 
+static void dirList_quit(const char *name, const char *path, void *data)
+{
+    gameGlobals *game = data;
+    char buf[PATH_MAX];
+    char *ext = rindex(name, '.');
+
+    if (ext)
+    {
+	if (0 == strcmp(ext, ".out"))
+	{
+	    const char *status = NULL;
+
+	    snprintf(buf, sizeof(buf), "%s/%s.events", path, name);
+//	    PD("Quitting Lua script %s", buf);
+	    status = sendToChannel(buf, "quit()");
+	    if (status)
+		PE("Error trying to kill script %s : %s", buf, status);
+	}
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -257,6 +278,13 @@ main(int argc, char **argv)
 	    ecore_main_loop_begin();
 	    ecore_animator_del(ani);
 	    ecore_evas_free(game.ee);
+	}
+	else
+	{
+	    // Wait awhile, then quit all scripts we started, for testing.
+	    sleep(2);
+	    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+	    eina_file_dir_list(buf, EINA_TRUE, dirList_quit, &game);
 	}
 
 	runnerTearDown(&game);
