@@ -335,16 +335,40 @@ function LSL.stateChange(x)
   end
 end;
 
-function LSL.mainLoop(x)
-  LSL.stateChange(x);
-  --[[    TODO -
-	  Sits around waiting for events.  This should be "wait for a message" in luaproc.
-	    Incoming events can be the same format as the OpenSim SID.event.* protocol on the wiki.
-	    When we get an event, run it, then go back to waiting.
+function LSL.mainLoop(SID, x)
+  -- TODO - disabled the stuff that waits until I implement the stuff that makes it stop waiting.  lol
+  local sid = SID .. ".events"
+  local status, errorMsg = "disabled" -- = luaproc.newchannel(sid)
+  local result
 
-	  Need a FIFO stack of incoming events.
-	    Which will be in the C main thread, coz that's listening on the socket for us.
-    ]]
+  if not status then
+    print("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
+    return
+  end
+
+  LSL.stateChange(x);
+
+  -- TODO - Need a FIFO stack of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
+
+--  while true do
+    local message = luaproc.receive(sid)
+    if message then
+      result, errorMsg = loadstring(message)
+      if nil == result then
+	print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+      else
+	status, result = pcall(result())
+	if not status then
+	  print("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
+	elseif result then
+	  status, errorMsg = luaproc.send(sid, result)
+	  if not status then
+	    print("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	  end
+	end
+      end
+    end
+--  end
 end
 
 -- Typecasting stuff.
