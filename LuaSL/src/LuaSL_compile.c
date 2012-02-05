@@ -2095,80 +2095,6 @@ static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
 }
 
-static boolean doneParsing(LuaSL_compiler *compiler)
-{
-    gameGlobals *game = compiler->game;
-    boolean result = FALSE;
-
-    if (compiler->ast)
-    {
-	FILE *out;
-	char buffer[PATH_MAX];
-	char outName[PATH_MAX];
-	char luaName[PATH_MAX];
-	int count;
-
-	if (LUASL_DIFF_CHECK)
-	{
-	    strcpy(outName, compiler->fileName);
-	    strcat(outName, "2");
-	    out = fopen(outName, "w");
-	    if (out)
-	    {
-		char diffName[PATH_MAX];
-
-		strcpy(diffName, compiler->fileName);
-		strcat(diffName, ".diff");
-		outputLeaf(out, OM_LSL, compiler->ast);
-		fclose(out);
-		sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->fileName, outName, diffName);
-		count = system(buffer);
-		if (0 != count)
-		    PE("LSL output file is different - %s!", outName);
-		else
-		    result = TRUE;
-	    }
-	    else
-		PC("Unable to open file %s for writing!", outName);
-	}
-	strcpy(luaName, compiler->fileName);
-	strcat(luaName, ".lua");
-	out = fopen(luaName, "w");
-	if (out)
-	{
-	    fprintf(out, "--// Generated code goes here.\n\n");
-	    fprintf(out, "local _bit = require(\"bit\")\n");
-	    fprintf(out, "local _LSL = require(\"LSL\")\n\n");
-	    outputLeaf(out, OM_LUA, compiler->ast);
-	    fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.
-	    fprintf(out, "\n--// End of generated code.\n\n");
-	    fclose(out);
-	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
-	    count = system(buffer);
-	    if (0 != count)
-	    {
-		compiler->script.bugCount++;
-		PE("Lua compile stage failed for %s!", compiler->fileName);
-	    }
-	}
-	else
-	    PC("Unable to open file %s for writing!", luaName);
-    }
-
-    if (compiler->script.bugCount)
-	PE("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
-    else
-    {
-	if (compiler->script.warningCount)
-	    PW("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
-	else
-	    PI("%d errors and %d warnings in %s", compiler->script.bugCount, compiler->script.warningCount, compiler->fileName);
-	result = TRUE;
-    }
-
-    return result;
-}
-
 boolean compilerSetup(gameGlobals *game)
 {
     int i;
@@ -2294,7 +2220,76 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	result = TRUE;
     }
     else
-	result = doneParsing(&compiler);
+    {
+	result = FALSE;
+
+	if (compiler.ast)
+	{
+	    FILE *out;
+	    char buffer[PATH_MAX];
+	    char outName[PATH_MAX];
+	    char luaName[PATH_MAX];
+	    int count;
+
+	    if (LUASL_DIFF_CHECK)
+	    {
+		strcpy(outName, compiler.fileName);
+		strcat(outName, "2");
+		out = fopen(outName, "w");
+		if (out)
+		{
+		    char diffName[PATH_MAX];
+
+		    strcpy(diffName, compiler.fileName);
+		    strcat(diffName, ".diff");
+		    outputLeaf(out, OM_LSL, compiler.ast);
+		    fclose(out);
+		    sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler.fileName, outName, diffName);
+		    count = system(buffer);
+		    if (0 != count)
+			PE("LSL output file is different - %s!", outName);
+		    else
+			result = TRUE;
+		}
+		else
+		    PC("Unable to open file %s for writing!", outName);
+	    }
+	    strcpy(luaName, compiler.fileName);
+	    strcat(luaName, ".lua");
+	    out = fopen(luaName, "w");
+	    // Generate the Lua source code.
+	    if (out)
+	    {
+		fprintf(out, "--// Generated code goes here.\n\n");
+		fprintf(out, "local _bit = require(\"bit\")\n");
+		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
+		outputLeaf(out, OM_LUA, compiler.ast);
+		fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.
+		fprintf(out, "\n--// End of generated code.\n\n");
+		fclose(out);
+		sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
+		count = system(buffer);
+		if (0 != count)
+		{
+		    compiler.script.bugCount++;
+		    PE("Lua compile stage failed for %s!", compiler.fileName);
+		}
+	    }
+	    else
+		PC("Unable to open file %s for writing!", luaName);
+	}
+
+	if (compiler.script.bugCount)
+	    PE("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
+	else
+	{
+	    if (compiler.script.warningCount)
+		PW("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
+	    else
+		PI("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
+	    result = TRUE;
+	}
+    }
 
     if (NULL != compiler.file)
     {
