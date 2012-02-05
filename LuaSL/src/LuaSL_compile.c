@@ -2130,6 +2130,16 @@ boolean compilerSetup(gameGlobals *game)
     return FALSE;
 }
 
+static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
+{
+    FILE *out = ud;
+    int result = 0;
+
+    if (sz != fwrite(p, 1, sz, out))
+	result = -1;
+    return result;
+}
+
 boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 {
     boolean result = FALSE;
@@ -2260,6 +2270,9 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	    // Generate the Lua source code.
 	    if (out)
 	    {
+		lua_State *L;
+		int err;
+
 		fprintf(out, "--// Generated code goes here.\n\n");
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
@@ -2267,12 +2280,39 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.
 		fprintf(out, "\n--// End of generated code.\n\n");
 		fclose(out);
-		sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
-		count = system(buffer);
-		if (0 != count)
+
+		// Compile the Lua source code.
+		L = luaL_newstate();
+		luaL_openlibs(L);
+		/* This ends up pushing a function onto the stack for a lua_pcall() to use.
+		* The function is the compiled code. */
+		err = luaL_loadfile(L, luaName);
+		if (err)
 		{
 		    compiler.script.bugCount++;
-		    PE("Lua compile stage failed for %s!", compiler.fileName);
+		    if (LUA_ERRSYNTAX == err)
+			PE("Lua syntax error in %s: %s", luaName, lua_tostring(L, -1));
+		    else if (LUA_ERRFILE == err)
+			PE("Lua compile file error in %s: %s", luaName, lua_tostring(L, -1));
+		    else if (LUA_ERRMEM == err)
+			PE("Lua compile memory allocation error in %s: %s", luaName, lua_tostring(L, -1));
+		}
+		else
+		{
+		    strcat(luaName, ".lua.out");
+		    out = fopen(luaName, "w");
+		    if (out)
+		    {
+			err = lua_dump(L, luaWriter, out);
+			if (err)
+			{
+			    compiler.script.bugCount++;
+			    PE("Lua compile file error writing to %s", luaName);
+			}
+			fclose(out);
+		    }
+		    else
+			PC("Unable to open file %s for writing!", luaName);
 		}
 	    }
 	    else
