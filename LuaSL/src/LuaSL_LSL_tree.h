@@ -62,7 +62,6 @@ typedef enum
 } outputMode;
 
 typedef void (*outputToken) (FILE *file, outputMode mode, LSL_Leaf *content);
-typedef LSL_Leaf * (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 
 //#ifndef FALSE
 //typedef enum
@@ -175,7 +174,6 @@ struct _LSL_Token
     const char 		*toKen;
     LSL_Flags		flags;
     outputToken		output;
-    evaluateToken	evaluate;
 };
 
 struct _LSL_Text
