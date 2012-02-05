@@ -123,7 +123,7 @@ static void dirList_quit(const char *name, const char *path, void *data)
 
 	    snprintf(buf, sizeof(buf), "%s/%s.events", path, name);
 //	    PD("Quitting Lua script %s", buf);
-	    status = sendToChannel(buf, "_LSL.quit()");
+	    status = sendToChannel(buf, "quit()");
 	    if (status)
 		PE("Error trying to kill script %s : %s", buf, status);
 	}
