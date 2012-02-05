@@ -76,7 +76,7 @@ void luaproc_register_lib( lua_State *L );
 /* queue a luaproc that tried to send a message */
 void luaproc_queue_sender( luaproc lp );
 
-const char *sendToChannel(const char *chname, const char *message);
+const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn);
 
 /* queue a luaproc that tried to receive a message */
 void luaproc_queue_receiver( luaproc lp );

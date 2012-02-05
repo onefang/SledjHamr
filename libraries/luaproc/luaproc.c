@@ -496,13 +496,15 @@ luaproc luaproc_getself( lua_State *L ) {
 	return lp;
 }
 
+/* error messages for the sendToChannel function */
 const char *sendToChannelErrors[] =
 {
     "non-existent channel",
     "error scheduling process"
 };
 
-const char *sendToChannel(const char *chname, const char *message)
+/* send a message to a lua process */
+const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn)
 {
     const char *result = NULL;
     channel chan;
@@ -551,7 +553,11 @@ const char *sendToChannel(const char *chname, const char *message)
 	/* unlock channel access */
 	luaproc_unlock_channel(chan);
     }
+    else if (dst)
+	dst = &dstlp;
 
+    if (chn)
+	chn = &chan;
     return result;
 }
 
@@ -561,59 +567,16 @@ static int luaproc_send( lua_State *L ) {
 	channel chan;
 	luaproc dstlp, self;
 	const char *chname = luaL_checkstring( L, 1 );
+	const char *message = luaL_checkstring( L, 2 );
+	const char *result = sendToChannel(chname, message, &dstlp, &chan);
 
-// TODO - use the above new function to do the heavy lifting.
-
-	/* get exclusive access to operate on channels */
-	pthread_mutex_lock( &mutex_channel );
-
-	/* wait until channel is not in use */
-	while((( chan = channel_search( chname )) != NULL ) && ( pthread_mutex_trylock( channel_get_mutex( chan )) != 0 )) {
-		pthread_cond_wait( channel_get_cond( chan ), &mutex_channel );
-	}
-
-	/* free access to operate on channels */
-	pthread_mutex_unlock( &mutex_channel );
-
-	/* if channel is not found, return an error to Lua */
-	if ( chan == NULL ) {
+	if (result) {
 		lua_pushnil( L );
-		lua_pushstring( L, "non-existent channel" );
+		lua_pushstring( L, result );
 		return 2;
 	}
 
-	/* try to find a matching receiver */
-	dstlp = luaproc_dequeue_receiver( chan );
-
-	/* if a match is found, move values to it and (queue) wake it */
-	if ( dstlp != NULL ) {
-
-		/* move values between Lua states' stacks */
-		luaproc_movevalues( L, dstlp->lstate );
-
-		dstlp->args = lua_gettop( dstlp->lstate ) - 1;
-
-		if ( sched_queue_proc( dstlp ) != LUAPROC_SCHED_QUEUE_PROC_OK ) {
-
-			/* unlock channel access */
-			luaproc_unlock_channel( chan );
-
-			/* decrease active luaproc count */
-			sched_lpcount_dec();
-
-			/* close lua_State */
-			lua_close( dstlp->lstate );
-			lua_pushnil( L );
-			lua_pushstring( L, "error scheduling process" );
-			return 2;
-		}
-
-		/* unlock channel access */
-		luaproc_unlock_channel( chan );
-	}
-
-	/* otherwise queue (block) the sending process */
-	else {
+	if ( dstlp == NULL ) {
 
 		self = luaproc_getself( L );
 
