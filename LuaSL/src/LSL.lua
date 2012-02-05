@@ -467,11 +467,11 @@ function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1;
 
 local currentState = {}
 local running = true
+local paused = false
 
 -- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
-function quit()
-  running = false
-end
+function pause() paused = true  end
+function quit()  running = false  end
 
 function LSL.stateChange(x)
   if currentState ~= x then  -- Changing to the same state is a NOP.
@@ -519,20 +519,24 @@ function LSL.mainLoop(SID, x)
   while running do
     local message = luaproc.receive(sid)
     if message then
-      result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
-      if nil == result then
-	print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+      if paused then
+	if "resume()" == message then paused = false  end
       else
-	-- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
-	-- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
-	setfenv(result, getfenv(1))
-	status, result = pcall(result)
-	if not status then
-	  print("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
-	elseif result then
-	  status, errorMsg = luaproc.send(sid, result)
+	result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
+	if nil == result then
+	  print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	else
+	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
+	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
+	  setfenv(result, getfenv(1))
+	  status, result = pcall(result)
 	  if not status then
-	    print("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	    print("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
+	  elseif result then
+	    status, errorMsg = luaproc.send(sid, result)
+	    if not status then
+	      print("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	    end
 	  end
 	end
       end
