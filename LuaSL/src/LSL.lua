@@ -314,69 +314,146 @@ function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]
 
 function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
 function --[[list]]	LSL.llDeleteSubList(--[[list]] l,--[[integer]] start,--[[integer]] eNd)
-  local temp = {}
+  local result = {}
   local x = 1
 
   -- Deal with the impedance mismatch.
   start = start + 1
   eNd   = eNd + 1
   for i = 1,#l do
-    if      i < start then temp[x] = l[i];  x = x + 1
-    elseif  i > eNd   then temp[x] = l[i];  x = x + 1
+    if      i < start then result[x] = l[i];  x = x + 1
+    elseif  i > eNd   then result[x] = l[i];  x = x + 1
     end
   end
 
-  return temp
+  return result
 end
 
-function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator) return "" end;
-function --[[string]]	LSL.llList2CSV(--[[list]] l) return "" end;
+function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator)
+  local result = ""
+  for i = 1,#l do
+    if "" ~= result then result = result .. separator end
+    result = result .. l[i]
+  end
+  return result
+end
+
+function --[[string]]	LSL.llList2CSV(--[[list]] l)
+  return LSL.llDumpList2String(l, ",")
+end
+
 function --[[float]] 	LSL.llList2Float(--[[list]] l,--[[integer]] index)
-  local temp = tonumber(l[index])
-  if nil == temp then temp = 0.0 end
-  return temp;
+  local result = tonumber(l[index])
+  if nil == result then result = 0.0 end
+  return result
 end
 
 function --[[integer]] 	LSL.llList2Integer(--[[list]] l,--[[integer]] index)
-  local temp = tonumber(l[index+1])
-  if nil == temp then temp = 0 end
-  return temp;
+  local result = tonumber(l[index+1])
+  if nil == result then result = 0 end
+  return result
 end
 
 function --[[key]]	LSL.llList2Key(--[[list]] l,--[[integer]] index)
-  local temp = l[index+1]
-  if temp then return "" .. temp else return LSL.NULL_KEY end
+  local result = l[index+1]
+  if result then return "" .. result else return LSL.NULL_KEY end
 end
 
-function --[[list]]	LSL.llList2List(--[[list]] l,--[[integer]] start,--[[integer]] eNd) return {} end;
+function --[[list]]	LSL.llList2List(--[[list]] l,--[[integer]] start,--[[integer]] eNd)
+  local result = {}
+  local x = 1
+
+  --[[ TODO -
+Using negative numbers for start and/or end causes the index to count backwards from the length of the list, so 0, -1 would capture the entire list.
+If start is larger than end the list returned is the exclusion of the entries, so 6, 4 would give the entire list except for the 5th entry.
+    ]]
+
+  -- Deal with the impedance mismatch.
+  start = start + 1
+  eNd   = eNd + 1
+  for i = 1,#l do
+    if      i >= start then result[x] = l[i];  x = x + 1
+    elseif  i <= eNd   then result[x] = l[i];  x = x + 1
+    end
+  end
+
+  return result
+end
+
 function --[[string]]	LSL.llList2String(--[[list]] l,--[[integer]] index)
-  local temp = l[index+1]
-  if temp then return "" .. temp else return "" end
+  local result = l[index+1]
+  if result then return "" .. result else return "" end
 end
 
 function --[[rotation]]	LSL.llList2Rotation(--[[list]] l,--[[integer]] index)
-  local temp = l[index+1]
-  if nil == temp then temp = LSL.ZERO_ROTATION end
+  local result = l[index+1]
+  if nil == result then result = LSL.ZERO_ROTATION end
   -- TODO - check if it's not an actual rotation, then return LSS.ZERO_ROTATION
-  return temp;
+  return result
 end
 
 function --[[vector]]	LSL.llList2Vector(--[[list]] l,--[[integer]] index)
-  local temp = l[index+1]
-  if nil == temp then temp = LSL.ZERO_VECTOR end
+  local result = l[index+1]
+  if nil == result then result = LSL.ZERO_VECTOR end
   -- TODO - check if it's not an actual rotation, then return LSS.ZERO_VECTOR
-  return temp;
+  return result
 end
 
 function --[[integer]] 	LSL.llListFindList(--[[list]] l, --[[list]] l1) return 0 end;
-function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer]] index) return {} end;
+function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer]] index)
+  local result = {}
+  local x = 1
+  local y
+  for i = 1,index do
+    result[x] = l[i]
+    x = x + 1
+  end
+  y = x
+  for i = 1,#ll do
+    result[x] = ll[i]
+    x = x + 1
+  end
+  for i = y,#l do
+    result[x] = l[i]
+    x = x + 1
+  end
+  return result
+end
+
 function --[[integer]] 	LSL.llGetListLength(--[[list]] l)
   return #l
 end
 
-function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd) return {} end;
-function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending) return {} end;
+function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd)
+  local result = {}
+  local x = 1
+  local y
+  for i = 1,index do
+    result[x] = l[i]
+    x = x + 1
+  end
+  for i = 1,#part do
+    result[x] = part[i]
+    x = x + 1
+  end
+  for i = index,#l do
+    result[x] = l[i]
+    x = x + 1
+  end
+  return result
+end
 
+function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending)
+  local result = {}
+
+  -- TODO - Deal with stride and ascending.
+  for i = 1,#l do
+    result[x] = l[i];  x = x + 1
+  end
+  table.sort(result)
+
+  return result
+end
 
 
 -- Crements stuff.
