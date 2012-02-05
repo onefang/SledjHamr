@@ -336,9 +336,8 @@ function LSL.stateChange(x)
 end;
 
 function LSL.mainLoop(SID, x)
-  -- TODO - disabled the stuff that waits until I implement the stuff that makes it stop waiting.  lol
   local sid = SID .. ".events"
-  local status, errorMsg = "disabled" -- = luaproc.newchannel(sid)
+  local status, errorMsg = luaproc.newchannel(sid)
   local result
 
   if not status then
@@ -350,9 +349,11 @@ function LSL.mainLoop(SID, x)
 
   -- TODO - Need a FIFO stack of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
 
---  while true do
+  while true do
     local message = luaproc.receive(sid)
-    if message then
+    if "quit()" == message then
+      return
+    elseif message then
       result, errorMsg = loadstring(message)
       if nil == result then
 	print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
@@ -368,7 +369,7 @@ function LSL.mainLoop(SID, x)
 	end
       end
     end
---  end
+  end
 end
 
 -- Typecasting stuff.
