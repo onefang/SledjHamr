@@ -69,7 +69,7 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
    ecore_main_loop_quit();
 }
 
-static void dirList_cb(const char *name, const char *path, void *data)
+static void dirList_compile(const char *name, const char *path, void *data)
 {
     gameGlobals *game = data;
     char buf[PATH_MAX];
@@ -90,6 +90,22 @@ static void dirList_cb(const char *name, const char *path, void *data)
     }
 }
 
+static void dirList_run(const char *name, const char *path, void *data)
+{
+    gameGlobals *game = data;
+    char buf[PATH_MAX];
+    char *ext = rindex(name, '.');
+
+    if (ext)
+    {
+	if (0 == strcmp(ext, ".out"))
+	{
+	    snprintf(buf, sizeof(buf), "%s/%s", path, name);
+//	    PD("Running Lua script %s", buf);
+	    runLuaFile(game, buf);
+	}
+    }
+}
 
 int
 main(int argc, char **argv)
@@ -229,9 +245,10 @@ main(int argc, char **argv)
 	runnerSetup(&game);
 	gettimeofday(&lastTime2, 0);
 	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
-	eina_file_dir_list(buf, EINA_TRUE, dirList_cb, &game);
+	eina_file_dir_list(buf, EINA_TRUE, dirList_compile, &game);
 	diff = timeDiff(&thisTime2, &lastTime2);
 	printf("Compiling %d LSL scripts took %f seconds, that's %f scripts per second.\n", scriptCount, diff, scriptCount / diff);
+	eina_file_dir_list(buf, EINA_TRUE, dirList_run, &game);
 
 	if (game.ui)
 	{
