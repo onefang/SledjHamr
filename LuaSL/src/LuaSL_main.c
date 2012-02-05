@@ -77,15 +77,17 @@ static void dirList_compile(const char *name, const char *path, void *data)
 
     if (ext)
     {
-    if ((!LUASL_DEBUG) || (0 == scriptCount))
-	if (0 == strcmp(ext, ".lsl"))
+	if ((!LUASL_DEBUG) || (0 == scriptCount))
 	{
-	    scriptCount++;
-	    snprintf(buf, sizeof(buf), "%s/%s", path, name);
-	    if (compileLSL(game, buf, FALSE))
-		PD("The compile of %s worked,", buf);
-	    else
-		PE("The compile of %s failed!", buf);
+	    if (0 == strcmp(ext, ".lsl"))
+	    {
+		scriptCount++;
+		snprintf(buf, sizeof(buf), "%s/%s", path, name);
+		if (compileLSL(game, buf, FALSE))
+		    PD("The compile of %s worked,", buf);
+		else
+		    PE("The compile of %s failed!", buf);
+	    }
 	}
     }
 }
