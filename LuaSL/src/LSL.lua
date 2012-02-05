@@ -30,6 +30,32 @@ upvalue--either way is a bit more efficient and less error prone.
 
 local LSL = {};
 
+
+-- Debugging aids
+
+-- Functions to print tables.
+local print_table, print_table_start;
+
+function print_table_start(table, space, name)
+  print(space .. name .. ": ");
+  print(space .. "{");
+  print_table(table, space .. "  ");
+  print(space .. "}");
+end
+
+function print_table(table, space)
+  for k, v in pairs(table) do
+    if type(v) == "table" then
+      print_table_start(v, space, k);
+    elseif type(v) == "string" then
+      print(space .. k .. ': "' .. v .. '";')
+    else
+      print(space .. k .. ": " .. v .. ";")
+    end
+  end
+end
+
+
 -- LSL constants.
 
 LSL.PI					= 3.14159265358979323846264338327950;
