@@ -8,7 +8,7 @@ int common(YYSTYPE *lval, char *text, int len, LuaSL_compiler *compiler, boolean
 %}
 
 %option reentrant never-interactive batch
-%option bison-bridge 8bit 
+%option bison-bridge 8bit
 %option noreject noyymore
 %option backup debug perf-report perf-report verbose warn
 %option align full
@@ -162,4 +162,3 @@ int yywrap(yyscan_t yyscanner)  // This as actually useless for our needs, as it
 
     return 1;
 }
-

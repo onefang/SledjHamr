@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "assert.h"  
+#include "assert.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,7 +28,7 @@
 #include <luaproc/sched.h>
 
 #include "LuaSL_lemon_yaccer.h"
-                    
+
 #define YYERRCODE 256
 #define YYDEBUG 1
 
@@ -67,7 +67,7 @@ typedef LSL_Leaf * (*evaluateToken) (LSL_Leaf  *content, LSL_Leaf *left, LSL_Lea
 //#ifndef FALSE
 //typedef enum
 //{
-//    FALSE	= 0, 
+//    FALSE	= 0,
 //    TRUE	= 1
 //} boolean;
 //#endif
@@ -266,7 +266,7 @@ struct _LSL_Statement
 /*
 LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);
 
-expr						expr			// Might be bogus, 
+expr						expr			// Might be bogus,
 Variable defines	identifier, optional	expr			// For these we only store the variable leaf in expressions.
 Function define		identifier,			block,	parens	// Also function params, but that's stored in the function anyway.
 state change		identifier
@@ -395,7 +395,7 @@ Once the parser has condensed things down, it only deals with the
 condensed nodes.  So we can get rid of some of the AST parts at this
 time, so long as we keep the relevant information.  This is what the
 other data structures above are for.  Lemon tries to free the no longer
-needed AST nodes itself, even if we are still using them internally. 
+needed AST nodes itself, even if we are still using them internally.
 Need to do something about that.
 
 */
@@ -464,4 +464,3 @@ void ParseFree(void *p, void (*freeProc)(void*));
 
 
 #endif // __LUASL_LSL_TREE_H__
-

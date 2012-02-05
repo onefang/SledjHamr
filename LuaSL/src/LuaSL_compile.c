@@ -1,7 +1,9 @@
+
 #include "LuaSL.h"
 
 /* TODO - problem de jour
 */
+
 
 static LSL_Leaf *evaluateFloatToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
 static LSL_Leaf *evaluateIntegerToken(LSL_Leaf  *content, LSL_Leaf *left, LSL_Leaf *right);
@@ -156,19 +158,19 @@ LSL_Token LSL_Tokens[] =
 };
 
 // VERY IMPORTANT to keep this in sync with enum opType from LuaSL_LSL_tree.h!
-allowedTypes allowed[] = 
+allowedTypes allowed[] =
 {
-    {OT_nothing,	"nothing",	(ST_NONE)},																// 
+    {OT_nothing,	"nothing",	(ST_NONE)},																//
 
     {OT_bool,		"boolean",	(ST_BOOL_NOT)},																// bool				!
     {OT_integer,	"integer",	(ST_BOOL_NOT | ST_BIT_NOT | ST_NEGATE)},												// int				! - ~
     {OT_float,		"float",	(ST_BOOL_NOT | ST_NEGATE)},														// float			! -
     {OT_key,		"key",		(ST_BOOL_NOT)},																// key				!
-    {OT_list,		"list",		(ST_NONE)},																// 
-    {OT_rotation,	"rotation",	(ST_NONE)},																// 
+    {OT_list,		"list",		(ST_NONE)},																//
+    {OT_rotation,	"rotation",	(ST_NONE)},																//
     {OT_string,		"string",	(ST_BOOL_NOT)},																// string			!
-    {OT_vector,		"vector",	(ST_NONE)},																// 
-    {OT_other,		"other",	(ST_NONE)},																// 
+    {OT_vector,		"vector",	(ST_NONE)},																//
+    {OT_other,		"other",	(ST_NONE)},																//
 
     {OT_bool,		"boolean",	(ST_BOOLEAN | ST_EQUALITY)},														// bool		bool		          == !=           =                            && ||
 
@@ -176,7 +178,7 @@ allowedTypes allowed[] =
     {OT_integer,	"integer",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT | ST_MODULO | ST_BITWISE)},	// int		int		* / + - % == != < > <= >= = += -= *= /= %= & | ^ << >>
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// int		float		cast to float float
     {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	int		cast to float float
-    {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	float		* / + -   == != < > <= >= = += -= *= /= 
+    {OT_float,		"float",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_COMPARISON | ST_CONCATENATION | ST_ASSIGNMENT)},					// float	float		* / + -   == != < > <= >= = += -= *= /=
 
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// key		key		cast to string string
     {OT_string,		"string",	(ST_ADD | ST_EQUALITY | ST_CONCATENATION)},												// key		string		cast to string string
@@ -196,11 +198,11 @@ allowedTypes allowed[] =
     {OT_vector,		"vector",	(ST_MULTIPLY | ST_ASSIGNMENT)},														// vector	float		* /                               *= /=
     {OT_vector,		"vector",	(ST_MULTIPLY)},																// vector	rotation	* /
 
-    {OT_rotation,	"rotation",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},							// rotation	rotation	* / + -   == !=           = += -= *= /= 
+    {OT_rotation,	"rotation",	(ST_MULTIPLY | ST_ADD | ST_SUBTRACT | ST_EQUALITY | ST_CONCATENATION | ST_ASSIGNMENT)},							// rotation	rotation	* / + -   == !=           = += -= *= /=
 
-    {OT_other,		"other",	(ST_NONE)},																// 
-    {OT_undeclared,	"undeclared",	(ST_NONE)},																// 
-    {OT_invalid,	"invalid",	(ST_NONE)}																// 
+    {OT_other,		"other",	(ST_NONE)},																//
+    {OT_undeclared,	"undeclared",	(ST_NONE)},																//
+    {OT_invalid,	"invalid",	(ST_NONE)}																//
 };
 
 opType opExpr[][10] =
@@ -269,7 +271,7 @@ static LSL_Leaf *findFunction(LuaSL_compiler *compiler, const char *name)
 	}
 	else
 	    func = eina_hash_find(compiler->script.functions, name);
-	
+
     }
 
     return func;
@@ -499,7 +501,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	 *	buggerAround();
 	 *    }
 	 *
-	 * Turns into - 
+	 * Turns into -
 	 *
 	 *    x = doSomething();
 	 *    while (x == foo)
@@ -873,13 +875,13 @@ LSL_Leaf *addNumby(LSL_Leaf *numby)
 	    case LSL_FLOAT :
 	    {
 		num->value.floatValue = atof(num->text.text);
-		numby->basicType = OT_float; 
+		numby->basicType = OT_float;
 		break;
 	    }
 	    case LSL_INTEGER :
 	    {
 		num->value.integerValue = atoi(num->text.text);
-		numby->basicType = OT_integer; 
+		numby->basicType = OT_integer;
 		break;
 	    }
 	    default:
@@ -2620,7 +2622,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 // Take the result of the parse, and convert it into Lua source.
 //   Each LSL script becomes a Lua state.
 //   LSL states are handled as Lua tables, with each LSL state function being a table function in a common metatable.
-//   LL and OS functions are likely to be C functions. 
+//   LL and OS functions are likely to be C functions.
 
 // Compile the Lua source by the Lua compiler.
 
@@ -2770,4 +2772,3 @@ int main(int argc, char **argv)
     return 0;
 }
 #endif
-

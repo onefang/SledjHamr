@@ -1,3 +1,4 @@
+
 #include "LuaSL.h"
 
 #define LUA_TEST	0
@@ -313,7 +314,7 @@ main(int argc, char **argv)
 
     if (badArgs)
     {
-	// display the program usage to the user as they have it wrong 
+	// display the program usage to the user as they have it wrong
 	printf("Usage: %s [-u]\n", programName);
 	printf("   -u: Show the test UI.\n");
     }
@@ -487,4 +488,3 @@ main(int argc, char **argv)
 
     return 0;
 }
-

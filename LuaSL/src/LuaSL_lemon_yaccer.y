@@ -1,5 +1,6 @@
-%include {
-#include "LuaSL.h"
+%include
+{
+    #include "LuaSL.h"
 }
 
 %extra_argument {LuaSL_compiler *compiler}
@@ -272,4 +273,3 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 %endif
 
 */
-
