@@ -287,23 +287,6 @@ function --[[integer]] 	LSL.llSubStringIndex(--[[string]] text, --[[string]] sub
 function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
 function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
 
-function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
-function --[[list]]	LSL.llDeleteSubList(--[[list]] l,--[[integer]] start,--[[integer]] eNd) return {} end;
-function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator) return "" end;
-function --[[string]]	LSL.llList2CSV(--[[list]] l) return "" end;
-function --[[float]] 	LSL.llList2Float(--[[list]] l,--[[integer]] index) return 0.0 end;
-function --[[integer]] 	LSL.llList2Integer(--[[list]] l,--[[integer]] index) return 0 end;
-function --[[key]]	LSL.llList2Key(--[[list]] l,--[[integer]] index) return LSL.NULL_KEY end;
-function --[[list]]	LSL.llList2List(--[[list]] l,--[[integer]] start,--[[integer]] eNd) return {} end;
-function --[[string]]	LSL.llList2String(--[[list]] l,--[[integer]] index) return "" end;
-function --[[rotation]]	LSL.llList2Rotation(--[[list]] l,--[[integer]] index) return LSL.ZERO_ROTATION end;
-function --[[vector]]	LSL.llList2Vector(--[[list]] l,--[[integer]] index) return LSL.ZERO_VECTOR end;
-function --[[integer]] 	LSL.llListFindList(--[[list]] l, --[[list]] l1) return 0 end;
-function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer]] index) return {} end;
-function --[[integer]] 	LSL.llGetListLength(--[[list]] l) return 0 end;
-function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd) return {} end;
-function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending) return {} end;
-
 function --[[key]]	LSL.llAvatarOnSitTarget() return LSL.NULL_KEY end;
 function --[[list]]	LSL.llGetAnimationList(--[[key]] id) return {} end;
 function --[[key]]	LSL.llGetKey() return LSL.NULL_KEY end;
@@ -326,6 +309,76 @@ function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) print("Channe
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
 
+
+-- LSL list functions.
+
+function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
+function --[[list]]	LSL.llDeleteSubList(--[[list]] l,--[[integer]] start,--[[integer]] eNd)
+  local temp = {}
+  local x = 1
+
+  -- Deal with the impedance mismatch.
+  start = start + 1
+  eNd   = eNd + 1
+  for i = 1,#l do
+    if      i < start then temp[x] = l[i];  x = x + 1
+    elseif  i > eNd   then temp[x] = l[i];  x = x + 1
+    end
+  end
+
+  return temp
+end
+
+function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator) return "" end;
+function --[[string]]	LSL.llList2CSV(--[[list]] l) return "" end;
+function --[[float]] 	LSL.llList2Float(--[[list]] l,--[[integer]] index)
+  local temp = tonumber(l[index])
+  if nil == temp then temp = 0.0 end
+  return temp;
+end
+
+function --[[integer]] 	LSL.llList2Integer(--[[list]] l,--[[integer]] index)
+  local temp = tonumber(l[index+1])
+  if nil == temp then temp = 0 end
+  return temp;
+end
+
+function --[[key]]	LSL.llList2Key(--[[list]] l,--[[integer]] index)
+  local temp = l[index+1]
+  if temp then return "" .. temp else return LSL.NULL_KEY end
+end
+
+function --[[list]]	LSL.llList2List(--[[list]] l,--[[integer]] start,--[[integer]] eNd) return {} end;
+function --[[string]]	LSL.llList2String(--[[list]] l,--[[integer]] index)
+  local temp = l[index+1]
+  if temp then return "" .. temp else return "" end
+end
+
+function --[[rotation]]	LSL.llList2Rotation(--[[list]] l,--[[integer]] index)
+  local temp = l[index+1]
+  if nil == temp then temp = LSL.ZERO_ROTATION end
+  -- TODO - check if it's not an actual rotation, then return LSS.ZERO_ROTATION
+  return temp;
+end
+
+function --[[vector]]	LSL.llList2Vector(--[[list]] l,--[[integer]] index)
+  local temp = l[index+1]
+  if nil == temp then temp = LSL.ZERO_VECTOR end
+  -- TODO - check if it's not an actual rotation, then return LSS.ZERO_VECTOR
+  return temp;
+end
+
+function --[[integer]] 	LSL.llListFindList(--[[list]] l, --[[list]] l1) return 0 end;
+function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer]] index) return {} end;
+function --[[integer]] 	LSL.llGetListLength(--[[list]] l)
+  return #l
+end
+
+function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd) return {} end;
+function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending) return {} end;
+
+
+
 -- Crements stuff.
 
 function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
@@ -336,7 +389,7 @@ function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1;
 -- State stuff
 
 local currentState = {}
-local running = true;
+local running = true
 
 -- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
 function quit()
