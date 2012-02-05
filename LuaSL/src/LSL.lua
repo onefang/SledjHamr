@@ -254,19 +254,19 @@ function 		LSL.llSetObjectName(--[[string]] text) end;
 
 function --[[string]]	LSL.llGetInventoryName(--[[integer]] tyPe,--[[integer]] index) return "" end;
 function --[[integer]] 	LSL.llGetInventoryNumber(--[[integer]] tyPe) return 0 end;
-function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return 0 end;
+function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INVENTORY_SCRIPT end;
 function --[[key]]	LSL.llGetNotecardLine(--[[string]] name,--[[integer]] index) return LSL.NULL_KEY end;
 
 function 		LSL.llDie() end;
 function --[[integer]] 	LSL.llGetFreeMemory() return 0 end;
 function --[[string]]	LSL.llGetScriptName() return "" end;
 function --[[float]] 	LSL.llGetTime() return 0.0 end;
-function 		LSL.llResetOtherScript(--[[string]] name) end;
+function 		LSL.llResetOtherScript(--[[string]] name) print("llResetOtherScript(" .. name .. ")") end;
 function 		LSL.llResetScript() end;
 function 		LSL.llResetTime() end;
-function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) end;
+function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) print("llSetScriptState(" .. name .. "," .. running .. ")") end;
 function 		LSL.llSetTimerEvent(--[[float]] seconds) end;
-function 		LSL.llSleep(--[[float]] seconds) end;
+function 		LSL.llSleep(--[[float]] seconds) print("llSleep(" .. seconds .. ")") end;
 
 function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
 function 		LSL.llRezObject(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
