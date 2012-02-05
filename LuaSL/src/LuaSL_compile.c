@@ -2284,8 +2284,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		// Compile the Lua source code.
 		L = luaL_newstate();
 		luaL_openlibs(L);
-		/* This ends up pushing a function onto the stack for a lua_pcall() to use.
-		* The function is the compiled code. */
+		// This ends up pushing a function onto the stack.  The function is the compiled code.
 		err = luaL_loadfile(L, luaName);
 		if (err)
 		{
@@ -2299,6 +2298,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		}
 		else
 		{
+		    // Write the compiled code to a file.
 		    strcat(luaName, ".lua.out");
 		    out = fopen(luaName, "w");
 		    if (out)
