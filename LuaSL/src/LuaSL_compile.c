@@ -1219,7 +1219,7 @@ Any binary operation involving a float and an integer implicitly casts the integ
 
 A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
 On the other hand, in Lua, only false and nil are false, everything else is true.  0 is true.  sigh
-Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
+Bitwise operations only apply to integers.  Right shifts are arithmetic, not logical.
 
 integer  = integer0   % integer1;  // Apparently only applies to integers, but works fine on floats in OS.
 string   = string0    + string1;   // Concatenation.
@@ -1764,7 +1764,7 @@ static void outputBitOp(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	    case LSL_BIT_XOR :		fprintf(file, " _bit.xor(");	break;
 	    case LSL_BIT_NOT :		fprintf(file, " _bit.bnot(");	break;
 	    case LSL_LEFT_SHIFT :	fprintf(file, " _bit.lshift(");	break;
-	    case LSL_RIGHT_SHIFT :	fprintf(file, " _bit.rshift(");	break;
+	    case LSL_RIGHT_SHIFT :	fprintf(file, " _bit.arshift(");	break;
 	    default : break;
 	}
 	outputLeaf(file, mode, leaf->left);
