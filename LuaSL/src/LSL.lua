@@ -307,6 +307,13 @@ function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1;
 -- State stuff
 
 local currentState = {}
+local running = true;
+
+-- Damn, looks like these sorts of functions have to be part of the table.
+-- Coz pcall() runs in the context of the script, not this module, so needs to call _LSL.quit().
+function LSL.quit()
+  running = false
+end
 
 function LSL.stateChange(x)
   if currentState ~= x then  -- Changing to the same state is a NOP.
@@ -347,18 +354,18 @@ function LSL.mainLoop(SID, x)
 
   LSL.stateChange(x);
 
-  -- TODO - Need a FIFO stack of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
+  -- TODO - Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
+  --        Actually, I think the luaproc message system manages such a queue for us anyway.
+  --        C should strip off the "SID." part and replace it with "_LSL.", so might be better to restrict the wire protocol to single function calls.
 
-  while true do
+  while running do
     local message = luaproc.receive(sid)
-    if "quit()" == message then
-      return
-    elseif message then
+    if message then
       result, errorMsg = loadstring(message)
       if nil == result then
 	print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
       else
-	status, result = pcall(result())
+	status, result = pcall(result)
 	if not status then
 	  print("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
 	elseif result then
