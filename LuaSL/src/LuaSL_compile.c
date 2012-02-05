@@ -1636,7 +1636,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		}
 		else if (OM_LUA == mode)
 		{
-		    fprintf(file, "_LSL.stateChange(_");
+		    fprintf(file, "return _LSL.stateChange(_");
 		    if (statement->identifier.text)
 			outputText(file, &(statement->identifier), TRUE);
 		    fprintf(file, "State)");
@@ -2277,7 +2277,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
 		outputLeaf(out, OM_LUA, compiler.ast);
-		fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.
+		fprintf(out, "\n\n_LSL.mainLoop(_defaultState)\n");  // This actually starts the script running.
 		fprintf(out, "\n--// End of generated code.\n\n");
 		fclose(out);
 

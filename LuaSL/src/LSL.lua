@@ -1,7 +1,7 @@
 -- A module of LSL stuffs.
 -- TODO - currently there is a constants.lsl file.  Move it into here.
 --   It contains LSL constants and ll*() functions stubs.
---   The compiler compiles that into a LSL_Scripts structure at startup, 
+--   The compiler compiles that into a LSL_Scripts structure at startup,
 --   then uses that for function and variable lookups, as well as looking up in the current script.
 --   I can run this at compiler startup time, then iterate through the LSL table from C to generate that LSL_Script structure.
 
@@ -22,10 +22,12 @@ written by different people or because they are different versions of
 the same module loaded simultaneously. To address this, one may instead
 use a lightuserdata (pointer to variable of static linkage to ensure
 global uniqueness) for this key or store the metatable as an
-upvalue--either way is a bit more efficient and less error prone. 
+upvalue--either way is a bit more efficient and less error prone.
 ]]
 
 local LSL = {};
+
+-- LSL constants.
 
 LSL.PI					= 3.14159265358979323846264338327950;
 LSL.PI_BY_TWO				= LSL.PI / 2;		-- 1.57079632679489661923132169163975
@@ -196,7 +198,7 @@ LSL.x					= 0.0;
 LSL.y					= 0.0;
 LSL.z					= 0.0;
 
--- Functions.
+-- ll*() functions.
 
 function --[[float]]	LSL.llPow(--[[float]] number,--[[float]] places) return 0.0 end;
 function --[[float]]	LSL.llFrand(--[[float]] max) return 0.0 end;
@@ -295,53 +297,89 @@ function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) print("Channe
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
 
+-- Crements stuff.
+
 function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
 function LSL.preIncrement(name) _G[name] = _G[name] + 1; return _G[name]; end;
 function LSL.postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;
 function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;
 
+-- State stuff
+
 local currentState = {}
+
 function LSL.stateChange(x)
+  if currentState ~= x then  -- Changing to the same state is a NOP.
+    -- TODO - Should clear out pending events, except timer()
+    -- Also forget about any event setup that needs setting up via some ll*() function, except timer().
     if nil ~= currentState.state_exit then
-	currentState.state_exit(); 
+      currentState.state_exit();
     end
     currentState = x;
-    if nil ~= currentState.state_entry then 
-	currentState.state_entry(); 
+    --[[  Never return to the current states event handler.  In theory.  lol
+	  Notably, it's not actually legal to do a state change from a function, only from handlers.
+	  There is a hack though, but it's unsupported, so I don't have to worry about it so much.
+
+	  Write out "state new;" as "return _LSL.stateChange(newState);", with stateChange() returning new.state_entry()) which will force two tail calls.
+
+	  The caller of stateChange() might be a function rather than an event handler.
+	  Which will return to the event handler (possibly via other nested function calls) as if the state never changed.
+	  http://lslwiki.net/lslwiki/wakka.php?wakka=FunctionStateChangeHack seems to imply that this is exactly what LSL does.
+	  Soooo, this might actually work perfectly.
+	  Except for one minor quirk, as that page shows - only the top level function's state sticks, unless the handler does one to, then the handlers one overrides things.
+	  Which I can probably ignore anyway, as this entire calling states within functions thing is an unsupported hack.
+      ]]
+    if nil ~= currentState.state_entry then
+      return currentState.state_entry();
     end
+  end
 end;
 
+function LSL.mainLoop(x)
+  LSL.stateChange(x);
+  --[[    TODO -
+	  Sits around waiting for events.  This should be "wait for a message" in luaproc.
+	    Incoming events can be the same format as the OpenSim SID.event.* protocol on the wiki.
+	    When we get an event, run it, then go back to waiting.
+
+	  Need a FIFO stack of incoming events.
+	    Which will be in the C main thread, coz that's listening on the socket for us.
+    ]]
+end
+
+-- Typecasting stuff.
+
 function LSL.floatTypecast(x)
-    local temp = tonumber(x)
-    if nil == temp then temp = 0 end
-    return temp;
+  local temp = tonumber(x)
+  if nil == temp then temp = 0 end
+  return temp;
 end
 
 function LSL.integerTypecast(x)
-    local temp = tonumber(x)
-    if nil == temp then temp = 0 end
-    return temp;
+  local temp = tonumber(x)
+  if nil == temp then temp = 0 end
+  return temp;
 end
 
 function LSL.keyTypecast(x)
-    return "" .. x;
+  return "" .. x;
 end
 
 function LSL.listTypecast(x)
-    return {x};
+  return {x};
 end
 
 function LSL.rotationTypecast(x)
-    return x;
+   return x;
 end
 
 function LSL.stringTypecast(x)
-    return "" .. x;
+   return "" .. x;
 end
 
 function LSL.vectorTypecast(x)
-    return x;
+   return x;
 end
 
-return LSL;
 
+return LSL;
