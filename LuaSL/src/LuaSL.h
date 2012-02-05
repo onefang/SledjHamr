@@ -13,7 +13,7 @@
 #include <Edje.h>
 #include <stdio.h>
 #include <ctype.h>
-       
+
 #define WIDTH  (1024)
 #define HEIGHT (768)
 
@@ -41,7 +41,7 @@
 // NEVER change this
 typedef enum
 {
-    FALSE	= 0, 
+    FALSE	= 0,
     TRUE	= 1
 } boolean;
 #endif
@@ -60,9 +60,12 @@ typedef struct
 boolean compilerSetup(gameGlobals *game);
 boolean compileLSL(gameGlobals *game, char *script, boolean doConstants);
 
+void runnerSetup(gameGlobals *game);
+void runnerTearDown(gameGlobals *game);
+void runLuaFile(gameGlobals *game, const char *filename);
+
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
 float timeDiff(struct timeval *now, struct timeval *then);
 
 #include "LuaSL_LSL_tree.h"
-
