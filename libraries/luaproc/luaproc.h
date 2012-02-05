@@ -71,16 +71,15 @@ luaproc luaproc_create_sched( char *code );
 void luaproc_register_funcs( lua_State *L );
 
 /* allow registering of luaproc's functions in c main prog */
-void luaproc_register_lib( lua_State *L ); 
+void luaproc_register_lib( lua_State *L );
 
 /* queue a luaproc that tried to send a message */
 void luaproc_queue_sender( luaproc lp );
- 
 
 const char *sendToChannel(const char *chname, const char *message);
 
 /* queue a luaproc that tried to receive a message */
-void luaproc_queue_receiver( luaproc lp ); 
+void luaproc_queue_receiver( luaproc lp );
 
 /* unlock a channel's access */
 void luaproc_unlock_channel( channel chan );

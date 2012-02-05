@@ -70,7 +70,7 @@ struct stluaproc {
 };
 
 /******************************
-* library functions prototypes 
+* library functions prototypes
 ******************************/
 /* create a new lua process */
 static int luaproc_create_newproc( lua_State *L );
@@ -157,7 +157,7 @@ luaproc luaproc_recycle_pop( void ) {
 		/* destroy node (but not associated luaproc) */
 		list_destroy_node( n );
 		/* return associated luaproc */
-		return lp; 
+		return lp;
 	}
 
 	/* free access to operate on recycle list */
@@ -452,7 +452,7 @@ luaproc luaproc_dequeue_sender( channel chan ) {
 /* queue a luc process receiving a message without a matching sender */
 void luaproc_queue_receiver( luaproc lp ) {
 	/* add the receiving process to this process' receive queue */
-	list_add( channel_get_recvq( lp->chan ), list_new_node( lp )); 
+	list_add( channel_get_recvq( lp->chan ), list_new_node( lp ));
 }
 
 /* dequeue a lua process receiving a message with a sender match */
@@ -592,7 +592,7 @@ static int luaproc_send( lua_State *L ) {
 		luaproc_movevalues( L, dstlp->lstate );
 
 		dstlp->args = lua_gettop( dstlp->lstate ) - 1;
-	
+
 		if ( sched_queue_proc( dstlp ) != LUAPROC_SCHED_QUEUE_PROC_OK ) {
 
 			/* unlock channel access */
@@ -801,7 +801,7 @@ static int luaproc_destroy_channel( lua_State *L ) {
 	pthread_mutex_t *chmutex;
 	pthread_cond_t *chcond;
 	const char *chname = luaL_checkstring( L, 1 );
-	
+
 
 	/* get exclusive access to operate on channels */
 	pthread_mutex_lock( &mutex_channel );
@@ -923,4 +923,3 @@ void luaproc_unlock_channel( channel chan ) {
 int luaproc_get_destroyworker( luaproc lp ) {
 	return lp->destroyworker;
 }
-
