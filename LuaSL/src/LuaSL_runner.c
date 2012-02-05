@@ -132,12 +132,6 @@ void runnerSetup(gameGlobals *game)
 	PE("Error creating luaproc worker thread.");
 }
 
-void runnerTearDown(gameGlobals *game)
-{
-// TODO - this is what hangs the system.
-    sched_join_workerthreads();
-}
-
 void runLuaFile(gameGlobals *game, const char *filename)
 {
     newProc(filename, TRUE);
@@ -157,4 +151,10 @@ void runLuaFile(gameGlobals *game, const char *filename)
     if ((err = lua_pcall(L, 0, 0, -2)))
 	_edje_lua2_error(L, err);
 */
+}
+
+void runnerTearDown(gameGlobals *game)
+{
+// TODO - this is what hangs the system.
+    sched_join_workerthreads();
 }

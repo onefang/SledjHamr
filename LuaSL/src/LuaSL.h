@@ -61,8 +61,8 @@ boolean compilerSetup(gameGlobals *game);
 boolean compileLSL(gameGlobals *game, char *script, boolean doConstants);
 
 void runnerSetup(gameGlobals *game);
-void runnerTearDown(gameGlobals *game);
 void runLuaFile(gameGlobals *game, const char *filename);
+void runnerTearDown(gameGlobals *game);
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
