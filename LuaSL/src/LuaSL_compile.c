@@ -42,7 +42,6 @@ LSL_Token LSL_Tokens[] =
     {LSL_BOOL_AND,		ST_BOOLEAN,		"&&",	LSL_RIGHT2LEFT,				NULL},
 // QUIRK - Seems to be some disagreement about BOOL_AND/BOOL_OR precedence.  Either they are equal, or OR is higher.
 // QUIRK - No boolean short circuiting.
-// QUIRK - Booleans and conditionals are executed right to left.  Or maybe not, depending on who you believe.
 // LUA   - Short circiuts boolean operations, and goes left to right.
 // LUA   - "and" returns its first argument if it is false, otherwise, it returns its second argument. "or" returns its first argument if it is not false, otherwise it returns its second argument.
 //           Note that the above means that "and/or" can return any type.
@@ -57,7 +56,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_LESS_EQUAL,		ST_COMPARISON,		"<=",	LSL_RIGHT2LEFT,				NULL},
     {LSL_GREATER_THAN,		ST_COMPARISON,		">",	LSL_RIGHT2LEFT,				NULL},
     {LSL_LESS_THAN,		ST_COMPARISON,		"<",	LSL_RIGHT2LEFT,				NULL},
-// LUA   - comparisons are always false if they are different types.  Tables, userdata, and functions are compared by reference.  Strings campare in alphabetical order, depending on current locale.
+// LUA   - comparisons are always false if they are different types.  Tables, userdata, and functions are compared by reference.  Strings compare in alphabetical order, depending on current locale.
 // LUA   - really only has three conditionals, as it translates a ~= b to not (a == b), a > b to b < a, and a >= b to b <= a.
     {LSL_RIGHT_SHIFT,		ST_BITWISE,		">>",	LSL_LEFT2RIGHT,				outputBitOp},
     {LSL_LEFT_SHIFT,		ST_BITWISE,		"<<",	LSL_LEFT2RIGHT,				outputBitOp},
@@ -73,7 +72,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_BOOL_NOT,		ST_BOOL_NOT,		"!",	LSL_RIGHT2LEFT | LSL_UNARY,		NULL},
     {LSL_BIT_NOT,		ST_BIT_NOT,		"~",	LSL_RIGHT2LEFT | LSL_UNARY,		outputBitOp},
 
-// LUA precedence - (it has no bit operators, at least not until 5.2, but LuaJIT has them.)
+// LUA precedence - (it has no bit operators, at least not until 5.2, but LuaJIT has them as table functions.)
 // or
 // and
 // < > <= >= ~= ==
@@ -906,7 +905,7 @@ LSL_Leaf *addParenthesis(LSL_Leaf *lval, LSL_Leaf *expr, LSL_Type type, LSL_Leaf
 	    if (expr)
 	    {
 		lval->basicType = expr->basicType;
-		// Propagate these flag inwards and outwards.
+		// Propagate these flags inwards and outwards.
 		if (MF_ASSIGNEXP & expr->flags)
 		    lval->flags |= MF_ASSIGNEXP;
 		if (MF_WRAPFUNC & expr->flags)
@@ -1219,7 +1218,7 @@ QUIRK - I have seen cases where a double explicit typecast was needed in SL, but
 Any binary operation involving a float and an integer implicitly casts the integer to float.
 
 A boolean operation deals with TRUE (1) and FALSE (0).  Any non zero value is a TRUE (generally sigh).
-On the other hand, in Lua, only false and nil are false, everything else is true.
+On the other hand, in Lua, only false and nil are false, everything else is true.  0 is true.  sigh
 Bitwise operations only apply to integers.  The shifts are arithmatic, not logical.  Right shifted bits are dropped, left shifts the sign bit.
 
 integer  = integer0   % integer1;  // Apparently only applies to integers, but works fine on floats in OS.
@@ -1446,6 +1445,7 @@ static void outputRawBlock(FILE *file, outputMode mode, LSL_Block *block, boolea
     }
 }
 
+// TODO - should clean this up by refactoring the bits in the switch outside.
 static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthesis *parenthesis, const char *typeName)
 {
     if ((OM_LUA == mode) && (LSL_TYPECAST_OPEN == parenthesis->type))
@@ -1757,11 +1757,6 @@ static void outputBitOp(FILE *file, outputMode mode, LSL_Leaf *leaf)
 	outputLeaf(file, mode, leaf);
     else if (OM_LUA == mode)
     {
-/*
-swap = (integer)((string)pkey) & 1;
-bit.band(swap= --[[(integer)]] ( --[[(string)]] pkey), 1) ;
-*/
-
 	switch (leaf->toKen->type)
 	{
 	    case LSL_BIT_AND :		fprintf(file, " _bit.band(");	break;
@@ -1830,8 +1825,8 @@ static void outputCrementsToken(FILE *file, outputMode mode, LSL_Leaf *content)
 		fprintf(file, " _LSL.");
 	    switch (content->toKen->type)
 	    {
-		case LSL_DECREMENT_PRE :	fprintf(file, "preDecrement");		break;
-		case LSL_INCREMENT_PRE :	fprintf(file, "preIncrement");		break;
+		case LSL_DECREMENT_PRE :	fprintf(file, "preDecrement");	break;
+		case LSL_INCREMENT_PRE :	fprintf(file, "preIncrement");	break;
 		case LSL_DECREMENT_POST :	fprintf(file, "postDecrement");	break;
 		case LSL_INCREMENT_POST :	fprintf(file, "postIncrement");	break;
 		default :
@@ -2145,7 +2140,7 @@ static boolean doneParsing(LuaSL_compiler *compiler)
 	    fprintf(out, "local _bit = require(\"bit\")\n");
 	    fprintf(out, "local _LSL = require(\"LSL\")\n\n");
 	    outputLeaf(out, OM_LUA, compiler->ast);
-	    fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.  Not ready for that yet, gotta implement some ll*() functions first.  So commented it out in Lua.
+	    fprintf(out, "\n\n_LSL.stateChange(_defaultState)\n");  // This actually starts the script running.
 	    fprintf(out, "\n--// End of generated code.\n\n");
 	    fclose(out);
 	    sprintf(buffer, "../../libraries/luajit-2.0/src/luajit \"%s\"", luaName);
@@ -2216,8 +2211,8 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
     void *pParser = ParseAlloc(malloc);
     int yv;
 
-// Parse the  LSL script, validating it and reporting errors.
-//   Just pass all constants and function names through to Lua, assume they are globals there.
+// Parse the LSL script, validating it and reporting errors.
+//   Just pass all LSL constants and ll*() )function names through to Lua, assume they are globals there.
 
     memset(&compiler, 0, sizeof(LuaSL_compiler));
     compiler.game = game;
@@ -2241,7 +2236,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
     PD("Compiling %s.", compiler.fileName);
     compiler.ast = NULL;
     compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
-    // Text editors usually start counting at 1, even programmers editors.
+    // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.
     compiler.column = 1;
     compiler.line = 1;
 
