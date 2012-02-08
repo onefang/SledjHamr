@@ -61,7 +61,7 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
     if (timeOut)
 	*timeOut = szClock;
 
-    // format 
+    // format
     strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
     return (dateTime);
 }
@@ -72,9 +72,6 @@ float timeDiff(struct timeval *now, struct timeval *then)
     {
 	struct timeval thisTime = { 0, 0 };
 	double  result = 0.0;
-
-//fprintf(stderr, "       %ld . %ld\n", now->tv_sec, now->tv_usec);
-//fprintf(stderr, "minus  %ld . %ld\n", then->tv_sec, then->tv_usec);
 
 	thisTime.tv_sec = now->tv_sec;
 	thisTime.tv_usec = now->tv_usec;
@@ -87,11 +84,8 @@ float timeDiff(struct timeval *now, struct timeval *then)
 	thisTime.tv_sec -= then->tv_sec;
 	result = ((double) thisTime.tv_usec) / ((double) 1000000.0);
 	result += thisTime.tv_sec;
-//fprintf(stderr, "equals %lf\n", result);
-//fflush(stderr);
 	return result;
     }
     else
 	return 0.0;
 }
-

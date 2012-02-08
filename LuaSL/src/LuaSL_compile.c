@@ -1897,7 +1897,7 @@ static void outputFunctionToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    }
 	    EINA_INARRAY_FOREACH((&(func->vars)), param)
 	    {
-		// TODO - comment out param types.
+		// Commenting out the types is done in outputLeaf() which outputs all the types.
 		if (!LUASL_DIFF_CHECK)
 		{
 		    if (!first)

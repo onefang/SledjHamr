@@ -261,23 +261,6 @@ struct _LSL_Statement
     Eina_Strbuf		**ignorable;	// Can be up to five of these I think.
 #endif
     miscFlags		flags;
-/*
-LSL_Leaf *addStatement(LSL_Leaf *lval, LSL_Type type, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block);
-
-expr						expr			// Might be bogus,
-Variable defines	identifier, optional	expr			// For these we only store the variable leaf in expressions.
-Function define		identifier,			block,	parens	// Also function params, but that's stored in the function anyway.
-state change		identifier
-Labels			identifier
-goto			identifier
-return				    optional	expr
-do						expr,	block,	parens
-for						exprx3,	block,	parens
-if						expr,	block,	parens
-else							block
-else if						expr,	block,	parens
-while						expr,	block,	parens
-*/
 };
 
 struct _LSL_Block

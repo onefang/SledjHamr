@@ -227,7 +227,7 @@ LSL.x					= 0.0;
 LSL.y					= 0.0;
 LSL.z					= 0.0;
 
--- ll*() functions.
+-- ll*() function stubs.
 
 function --[[float]]	LSL.llPow(--[[float]] number,--[[float]] places) return 0.0 end;
 function --[[float]]	LSL.llFrand(--[[float]] max) return 0.0 end;
