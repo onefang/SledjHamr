@@ -29,6 +29,7 @@ upvalue--either way is a bit more efficient and less error prone.
 -- http://www.lua.org/pil/15.5.html the last part about autoloading functions might be useful.
 
 local LSL = {};
+local SID = "";
 
 
 -- Debugging aids
@@ -55,6 +56,9 @@ function print_table(table, space)
   end
 end
 
+function msg(...)
+  print(SID, ...)  -- The comma adds a tab, fancy that.  B-)
+end
 
 -- LSL constants.
 
@@ -261,12 +265,12 @@ function 		LSL.llDie() end;
 function --[[integer]] 	LSL.llGetFreeMemory() return 0 end;
 function --[[string]]	LSL.llGetScriptName() return "" end;
 function --[[float]] 	LSL.llGetTime() return 0.0 end;
-function 		LSL.llResetOtherScript(--[[string]] name) print("llResetOtherScript(" .. name .. ")") end;
+function 		LSL.llResetOtherScript(--[[string]] name) msg("llResetOtherScript(" .. name .. ")") end;
 function 		LSL.llResetScript() end;
 function 		LSL.llResetTime() end;
-function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) print("llSetScriptState(" .. name .. "," .. running .. ")") end;
+function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) msg("llSetScriptState(" .. name .. "," .. running .. ")") end;
 function 		LSL.llSetTimerEvent(--[[float]] seconds) end;
-function 		LSL.llSleep(--[[float]] seconds) print("llSleep(" .. seconds .. ")") end;
+function 		LSL.llSleep(--[[float]] seconds) msg("llSleep(" .. seconds .. ")") end;
 
 function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
 function 		LSL.llRezObject(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
@@ -302,10 +306,10 @@ function 		LSL.llUnSit(--[[key]] avatar) end;
 function 		LSL.llDialog(--[[key]] avatar, --[[string]] caption, --[[list]] arseBackwardsMenu,--[[integer]] channel) end;
 function --[[integer]] 	LSL.llListen(--[[integer]] channel, --[[string]] name, --[[key]] id, --[[string]] msg) return 0 end;
 function 		LSL.llListenRemove(--[[integer]] handle) end;
-function 		LSL.llOwnerSay(--[[string]] text) print("Owner say: " .. text); end;
-function 		LSL.llSay(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " say: " .. text); end;
-function 		LSL.llShout(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " shout: " .. text); end;
-function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) print("Channel " .. channel .. " whisper: " .. text); end;
+function 		LSL.llOwnerSay(--[[string]] text) msg("Owner say: " .. text); end;
+function 		LSL.llSay(--[[integer]] channel, --[[string]] text) msg("Channel " .. channel .. " say: " .. text); end;
+function 		LSL.llShout(--[[integer]] channel, --[[string]] text) msg("Channel " .. channel .. " shout: " .. text); end;
+function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) msg("Channel " .. channel .. " whisper: " .. text); end;
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
 
@@ -500,13 +504,15 @@ function LSL.stateChange(x)
   end
 end;
 
-function LSL.mainLoop(SID, x)
-  local sid = SID .. ".events"
+function LSL.mainLoop(ourSID, x)
+  local sid = ourSID .. ".events"
   local status, errorMsg = luaproc.newchannel(sid)
   local result
 
+  SID = ourSID
+
   if not status then
-    print("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
+    msg("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
     return
   end
 
@@ -524,18 +530,18 @@ function LSL.mainLoop(SID, x)
       else
 	result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
-	  print("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	  msg("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	else
 	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
 	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
 	  setfenv(result, getfenv(1))
 	  status, result = pcall(result)
 	  if not status then
-	    print("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
+	    msg("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
 	  elseif result then
 	    status, errorMsg = luaproc.send(sid, result)
 	    if not status then
-	      print("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	      msg("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	    end
 	  end
 	end
