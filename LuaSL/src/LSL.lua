@@ -233,75 +233,28 @@ LSL.z					= 0.0;
 
 -- ll*() function stubs.
 
-function --[[float]]	LSL.llPow(--[[float]] number,--[[float]] places) return 0.0 end;
-function --[[float]]	LSL.llFrand(--[[float]] max) return 0.0 end;
-function --[[integer]]	LSL.llRound(--[[float]] number) return 0 end;
 
-function --[[key]]	LSL.llDetectedKey(--[[integer]] index) return LSL.NULL_KEY end;
-function --[[key]]	LSL.llDetectedGroup(--[[integer]] index) return LSL.NULL_KEY end;
-function --[[integer]] 	LSL.llSameGroup(--[[key]] avatar) return 0 end;
-
-function --[[float]] 	LSL.llGetAlpha(--[[integer]] side) return 0.0 end;
-function 		LSL.llSetAlpha(--[[float]] alpha,--[[integer]] side) end;
-function 		LSL.llSetColor(--[[vector]] colour,--[[integer]] side) end;
-function 		LSL.llSetPrimitiveParams(--[[list]] params) end;
-function 		LSL.llSetScale(--[[vector]] scale) end;
-function 		LSL.llSetSitText(--[[string]] text) end;
-function 		LSL.llSetText(--[[string]] text, --[[vector]] colour,--[[float]] alpha) end;
-function 		LSL.llSitTarget(--[[vector]] pos, --[[rotation]] rot) end;
-
-function --[[integer]] 	LSL.llGetLinkNumber() return 0 end;
-function --[[string]]	LSL.llGetObjectDesc() return "" end;
-function 		LSL.llSetObjectDesc(--[[string]] text) end;
-function --[[string]]	LSL.llGetObjectName() return "" end;
-function 		LSL.llSetObjectName(--[[string]] text) end;
-
-function --[[string]]	LSL.llGetInventoryName(--[[integer]] tyPe,--[[integer]] index) return "" end;
-function --[[integer]] 	LSL.llGetInventoryNumber(--[[integer]] tyPe) return 0 end;
-function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INVENTORY_SCRIPT end;
-function --[[key]]	LSL.llGetNotecardLine(--[[string]] name,--[[integer]] index) return LSL.NULL_KEY end;
-
-function 		LSL.llDie() end;
-function --[[integer]] 	LSL.llGetFreeMemory() return 0 end;
-function --[[string]]	LSL.llGetScriptName() return "" end;
-function --[[float]] 	LSL.llGetTime() return 0.0 end;
-function 		LSL.llResetOtherScript(--[[string]] name) msg("llResetOtherScript(" .. name .. ")") end;
-function 		LSL.llResetScript() end;
-function 		LSL.llResetTime() end;
-function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) msg("llSetScriptState(" .. name .. "," .. running .. ")") end;
-function 		LSL.llSetTimerEvent(--[[float]] seconds) end;
-function 		LSL.llSleep(--[[float]] seconds) msg("llSleep(" .. seconds .. ")") end;
-
-function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
-function 		LSL.llRezObject(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
-function 		LSL.llRezAtRoot(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
-
-function --[[vector]]	LSL.llGetPos() return LSL.ZERO_VECTOR end;
-function 		LSL.llSetPos(--[[vector]] pos) end;
-function --[[rotation]]	LSL.llGetRot() return LSL.ZERO_ROTATION end;
-function 		LSL.llSetRot(--[[rotation]] rot) end;
-
-function --[[rotation]]	LSL.llEuler2Rot(--[[vector]] vec) return LSL.ZERO_ROTATION end;
-function --[[vector]]	LSL.llRot2Euler(--[[rotation]] rot)  return LSL.ZERO_VECTOR end;
-
-function --[[string]]	LSL.llGetSubString(--[[string]] text,--[[integer]] start,--[[integer]] eNd) return "" end;
-function --[[integer]] 	LSL.llStringLength(--[[string]] text) return 0 end;
-function --[[string]]	LSL.llStringTrim(--[[string]] text,--[[integer]] tyPe) return "" end;
-function --[[integer]] 	LSL.llSubStringIndex(--[[string]] text, --[[string]] sub) return 0 end;
-function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
-function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+-- LSL avatar functions
 
 function --[[key]]	LSL.llAvatarOnSitTarget() return LSL.NULL_KEY end;
 function --[[list]]	LSL.llGetAnimationList(--[[key]] id) return {} end;
-function --[[key]]	LSL.llGetKey() return LSL.NULL_KEY end;
-function --[[key]]	LSL.llGetOwner() return LSL.NULL_KEY end;
 function --[[integer]] 	LSL.llGetPermissions() return 0 end;
 function --[[key]]	LSL.llGetPermissionsKey() return LSL.NULL_KEY end;
 function --[[string]]	LSL.llKey2Name(--[[key]] avatar) return "" end;
 function 		LSL.llRequestPermissions(--[[key]] avatar,--[[integer]] perms) end;
+function --[[integer]] 	LSL.llSameGroup(--[[key]] avatar) return 0 end;
 function 		LSL.llStartAnimation(--[[string]] anim) end;
 function 		LSL.llStopAnimation(--[[string]] anim) end;
 function 		LSL.llUnSit(--[[key]] avatar) end;
+
+
+-- LSL collision / detect / sensor functions
+
+function --[[key]]	LSL.llDetectedGroup(--[[integer]] index) return LSL.NULL_KEY end;
+function --[[key]]	LSL.llDetectedKey(--[[integer]] index) return LSL.NULL_KEY end;
+
+
+-- LSL communications functions
 
 function 		LSL.llDialog(--[[key]] avatar, --[[string]] caption, --[[list]] arseBackwardsMenu,--[[integer]] channel) end;
 function --[[integer]] 	LSL.llListen(--[[integer]] channel, --[[string]] name, --[[key]] id, --[[string]] msg) return 0 end;
@@ -312,6 +265,16 @@ function 		LSL.llShout(--[[integer]] channel, --[[string]] text) msg("Channel " 
 function 		LSL.llWhisper(--[[integer]] channel, --[[string]] text) msg("Channel " .. channel .. " whisper: " .. text); end;
 
 function 		LSL.llMessageLinked(--[[integer]] link,--[[integer]] num, --[[string]] text, --[[key]] aKey) end;
+
+
+-- LSL inventory functions.
+
+function --[[string]]	LSL.llGetInventoryName(--[[integer]] tyPe,--[[integer]] index) return "" end;
+function --[[integer]] 	LSL.llGetInventoryNumber(--[[integer]] tyPe) return 0 end;
+function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INVENTORY_SCRIPT end;
+function --[[key]]	LSL.llGetNotecardLine(--[[string]] name,--[[integer]] index) return LSL.NULL_KEY end;
+function 		LSL.llRezAtRoot(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
+function 		LSL.llRezObject(--[[string]] name, --[[vector]] position, --[[vector]] velocity, --[[rotation]] rot,--[[integer]] channel) end;
 
 
 -- LSL list functions.
@@ -340,6 +303,10 @@ function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator
     result = result .. l[i]
   end
   return result
+end
+
+function --[[integer]] 	LSL.llGetListLength(--[[list]] l)
+  return #l
 end
 
 function --[[string]]	LSL.llList2CSV(--[[list]] l)
@@ -424,10 +391,6 @@ function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer
   return result
 end
 
-function --[[integer]] 	LSL.llGetListLength(--[[list]] l)
-  return #l
-end
-
 function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd)
   local result = {}
   local x = 1
@@ -459,6 +422,81 @@ function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer
   return result
 end
 
+function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+
+
+-- LSL math functions
+
+function --[[rotation]]	LSL.llEuler2Rot(--[[vector]] vec) return LSL.ZERO_ROTATION end;
+function --[[float]]	LSL.llFrand(--[[float]] max) return 0.0 end;
+function --[[float]]	LSL.llPow(--[[float]] number,--[[float]] places) return 0.0 end;
+function --[[vector]]	LSL.llRot2Euler(--[[rotation]] rot)  return LSL.ZERO_VECTOR end;
+function --[[integer]]	LSL.llRound(--[[float]] number) return 0 end;
+
+
+-- LSL object / prim functions
+
+function 		LSL.llDie() end;
+function --[[key]]	LSL.llGetKey() return LSL.NULL_KEY end;
+function --[[integer]] 	LSL.llGetLinkNumber() return 0 end;
+function --[[string]]	LSL.llGetObjectDesc() return "" end;
+function --[[string]]	LSL.llGetObjectName() return "" end;
+function --[[key]]	LSL.llGetOwner() return LSL.NULL_KEY end;
+function 		LSL.llSetObjectDesc(--[[string]] text) end;
+function 		LSL.llSetObjectName(--[[string]] text) end;
+function 		LSL.llSetPrimitiveParams(--[[list]] params) end;
+function 		LSL.llSetSitText(--[[string]] text) end;
+function 		LSL.llSetText(--[[string]] text, --[[vector]] colour,--[[float]] alpha) end;
+function 		LSL.llSitTarget(--[[vector]] pos, --[[rotation]] rot) end;
+
+
+-- LSL rotation / scaling / translation functions
+
+function --[[vector]]	LSL.llGetPos() return LSL.ZERO_VECTOR end;
+function --[[rotation]]	LSL.llGetRot() return LSL.ZERO_ROTATION end;
+function 		LSL.llSetPos(--[[vector]] pos) end;
+function 		LSL.llSetRot(--[[rotation]] rot) end;
+function 		LSL.llSetScale(--[[vector]] scale) end;
+
+
+-- LSL script functions
+
+function --[[integer]] 	LSL.llGetFreeMemory() return 0 end;
+function --[[string]]	LSL.llGetScriptName() return "" end;
+function 		LSL.llResetOtherScript(--[[string]] name) msg("llResetOtherScript(" .. name .. ")") end;
+function 		LSL.llResetScript() end;
+function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) msg("llSetScriptState(" .. name .. "," .. running .. ")") end;
+
+
+-- LSL sound functions
+
+function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
+
+
+-- LSL string functions
+
+function --[[string]]	LSL.llGetSubString(--[[string]] text,--[[integer]] start,--[[integer]] eNd) return "" end;
+function --[[integer]] 	LSL.llStringLength(--[[string]] text) return 0 end;
+function --[[string]]	LSL.llStringTrim(--[[string]] text,--[[integer]] tyPe) return "" end;
+function --[[integer]] 	LSL.llSubStringIndex(--[[string]] text, --[[string]] sub) return 0 end;
+
+
+-- LSL texture functions
+
+function --[[float]] 	LSL.llGetAlpha(--[[integer]] side) return 0.0 end;
+function 		LSL.llSetAlpha(--[[float]] alpha,--[[integer]] side) end;
+function 		LSL.llSetColor(--[[vector]] colour,--[[integer]] side) end;
+
+
+-- LSL time functions
+
+function --[[float]] 	LSL.llGetTime() return 0.0 end;
+function 		LSL.llResetTime() end;
+function 		LSL.llSetTimerEvent(--[[float]] seconds) end;
+function 		LSL.llSleep(--[[float]] seconds) msg("llSleep(" .. seconds .. ")") end;
+
+
 
 -- Crements stuff.
 
@@ -466,6 +504,7 @@ function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
 function LSL.preIncrement(name) _G[name] = _G[name] + 1; return _G[name]; end;
 function LSL.postDecrement(name) local temp = _G[name]; _G[name] = _G[name] - 1; return temp; end;
 function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1; return temp; end;
+
 
 -- State stuff
 
@@ -549,6 +588,7 @@ function LSL.mainLoop(ourSID, x)
     end
   end
 end
+
 
 -- Typecasting stuff.
 
