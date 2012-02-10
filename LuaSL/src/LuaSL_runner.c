@@ -191,6 +191,21 @@ void runnerTearDown(gameGlobals *game)
  *   There is also an asset UUID (the one printed out on the console at script startup time) that points to the source code in the prim.
  *     Which will be identical to the asset UUID for the multiple copies of the same script.
  *
+ * Object inventory "cache".
+ *
+ *   This code currently pretends that there is a local file based sim object store available.
+ *   I think it would be a good idea to abuse the OpenSim cache system to produce that file based object store.
+ *   It will help with the "damn OpenSim's asset database has to be a bottomless pit" monster design flaw.
+ *   Prim contents must all be unique names anyway, and there are SOME constraints on contents names, so probably don't have to do much to convert an item name to a legal file name.
+ *     Oops, names can have directory slashes in them.  lol
+ *   On the other hand, sim objects CAN have the same name.
+ *
+ *   So we got sim directories, with an objects directory inside it, with object directories inside that.  The object directories have object files in them.  This is all like the test setup that is here.
+ *   We need metadata.  Sim metadata, object metadata, and object contents metadata.  That can be done with a "foo.omg" file at each level.
+ *     sim/index.omg - the list of object name.UUIDs, their X,Y,Z location, size, and rotation.
+ *     sim/objects/objectName_UUID/index.omg - the list of contents names, item UUIDs, asset UUIDs, and types.
+ *     sim/objects/objectName/subObjectName - the list of ITS contents names, item UUIDs, asset UUIDs, and types.
+ *
  * Script start, stop, reset. - OpenSim/Region/ScriptEngine/Interfaces/IScriptEngine.cs
  *
  *   Scripts and users have to be able to start, stop, and reset scripts.
@@ -224,9 +239,63 @@ void runnerTearDown(gameGlobals *game)
  *     Before I hacked it up, actual message sending was done by copying the contents of the sending Lua states stack to the receiver states stack.
  *     This is the simple method for the luaproc programmers, as both states are in the context of a luaproc call, so both stacks are available.
  *     My hacked up version either takes one message from the sender, or is passed one from C.  The C call just returns if there is no one waiting on that channel.
- *     luaproc.send() cals that C function after taking a single message from the stack, and block waits as usual if the C call cannot deliver.
+ *     luaproc.send() calls that C function after taking a single message from the stack, and block waits as usual if the C call cannot deliver.
  *   Don't think there is C to receive messages, luaproc seems to be lacking entirely in C side API.
+ *   NOTE - Sending from C means that the message goes nowhere if no one is waiting for it.
+ *     SOOOO, we may need to queue messages to.
+ *     Just chuck them in a FIFO per channel, and destroy the FIFO when the channel get's destroyed.
  *   Edje messages might have to be used instead, or some hybrid.
+ *
+ *   Main loop is waiting on messages, and that's the main driver.  Luaproc is fine with that.  Good for events.
+ *   End of event handler -
+ *     just wait for the next event.
+ *   Stop a script from LSL -
+ *     gotta find it's SID from it's name, and the prim UUID
+ *     send the message
+ *     wait for it to get the message - BUT we don't really want to wait.
+ *   Stop a script from OpenSim -
+ *     we should have it's SID from OpenSim, just send the message from C, no need to wait.
+ *   Start a script -
+ *     if it's stopped, it's already waiting for the message.
+ *     if it's not stopped, then we don't care.  BUT then we might be waiting for it to get the message if starting it from LSL.
+ *   Reset a script -
+ *     probably should be done from C anyway, and can reuse the libraries like luaproc likes to do.
+ *     ask C to reset it.
+ *   LSL calls a function we have to hand to OpenSim -
+ *     send the message to C, wait.
+ *     C eventually sends a message back.
+ *   Sleep -
+ *     tell C it's waiting for the wake up message.
+ *     wait for the wake up message.
+ *
+ *   C needs -
+ *     Lua call for stop script.
+ *       get the SID from the name, and the prim UUID.
+ *       send the stop message to the SID.
+ *       send something to OpenSim so it knows.
+ *       return to Lua.
+ *     Lua call for start script.
+ *       get the SID from the name, and the prim UUID.
+ *       send the start message to the SID.
+ *       send something to OpenSim so it knows.
+ *       return to Lua.
+ *     Lua call for reset other script.
+ *       get the SID from the name, and the prim UUID.
+ *       figure out which Lua state it is.
+ *       fall through to "reset this script", only with the script set to the found one.
+ *     Lua call for reset this script.
+ *       get luaproc to close this Lua state
+ *       reload the script file
+ *       start it again, reusing the previous Lua state, or which ever one luaproc wants to use.
+ *     Lua call for sending a function to OpenSim.
+ *       Lua first strings up the function call and args, with SID.
+ *       C packs it off to opensim.
+ *       C puts Lua state on the "waiting for message" queue if a return value is needed.
+ *       OpenSim sends back the return value, business as usual.
+ *     Lua call for sleep.
+ *       setup an ecore timer callback
+ *       put the Lua state into "waiting for message" queue.
+ *       ecore timer callback sends the wake up message.
  *
  * Time and timers, plus deal with time dilation.
  *
@@ -250,20 +319,5 @@ void runnerTearDown(gameGlobals *game)
  *   LSL has functions for using these as communications methods.  We should implement them ourselves eventually, but use the existing OpenSim methods for now.
  *   Note that doing it ourselves may cause issues with OpenSim doing it for some other script engine.
  *   Azy might be suitable, but it's also in prototype.
- *
- * Object inventory "cache".
- *
- *   This code currently pretends that there is a local file based sim object store available.
- *   I think it would be a good idea to abuse the OpenSim cache system to produce that file based object store.
- *   It will help with the "damn OpenSim's asset database has to be a bottomless pit" monster design flaw.
- *   Prim contents must all be unique names anyway, and there are SOME constraints on contents names, so probably don't have to do much to convert an item name to a legal file name.
- *     Oops, names can have directory slashes in them.  lol
- *   On the other hand, sim objects CAN have the same name.
- *
- *   So we got sim directories, with an objects directory inside it, with object directories inside that.  The object directories have object files in them.  This is all like the test setup that is here.
- *   We need metadata.  Sim metadata, object metadata, and object contents metadata.  That can be done with a "foo.omg" file at each level.
- *     sim/index.omg - the list of object name.UUIDs, their X,Y,Z location, size, and rotation.
- *     sim/objects/objectName_UUID/index.omg - the list of contents names, item UUIDs, asset UUIDs, and types.
- *     sim/objects/objectName/subObjectName - the list of ITS contents names, item UUIDs, asset UUIDs, and types.
  *
 */
