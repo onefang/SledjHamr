@@ -2276,9 +2276,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		fprintf(out, "--// Generated code goes here.\n\n");
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
-		// TODO - Use the scripts UUID instead of the file name here.
-		// Hmm, copies of the same script in the same prim would have the same UUID, but different name, though they would run independently.
-		// Copies of the same script in different prims could have the same UUID AND the same name.
+		// TODO - Use the scripts UUID instead of the file name here, or something.
 		fprintf(out, "local _SID = [=[%s.lua.out]=]\n\n", compiler.fileName);
 		outputLeaf(out, OM_LUA, compiler.ast);
 		fprintf(out, "\n\n_LSL.mainLoop(_SID, _defaultState)\n");  // This actually starts the script running.

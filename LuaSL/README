@@ -19,7 +19,8 @@ The basic design will be made up as I go along, but so far I have this -
 
 An object is a file system directory, full of LSL scripts as text files,
 notecards as text files, animations as BVH (or later BVJ) files, etc. 
-There will be some sort of metadata in place.
+There will be some sort of metadata in place.  This could be created by
+our own OpenSim compatible cache module.
 
 A parser parses an LSL script, validating it and reporting errors.
 
@@ -34,8 +35,9 @@ The Lua source is compiled by the Lua compiler.
 
 LuaJIT is used as the Lua compiler, library, and runtime.
 
-Luaproc is used to start up operating system threads and hand Lua
-states between them.
+Luaproc is used to start up operating system threads and hand Lua states
+between them.  Luaproc messaging is also being used, but might need to
+change to edje messaging.
 
 Nails is used to pump commands in and out of the LuaSL system.  Incoming
 commands invoke LSL events via the LuaSL state metatable.  LL and OS
@@ -45,7 +47,7 @@ to the command pump.
 Initialy, since this is the first thing being written, a nails command
 pump client needs to be installed into OpenSim's C# stuff.  Though it
 might be possible to talk directly to ROBUST instead.  Think I'll try
-the ROBUST route, see hov far I can get.  That's the general principle
+the ROBUST route, see how far I can get.  That's the general principle
 applying in all of this - try to avoid C# and see how for we can get. 
 lol
 
@@ -55,6 +57,14 @@ processing any event.
 Some form of serialization will need to be created for saving script
 state during shutdowns, passing script state to other threads /
 processes / computers.
+
+There will have to be a MySQL (and maybe SQLite) client in the system,
+so we can talk directly to the local sim database.  Esskyuehl may be
+suitable, though it's still in the prototype stage.
+
+Email, HTTP, and XML-RPC might need to be dealt with by us.  A ROBUST
+client will be needed to.  Azy might be suitable, but it's also in
+prototype.
 
 
 Test harness.
