@@ -256,5 +256,14 @@ void runnerTearDown(gameGlobals *game)
  *   This code currently pretends that there is a local file based sim object store available.
  *   I think it would be a good idea to abuse the OpenSim cache system to produce that file based object store.
  *   It will help with the "damn OpenSim's asset database has to be a bottomless pit" monster design flaw.
+ *   Prim contents must all be unique names anyway, and there are SOME constraints on contents names, so probably don't have to do much to convert an item name to a legal file name.
+ *     Oops, names can have directory slashes in them.  lol
+ *   On the other hand, sim objects CAN have the same name.
+ *
+ *   So we got sim directories, with an objects directory inside it, with object directories inside that.  The object directories have object files in them.  This is all like the test setup that is here.
+ *   We need metadata.  Sim metadata, object metadata, and object contents metadata.  That can be done with a "foo.omg" file at each level.
+ *     sim/index.omg - the list of object name.UUIDs, their X,Y,Z location, size, and rotation.
+ *     sim/objects/objectName_UUID/index.omg - the list of contents names, item UUIDs, asset UUIDs, and types.
+ *     sim/objects/objectName/subObjectName - the list of ITS contents names, item UUIDs, asset UUIDs, and types.
  *
 */
