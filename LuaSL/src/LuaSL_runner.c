@@ -180,14 +180,18 @@ void runnerTearDown(gameGlobals *game)
  *   It's easy enough to have a watchdog thread wake up every now and then to check if any given Lua state has been hogging it's CPU for too long.
  *   The hard part is forcing Lua states to yield cleanly, without slowing performance too much.
  *
- * Identifying scripts.
+ * Identifying scripts. - OpenSim/Region/ScriptEngine/Interfaces/IScriptInstance.cs
  *
  *   We need to be able to identify scripts so that messages can get to the right ones.  Also the objects they are in.
  *   And do it all in a way that OpenSim is happy with.
- *   Copies of the same script in the same prim would have the same UUID, but different name, though they would run independently.
- *   Copies of the same script in different prims could have the same UUID AND the same name.
+ *   Copies of the same script in the same prim would have the same asset UUID, but different name, though they would run independently.
+ *   Copies of the same script in different prims could have the same asset UUID AND the same name.
+ *   OpenSim seems to be using a UUID to identify single scripts, and a uint to identify single prims, when sending events for either case.
+ *   The UUID is from the script item in the prims inventory.
+ *   There is also an asset UUID (the one printed out on the console at script startup time) that points to the source code in the prim.
+ *     Which will be identical to the asset UUID for the multiple copies of the same script.
  *
- * Script start, stop, reset.
+ * Script start, stop, reset. - OpenSim/Region/ScriptEngine/Interfaces/IScriptEngine.cs
  *
  *   Scripts and users have to be able to start, stop, and reset scripts.
  *   Users have to be able to see the start / stopped status of scripts from the viewer.
@@ -205,6 +209,8 @@ void runnerTearDown(gameGlobals *game)
  *   ROBUST uses HTTP for the communications, and some sort of XML, probably XML-RPC.
  *   OpenSim has some sort of generic mechanism for talking to script engines in C#.  I want to turn that into a socket based, pass textual Lua function calls, type system.
  *     That assumes C# has some sort of semi decent introspection or reflection system.
+ *     After a minimum of research, I have come to the conclusion that C# has suitable introspection, and will go ahead with my plans, leaving that problem to the C# coders.
+ *     Looks like OpenSim is already using a bit of C# introspection for ll*() functions anyway.
  *     The scripts main loop can already deal with incoming commands as a string with a Lua function call in it.
  *
  * Send messages from / to Lua or C, and wait or not wait.
