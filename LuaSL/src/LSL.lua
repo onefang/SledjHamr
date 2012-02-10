@@ -459,6 +459,11 @@ function --[[vector]]	LSL.llRot2Euler(--[[rotation]] rot)  return LSL.ZERO_VECTO
 function --[[integer]]	LSL.llRound(--[[float]] number) return 0 end;
 
 
+-- LSL media functions
+
+function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
+
+
 -- LSL object / prim functions
 
 function 		LSL.llDie() end;
@@ -491,11 +496,6 @@ function --[[string]]	LSL.llGetScriptName() return "" end;
 function 		LSL.llResetOtherScript(--[[string]] name) msg("llResetOtherScript(" .. name .. ")") end;
 function 		LSL.llResetScript() end;
 function 		LSL.llSetScriptState(--[[string]] name,--[[integer]] running) msg("llSetScriptState(" .. name .. "," .. running .. ")") end;
-
-
--- LSL sound functions
-
-function 		LSL.llPlaySound(--[[string]] name,--[[float]] volume) end;
 
 
 -- LSL string functions
