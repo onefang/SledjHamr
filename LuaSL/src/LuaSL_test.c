@@ -104,7 +104,7 @@ static void dirList_quit(const char *name, const char *path, void *data)
     common_dirList(game, name, path, ".out", "quit");
 }
 
-Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
+static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
 {
     gameGlobals *game = data;
     char buf[PATH_MAX];
@@ -124,7 +124,14 @@ Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
     return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Del *ev)
+static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Data *ev)
+{
+    gameGlobals *game = data;
+
+    return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Del *ev)
 {
     gameGlobals *game = data;
 
@@ -134,13 +141,6 @@ Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Del *ev)
 	ecore_con_server_del(ev->server);
 	ecore_main_loop_quit();
     }
-
-    return ECORE_CALLBACK_RENEW;
-}
-
-Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Data *ev)
-{
-    gameGlobals *game = data;
 
     return ECORE_CALLBACK_RENEW;
 }
@@ -165,8 +165,8 @@ int main(int argc, char **argv)
 	    if ((game.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
 	    {
 		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
 		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _data, &game);
+		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
 
 		if (ecore_evas_init())
                 {

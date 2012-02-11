@@ -438,6 +438,9 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);
 
+boolean compilerSetup(gameGlobals *game);
+boolean compileLSL(gameGlobals *game, char *script, boolean doConstants);
+
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
 void Parse(void *yyp, int yymajor, LSL_Leaf *yyminor, LuaSL_compiler *compiler);

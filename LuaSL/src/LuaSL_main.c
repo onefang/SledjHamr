@@ -6,26 +6,13 @@ static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
 
-Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
+static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
 {
     ecore_con_client_timeout_set(ev->client, 0);
     return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Del *ev)
-{
-    gameGlobals *game = data;
-
-    if (ev->client)
-    {
-	PD("No more clients, exiting.");
-	ecore_con_client_del(ev->client);
-	ecore_main_loop_quit();
-    }
-    return ECORE_CALLBACK_RENEW;
-}
-
-Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
+static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
 {
     gameGlobals *game = data;
     char SID[PATH_MAX];
@@ -81,6 +68,19 @@ Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev
    return ECORE_CALLBACK_RENEW;
 }
 
+static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Del *ev)
+{
+    gameGlobals *game = data;
+
+    if (ev->client)
+    {
+	PD("No more clients, exiting.");
+	ecore_con_client_del(ev->client);
+	ecore_main_loop_quit();
+    }
+    return ECORE_CALLBACK_RENEW;
+}
+
 int main(int argc, char **argv)
 {
     gameGlobals game;
@@ -98,8 +98,8 @@ int main(int argc, char **argv)
 	    if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
 	    {
 		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
-		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
 		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &game);
+		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
 		ecore_con_server_timeout_set(game.server, 0);
 		ecore_con_server_client_limit_set(game.server, -1, 0);
 		clientStream = eina_strbuf_new();
