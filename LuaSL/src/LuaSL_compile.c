@@ -2168,8 +2168,6 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	PE("Error opening file %s.", compiler.fileName);
 	return FALSE;
     }
-    printf("\n");
-    PD("Compiling %s.", compiler.fileName);
     compiler.ast = NULL;
     compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.
@@ -2199,7 +2197,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 
     if (compiler.undeclared)
     {
-	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
+//	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
 	if (eina_clist_count(&(compiler.danglingCalls)))
 	{
 	    LSL_FunctionCall *call = NULL;
@@ -2221,7 +2219,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	    }
 	}
 	secondPass(&compiler, compiler.ast);
-	PD("Second pass completed.");
+//	PD("Second pass completed.");
     }
 
     if (doConstants)
@@ -2327,8 +2325,8 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 	{
 	    if (compiler.script.warningCount)
 		PW("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
-	    else
-		PI("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
+//	    else
+//		PI("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
 	    result = TRUE;
 	}
     }
