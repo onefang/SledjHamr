@@ -1,7 +1,22 @@
 
 #include "LuaSL.h"
 
+
+typedef struct
+{
+    char		SID[PATH_MAX];
+    char		fileName[PATH_MAX];
+    struct timeval	startTime;
+    float		compileTime;
+    int			errors, warnings;
+    boolean		running;
+
+} script;
+
+
 static Eina_Strbuf *clientStream;
+static int scriptCount = 0;
+static float compileTime = 0.0;
 
 static const char *names[] =
 {
@@ -68,43 +83,45 @@ _on_delete(Ecore_Evas *ee __UNUSED__)
     ecore_main_loop_quit();
 }
 
-static void common_dirList(gameGlobals *game, const char *name, const char *path, const char *type, const char *command)
+static void dirList_compile(const char *name, const char *path, void *data)
 {
+    gameGlobals *game = data;
+
     char buf[PATH_MAX];
     char *ext = rindex(name, '.');
 
     if (ext)
     {
-	if (0 == strcmp(ext, type))
+	if (0 == strcmp(ext, ".lsl"))
 	{
-	    snprintf(buf, sizeof(buf), "%s/%s.%s()\n", path, name, command);
+	    script *me = calloc(1, sizeof(script));
+
+	    gettimeofday(&me->startTime, NULL);
+	    snprintf(me->SID, sizeof(me->SID), "%s/%s", path, name);
+	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
+	    eina_hash_add(game->scripts, me->SID, me);
+	    snprintf(buf, sizeof(buf), "%s/%s.compile()\n", path, name);
 	    ecore_con_server_send(game->server, buf, strlen(buf));
 	    ecore_con_server_flush(game->server);
 	}
     }
 }
 
-static void dirList_compile(const char *name, const char *path, void *data)
-{
-    gameGlobals *game = data;
-
-    common_dirList(game, name, path, ".lsl", "compile");
-}
-
-static void dirList_quit(const char *name, const char *path, void *data)
-{
-    gameGlobals *game = data;
-
-    common_dirList(game, name, path, ".out", "quit");
-}
-
 static Eina_Bool _quit_timer_cb(void *data)
 {
     gameGlobals *game = data;
-    char buf[PATH_MAX];
+    Eina_Iterator *scripts;
+    script *me;
 
-    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
-    eina_file_dir_list(buf, EINA_TRUE, dirList_quit, game);
+    scripts = eina_hash_iterator_data_new(game->scripts);
+    while(eina_iterator_next(scripts, (void **) &me))
+    {
+	char buf[PATH_MAX];
+
+	snprintf(buf, sizeof(buf), "%s.lua.out.quit()\n", me->SID);
+	ecore_con_server_send(game->server, buf, strlen(buf));
+	ecore_con_server_flush(game->server);
+    }
 
     ecore_con_server_send(game->server, ".exit()\n", 8);
     ecore_con_server_flush(game->server);
@@ -153,6 +170,18 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 		PE("The compile of %s failed!", SID);
 	    else if (0 == strcmp(command, "compiled(true)"))
 	    {
+		script *me = eina_hash_find(game->scripts, SID);
+
+		if (me)
+		{
+		    struct timeval now;
+
+		    me->compileTime = timeDiff(&now, &me->startTime);
+		    me->running = TRUE;
+		    scriptCount++;
+		    compileTime += me->compileTime;
+		    PI("Average compile speed is %f scripts per second", scriptCount / compileTime);
+		}
 		PD("The compile of %s worked, running it now.", SID);
 		snprintf(buf, sizeof(buf), "%s.lua.out.start()\n", SID);
 		ecore_con_server_send(game->server, buf, strlen(buf));
@@ -200,6 +229,8 @@ int main(int argc, char **argv)
     if (eina_init())
     {
 	loggingStartup(&game);
+	game.scripts = eina_hash_string_superfast_new(NULL);
+
 	if (ecore_con_init())
 	{
 	    if ((game.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
