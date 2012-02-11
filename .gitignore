@@ -11,6 +11,7 @@ libraries/LuaJIT-1.1.7/src/luajit
 libraries/luaproc/luaproc.so
 libraries/lemon/lemon
 LuaSL/LuaSL
+LuaSL/LuaSL_test
 LuaSL/LuaSL_parser
 LuaSL/src/LuaSL_lemon_yaccer.c
 LuaSL/src/LuaSL_lemon_yaccer.h
