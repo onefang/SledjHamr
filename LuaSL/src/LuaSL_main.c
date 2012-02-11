@@ -43,7 +43,10 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    }
 	    else if (0 == strcmp(command, "start()"))
 	    {
-		newProc(SID, TRUE);
+		char buf[PATH_MAX];
+
+		sprintf(buf, "%s.lua.out", SID);
+		newProc(buf, TRUE);
 	    }
 	    else if (0 == strcmp(command, "exit()"))
 	    {
@@ -52,11 +55,9 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    }
 	    else
 	    {
-		char temp[PATH_MAX];
 		const char *status = NULL;
 
-		snprintf(temp, sizeof(temp), "%s.events", SID);
-		status = sendToChannel(temp, command, NULL, NULL);
+		status = sendToChannel(SID, command, NULL, NULL);
 		if (status)
 		    PE("Error sending command %s to script %s : %s", command, SID, status);
 	    }
