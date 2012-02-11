@@ -8,6 +8,7 @@
 
 #include <Eet.h>
 #include <Ecore.h>
+#include <Ecore_Con.h>
 #include <Ecore_Evas.h>
 #include <Ecore_File.h>
 #include <Edje.h>
@@ -48,12 +49,15 @@ typedef enum
 
 typedef struct
 {
-    Ecore_Evas	*ee;		// Our window.
-    Evas	*canvas;	// The canvas for drawing directly onto.
-    Evas_Object	*bg;		// Our background edje, also the game specific stuff.
-    Evas_Object	*edje;		// The edje of the background.
-    int logDom;
-    boolean	ui;		// Wether we actually start up the UI.
+    Ecore_Evas		*ee;		// Our window.
+    Evas		*canvas;	// The canvas for drawing directly onto.
+    Evas_Object		*bg;		// Our background edje, also the game specific stuff.
+    Evas_Object		*edje;		// The edje of the background.
+    Ecore_Con_Server	*server;
+    int			logDom;
+    const char		*address;
+    int			port;
+    boolean		ui;		// Wether we actually start up the UI.
 } gameGlobals;
 
 

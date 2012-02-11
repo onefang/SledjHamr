@@ -76,3 +76,16 @@ command="gcc $CFLAGS -o ../LuaSL $objects $LDFLAGS $libs"
 echo $command
 $command
 
+names="LuaSL_test LuaSL_utilities"
+objects=""
+for i in $names
+do
+    command="gcc $CFLAGS -c -o $i.o $i.c"
+    echo $command
+    $command
+    objects="$objects $i.o"
+done
+command="gcc $CFLAGS -o ../LuaSL_test $objects $LDFLAGS $libs"
+echo $command
+$command
+
