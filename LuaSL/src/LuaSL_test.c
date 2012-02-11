@@ -1,6 +1,7 @@
 
 #include "LuaSL.h"
 
+static Eina_Strbuf *clientStream;
 
 static const char *names[] =
 {
@@ -128,6 +129,44 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 {
     gameGlobals *game = data;
 
+    char buf[PATH_MAX];
+    char SID[PATH_MAX];
+    const char *command;
+    char *ext;
+
+    eina_strbuf_append_length(clientStream, ev->data, ev->size);
+    command = eina_strbuf_string_get(clientStream);
+    while ((ext = index(command, '\n')))
+    {
+	int length = ext - command;
+
+	strncpy(SID, command, length + 1);
+	SID[length] = '\0';
+	eina_strbuf_remove(clientStream, 0, length + 1);
+	ext = rindex(SID, '.');
+	if (ext)
+	{
+	    ext[0] = '\0';
+	    command = ext + 1;
+	    if (0 == strcmp(command, "compiled(false)"))
+		PE("The compile of %s failed!", SID);
+	    else if (0 == strcmp(command, "compiled(true)"))
+	    {
+		PD("The compile of %s worked, running it now.", SID);
+		snprintf(buf, sizeof(buf), "%s.lua.out.start()\n", SID);
+		ecore_con_server_send(game->server, buf, strlen(buf));
+		ecore_con_server_flush(game->server);
+	    }
+	    else
+	    {
+		PI("Command %s from script %s", command, SID);
+	    }
+	}
+
+	// Get the next blob to check it.
+	command = eina_strbuf_string_get(clientStream);
+    }
+
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -167,6 +206,7 @@ int main(int argc, char **argv)
 		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
 		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _data, &game);
 		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
+		clientStream = eina_strbuf_new();
 
 		if (ecore_evas_init())
                 {

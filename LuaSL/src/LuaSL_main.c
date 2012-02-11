@@ -5,6 +5,14 @@
 static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
+static void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message)
+{
+    char buf[PATH_MAX];
+
+    sprintf(buf, "%s.%s\n", SID, message);
+    ecore_con_client_send(client, buf, strlen(buf));
+    ecore_con_client_flush(client);
+}
 
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
 {
@@ -35,10 +43,11 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    command = ext + 1;
 	    if (0 == strcmp(command, "compile()"))
 	    {
+		PD("Compiling %s.", SID);
 		if (compileLSL(game, SID, FALSE))
-		    PD("The compile of %s worked.", SID);
+		    sendBack(game, ev->client, SID, "compiled(true)");
 		else
-		    PE("The compile of %s failed!", SID);
+		    sendBack(game, ev->client, SID, "compiled(false)");
 	    }
 	    else if (0 == strcmp(command, "start()"))
 	    {
@@ -57,7 +66,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		snprintf(temp, sizeof(temp), "%s.events", SID);
 		status = sendToChannel(temp, command, NULL, NULL);
 		if (status)
-		    PE("Error sending command %s to script %s : %s", command, temp, status);
+		    PE("Error sending command %s to script %s : %s", command, SID, status);
 	    }
 	}
 
