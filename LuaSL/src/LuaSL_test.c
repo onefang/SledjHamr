@@ -89,7 +89,6 @@ static void dirList_compile(const char *name, const char *path, void *data)
 {
     gameGlobals *game = data;
 
-    char buf[PATH_MAX];
     char *ext = rindex(name, '.');
 
     if (ext)
@@ -103,9 +102,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	    snprintf(me->SID, sizeof(me->SID), "%s/%s", path, name);
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(game->scripts, me->SID, me);
-	    snprintf(buf, sizeof(buf), "%s/%s.compile()\n", path, name);
-	    ecore_con_server_send(game->server, buf, strlen(buf));
-	    ecore_con_server_flush(game->server);
+	    sendForth(game, me->SID, "compile()");
 	}
     }
 }
@@ -119,11 +116,7 @@ static Eina_Bool _quit_timer_cb(void *data)
     scripts = eina_hash_iterator_data_new(game->scripts);
     while(eina_iterator_next(scripts, (void **) &me))
     {
-	char buf[PATH_MAX];
-
-	snprintf(buf, sizeof(buf), "%s.lua.out.quit()\n", me->SID);
-	ecore_con_server_send(game->server, buf, strlen(buf));
-	ecore_con_server_flush(game->server);
+	sendForth(game, me->SID, "quit()");
     }
 
     ecore_con_server_send(game->server, ".exit()\n", 8);
@@ -151,7 +144,6 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 {
     gameGlobals *game = data;
 
-    char buf[PATH_MAX];
     char SID[PATH_MAX];
     const char *command;
     char *ext;
@@ -191,9 +183,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 		    }
 		}
 		PD("The compile of %s worked, running it now.", SID);
-		snprintf(buf, sizeof(buf), "%s.lua.out.start()\n", SID);
-		ecore_con_server_send(game->server, buf, strlen(buf));
-		ecore_con_server_flush(game->server);
+		sendForth(game, SID, "start()");
 	    }
 	    else
 	    {

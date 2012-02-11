@@ -66,6 +66,24 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
     return (dateTime);
 }
 
+void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message)
+{
+    char buf[PATH_MAX];
+
+    sprintf(buf, "%s.%s\n", SID, message);
+    ecore_con_client_send(client, buf, strlen(buf));
+    ecore_con_client_flush(client);
+}
+
+void sendForth(gameGlobals *game, const char *SID, const char *message)
+{
+    char buf[PATH_MAX];
+
+    snprintf(buf, sizeof(buf), "%s.%s\n", SID, message);
+    ecore_con_server_send(game->server, buf, strlen(buf));
+    ecore_con_server_flush(game->server);
+}
+
 float timeDiff(struct timeval *now, struct timeval *then)
 {
     if (0 == gettimeofday(now, 0))

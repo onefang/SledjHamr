@@ -64,6 +64,8 @@ typedef struct
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
+void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message);
+void sendForth(gameGlobals *game, const char *SID, const char *message);
 float timeDiff(struct timeval *now, struct timeval *then);
 
 #include "LuaSL_LSL_tree.h"

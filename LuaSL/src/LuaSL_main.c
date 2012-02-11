@@ -5,14 +5,6 @@
 static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
-static void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message)
-{
-    char buf[PATH_MAX];
-
-    sprintf(buf, "%s.%s\n", SID, message);
-    ecore_con_client_send(client, buf, strlen(buf));
-    ecore_con_client_flush(client);
-}
 
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
 {
