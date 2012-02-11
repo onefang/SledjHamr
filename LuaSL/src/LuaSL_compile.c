@@ -358,7 +358,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	else
 	{
 	    compiler->script.bugCount++;
-	    PE("NOT found %s @ line %d, column %d!", identifier->value.stringValue, identifier->line, identifier->column);
+	    sendBack(game, compiler->client, compiler->fileName, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -402,7 +402,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == lType)
 	    {
 		compiler->script.warningCount++;
-		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
+		sendBack(game, compiler->client, compiler->fileName, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -430,7 +430,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == rType)
 	    {
 		compiler->script.warningCount++;
-		PW("Undeclared identifier issue, deferring this until the second pass. @ line %d, column %d.", lval->line, lval->column);
+		sendBack(game, compiler->client, compiler->fileName, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -587,7 +587,7 @@ else
 	    }
 
 	    compiler->script.bugCount++;
-	    PE("Invalid operation [%s(%s) %s %s(%s)] @ line %d, column %d!", leftType, leftToken, lval->toKen->toKen, rightType, rightToken, lval->line, lval->column);
+	    sendBack(game, compiler->client, compiler->fileName, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	}
     }
 
@@ -2120,7 +2120,7 @@ boolean compilerSetup(gameGlobals *game)
 
 	// Compile the constants.
 	snprintf(buf, sizeof(buf), "%s/src/constants.lsl", PACKAGE_DATA_DIR);
-	compileLSL(game, buf, TRUE);
+	compileLSL(game, NULL, buf, TRUE);
 
 	return TRUE;
     }
@@ -2140,7 +2140,7 @@ static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
     return result;
 }
 
-boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
+boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *script, boolean doConstants)
 {
     boolean result = FALSE;
     LuaSL_compiler compiler;
@@ -2152,6 +2152,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 
     memset(&compiler, 0, sizeof(LuaSL_compiler));
     compiler.game = game;
+    compiler.client = client;
     compiler.script.functions = eina_hash_stringshared_new(burnLeaf);
     compiler.script.states = eina_hash_stringshared_new(burnLeaf);
     compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
@@ -2215,7 +2216,7 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    PE("Undeclared function %s called @ line %d, column %d!", call->call->value.stringValue, call->call->line, call->call->column);
+		    sendBack(game, compiler.client, compiler.fileName, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
 	secondPass(&compiler, compiler.ast);
@@ -2319,16 +2320,8 @@ boolean compileLSL(gameGlobals *game, char *script, boolean doConstants)
 		PC("Unable to open file %s for writing!", luaName);
 	}
 
-	if (compiler.script.bugCount)
-	    PE("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
-	else
-	{
-	    if (compiler.script.warningCount)
-		PW("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
-//	    else
-//		PI("%d errors and %d warnings in %s", compiler.script.bugCount, compiler.script.warningCount, compiler.fileName);
+	if (0 == compiler.script.bugCount)
 	    result = TRUE;
-	}
     }
 
     if (NULL != compiler.file)

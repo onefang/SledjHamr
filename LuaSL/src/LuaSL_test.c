@@ -8,7 +8,7 @@ typedef struct
     char		fileName[PATH_MAX];
     struct timeval	startTime;
     float		compileTime;
-    int			errors, warnings;
+    int			bugs, warnings;
     boolean		running;
 
 } script;
@@ -144,6 +144,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 {
     gameGlobals *game = data;
 
+    char buf[PATH_MAX];
     char SID[PATH_MAX];
     const char *command;
     char *ext;
@@ -160,14 +161,65 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 	ext = rindex(SID, '.');
 	if (ext)
 	{
+	    script *me;
+
 	    ext[0] = '\0';
 	    command = ext + 1;
-	    if (0 == strcmp(command, "compiled(false)"))
+	    me = eina_hash_find(game->scripts, SID);
+	    if (0 == strncmp(command, "compilerWarning(", 16))
+	    {
+		char *temp;
+		char *line;
+		char *column;
+		char *text;
+
+		strcpy(buf, &command[16]);
+		temp = buf;
+		line = temp;
+		while (',' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		column = ++temp;
+		while (',' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		text = ++temp;
+		while (')' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		PW("%s @ line %s, column %s.", text, line, column);
+		if (me)
+		    me->warnings++;
+	    }
+	    else if (0 == strncmp(command, "compilerError(", 14))
+	    {
+		char *temp;
+		char *line;
+		char *column;
+		char *text;
+
+		strcpy(buf, &command[14]);
+		temp = buf;
+		line = temp;
+		while (',' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		column = ++temp;
+		while (',' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		text = ++temp;
+		while (')' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		PE("%s @ line %s, column %s.", text, line, column);
+		if (me)
+		    me->bugs++;
+	    }
+	    else if (0 == strcmp(command, "compiled(false)"))
 		PE("The compile of %s failed!", SID);
 	    else if (0 == strcmp(command, "compiled(true)"))
 	    {
-		script *me = eina_hash_find(game->scripts, SID);
-
 		if (me)
 		{
 		    struct timeval now;

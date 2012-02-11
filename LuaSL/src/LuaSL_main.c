@@ -36,7 +36,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    if (0 == strcmp(command, "compile()"))
 	    {
 		PD("Compiling %s.", SID);
-		if (compileLSL(game, SID, FALSE))
+		if (compileLSL(game, ev->client, SID, FALSE))
 		    sendBack(game, ev->client, SID, "compiled(true)");
 		else
 		    sendBack(game, ev->client, SID, "compiled(false)");
