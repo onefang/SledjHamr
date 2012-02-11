@@ -63,7 +63,7 @@ command="edje_cc $EDJE_FLAGS LuaSL.edc ../LuaSL.edj"
 echo $command
 $command
 
-names="LuaSL_main LuaSL_compile LuaSL_runner LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
+names="LuaSL_main LuaSL_compile LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
 objects="../../libraries/luaproc/channel.o ../../libraries/luaproc/list.o ../../libraries/luaproc/luaproc.o ../../libraries/luaproc/sched.o "
 for i in $names
 do
