@@ -66,20 +66,36 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
     return (dateTime);
 }
 
-void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message)
+void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message, ...)
 {
+    va_list args;
     char buf[PATH_MAX];
+    int length = strlen(SID);
 
-    sprintf(buf, "%s.%s\n", SID, message);
+    strncpy(buf, SID, length);
+    buf[length++] = '.';
+    va_start(args, message);
+    length += vsprintf(&buf[length], message, args);
+    va_end(args);
+    buf[length++] = '\n';
+    buf[length++] = '\0';
     ecore_con_client_send(client, buf, strlen(buf));
     ecore_con_client_flush(client);
 }
 
-void sendForth(gameGlobals *game, const char *SID, const char *message)
+void sendForth(gameGlobals *game, const char *SID, const char *message, ...)
 {
+    va_list args;
     char buf[PATH_MAX];
+    int length = strlen(SID);
 
-    snprintf(buf, sizeof(buf), "%s.%s\n", SID, message);
+    strncpy(buf, SID, length);
+    buf[length++] = '.';
+    va_start(args, message);
+    length += vsprintf(&buf[length], message, args);
+    va_end(args);
+    buf[length++] = '\n';
+    buf[length++] = '\0';
     ecore_con_server_send(game->server, buf, strlen(buf));
     ecore_con_server_flush(game->server);
 }
