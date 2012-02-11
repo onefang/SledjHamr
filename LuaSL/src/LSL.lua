@@ -537,7 +537,7 @@ local running = true
 local paused = false
 
 -- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
-function pause() paused = true  end
+function stop() paused = true  end
 function quit()  running = false  end
 
 function LSL.stateChange(x)
@@ -580,15 +580,16 @@ function LSL.mainLoop(sid, x)
 
   LSL.stateChange(x);
 
-  -- TODO - Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
-  --        Actually, I think the luaproc message system manages such a queue for us anyway.
-  --        C should strip off the "SID." part and replace it with "_LSL.", so might be better to restrict the wire protocol to single function calls.
+  -- Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
+  -- The ecore_con stuff ends up being a sorta FIFO queue of the commands coming from OpenSim.
+  -- Plus, I think the luaproc message system manages a FIFO queue for us as well.
+  -- Might still need one.  lol
 
   while running do
     local message = luaproc.receive(sid)
     if message then
       if paused then
-	if "resume()" == message then paused = false  end
+	if "start()" == message then paused = false  end
       else
 	result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then

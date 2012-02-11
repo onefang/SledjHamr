@@ -41,7 +41,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		else
 		    sendBack(game, ev->client, SID, "compiled(false)");
 	    }
-	    else if (0 == strcmp(command, "start()"))
+	    else if (0 == strcmp(command, "run()"))
 	    {
 		char buf[PATH_MAX];
 

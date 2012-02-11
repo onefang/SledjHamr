@@ -413,7 +413,11 @@ typedef struct
 #endif
 
 
+
+boolean compilerSetup(gameGlobals *game);
+boolean compileLSL(gameGlobals *game, char *script, boolean doConstants);
 void burnLeaf(void *data);
+
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);
 LSL_Leaf *addCrement(LuaSL_compiler *compiler, LSL_Leaf *variable, LSL_Leaf *crement, LSL_Type type);
 LSL_Leaf *addFor(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr0, LSL_Leaf *stat0, LSL_Leaf *expr1, LSL_Leaf *stat1, LSL_Leaf *expr2, LSL_Leaf *right, LSL_Leaf *block);
@@ -437,9 +441,6 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *arg);
 LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *comma, LSL_Leaf *newParam);
 LSL_Leaf *collectStatements(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *newStatement);
-
-boolean compilerSetup(gameGlobals *game);
-boolean compileLSL(gameGlobals *game, char *script, boolean doConstants);
 
 void *ParseAlloc(void *(*mallocProc)(size_t));
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt);
