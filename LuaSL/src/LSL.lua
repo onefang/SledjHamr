@@ -567,12 +567,11 @@ function LSL.stateChange(x)
   end
 end;
 
-function LSL.mainLoop(ourSID, x)
-  local sid = ourSID .. ".events"
+function LSL.mainLoop(sid, x)
   local status, errorMsg = luaproc.newchannel(sid)
   local result
 
-  SID = ourSID
+  SID = sid
 
   if not status then
     msg("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
