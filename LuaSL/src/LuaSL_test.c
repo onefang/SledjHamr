@@ -91,18 +91,26 @@ static void dirList_compile(const char *name, const char *path, void *data)
     common_dirList(game, name, path, ".lsl", "compile");
 }
 
-static void dirList_run(const char *name, const char *path, void *data)
-{
-    gameGlobals *game = data;
-
-    common_dirList(game, name, path, ".out", "start");
-}
-
 static void dirList_quit(const char *name, const char *path, void *data)
 {
     gameGlobals *game = data;
 
     common_dirList(game, name, path, ".out", "quit");
+}
+
+static Eina_Bool _quit_timer_cb(void *data)
+{
+    gameGlobals *game = data;
+    char buf[PATH_MAX];
+
+    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+    eina_file_dir_list(buf, EINA_TRUE, dirList_quit, game);
+
+    ecore_con_server_send(game->server, ".exit()\n", 8);
+    ecore_con_server_flush(game->server);
+    ecore_main_loop_quit();
+
+   return ECORE_CALLBACK_CANCEL;
 }
 
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
@@ -113,15 +121,8 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
     game->server = ev->server;
     snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, game);
-    eina_file_dir_list(buf, EINA_TRUE, dirList_run, game);
     // Wait awhile, then quit all scripts we started, for testing.
-    sleep(2);
-    eina_file_dir_list(buf, EINA_TRUE, dirList_quit, game);
-
-    ecore_con_server_send(game->server, ".exit()\n", 8);
-    ecore_con_server_flush(game->server);
-    ecore_main_loop_quit();
-
+    ecore_timer_add(2.0, _quit_timer_cb, game);
     return ECORE_CALLBACK_RENEW;
 }
 
