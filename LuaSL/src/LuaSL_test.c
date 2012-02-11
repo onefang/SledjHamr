@@ -16,7 +16,9 @@ typedef struct
 
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
+static int compiledCount = 0;
 static float compileTime = 0.0;
+static struct timeval startTime;
 
 static const char *names[] =
 {
@@ -96,6 +98,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	{
 	    script *me = calloc(1, sizeof(script));
 
+	    scriptCount++;
 	    gettimeofday(&me->startTime, NULL);
 	    snprintf(me->SID, sizeof(me->SID), "%s/%s", path, name);
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
@@ -136,6 +139,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
     char buf[PATH_MAX];
 
     game->server = ev->server;
+    gettimeofday(&startTime, NULL);
     snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, game);
     // Wait awhile, then quit all scripts we started, for testing.
@@ -178,9 +182,13 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 
 		    me->compileTime = timeDiff(&now, &me->startTime);
 		    me->running = TRUE;
-		    scriptCount++;
+		    compiledCount++;
 		    compileTime += me->compileTime;
-		    PI("Average compile speed is %f scripts per second", scriptCount / compileTime);
+		    PI("Average compile speed is %f scripts per second", compiledCount / compileTime);
+		    if (compiledCount == scriptCount)
+		    {
+			PI("*********************TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
+		    }
 		}
 		PD("The compile of %s worked, running it now.", SID);
 		snprintf(buf, sizeof(buf), "%s.lua.out.start()\n", SID);
