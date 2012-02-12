@@ -313,6 +313,123 @@ void runLuaFile(gameGlobals *game, const char *filename)
  *   There is also an asset UUID (the one printed out on the console at script startup time) that points to the source code in the prim.
  *     Which will be identical to the asset UUID for the multiple copies of the same script.
  *
+ *   script assetID
+ *     UUID of the script source in the grids asset database, also the script source in the prim.
+ *
+ *   script itemID
+ *     UUID of this instance of the running script.
+ *     UUID of the scripts binary in the prims inventory.
+ *     This is the one used to identify the running script.
+ *
+ *   prim uint localID
+ *     Some sort of number representing the prim the script is running in.
+ *     Events are sometimes sent to this.
+ *
+ *   path/filename
+ *     An invention of LuaSL, coz we store stuff as files.
+ *
+ *   OpenSim says "compile this assetID for this itemID, in this prim uint"
+ *     Current infrastructure does not allow easy sending of the script source, but we don't have ROBUST code to get it either.
+ *     ROBUST is the way to go though, coz we can sneakily start to suck other stuff, like prim contents across when needed.
+ *       Though that sort of thing needs access to the local sim databases to lookup the prim and it's other contents.  sigh
+ *       I think that new script and notecard contents get new assetIDs anyway, so keeping an eye on assets.create_time or asset_access_time wont help much.
+ *
+ *   OpenSim says "start / stop this itemID"
+ *     Already catered for.
+ *
+ *   What does OpenSim REALLY do?
+ *
+ *     Region/Framework/Scenes/Scene.Inventory.cs - CapsUpdateTaskInventoryScriptAsset(IClientAPI remoteClient, UUID itemId, UUID primId, bool isScriptRunning, byte[] data)
+ *         remoteClient
+ *         itemID - UUID of the script source.
+ *         primID - UUID of the prim it is in.
+ *         isScriptRunning
+ *         data   - the script source code.
+ *       Called when a user saves the script.  itemID stays the same, but we get a new assetID, for the new asset.
+ *       Looks up the item in the prim.
+ *       AssetBase asset = CreateAsset(item.Name, item.Description, (sbyte)AssetType.LSLText, data, remoteClient.AgentId);
+ *       AssetService.Store(asset);
+ *       stashes the new assetID in the item
+ *       updates the item in the prim
+ *       if (isScriptRunning)
+ *         part.Inventory.RemoveScriptInstance(item.ItemID, false);
+ *         part.Inventory.CreateScriptInstance(item.ItemID, 0, false, DefaultScriptEngine, 0);
+ *         errors = part.Inventory.GetScriptErrors(item.ItemID);
+ *
+ *     CreateScriptInstance() is generally called to start scripts, part.ParentGroup.ResumeScripts(); is usually called after CreateScriptInstance()
+ *
+ *     Region/Framework/Scenes/SceneObjectPartInventory.cs - CreateScriptInstance(UUID itemId, int startParam, bool postOnRez, string engine, int stateSource)
+ *       looks up the itemID, then calls the real one -
+ *     Region/Framework/Scenes/SceneObjectPartInventory.cs - CreateScriptInstance(TaskInventoryItem item, int startParam, bool postOnRez, string engine, int stateSource)
+ *       get the asset from the asset database using the items assetID
+ *       restores script state if needed
+ *       converts asset.data to a string called script
+ *       m_part.ParentGroup.Scene.EventManager.TriggerRezScript(m_part.LocalId, item.ItemID, script, startParam, postOnRez, engine, stateSource);
+ *       QUIRK - if it's a sim border crossing, TriggerRezScript() gets called with empty script source.
+ *
+ *     Region/ScriptEngine/XEngine/XEngine.cs - AddRegion(Scene scene)
+ *       m_log.InfoFormat("[XEngine] Initializing scripts in region {0}", scene.RegionInfo.RegionName);
+ *       gets the script config info, which is the same damn stuff for each sim.  Pffft
+ *       Think it relies on the scenes event manager to call OnRezScript() -
+ *         m_Scene.EventManager.OnRezScript += OnRezScript;
+ *
+ *     Region/Framework/Scenes/EventManager.cs - TriggerRezScript(uint localID, UUID itemID, string script, int startParam, bool postOnRez, string engine, int stateSource)
+ *       Loops through Scene.EventManager.OnRezScript calling them.
+ *
+ *     Region/ScriptEngine/XEngine/XEngine.cs - OnRezScript(uint localID, UUID itemID, string script, int startParam, bool postOnRez, string engine, int stateSource)
+ *       Looks at the script source to figure out if it's an XEngine script.
+ *       Either queues the script for later, or does it direct.
+ *       Region/ScriptEngine/XEngine/XEngine.cs - DoOnRezScript() is passed an array holding -
+ *           localID is a uint that represents the containing prim in the current scene
+ *           itemID is the UUID of the script in the prims contents
+ *           script is the script source code.
+ *           startParam is the scripts startParam
+ *           postOnRez
+ *           stateSource is an integer saying how we where started, used to trigger the appropriate startup events.
+ *         uses localID to look up the prim in the scene, then looks inside that for the itemID to find the assetID.
+ *         m_Compiler.PerformScriptCompile(script, assetID.ToString(), item.OwnerID, out assembly, out linemap);
+ *           Which is in Region/ScriptEngine/Shared/CodeTools/Compiler.cs
+ *         instance = new ScriptInstance(this, part, itemID, assetID, assembly, m_AppDomains[appDomain], part.ParentGroup.RootPart.Name, item.Name, startParam, postOnRez, stateSource, m_MaxScriptQueue);
+ *           Region/ScriptEngine/Shared/Instance/ScriptInstance.cs - ScriptInstance(IScriptEngine engine, SceneObjectPart part, UUID itemID, UUID assetID, string assembly, AppDomain dom, string primName, string scriptName, int startParam, bool postOnRez, StateSource stateSource, int maxScriptQueue)
+ *             inits all the APIs
+ *             loads in any saved state if it can find one
+ *         m_log.DebugFormat("[XEngine] Loaded script {0}.{1}, script UUID {2}, prim UUID {3} @ {4}.{5}", part.ParentGroup.RootPart.Name, item.Name, assetID, part.UUID, part.ParentGroup.RootPart.AbsolutePosition, part.ParentGroup.Scene.RegionInfo.RegionName);
+ *
+ *   Soooo, when a script is saved -
+ *     the new source is saved in the asset database
+ *     The script item in the prim gets the new assetID
+ *     if the script is running -
+ *       remove the old script instance (item.ItemID)
+ *       create a new one (item.ItemID)
+ *         get the source code from the asset database (item.assetID)
+ *         restore script state
+ *         TriggerRezOnScript()
+ *           Loop through all those that are interested, incuding XEngine.onRezScript()
+ ***           check the first line to see if it's an XEngine script
+ *               sooner or later passes it to XEngine.DoOnRezScript()
+ *                 looks up localID to get the prim
+ *                 looks inside prim to get the script from itemID
+ *                 gets the assetID from the script item
+ *                 compiles the script
+ *                 creates the script instance
+ *                   loads up the APIs
+ *                   restores any script state
+ *                 calls instance.Init() which is Region/ScriptEngine/Shared/Instance/ScriptInstance.cs - Init()
+ *                   passes the usual startup events to the script.
+ *     part.ParentGroup.ResumeScripts()
+ *
+ *   At the *** marked point, LuaSL.onRezScript should -
+ *     check the first line to see if it's an LuaSL script
+ *       looks up localID to get the prim
+ *       looks inside prim to get the script from itemID
+ *       gets the assetID from the script item
+ *       filename encode the sim name, object name, and script name
+ *         replace anything less than 0x21, DEL " * / : < > ? \ | + [ ] - , . ( ) $ % # @ from - http://en.wikipedia.org/wiki/Filename plus a few more
+ *         THEN reduce to 254 characters
+ *       write the script to a file - /script/engine/path/sim_name/objects/object_name/script_name
+ *       send the itemID.compile(/script/engine/path/sim_name/objects/object_name/script_name) message to the script engine's socket
+ *
+ *
  * Object inventory "cache".
  *
  *   This code currently pretends that there is a local file based sim object store available.
