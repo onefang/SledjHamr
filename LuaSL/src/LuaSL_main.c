@@ -345,7 +345,7 @@ void runLuaFile(gameGlobals *game, const char *filename)
  *         primID - UUID of the prim it is in.
  *         isScriptRunning
  *         data   - the script source code.
- *       Called when a user saves the script.  itemID stays the same, but we get a new assetID, for the new asset.
+ *       Called when a user saves the script.  itemID stays the same, but we get a new assetID, for the new source code asset.
  *       Looks up the item in the prim.
  *       AssetBase asset = CreateAsset(item.Name, item.Description, (sbyte)AssetType.LSLText, data, remoteClient.AgentId);
  *       AssetService.Store(asset);
@@ -426,6 +426,7 @@ void runLuaFile(gameGlobals *game, const char *filename)
  *       filename encode the sim name, object name, and script name
  *         replace anything less than 0x21, DEL " * / : < > ? \ | + [ ] - , . ( ) $ % # @ from - http://en.wikipedia.org/wiki/Filename plus a few more
  *         THEN reduce to 254 characters
+ *           NOTE the object names might be identical, disambiguate them.
  *       write the script to a file - /script/engine/path/sim_name/objects/object_name/script_name
  *       send the itemID.compile(/script/engine/path/sim_name/objects/object_name/script_name) message to the script engine's socket
  *
@@ -483,6 +484,7 @@ void runLuaFile(gameGlobals *game, const char *filename)
  *   NOTE - Sending from C means that the message goes nowhere if no one is waiting for it.
  *     SOOOO, we may need to queue messages to.
  *     Just chuck them in a FIFO per channel, and destroy the FIFO when the channel get's destroyed.
+ *     See if I can create the SID channel in C before I start the Lua state running.
  *   Edje messages might have to be used instead, or some hybrid.
  *
  *   Main loop is waiting on messages, and that's the main driver.  Luaproc is fine with that.  Good for events.
