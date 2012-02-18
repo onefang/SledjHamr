@@ -2,18 +2,6 @@
 #include "LuaSL.h"
 
 
-typedef struct
-{
-    char		SID[PATH_MAX];
-    char		fileName[PATH_MAX];
-    struct timeval	startTime;
-    float		compileTime;
-    int			bugs, warnings;
-    boolean		running;
-
-} script;
-
-
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
@@ -99,10 +87,10 @@ static void dirList_compile(const char *name, const char *path, void *data)
 
 	    scriptCount++;
 	    gettimeofday(&me->startTime, NULL);
-	    snprintf(me->SID, sizeof(me->SID), "%s/%s", path, name);
+	    snprintf(me->SID, sizeof(me->SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(game->scripts, me->SID, me);
-	    sendForth(game, me->SID, "compile()");
+	    sendForth(game, me->SID, "compile(%s)", me->fileName);
 	}
     }
 }
@@ -158,7 +146,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 	strncpy(SID, command, length + 1);
 	SID[length] = '\0';
 	eina_strbuf_remove(clientStream, 0, length + 1);
-	ext = rindex(SID, '.');
+	ext = index(SID, '.');
 	if (ext)
 	{
 	    script *me;

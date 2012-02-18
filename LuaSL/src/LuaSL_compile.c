@@ -358,7 +358,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	else
 	{
 	    compiler->script.bugCount++;
-	    sendBack(game, compiler->client, compiler->fileName, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    sendBack(game, compiler->client, compiler->SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -402,7 +402,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == lType)
 	    {
 		compiler->script.warningCount++;
-		sendBack(game, compiler->client, compiler->fileName, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+		sendBack(game, compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -430,7 +430,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == rType)
 	    {
 		compiler->script.warningCount++;
-		sendBack(game, compiler->client, compiler->fileName, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+		sendBack(game, compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -587,7 +587,7 @@ else
 	    }
 
 	    compiler->script.bugCount++;
-	    sendBack(game, compiler->client, compiler->fileName, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+	    sendBack(game, compiler->client, compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	}
     }
 
@@ -2120,7 +2120,7 @@ boolean compilerSetup(gameGlobals *game)
 
 	// Compile the constants.
 	snprintf(buf, sizeof(buf), "%s/src/constants.lsl", PACKAGE_DATA_DIR);
-	compileLSL(game, NULL, buf, TRUE);
+	compileLSL(game, NULL, "FAKE_SID", buf, TRUE);
 
 	return TRUE;
     }
@@ -2140,7 +2140,7 @@ static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
     return result;
 }
 
-boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *script, boolean doConstants)
+boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants)
 {
     boolean result = FALSE;
     LuaSL_compiler compiler;
@@ -2161,6 +2161,8 @@ boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *script, bo
     compiler.ignorable = eina_strbuf_new();
 #endif
 
+    strncpy(compiler.SID, SID, 36);
+    compiler.SID[36] = '\0';
     strncpy(compiler.fileName, script, PATH_MAX - 1);
     compiler.fileName[PATH_MAX - 1] = '\0';
     compiler.file = fopen(compiler.fileName, "r");
@@ -2216,7 +2218,7 @@ boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *script, bo
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(game, compiler.client, compiler.fileName, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    sendBack(game, compiler.client, compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
 	secondPass(&compiler, compiler.ast);
@@ -2275,8 +2277,7 @@ boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *script, bo
 		fprintf(out, "--// Generated code goes here.\n\n");
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
-		// TODO - Use the scripts UUID instead of the file name here, or something.
-		fprintf(out, "local _SID = [=[%s]=]\n\n", compiler.fileName);
+		fprintf(out, "local _SID = [=[%s]=]\n\n", compiler.SID);
 		outputLeaf(out, OM_LUA, compiler.ast);
 		fprintf(out, "\n\n_LSL.mainLoop(_SID, _defaultState)\n");  // This actually starts the script running.
 		fprintf(out, "\n--// End of generated code.\n\n");

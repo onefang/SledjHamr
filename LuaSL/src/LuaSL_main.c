@@ -15,6 +15,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Ad
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
 {
     gameGlobals *game = data;
+    char buf[PATH_MAX];
     char SID[PATH_MAX];
     const char *command;
     char *ext;
@@ -28,25 +29,48 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	strncpy(SID, command, length + 1);
 	SID[length] = '\0';
 	eina_strbuf_remove(clientStream, 0, length + 1);
-	ext = rindex(SID, '.');
+	ext = index(SID, '.');
 	if (ext)
 	{
 	    ext[0] = '\0';
 	    command = ext + 1;
-	    if (0 == strcmp(command, "compile()"))
+	    if (0 == strncmp(command, "compile(", 8))
 	    {
-		PD("Compiling %s.", SID);
-		if (compileLSL(game, ev->client, SID, FALSE))
+		char *temp;
+		char *file;
+
+		strcpy(buf, &command[8]);
+		temp = buf;
+		file = temp;
+		while (')' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+
+		PD("Compiling %s, %s.", SID, file);
+		if (compileLSL(game, ev->client, SID, file, FALSE))
+		{
+		    script *me = calloc(1, sizeof(script));
+
+		    gettimeofday(&me->startTime, NULL);
+		    strncpy(me->SID, SID, sizeof(me->SID));
+		    strncpy(me->fileName, file, sizeof(me->fileName));
+		    eina_hash_add(game->scripts, me->SID, me);
 		    sendBack(game, ev->client, SID, "compiled(true)");
+		}
 		else
 		    sendBack(game, ev->client, SID, "compiled(false)");
 	    }
 	    else if (0 == strcmp(command, "run()"))
 	    {
+		script *me;
 		char buf[PATH_MAX];
 
-		sprintf(buf, "%s.lua.out", SID);
-		newProc(buf, TRUE);
+		me = eina_hash_find(game->scripts, SID);
+		if (me)
+		{
+		    sprintf(buf, "%s.lua.out", me->fileName);
+		    newProc(buf, TRUE);
+		}
 	    }
 	    else if (0 == strcmp(command, "exit()"))
 	    {
@@ -95,6 +119,7 @@ int main(int argc, char **argv)
     if (eina_init())
     {
 	loggingStartup(&game);
+	game.scripts = eina_hash_string_superfast_new(NULL);
 	if (ecore_con_init())
 	{
 	    if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
