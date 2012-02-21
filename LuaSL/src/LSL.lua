@@ -25,6 +25,7 @@ upvalue--either way is a bit more efficient and less error prone.
 
 local LSL = {};
 local SID = "";
+local scriptName = "";
 
 -- Debugging aids
 
@@ -567,6 +568,13 @@ function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[li
 function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
 
 
+-- LSL script functions
+
+function --[[string]] LSL.llGetScriptName()
+  return scriptName
+end
+
+
 -- Crements stuff.
 
 function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
@@ -612,11 +620,12 @@ function LSL.stateChange(x)
   end
 end;
 
-function LSL.mainLoop(sid, x)
+function LSL.mainLoop(sid, name, x)
   local status, errorMsg = luaproc.newchannel(sid)
   local result
 
   SID = sid
+  scriptName = name
 
   LSL.EOF = "\n\n\n"	-- Fix this up now.
 
