@@ -57,13 +57,74 @@ end
 
 -- LSL function and constant creation stuff.
 
+local args2string	-- Pre declare this.
+local functions = {}
+local mt = {}
+
+local function value2string(value, Type)
+  local temp = ""
+
+  if  	 "float"	== Type then temp = temp .. value
+  elseif "integer"	== Type then temp = temp .. value
+  elseif "key"		== Type then temp = "\"" .. value .. "\""
+  elseif "list"		== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
+  elseif "table"	== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
+  elseif "string"	== Type then temp = "\"" .. value .. "\""
+  elseif "rotation"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ", " .. value.s .. ">"
+  elseif "vector"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ">"
+  else
+    temp = temp .. value
+  end
+  return temp
+end
+
+function args2string(doType, ...)
+  local temp = ""
+  local first = true
+
+  for j,w in ipairs( {...} ) do
+    if first then first = false else temp = temp .. ", " end
+    if doType then
+      temp = temp .. value2string(w, type(w))
+    else
+      temp = temp .. w
+    end
+  end
+  return temp
+end
+
+function mt.callAndReturn(name, ... )
+  print("mt.callAndReturn(" .. name .. "(" .. args2string(true, ...) .. "))")
+end
+
+function mt.callAndWait(name, ... )
+  local func = functions[name]
+
+  print("mt.callAndWait(" .. name .. "(" .. args2string(true, ...) .. "))")
+
+  if	 "float"	== func.Type then return 0.0
+  elseif "integer"	== func.Type then return 0
+  elseif "key"		== func.Type then return LSL.NULL_KEY
+  elseif "list"		== func.Type then return {}
+  elseif "string"	== func.Type then return ""
+  elseif "rotation"	== func.Type then return LSL.ZERO_ROTATION
+  elseif "vector"	== func.Type then return LSL.ZERO_VECTOR
+  end
+  return nil
+end
+
 local function newConst(Type, name, value)
   LSL[name] = value
   return { Type = Type, name = name }
 end
 
-local function newFunc(Type, ... )
-    return { Type = Type, args = {...} }
+local function newFunc(Type, name, ... )
+  functions[name] = { Type = Type, args = {...} }
+  if "" == Type then
+    LSL[name] = function(...) mt.callAndReturn(name, ... ) end
+  else
+    LSL[name] = function(...) return mt.callAndWait(name, ... ) end
+  end
 end
 
 
@@ -243,117 +304,114 @@ local constants =
 
 -- ll*() function definitions
 
-local functions =
-{
 -- LSL avatar functions
-  llAvatarOnSitTarget	= newFunc("key"),
-  llGetAnimationList	= newFunc("list", "key id"),
-  llGetPermissions	= newFunc("integer"),
-  llGetPermissionsKey	= newFunc("key"),
-  llKey2Name		= newFunc("string", "key avatar"),
-  llRequestPermissions	= newFunc("", "key avatar", "integer perms"),
-  llSameGroup		= newFunc("integer", "key avatar"),
-  llStartAnimation	= newFunc("", "string anim"),
-  llStopAnimation	= newFunc("", "string anim"),
-  llUnSit		= newFunc("", "key avatar"),
+newFunc("key",		"llAvatarOnSitTarget")
+newFunc("list",		"llGetAnimationList", "key id")
+newFunc("integer",	"llGetPermissions")
+newFunc("key",		"llGetPermissionsKey")
+newFunc("string",	"llKey2Name", "key avatar")
+newFunc("",		"llRequestPermissions", "key avatar", "integer perms")
+newFunc("integer",	"llSameGroup", "key avatar")
+newFunc("",		"llStartAnimation", "string anim")
+newFunc("",		"llStopAnimation", "string anim")
+newFunc("",		"llUnSit", "key avatar")
 
 -- LSL collision / detect / sensor functions
-  llDetectedGroup	= newFunc("key", "integer index"),
-  llDetectedKey		= newFunc("key", "integer index"),
+newFunc("key",		"llDetectedGroup", "integer index")
+newFunc("key",		"llDetectedKey", "integer index")
 
 -- LSL communications functions
-  llDialog		= newFunc("", "key avatar", "string caption", "list arseBackwardsMenu", "integer channel"),
-  llListen		= newFunc("integer", "integer channel", "string name", "key id", "string msg"),
-  llListenRemove	= newFunc("", "integer handle"),
-  llOwnerSay		= newFunc("", "string text"),
-  llSay			= newFunc("", "integer channel", "string text"),
-  llShout		= newFunc("", "integer channel", "string text"),
-  llWhisper		= newFunc("", "integer channel", "string text"),
-  llMessageLinked	= newFunc("", "integer link", "integer num", "string text", "key aKey"),
+newFunc("",		"llDialog", "key avatar", "string caption", "list arseBackwardsMenu", "integer channel")
+newFunc("integer",	"llListen", "integer channel", "string name", "key id", "string msg")
+newFunc("",		"llListenRemove", "integer handle")
+newFunc("",		"llOwnerSay", "string text")
+newFunc("",		"llSay", "integer channel", "string text")
+newFunc("",		"llShout", "integer channel", "string text")
+newFunc("",		"llWhisper", "integer channel", "string text")
+newFunc("",		"llMessageLinked", "integer link", "integer num", "string text", "key aKey")
 
 -- LSL inventory functions.
-   llGetInventoryName	= newFunc("string", "integer Type", "integer index"),
-   llGetInventoryNumber	= newFunc("integer", "integer Type"),
-   llGetInventoryType	= newFunc("integer", "string name"),
-   llGetNotecardLine	= newFunc("key", "string name", "integer index"),
-   llRezAtRoot		= newFunc("", "string name", "vector position", "vector velocity", "rotation rot", "integer channel"),
-   llRezObject		= newFunc("", "string name", "vector position", "vector velocity", "rotation rot", "integer channel"),
+newFunc("string",	"llGetInventoryName", "integer Type", "integer index")
+newFunc("integer",	"llGetInventoryNumber", "integer Type")
+newFunc("integer",	"llGetInventoryType", "string name")
+newFunc("key",		"llGetNotecardLine", "string name", "integer index")
+newFunc("",		"llRezAtRoot", "string name", "vector position", "vector velocity", "rotation rot", "integer channel")
+newFunc("",		"llRezObject", "string name", "vector position", "vector velocity", "rotation rot", "integer channel")
 
 -- LSL list functions.
-  llCSV2List			= newFunc("list", "string text"),
-  llDeleteSubList		= newFunc("list", "list l", "integer start", "integer End"),
-  llDumpList2String		= newFunc("string", "list l", "string separator"),
-  llGetListLength		= newFunc("integer", "list l"),
-  llList2CSV			= newFunc("string", "list l"),
-  llList2Float			= newFunc("float", "list l", "integer index"),
-  llList2Integer		= newFunc("integer", "list l", "integer index"),
-  llList2Key			= newFunc("key", "list l", "integer index"),
-  llList2List			= newFunc("list", "list l", "integer start", "integer End"),
-  llList2String			= newFunc("string", "list l", "integer index"),
-  llList2Rotation		= newFunc("rotation", "list l", "integer index"),
-  llList2Vector			= newFunc("vector", "list l", "integer index"),
-  llListFindList		= newFunc("integer", "list l", "list l1"),
-  llListInsertList		= newFunc("list", "list l", "list l1", "integer index"),
-  llListReplaceList		= newFunc("list", "list l", "list part", "integer start", "integer End"),
-  llListSort			= newFunc("list", "list l", "integer stride", "integer ascending"),
-  llParseString2List		= newFunc("list", "string In", "list l", "list l1"),
-  llParseStringKeepNulls	= newFunc("list", "string In", "list l", "list l1"),
+newFunc("list",		"llCSV2List", "string text")
+newFunc("list",		"llDeleteSubList", "list l", "integer start", "integer End")
+newFunc("string",	"llDumpList2String", "list l", "string separator")
+newFunc("integer",	"llGetListLength", "list l")
+newFunc("string",	"llList2CSV", "list l")
+newFunc("float",	"llList2Float", "list l", "integer index")
+newFunc("integer",	"llList2Integer", "list l", "integer index")
+newFunc("key",		"llList2Key", "list l", "integer index")
+newFunc("list",		"llList2List", "list l", "integer start", "integer End")
+newFunc("string",	"llList2String", "list l", "integer index")
+newFunc("rotation",	"llList2Rotation", "list l", "integer index")
+newFunc("vector",	"llList2Vector", "list l", "integer index")
+newFunc("integer",	"llListFindList", "list l", "list l1")
+newFunc("list",		"llListInsertList", "list l", "list l1", "integer index")
+newFunc("list",		"llListReplaceList", "list l", "list part", "integer start", "integer End")
+newFunc("list",		"llListSort", "list l", "integer stride", "integer ascending")
+newFunc("list",		"llParseString2List", "string In", "list l", "list l1")
+newFunc("list",		"llParseStringKeepNulls", "string In", "list l", "list l1")
 
 -- LSL math functions
-  llEuler2Rot		= newFunc("rotation", "vector vec"),
-  llFrand		= newFunc("float", "float max"),
-  llPow			= newFunc("float", "float number", "float places"),
-  llRot2Euler		= newFunc("vector", "rotation rot"),
-  llRound		= newFunc("integer", "float number"),
+newFunc("rotation",	"llEuler2Rot", "vector vec")
+newFunc("float",	"llFrand", "float max")
+newFunc("float",	"llPow", "float number", "float places")
+newFunc("vector",	"llRot2Euler", "rotation rot")
+newFunc("integer",	"llRound", "float number")
 
 -- LSL media functions
-  llPlaySound		= newFunc("", "string name", "float volume"),
+newFunc("",		"llPlaySound", "string name", "float volume")
 
 -- LSL object / prim functions
-  llDie			= newFunc(""),
-  llGetKey		= newFunc("key"),
-  llGetLinkNumber	= newFunc("integer"),
-  llGetObjectDesc	= newFunc("string"),
-  llGetObjectName	= newFunc("string"),
-  llGetOwner		= newFunc("key"),
-  llSetObjectDesc	= newFunc("", "string text"),
-  llSetObjectName	= newFunc("", "string text"),
-  llSetPrimitiveParams	= newFunc("", "list params"),
-  llSetSitText		= newFunc("", "string text"),
-  llSetText		= newFunc("", "string text", "vector colour", "float alpha"),
-  llSitTarget		= newFunc("", "vector pos", "rotation rot"),
+newFunc("",		"llDie")
+newFunc("key",		"llGetKey")
+newFunc("integer",	"llGetLinkNumber")
+newFunc("string",	"llGetObjectDesc")
+newFunc("string",	"llGetObjectName")
+newFunc("key",		"llGetOwner")
+newFunc("",		"llSetObjectDesc", "string text")
+newFunc("",		"llSetObjectName", "string text")
+newFunc("",		"llSetPrimitiveParams", "list params")
+newFunc("",		"llSetSitText", "string text")
+newFunc("",		"llSetText", "string text", "vector colour", "float alpha")
+newFunc("",		"llSitTarget", "vector pos", "rotation rot")
 
 -- LSL rotation / scaling / translation functions
-  llGetPos		= newFunc("vector", ""),
-  llGetRot		= newFunc("rotation", ""),
-  llSetPos		= newFunc("", "vector pos"),
-  llSetRot		= newFunc("", "rotation rot"),
-  llSetScale		= newFunc("", "vector scale"),
+newFunc("vector",	"llGetPos")
+newFunc("rotation",	"llGetRot")
+newFunc("",		"llSetPos", "vector pos")
+newFunc("",		"llSetRot", "rotation rot")
+newFunc("",		"llSetScale", "vector scale")
 
 -- LSL script functions
-  llGetFreeMemory	= newFunc("integer", ""),
-  llGetScriptName	= newFunc("string", ""),
-  llResetOtherScript	= newFunc("", "string name"),
-  llResetScript		= newFunc("", ""),
-  llSetScriptState	= newFunc("", "string name", "integer running"),
+newFunc("integer",	"llGetFreeMemory")
+newFunc("string",	"llGetScriptName")
+newFunc("",		"llResetOtherScript", "string name")
+newFunc("",		"llResetScript")
+newFunc("",		"llSetScriptState", "string name", "integer running")
 
 -- LSL string functions
-  llGetSubString	= newFunc("string", "string text", "integer start", "integer End"),
-  llStringLength	= newFunc("integer", "string text"),
-  llStringTrim		= newFunc("string", "string text", "integer type"),
-  llSubStringIndex	= newFunc("integer", "string text", "string sub"),
+newFunc("string",	"llGetSubString", "string text", "integer start", "integer End")
+newFunc("integer",	"llStringLength", "string text")
+newFunc("string",	"llStringTrim", "string text", "integer type")
+newFunc("integer",	"llSubStringIndex", "string text", "string sub")
 
 -- LSL texture functions
-  llGetAlpha		= newFunc("float", "integer side"),
-  llSetAlpha		= newFunc("", "float alpha", "integer side"),
-  llSetColor		= newFunc("", "vector colour", "integer side"),
+newFunc("float",	"llGetAlpha", "integer side")
+newFunc("",		"llSetAlpha", "float alpha", "integer side")
+newFunc("",		"llSetColor", "vector colour", "integer side")
 
 -- LSL time functions
-  llGetTime		= newFunc("float", ""),
-  llResetTime		= newFunc("", ""),
-  llSetTimerEvent	= newFunc("", "float seconds"),
-  llSleep		= newFunc("", "float seconds"),
-}
+newFunc("float",	"llGetTime")
+newFunc("",		"llResetTime")
+newFunc("",		"llSetTimerEvent", "float seconds")
+newFunc("",		"llSleep", "float seconds")
 
 
 -- TODO - fake this for now.
@@ -636,43 +694,6 @@ function LSL.vectorTypecast(x)
 end
 
 
--- glue stuff
-
-local args2string	-- Pre declare this.
-local mt = {}
-
-local function value2string(value, Type)
-  local temp = ""
-
-  if  	 "float"	== Type then temp = temp .. value
-  elseif "integer"	== Type then temp = temp .. value
-  elseif "key"		== Type then temp = "\"" .. value .. "\""
-  elseif "list"		== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
-  elseif "table"	== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
-  elseif "string"	== Type then temp = "\"" .. value .. "\""
-  elseif "rotation"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ", " .. value.s .. ">"
-  elseif "vector"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ">"
-  else
-    temp = temp .. value
-  end
-  return temp
-end
-
-function args2string(doType, ...)
-  local temp = ""
-  local first = true
-
-  for j,w in ipairs( {...} ) do
-    if first then first = false else temp = temp .. ", " end
-    if doType then
-      temp = temp .. value2string(w, type(w))
-    else
-      temp = temp .. w
-    end
-  end
-  return temp
-end
-
 function LSL.gimmeLSL()
   for i,v in ipairs(constants) do
     local value = LSL[v.name]
@@ -690,41 +711,6 @@ function LSL.gimmeLSL()
   end
   LSL.EOF = "\n\n\n"	-- Fix this up now.
 end
-
-function mt.callAndReturn( ... )
-  print("mt.callAndReturn(" .. mt.name .. "(" .. args2string(true, ...) .. "))")
-end
-
-function mt.callAndWait( ... )
-  local func = functions[mt.name]
-
-  print("mt.callAndWait(" .. mt.name .. "(" .. args2string(true, ...) .. "))")
-
-  if	 "float"	== func.Type then return 0.0
-  elseif "integer"	== func.Type then return 0
-  elseif "key"		== func.Type then return LSL.NULL_KEY
-  elseif "list"		== func.Type then return {}
-  elseif "string"	== func.Type then return ""
-  elseif "rotation"	== func.Type then return LSL.ZERO_ROTATION
-  elseif "vector"	== func.Type then return LSL.ZERO_VECTOR
-  end
-  return nil
-end
-
-function mt.__index(Table, key)
-  local func = functions[key]
-
-  -- This is hacky, but we should only be running one at a time.
-  mt.name = key
-
-  if "" == func.Type then
-    return mt.callAndReturn
-  else
-    return mt.callAndWait
-  end
-end
-
-setmetatable(LSL, mt)
 
 
 return LSL;
