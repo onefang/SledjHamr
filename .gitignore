@@ -13,6 +13,7 @@ libraries/lemon/lemon
 LuaSL/LuaSL
 LuaSL/LuaSL_test
 LuaSL/LuaSL_parser
+LuaSL/constants.lsl
 LuaSL/src/LuaSL_lemon_yaccer.c
 LuaSL/src/LuaSL_lemon_yaccer.h
 LuaSL/src/LuaSL_lemon_yaccer.out
