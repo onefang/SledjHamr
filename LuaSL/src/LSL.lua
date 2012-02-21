@@ -618,6 +618,8 @@ function LSL.mainLoop(sid, x)
 
   SID = sid
 
+  LSL.EOF = "\n\n\n"	-- Fix this up now.
+
   if not status then
     msg("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
     return
@@ -694,6 +696,7 @@ function LSL.vectorTypecast(x)
 end
 
 
+-- Called at compiler set up time, to produce the constants.lsl file.
 function LSL.gimmeLSL()
   for i,v in ipairs(constants) do
     local value = LSL[v.name]
@@ -709,7 +712,6 @@ function LSL.gimmeLSL()
       print(v.Type .. " " .. k .. "(" .. args2string(false, unpack(v.args)) .. "){}")
     end
   end
-  LSL.EOF = "\n\n\n"	-- Fix this up now.
 end
 
 
