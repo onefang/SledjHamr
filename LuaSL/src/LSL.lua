@@ -4,6 +4,16 @@
 --   The compiler compiles that into a LSL_Scripts structure at startup,
 --   then uses that for function and variable lookups, as well as looking up in the current script.
 --   I can run this at compiler startup time, then iterate through the LSL table from C to generate that LSL_Script structure.
+--[[
+Have an array of functions and argument types.
+Compiler startup writes a short script that loads this module as normal, then calls the special "gimme the LSL" function.
+  The function runs through the array, calling back to C, passing each function definition.
+  It also runs through the constants, calling back to C, passing each constant type, name, and value.
+  In both cases, it could just combine them all (variables and functions together) into one big string blob to pass to the lexer+parser.
+Hook up the metatable _call method to check if the function is in the array, then pass it to OpenSim.
+  The array includes any return type, so _call knows if it has to wait for the reply.
+  So the function array should have some structure, to be able to tell the function name, and the various types.
+]]
 
 -- Using a module means it gets compiled each time?  Maybe not if I can use bytecode files.  Perhaps LuaJIT caches these?
 --   Does not seem to be slowing it down noticably, but that might change once the stubs are filled out.
@@ -59,6 +69,29 @@ end
 function msg(...)
   print(SID, ...)  -- The comma adds a tab, fancy that.  B-)
 end
+
+-- LSL function and constant creation stuff.
+
+local function newConst(Type, name, value)
+  LSL[name] = value
+  return { Type = Type, name = name }
+end
+
+local function newFunc(Type, name, ... )
+    return { Type = Type, name = name, args = ... }
+end
+
+local functions =
+{
+  newFunc("key", "llAvatarOnSitTarget"),
+  newFunc("list", "llGetAnimationList", "key"),
+}
+
+local constants =
+{
+  newConst("float", "PI", 3.14159265358979323846264338327950),
+}
+
 
 -- LSL constants.
 
