@@ -66,11 +66,12 @@ typedef struct
     char		SID[PATH_MAX];
     char		fileName[PATH_MAX];
     struct timeval	startTime;
-    float		compileTime;
+    float		compileTime, timerTime;
     int			bugs, warnings;
     boolean		running;
     gameGlobals		*game;
     Ecore_Con_Client	*client;
+    Ecore_Timer		*timer;
 } script;
 
 typedef struct

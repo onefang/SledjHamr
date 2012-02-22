@@ -8,11 +8,22 @@ static Eina_Strbuf *clientStream;
 
 static Eina_Bool _sleep_timer_cb(void *data)
 {
-    char *SID = data;
+    script *script = data;
+    gameGlobals *game = script->game;
 
-printf("Waking up %s\n", SID);
-    sendToChannel(SID, "0.0", NULL, NULL);
+    PD("Waking up %s", script->SID);
+    sendToChannel(script->SID, "0.0", NULL, NULL);
     return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _timer_timer_cb(void *data)
+{
+    script *script = data;
+    gameGlobals *game = script->game;
+
+    PD("Timer for %s", script->SID);
+    sendToChannel(script->SID, "events.timer()", NULL, NULL);
+    return ECORE_CALLBACK_RENEW;
 }
 
 static void _sendBack(void * data)
@@ -20,7 +31,19 @@ static void _sendBack(void * data)
     scriptMessage *message = data;
 
     if (0 == strncmp(message->message, "llSleep(", 8))
-	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script->SID);
+	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);
+    else if (0 == strncmp(message->message, "llSetTimerEvent(", 16))
+    {
+	message->script->timerTime = atof(&(message->message)[16]);
+	if (0.0 == message->script->timerTime)
+	{
+	    if (message->script->timer)
+		ecore_timer_del(message->script->timer);
+	    message->script->timer = NULL;
+	}
+	else
+	    message->script->timer = ecore_timer_add(message->script->timerTime, _timer_timer_cb, message->script);
+    }
     else
 	sendBack(message->script->game, message->script->client, message->script->SID, message->message);
     free(message);
