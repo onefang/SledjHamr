@@ -601,6 +601,16 @@ function --[[string]] LSL.llGetScriptName()
 end
 
 
+-- LSL string functions
+function --[[string]] LSL.llGetSubString( --[[string]] text, --[[integer]] start, --[[integer]] End)
+  -- Deal with the impedance mismatch.
+  if 0 <= start  then  start = start + 1  end
+  if 0 <= End    then  End   = End   + 1  end
+-- TODO - If start is larger than end the substring is the exclusion of the entries, so 6,4 would give the entire string except for the 5th character.
+  return string.sub(text, start, End)
+end
+
+
 -- Crements stuff.
 
 function LSL.preDecrement(name) _G[name] = _G[name] - 1; return _G[name]; end;
