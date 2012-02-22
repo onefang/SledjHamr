@@ -216,11 +216,11 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 		    me->running = TRUE;
 		    compiledCount++;
 		    compileTime += me->compileTime;
-		    PI("Average compile speed is %f scripts per second", compiledCount / compileTime);
+//		    PD("Average compile speed is %f scripts per second", compiledCount / compileTime);
 		    if (compiledCount == scriptCount)
-			PI("*********************TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
+			PD("TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
 		}
-		PD("The compile of %s worked, running it now.", SID);
+//		PD("The compile of %s worked, running it now.", SID);
 		sendForth(game, SID, "run()");
 	    }
 	    else
