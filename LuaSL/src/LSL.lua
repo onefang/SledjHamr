@@ -612,6 +612,7 @@ end
 
 function --[[integer]] LSL.llSubStringIndex(--[[string]] text, --[[string]] sub)
   local start, End = string.find(text, sub, 1, true)
+
   if nil == start then return -1 else return start - 1 end
 end
 
