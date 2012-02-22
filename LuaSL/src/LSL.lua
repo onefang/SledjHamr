@@ -447,7 +447,7 @@ function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INV
 
 -- LSL list functions.
 
-function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
+--function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
 function --[[list]]	LSL.llDeleteSubList(--[[list]] l,--[[integer]] start,--[[integer]] eNd)
   local result = {}
   local x = 1
@@ -538,7 +538,7 @@ function --[[vector]]	LSL.llList2Vector(--[[list]] l,--[[integer]] index)
   return result
 end
 
-function --[[integer]] 	LSL.llListFindList(--[[list]] l, --[[list]] l1) return 0 end;
+--function --[[integer]] 	LSL.llListFindList(--[[list]] l, --[[list]] l1) return 0 end;
 function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer]] index)
   local result = {}
   local x = 1
@@ -590,8 +590,8 @@ function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer
   return result
 end
 
-function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
-function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+--function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+--function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
 
 
 -- LSL script functions
@@ -602,6 +602,7 @@ end
 
 
 -- LSL string functions
+
 function --[[string]] LSL.llGetSubString(--[[string]] text, --[[integer]] start, --[[integer]] End)
   -- Deal with the impedance mismatch.
   if 0 <= start  then  start = start + 1  end
