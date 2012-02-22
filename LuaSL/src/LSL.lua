@@ -26,6 +26,15 @@ upvalue--either way is a bit more efficient and less error prone.
 local LSL = {};
 local SID = "";
 local scriptName = "";
+local running = true
+local paused = false
+
+
+-- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
+function stop()		paused = true		end
+function result(...)	return {...}		end
+function quit()		running = false		end
+
 
 -- Debugging aids
 
@@ -102,11 +111,24 @@ function mt.callAndWait(name, ...)
   local func = functions[name]
 
   mt.callAndReturn(name, ...);
-
---[[ TODO - do a luaproc sync receive() waiting for the result.
-      Eventually a sendForth() is called, which should end up passing through SendToChannel().
-      The format of the result should be something like - SID.result({x=0.45, y=0.6, z=1.8})
-]]
+  -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
+  -- Wait for the result, which should be something like - result({x=0.45, y=0.6, z=1.8})
+  local message = luaproc.receive(SID)
+  if message then
+    result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
+    if nil == result then
+      msg("Not a valid result: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+    else
+      -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
+      setfenv(result, getfenv(1))
+      status, result = pcall(result)
+      if not status then
+	msg("Error from result: " .. message .. "  ERROR MESSAGE: " .. result)
+      elseif result then
+	return result
+      end
+    end
+  end
 
   if	 "float"	== func.Type then return 0.0
   elseif "integer"	== func.Type then return 0
@@ -591,12 +613,6 @@ function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1;
 -- State stuff
 
 local currentState = {}
-local running = true
-local paused = false
-
--- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
-function stop() paused = true  end
-function quit()  running = false  end
 
 function LSL.stateChange(x)
   if currentState ~= x then  -- Changing to the same state is a NOP.
