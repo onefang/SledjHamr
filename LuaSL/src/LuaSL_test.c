@@ -234,7 +234,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 		else if (0 == strcmp(command, "llGetObjectDesc()"))	// Send back a blank description for testing.
 		    sendForth(game, SID, "\"\"");
 		else
-		    PI("Command %s from script %s", command, SID);
+		    PI("Script %s sent command %s", SID, command);
 	    }
 	}
 
