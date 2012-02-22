@@ -438,7 +438,7 @@ newFunc("",		"llSetColor", "vector colour", "integer side")
 newFunc("float",	"llGetTime")
 newFunc("",		"llResetTime")
 newFunc("",		"llSetTimerEvent", "float seconds")
-newFunc("",		"llSleep", "float seconds")
+newFunc("float",	"llSleep", "float seconds")  -- Faked return type, it actually does not return anything.  This forces it to wait.  Actually fully implements llSleep().  B-)
 
 
 -- TODO - fake this for now.

@@ -6,11 +6,23 @@ static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
 
+static Eina_Bool _sleep_timer_cb(void *data)
+{
+    char *SID = data;
+
+printf("Waking up %s\n", SID);
+    sendToChannel(SID, "0.0", NULL, NULL);
+    return ECORE_CALLBACK_CANCEL;
+}
+
 static void _sendBack(void * data)
 {
     scriptMessage *message = data;
 
-    sendBack(message->script->game, message->script->client, message->script->SID, message->message);
+    if (0 == strncmp(message->message, "llSleep(", 8))
+	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script->SID);
+    else
+	sendBack(message->script->game, message->script->client, message->script->SID, message->message);
     free(message);
 }
 

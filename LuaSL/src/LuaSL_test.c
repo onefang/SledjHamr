@@ -124,7 +124,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
     snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, game);
     // Wait awhile, then quit all scripts we started, for testing.
-    ecore_timer_add(2.0, _quit_timer_cb, game);
+    ecore_timer_add(3.5, _quit_timer_cb, game);
     return ECORE_CALLBACK_RENEW;
 }
 
