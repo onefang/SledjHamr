@@ -94,14 +94,19 @@ function args2string(doType, ...)
   return temp
 end
 
-function mt.callAndReturn(name, ... )
-  print("mt.callAndReturn(" .. name .. "(" .. args2string(true, ...) .. "))")
+function mt.callAndReturn(name, ...)
+  luaproc.sendback(name .. "(" .. args2string(true, ...) .. ")")
 end
 
-function mt.callAndWait(name, ... )
+function mt.callAndWait(name, ...)
   local func = functions[name]
 
-  print("mt.callAndWait(" .. name .. "(" .. args2string(true, ...) .. "))")
+  mt.callAndReturn(name, ...);
+
+--[[ TODO - do a luaproc sync receive() waiting for the result.
+      Eventually a sendForth() is called, which should end up passing through SendToChannel().
+      The format of the result should be something like - SID.result({x=0.45, y=0.6, z=1.8})
+]]
 
   if	 "float"	== func.Type then return 0.0
   elseif "integer"	== func.Type then return 0

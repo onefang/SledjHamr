@@ -49,17 +49,6 @@ typedef enum
 
 typedef struct
 {
-    char		SID[PATH_MAX];
-    char		fileName[PATH_MAX];
-    struct timeval	startTime;
-    float		compileTime;
-    int			bugs, warnings;
-    boolean		running;
-
-} script;
-
-typedef struct
-{
     Ecore_Evas		*ee;		// Our window.
     Evas		*canvas;	// The canvas for drawing directly onto.
     Evas_Object		*bg;		// Our background edje, also the game specific stuff.
@@ -71,6 +60,24 @@ typedef struct
     int			port;
     boolean		ui;		// Wether we actually start up the UI.
 } gameGlobals;
+
+typedef struct
+{
+    char		SID[PATH_MAX];
+    char		fileName[PATH_MAX];
+    struct timeval	startTime;
+    float		compileTime;
+    int			bugs, warnings;
+    boolean		running;
+    gameGlobals		*game;
+    Ecore_Con_Client	*client;
+} script;
+
+typedef struct
+{
+  script	*script;
+  const char	message[PATH_MAX];
+} scriptMessage;
 
 
 void loggingStartup(gameGlobals *game);

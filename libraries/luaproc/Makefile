@@ -33,7 +33,8 @@ LUA_LIB_PATH=/usr/lib/lua5.1
 
 # standard makefile variables
 CC=gcc
-CFLAGS=-c -Wall -fPIC -I${LUA_INC_PATH}
+# TODO - hack, hard coded EFL include paths for now.
+CFLAGS=-c -Wall -fPIC -I${LUA_INC_PATH} -I/opt/e17/include/eina-1 -I/opt/e17/include/eina-1/eina -I/opt/e17/include/ecore-1
 LDFLAGS=-shared -L${LUA_LIB_PATH} -lpthread
 SOURCES=sched.c list.c luaproc.c channel.c
 OBJECTS=${SOURCES:.c=.o}

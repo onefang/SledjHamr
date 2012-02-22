@@ -6,6 +6,14 @@ static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
 
+static void _sendBack(void * data)
+{
+    scriptMessage *message = data;
+
+    sendBack(message->script->game, message->script->client, message->script->SID, message->message);
+    free(message);
+}
+
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
 {
     ecore_con_client_timeout_set(ev->client, 0);
@@ -54,6 +62,8 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    gettimeofday(&me->startTime, NULL);
 		    strncpy(me->SID, SID, sizeof(me->SID));
 		    strncpy(me->fileName, file, sizeof(me->fileName));
+		    me->game = game;
+		    me->client = ev->client;
 		    eina_hash_add(game->scripts, me->SID, me);
 		    sendBack(game, ev->client, SID, "compiled(true)");
 		}
@@ -69,7 +79,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		if (me)
 		{
 		    sprintf(buf, "%s.lua.out", me->fileName);
-		    newProc(buf, TRUE);
+		    newProc(buf, TRUE, (Ecore_Cb) _sendBack, me);
 		}
 	    }
 	    else if (0 == strcmp(command, "exit()"))

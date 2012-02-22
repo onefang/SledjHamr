@@ -29,6 +29,7 @@ THE SOFTWARE.
 #define _LUAPROC_H_
 
 #include "channel.h"
+#include <Ecore.h>
 
 /* process is idle */
 #define LUAPROC_STAT_IDLE			0
@@ -46,7 +47,7 @@ typedef struct stluaproc *luaproc;
 
 void luaprocInit(void);
 void luaprocRegister(lua_State *L);
-int newProc(const char *code, int file);
+int newProc(const char *code, int file, Ecore_Cb callback, void *data);
 
 
 /* return a process' status */

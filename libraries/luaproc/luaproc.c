@@ -41,6 +41,7 @@ THE SOFTWARE.
 #include "sched.h"
 #include "channel.h"
 
+
 #define FALSE 0
 #define TRUE  1
 
@@ -67,7 +68,17 @@ struct stluaproc {
 	int args;
 	channel chan;
 	int destroyworker;
+	void *data;
+	Ecore_Cb callback;
 };
+
+/* TODO - hack, duplicating something from LuaSL for now. */
+typedef struct
+{
+  void	*script;
+  char	message[PATH_MAX];
+} scriptMessage;
+
 
 /******************************
 * library functions prototypes
@@ -90,6 +101,8 @@ static int luaproc_create_worker( lua_State *L );
 static int luaproc_destroy_worker( lua_State *L );
 /* set amount of lua processes that should be recycled (ie, reused) */
 static int luaproc_recycle_set( lua_State *L );
+/* send a message back to the main loop */
+static int luaproc_send_back( lua_State *L );
 
 /* luaproc function registration array - main (parent) functions */
 static const struct luaL_reg luaproc_funcs_parent[] = {
@@ -98,6 +111,7 @@ static const struct luaL_reg luaproc_funcs_parent[] = {
 	{ "createworker", luaproc_create_worker },
 	{ "destroyworker", luaproc_destroy_worker },
 	{ "recycle", luaproc_recycle_set },
+	{ "sendback", luaproc_send_back },
 	{ NULL, NULL }
 };
 
@@ -111,6 +125,7 @@ static const struct luaL_reg luaproc_funcs_child[] = {
 	{ "createworker", luaproc_create_worker },
 	{ "destroyworker", luaproc_destroy_worker },
 	{ "recycle", luaproc_recycle_set },
+	{ "sendback", luaproc_send_back },
 	{ NULL, NULL }
 };
 
@@ -359,7 +374,7 @@ static luaproc luaproc_recycle( luaproc lp, const char *code, int file ) {
 }
 
 
-int newProc(const char *code, int file)
+int newProc(const char *code, int file, Ecore_Cb callback, void *data)
 {
 	/* new lua process pointer */
 	luaproc lp;
@@ -383,6 +398,10 @@ int newProc(const char *code, int file)
 		return 1;
 	}
 
+	/* Stash any data and callback given to us. */
+	lp->data = data;
+	lp->callback = callback;
+
 	/* increase active luaproc count */
 	sched_lpcount_inc();
 
@@ -405,7 +424,7 @@ static int luaproc_create_newproc( lua_State *L ) {
 	/* check if first argument is a string (lua code) */
 	const char *code = luaL_checkstring( L, 1 );
 
-	switch (newProc(code, FALSE))
+	switch (newProc(code, FALSE, NULL, NULL))
 	{
 	    case 1 :
 		/* in case of errors return nil + error msg */
@@ -494,6 +513,28 @@ luaproc luaproc_getself( lua_State *L ) {
 	lp = (luaproc )lua_touserdata( L, -1 );
 	lua_pop( L, 1 );
 	return lp;
+}
+
+/* send a message to a lua process */
+static int luaproc_send_back( lua_State *L ) {
+
+	luaproc self;
+	const char *message = luaL_checkstring( L, 1 );
+
+	self = luaproc_getself( L );
+	if (self && self->callback && self->data)
+	{
+	    scriptMessage *sm = calloc(1, sizeof(scriptMessage));
+
+	    if (sm)
+	    {
+		sm->script = self->data;
+		strcpy(sm->message, message);
+		ecore_main_loop_thread_safe_call_async(self->callback, sm);
+	    }
+	}
+
+	return 0;
 }
 
 /* error messages for the sendToChannel function */
