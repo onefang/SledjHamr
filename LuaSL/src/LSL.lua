@@ -32,7 +32,6 @@ local paused = false
 
 -- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
 function stop()		paused = true		end
-function result(...)	return {...}		end
 function quit()		running = false		end
 
 
@@ -112,10 +111,10 @@ function mt.callAndWait(name, ...)
 
   mt.callAndReturn(name, ...);
   -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
-  -- Wait for the result, which should be something like - result({x=0.45, y=0.6, z=1.8})
+  -- Wait for the result, which should be a Lua value as a string.
   local message = luaproc.receive(SID)
   if message then
-    result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
+    result, errorMsg = loadstring("return " .. message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
     if nil == result then
       msg("Not a valid result: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
     else

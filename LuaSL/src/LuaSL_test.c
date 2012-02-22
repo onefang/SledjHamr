@@ -224,7 +224,18 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 		sendForth(game, SID, "run()");
 	    }
 	    else
-		PI("Command %s from script %s", command, SID);
+	    {
+		if (0 == strcmp(command, "llGetKey()"))			// Send back a random UUID for testing.
+		    sendForth(game, SID, "\"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+		else if (0 == strcmp(command, "llGetPos()"))		// Send back a fixed position for testing.
+		    sendForth(game, SID, "{x=128.0, y=128.0, z=128.0}");
+		else if (0 == strcmp(command, "llGetRot()"))		// Send back a fixed rotation for testing.
+		    sendForth(game, SID, "{x=0.0, y=0.0, z=0.0, s=1.0}");
+		else if (0 == strcmp(command, "llGetObjectDesc()"))	// Send back a blank description for testing.
+		    sendForth(game, SID, "\"\"");
+		else
+		    PI("Command %s from script %s", command, SID);
+	    }
 	}
 
 	// Get the next blob to check it.
