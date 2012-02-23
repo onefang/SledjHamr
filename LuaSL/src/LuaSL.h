@@ -54,7 +54,7 @@ typedef struct
     Evas_Object		*bg;		// Our background edje, also the game specific stuff.
     Evas_Object		*edje;		// The edje of the background.
     Ecore_Con_Server	*server;
-    Eina_Hash		*scripts;
+    Eina_Hash		*scripts, *names;
     int			logDom;
     const char		*address;
     int			port;

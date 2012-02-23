@@ -29,6 +29,7 @@ static Eina_Bool _timer_timer_cb(void *data)
 static void _sendBack(void * data)
 {
     scriptMessage *message = data;
+    gameGlobals *game = message->script->game;
 
     if (0 == strncmp(message->message, "llSleep(", 8))
 	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);
@@ -44,8 +45,41 @@ static void _sendBack(void * data)
 	else
 	    message->script->timer = ecore_timer_add(message->script->timerTime, _timer_timer_cb, message->script);
     }
+    else if (0 == strncmp(message->message, "llSetScriptState(", 17))
+    {
+	char name[PATH_MAX];
+	char *temp;
+	script *them;
+	boolean state = TRUE;
+
+	strncpy(name, message->script->fileName, PATH_MAX);
+	if ((temp = rindex(name, '/')))
+	    temp[1] = '\0';
+	strcat(name, &(message->message[18]));
+	if ((temp = rindex(name, '""')))
+	{
+	    temp[0] = '\0';
+	    while (isspace(*temp))
+		temp++;
+	    if (',' == *temp)
+		temp++;
+	    while (isspace(*temp))
+		temp++;
+	    state = '1' == *temp;
+	}
+	strcat(name, ".lsl");
+	if ((them = eina_hash_find(game->names, name)))
+	{
+	    if (state)
+		sendToChannel(them->SID, "start()", NULL, NULL);
+	    else
+		sendToChannel(them->SID, "stop()", NULL, NULL);
+	}
+	else
+	    PE("Can't stop script %s", name);
+    }
     else
-	sendBack(message->script->game, message->script->client, message->script->SID, message->message);
+	sendBack(game, message->script->client, message->script->SID, message->message);
     free(message);
 }
 
@@ -100,6 +134,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    me->game = game;
 		    me->client = ev->client;
 		    eina_hash_add(game->scripts, me->SID, me);
+		    eina_hash_add(game->names, me->fileName, me);
 		    sendBack(game, ev->client, SID, "compiled(true)");
 		}
 		else
@@ -165,6 +200,7 @@ int main(int argc, char **argv)
     {
 	loggingStartup(&game);
 	game.scripts = eina_hash_string_superfast_new(NULL);
+	game.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_con_init())
 	{
 	    if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
