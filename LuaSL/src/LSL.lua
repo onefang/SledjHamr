@@ -23,22 +23,22 @@ upvalue--either way is a bit more efficient and less error prone.
 -- http://www.lua.org/pil/15.4.html looks useful.
 -- http://www.lua.org/pil/15.5.html the last part about autoloading functions might be useful.
 
+
 local LSL = {};
 local SID = "";
 local scriptName = "";
 local running = true
 local paused = false
-
-
--- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
-function stop()		paused = true		end
-function quit()		running = false		end
+local currentState = {}
+local detectedKeys = {}
+local detectedNames = {}
+local waitAndProcess
 
 
 -- Debugging aids
 
 -- Functions to print tables.
-local print_table, print_table_start;
+local print_table, print_table_start
 
 function print_table_start(table, space, name)
   print(space .. name .. ": ");
@@ -61,6 +61,31 @@ end
 
 function msg(...)
   print(SID, ...)  -- The comma adds a tab, fancy that.  B-)
+end
+
+
+-- Stuff called from the wire protocol has to be global, but I think this means just global to this file.
+
+events = {}
+
+function stop()		paused = true		end
+function quit()		running = false		end
+
+function events.detectedKeys(list)
+  detectedKeys = list
+end
+
+function events.detectedNames(list)
+  detectedNames = list
+end
+
+function events.touch_start(number)
+--print_table_start(detectedKeys, "", "detectedKeys")
+--print_table_start(detectedNames, "", "detectedNames")
+--print(scriptName .. ".touch_start(" .. number .. ")\n")
+  if nil ~= currentState.touch_start then currentState.touch_start(number) end
+  detectedKeys = {}
+  detectedNames = {}
 end
 
 
@@ -107,37 +132,10 @@ function mt.callAndReturn(name, ...)
 end
 
 function mt.callAndWait(name, ...)
-  local func = functions[name]
-
   mt.callAndReturn(name, ...);
   -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
   -- Wait for the result, which should be a Lua value as a string.
-  local message = luaproc.receive(SID)
-  if message then
-    result, errorMsg = loadstring("return " .. message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
-    if nil == result then
-      msg("Not a valid result: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
-    else
-      -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
-      setfenv(result, getfenv(1))
-      status, result = pcall(result)
-      if not status then
-	msg("Error from result: " .. message .. "  ERROR MESSAGE: " .. result)
-      elseif result then
-	return result
-      end
-    end
-  end
-
-  if	 "float"	== func.Type then return 0.0
-  elseif "integer"	== func.Type then return 0
-  elseif "key"		== func.Type then return LSL.NULL_KEY
-  elseif "list"		== func.Type then return {}
-  elseif "string"	== func.Type then return ""
-  elseif "rotation"	== func.Type then return LSL.ZERO_ROTATION
-  elseif "vector"	== func.Type then return LSL.ZERO_VECTOR
-  end
-  return nil
+  return waitAndProcess(true)
 end
 
 local function newConst(Type, name, value)
@@ -628,8 +626,6 @@ function LSL.postIncrement(name) local temp = _G[name]; _G[name] = _G[name] + 1;
 
 -- State stuff
 
-local currentState = {}
-
 function LSL.stateChange(x)
   if currentState ~= x then  -- Changing to the same state is a NOP.
     -- TODO - Should clear out pending events, except timer()
@@ -672,32 +668,42 @@ function LSL.mainLoop(sid, name, x)
   end
 
   LSL.stateChange(x);
+  waitAndProcess(false)
+  msg("Script quitting.")
+end
 
-  -- Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
-  -- The ecore_con stuff ends up being a sorta FIFO queue of the commands coming from OpenSim.
-  -- Plus, I think the luaproc message system manages a FIFO queue for us as well.
-  -- Might still need one.  lol
+-- Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
+-- The ecore_con stuff ends up being a FIFO queue of the commands coming from OpenSim.  So no worries.
+function waitAndProcess(returnWanted)
+  local Type = "event"
 
+  if returnWanted then Type = "result" end
   while running do
-    local message = luaproc.receive(sid)
+    local message = luaproc.receive(SID)
     if message then
+      -- TODO - should we be discarding return values while paused?  I don't think so, so we need to process those,
       if paused then
 	if "start()" == message then paused = false  end
       else
 	result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
-	  msg("Not a valid event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	  msg("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	else
 	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
 	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
 	  setfenv(result, getfenv(1))
 	  status, result = pcall(result)
 	  if not status then
-	    msg("Error from event: " .. message .. "  ERROR MESSAGE: " .. result)
+	    msg("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result)
 	  elseif result then
+	    -- Check if we are waiting for a return, and got it.
+	    if returnWanted and string.match(message, "^return ") then
+	      return result
+            end
+	    -- Otherwise, just run it and keep looping.
 	    status, errorMsg = luaproc.send(sid, result)
 	    if not status then
-	      msg("Error sending results from event: " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	    end
 	  end
 	end
@@ -705,7 +711,6 @@ function LSL.mainLoop(sid, name, x)
     end
   end
 end
-
 
 -- Typecasting stuff.
 
