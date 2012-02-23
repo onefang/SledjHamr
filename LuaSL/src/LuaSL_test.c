@@ -118,12 +118,12 @@ static Eina_Bool _timer_cb(void *data)
 //		sendForth(game, me->SID, "events.touch_start(1)");
 		break;
 	    }
-	    case 7 :
+	    case 9 :
 	    {
 		sendForth(game, me->SID, "quit()");
 		break;
 	    }
-	    case 9 :
+	    case 11 :
 	    {
 		exit = TRUE;
 		break;
