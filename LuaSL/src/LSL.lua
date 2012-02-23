@@ -30,8 +30,22 @@ local scriptName = "";
 local running = true
 local paused = false
 local currentState = {}
+local detectedGroups = {}
+local detectedGrabs = {}
 local detectedKeys = {}
+local detectedLinkNumbers = {}
 local detectedNames = {}
+local detectedOwners = {}
+local detectedPoss = {}
+local detectedRots = {}
+local detectedTouchBinormals = {}
+local detectedTouchFaces = {}
+local detectedTouchNormals = {}
+local detectedTouchPoss = {}
+local detectedTouchSTs = {}
+local detectedTouchUVs = {}
+local detectedTypes = {}
+local detectedVels = {}
 local waitAndProcess
 
 
@@ -71,22 +85,77 @@ events = {}
 function stop()		paused = true		end
 function quit()		running = false		end
 
-function events.detectedKeys(list)
-  detectedKeys = list
-end
+function events.detectedGroups(list)		detectedGroups = list		end
+function events.detectedGrabs(list)		detectedGrabs = list		end
+function events.detectedKeys(list)		detectedKeys = list		end
+function events.detectedLinkNumbers(list)	detectedLinkNumbers = list	end
+function events.detectedNames(list)		detectedNames = list		end
+function events.detectedOwners(list)		detectedOwners = list		end
+function events.detectedPoss(list)		detectedPoss = list		end
+function events.detectedRots(list)		detectedRots = list		end
+function events.detectedTouchBinormals(list)	detectedTouchBinormals = list	end
+function events.detectedTouchFaces(list)	detectedTouchFaces = list	end
+function events.detectedTouchNormals(list)	detectedTouchNormals = list	end
+function events.detectedTouchPoss(list)		detectedTouchPoss = list	end
+function events.detectedTouchSTs(list)		detectedTouchSTs = list		end
+function events.detectedTouchUVs(list)		detectedTouchUVs = list		end
+function events.detectedTypes(list)		detectedTypes = list		end
+function events.detectedVels(list)		detectedVels = list		end
 
-function events.detectedNames(list)
-  detectedNames = list
-end
-
-function events.touch_start(number)
---print_table_start(detectedKeys, "", "detectedKeys")
---print_table_start(detectedNames, "", "detectedNames")
---print(scriptName .. ".touch_start(" .. number .. ")\n")
-  if nil ~= currentState.touch_start then currentState.touch_start(number) end
+function events.detectsClear()
+  detectedGroups = {}
+  detectedGrabs = {}
   detectedKeys = {}
+  detectedLinkNumbers = {}
   detectedNames = {}
+  detectedOwners = {}
+  detectedPoss = {}
+  detectedRots = {}
+  detectedTouchBinormals = {}
+  detectedTouchFaces = {}
+  detectedTouchNormals = {}
+  detectedTouchPoss = {}
+  detectedTouchSTs = {}
+  detectedTouchUVs = {}
+  detectedTypes = {}
+  detectedVels = {}
 end
+
+function events.at_rot_target(tnum, targetrot, ourrot)					if nil ~= currentState.at_rot_target		then currentState.at_rot_target(tnum, targetrot, ourrot)				end  events.detectsClear()  end
+function events.at_target(tnum, targetpos, ourpos)					if nil ~= currentState.at_target		then currentState.at_target(tnum, targetpos, ourpos)					end  events.detectsClear()  end
+function events.attach(id)								if nil ~= currentState.attach			then currentState.attach(id)								end  events.detectsClear()  end
+function events.changed(change)								if nil ~= currentState.changed			then currentState.changed(change)							end  events.detectsClear()  end
+function events.collision_start(num_detected)						if nil ~= currentState.collision_start		then currentState.collision_start(num_detected)						end  events.detectsClear()  end
+function events.collision(num_detected)							if nil ~= currentState.collision		then currentState.collision(num_detected)						end  events.detectsClear()  end
+function events.collision_end(num_detected)						if nil ~= currentState.collision_end		then currentState.collision_end(num_detected)						end  events.detectsClear()  end
+function events.control(id, held, changed)						if nil ~= currentState.control			then currentState.control(id, held, changed)						end  events.detectsClear()  end
+function events.dataserver(queryid, data)						if nil ~= currentState.dataserver		then currentState.dataserver(queryid, data)						end  events.detectsClear()  end
+function events.email(Time, address, subj, message, num_left)				if nil ~= currentState.email			then currentState.email(Time, address, subj, message, num_left)				end  events.detectsClear()  end
+function events.http_request(request_id, status, metadata, body)			if nil ~= currentState.http_request		then currentState.http_request(request_id, status, metadata, body)			end  events.detectsClear()  end
+function events.http_response(request_id, status, metadata, body)			if nil ~= currentState.http_response		then currentState.http_response(request_id, status, metadata, body)			end  events.detectsClear()  end
+function events.land_collision_start(pos)						if nil ~= currentState.land_collision_start	then currentState.land_collision_start(pos)						end  events.detectsClear()  end
+function events.land_collision(pos)							if nil ~= currentState.land_collision		then currentState.land_collision(pos)							end  events.detectsClear()  end
+function events.land_collision_end(pos)							if nil ~= currentState.land_collision_end	then currentState.land_collision_end(pos)						end  events.detectsClear()  end
+function events.link_message(sender_num, num, str, id)					if nil ~= currentState.link_message		then currentState.link_message(sender_num, num, str, id)				end  events.detectsClear()  end
+function events.listen(channel, name, id, message)					if nil ~= currentState.listen			then currentState.listen(channel, name, id, message)					end  events.detectsClear()  end
+function events.money(id, amount)							if nil ~= currentState.money			then currentState.money(id, amount)							end  events.detectsClear()  end
+function events.moving_start()								if nil ~= currentState.moving_start		then currentState.moving_start()							end  events.detectsClear()  end
+function events.moving_end()								if nil ~= currentState.moving_end		then currentState.moving_end()								end  events.detectsClear()  end
+function events.no_sensor()								if nil ~= currentState.no_sensor		then currentState.no_sensor()								end  events.detectsClear()  end
+function events.not_at_rot_target()							if nil ~= currentState.not_at_rot_target	then currentState.not_at_rot_target()							end  events.detectsClear()  end
+function events.not_at_target()								if nil ~= currentState.not_at_target		then currentState.not_at_target()							end  events.detectsClear()  end
+function events.object_rez(id)								if nil ~= currentState.object_rez		then currentState.object_rez()								end  events.detectsClear()  end
+function events.on_rez(start_param)							if nil ~= currentState.on_rezz			then currentState.on_rez(start_param)							end  events.detectsClear()  end
+function events.remote_data(event_type, channel, message_id, sender, idata, sdata)	if nil ~= currentState.remote_data		then currentState.remote_data(event_type, channel, message_id, sender, idata, sdata)	end  events.detectsClear()  end
+function events.run_time_permissions(perm)						if nil ~= currentState.run_time_permisions	then currentState.run_time_permissions(perm)						end  events.detectsClear()  end
+function events.sensor(num_detected)							if nil ~= currentState.sensor			then currentState.sensor(num_detected)							end  events.detectsClear()  end
+function events.state_entry()								if nil ~= currentState.state_entry		then currentState.state_entry()								end  events.detectsClear()  end
+function events.state_exit()								if nil ~= currentState.state_exit		then currentState.state_exit()								end  events.detectsClear()  end
+function events.timer()									if nil ~= currentState.timer			then currentState.timer()								end  events.detectsClear()  end
+function events.touch_start(num_detected)						if nil ~= currentState.touch_start		then currentState.touch_start(num_detected)						end  events.detectsClear()  end
+function events.touch(num_detected)							if nil ~= currentState.touch			then currentState.touch(num_detected)							end  events.detectsClear()  end
+function events.touch_end(num_detected)							if nil ~= currentState.touch_end		then currentState.touch_end(num_detected)						end  events.detectsClear()  end
+function events.transaction_result(id, success, data)					if nil ~= currentState.transaction_result	then currentState.transaction_result(id, success, data)					end  events.detectsClear()  end
 
 
 -- LSL function and constant creation stuff.
@@ -305,6 +374,10 @@ local constants =
   newConst("integer", "TRUE",			1),
   newConst("integer", "FALSE",			0),
 
+  newConst("integer", "TOUCH_INVALID_FACE",	0x7FFFFFFF),
+  newConst("vector",  "TOUCH_INVALID_TEXCOORD",	{x=-1.0, y=-1.0, z=0.0}),
+  newConst("vector",  "TOUCH_INVALID_VECTOR",	{x=0.0, y=0.0, z=0.0}),
+
   newConst("integer", "TYPE_INTEGER",		1),
   newConst("integer", "TYPE_FLOAT",		2),
   newConst("integer", "TYPE_STRING",		3),
@@ -342,8 +415,23 @@ newFunc("",		"llStopAnimation", "string anim")
 newFunc("",		"llUnSit", "key avatar")
 
 -- LSL collision / detect / sensor functions
-newFunc("key",		"llDetectedGroup", "integer index")
+newFunc("integer",	"llDetectedGroup", "integer index")
+newFunc("vector",	"llDetectedGrab", "integer index")
 newFunc("key",		"llDetectedKey", "integer index")
+newFunc("integer",	"llDetectedLinkNumber", "integer index")
+newFunc("string",	"llDetectedName", "integer index")
+newFunc("key",		"llDetectedOwner", "integer index")
+newFunc("vector",	"llDetectedPos", "integer index")
+newFunc("rotation",	"llDetectedRot", "integer index")
+newFunc("vector",	"llDetectedTouchBinormal", "integer index")
+newFunc("integer",	"llDetectedTouchFace", "integer index")
+newFunc("vector",	"llDetectedTouchNormal", "integer index")
+newFunc("vector",	"llDetectedTouchPos", "integer index")
+newFunc("vector",	"llDetectedTouchST", "integer index")
+newFunc("vector",	"llDetectedTouchUV", "integer index")
+newFunc("integer",	"llDetectedType", "integer index")
+newFunc("vector",	"llDetectedVel", "integer index")
+
 
 -- LSL communications functions
 newFunc("",		"llDialog", "key avatar", "string caption", "list arseBackwardsMenu", "integer channel")
@@ -444,9 +532,22 @@ function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INV
 
 
 -- LSL collision / detect / sensor functions
-function --[[key]] LSL.llDetectedKey(--[[integer]] index)
-  return detectedKeys[index + 1]
-end
+function --[[integer]]	LSL.llDetectedGroup(		--[[integer]] index)	return detectedGroups		[index + 1] or false				end
+function --[[vector]]	LSL.llDetectedGrab(		--[[integer]] index)	return detectedGrabs		[index + 1] or LSL.ZERO_VECTOR			end
+function --[[key]]	LSL.llDetectedKey(		--[[integer]] index)	return detectedKeys		[index + 1] or LSL.NULL_KEY			end	-- LL says "returns empty key" which is "", but LSL Wiki says NULL_KEY
+function --[[integer]]	LSL.llDetectedLinkNumber(	--[[integer]] index)	return detectedLinkNumbers	[index + 1] or 0				end
+function --[[string]]	LSL.llDetectedName(		--[[integer]] index)	return detectedNames		[index + 1] or ""				end	-- LL says it returns NULL_KEY, LSL Wiki says an empty string.  Apparently there used to be an exploit for creating multi kb names, normally they are 255 characters.
+function --[[key]]	LSL.llDetectedOwner(		--[[integer]] index)	return detectedOwners		[index + 1] or LSL.NULL_KEY			end	-- LL says "returns empty key" which is "", but LSL Wiki says NULL_KEY
+function --[[vector]]	LSL.llDetectedPos(		--[[integer]] index)	return detectedPoss		[index + 1] or LSL.ZERO_VECTOR			end
+function --[[rotation]]	LSL.llDetectedRot(		--[[integer]] index)	return detectedRots		[index + 1] or LSL.ZERO_ROTATION		end
+function --[[vector]]	LSL.llDetectedTouchBinormal(	--[[integer]] index)	return detectedTouchBinormals	[index + 1] or LSL.TOUCH_INVALID_VECTOR		end
+function --[[integer]]	LSL.llDetectedTouchFace(	--[[integer]] index)	return detectedTouchFaces	[index + 1] or LSL.TOUCH_INVALID_FACE		end
+function --[[vector]]	LSL.llDetectedTouchNormal(	--[[integer]] index)	return detectedTouchNormals	[index + 1] or LSL.TOUCH_INVALID_VECTOR		end
+function --[[vector]]	LSL.llDetectedTouchPos(		--[[integer]] index)	return detectedTouchPoss	[index + 1] or LSL.TOUCH_INVALID_VECTOR		end
+function --[[vector]]	LSL.llDetectedTouchST(		--[[integer]] index)	return detectedTouchSTs		[index + 1] or LSL.TOUCH_INVALID_TEXCOORD	end
+function --[[vector]]	LSL.llDetectedTouchUV(		--[[integer]] index)	return detectedTouchUVs		[index + 1] or LSL.TOUCH_INVALID_TEXCOORD	end
+function --[[integer]]	LSL.llDetectedType(		--[[integer]] index)	return detectedTypes		[index + 1] or 0				end
+function --[[vector]]	LSL.llDetectedVel(		--[[integer]] index)	return detectedVels		[index + 1] or LSL.ZERO_VECTOR			end
 
 
 -- LSL list functions.
