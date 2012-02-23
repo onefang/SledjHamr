@@ -12,7 +12,7 @@ static Eina_Bool _sleep_timer_cb(void *data)
     gameGlobals *game = script->game;
 
     PD("Waking up %s", script->SID);
-    sendToChannel(script->SID, "0.0", NULL, NULL);
+    sendToChannel(script->SID, "return 0.0", NULL, NULL);
     return ECORE_CALLBACK_CANCEL;
 }
 

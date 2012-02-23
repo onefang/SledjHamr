@@ -252,26 +252,27 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 	    }
 	    else
 	    {
-		if (0 == strcmp(command, "llGetKey()"))			// Send back a random UUID for testing.
-		    sendForth(game, SID, "\"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
-		else if (0 == strcmp(command, "llGetOwner()"))		// Send back a random UUID for testing.
-		    sendForth(game, SID, "\"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
-		else if (0 == strcmp(command, "llGetPos()"))		// Send back a fixed position for testing.
-		    sendForth(game, SID, "{x=128.0, y=128.0, z=128.0}");
-		else if (0 == strcmp(command, "llGetRot()"))		// Send back a fixed rotation for testing.
-		    sendForth(game, SID, "{x=0.0, y=0.0, z=0.0, s=1.0}");
-		else if (0 == strcmp(command, "llGetObjectDesc()"))	// Send back a blank description for testing.
-		    sendForth(game, SID, "\"\"");
-		else if (0 == strncmp(command, "llGetAlpha(", 11))	// Send back a fixed alpha for testing.
-		    sendForth(game, SID, "1.0");
-		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))	// Send back a fixed value for testing.
-		    sendForth(game, SID, "3");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))	// Send back a fixed value for testing.
-		    sendForth(game, SID, "\".readme\"");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))	// Send back a fixed value for testing.
-		    sendForth(game, SID, "\".POSITIONS\"");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))	// Send back a fixed value for testing.
-		    sendForth(game, SID, "\".MENUITEMS\"");
+		// Send back some random or fixed values for testing.
+		if (0 == strcmp(command, "llGetKey()"))
+		    sendForth(game, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+		else if (0 == strcmp(command, "llGetOwner()"))
+		    sendForth(game, SID, "return \"%s\"", ownerKey);
+		else if (0 == strcmp(command, "llGetPos()"))
+		    sendForth(game, SID, "return {x=128.0, y=128.0, z=128.0}");
+		else if (0 == strcmp(command, "llGetRot()"))
+		    sendForth(game, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+		else if (0 == strcmp(command, "llGetObjectDesc()"))
+		    sendForth(game, SID, "return \"\"");
+		else if (0 == strncmp(command, "llGetAlpha(", 11))
+		    sendForth(game, SID, "return 1.0");
+		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
+		    sendForth(game, SID, "return 3");
+		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
+		    sendForth(game, SID, "return \".readme\"");
+		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
+		    sendForth(game, SID, "return \".POSITIONS\"");
+		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
+		    sendForth(game, SID, "return \".MENUITEMS\"");
 		else
 		    PI("Script %s sent command %s", SID, command);
 	    }
