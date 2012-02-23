@@ -443,6 +443,12 @@ newFunc("float",	"llSleep", "float seconds")  -- Faked return type, it actually 
 function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INVENTORY_SCRIPT end;
 
 
+-- LSL collision / detect / sensor functions
+function --[[key]] LSL.llDetectedKey(--[[integer]] index)
+  return detectedKeys[index + 1]
+end
+
+
 -- LSL list functions.
 
 --function --[[list]]	LSL.llCSV2List(--[[string]] text) return {} end;
