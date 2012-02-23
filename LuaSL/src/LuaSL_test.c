@@ -7,6 +7,9 @@ static int scriptCount = 0;
 static int compiledCount = 0;
 static float compileTime = 0.0;
 static struct timeval startTime;
+static int timedEvent = 0;
+static char *ownerKey = "12345678-1234-4321-abcd-0123456789ab";
+static char *ownerName = "onefang rejected";
 
 static const char *names[] =
 {
@@ -95,23 +98,47 @@ static void dirList_compile(const char *name, const char *path, void *data)
     }
 }
 
-static Eina_Bool _quit_timer_cb(void *data)
+static Eina_Bool _timer_cb(void *data)
 {
     gameGlobals *game = data;
     Eina_Iterator *scripts;
     script *me;
+    boolean exit = FALSE;
 
     scripts = eina_hash_iterator_data_new(game->scripts);
     while(eina_iterator_next(scripts, (void **) &me))
     {
-	sendForth(game, me->SID, "quit()");
+	switch (timedEvent)
+	{
+	    case 5 :
+	    {
+		// TODO - do it as one line, coz sendToChannel() locks up if I do them one at a time too quickly.
+		sendForth(game, me->SID, "events.detectedKeys({\"%s\"}); events.detectedNames({\"%s\"}); events.touch_start(1)", ownerKey, ownerName);
+//		sendForth(game, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+//		sendForth(game, me->SID, "events.touch_start(1)");
+		break;
+	    }
+	    case 7 :
+	    {
+		sendForth(game, me->SID, "quit()");
+		break;
+	    }
+	    case 9 :
+	    {
+		exit = TRUE;
+		break;
+	    }
+	}
     }
+    timedEvent++;
 
-    ecore_con_server_send(game->server, ".exit()\n", 8);
-    ecore_con_server_flush(game->server);
-    ecore_main_loop_quit();
-
-   return ECORE_CALLBACK_CANCEL;
+    if (exit)
+    {
+	sendForth(game, ownerKey, "exit()");
+	ecore_main_loop_quit();
+	return ECORE_CALLBACK_CANCEL;
+    }
+    return ECORE_CALLBACK_RENEW;
 }
 
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
@@ -123,8 +150,8 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
     gettimeofday(&startTime, NULL);
     snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, game);
-    // Wait awhile, then quit all scripts we started, for testing.
-    ecore_timer_add(4.0, _quit_timer_cb, game);
+    // Wait awhile, then start sending events for testing.
+    ecore_timer_add(0.5, _timer_cb, game);
     return ECORE_CALLBACK_RENEW;
 }
 
