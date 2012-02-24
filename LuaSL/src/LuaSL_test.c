@@ -114,16 +114,17 @@ static Eina_Bool _timer_cb(void *data)
 	    {
 		// TODO - do it as one line, coz sendToChannel() locks up if I do them one at a time too quickly.
 		sendForth(game, me->SID, "events.detectedKeys({\"%s\"}); events.detectedNames({\"%s\"}); events.touch_start(1)", ownerKey, ownerName);
+//		sendForth(game, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
 //		sendForth(game, me->SID, "events.detectedNames({\"%s\"})", ownerName);
 //		sendForth(game, me->SID, "events.touch_start(1)");
 		break;
 	    }
-	    case 9 :
+	    case 9+3 :
 	    {
 		sendForth(game, me->SID, "quit()");
 		break;
 	    }
-	    case 11 :
+	    case 11+3 :
 	    {
 		exit = TRUE;
 		break;

@@ -161,6 +161,7 @@ default {
     }
 
     touch_start(integer i) {
+llOwnerSay("SOMEONE TOUCHED ME!!!!");
         if (llDetectedKey(0) == llGetOwner()) state run;
     }   
     
@@ -180,6 +181,7 @@ default {
 
 state run {
     state_entry() {
+llOwnerSay("RUNNING NOW.");
         setRunning(TRUE);
     }
     changed(integer change) {

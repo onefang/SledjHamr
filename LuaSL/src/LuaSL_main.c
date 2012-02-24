@@ -12,7 +12,7 @@ static Eina_Bool _sleep_timer_cb(void *data)
     gameGlobals *game = script->game;
 
     PD("Waking up %s", script->SID);
-    sendToChannel(script->SID, "return 0.0", NULL, NULL);
+    sendToChannel(game, script->SID, "return 0.0", NULL, NULL);
     return ECORE_CALLBACK_CANCEL;
 }
 
@@ -22,7 +22,7 @@ static Eina_Bool _timer_timer_cb(void *data)
     gameGlobals *game = script->game;
 
     PD("Timer for %s", script->SID);
-    sendToChannel(script->SID, "events.timer()", NULL, NULL);
+    sendToChannel(game, script->SID, "events.timer()", NULL, NULL);
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -82,9 +82,9 @@ void scriptSendBack(void * data)
 		while (isspace(*temp))
 		    temp++;
 		if ('1' == *temp)
-		    sendToChannel(them->SID, "start()", NULL, NULL);
+		    sendToChannel(game, them->SID, "start()", NULL, NULL);
 		else
-		    sendToChannel(them->SID, "stop()", NULL, NULL);
+		    sendToChannel(game, them->SID, "stop()", NULL, NULL);
 		PD("Stopped %s", them->fileName);
 	    }
 	    else
@@ -191,7 +191,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    {
 		const char *status = NULL;
 
-		status = sendToChannel(SID, command, NULL, NULL);
+		status = sendToChannel(game, SID, command, NULL, NULL);
 		if (status)
 		    PE("Error sending command %s to script %s : %s", command, SID, status);
 	    }

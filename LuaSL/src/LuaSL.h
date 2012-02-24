@@ -19,7 +19,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-typedef struct _script script;	// Define this here, so LuaSL_threads.h can use it.
+typedef struct _script script;			// Define this here, so LuaSL_threads.h can use it.
+typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h can use it.
 
 #include "LuaSL_threads.h"
 
@@ -56,7 +57,7 @@ typedef enum
 } boolean;
 #endif
 
-typedef struct
+struct _gameGlobals
 {
     Ecore_Evas		*ee;		// Our window.
     Evas		*canvas;	// The canvas for drawing directly onto.
@@ -68,7 +69,7 @@ typedef struct
     const char		*address;
     int			port;
     boolean		ui;		// Wether we actually start up the UI.
-} gameGlobals;
+};
 
 struct _script
 {
@@ -84,12 +85,14 @@ struct _script
     int			status;
     int			args;
     channel		chan;
+    Eina_Clist		messages;
     Ecore_Con_Client	*client;
     Ecore_Timer		*timer;
 };
 
 typedef struct
 {
+  Eina_Clist	node;
   script	*script;
   const char	message[PATH_MAX];
 } scriptMessage;

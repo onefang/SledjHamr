@@ -53,7 +53,7 @@ void luaprocInit(void);
 int sched_create_worker(void);
 
 void newProc(const char *code, int file, script *lp);
-const char *sendToChannel(const char *chname, const char *message, script **dst, channel *chn);
+const char *sendToChannel(gameGlobals *game, const char *chname, const char *message, script **dst, channel *chn);
 
 /* join all worker threads and exit */
 void sched_join_workerthreads(void);

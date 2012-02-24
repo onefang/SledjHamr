@@ -410,6 +410,7 @@ void newProc(const char *code, int file, script *lp)
     lp->args = 0;
     lp->chan = NULL;
     eina_clist_element_init(&(lp->node));
+    eina_clist_init(&(lp->messages));
 
     /* load process' code */
     if (file)
@@ -454,6 +455,7 @@ static void luaproc_movevalues( lua_State *Lfrom, lua_State *Lto ) {
 static script *luaproc_getself(lua_State *L)
 {
     script *lp;
+
     lua_getfield(L, LUA_REGISTRYINDEX, "_SELF");
     lp = (script *) lua_touserdata(L, -1);
     lua_pop(L, 1);
@@ -503,7 +505,7 @@ static int luaproc_create_channel(lua_State *L)
     return 1;
 }
 
-/* send a message to a lua process */
+/* send a message to the client process */
 static int luaproc_send_back( lua_State *L ) {
 
 	script *self;
@@ -516,6 +518,7 @@ static int luaproc_send_back( lua_State *L ) {
 
 	    if (sm)
 	    {
+		eina_clist_element_init(&(sm->node));
 		sm->script = self;
 		strcpy((char *) sm->message, message);
 		ecore_main_loop_thread_safe_call_async(scriptSendBack, sm);
@@ -532,17 +535,27 @@ const char *sendToChannelErrors[] =
     "error scheduling process"
 };
 
-// TODO - If these come in too quick, then messages might get lost.  Also, in at least one case, it locked up this thread I think.
-
 /* send a message to a lua process */
-const char *sendToChannel(const char *chname, const char *message, script **dst, channel *chn)
+const char *sendToChannel(gameGlobals *game, const char *chname, const char *message, script **dst, channel *chn)
 {
     const char *result = NULL;
     channel chan;
     script *dstlp;
+    scriptMessage *sm = NULL;
 
     /* get exclusive access to operate on channels */
     pthread_mutex_lock(&mutex_channel);
+
+    // Add the message to the queue.
+    if ((dstlp = eina_hash_find(game->scripts, chname)))
+    {
+	if ((sm = malloc(sizeof(scriptMessage))))
+	{
+	    sm->script = dstlp;
+	    strcpy((char *) sm->message, message);
+	    eina_clist_add_tail(&(sm->script->messages), &(sm->node));
+	}
+    }
 
     /* wait until channel is not in use */
     while( ((chan = eina_hash_find(channels, chname)) != NULL) && (pthread_mutex_trylock(chan->mutex) != 0 ))
@@ -563,10 +576,19 @@ const char *sendToChannel(const char *chname, const char *message, script **dst,
     /* if a match is found, send the message to it and (queue) wake it */
     if (dstlp != NULL)
     {
-	/* push the message onto the receivers stack */
-	lua_pushstring( dstlp->L, message);
+	scriptMessage *msg = (scriptMessage *) eina_clist_head(&(dstlp->messages));
 
+	// See if there's a message on the queue.  Note, this may not be the same as the incoming message, if there was already a queue.
+	if (msg)
+	{
+	    eina_clist_remove(&(msg->node));
+	    message = msg->message;
+	}
+	/* push the message onto the receivers stack */
+	lua_pushstring(dstlp->L, message);
 	dstlp->args = lua_gettop(dstlp->L) - 1;
+	if (msg)
+	    free(msg);
 
 	if (sched_queue_proc(dstlp) != LUAPROC_SCHED_QUEUE_PROC_OK)
 	{
@@ -596,10 +618,10 @@ const char *sendToChannel(const char *chname, const char *message, script **dst,
 static int luaproc_send( lua_State *L ) {
 
 	channel chan;
-	script *dstlp, *self;
+	script *dstlp, *self = luaproc_getself(L);
 	const char *chname = luaL_checkstring( L, 1 );
 	const char *message = luaL_checkstring( L, 2 );
-	const char *result = sendToChannel(chname, message, &dstlp, &chan);
+	const char *result = sendToChannel(self->game, chname, message, &dstlp, &chan);
 
 	if (result) {
 		lua_pushnil( L );
@@ -608,8 +630,6 @@ static int luaproc_send( lua_State *L ) {
 	}
 
 	if ( dstlp == NULL ) {
-
-		self = luaproc_getself( L );
 
 		if ( self != NULL ) {
 			self->status = LUAPROC_STAT_BLOCKED_SEND;
@@ -630,6 +650,17 @@ static int luaproc_receive( lua_State *L ) {
 	channel chan;
 	script *srclp, *self;
 	const char *chname = luaL_checkstring( L, 1 );
+	scriptMessage *msg;
+
+	// First check if there are queued messages, and grab one.
+	self = luaproc_getself(L);
+	if ((msg = (scriptMessage *) eina_clist_head(&(self->messages))))
+	{
+	    eina_clist_remove(&(msg->node));
+	    lua_pushstring(L, msg->message);
+	    free(msg);
+	    return lua_gettop(L) - 1;
+	}
 
 	/* get exclusive access to operate on channels */
 	pthread_mutex_lock( &mutex_channel );
@@ -698,7 +729,6 @@ static int luaproc_receive( lua_State *L ) {
 
 		/* otherwise (synchronous receive) simply block process */
 		else {
-			self = luaproc_getself( L );
 
 			if ( self != NULL ) {
 				self->status = LUAPROC_STAT_BLOCKED_RECV;
