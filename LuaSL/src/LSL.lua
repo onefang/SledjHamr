@@ -82,6 +82,7 @@ end
 
 events = {}
 
+function start()	paused = false		end
 function stop()		paused = true		end
 function quit()		running = false		end
 
@@ -761,26 +762,18 @@ function LSL.stateChange(x)
 end;
 
 function LSL.mainLoop(sid, name, x)
-  local status, errorMsg = luaproc.newchannel(sid)
+  local status, errorMsg
   local result
 
   SID = sid
   scriptName = name
-
   LSL.EOF = "\n\n\n"	-- Fix this up now.
-
-  if not status then
-    msg("Can't open the luaproc channel " .. sid .. "  ERROR MESSAGE: " .. errorMsg)
-    return
-  end
 
   LSL.stateChange(x);
   waitAndProcess(false)
   msg("Script quitting.")
 end
 
--- Need a FIFO queue of incoming events.  Which will be in the C main thread, coz that's listening on the socket for us.
--- The ecore_con stuff ends up being a FIFO queue of the commands coming from OpenSim.  So no worries.
 function waitAndProcess(returnWanted)
   local Type = "event"
 
@@ -798,6 +791,7 @@ function waitAndProcess(returnWanted)
 	else
 	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
 	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
+	  --        Meh, seems to be working fine as it is.
 	  setfenv(result, getfenv(1))
 	  status, result = pcall(result)
 	  if not status then

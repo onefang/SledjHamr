@@ -84,7 +84,6 @@ struct _script
     boolean		running;
     int			status;
     int			args;
-    channel		chan;
     Eina_Clist		messages;
     Ecore_Con_Client	*client;
     Ecore_Timer		*timer;

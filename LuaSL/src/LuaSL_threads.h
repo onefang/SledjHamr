@@ -43,17 +43,10 @@ THE SOFTWARE.
 #define LUAPROC_SCHED_INIT_ERROR	-7
 
 
-/* message channel pointer type */
-typedef struct stchannel *channel;
-
-
 void luaprocInit(void);
-
-/* create a new worker pthread */
 int sched_create_worker(void);
-
 void newProc(const char *code, int file, script *lp);
-const char *sendToChannel(gameGlobals *game, const char *chname, const char *message, script **dst, channel *chn);
+const char *sendToChannel(gameGlobals *game, const char *SID, const char *message);
 
 /* join all worker threads and exit */
 void sched_join_workerthreads(void);
