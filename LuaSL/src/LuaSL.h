@@ -19,6 +19,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+typedef struct _script script;	// Define this here, so LuaSL_threads.h can use it.
+
 #include "LuaSL_threads.h"
 
 
@@ -68,7 +70,7 @@ typedef struct
     boolean		ui;		// Wether we actually start up the UI.
 } gameGlobals;
 
-typedef struct
+struct _script
 {
     Eina_Clist		node;
     gameGlobals		*game;
@@ -79,16 +81,12 @@ typedef struct
     float		compileTime, timerTime;
     int			bugs, warnings;
     boolean		running;
+    int			status;
+    int			args;
+    channel		chan;
     Ecore_Con_Client	*client;
     Ecore_Timer		*timer;
-} script;
-
-//struct stluaproc {
-//	int stat;
-//	int args;
-//	channel chan;
-//	void *data;
-//};
+};
 
 typedef struct
 {
