@@ -26,6 +26,29 @@ static Eina_Bool _timer_timer_cb(void *data)
     return ECORE_CALLBACK_RENEW;
 }
 
+static script *findThem(gameGlobals *game, const char *base, const char *text)
+{
+    char name[PATH_MAX];
+    char *temp;
+
+    strncpy(name, base, PATH_MAX);
+    if ((temp = rindex(name, '/')))
+	temp[1] = '\0';
+    strcat(name, text);
+    if ((temp = rindex(name, '"')))
+	temp[0] = '\0';
+    strcat(name, ".lsl");
+    return eina_hash_find(game->names, name);
+}
+
+static void resetScript(script *victim)
+{
+    gameGlobals *game = victim->game;
+
+    PD("Resetting %s", victim->fileName);
+    // TODO - now what?
+}
+
 static void _sendBack(void * data)
 {
     scriptMessage *message = data;
@@ -47,37 +70,44 @@ static void _sendBack(void * data)
     }
     else if (0 == strncmp(message->message, "llSetScriptState(", 17))
     {
-	char name[PATH_MAX];
-	char *temp;
 	script *them;
-	boolean state = TRUE;
 
-	strncpy(name, message->script->fileName, PATH_MAX);
-	if ((temp = rindex(name, '/')))
-	    temp[1] = '\0';
-	strcat(name, &(message->message[18]));
-	if ((temp = rindex(name, '""')))
+	if ((them = findThem(game, message->script->fileName, &(message->message[18]))))
 	{
-	    temp[0] = '\0';
-	    while (isspace(*temp))
+	    char *temp = rindex(&(message->message[18]), ',');
+
+	    if (temp)
+	    {
 		temp++;
-	    if (',' == *temp)
-		temp++;
-	    while (isspace(*temp))
-		temp++;
-	    state = '1' == *temp;
-	}
-	strcat(name, ".lsl");
-	if ((them = eina_hash_find(game->names, name)))
-	{
-	    if (state)
-		sendToChannel(them->SID, "start()", NULL, NULL);
+		while (isspace(*temp))
+		    temp++;
+		if ('1' == *temp)
+		    sendToChannel(them->SID, "start()", NULL, NULL);
+		else
+		    sendToChannel(them->SID, "stop()", NULL, NULL);
+		PD("Stopped %s", them->fileName);
+	    }
 	    else
-		sendToChannel(them->SID, "stop()", NULL, NULL);
+		PE("Missing script state in llSetScriptState(%s, )", them->fileName);
 	}
 	else
-	    PE("Can't stop script %s", name);
+	{
+	    char *temp = rindex(&(message->message[18]), '"');
+
+	    if (temp)
+		*temp = '\0';
+	    PE("Can't stop script, can't find %s", &(message->message[18]));
+	}
     }
+    else if (0 == strncmp(message->message, "llResetOtherScript(", 19))
+    {
+	script *them;
+
+	if ((them = findThem(game, message->script->fileName, &(message->message[20]))))
+	    resetScript(them);
+    }
+    else if (0 == strncmp(message->message, "llResetScript(", 14))
+	resetScript(message->script);
     else
 	sendBack(game, message->script->client, message->script->SID, message->message);
     free(message);
