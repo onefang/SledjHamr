@@ -46,19 +46,16 @@ THE SOFTWARE.
 /* message channel pointer type */
 typedef struct stchannel *channel;
 
-/* lua process pointer type */
-typedef struct stluaproc *luaproc;
-
 
 void luaprocInit(void);
 
 /* create a new worker pthread */
-int sched_create_worker( void );
+int sched_create_worker(void);
 
-void newProc(const char *code, int file, script *data);
-const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn);
+void newProc(const char *code, int file, script *lp);
+const char *sendToChannel(const char *chname, const char *message, script **dst, channel *chn);
 
 /* join all worker threads and exit */
-void sched_join_workerthreads( void );
+void sched_join_workerthreads(void);
 
 #endif

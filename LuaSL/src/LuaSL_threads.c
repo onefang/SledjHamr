@@ -40,7 +40,6 @@ THE SOFTWARE.
  *   Probably one fixed unique message channel per object, which each script in the object shares.
  *     But might be better to handle that C side anyway.
  * Better integration with LuaSL.
- *   Merge the luaproc structure with the script structure.
  * Use ecore threads instead of raw pthreads.
  *   Ecore threads pretty much wraps pthreads on posix, but has Windows support to.
  * Merge in the edje Lua code, and keep an eye on that, coz we might want to actually add this to edje Lua in the future.
@@ -80,16 +79,11 @@ struct stchannel {
 	pthread_cond_t *in_use;
 };
 
-/* lua process */
-struct stluaproc {
-	Eina_Clist node;
-	lua_State *lstate;
-	int status;
-	int args;
-	channel chan;
-	void *data;
-};
-
+typedef struct
+{
+    Eina_Clist node;
+    lua_State *L;
+} recycled;
 
 /*********
 * globals
@@ -161,34 +155,34 @@ static const struct luaL_reg luaproc_funcs_child[] = {
 
 
 /* queue a lua process sending a message without a matching receiver */
-static void luaproc_queue_sender(luaproc lp)
+static void luaproc_queue_sender(script *lp)
 {
     eina_clist_add_tail(&(lp->chan->send), &(lp->node));
 }
 
 /* dequeue a lua process sending a message with a receiver match */
-static luaproc luaproc_dequeue_sender(channel chan)
+static script *luaproc_dequeue_sender(channel chan)
 {
-    luaproc lp;
+    script *lp;
 
-    if ((lp = (luaproc) eina_clist_head(&(chan->send))))
+    if ((lp = (script *) eina_clist_head(&(chan->send))))
 	eina_clist_remove(&(lp->node));
 
     return lp;
 }
 
 /* queue a luc process receiving a message without a matching sender */
-static void luaproc_queue_receiver(luaproc lp)
+static void luaproc_queue_receiver(script *lp)
 {
     eina_clist_add_tail(&(lp->chan->recv), &(lp->node));
 }
 
 /* dequeue a lua process receiving a message with a sender match */
-static luaproc luaproc_dequeue_receiver(channel chan)
+static script *luaproc_dequeue_receiver(channel chan)
 {
-    luaproc lp;
+    script *lp;
 
-    if ((lp = (luaproc) eina_clist_head(&(chan->recv))))
+    if ((lp = (script *) eina_clist_head(&(chan->recv))))
 	eina_clist_remove(&(lp->node));
 
     return lp;
@@ -229,7 +223,7 @@ static void sched_lpcount_dec(void)
 /* worker thread main function */
 static void *workermain( void *args ) {
 
-	luaproc lp;
+	script *lp;
 	int procstat;
 
 	/* detach thread so resources are freed as soon as thread exits (no further joining) */
@@ -247,7 +241,7 @@ static void *workermain( void *args ) {
 		}
 
 		/* pop the first node from the ready process queue */
-		if ((lp = (luaproc) eina_clist_head(&lpready)))
+		if ((lp = (script *) eina_clist_head(&lpready)))
 		    eina_clist_remove(&(lp->node));
 		else {
 			/* free access to the process ready queue */
@@ -260,19 +254,28 @@ static void *workermain( void *args ) {
 		pthread_mutex_unlock( &mutex_queue_access );
 
 		/* execute the lua code specified in the lua process struct */
-		procstat = lua_resume(lp->lstate, lp->args);
+		procstat = lua_resume(lp->L, lp->args);
 
 		/* reset the process argument count */
 		lp->args = 0;
 
 		/* check if process finished its whole execution, then recycle it */
-		if ( procstat == 0 ) {
+		if (procstat == 0)
+		{
+		    recycled *trash = malloc(sizeof(recycled));
 
+		    if (trash)
+		    {
+			trash->L = lp->L;
 			pthread_mutex_lock(&mutex_recycle_list);
-			eina_clist_add_tail(&recyclelp, &(lp->node));
+			eina_clist_add_tail(&recyclelp, &(trash->node));
 			pthread_mutex_unlock(&mutex_recycle_list);
 			sched_lpcount_dec();
-
+		    }
+		    lua_close(lp->L);
+//		    if (lp->timer)
+//			ecore_timer_del(lp->timer);
+		    free(lp);
 		}
 
 		/* check if process yielded */
@@ -307,9 +310,9 @@ static void *workermain( void *args ) {
 		/* check if there was any execution error (LUA_ERRRUN, LUA_ERRSYNTAX, LUA_ERRMEM or LUA_ERRERR) */
 		else {
 			/* print error message */
-			fprintf( stderr, "close lua_State (error: %s)\n", luaL_checkstring(lp->lstate, -1 ));
+			fprintf( stderr, "close lua_State (error: %s)\n", luaL_checkstring(lp->L, -1 ));
 			/* close lua state */
-			lua_close(lp->lstate);
+			lua_close(lp->L);
 			/* decrease active lua process count */
 			sched_lpcount_dec();
 		}
@@ -317,7 +320,7 @@ static void *workermain( void *args ) {
 }
 
 /* move process to ready queue (ie, schedule process) */
-static int sched_queue_proc( luaproc lp ) {
+static int sched_queue_proc( script *lp ) {
 
 	/* get exclusive access to the ready process queue */
 	pthread_mutex_lock( &mutex_queue_access );
@@ -376,51 +379,53 @@ int sched_create_worker( void ) {
 
 
 
-void newProc(const char *code, int file, script *data)
+void newProc(const char *code, int file, script *lp)
 {
     int ret;
-    luaproc lp;
+    recycled *trash;
 
     // Try to recycle a Lua state, otherwise create one from scratch.
     pthread_mutex_lock(&mutex_recycle_list);
     /* pop list head */
-    if ((lp = (luaproc) eina_clist_head(&recyclelp)))
-	eina_clist_remove(&(lp->node));
+    if ((trash = (recycled *) eina_clist_head(&recyclelp)))
+    {
+	eina_clist_remove(&(trash->node));
+	lp->L = trash->L;
+	free(trash);
+    }
     pthread_mutex_unlock(&mutex_recycle_list);
 
-    if (lp == NULL)
+    if (NULL == lp->L)
     {
-	lua_State *lpst = luaL_newstate();
+	lp->L = luaL_newstate();
 
-	/* store the luaproc struct in its own Lua state */
-	lp = (luaproc) lua_newuserdata(lpst, sizeof(struct stluaproc));
-	lp->lstate = lpst;
-	lua_setfield(lp->lstate, LUA_REGISTRYINDEX, "_SELF");
-	luaL_openlibs(lp->lstate);
-	luaL_register(lp->lstate, "luaproc", luaproc_funcs_child);
-	eina_clist_element_init(&(lp->node));
+	/* store the script struct in its own Lua state */
+	lua_pushlightuserdata(lp->L, lp);
+	lua_setfield(lp->L, LUA_REGISTRYINDEX, "_SELF");
+	luaL_openlibs(lp->L);
+	luaL_register(lp->L, "luaproc", luaproc_funcs_child);
     }
 
     lp->status = LUAPROC_STAT_IDLE;
     lp->args = 0;
     lp->chan = NULL;
+    eina_clist_element_init(&(lp->node));
 
     /* load process' code */
     if (file)
-	ret = luaL_loadfile(lp->lstate, code);
+	ret = luaL_loadfile(lp->L, code);
     else
-	ret = luaL_loadstring(lp->lstate, code);
+	ret = luaL_loadstring(lp->L, code);
 
     /* in case of errors, destroy Lua process */
     if (ret != 0)
     {
-	lua_close(lp->lstate);
-	lp = NULL;
+	lua_close(lp->L);
+	lp->L = NULL;
     }
 
-    if (lp)
+    if (lp->L)
     {
-	lp->data = data;
 	sched_lpcount_inc();
 
 	/* schedule luaproc */
@@ -428,7 +433,7 @@ void newProc(const char *code, int file, script *data)
 	{
 	    printf( "[luaproc] error queueing Lua process\n" );
 	    sched_lpcount_dec();
-	    lua_close(lp->lstate);
+	    lua_close(lp->L);
 	}
     }
 }
@@ -446,12 +451,13 @@ static void luaproc_movevalues( lua_State *Lfrom, lua_State *Lto ) {
 }
 
 /* return the lua process associated with a given lua state */
-static luaproc luaproc_getself( lua_State *L ) {
-	luaproc lp;
-	lua_getfield( L, LUA_REGISTRYINDEX, "_SELF" );
-	lp = (luaproc )lua_touserdata( L, -1 );
-	lua_pop( L, 1 );
-	return lp;
+static script *luaproc_getself(lua_State *L)
+{
+    script *lp;
+    lua_getfield(L, LUA_REGISTRYINDEX, "_SELF");
+    lp = (script *) lua_touserdata(L, -1);
+    lua_pop(L, 1);
+    return lp;
 }
 
 /* create a new channel */
@@ -500,17 +506,17 @@ static int luaproc_create_channel(lua_State *L)
 /* send a message to a lua process */
 static int luaproc_send_back( lua_State *L ) {
 
-	luaproc self;
+	script *self;
 	const char *message = luaL_checkstring( L, 1 );
 
-	self = luaproc_getself( L );
-	if (self && self->data)
+	self = luaproc_getself(L);
+	if (self)
 	{
 	    scriptMessage *sm = calloc(1, sizeof(scriptMessage));
 
 	    if (sm)
 	    {
-		sm->script = self->data;
+		sm->script = self;
 		strcpy((char *) sm->message, message);
 		ecore_main_loop_thread_safe_call_async(scriptSendBack, sm);
 	    }
@@ -529,11 +535,11 @@ const char *sendToChannelErrors[] =
 // TODO - If these come in too quick, then messages might get lost.  Also, in at least one case, it locked up this thread I think.
 
 /* send a message to a lua process */
-const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn)
+const char *sendToChannel(const char *chname, const char *message, script **dst, channel *chn)
 {
     const char *result = NULL;
     channel chan;
-    luaproc dstlp;
+    script *dstlp;
 
     /* get exclusive access to operate on channels */
     pthread_mutex_lock(&mutex_channel);
@@ -558,9 +564,9 @@ const char *sendToChannel(const char *chname, const char *message, luaproc *dst,
     if (dstlp != NULL)
     {
 	/* push the message onto the receivers stack */
-	lua_pushstring( dstlp->lstate, message);
+	lua_pushstring( dstlp->L, message);
 
-	dstlp->args = lua_gettop(dstlp->lstate) - 1;
+	dstlp->args = lua_gettop(dstlp->L) - 1;
 
 	if (sched_queue_proc(dstlp) != LUAPROC_SCHED_QUEUE_PROC_OK)
 	{
@@ -571,7 +577,7 @@ const char *sendToChannel(const char *chname, const char *message, luaproc *dst,
 	    sched_lpcount_dec();
 
 	    /* close lua_State */
-	    lua_close(dstlp->lstate);
+	    lua_close(dstlp->L);
 	    return sendToChannelErrors[1];
 	}
 
@@ -579,7 +585,7 @@ const char *sendToChannel(const char *chname, const char *message, luaproc *dst,
 	luaproc_unlock_channel(chan);
     }
     else if (dst)
-	dst = &dstlp;
+	*dst = dstlp;
 
     if (chn)
 	chn = &chan;
@@ -590,7 +596,7 @@ const char *sendToChannel(const char *chname, const char *message, luaproc *dst,
 static int luaproc_send( lua_State *L ) {
 
 	channel chan;
-	luaproc dstlp, self;
+	script *dstlp, *self;
 	const char *chname = luaL_checkstring( L, 1 );
 	const char *message = luaL_checkstring( L, 2 );
 	const char *result = sendToChannel(chname, message, &dstlp, &chan);
@@ -622,7 +628,7 @@ static int luaproc_send( lua_State *L ) {
 static int luaproc_receive( lua_State *L ) {
 
 	channel chan;
-	luaproc srclp, self;
+	script *srclp, *self;
 	const char *chname = luaL_checkstring( L, 1 );
 
 	/* get exclusive access to operate on channels */
@@ -650,10 +656,10 @@ static int luaproc_receive( lua_State *L ) {
 	if ( srclp != NULL ) {
 
 		/* move values between Lua states' stacks */
-		luaproc_movevalues( srclp->lstate, L );
+		luaproc_movevalues( srclp->L, L );
 
 		/* return to sender indicanting message was sent */
-		lua_pushboolean( srclp->lstate, TRUE );
+		lua_pushboolean( srclp->L, TRUE );
 		srclp->args = 1;
 
 		if ( sched_queue_proc( srclp ) != LUAPROC_SCHED_QUEUE_PROC_OK ) {
@@ -665,7 +671,7 @@ static int luaproc_receive( lua_State *L ) {
 			sched_lpcount_dec();
 
 			/* close lua_State */
-			lua_close( srclp->lstate );
+			lua_close( srclp->L );
 			lua_pushnil( L );
 			lua_pushstring( L, "error scheduling process" );
 			return 2;
