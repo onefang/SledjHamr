@@ -55,7 +55,7 @@ void luaprocInit(void);
 /* create a new worker pthread */
 int sched_create_worker( void );
 
-int newProc(const char *code, int file, void *data);
+void newProc(const char *code, int file, script *data);
 const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn);
 
 /* join all worker threads and exit */
