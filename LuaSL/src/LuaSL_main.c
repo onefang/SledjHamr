@@ -49,7 +49,7 @@ static void resetScript(script *victim)
     // TODO - now what?
 }
 
-static void _sendBack(void * data)
+void scriptSendBack(void * data)
 {
     scriptMessage *message = data;
     gameGlobals *game = message->script->game;
@@ -179,7 +179,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		if (me)
 		{
 		    sprintf(buf, "%s.lua.out", me->fileName);
-		    newProc(buf, TRUE, (Ecore_Cb) _sendBack, me);
+		    newProc(buf, TRUE, me);
 		}
 	    }
 	    else if (0 == strcmp(command, "exit()"))

@@ -14,6 +14,14 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include <lua.h>
+#include <luajit.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
+#include "LuaSL_threads.h"
+
+
 #define WIDTH  (1024)
 #define HEIGHT (768)
 
@@ -62,16 +70,25 @@ typedef struct
 
 typedef struct
 {
+    Eina_Clist		node;
+    gameGlobals		*game;
     char		SID[PATH_MAX];
     char		fileName[PATH_MAX];
+    lua_State		*lstate;
     struct timeval	startTime;
     float		compileTime, timerTime;
     int			bugs, warnings;
     boolean		running;
-    gameGlobals		*game;
     Ecore_Con_Client	*client;
     Ecore_Timer		*timer;
 } script;
+
+//struct stluaproc {
+//	int stat;
+//	int args;
+//	channel chan;
+//	void *data;
+//};
 
 typedef struct
 {
@@ -82,6 +99,7 @@ typedef struct
 
 void loggingStartup(gameGlobals *game);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
+void scriptSendBack(void * data);
 void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message, ...);
 void sendForth(gameGlobals *game, const char *SID, const char *message, ...);
 float timeDiff(struct timeval *now, struct timeval *then);

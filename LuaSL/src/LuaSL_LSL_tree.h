@@ -17,13 +17,6 @@
 #include <stdio.h>
 #include <limits.h>	// For PATH_MAX.
 
-#include <lua.h>
-#include <luajit.h>
-#include <lualib.h>
-#include <lauxlib.h>
-
-#include "LuaSL_threads.h"
-
 #include "LuaSL_lemon_yaccer.h"
 
 #define YYERRCODE 256
