@@ -64,7 +64,7 @@ echo $command
 $command
 
 names="LuaSL_main LuaSL_compile LuaSL_threads LuaSL_utilities LuaSL_lexer LuaSL_lemon_yaccer"
-objects="../../libraries/luaproc/channel.o ../../libraries/luaproc/list.o ../../libraries/luaproc/luaproc.o ../../libraries/luaproc/sched.o "
+objects=""
 for i in $names
 do
     command="gcc $CFLAGS -c -o $i.o $i.c"

@@ -13,9 +13,6 @@
 
 #include "assert.h"
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>	// For PATH_MAX.
@@ -25,7 +22,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-#include <luaproc/sched.h>
+#include "LuaSL_threads.h"
 
 #include "LuaSL_lemon_yaccer.h"
 

@@ -6,12 +6,6 @@ echo "_______________ BUILDING LuaJIT _______________"
 cd $wd/libraries/luajit-2.0
 make amalg PREFIX=$()/src
 
-
-echo "_______________ BUILDING luaproc _______________"
-cd $wd/libraries/luaproc
-make
-
-
 echo "_______________ BUILDING lemon _______________"
 cd $wd/libraries/lemon
 rm -f *.o lemon
