@@ -544,6 +544,8 @@ const char *sendToChannelErrors[] =
     "error scheduling process"
 };
 
+// TODO - If these come in too quick, then messages might get lost.  Also, in at least one case, it locked up this thread I think.
+
 /* send a message to a lua process */
 const char *sendToChannel(const char *chname, const char *message, luaproc *dst, channel *chn)
 {
