@@ -17,14 +17,9 @@ Design.
 
 The basic design will be made up as I go along, but so far I have this -
 
-An object is a file system directory, full of LSL scripts as text files,
-notecards as text files, animations as BVH (or later BVJ) files, etc. 
-There will be some sort of metadata in place.  This could be created by
-our own OpenSim compatible cache module.
-
 A parser parses an LSL script, validating it and reporting errors.
 
-A preprocessor takes the result of the parse, and converts it into Lua
+A translator takes the result of the parse, and converts it into Lua
 source.  Each LSL script becomes a Lua state.  LSL states are handled as
 Lua tables, with each LSL state function being a table function in a
 common metatable.  LL and OS functions are likely to be C or Lua
@@ -37,12 +32,15 @@ LuaJIT is used as the Lua compiler, library, and runtime.
 
 Luaproc is used to start up operating system threads and hand Lua states
 between them.  Luaproc messaging is also being used, but might need to
-change to edje messaging.
+change to edje messaging.  Note - luaproc has been extensively rewritten
+for this project, mostly converting it to use EFL.  That rewrite
+substantially shrunk the source code.  More might be rewritten in
+future.
 
-Nails is used to pump commands in and out of the LuaSL system.  Incoming
-commands invoke LSL events via the LuaSL state metatable.  LL and OS
-functions that impact the world will be converted to nails commands sent
-to the command pump.
+Nails will be used to pump commands in and out of the LuaSL system. 
+Incoming commands invoke LSL events via the LuaSL state metatable.  LL
+and OS functions that impact the world will be converted to nails
+commands sent to the command pump.
 
 Initialy, since this is the first thing being written, a nails command
 pump client needs to be installed into OpenSim's C# stuff.  Though it
@@ -51,12 +49,18 @@ the ROBUST route, see how far I can get.  That's the general principle
 applying in all of this - try to avoid C# and see how for we can get. 
 lol
 
-A watchdog thread is used to make sure no LuaSL script spends forever
-processing any event.
+On the other hand, might be better to leverage the existing C#
+implementations of LSL functions, just to get things up and running
+quickly.  To that end, a protocol involving exchanging snippets of Lua
+over a network socket has been developed, and the next step is to write
+the C# side.  sigh
+
+A watchdog thread should be used to make sure no LuaSL script spends
+forever processing any event.
 
 Some form of serialization will need to be created for saving script
 state during shutdowns, passing script state to other threads /
-processes / computers.
+processes / computers.  Aparently Lua is good at this.
 
 There will have to be a MySQL (and maybe SQLite) client in the system,
 so we can talk directly to the local sim database.  Esskyuehl may be
@@ -65,6 +69,11 @@ suitable, though it's still in the prototype stage.
 Email, HTTP, and XML-RPC might need to be dealt with by us.  A ROBUST
 client will be needed to.  Azy might be suitable, but it's also in
 prototype.
+
+An object is a file system directory, full of LSL scripts as text files,
+notecards as text files, animations as BVH (or later BVJ) files, etc. 
+There will be some sort of metadata in place.  This could be created by
+our own OpenSim compatible cache module.
 
 
 Test harness.
@@ -82,7 +91,7 @@ Later I should add stock standard OpenCollar scripts from SL.  They are
 a bitch to get working under OpenSim, so would be good compatability
 tests.
 
-Various eina logging domains will be used to handle whisper, say, shout,
+Various eina logging domains might be used to handle whisper, say, shout,
 etc.
 
 Performance testing will have to be done on 5000 scripts, to see how
