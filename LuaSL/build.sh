@@ -17,7 +17,7 @@ fi
 
 # No need for a make file, or dependencies, the entire thing takes only a few seconds to build.
 
-CFLAGS="-g -Wall -I include -I $LOCALDIR/src"
+CFLAGS="-g -Wall -Wunreachable-code -I include -I $LOCALDIR/src"
 CFLAGS="$CFLAGS -I ../../libraries"
 CFLAGS="$CFLAGS -I ../../libraries/luajit-2.0/src"
 #CFLAGS="$CFLAGS -I /usr/include/lua5.1"
