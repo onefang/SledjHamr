@@ -1,5 +1,9 @@
-Unless otherwise stated, all of this is covered by the following BSD style
-licence.
+"Me" in this document usually refers to David Walter Seikel, the main author.
+
+Unless otherwise stated, all of this is covered by the following BSD
+style license.  Most of the rest is either BSD, MIT, or public domain. 
+To avoid viral contamination, only LGPL varieties of GPL code will be
+linked.  See below for details.
 
 --------------------------------------------------------------------------------
 
@@ -43,10 +47,12 @@ Embryo - partly BSD, partly something similar to BSD.
 
 See the various COPYING and AUTHORS files for details.
 
-Epp is a seperate tool used to process .edc source files, but otherwise
+Epp is a separate tool used to process .edc source files, but otherwise
 not a part of the SledjHamr system.  The only .edc file is the LuaSL
-test harness, and likely there wont be any more in the future.  So the
-viral nature of GPL does not apply.
+test harness.  So the viral nature of GPL does not apply.
+
+Note that eina is the only GPL thing that is linked, and it's LGPL, so
+linking to non GPL stuff is fine.
 
 --------------------------------------------------------------------------------
 
@@ -117,6 +123,10 @@ http://creativecommons.org/licenses/publicdomain
 
 --------------------------------------------------------------------------------
 
+Note that luaproc has been extensively rewritten by me, but large parts
+of it still exist in the original form, and the rewritten bits tended to
+stick with the original design.
+
 Luaproc is covered by this copyright notice and license -
 
 Copyright 2008 Alexandre Skyrme, Noemi Rodriguez, Roberto Ierusalimschy
@@ -141,6 +151,16 @@ THE SOFTWARE.
 
 --------------------------------------------------------------------------------
 
+All things below this line are temporary things, some of them already
+removed.  They are listed coz they are still in the source repo, even
+though not in the current latest version.  Thus they are being
+distributed, even if not by default.  None of them are counted as
+"linked" for licensing purposes, as they are no longer used.  Those
+things that actually care about linking in their licenses where never
+linked, merely used as examples for research.
+
+--------------------------------------------------------------------------------
+
 The MLP scripts used for testing are BSD, Copyright (c) 2006, by Miffy Fluffy.
 
 --------------------------------------------------------------------------------
@@ -159,12 +179,13 @@ There is no longer any parts of that code left I think.
 
 --------------------------------------------------------------------------------
 
-The flex and bison source files for the LSL parser are from the SL
-viewer under GPL 2 and copyright at some unknown date (due to missing
-copyright notice in those specific files) by Linden Research, Inc. 
-Those files have gone away, as I wrote my own, and most of it was
-useless to me anyway.  Never actually used them, so GPL terms do not
-apply.
+There used to be flex and bison source files for a LSL parser, taken
+from from the SL viewer under GPL 2 and copyright at some unknown date
+(due to missing copyright notice in those specific files) by Linden
+Research, Inc.  Those files have gone away, as I wrote my own, and most
+of it was useless to me anyway.  Never actually used them, so GPL terms
+do not apply.  The flex source file actually used is written by me,
+bison is not used at all.
 
 --------------------------------------------------------------------------------
 
