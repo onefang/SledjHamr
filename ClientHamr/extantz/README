@@ -38,7 +38,7 @@ custom viewers, but the user wants to use a more generic viewer for all
 the other grids.  Or if the user wants to use one viewer for OpenSim
 grids, but another for LL (Linden Labs) grids.  Coz perhaps their chosen
 viewer is not TPVP (Third Party Viewer Policy, an LL thing) compliant,
-and Ll are just more anal than the rest of the universe.
+and LL are just more anal than the rest of the universe.
 
 The grid manager will also include some sort of search capability, as is
 currently being discussed by various people in the OpenSim universe. 
@@ -102,6 +102,62 @@ which is different from the "gets out of the way" it usually does, still
 running, just not on screen.
 
 
+The problem with the web.
+-------------------------
+
+At least that's the theory.  In practice, a web browser takes up almost
+one third of the viewer, and is only used for three things.  Login
+pages, simple built in browser window, and MOAP (Media On A Prim).  For
+the first two full blown web browsers are massive overkill.  MOAP is not
+supported by meta-impy yet anyway.
+
+WebKit is a pain to compile at the moment, for reasons I wont go into
+right now.  At the opposite of the spectrum is dillo, which is not quite
+up to spec enough for login pages that have fancy stuff.  There does not
+appear to be any middle ground.  So right now, I'll work on using random
+web browsers as external windows.  That will suffice for everything but
+MOAP, which I can leave until later.
+
+The web is a bloated mess, so it's not surprising that a fully featured
+web browser component like WebKit is also a bloated mess.
 
 
+Design.
+-------
+
+A thin window on the left.
+
+Menus across the top.
+View tabs.
+    Grids  Accounts  Viewers  Landmarks
+
+Grids tab is the grid manager, though you can also drill down / tree out
+the accounts list per grid.
+
+Accounts shows accounts, though can drill down to grid list per account. 
+Also consider launching thin viewers, text only ones and such.  The
+account view is almost a natural for extending into a IM style thingy.
+
+Viewers lists the installed viewers, can install more, and allows
+preferences editing.  It can handle viewer installs, upgrades, even
+compiling them from source.
+
+Landmarks manages LMs from viewers, or log in spots, or SLURLs etc.
+
+A user configurable web browser can open up to fill the right of the
+screen.
+
+Might be good to allow Lua scripting.  One way of dealing with viewer
+prefs perhaps?  Certainly think about Lua for the UI, and a built in
+editor, etc. ala skang.  All the fancy stuff like development and such
+should be kept in some sort of module, so as not to bloat the main
+proggy.  See if it's possible to disable the Emerald/Phoenix/Firestorm
+LSL bridge when connecting to OpenSim.  See if we can do it from Lua,
+with some sort of generic Lua system for munging things.
+
+Log file management features, including viewer stdout, check if only
+Linux viewers do that.  Including chat logs.
+
+Dillo and uzbl can insert themselves into the windows of others.  Should
+check that out.
 
