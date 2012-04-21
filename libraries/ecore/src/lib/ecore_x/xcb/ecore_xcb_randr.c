@@ -1,7 +1,6 @@
 /* TODO: List of missing functions
  *
  * ecore_x_randr_crtc_clone_set
- * ecore_x_randr_output_size_mm_get
  * ecore_x_randr_output_crtc_set
  * ecore_x_randr_edid_version_get
  * ecore_x_randr_edid_info_has_valid_checksum
@@ -776,6 +775,24 @@ ecore_x_randr_output_modes_get(Ecore_X_Window       root,
    return modes;
 }
 
+EAPI Eina_Bool 
+ecore_x_randr_output_mode_add(Ecore_X_Randr_Output output, Ecore_X_Randr_Mode mode)
+{
+   LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
+
+#ifdef ECORE_XCB_RANDR
+   RANDR_CHECK_1_2_RET(EINA_FALSE);
+
+   if ((output == Ecore_X_Randr_None) || (mode == Ecore_X_Randr_None))
+     return EINA_FALSE;
+
+   xcb_randr_add_output_mode(_ecore_xcb_conn, output, mode);
+   return EINA_TRUE;
+#endif
+   return EINA_FALSE;
+}
+
 /*
  * @brief get detailed information for a given mode id
  * @param root window which's screen's ressources are queried
@@ -802,6 +819,63 @@ ecore_x_randr_mode_info_get(Ecore_X_Window     root,
      ret = _ecore_xcb_randr_12_mode_info_get(root, mode);
 #endif
    return ret;
+}
+
+/*
+ * @brief add a mode to a display
+ * @param root window to which's screen's ressources are added
+ * @param mode_info
+ * @return Ecore_X_Randr_Mode of the added mode. Ecore_X_Randr_None if mode
+ * adding failed.
+ * @since 1.2.0
+ */
+EAPI Ecore_X_Randr_Mode 
+ecore_x_randr_mode_info_add(Ecore_X_Window root, Ecore_X_Randr_Mode_Info *mode_info)
+{
+#ifdef ECORE_XCB_RANDR
+   Ecore_X_Randr_Mode mode = Ecore_X_Randr_None;
+   xcb_randr_create_mode_cookie_t cookie;
+   xcb_randr_create_mode_reply_t *reply;
+   xcb_randr_mode_info_t info;
+   int namelen = 0;
+#endif
+
+   LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
+
+#ifdef ECORE_XCB_RANDR
+   RANDR_CHECK_1_2_RET(EINA_FALSE);
+
+   if (!mode_info) return Ecore_X_Randr_None;
+   if (!_ecore_xcb_randr_root_validate(root)) return Ecore_X_Randr_None;
+
+   namelen = strlen(mode_info->name);
+
+   memset(&info, 0, sizeof(info));
+   info.width = mode_info->width;
+   info.height = mode_info->height;
+   info.dot_clock = mode_info->dotClock;
+   info.hsync_start = mode_info->hSyncStart;
+   info.hsync_end = mode_info->hSyncEnd;
+   info.htotal = mode_info->hTotal;
+   info.hskew = mode_info->hSkew;
+   info.vsync_start = mode_info->vSyncStart;
+   info.vsync_end = mode_info->vSyncEnd;
+   info.vtotal = mode_info->vTotal;
+   info.mode_flags = mode_info->modeFlags;
+   info.name_len = namelen;
+
+   cookie = 
+     xcb_randr_create_mode_unchecked(_ecore_xcb_conn, root, info, 
+                                     namelen, mode_info->name);
+   reply = xcb_randr_create_mode_reply(_ecore_xcb_conn, cookie, NULL);
+   if (reply)
+     {
+        mode = mode_info->xid;
+        free(reply);
+     }
+#endif
+   return mode;
 }
 
 /*
@@ -1055,6 +1129,53 @@ ecore_x_randr_output_crtc_get(Ecore_X_Window       root,
 #endif
 
    return Ecore_X_Randr_None;
+}
+
+EAPI void 
+ecore_x_randr_output_size_mm_get(Ecore_X_Window root, Ecore_X_Randr_Output output, int *w_mm, int *h_mm)
+{
+#ifdef ECORE_XCB_RANDR
+   xcb_randr_get_output_info_cookie_t ocookie;
+   xcb_randr_get_output_info_reply_t *oreply;
+   xcb_timestamp_t timestamp = 0;
+#endif
+
+   LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
+
+   if (w_mm) *w_mm = 0;
+   if (h_mm) *h_mm = 0;
+
+#ifdef ECORE_XCB_RANDR
+   RANDR_CHECK_1_2_RET();
+
+   if ((output != Ecore_X_Randr_None) && (_randr_version >= RANDR_1_3))
+     {
+        xcb_randr_get_screen_resources_current_reply_t *reply;
+
+        reply = _ecore_xcb_randr_13_get_resources(root);
+        timestamp = reply->config_timestamp;
+        free(reply);
+     }
+   else if ((output != Ecore_X_Randr_None) && (_randr_version == RANDR_1_2))
+     {
+        xcb_randr_get_screen_resources_reply_t *reply;
+
+        reply = _ecore_xcb_randr_12_get_resources(root);
+        timestamp = reply->config_timestamp;
+        free(reply);
+     }
+
+   ocookie =
+     xcb_randr_get_output_info_unchecked(_ecore_xcb_conn, output, timestamp);
+   oreply = xcb_randr_get_output_info_reply(_ecore_xcb_conn, ocookie, NULL);
+   if (oreply)
+     {
+        if (w_mm) *w_mm = oreply->mm_width;
+        if (h_mm) *h_mm = oreply->mm_height;
+        free(oreply);
+     }
+#endif
 }
 
 /**
@@ -1436,6 +1557,87 @@ ecore_x_randr_crtcs_get(Ecore_X_Window root,
 #endif
 
    return ret;
+}
+
+/*
+ * @deprecated bad naming. Use ecore_x_randr_window_crtcs_get instead.
+ * @brief get the CRTCs, which display a certain window
+ * @param window window the displaying CRTCs shall be found for
+ * @param num the number of CRTCs displaying the window
+ * @return array of CRTCs that display a certain window. NULL if no CRTCs
+ * was found that displays the specified window.
+ */
+EAPI Ecore_X_Randr_Crtc *
+ecore_x_randr_current_crtc_get(Ecore_X_Window window,
+                                 int           *num)
+{
+   return ecore_x_randr_window_crtcs_get(window, num);
+}
+
+/*
+ * @brief get the CRTCs, which display a certain window
+ * @param window window the displaying crtcs shall be found for
+ * @param num the number of crtcs displaying the window
+ * @return array of crtcs that display a certain window. NULL if no crtcs
+ * was found that displays the specified window.
+ * @since 1.2.0
+ */
+EAPI Ecore_X_Randr_Crtc *
+ecore_x_randr_window_crtcs_get(Ecore_X_Window window,
+                               int *num)
+{
+#ifdef ECORE_XCB_RANDR
+   Ecore_X_Window root;
+   Eina_Rectangle w_geo, c_geo;
+   Ecore_X_Randr_Crtc *crtcs, *ret = NULL;
+   Ecore_X_Randr_Mode mode;
+   int ncrtcs, i, nret = 0;
+   xcb_translate_coordinates_cookie_t cookie;
+   xcb_translate_coordinates_reply_t *trans;
+#endif
+
+   LOGFN(__FILE__, __LINE__, __FUNCTION__);
+   CHECK_XCB_CONN;
+
+#ifdef ECORE_XCB_RANDR
+   RANDR_CHECK_1_2_RET(NULL);
+
+   ecore_x_window_geometry_get(window, &w_geo.x, &w_geo.y, &w_geo.w, &w_geo.h);
+
+   root = ecore_x_window_root_get(window);
+   crtcs = ecore_x_randr_crtcs_get(root, &ncrtcs);
+   if (!crtcs) return NULL;
+
+   /* now get window RELATIVE to root window - thats what matters. */
+   cookie = xcb_translate_coordinates(_ecore_xcb_conn, window, root, 0, 0);
+   trans = xcb_translate_coordinates_reply(_ecore_xcb_conn, cookie, NULL);
+   w_geo.x = trans->dst_x;
+   w_geo.y = trans->dst_y;
+   free(trans);
+
+   for (i = 0, nret = 0; i < ncrtcs; i++)
+     {
+        /* if crtc is not enabled, don't bother about it any further */
+         mode = ecore_x_randr_crtc_mode_get(root, crtcs[i]);
+         if (mode == Ecore_X_Randr_None) continue;
+
+         ecore_x_randr_crtc_geometry_get(root, crtcs[i], &c_geo.x, &c_geo.y,
+                                         &c_geo.w, &c_geo.h);
+         if (eina_rectangles_intersect(&w_geo, &c_geo))
+           {
+              ret = realloc(ret, (++nret *
+                                   sizeof(Ecore_X_Randr_Output)));
+              ret[nret] = crtcs[i];
+           }
+     }
+   free(crtcs);
+
+   if (num) *num = nret;
+   return ret;
+
+#endif
+   if (num) *num = 0;
+   return NULL;
 }
 
 /*
@@ -2172,6 +2374,22 @@ ecore_x_randr_screen_current_size_set(Ecore_X_Window root,
 }
 
 /*
+ * @deprecated bad naming. Use ecore_x_randr_window_outputs_get instead.
+ * @brief get the outputs, which display a certain window
+ * @param window window the displaying outputs shall be found for
+ * @param num the number of outputs displaying the window
+ * @return array of outputs that display a certain window. NULL if no outputs
+ * was found that displays the specified window.
+ */
+
+Ecore_X_Randr_Output *
+ecore_x_randr_current_output_get(Ecore_X_Window window,
+                                 int *num)
+{
+   return ecore_x_randr_window_outputs_get(window, num);
+}
+
+/*
  * @brief get the outputs, which display a certain window
  * @param window window the displaying outputs shall be found for
  * @param num the number of outputs displaying the window
@@ -2184,13 +2402,9 @@ ecore_x_randr_window_outputs_get(Ecore_X_Window window,
 {
 #ifdef ECORE_XCB_RANDR
    Ecore_X_Window root;
-   Eina_Rectangle w_geo, c_geo;
    Ecore_X_Randr_Crtc *crtcs;
-   Ecore_X_Randr_Mode mode;
-   Ecore_X_Randr_Output *outputs, *ret = NULL, *tret;
+   Ecore_X_Randr_Output *outputs, *ret = NULL;
    int ncrtcs, noutputs, i, nret = 0;
-   xcb_translate_coordinates_cookie_t cookie;
-   xcb_translate_coordinates_reply_t *trans;
 #endif
 
    LOGFN(__FILE__, __LINE__, __FUNCTION__);
@@ -2199,64 +2413,36 @@ ecore_x_randr_window_outputs_get(Ecore_X_Window window,
    if (num) *num = 0;
 
 #ifdef ECORE_XCB_RANDR
-   RANDR_CHECK_1_2_RET(NULL);
-
-   ecore_x_window_geometry_get(window, &w_geo.x, &w_geo.y, &w_geo.w, &w_geo.h);
+   if (_randr_version < RANDR_1_2) goto _ecore_x_randr_current_output_get_fail;
 
    root = ecore_x_window_root_get(window);
-   crtcs = ecore_x_randr_crtcs_get(root, &ncrtcs);
-   if (!crtcs) return NULL;
+   if (!(crtcs = ecore_x_randr_window_crtcs_get(window, &ncrtcs)))
+     goto _ecore_x_randr_current_output_get_fail;
 
-   /* now get window RELATIVE to root window - thats what matters. */
-   cookie = xcb_translate_coordinates(_ecore_xcb_conn, window, root, 0, 0);
-   trans = xcb_translate_coordinates_reply(_ecore_xcb_conn, cookie, NULL);
-   w_geo.x = trans->dst_x;
-   w_geo.y = trans->dst_y;
-   free(trans);
-
-   for (i = 0; i < ncrtcs; i++)
+   for (i = 0, nret = 0; i < ncrtcs; i++)
      {
-        /* if crtc is not enabled, don't bother about it any further */
-         mode = ecore_x_randr_crtc_mode_get(root, crtcs[i]);
-         if (mode == Ecore_X_Randr_None) continue;
 
-         ecore_x_randr_crtc_geometry_get(root, crtcs[i], &c_geo.x, &c_geo.y,
-                                         &c_geo.w, &c_geo.h);
-         if (eina_rectangles_intersect(&w_geo, &c_geo))
-           {
-              outputs =
-                ecore_x_randr_crtc_outputs_get(root, crtcs[i], &noutputs);
-     /* The case below should be impossible, but for safety reasons
-      * remains */
-              if (!outputs)
-                {
-                   if (num) *num = 0;
-                   free(ret);
-                   free(crtcs);
-                   return NULL;
-                }
-              tret = realloc(ret, ((nret + noutputs) *
-                                   sizeof(Ecore_X_Randr_Output)));
-              if (!tret)
-                {
-                   if (num) *num = 0;
-                   free(outputs);
-                   free(ret);
-                   free(crtcs);
-                   return NULL;
-                }
-              ret = tret;
-              memcpy(&ret[nret], outputs,
-                     (noutputs * sizeof(Ecore_X_Randr_Output)));
-              nret += noutputs;
-              free(outputs);
-           }
+        outputs = ecore_x_randr_crtc_outputs_get(root, crtcs[i],
+              &noutputs);
+        if (!outputs)
+          goto _ecore_x_randr_current_output_get_fail_free;
+        nret += noutputs;
+        ret = realloc(ret, (nret * sizeof(Ecore_X_Randr_Output)));
+        memcpy(&ret[nret], outputs, (noutputs * sizeof(Ecore_X_Randr_Output)));
+        free(outputs);
      }
    free(crtcs);
 
-   if (num) *num = nret;
+   if (num)
+     *num = nret;
+
    return ret;
 
+_ecore_x_randr_current_output_get_fail_free:
+   free(outputs);
+   free(crtcs);
+   free(ret);
+_ecore_x_randr_current_output_get_fail:
 #endif
    if (num) *num = 0;
    return NULL;

@@ -126,6 +126,20 @@
  * string creation/destruction speed, reduces memory use and decreases
  * memory fragmentation, so a win all-around.
  *
+ * Using eina stringshares usually boils down to:
+ * @code
+ * const char *str = eina_stringshare_add("My string");
+ * ...
+ * //Use str
+ * ...
+ * eina_stringshare_del(str);
+ * @endcode
+ * @note It's very important to note that string shares are @b @c const,
+ * changing them will result in undefined behavior.
+ * @note eina_stringshare_del() @b doesn't guarantee the string share will be
+ * freed, it releases a reference to it, but if other references to it still
+ * exist the string share will live until those are released.
+ *
  * The following diagram gives an idea of what happens as you create strings
  * with eina_stringshare_add():
  *
@@ -148,6 +162,15 @@
  * @{
  */
 
+/**
+ * @typedef Eina_Stringshare
+ *
+ * Interchangeable with "const char *" but still a good visual hint for the
+ * purpose. Maybe in the far far future we'll even add strict type checking.
+ *
+ * @since 1.2.0
+ */
+typedef const char Eina_Stringshare;
 
 /**
  * @brief Retrieve an instance of a string for use in a program.
@@ -168,7 +191,7 @@
  *
  * @see eina_share_common_add()
  */
-EAPI const char        *eina_stringshare_add_length(const char *str, unsigned int slen) EINA_WARN_UNUSED_RESULT;
+EAPI Eina_Stringshare  *eina_stringshare_add_length(const char *str, unsigned int slen) EINA_WARN_UNUSED_RESULT;
 
 /**
  * @brief Retrieve an instance of a string for use in a program.
@@ -188,7 +211,7 @@ EAPI const char        *eina_stringshare_add_length(const char *str, unsigned in
  *
  * @see eina_stringshare_add_length()
  */
-EAPI const char        *eina_stringshare_add(const char *str) EINA_WARN_UNUSED_RESULT;
+EAPI Eina_Stringshare  *eina_stringshare_add(const char *str) EINA_WARN_UNUSED_RESULT;
 
 /**
  * @brief Retrieve an instance of a string for use in a program
@@ -209,7 +232,7 @@ EAPI const char        *eina_stringshare_add(const char *str) EINA_WARN_UNUSED_R
  *
  * @see eina_stringshare_nprintf()
  */
-EAPI const char        *eina_stringshare_printf(const char *fmt, ...) EINA_WARN_UNUSED_RESULT EINA_PRINTF(1, 2);
+EAPI Eina_Stringshare  *eina_stringshare_printf(const char *fmt, ...) EINA_WARN_UNUSED_RESULT EINA_PRINTF(1, 2);
 
 /**
  * @brief Retrieve an instance of a string for use in a program
@@ -231,7 +254,7 @@ EAPI const char        *eina_stringshare_printf(const char *fmt, ...) EINA_WARN_
  *
  * @see eina_stringshare_nprintf()
  */
-EAPI const char        *eina_stringshare_vprintf(const char *fmt, va_list args) EINA_WARN_UNUSED_RESULT;
+EAPI Eina_Stringshare  *eina_stringshare_vprintf(const char *fmt, va_list args) EINA_WARN_UNUSED_RESULT;
 
 /**
  * @brief Retrieve an instance of a string for use in a program
@@ -251,7 +274,7 @@ EAPI const char        *eina_stringshare_vprintf(const char *fmt, va_list args) 
  *
  * @see eina_stringshare_printf()
  */
-EAPI const char        *eina_stringshare_nprintf(unsigned int len, const char *fmt, ...) EINA_WARN_UNUSED_RESULT EINA_PRINTF(2, 3);
+EAPI Eina_Stringshare  *eina_stringshare_nprintf(unsigned int len, const char *fmt, ...) EINA_WARN_UNUSED_RESULT EINA_PRINTF(2, 3);
 
 /**
  * Increment references of the given shared string.
@@ -267,7 +290,7 @@ EAPI const char        *eina_stringshare_nprintf(unsigned int len, const char *f
  *
  * There is no unref since this is the work of eina_share_common_del().
  */
-EAPI const char        *eina_stringshare_ref(const char *str);
+EAPI Eina_Stringshare  *eina_stringshare_ref(Eina_Stringshare *str);
 
 /**
  * @brief Note that the given string has lost an instance.
@@ -282,7 +305,7 @@ EAPI const char        *eina_stringshare_ref(const char *str);
  * Note that if the given pointer is not shared or NULL, bad things
  * will happen, likely a segmentation fault.
  */
-EAPI void               eina_stringshare_del(const char *str);
+EAPI void               eina_stringshare_del(Eina_Stringshare *str);
 
 /**
  * @brief Note that the given string @b must be shared.
@@ -296,7 +319,7 @@ EAPI void               eina_stringshare_del(const char *str);
  * things will happen, likely a segmentation fault. If in doubt, try
  * strlen().
  */
-EAPI int                eina_stringshare_strlen(const char *str) EINA_PURE EINA_WARN_UNUSED_RESULT;
+EAPI int                eina_stringshare_strlen(Eina_Stringshare *str) EINA_PURE EINA_WARN_UNUSED_RESULT;
 
 /**
  * @brief Dump the contents of the share_common.
@@ -306,8 +329,8 @@ EAPI int                eina_stringshare_strlen(const char *str) EINA_PURE EINA_
  */
 EAPI void               eina_stringshare_dump(void);
 
-static inline Eina_Bool eina_stringshare_replace(const char **p_str, const char *news) EINA_ARG_NONNULL(1);
-static inline Eina_Bool eina_stringshare_replace_length(const char **p_str, const char *news, unsigned int slen) EINA_ARG_NONNULL(1);
+static inline Eina_Bool eina_stringshare_replace(Eina_Stringshare **p_str, const char *news) EINA_ARG_NONNULL(1);
+static inline Eina_Bool eina_stringshare_replace_length(Eina_Stringshare **p_str, const char *news, unsigned int slen) EINA_ARG_NONNULL(1);
 
 #include "eina_inline_stringshare.x"
 

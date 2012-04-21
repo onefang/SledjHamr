@@ -230,7 +230,7 @@ evas_object_clip_changes_clean(Evas_Object *obj)
 }
 
 void
-evas_object_render_pre_effect_updates(Eina_Array *rects, Evas_Object *obj, int is_v, int was_v)
+evas_object_render_pre_effect_updates(Eina_Array *rects, Evas_Object *obj, int is_v, int was_v __UNUSED__)
 {
    Eina_Rectangle *r;
    Evas_Object *clipper;
@@ -241,7 +241,6 @@ evas_object_render_pre_effect_updates(Eina_Array *rects, Evas_Object *obj, int i
 
    if (obj->smart.smart) goto end;
    /* FIXME: was_v isn't used... why? */
-   was_v = 0;
    if (!obj->clip.clipees)
      {
         EINA_ARRAY_ITER_NEXT(rects, i, r, it)
@@ -1042,6 +1041,22 @@ evas_object_color_set(Evas_Object *obj, int r, int g, int b, int a)
    if (g > 255) g = 255; if (g < 0) g = 0;
    if (b > 255) b = 255; if (b < 0) b = 0;
    if (a > 255) a = 255; if (a < 0) a = 0;
+   if (r > a)
+     {
+        r = a;
+        ERR("Evas only handle pre multiplied color !");
+     }
+   if (g > a)
+     {
+        g = a;
+        ERR("Evas only handle pre multiplied color !");
+     }
+   if (b > a)
+     {
+        b = a;
+        ERR("Evas only handle pre multiplied color !");
+     }
+
    if (evas_object_intercept_call_color_set(obj, r, g, b, a)) return;
    if (obj->smart.smart)
      {

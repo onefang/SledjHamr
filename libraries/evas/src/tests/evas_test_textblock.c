@@ -1283,6 +1283,15 @@ START_TEST(evas_textblock_various)
    evas_object_textblock_text_markup_set(tb, "a<ps/>a<ps/>a");
    fail_if(!_evas_textblock_check_item_node_link(tb));
 
+   /* These shouldn't crash (although the desired outcome is not yet defined) */
+   evas_object_textblock_text_markup_set(tb, "&#xfffc;");
+   evas_textblock_cursor_pos_set(cur, 0);
+   evas_textblock_cursor_char_delete(cur);
+
+   evas_object_textblock_text_markup_set(tb, "\xEF\xBF\xBC");
+   evas_textblock_cursor_pos_set(cur, 0);
+   evas_textblock_cursor_char_delete(cur);
+
    END_TB_TEST();
 }
 END_TEST
@@ -2089,6 +2098,29 @@ START_TEST(evas_textblock_size)
    evas_object_textblock_size_native_get(tb, &nw, &nh);
    fail_if((w != nw) || (h != nh));
    fail_if(w <= 0);
+
+   /* This time with margins. */
+     {
+        Evas_Textblock_Style *newst;
+        Evas_Coord oldw, oldh, oldnw, oldnh;
+
+        evas_object_textblock_text_markup_set(tb, buf);
+        evas_object_textblock_size_formatted_get(tb, &oldw, &oldh);
+        evas_object_textblock_size_native_get(tb, &oldnw, &oldnh);
+
+
+        newst = evas_textblock_style_new();
+        fail_if(!newst);
+        evas_textblock_style_set(newst,
+              "DEFAULT='left_margin=4 right_margin=4'");
+        evas_object_textblock_style_user_push(tb, newst);
+
+        evas_object_textblock_size_formatted_get(tb, &w, &h);
+        evas_object_textblock_size_native_get(tb, &nw, &nh);
+
+        fail_if((w != oldw + 8) || (h != oldh) ||
+              (nw != oldnw + 8) || (nh != oldnh));
+     }
 
    /* FIXME: There is a lot more to be done. */
    END_TB_TEST();

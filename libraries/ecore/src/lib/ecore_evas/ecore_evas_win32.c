@@ -420,7 +420,7 @@ _ecore_evas_win32_free(Ecore_Evas *ee)
 
 static void
 _ecore_evas_win32_callback_delete_request_set(Ecore_Evas *ee,
-                                              void (*func) (Ecore_Evas *ee))
+                                              Ecore_Evas_Event_Cb func)
 {
    ee->func.fn_delete_request = func;
 }
@@ -717,7 +717,7 @@ _ecore_evas_win32_activate(Ecore_Evas *ee)
 {
    INF("ecore evas activate");
 
-   ecore_win32_window_focus_set((struct _Ecore_Win32_Window *)ee->prop.window);
+   ecore_win32_window_focus((struct _Ecore_Win32_Window *)ee->prop.window);
 }
 
 static void
@@ -819,7 +819,7 @@ _ecore_evas_win32_cursor_set(Ecore_Evas *ee, Evas_Object *obj, int layer, int ho
 static void
 _ecore_evas_win32_focus_set(Ecore_Evas *ee, int on __UNUSED__)
 {
-   ecore_win32_window_focus_set((struct _Ecore_Win32_Window *)ee->prop.window);
+   ecore_win32_window_focus((struct _Ecore_Win32_Window *)ee->prop.window);
 }
 
 static void
@@ -879,18 +879,12 @@ _ecore_evas_win32_fullscreen_set(Ecore_Evas *ee, int on)
 
    if (on != 0)
    {
-      ecore_win32_window_shape_set((struct _Ecore_Win32_Window *)ee->prop.window,
-                                   0, 0, NULL);
       ecore_win32_window_fullscreen_set((struct _Ecore_Win32_Window *)ee->prop.window,
                                         on);
    }
    else
    {
       ecore_win32_window_fullscreen_set(window, on);
-      ecore_win32_window_shape_set(window,
-                                   window->shape.width,
-                                   window->shape.height,
-                                   window->shape.mask);
    }
 
    /* Nothing to be done for the GDI backend at the evas level */
@@ -981,6 +975,13 @@ static Ecore_Evas_Engine_Func _ecore_win32_engine_func =
      NULL, /* _ecore_evas_x_ignore_events_set */
      NULL,  /* _ecore_evas_x_alpha_set */
      NULL, //transparent
+
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
 
      NULL, // render
      NULL  //screen_geometry_get

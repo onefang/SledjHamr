@@ -9,7 +9,7 @@
    @mainpage Ecore
 
    @version 1.1
-   @date 2000-2011
+   @date 2000-2012
 
    Please see the @ref authors page for contact details.
 
@@ -22,7 +22,7 @@
    @li @ref Ecore_Main_Loop_Group
    @li @ref Ecore_File_Group
    @li @ref Ecore_Con_Group
-   @li @link Ecore_Evas.h   Ecore_Evas - Evas convenience functions. @endlink
+   @li @ref Ecore_Evas_Group
    @li @ref Ecore_FB_Group
    @li @link Ecore_Ipc.h    Ecore_IPC - Inter Process Communication functions. @endlink
    @li @link Ecore_X.h      Ecore_X - X Windows System wrapper. @endlink
@@ -35,21 +35,31 @@
    pkgconfig (.pc) files are installed for every ecore module.
    Thus, to compile using any of them, you can use something like the following:
 
-   @verbatim
-   gcc *.c $(pkg-config ecore ecore-$x ecore-$y [...] --cflags --libs)
-   @endverbatim
+@verbatim
+gcc *.c $(pkg-config ecore ecore-$x ecore-$y [...] --cflags --libs)
+@endverbatim
 
    @section install How is it installed?
 
-   Suggested configure options for evas for a Linux desktop X display:
+   Suggested configure options for ecore for a Linux desktop X display
+   with OpenGL and Software support, communication (networking) and
+   IPC (inter process communication):
 
-   @verbatim
-   ./configure \
-   make
-   su -
-   ...
-   make install
-   @endverbatim
+@verbatim
+./configure \
+    --enable-ecore-con \
+    --enable-ecore-ipc \
+    --enable-ecore-file \
+    --enable-ecore-input \
+    --enable-ecore-input-evas \
+    --enable-ecore-x \
+    --enable-ecore-evas \
+    --enable-ecore-evas-software-buffer \
+    --enable-ecore-evas-software-x11 \
+    --enable-ecore-evas-opengl-x11
+make
+sudo make install
+@endverbatim
 
  */
 
@@ -112,140 +122,175 @@
  */
 
 /**
-   @page Ecore_Main_Loop_Page The Ecore Main Loop
-
-   @section intro What is Ecore?
-
-   Ecore is a clean and tiny event loop library with many modules to do lots of
-   convenient things for a programmer, to save time and effort.
-
-   It's small and lean, designed to work on embedded systems all the way to
-   large and powerful multi-cpu workstations. It serialises all system signals,
-   events etc. into a single event queue, that is easily processed without
-   needing to worry about concurrency. A properly written, event-driven program
-   using this kind of programming doesn't need threads, nor has to worry about
-   concurrency. It turns a program into a state machine, and makes it very
-   robust and easy to follow.
-
-   Ecore gives you other handy primitives, such as timers to tick over for you
-   and call specified functions at particular times so the programmer can use
-   this to do things, like animate, or time out on connections or tasks that take
-   too long etc.
-
-   Idle handlers are provided too, as well as calls on entering an idle state
-   (often a very good time to update the state of the program). All events that
-   enter the system are passed to specific callback functions that the program
-   sets up to handle those events. Handling them is simple and other Ecore
-   modules produce more events on the queue, coming from other sources such as
-   file descriptors etc.
-
-   Ecore also lets you have functions called when file descriptors become active
-   for reading or writing, allowing for streamlined, non-blocking IO.
-
-   Here is an example of a simple program and its basic event loop flow:
-
-   @image html  prog_flow.png
-   @image latex prog_flow.eps width=\textwidth
-
-
-
-   @section work How does Ecore work?
-
-   Ecore is very easy to learn and use. All the function calls are designed to
-   be easy to remember, explicit in describing what they do, and heavily
-   name-spaced. Ecore programs can start and be very simple.
-
-   For example:
-
-   @code
-   #include <Ecore.h>
-
-   int
-   main(int argc, const char **argv)
-   {
-   ecore_init();
-   ecore_app_args_set(argc, argv);
-   ecore_main_loop_begin();
-   ecore_shutdown();
-   return 0;
-   }
-   @endcode
-
-   This program is very simple and doesn't check for errors, but it does start up
-   and begin a main loop waiting for events or timers to tick off. This program
-   doesn't set up any, but now we can expand on this simple program a little
-   more by adding some event handlers and timers.
-
-   @code
-   #include <Ecore.h>
-
-   Ecore_Timer         *timer1     = NULL;
-   Ecore_Event_Handler *handler1   = NULL;
-   double               start_time = 0.0;
-
-   int
-   timer_func(void *data)
-   {
-   printf("Tick timer. Sec: %3.2f\n", ecore_time_get() - start_time);
-   return 1;
-   }
-
-   int
-   exit_func(void *data, int ev_type, void *ev)
-   {
-   Ecore_Event_Signal_Exit *e;
-
-   e = (Ecore_Event_Signal_Exit *)ev;
-   if (e->interrupt)      printf("Exit: interrupt\n");
-   else if (e->quit)      printf("Exit: quit\n");
-   else if (e->terminate) printf("Exit: terminate\n");
-   ecore_main_loop_quit();
-   return 1;
-   }
-
-   int
-   main(int argc, const char **argv)
-   {
-   ecore_init();
-   ecore_app_args_set(argc, argv);
-   start_time = ecore_time_get();
-   handler1 = ecore_event_handler_add(ECORE_EVENT_SIGNAL_EXIT, exit_func, NULL);
-   timer1 = ecore_timer_add(0.5, timer_func, NULL);
-   ecore_main_loop_begin();
-   ecore_shutdown();
-   return 0;
-   }
-   @endcode
-
-   In the previous example, we initialize our application and get the time at
-   which our program has started so we can calculate an offset. We set
-   up a timer to tick off in 0.5 seconds, and since it returns 1, will
-   keep ticking off every 0.5 seconds until it returns 0, or is deleted
-   by hand. An event handler is set up to call a function -
-   exit_func(),
-   whenever an event of type ECORE_EVENT_SIGNAL_EXIT is received (CTRL-C
-   on the command line will cause such an event to happen). If this event
-   occurs it tells you what kind of exit signal was received, and asks
-   the main loop to quit when it is finished by calling
-   ecore_main_loop_quit().
-
-   The handles returned by ecore_timer_add() and
-   ecore_event_handler_add() are
-   only stored here as an example. If you don't need to address the timer or
-   event handler again you don't need to store the result, so just call the
-   function, and don't assign the result to any variable.
-
-   This program looks slightly more complex than needed to do these simple
-   things, but in principle, programs don't get any more complex. You add more
-   event handlers, for more events, will have more timers and such, BUT it all
-   follows the same principles as shown in this example.
-
+ * @page Ecore_Main_Loop_Page The Ecore Main Loop
+ *
+ * @section intro What is Ecore?
+ *
+ * Ecore is a clean and tiny event loop library with many modules to do lots of
+ * convenient things for a programmer, to save time and effort. It's small and
+ * lean, designed to work from embedded systems all the way up to large and
+ * powerful multi-cpu workstations. The main loop has a number of primitives to
+ * be used with its main loop. It serializes all the primitives and allows for
+ * great responsiveness without the need for threads(or any other concurrency).
+ *
+ * @subsection timers Timers
+ *
+ * Timers serve two main purposes: doing something at a specified time and
+ * repeatedly doing something with a set interval.
+ * @see Ecore_Timer_Group
+ *
+ * @subsection poolers Poolers
+ *
+ * Poolers allow for pooling to be centralized into a single place therefore
+ * alleviating the need for different parts of the program to wake up at
+ * different times to do pooling, thereby making the code simpler and more
+ * efficient.
+ * @see Ecore_Poller_Group
+ *
+ * @subsection idler Idlers
+ *
+ * There are three types of idlers, enterers, idlers(proper) and exiters, they
+ * are called, respectively, when the program is about to enter an idle state,
+ * when the program is idle and when the program is leaving an idle state. Idler
+ * enterers are usually a good place to update the program state. Proper idlers
+ * are the appropriate place to do heavy computational tasks thereby using what
+ * would otherwise be wasted CPU cycles. Exiters are the perfect place to do
+ * anything your program should do just before processing events(also timers,
+ * poolers, file descriptor handlers and animators)
+ * @see Ecore_Idle_Group
+ *
+ * @subsection fd_handler File descriptor handlers
+ *
+ * File descriptor handlers allow you to monitor when there is data available to
+ * read on file descriptors, when writing will not block or if there was an
+ * error. Any valid file descriptor can be used with this API, regardless of if
+ * was gotten with an OS specific API or from ecore.
+ * @see Ecore_FD_Handler_Group
+ *
+ * @subsection animators Animators
+ *
+ * Ecore provides a facility called animators, so named since the intended use
+ * was in animations, that facilitates knowing what percentage of a given
+ * interval has elapsed. This is perfect for performing animations, but is not
+ * limited to that use, it can, for example, also be used to create a progress
+ * bar.
+ * @see Ecore_Animator_Group
+ *
+ * @subsection ev_handlers Event handlers
+ *
+ * Event handlers are, arguably, the most important feature of the ecore main
+ * loop, they are what allows the programmer to easily handle user interaction.
+ * Events however are not only things the user does, events can represent
+ * anything for which a type is created.
+ * @see Ecore_Event_Group
+ *
+ * All of these primitives are discussed in more detail in their respective
+ * pages linked above.
+ *
+ * Here is a diagram of the main loop flow of a simple program:
+ *
+ * @image html  prog_flow.png
+ * @image latex prog_flow.eps width=\textwidth
+ *
+ *
+ *
+ * @section work How does Ecore work?
+ *
+ * Ecore is very easy to learn and use. All the function calls are designed to
+ * be easy to remember, explicit in describing what they do, and heavily
+ * name-spaced. Ecore programs can start and be very simple.
+ *
+ * For example:
+ *
+ * @code
+ * #include <Ecore.h>
+ *
+ * int
+ * main(int argc, const char **argv)
+ * {
+ *    ecore_init();
+ *    ecore_app_args_set(argc, argv);
+ *    ecore_main_loop_begin();
+ *    ecore_shutdown();
+ *    return 0;
+ * }
+ * @endcode
+ *
+ * This program is very simple and doesn't check for errors, but it does start up
+ * and begin a main loop waiting for events or timers to tick off. This program
+ * doesn't set up any, but now we can expand on this simple program a little
+ * more by adding some event handlers and timers.
+ *
+ * @code
+ * #include <Ecore.h>
+ *
+ * Ecore_Timer         *timer1     = NULL;
+ * Ecore_Event_Handler *handler1   = NULL;
+ * double               start_time = 0.0;
+ *
+ * int
+ * timer_func(void *data)
+ * {
+ *    printf("Tick timer. Sec: %3.2f\n", ecore_time_get() - start_time);
+ *    return 1;
+ * }
+ *
+ * int
+ * exit_func(void *data, int ev_type, void *ev)
+ * {
+ *    Ecore_Event_Signal_Exit *e;
+ *
+ *    e = (Ecore_Event_Signal_Exit *)ev;
+ *    if (e->interrupt)      printf("Exit: interrupt\n");
+ *    else if (e->quit)      printf("Exit: quit\n");
+ *    else if (e->terminate) printf("Exit: terminate\n");
+ *    ecore_main_loop_quit();
+ *    return 1;
+ * }
+ *
+ * int
+ * main(int argc, const char **argv)
+ * {
+ *    ecore_init();
+ *    ecore_app_args_set(argc, argv);
+ *    start_time = ecore_time_get();
+ *    handler1 = ecore_event_handler_add(ECORE_EVENT_SIGNAL_EXIT, exit_func, NULL);
+ *    timer1 = ecore_timer_add(0.5, timer_func, NULL);
+ *    ecore_main_loop_begin();
+ *    ecore_shutdown();
+ *    return 0;
+ * }
+ * @endcode
+ *
+ * In the previous example, we initialize our application and get the time at
+ * which our program has started so we can calculate an offset. We set
+ * up a timer to tick off in 0.5 seconds, and since it returns 1, will
+ * keep ticking off every 0.5 seconds until it returns 0, or is deleted
+ * by hand. An event handler is set up to call a function -
+ * exit_func(),
+ * whenever an event of type ECORE_EVENT_SIGNAL_EXIT is received (CTRL-C
+ * on the command line will cause such an event to happen). If this event
+ * occurs it tells you what kind of exit signal was received, and asks
+ * the main loop to quit when it is finished by calling
+ * ecore_main_loop_quit().
+ *
+ * The handles returned by ecore_timer_add() and
+ * ecore_event_handler_add() are
+ * only stored here as an example. If you don't need to address the timer or
+ * event handler again you don't need to store the result, so just call the
+ * function, and don't assign the result to any variable.
+ *
+ * This program looks slightly more complex than needed to do these simple
+ * things, but in principle, programs don't get any more complex. You add more
+ * event handlers, for more events, will have more timers and such, BUT it all
+ * follows the same principles as shown in this example.
+ *
  */
 
 /*
    @page Ecore_Config_Page The Enlightened Property Library
 
-   The Enlightened Property Library (Ecore_Config) is an adbstraction
+   The Enlightened Property Library (Ecore_Config) is an abstraction
    from the complexities of writing your own configuration. It provides
    many features using the Enlightenment 17 development libraries.
 
@@ -310,7 +355,9 @@
 # include <signal.h>
 #else
 # include <sys/time.h>
-# include <signal.h>
+# if !defined (EXOTIC_NO_SIGNAL)
+#  include <signal.h>
+# endif
 #endif
 
 #include <sys/types.h>
@@ -333,47 +380,21 @@ EAPI int ecore_shutdown(void);
  */
 
 /**
+ * @defgroup Ecore_Main_Loop_Group Ecore main loop
  *
- * @defgroup Ecore_Main_Loop_Group Ecore main loop functions
+ * This group discusses functions that are acting on Ecore's main loop itself or
+ * on events and infrastructure directly linked to it. Most programs only need
+ * to start and end the main loop, the rest of the function discussed here are
+ * meant to be used in special situations, and with great care.
  *
- * These are functions acting on Ecore's main loop itself or on
- * events and infrastructure directly linked to it. This loop is
- * designed to work on embedded systems all the way to large and
- * powerful multi-cpu workstations.
- *
- * It serialises all system signals and events into a single event
- * queue, that can be easily processed without needing to worry
- * about concurrency. A properly written, event-driven program
- * using this kind of programming does not need threads. It makes
- * the program very robust and easy to follow.
- *
- * For example, for the main loop to be of any use, you need to be
- * able to add @b events and event handlers on it. Events for file
- * descriptor events are covered in @ref Ecore_FD_Handler_Group.
- *
- * Timer functions are covered in @ref Ecore_Time_Group.
- *
- * There is also provision for callbacks for when the loop enters or
- * exits an @b idle state. See @ref Ecore_Idle_Group for more
- * information on it.
- *
- * Functions are also provided for spawning child processes using
- * @c fork(). See @ref Ecore_Exe_Group for more details on it.
- *
- * Here is an example of simple program and its basic event loop
- * flow:
- *
- * @image html prog_flow.png
- * @image latex prog_flow.eps width=\textwidth
- *
- * For examples of setting up and using a main loop, see
- * @ref Ecore_Main_Loop_Page.
+ * For details on the usage of ecore's main loop and how it interacts with other
+ * ecore facilities see: @ref Ecore_Main_Loop_Page.
  *
  * @{
  */
 
 #define ECORE_VERSION_MAJOR 1
-#define ECORE_VERSION_MINOR 0
+#define ECORE_VERSION_MINOR 2
 
 typedef struct _Ecore_Version
 {
@@ -469,7 +490,7 @@ EAPI void *ecore_main_loop_thread_safe_call_sync(Ecore_Data_Cb callback, void *d
  * in this thread, if the main loop was suspended correctly. If not, it return @c -1.
  *
  * This function suspend the main loop in a know state, this let you
- * use any EFL call you want after it return. Be carefull, the main loop
+ * use any EFL call you want after it return. Be carefully, the main loop
  * is blocked until you call ecore_thread_main_loop_end(). This is
  * the only sane way to achieve pseudo thread safety.
  *
@@ -489,7 +510,7 @@ EAPI int ecore_thread_main_loop_begin(void);
  * the main loop is unlocked again. @c -1 will be returned if you are trying to unlock
  * when there wasn't enough call to ecore_thread_main_loop_begin().
  *
- * After a call to ecore_thread_main_loop_begin(), you need to absolutly
+ * After a call to ecore_thread_main_loop_begin(), you need to absolutely
  * call ecore_thread_main_loop_end(), or you application will stay frozen.
  */
 EAPI int ecore_thread_main_loop_end(void);
@@ -501,34 +522,51 @@ EAPI int ecore_thread_main_loop_end(void);
 /**
  * @defgroup Ecore_Event_Group Ecore Event functions
  *
- * Ecore events are used to wake up the Ecore main loop to warn
- * about state changes, tasks completed, data available for reading
- * or writing, etc. They are the base of the event oriented
- * programming.
+ * Ecore events provide two main features that are of use to those using ecore:
+ * creating events and being notified of events. Those two will usually be used
+ * in different contexts, creating events is mainly done by libraries wrapping
+ * some system functionality while being notified of events is mainly a
+ * necessity of applications.
  *
- * The idea is to write many functions (callbacks) that will be
- * registered to specific events, and called when these events
- * happen. This way, when the system state changes (a mouse click is
- * detected, a key is pressed, or the content of a file changes, for
- * example), the respective callbacks will be called with some
- * information about that event. Usually the function/callback will
- * have a data pointer to the event info (the position in the screen
- * where the mouse was clicked, the name of the key that was
- * pressed, or the name of the file that has changed).
+ * For a program to be notified of events it's interested in it needs to have a
+ * function to process the event and to register that function as the callback
+ * to the event, that's all:
+ * @code
+ * ecore_event_handler_add(EVENT_TYPE, _my_event_handler, some_data);
+ * ...
+ * static Eina_Bool
+ * _my_event_handler(void *data, int type, void *event)
+ * {
+ *    //data is some_data
+ *    //event is provided by whoever created the event
+ *    //Do really cool stuff with event
+ * }
+ * @endcode
  *
- * The basic usage, when one needs to watch for an existing event,
- * is to register a callback to it using ecore_event_add(). Of
- * course it's necessary to know beforehand what are the types of
- * events that the system/library will emmit.  This should be
- * available with the documentation from that system/library.
+ * One very important thing to note here is the @c EVENT_TYPE, to register a
+ * handler for an event you must know it's type before hand. This information
+ * can be found on the documentation of the library emitting the signal, so,
+ * for example, for events related to windowing one would look in @ref
+ * Ecore_Evas_Group.
  *
- * When writing a library or group of functions that need to inform
- * about something, and you already are running on top of a main
- * loop, it is usually a good approach to use events. This way you
- * allow others to register as many callbacks as necessary to this
- * event, and don't have to care about who is registering to it. The
- * functions ecore_event_type_new() and ecore_event_add() are
- * available for this purpose.
+ * Examples of libraries that integrate into ecore's main loop by providing
+ * events are @ref Ecore_Con_Group, @ref Ecore_Evas_Group and @ref
+ * Ecore_Exe_Group amongst others. This usage can be divided into two parts,
+ * setup and adding events. The setup is very simple, all that needs doing is
+ * getting a type id for the event:
+ * @code
+ * int MY_EV_TYPE = ecore_event_type_new();
+ * @endcode
+ * @note This variable should be declared in the header since it'll be needed by
+ * anyone wishing to register a handler to your event.
+ *
+ * The complexity of adding of an event to the queue depends on whether that
+ * event sends uses @c event, if it doesn't it a one-liner:
+ * @code
+ * ecore_event_add(MY_EV_TYPE, NULL, NULL, NULL);
+ * @endcode
+ * The usage when an @c event is needed is not that much more complex and can be
+ * seen in @ref ecore_event_add.
  *
  * Example that deals with events:
  *
@@ -582,7 +620,7 @@ struct _Ecore_Event_Signal_User    /** User signal event */
    int       number;  /**< The signal number. Either 1 or 2 */
    void     *ext_data;  /**< Extension data - not used */
 
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t data; /**< Signal info */
 #endif
 };
@@ -591,7 +629,7 @@ struct _Ecore_Event_Signal_Hup    /** Hup signal event */
 {
    void     *ext_data;  /**< Extension data - not used */
 
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t data; /**< Signal info */
 #endif
 };
@@ -600,10 +638,10 @@ struct _Ecore_Event_Signal_Exit    /** Exit request event */
 {
    Eina_Bool interrupt : 1; /**< Set if the exit request was an interrupt  signal*/
    Eina_Bool quit      : 1; /**< set if the exit request was a quit signal */
-   Eina_Bool terminate : 1; /**< Set if the exit request was a terminate singal */
+   Eina_Bool terminate : 1; /**< Set if the exit request was a terminate signal */
    void     *ext_data; /**< Extension data - not used */
 
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t data; /**< Signal info */
 #endif
 };
@@ -612,7 +650,7 @@ struct _Ecore_Event_Signal_Power    /** Power event */
 {
    void     *ext_data;  /**< Extension data - not used */
 
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t data; /**< Signal info */
 #endif
 };
@@ -621,21 +659,161 @@ struct _Ecore_Event_Signal_Realtime    /** Realtime event */
 {
    int       num; /**< The realtime signal's number */
 
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t data; /**< Signal info */
 #endif
 };
 
+/**
+ * @brief Add an event handler.
+ * @param type The type of the event this handler will get called for
+ * @param func The function to call when the event is found in the queue
+ * @param data A data pointer to pass to the called function @p func
+ * @return A new Event handler, or NULL on failure
+ *
+ * Add an event handler to the list of handlers. This will, on success, return
+ * a handle to the event handler object that was created, that can be used
+ * later to remove the handler using ecore_event_handler_del(). The @p type
+ * parameter is the integer of the event type that will trigger this callback
+ * to be called. The callback @p func is called when this event is processed
+ * and will be passed the event type, a pointer to the private event
+ * structure that is specific to that event type, and a data pointer that is
+ * provided in this call as the @p data parameter.
+ *
+ * When the callback @p func is called, it must return 1 or 0. If it returns
+ * 1 (or ECORE_CALLBACK_PASS_ON), It will keep being called as per normal, for
+ * each handler set up for that event type. If it returns 0 (or
+ * ECORE_CALLBACK_DONE), it will cease processing handlers for that particular
+ * event, so all handler set to handle that event type that have not already
+ * been called, will not be.
+ */
 EAPI Ecore_Event_Handler *ecore_event_handler_add(int type, Ecore_Event_Handler_Cb func, const void *data);
+/**
+ * @brief Delete an event handler.
+ * @param event_handler Event handler handle to delete
+ * @return Data passed to handler
+ *
+ * Delete a specified event handler from the handler list. On success this will
+ * delete the event handler and return the pointer passed as @p data when the
+ * handler was added by ecore_event_handler_add(). On failure NULL will be
+ * returned. Once a handler is deleted it will no longer be called.
+ */
 EAPI void *ecore_event_handler_del(Ecore_Event_Handler *event_handler);
+/**
+ * @brief Add an event to the event queue.
+ * @param type The event type to add to the end of the event queue
+ * @param ev The data structure passed as @c event to event handlers
+ * @param func_free The function to be called to free @a ev
+ * @param data The data pointer to be passed to the free function
+ * @return A Handle for that event on success, otherwise NULL
+ *
+ * If it succeeds, an event of type @a type will be added to the queue for
+ * processing by event handlers added by ecore_event_handler_add(). The @a ev
+ * parameter will be passed as the @c event parameter of the handler. When the
+ * event is no longer needed, @a func_free will be called and passed @a ev for
+ * cleaning up. If @p func_free is NULL, free() will be called with the private
+ * structure pointer.
+ */
 EAPI Ecore_Event *ecore_event_add(int type, void *ev, Ecore_End_Cb func_free, void *data);
+/**
+ * @brief Delete an event from the queue.
+ * @param event The event handle to delete
+ * @return The data pointer originally set for the event free function
+ *
+ * This deletes the event @p event from the event queue, and returns the
+ * @p data parameter originally set when adding it with ecore_event_add(). This
+ * does not immediately call the free function, and it may be called later on
+ * cleanup, and so if the free function depends on the data pointer to work,
+ * you should defer cleaning of this till the free function is called later.
+ */
 EAPI void *ecore_event_del(Ecore_Event *event);
+/**
+ * @brief Get the data associated with an #Ecore_Event_Handler
+ * @param eh The event handler
+ * @return The data
+ *
+ * This function returns the data previously associated with @p eh by
+ * ecore_event_handler_add().
+ */
 EAPI void *ecore_event_handler_data_get(Ecore_Event_Handler *eh);
+/**
+ * @brief Set the data associated with an #Ecore_Event_Handler
+ * @param eh The event handler
+ * @param data The data to associate
+ * @return The previous data
+ *
+ * This function sets @p data to @p eh and returns the old data pointer
+ * which was previously associated with @p eh by ecore_event_handler_add().
+ */
 EAPI void *ecore_event_handler_data_set(Ecore_Event_Handler *eh, const void *data);
+/**
+ * @brief Allocate a new event type id sensibly and return the new id.
+ * @return A new event type id.
+ *
+ * This function allocates a new event type id and returns it. Once an event
+ * type has been allocated it can never be de-allocated during the life of
+ * the program. There is no guarantee of the contents of this event ID, or how
+ * it is calculated, except that the ID will be unique to the current instance
+ * of the process.
+ */
 EAPI int ecore_event_type_new(void);
+/**
+ * @brief Add a filter the current event queue.
+ *
+ * @param func_start Function to call just before filtering and return data
+ * @param func_filter Function to call on each event
+ * @param func_end Function to call after the queue has been filtered
+ * @param data Data to pass to the filter functions
+ * @return A filter handle on success, NULL otherwise
+ *
+ * Adds a callback to filter events from the event queue. Filters are called on
+ * the queue just before Event handler processing to try and remove redundant
+ * events. Just as processing is about to start @a func_start is called and
+ * passed the @a data pointer, the return value of this functions is passed to
+ * @a func_filter as loop_data. @a func_filter is also passed @a data and the
+ * event type and event structure. If this @a func_filter returns #EINA_FALSE,
+ * the event is removed from the queue, if it returns #EINA_TRUE, the event is
+ * kept. When processing is finished @p func_end is called and is passed the
+ * loop_data(returned by @c func_start) and @p data pointer to clean up.
+ */
 EAPI Ecore_Event_Filter *ecore_event_filter_add(Ecore_Data_Cb func_start, Ecore_Filter_Cb func_filter, Ecore_End_Cb func_end, const void *data);
+/**
+ * @brief Delete an event filter.
+ * @param ef The event filter handle
+ * @return The data set for the filter on success, NULL otherwise
+ *
+ * Delete a filter that has been added by its @p ef handle.
+ */
 EAPI void *ecore_event_filter_del(Ecore_Event_Filter *ef);
+/**
+ * @brief Return the current event type being handled.
+ * @return The current event type being handled if inside a handler callback,
+ * ECORE_EVENT_NONE otherwise
+ *
+ * If the program is currently inside an Ecore event handler callback this
+ * will return the type of the current event being processed.
+ *
+ * This is useful when certain Ecore modules such as Ecore_Evas "swallow"
+ * events and not all the original information is passed on. In special cases
+ * this extra information may be useful or needed and using this call can let
+ * the program know if the event type being handled is one it wants to get more
+ * information about.
+ */
 EAPI int ecore_event_current_type_get(void);
+/**
+ * @brief Return the current event type pointer handled.
+ * @return The current event pointer being handled if inside a handler callback,
+ * NULL otherwise
+ *
+ * If the program is currently inside an Ecore event handler callback this
+ * will return the pointer of the current event being processed.
+ *
+ * This is useful when certain Ecore modules such as Ecore_Evas "swallow"
+ * events and not all the original information is passed on. In special cases
+ * this extra information may be useful or needed and using this call can let
+ * the program access the event data if the type of the event is handled by
+ * the program.
+ */
 EAPI void *ecore_event_current_event_get(void);
 
 /**
@@ -652,7 +830,8 @@ EAPI void *ecore_event_current_event_get(void);
  * @{
  */
 
- #define ECORE_EXE_PRIORITY_INHERIT 9999
+/** Inherit priority from parent process */
+#define ECORE_EXE_PRIORITY_INHERIT 9999
 
 EAPI extern int ECORE_EXE_EVENT_ADD;     /**< A child process has been added */
 EAPI extern int ECORE_EXE_EVENT_DEL;     /**< A child process has been deleted (it exited, naming consistent with the rest of ecore). */
@@ -715,7 +894,7 @@ struct _Ecore_Exe_Event_Del    /** Process exit event */
    Eina_Bool  exited    : 1; /** < set to 1 if the process exited of its own accord */
    Eina_Bool  signalled : 1; /** < set to 1 id the process exited due to uncaught signal */
    void      *ext_data; /**< Extension data - not used */
-#if !defined (_WIN32) && !defined (__lv2ppu__)
+#if !defined (_WIN32) && !defined (__lv2ppu__) && !defined (EXOTIC_NO_SIGNAL)
    siginfo_t  data; /**< Signal info */
 #endif
 };
@@ -768,24 +947,30 @@ EAPI void ecore_exe_hup(Ecore_Exe *exe);
 /**
  * @defgroup Ecore_FD_Handler_Group File Event Handling Functions
  *
- * Functions that deal with file descriptor handlers.
+ * @brief Functions that deal with file descriptor handlers.
  *
- * The @ref Ecore_Fd_Handler can be used to watch a file descriptor
- * for data available for reading, for the availability to write
- * without blocking, and for errors on the file descriptor.
+ * File descriptor handlers facilitate reading, writing and checking for errors
+ * without blocking the program or doing expensive pooling. This can be used to
+ * monitor a socket, pipe, or other stream for which an FD can be had.
  *
- *ecore_main_fd_handler_add() is used to setup a handler for a
- * given file descriptor. This file descriptor can be the standard
- * input, a network socket, a stream received through some driver
- * of a hardware decoder, etc. Thus it can contain errors, like a
- * disconnection, a broken pipe, and so, and that's why it's
- * possible to check for these errors with the @ref ECORE_FD_ERROR
- * flag.
+ * @warning This function @b can't be used for monitoring to regular files!
  *
- * An @ref Ecore_Fd_Handler can be used to watch on a file
- * descriptor without blocking, still being able to receive events,
- * expire timers, and other watch for other things that happen in
- * the Ecore main loop.
+ * One common FD to be monitored is the standard input(stdin), monitoring it for
+ * reading requires a single call:
+ * @code
+ * static Eina_Bool
+ * _my_cb_func(void *data, Ecore_Fd_Handler *handler)
+ * {
+ *    char c;
+ *    scanf("%c", &c); //Guaranteed not to block
+ *    ... do stuff with c ...
+ * }
+ * ecore_main_fd_handler_add(STDIN_FILENO, ECORE_FD_READ, _my_cb_func, NULL, NULL, NULL);
+ * @endcode
+ *
+ * When using a socket, pipe or other stream it's important to remember that
+ * errors may occur and as such to monitor not only for reading/writing but also
+ * for errors using the @ref ECORE_FD_ERROR flag.
  *
  * Example of use of a file descriptor handler:
  * @li @ref ecore_fd_handler_example_c
@@ -823,11 +1008,93 @@ typedef void (*Ecore_Fd_Prep_Cb)(void *data, Ecore_Fd_Handler *fd_handler);
  */
 typedef Eina_Bool (*Ecore_Win32_Handle_Cb)(void *data, Ecore_Win32_Handler *wh);
 
+/**
+ * @brief Adds a callback for activity on the given file descriptor.
+ *
+ * @param fd The file descriptor to watch.
+ * @param flags To monitor it for reading use @c ECORE_FD_READ, for writing @c
+ * ECORE_FD_WRITE, and for error @c ECORE_FD_ERROR. Values bay |(ored).
+ * @param func The callback function.
+ * @param data The data to pass to the callback.
+ * @param buf_func The function to call to check if any data has been buffered
+ * and already read from the fd. May be @c NULL.
+ * @param buf_data The data to pass to the @p buf_func function.
+ * @return A fd handler handle on success, @c NULL otherwise.
+ *
+ * @a func will be called during the execution of @ref Ecore_Main_Loop_Page
+ * when the file descriptor is available for reading, writing, or there has been
+ * an error(depending on the given @a flags).
+ *
+ * When @a func returns ECORE_CALLBACK_CANCEL, it indicates that the
+ * handler should be marked for deletion (identical to calling @ref
+ * ecore_main_fd_handler_del).
+ *
+ * @warning @a buf_func is meant for @b internal use only and should be @b
+ * avoided.
+ *
+ * The return value of @a buf_func has a different meaning, when it returns
+ * ECORE_CALLBACK_CANCEL, it indicates that @a func @b shouldn't be called, and
+ * when it returns ECORE_CALLBACK_RENEW it indicates @a func should be called.
+ * The return value of @a buf_func will not cause the FD handler to be deleted.
+ *
+ * @a buf_func is called during event loop handling to check if data that has
+ * been read from the file descriptor is in a buffer and is available to read.
+ * Some systems, notably xlib, handle their own buffering, and would otherwise
+ * not work with select(). These systems should use a @a buf_func. This is a
+ * most annoying hack, only ecore_x uses it, so refer to that for an example.
+ */
 EAPI Ecore_Fd_Handler *ecore_main_fd_handler_add(int fd, Ecore_Fd_Handler_Flags flags, Ecore_Fd_Cb func, const void *data, Ecore_Fd_Cb buf_func, const void *buf_data);
+/**
+ * @brief Set the prepare callback with data for a given #Ecore_Fd_Handler
+ *
+ * @param fd_handler The fd handler
+ * @param func The prep function
+ * @param data The data to pass to the prep function
+ *
+ * This function will be called prior to any fd handler's callback function
+ * (even the other fd handlers), before entering the main loop select function.
+ *
+ * @note Once a prepare callback is set for a fd handler, it cannot be changed.
+ * You need to delete the fd handler and create a new one, to set another
+ * callback.
+ * @note You probably don't need this function. It is only necessary for very
+ * uncommon cases that need special behavior.
+ */
 EAPI void ecore_main_fd_handler_prepare_callback_set(Ecore_Fd_Handler *fd_handler, Ecore_Fd_Prep_Cb func, const void *data);
+/**
+ * @brief Marks an FD handler for deletion.
+ * @param fd_handler The FD handler.
+ * @return The data pointer set using @ref ecore_main_fd_handler_add, for @a
+ * fd_handler on success, @c NULL otherwise.
+ * This function marks an fd handler to be deleted during an iteration of the
+ * main loop. It does NOT close the associated fd!
+ *
+ * @warning If the underlying fd is already closed ecore may complain if the
+ * main loop is using epoll internally, and also in some rare cases this may
+ * cause crashes and instability. Remember to delete your fd handlers before the
+ * fds they listen to are closed.
+ */
 EAPI void *ecore_main_fd_handler_del(Ecore_Fd_Handler *fd_handler);
+/**
+ * @brief Retrieves the file descriptor that the given handler is handling.
+ * @param fd_handler The given FD handler.
+ * @return The file descriptor the handler is watching.
+ */
 EAPI int ecore_main_fd_handler_fd_get(Ecore_Fd_Handler *fd_handler);
+/**
+ * @brief Gets which flags are active on an FD handler.
+ * @param fd_handler The given FD handler.
+ * @param flags The flags, @c ECORE_FD_READ, @c ECORE_FD_WRITE or @c
+ * ECORE_FD_ERROR to query.
+ * @return  #EINA_TRUE if any of the given flags are active, #EINA_FALSE
+ * otherwise.
+ */
 EAPI Eina_Bool ecore_main_fd_handler_active_get(Ecore_Fd_Handler *fd_handler, Ecore_Fd_Handler_Flags flags);
+/**
+ * @brief Set what active streams the given FD handler should be monitoring.
+ * @param fd_handler The given FD handler.
+ * @param flags The flags to be watching.
+ */
 EAPI void ecore_main_fd_handler_active_set(Ecore_Fd_Handler *fd_handler, Ecore_Fd_Handler_Flags flags);
 
 EAPI Ecore_Win32_Handler *ecore_main_win32_handler_add(void *h, Ecore_Win32_Handle_Cb func, const void *data);
@@ -840,13 +1107,30 @@ EAPI void *ecore_main_win32_handler_del(Ecore_Win32_Handler *win32_handler);
 /**
  * @defgroup Ecore_Poller_Group Ecore Poll functions
  *
- * These functions are for the need to poll information, but provide
- * a shared abstracted API to pool such polling to minimise wakeup
- * and ensure all the polling happens in as few spots as possible
- * areound a core poll interval.  For now only 1 core poller type is
- * supprted: ECORE_POLLER_CORE
+ * Ecore poller provides infrastructure for the creation of pollers. Pollers
+ * are, in essence, callbacks that share a single timer per type. Because not
+ * all pollers need to be called at the same frequency the user may specify the
+ * frequency in ticks(each expiration of the shared timer is called a tick, in
+ * ecore poller parlance) for each added poller. Ecore pollers should only be
+ * used when the poller doesn't have specific requirements on the exact times
+ * to poll.
  *
- * Example of @ref Ecore_Poller :
+ * This architecture means that the main loop is only woken up once to handle
+ * all pollers of that type, this will save power as the CPU has more of a
+ * chance to go into a low power state the longer it is asleep for, so this
+ * should be used in situations where power usage is a concern.
+ *
+ * For now only 1 core poller type is supported: ECORE_POLLER_CORE, the default
+ * interval for ECORE_POLLER_CORE is 0.125(or 1/8th) second.
+ *
+ * The creation of a poller is extremely simple and only required one line:
+ * @code
+ * ecore_poller_add(ECORE_POLLER_CORE, 1, my_poller_function, NULL);
+ * @endcode
+ * This sample creates a poller to call @c my_poller_function at every tick with
+ * @c NULL as data.
+ *
+ * Example:
  * @li @ref ecore_poller_example_c
  *
  * @ingroup Ecore_Main_Loop_Group
@@ -862,11 +1146,76 @@ typedef enum _Ecore_Poller_Type Ecore_Poller_Type;
 
 typedef struct _Ecore_Poller    Ecore_Poller; /**< A handle for pollers */
 
+/**
+ * @brief Sets the time(in seconds) between ticks for the given poller type.
+ * @param type The poller type to adjust.
+ * @param poll_time The time(in seconds) between ticks of the timer.
+ *
+ * This will adjust the time between ticks of the given timer type defined by
+ * @p type to the time period defined by @p poll_time.
+ */
 EAPI void ecore_poller_poll_interval_set(Ecore_Poller_Type type, double poll_time);
+/**
+ * @brief Gets the time(in seconds) between ticks for the given poller type.
+ * @param type The poller type to query.
+ * @return The time in seconds between ticks of the poller timer.
+ *
+ * This will get the time between ticks of the specified poller timer.
+ */
 EAPI double ecore_poller_poll_interval_get(Ecore_Poller_Type type);
+/**
+ * @brief Changes the polling interval rate of @p poller.
+ * @param poller The Ecore_Poller to change the interval of.
+ * @param interval The tick interval to set; must be a power of 2 and <= 32768.
+ * @return Returns true on success, false on failure.
+ *
+ * This allows the changing of a poller's polling interval. It is useful when
+ * you want to alter a poll rate without deleting and re-creating a poller.
+ */
 EAPI Eina_Bool ecore_poller_poller_interval_set(Ecore_Poller *poller, int interval);
+/**
+ * @brief Gets the polling interval rate of @p poller.
+ * @param poller The Ecore_Poller to change the interval of.
+ * @return Returns the interval, in ticks, that @p poller polls at.
+ *
+ * This returns a poller's polling interval, or 0 on error.
+ */
 EAPI int ecore_poller_poller_interval_get(Ecore_Poller *poller);
+/**
+ * @brief Creates a poller to call the given function at a particular tick interval.
+ * @param type The ticker type to attach the poller to. Must be ECORE_POLLER_CORE.
+ * @param interval The poll interval.
+ * @param func The poller function.
+ * @param data Data to pass to @a func when it is called.
+ * @return A poller object on success, @c NULL otherwise.
+ *
+ * This function adds @a func as a poller callback that will be called every @a
+ * interval ticks together with other pollers of type @a type. @a func will be
+ * passed the @p data pointer as a parameter.
+ *
+ * The @p interval must be between 1 and 32768 inclusive, and must be a power of
+ * 2 (i.e. 1, 2, 4, 8, 16, ... 16384, 32768). The exact tick in which @a func
+ * will be called is undefined, as only the interval between calls can be
+ * defined. Ecore will endeavor to keep pollers synchronized and to call as
+ * many in 1 wakeup event as possible. If @a interval is not a power of two, the
+ * closest power of 2 greater than @a interval will be used.
+ *
+ * When the poller @p func is called, it must return a value of either
+ * ECORE_CALLBACK_RENEW(or 1) or ECORE_CALLBACK_CANCEL(or 0). If it
+ * returns 1, it will be called again at the next tick, or if it returns
+ * 0 it will be deleted automatically making any references/handles for it
+ * invalid.
+ */
 EAPI Ecore_Poller *ecore_poller_add(Ecore_Poller_Type type, int interval, Ecore_Task_Cb func, const void *data);
+/**
+ * @brief Delete the specified poller from the timer list.
+ * @param poller The poller to delete.
+ * @return The data pointer set for the timer when @ref ecore_poller_add was
+ * called on success, @c NULL otherwise.
+ *
+ * @note @a poller must be a valid handle. If the poller function has already
+ * returned 0, the handle is no longer valid (and does not need to be deleted).
+ */
 EAPI void *ecore_poller_del(Ecore_Poller *poller);
 
 /**
@@ -941,7 +1290,7 @@ typedef enum _Ecore_Animator_Source Ecore_Animator_Source;
 typedef Eina_Bool (*Ecore_Timeline_Cb)(void *data, double pos);
 
 /**
- * @brief Add an animator to call @p func at every animaton tick during main
+ * @brief Add an animator to call @p func at every animation tick during main
  * loop execution.
  *
  * @param func The function to call when it ticks off
@@ -1011,7 +1360,7 @@ EAPI void *ecore_animator_del(Ecore_Animator *animator);
  *
  * @param animator The animator to delete
  *
- * The specified @p animator will be temporarly removed from the set of
+ * The specified @p animator will be temporarily removed from the set of
  * animators that are executed during main loop.
  *
  * @warning Freezing an animator doesn't freeze accounting of how long that
@@ -1069,7 +1418,7 @@ EAPI double ecore_animator_frametime_get(void);
  * has "overshot" the mark) using some interpolation (mapping) algorithm.
  *
  * This function useful to create non-linear animations. It offers a variety
- * of possible animaton curves to be used:
+ * of possible animation curves to be used:
  * @li ECORE_POS_MAP_LINEAR - Linear, returns @p pos
  * @li ECORE_POS_MAP_ACCELERATE - Start slow then speed up
  * @li ECORE_POS_MAP_DECELERATE - Start fast then slow down
@@ -1107,7 +1456,7 @@ EAPI double ecore_animator_frametime_get(void);
  * y = (y1 * out) + (y2 * (1.0 - out));
  * move_my_object_to(myobject, x, y);
  * @endcode
- * This will make an animaton that bounces 7 each times diminishing by a
+ * This will make an animation that bounces 7 each times diminishing by a
  * factor of 1.8.
  *
  * @see _Ecore_Pos_Map
@@ -1205,16 +1554,39 @@ EAPI void ecore_animator_custom_tick(void);
  */
 
 /**
- * @defgroup Ecore_Time_Group Ecore Time functions
+ * @defgroup Ecore_Time_Group Ecore time functions
  *
- * Functions that deal with time. These functions include those
- * that simply retrieve it in a given format, and those that create
- * events based on it.
+ * These are function to retrieve time in a given format.
  *
- * The timer allows callbacks to be called at specific intervals.
- *
- * Examples with functions that deal with time:
+ * Examples:
  * @li @ref ecore_time_functions_example_c
+ * @{
+ */
+EAPI double ecore_time_get(void);
+EAPI double ecore_time_unix_get(void);
+EAPI double ecore_loop_time_get(void);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup Ecore_Timer_Group Ecore Timer functions
+ *
+ * Ecore provides very flexible timer functionality. The basic usage of timers,
+ * to call a certain function at a certain interval can be achieved with a
+ * single line:
+ * @code
+ * Eina_Bool my_func(void *data) {
+ *    do_funky_stuff_with_data(data);
+ *    return EINA_TRUE;
+ * }
+ * ecore_timer_add(interval_in_seconds, my_func, data_given_to_function);
+ * @endcode
+ * @note If the function was to be executed only once simply return EINA_FALSE
+ * instead.
+ *
+ * An example that shows the usage of a lot of these:
  * @li @ref ecore_timer_example_c
  *
  * @ingroup Ecore_Main_Loop_Group
@@ -1223,10 +1595,6 @@ EAPI void ecore_animator_custom_tick(void);
  */
 
 typedef struct _Ecore_Timer Ecore_Timer; /**< A handle for timers */
-
-EAPI double ecore_time_get(void);
-EAPI double ecore_time_unix_get(void);
-EAPI double ecore_loop_time_get(void);
 
 EAPI Ecore_Timer *ecore_timer_add(double in, Ecore_Task_Cb func, const void *data);
 EAPI Ecore_Timer *ecore_timer_loop_add(double in, Ecore_Task_Cb func, const void *data);
@@ -1249,14 +1617,15 @@ EAPI char *ecore_timer_dump(void);
 /**
  * @defgroup Ecore_Idle_Group Ecore Idle functions
  *
- * Callbacks that are called when the program enters or exits an
- * idle state.
+ * The idler functionality in Ecore allows for callbacks to be called when the
+ * program isn't handling @ref Ecore_Event_Group "events", @ref Ecore_Timer_Group
+ * "timers" or @ref Ecore_FD_Handler_Group "fd handlers".
  *
- * The ecore main loop enters an idle state when it is waiting for
- * timers to time out, data to come in on a file descriptor or any
- * other event to occur.  You can set callbacks to be called when
- * the main loop enters an idle state, during an idle state or just
- * after the program wakes up.
+ * There are three types of idlers: Enterers, Idlers(proper) and Exiters. They
+ * are called, respectively, when the program is about to enter an idle state,
+ * when the program is in an idle state and when the program has just left an
+ * idle state and will begin processing @ref Ecore_Event_Group "events", @ref
+ * Ecore_Timer_Group "timers" or @ref Ecore_FD_Handler_Group "fd handlers".
  *
  * Enterer callbacks are good for updating your program's state, if
  * it has a state engine.  Once all of the enterer handlers are
@@ -1266,13 +1635,12 @@ EAPI char *ecore_timer_dump(void);
  * enterer handlers.  They are useful for interfaces that require
  * polling and timers would be too slow to use.
  *
+ * Exiter callbacks are called when the main loop wakes up from an idle state.
+ *
  * If no idler callbacks are specified, then the process literally
  * goes to sleep.  Otherwise, the idler callbacks are called
  * continuously while the loop is "idle", using as much CPU as is
  * available to the process.
- *
- * Exiter callbacks are called when the main loop wakes up from an
- * idle state.
  *
  * @note Idle state doesn't mean that the @b program is idle, but
  * that the <b>main loop</b> is idle. It doesn't have any timers,
@@ -1343,7 +1711,7 @@ EAPI void *ecore_idle_exiter_del(Ecore_Idle_Exiter *idle_exiter);
  * thread, the one running the main loop. This problem can be solved
  * by running a thread that sends messages to the main one using an
  * @ref Ecore_Pipe_Group "Ecore_Pipe", but when you need to handle other
- * things like cancelling the thread, your code grows in coplexity and gets
+ * things like cancelling the thread, your code grows in complexity and gets
  * much harder to maintain.
  *
  * Ecore Thread is here to solve that problem. It is @b not a simple wrapper
@@ -1514,7 +1882,7 @@ EAPI Ecore_Thread *ecore_thread_run(Ecore_Thread_Cb func_blocking, Ecore_Thread_
  * with ecore_thread_feedback().
  *
  * Like with ecore_thread_run(), a new thread will be launched to run
- * @p func_heavy unless the maximum number of simultaneous threadas has been
+ * @p func_heavy unless the maximum number of simultaneous threads has been
  * reached, in which case the function will be scheduled to run whenever a
  * running task ends and a thread becomes free. But if @p try_no_queue is
  * set, Ecore will first try to launch a thread outside of the pool to run
@@ -2076,7 +2444,7 @@ EAPI int ecore_pipe_wait(Ecore_Pipe *p, int message_count, double wait);
  * also will be executed in the order in which they were added.
  *
  * A good use for them is when you don't want to execute an action
- * immeditately, but want to give the control back to the main loop
+ * immediately, but want to give the control back to the main loop
  * so that it will call your job callback when jobs start being
  * processed (and if there are other jobs added before yours, they
  * will be processed first). This also gives the chance to other

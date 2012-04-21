@@ -1,12 +1,12 @@
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 m4_define([v_maj], [1])
-m4_define([v_min], [1])
-m4_define([v_mic], [99])
+m4_define([v_min], [2])
+m4_define([v_mic], [0])
 m4_define([v_rev], m4_esyscmd([(svnversion "${SVN_REPO_PATH:-.}" | grep -v '\(export\|Unversioned directory\)' || echo 0) | awk -F : '{printf("%s\n", $1);}' | tr -d ' :MSP\n']))
 m4_if(v_rev, [0], [m4_define([v_rev], m4_esyscmd([git log 2> /dev/null | (grep -m1 git-svn-id || echo 0) | sed -e 's/.*@\([0-9]*\).*/\1/' | tr -d '\n']))])
 ##--   When released, remove the dnl on the below line
-dnl m4_undefine([v_rev])
+m4_undefine([v_rev])
 ##--   When doing snapshots - change soname. remove dnl on below line
 dnl m4_define([relname], [ver-pre-svn-07])
 dnl m4_define([v_rel], [-release relname])
@@ -18,7 +18,7 @@ m4_define([lt_age], v_min)
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 
-AC_INIT([eina], [v_ver], [enlightenment-devel@lists.sourceforge.net])
+AC_INIT([eina], [v_ver]-alpha, [enlightenment-devel@lists.sourceforge.net])
 AC_PREREQ([2.59])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -316,7 +316,7 @@ case "$host_os" in
    mingw*)
       PKG_CHECK_MODULES([EVIL], [evil >= 1.0.0])
       AC_DEFINE([HAVE_EVIL], [1], [Set to 1 if evil package is installed])
-      requirement_eina="evil"
+      requirement_eina="${requirement_eina} evil"
       EFL_EINA_BUILD="-DEFL_EINA_BUILD"
    ;;
 esac
@@ -361,17 +361,14 @@ EFL_ATTRIBUTE_UNUSED
 
 have_wince="no"
 have_win32="no"
-EINA_CPPFLAGS=""
 EINA_CFLAGS=""
 case "$host_os" in
    mingw32ce*)
-      EINA_CPPFLAGS="-D_WIN32_WCE=0x0420"
       EINA_CFLAGS="${EVIL_CFLAGS}"
       have_win32="yes"
       have_wince="yes"
       ;;
    mingw*)
-      EINA_CPPFLAGS="-D_WIN32_WINNT=0x0501"
       EINA_CFLAGS="${EVIL_CFLAGS}"
       have_win32="yes"
       ;;
@@ -387,41 +384,57 @@ m4_ifdef([v_mic],
 
 EFL_COMPILER_FLAG([-Wshadow])
 
+### Checks for portability layer
+
+PKG_CHECK_MODULES([EXOTIC],
+   [exotic],
+   [enable_exotic="yes"],
+   [enable_exotic="no"])
+
+if test "x${enable_exotic}" = "xyes"; then
+    requirement_eina="exotic ${requirement_eina}"
+    EINA_CFLAGS="${EINA_CFLAGS} ${EXOTIC_CFLAGS}"
+    EINA_LIBS="${EXOTIC_LIBS}"
+
+    EINA_CONFIGURE_HAVE_EXOTIC="#define EINA_HAVE_EXOTIC"
+    AC_DEFINE([HAVE_EXOTIC_H], [1], [Define to 1 if you have Exotic.])
+fi
+AM_CONDITIONAL([EINA_HAVE_EXOTIC], [test "x${enable_exotic}" = "xyes"])
+AC_SUBST([EINA_CONFIGURE_HAVE_EXOTIC])
+
 case "$host_vendor" in
   ps3*)
       PKG_CHECK_MODULES([ESCAPE], [escape])
-      AC_DEFINE(HAVE_ESCAPE, 1, [Set to 1 if evil package is installed])
-      requirement_eina="escape"
+      AC_DEFINE(HAVE_ESCAPE, 1, [Set to 1 if Escape package is installed])
+      requirement_eina="${requirement_eina} escape"
       EINA_CFLAGS="${ESCAPE_CFLAGS} ${EINA_CFLAGS}"
     ;;
 esac
 
-AC_SUBST([EINA_CPPFLAGS])
 AC_SUBST([EINA_CFLAGS])
-
 
 ### Checks for linker characteristics
 EINA_LIBS=
 lt_enable_auto_import=""
 case "${host_os}" in
    mingw*)
-      EINA_LIBS="-ldl ${EVIL_LIBS} -lm"
+      EINA_LIBS="${EINA_LIBS} -ldl ${EVIL_LIBS} -lm"
       lt_enable_auto_import="-Wl,--enable-auto-import"
    ;;
    dragonfly*|openbsd*)
-      EINA_LIBS="-lm"
+      EINA_LIBS="${EINA_LIBS} -lm"
    ;;
    freebsd*|netbsd*)
-      EINA_LIBS="-lrt -lm"
+      EINA_LIBS="${EINA_LIBS} -lrt -lm"
    ;;
    darwin*)
-      EINA_LIBS="-lm"
+      EINA_LIBS="${EINA_LIBS} -lm"
    ;;
    cygwin*)
-      EINA_LIBS="-ldl -lm"
+      EINA_LIBS="${EINA_LIBS} -ldl -lm"
    ;;
    *)
-      EINA_LIBS="-ldl -lrt -lm"
+      EINA_LIBS="${EINA_LIBS} -lrt -ldl -lm"
    ;;
 esac
 case "$host_vendor" in
@@ -443,7 +456,7 @@ LIBS="${LIBS} ${EINA_LIBS}"
 AC_HEADER_ASSERT
 AC_HEADER_TIME
 EFL_CHECK_PATH_MAX
-AC_CHECK_HEADERS([unistd.h libgen.h inttypes.h stdint.h sys/types.h siginfo.h strings.h sys/mman.h])
+AC_CHECK_HEADERS([unistd.h libgen.h inttypes.h stdint.h sys/types.h siginfo.h strings.h sys/mman.h execinfo.h])
 
 if test "x${ac_cv_header_inttypes_h}" = "xyes" ; then
    EINA_CONFIGURE_HAVE_INTTYPES_H="#define EINA_HAVE_INTTYPES_H"
@@ -484,7 +497,7 @@ AC_SUBST([EINA_CONFIGURE_HAVE_DIRENT_H])
 ### Checks for library functions
 AC_ISC_POSIX
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS([strlcpy openat fstatat fpathconf execvp])
+AC_CHECK_FUNCS([strlcpy openat fstatat fpathconf execvp backtrace backtrace_symbols])
 
 AC_MSG_CHECKING([for dirfd])
 AC_LINK_IFELSE(
@@ -785,7 +798,7 @@ if test -n "$CXX" && test "x$enable_benchmark" = "xyes" ; then
 fi
 AM_CONDITIONAL([CITYHASH_BENCH], [test -n "$CXX" && test "x$enable_benchmark" = "xyes"])
 
-AC_SUBST(requirement_eina)
+AC_SUBST([requirement_eina])
 
 ### Build and install examples
 EFL_CHECK_BUILD_EXAMPLES([enable_build_examples="yes"], [enable_build_examples="no"])

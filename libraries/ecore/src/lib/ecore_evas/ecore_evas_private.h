@@ -123,6 +123,7 @@ extern int _ecore_evas_log_dom;
 #define IDLE_FLUSH_TIME 0.5
 #ifndef _ECORE_EVAS_H
 typedef struct _Ecore_Evas Ecore_Evas;
+typedef void   (*Ecore_Evas_Event_Cb) (Ecore_Evas *ee);
 #endif
 
 typedef struct _Ecore_Evas_Engine Ecore_Evas_Engine;
@@ -131,20 +132,20 @@ typedef struct _Ecore_Evas_Engine_Func Ecore_Evas_Engine_Func;
 struct _Ecore_Evas_Engine_Func
 {
    void (*fn_free) (Ecore_Evas *ee);
-   void (*fn_callback_resize_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_move_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_show_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_hide_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_delete_request_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_destroy_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_focus_in_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_focus_out_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_mouse_in_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_mouse_out_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_sticky_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_unsticky_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_pre_render_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
-   void (*fn_callback_post_render_set) (Ecore_Evas *ee, void (*func) (Ecore_Evas *ee));
+   void (*fn_callback_resize_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_move_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_show_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_hide_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_delete_request_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_destroy_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_focus_in_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_focus_out_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_mouse_in_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_mouse_out_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_sticky_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_unsticky_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_pre_render_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
+   void (*fn_callback_post_render_set) (Ecore_Evas *ee, Ecore_Evas_Event_Cb func);
    void (*fn_move) (Ecore_Evas *ee, int x, int y);
    void (*fn_managed_move) (Ecore_Evas *ee, int x, int y);
    void (*fn_resize) (Ecore_Evas *ee, int w, int h);
@@ -176,6 +177,13 @@ struct _Ecore_Evas_Engine_Func
    void (*fn_ignore_events_set) (Ecore_Evas *ee, int ignore);
    void (*fn_alpha_set) (Ecore_Evas *ee, int alpha);
    void (*fn_transparent_set) (Ecore_Evas *ee, int transparent);
+
+   void (*fn_window_group_set) (Ecore_Evas *ee, const Ecore_Evas *ee_group);
+   void (*fn_aspect_set) (Ecore_Evas *ee, double aspect);
+   void (*fn_urgent_set) (Ecore_Evas *ee, int urgent);
+   void (*fn_modal_set) (Ecore_Evas *ee, int modal);
+   void (*fn_demands_attention_set) (Ecore_Evas *ee, int demand);
+   void (*fn_focus_skip_set) (Ecore_Evas *ee, int skip);
 
    int (*fn_render) (Ecore_Evas *ee);
    void (*fn_screen_geometry_get) (const Ecore_Evas *ee, int *x, int *y, int *w, int *h);
@@ -271,11 +279,13 @@ struct _Ecore_Evas_Engine
 #if defined(BUILD_ECORE_EVAS_WAYLAND_SHM) || defined(BUILD_ECORE_EVAS_WAYLAND_EGL)
    struct 
      {
+        Ecore_Wl_Window *parent, *win;
         Evas_Object *frame;
 
-        struct wl_shell_surface *shell_surface;
-        struct wl_surface *surface;
+# if defined(BUILD_ECORE_EVAS_WAYLAND_SHM)
         struct wl_buffer *buffer;
+# endif
+
      } wl;
 #endif
 
@@ -333,6 +343,9 @@ struct _Ecore_Evas
       int             layer;
       Ecore_Window    window;
       unsigned char   avoid_damage;
+      Ecore_Evas     *group_ee;
+      Ecore_Window    group_ee_win;
+      double          aspect;
       char            focused      : 1;
       char            iconified    : 1;
       char            borderless   : 1;
@@ -343,7 +356,12 @@ struct _Ecore_Evas
       char            sticky       : 1;
       char            request_pos  : 1;
       char            draw_frame   : 1;
-   } prop;
+      char            hwsurface    : 1;
+      char            urgent           : 1;
+      char            modal            : 1;
+      char            demand_attention : 1;
+      char            focus_skip       : 1;
+  } prop;
 
    struct {
       void          (*fn_resize) (Ecore_Evas *ee);
@@ -361,6 +379,7 @@ struct _Ecore_Evas
       void          (*fn_pre_render) (Ecore_Evas *ee);
       void          (*fn_post_render) (Ecore_Evas *ee);
       void          (*fn_pre_free) (Ecore_Evas *ee);
+      void          (*fn_state_change) (Ecore_Evas *ee);
    } func;
 
    Ecore_Evas_Engine engine;
@@ -406,11 +425,15 @@ int _ecore_evas_ews_shutdown(void);
 #ifdef BUILD_ECORE_EVAS_WAYLAND_SHM
 void _ecore_evas_wayland_shm_resize(Ecore_Evas *ee, int location);
 void _ecore_evas_wayland_shm_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source);
+void _ecore_evas_wayland_shm_pointer_set(Ecore_Evas *ee, int hot_x, int hot_y);
+void _ecore_evas_wayland_shm_type_set(Ecore_Evas *ee, int type);
 #endif
 
 #ifdef BUILD_ECORE_EVAS_WAYLAND_EGL
 void _ecore_evas_wayland_egl_resize(Ecore_Evas *ee, int location);
 void _ecore_evas_wayland_egl_drag_start(Ecore_Evas *ee, Ecore_Evas *drag_ee, void *source);
+void _ecore_evas_wayland_egl_pointer_set(Ecore_Evas *ee, int hot_x, int hot_y);
+void _ecore_evas_wayland_egl_type_set(Ecore_Evas *ee, int type);
 #endif
 
 void _ecore_evas_fps_debug_init(void);

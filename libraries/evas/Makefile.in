@@ -49,7 +49,7 @@ host_triplet = @host@
 @BUILD_ENGINE_SOFTWARE_16_DDRAW_TRUE@am__append_12 = evas-software-16-ddraw.pc
 @BUILD_ENGINE_DIRECT3D_TRUE@am__append_13 = evas-direct3d.pc
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@am__append_14 = evas-software-16-wince.pc
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@am__append_15 = evas-software-sdl.pc
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@am__append_15 = evas-software-sdl.pc
 @BUILD_ENGINE_PSL1GHT_TRUE@am__append_16 = evas-psl1ght.pc
 @BUILD_ENGINE_WAYLAND_SHM_TRUE@am__append_17 = evas-wayland-shm.pc
 @BUILD_ENGINE_WAYLAND_EGL_TRUE@am__append_18 = evas-wayland-egl.pc
@@ -72,8 +72,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/evas-wayland-egl.pc.in \
 	$(srcdir)/evas-wayland-shm.pc.in $(srcdir)/evas.pc.in \
 	$(srcdir)/evas.spec.in $(top_srcdir)/configure ABOUT-NLS \
-	AUTHORS COPYING ChangeLog INSTALL NEWS config.guess config.sub \
-	depcomp install-sh ltmain.sh missing
+	AUTHORS COPYING ChangeLog INSTALL NEWS compile config.guess \
+	config.sub depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/efl_attribute.m4 \
 	$(top_srcdir)/m4/efl_coverage.m4 \
@@ -238,6 +238,8 @@ EVAS_SSE3_CFLAGS = @EVAS_SSE3_CFLAGS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
 FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
@@ -288,6 +290,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -306,8 +310,6 @@ VERSION = @VERSION@
 VMAJ = @VMAJ@
 WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
 WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
-WIN32_CFLAGS = @WIN32_CFLAGS@
-WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
 XCB_GL_CFLAGS = @XCB_GL_CFLAGS@
 XCB_GL_LIBS = @XCB_GL_LIBS@
@@ -381,8 +383,6 @@ evas_engine_software_ddraw_cflags = @evas_engine_software_ddraw_cflags@
 evas_engine_software_ddraw_libs = @evas_engine_software_ddraw_libs@
 evas_engine_software_gdi_cflags = @evas_engine_software_gdi_cflags@
 evas_engine_software_gdi_libs = @evas_engine_software_gdi_libs@
-evas_engine_software_sdl_cflags = @evas_engine_software_sdl_cflags@
-evas_engine_software_sdl_libs = @evas_engine_software_sdl_libs@
 evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
@@ -507,7 +507,6 @@ evas-software-ddraw.pc.in \
 evas-software-16-ddraw.pc.in \
 evas-direct3d.pc.in \
 evas-software-16-wince.pc.in \
-evas-software-sdl.pc.in \
 evas-psl1ght.pc.in \
 evas-wayland-shm.pc.in \
 evas-wayland-egl.pc.in \
@@ -1149,23 +1148,21 @@ doc:
 # Coverage report
 
 @EFL_ENABLE_COVERAGE_TRUE@lcov-reset:
-@EFL_ENABLE_COVERAGE_TRUE@	@rm -rf coverage
-@EFL_ENABLE_COVERAGE_TRUE@	@find . -name "*.gcda" -exec rm {} \;
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov --directory . --zerocounters
+@EFL_ENABLE_COVERAGE_TRUE@	@rm -rf $(top_builddir)/coverage
+@EFL_ENABLE_COVERAGE_TRUE@	@find $(top_builddir) -name "*.gcda" -delete
+@EFL_ENABLE_COVERAGE_TRUE@	@lcov --zerocounters --directory $(top_builddir)
 
 @EFL_ENABLE_COVERAGE_TRUE@lcov-report:
-@EFL_ENABLE_COVERAGE_TRUE@	@mkdir coverage
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov --compat-libtool --directory $(top_srcdir)/src --capture --output-file coverage/coverage.info
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov -l coverage/coverage.info |grep "\\.h"  |cut -d " " -f 2 > coverage/remove
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov -r coverage/coverage.info `cat coverage/remove` > coverage/coverage.cleaned.info
-@EFL_ENABLE_COVERAGE_TRUE@	@rm coverage/remove
-@EFL_ENABLE_COVERAGE_TRUE@	@mv coverage/coverage.cleaned.info coverage/coverage.info
-@EFL_ENABLE_COVERAGE_TRUE@	@genhtml -t "$(PACKAGE_STRING)" -o coverage coverage/coverage.info
+@EFL_ENABLE_COVERAGE_TRUE@	@mkdir $(top_builddir)/coverage
+@EFL_ENABLE_COVERAGE_TRUE@	lcov --capture --compat-libtool --output-file $(top_builddir)/coverage/coverage.info --directory $(top_builddir)
+@EFL_ENABLE_COVERAGE_TRUE@	lcov --remove $(top_builddir)/coverage/coverage.info '*.h' --output-file $(top_builddir)/coverage/coverage.cleaned.info
+@EFL_ENABLE_COVERAGE_TRUE@	genhtml -t "$(PACKAGE_STRING)" -o $(top_builddir)/coverage/html $(top_builddir)/coverage/coverage.cleaned.info
+@EFL_ENABLE_COVERAGE_TRUE@	@echo "Coverage Report at $(top_builddir)/coverage/html"
 
 @EFL_ENABLE_COVERAGE_TRUE@coverage:
-@EFL_ENABLE_COVERAGE_TRUE@	@make lcov-reset
-@EFL_ENABLE_COVERAGE_TRUE@	@make check
-@EFL_ENABLE_COVERAGE_TRUE@	@make lcov-report
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) lcov-reset
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) check
+@EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) lcov-report
 @EFL_ENABLE_COVERAGE_FALSE@lcov-reset:
 @EFL_ENABLE_COVERAGE_FALSE@	@echo "reconfigure with --enable-coverage"
 

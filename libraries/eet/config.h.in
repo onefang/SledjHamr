@@ -19,6 +19,12 @@
 /* use gnutls_x509_crt_verify_hash */
 #undef EET_USE_NEW_GNUTLS_API
 
+/* use gnutls_privkey_sign_data */
+#undef EET_USE_NEW_PRIVKEY_SIGN_DATA
+
+/* use gnutls_pubkey_verify_hash */
+#undef EET_USE_NEW_PUBKEY_VERIFY_HASH
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -34,6 +40,9 @@
 
 /* Set to 1 if Evil library is installed */
 #undef HAVE_EVIL
+
+/* Define to 1 if you have Exotic. */
+#undef HAVE_EXOTIC_H
 
 /* Define to 1 if you have the `fmemopen' function. */
 #undef HAVE_FMEMOPEN

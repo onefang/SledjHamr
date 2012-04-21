@@ -170,9 +170,6 @@
 /* Software GDI rendering backend */
 #undef BUILD_ENGINE_SOFTWARE_GDI
 
-/* Software SDL rendering backend */
-#undef BUILD_ENGINE_SOFTWARE_SDL
-
 /* Build software X11 engine */
 #undef BUILD_ENGINE_SOFTWARE_X11
 
@@ -395,9 +392,6 @@
 /* Build software generic engine as part of libevas */
 #undef EVAS_STATIC_BUILD_SOFTWARE_GENERIC
 
-/* Build software-sdl engine inside libevas */
-#undef EVAS_STATIC_BUILD_SOFTWARE_SDL
-
 /* Build software X11 engine as part of libevas */
 #undef EVAS_STATIC_BUILD_SOFTWARE_X11
 
@@ -458,6 +452,9 @@
 
 /* Set to 1 if evil package is installed */
 #undef HAVE_EVIL
+
+/* Define to 1 if you have Exotic. */
+#undef HAVE_EXOTIC
 
 /* have fontconfig searching capabilities */
 #undef HAVE_FONTCONFIG

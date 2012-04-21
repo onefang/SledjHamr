@@ -62,27 +62,39 @@ examples_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
 @EFL_BUILD_EXAMPLES_TRUE@	eina_inlist_02 \
 @EFL_BUILD_EXAMPLES_TRUE@	eina_inlist_03 \
 @EFL_BUILD_EXAMPLES_TRUE@	eina_str_01 \
-@EFL_BUILD_EXAMPLES_TRUE@	eina_strbuf_01
+@EFL_BUILD_EXAMPLES_TRUE@	eina_strbuf_01 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_01 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_02 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_03 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_01 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_02 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_03 \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_inarray_01
 
 @BUILD_TILER_EXAMPLE_TRUE@@EFL_BUILD_EXAMPLES_TRUE@am__append_2 = @ECORE_EVAS_CFLAGS@
 @BUILD_TILER_EXAMPLE_TRUE@@EFL_BUILD_EXAMPLES_TRUE@am__append_3 = eina_tiler_01
 subdir = src/examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/efl_attribute.m4 \
-	$(top_srcdir)/m4/efl_benchmark.m4 \
-	$(top_srcdir)/m4/efl_compiler_flag.m4 \
-	$(top_srcdir)/m4/efl_coverage.m4 $(top_srcdir)/m4/efl_cpu.m4 \
-	$(top_srcdir)/m4/efl_doxygen.m4 \
-	$(top_srcdir)/m4/efl_examples.m4 \
-	$(top_srcdir)/m4/efl_fnmatch.m4 \
-	$(top_srcdir)/m4/efl_path_max.m4 $(top_srcdir)/m4/efl_tests.m4 \
-	$(top_srcdir)/m4/efl_threads.m4 \
-	$(top_srcdir)/m4/efl_voltron.m4 $(top_srcdir)/m4/eina_bench.m4 \
-	$(top_srcdir)/m4/eina_check.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/eina/eina_bench.m4 \
+	$(top_srcdir)/m4/eina/eina_check.m4 \
+	$(top_srcdir)/m4/common/efl_attribute.m4 \
+	$(top_srcdir)/m4/common/efl_benchmark.m4 \
+	$(top_srcdir)/m4/common/efl_compiler_flag.m4 \
+	$(top_srcdir)/m4/common/efl_coverage.m4 \
+	$(top_srcdir)/m4/common/efl_cpu.m4 \
+	$(top_srcdir)/m4/common/efl_doxygen.m4 \
+	$(top_srcdir)/m4/common/efl_examples.m4 \
+	$(top_srcdir)/m4/common/efl_fnmatch.m4 \
+	$(top_srcdir)/m4/common/efl_path_max.m4 \
+	$(top_srcdir)/m4/common/efl_tests.m4 \
+	$(top_srcdir)/m4/common/efl_threads.m4 \
+	$(top_srcdir)/m4/common/efl_voltron.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -114,7 +126,15 @@ CONFIG_CLEAN_VPATH_FILES =
 @EFL_BUILD_EXAMPLES_TRUE@	eina_inlist_02$(EXEEXT) \
 @EFL_BUILD_EXAMPLES_TRUE@	eina_inlist_03$(EXEEXT) \
 @EFL_BUILD_EXAMPLES_TRUE@	eina_str_01$(EXEEXT) \
-@EFL_BUILD_EXAMPLES_TRUE@	eina_strbuf_01$(EXEEXT)
+@EFL_BUILD_EXAMPLES_TRUE@	eina_strbuf_01$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_01$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_02$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_03$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_01$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_02$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_value_03$(EXEEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_inarray_01$(EXEEXT)
 @BUILD_TILER_EXAMPLE_TRUE@@EFL_BUILD_EXAMPLES_TRUE@am__EXEEXT_2 = eina_tiler_01$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(examplesdir)" "$(DESTDIR)$(filesdir)"
 PROGRAMS = $(examples_PROGRAMS)
@@ -173,6 +193,10 @@ eina_hash_08_SOURCES = eina_hash_08.c
 eina_hash_08_OBJECTS = eina_hash_08.$(OBJEXT)
 eina_hash_08_LDADD = $(LDADD)
 eina_hash_08_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_inarray_01_SOURCES = eina_inarray_01.c
+eina_inarray_01_OBJECTS = eina_inarray_01.$(OBJEXT)
+eina_inarray_01_LDADD = $(LDADD)
+eina_inarray_01_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
 eina_inlist_01_SOURCES = eina_inlist_01.c
 eina_inlist_01_OBJECTS = eina_inlist_01.$(OBJEXT)
 eina_inlist_01_LDADD = $(LDADD)
@@ -217,6 +241,32 @@ eina_log_03_SOURCES = eina_log_03.c
 eina_log_03_OBJECTS = eina_log_03.$(OBJEXT)
 eina_log_03_LDADD = $(LDADD)
 eina_log_03_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_model_01_SOURCES = eina_model_01.c
+eina_model_01_OBJECTS = eina_model_01.$(OBJEXT)
+eina_model_01_LDADD = $(LDADD)
+eina_model_01_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_model_02_SOURCES = eina_model_02.c
+eina_model_02_OBJECTS = eina_model_02.$(OBJEXT)
+eina_model_02_LDADD = $(LDADD)
+eina_model_02_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_model_03_SOURCES = eina_model_03.c
+eina_model_03_OBJECTS = eina_model_03.$(OBJEXT)
+eina_model_03_LDADD = $(LDADD)
+eina_model_03_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+am__eina_model_04_SOURCES_DIST = eina_model_04_animal.c \
+	eina_model_04_child.c eina_model_04_human.c \
+	eina_model_04_main.c eina_model_04_parrot.c \
+	eina_model_04_whistler.c
+@EFL_BUILD_EXAMPLES_TRUE@am_eina_model_04_OBJECTS =  \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_animal.$(OBJEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_child.$(OBJEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_human.$(OBJEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_main.$(OBJEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_parrot.$(OBJEXT) \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_whistler.$(OBJEXT)
+eina_model_04_OBJECTS = $(am_eina_model_04_OBJECTS)
+eina_model_04_LDADD = $(LDADD)
+eina_model_04_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
 eina_str_01_SOURCES = eina_str_01.c
 eina_str_01_OBJECTS = eina_str_01.$(OBJEXT)
 eina_str_01_LDADD = $(LDADD)
@@ -228,6 +278,18 @@ eina_strbuf_01_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
 eina_tiler_01_SOURCES = eina_tiler_01.c
 eina_tiler_01_OBJECTS = eina_tiler_01.$(OBJEXT)
 @BUILD_TILER_EXAMPLE_TRUE@@EFL_BUILD_EXAMPLES_TRUE@eina_tiler_01_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_value_01_SOURCES = eina_value_01.c
+eina_value_01_OBJECTS = eina_value_01.$(OBJEXT)
+eina_value_01_LDADD = $(LDADD)
+eina_value_01_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_value_02_SOURCES = eina_value_02.c
+eina_value_02_OBJECTS = eina_value_02.$(OBJEXT)
+eina_value_02_LDADD = $(LDADD)
+eina_value_02_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
+eina_value_03_SOURCES = eina_value_03.c
+eina_value_03_OBJECTS = eina_value_03.$(OBJEXT)
+eina_value_03_LDADD = $(LDADD)
+eina_value_03_DEPENDENCIES = $(top_builddir)/src/lib/libeina.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -257,19 +319,25 @@ am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = eina_accessor_01.c eina_array_01.c eina_array_02.c \
 	eina_error_01.c eina_file_01.c eina_hash_01.c eina_hash_02.c \
 	eina_hash_03.c eina_hash_04.c eina_hash_05.c eina_hash_06.c \
-	eina_hash_07.c eina_hash_08.c eina_inlist_01.c \
-	eina_inlist_02.c eina_inlist_03.c eina_iterator_01.c \
-	eina_list_01.c eina_list_02.c eina_list_03.c eina_list_04.c \
-	eina_log_01.c eina_log_02.c eina_log_03.c eina_str_01.c \
-	eina_strbuf_01.c eina_tiler_01.c
+	eina_hash_07.c eina_hash_08.c eina_inarray_01.c \
+	eina_inlist_01.c eina_inlist_02.c eina_inlist_03.c \
+	eina_iterator_01.c eina_list_01.c eina_list_02.c \
+	eina_list_03.c eina_list_04.c eina_log_01.c eina_log_02.c \
+	eina_log_03.c eina_model_01.c eina_model_02.c eina_model_03.c \
+	$(eina_model_04_SOURCES) eina_str_01.c eina_strbuf_01.c \
+	eina_tiler_01.c eina_value_01.c eina_value_02.c \
+	eina_value_03.c
 DIST_SOURCES = eina_accessor_01.c eina_array_01.c eina_array_02.c \
 	eina_error_01.c eina_file_01.c eina_hash_01.c eina_hash_02.c \
 	eina_hash_03.c eina_hash_04.c eina_hash_05.c eina_hash_06.c \
-	eina_hash_07.c eina_hash_08.c eina_inlist_01.c \
-	eina_inlist_02.c eina_inlist_03.c eina_iterator_01.c \
-	eina_list_01.c eina_list_02.c eina_list_03.c eina_list_04.c \
-	eina_log_01.c eina_log_02.c eina_log_03.c eina_str_01.c \
-	eina_strbuf_01.c eina_tiler_01.c
+	eina_hash_07.c eina_hash_08.c eina_inarray_01.c \
+	eina_inlist_01.c eina_inlist_02.c eina_inlist_03.c \
+	eina_iterator_01.c eina_list_01.c eina_list_02.c \
+	eina_list_03.c eina_list_04.c eina_log_01.c eina_log_02.c \
+	eina_log_03.c eina_model_01.c eina_model_02.c eina_model_03.c \
+	$(am__eina_model_04_SOURCES_DIST) eina_str_01.c \
+	eina_strbuf_01.c eina_tiler_01.c eina_value_01.c \
+	eina_value_02.c eina_value_03.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -340,13 +408,13 @@ EINA_CONFIGURE_DEFAULT_MEMPOOL = @EINA_CONFIGURE_DEFAULT_MEMPOOL@
 EINA_CONFIGURE_ENABLE_LOG = @EINA_CONFIGURE_ENABLE_LOG@
 EINA_CONFIGURE_HAVE_DEBUG_THREADS = @EINA_CONFIGURE_HAVE_DEBUG_THREADS@
 EINA_CONFIGURE_HAVE_DIRENT_H = @EINA_CONFIGURE_HAVE_DIRENT_H@
+EINA_CONFIGURE_HAVE_EXOTIC = @EINA_CONFIGURE_HAVE_EXOTIC@
 EINA_CONFIGURE_HAVE_INTTYPES_H = @EINA_CONFIGURE_HAVE_INTTYPES_H@
 EINA_CONFIGURE_HAVE_ON_OFF_THREADS = @EINA_CONFIGURE_HAVE_ON_OFF_THREADS@
 EINA_CONFIGURE_HAVE_STDINT_H = @EINA_CONFIGURE_HAVE_STDINT_H@
 EINA_CONFIGURE_HAVE_THREADS = @EINA_CONFIGURE_HAVE_THREADS@
 EINA_CONFIGURE_MAGIC_DEBUG = @EINA_CONFIGURE_MAGIC_DEBUG@
 EINA_CONFIGURE_SAFETY_CHECKS = @EINA_CONFIGURE_SAFETY_CHECKS@
-EINA_CPPFLAGS = @EINA_CPPFLAGS@
 EINA_LIBS = @EINA_LIBS@
 EINA_SIZEOF_WCHAR_T = @EINA_SIZEOF_WCHAR_T@
 EMEMOA_CFLAGS = @EMEMOA_CFLAGS@
@@ -356,6 +424,8 @@ ESCAPE_LIBS = @ESCAPE_LIBS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_LIBS = @GLIB_LIBS@
@@ -391,6 +461,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -498,10 +570,25 @@ SRCS = \
 	eina_inlist_03.c \
 	eina_str_01.c \
 	eina_strbuf_01.c \
-	eina_tiler_01.c
+	eina_tiler_01.c \
+	eina_model_01.c \
+	eina_model_02.c \
+	eina_model_03.c \
+	eina_value_01.c \
+	eina_value_02.c \
+	eina_value_03.c \
+	eina_inarray_01.c
 
 @EFL_INSTALL_EXAMPLES_TRUE@filesdir = $(datadir)/$(PACKAGE)/examples
 @EFL_INSTALL_EXAMPLES_TRUE@files_DATA = $(SRCS)
+@EFL_BUILD_EXAMPLES_TRUE@eina_model_04_SOURCES = \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_animal.c \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_child.c \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_human.c \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_main.c \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_parrot.c \
+@EFL_BUILD_EXAMPLES_TRUE@	eina_model_04_whistler.c
+
 @BUILD_TILER_EXAMPLE_TRUE@@EFL_BUILD_EXAMPLES_TRUE@eina_tiler_01_LDADD = $(top_builddir)/src/lib/libeina.la @ECORE_EVAS_LIBS@
 all: all-am
 
@@ -619,6 +706,9 @@ eina_hash_07$(EXEEXT): $(eina_hash_07_OBJECTS) $(eina_hash_07_DEPENDENCIES)
 eina_hash_08$(EXEEXT): $(eina_hash_08_OBJECTS) $(eina_hash_08_DEPENDENCIES) 
 	@rm -f eina_hash_08$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(eina_hash_08_OBJECTS) $(eina_hash_08_LDADD) $(LIBS)
+eina_inarray_01$(EXEEXT): $(eina_inarray_01_OBJECTS) $(eina_inarray_01_DEPENDENCIES) 
+	@rm -f eina_inarray_01$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_inarray_01_OBJECTS) $(eina_inarray_01_LDADD) $(LIBS)
 eina_inlist_01$(EXEEXT): $(eina_inlist_01_OBJECTS) $(eina_inlist_01_DEPENDENCIES) 
 	@rm -f eina_inlist_01$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(eina_inlist_01_OBJECTS) $(eina_inlist_01_LDADD) $(LIBS)
@@ -652,6 +742,18 @@ eina_log_02$(EXEEXT): $(eina_log_02_OBJECTS) $(eina_log_02_DEPENDENCIES)
 eina_log_03$(EXEEXT): $(eina_log_03_OBJECTS) $(eina_log_03_DEPENDENCIES) 
 	@rm -f eina_log_03$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(eina_log_03_OBJECTS) $(eina_log_03_LDADD) $(LIBS)
+eina_model_01$(EXEEXT): $(eina_model_01_OBJECTS) $(eina_model_01_DEPENDENCIES) 
+	@rm -f eina_model_01$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_model_01_OBJECTS) $(eina_model_01_LDADD) $(LIBS)
+eina_model_02$(EXEEXT): $(eina_model_02_OBJECTS) $(eina_model_02_DEPENDENCIES) 
+	@rm -f eina_model_02$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_model_02_OBJECTS) $(eina_model_02_LDADD) $(LIBS)
+eina_model_03$(EXEEXT): $(eina_model_03_OBJECTS) $(eina_model_03_DEPENDENCIES) 
+	@rm -f eina_model_03$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_model_03_OBJECTS) $(eina_model_03_LDADD) $(LIBS)
+eina_model_04$(EXEEXT): $(eina_model_04_OBJECTS) $(eina_model_04_DEPENDENCIES) 
+	@rm -f eina_model_04$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_model_04_OBJECTS) $(eina_model_04_LDADD) $(LIBS)
 eina_str_01$(EXEEXT): $(eina_str_01_OBJECTS) $(eina_str_01_DEPENDENCIES) 
 	@rm -f eina_str_01$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(eina_str_01_OBJECTS) $(eina_str_01_LDADD) $(LIBS)
@@ -661,6 +763,15 @@ eina_strbuf_01$(EXEEXT): $(eina_strbuf_01_OBJECTS) $(eina_strbuf_01_DEPENDENCIES
 eina_tiler_01$(EXEEXT): $(eina_tiler_01_OBJECTS) $(eina_tiler_01_DEPENDENCIES) 
 	@rm -f eina_tiler_01$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(eina_tiler_01_OBJECTS) $(eina_tiler_01_LDADD) $(LIBS)
+eina_value_01$(EXEEXT): $(eina_value_01_OBJECTS) $(eina_value_01_DEPENDENCIES) 
+	@rm -f eina_value_01$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_value_01_OBJECTS) $(eina_value_01_LDADD) $(LIBS)
+eina_value_02$(EXEEXT): $(eina_value_02_OBJECTS) $(eina_value_02_DEPENDENCIES) 
+	@rm -f eina_value_02$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_value_02_OBJECTS) $(eina_value_02_LDADD) $(LIBS)
+eina_value_03$(EXEEXT): $(eina_value_03_OBJECTS) $(eina_value_03_DEPENDENCIES) 
+	@rm -f eina_value_03$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(eina_value_03_OBJECTS) $(eina_value_03_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -681,6 +792,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_hash_06.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_hash_07.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_hash_08.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_inarray_01.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_inlist_01.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_inlist_02.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_inlist_03.Po@am__quote@
@@ -692,9 +804,21 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_log_01.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_log_02.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_log_03.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_01.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_02.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_03.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_animal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_child.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_human.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_parrot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_model_04_whistler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_str_01.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_strbuf_01.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_tiler_01.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_value_01.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_value_02.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eina_value_03.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

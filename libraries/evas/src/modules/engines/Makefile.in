@@ -49,13 +49,12 @@ host_triplet = @host@
 @EVAS_STATIC_BUILD_SOFTWARE_16_DDRAW_FALSE@am__append_14 = software_16_ddraw
 @EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@am__append_15 = software_16_wince
 @EVAS_STATIC_BUILD_SOFTWARE_16_X11_FALSE@am__append_16 = software_16_x11
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@am__append_17 = software_sdl
-@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@am__append_18 = software_16_sdl
-@EVAS_STATIC_BUILD_SOFTWARE_DDRAW_FALSE@am__append_19 = software_ddraw
-@EVAS_STATIC_BUILD_SOFTWARE_GDI_FALSE@am__append_20 = software_gdi
-@EVAS_STATIC_BUILD_SOFTWARE_X11_FALSE@am__append_21 = software_x11
-@EVAS_STATIC_BUILD_WAYLAND_SHM_FALSE@am__append_22 = wayland_shm
-@EVAS_STATIC_BUILD_WAYLAND_EGL_FALSE@am__append_23 = wayland_egl
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@am__append_17 = software_16_sdl
+@EVAS_STATIC_BUILD_SOFTWARE_DDRAW_FALSE@am__append_18 = software_ddraw
+@EVAS_STATIC_BUILD_SOFTWARE_GDI_FALSE@am__append_19 = software_gdi
+@EVAS_STATIC_BUILD_SOFTWARE_X11_FALSE@am__append_20 = software_x11
+@EVAS_STATIC_BUILD_WAYLAND_SHM_FALSE@am__append_21 = wayland_shm
+@EVAS_STATIC_BUILD_WAYLAND_EGL_FALSE@am__append_22 = wayland_egl
 subdir = src/modules/engines
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -103,8 +102,8 @@ CTAGS = ctags
 DIST_SUBDIRS = software_generic buffer direct3d directfb fb psl1ght \
 	gl_common gl_x11 gl_sdl gl_cocoa software_8 software_8_x11 \
 	software_16 software_16_ddraw software_16_wince \
-	software_16_x11 software_sdl software_16_sdl software_ddraw \
-	software_gdi software_x11 wayland_shm wayland_egl
+	software_16_x11 software_16_sdl software_ddraw software_gdi \
+	software_x11 wayland_shm wayland_egl
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -183,6 +182,8 @@ EVAS_SSE3_CFLAGS = @EVAS_SSE3_CFLAGS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
 FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
@@ -233,6 +234,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -251,8 +254,6 @@ VERSION = @VERSION@
 VMAJ = @VMAJ@
 WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
 WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
-WIN32_CFLAGS = @WIN32_CFLAGS@
-WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
 XCB_GL_CFLAGS = @XCB_GL_CFLAGS@
 XCB_GL_LIBS = @XCB_GL_LIBS@
@@ -326,8 +327,6 @@ evas_engine_software_ddraw_cflags = @evas_engine_software_ddraw_cflags@
 evas_engine_software_ddraw_libs = @evas_engine_software_ddraw_libs@
 evas_engine_software_gdi_cflags = @evas_engine_software_gdi_cflags@
 evas_engine_software_gdi_libs = @evas_engine_software_gdi_libs@
-evas_engine_software_sdl_cflags = @evas_engine_software_sdl_cflags@
-evas_engine_software_sdl_libs = @evas_engine_software_sdl_libs@
 evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
@@ -418,7 +417,7 @@ SUBDIRS = $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_13) $(am__append_14) $(am__append_15) \
 	$(am__append_16) $(am__append_17) $(am__append_18) \
 	$(am__append_19) $(am__append_20) $(am__append_21) \
-	$(am__append_22) $(am__append_23)
+	$(am__append_22)
 all: all-recursive
 
 .SUFFIXES:

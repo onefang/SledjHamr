@@ -14,8 +14,20 @@ Additions:
     * Deprecated eina_array_count_get(), use eina_array_count() instead.
     * Added eina_inarray data type
     * Added eina_value data type (generic value storage)
+    * Added eina_model data type (generic hierarchy data access)
+    * Add eina_file_stat.
 
-Eina 1.1.0
+Fixes:
+
+    * compilation errors in Eina_RWLock code when building code on Windows > XP
+    * stop leaking Eina_File.
+    * remove dead lock in Eina_File.
+
+Improvements:
+
+    * faster implementation of Eina_Rbtree.
+
+Eina 1.1.0 (2011-12-02)
 
 Changes since Eina 1.0.0:
 -------------------------

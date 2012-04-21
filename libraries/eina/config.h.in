@@ -110,6 +110,12 @@
    */
 #undef HAVE_ALLOCA_H
 
+/* Define to 1 if you have the `backtrace' function. */
+#undef HAVE_BACKTRACE
+
+/* Define to 1 if you have the `backtrace_symbols' function. */
+#undef HAVE_BACKTRACE_SYMBOLS
+
 /* Define to 1 if you have a valid <dirent.h> header file. */
 #undef HAVE_DIRENT_H
 
@@ -125,14 +131,20 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
-/* Set to 1 if evil package is installed */
+/* Set to 1 if Escape package is installed */
 #undef HAVE_ESCAPE
 
 /* Set to 1 if evil package is installed */
 #undef HAVE_EVIL
 
+/* Define to 1 if you have the <execinfo.h> header file. */
+#undef HAVE_EXECINFO_H
+
 /* Define to 1 if you have the `execvp' function. */
 #undef HAVE_EXECVP
+
+/* Define to 1 if you have Exotic. */
+#undef HAVE_EXOTIC_H
 
 /* Define to 1 if you have the `fpathconf' function. */
 #undef HAVE_FPATHCONF

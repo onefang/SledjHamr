@@ -30,15 +30,15 @@
 #endif
 #ifdef HAVE_ALLOCA_H
 # include <alloca.h>
-#elif defined __GNUC__
-# define alloca __builtin_alloca
-#elif defined _AIX
-# define alloca __alloca
-#elif defined _MSC_VER
-# include <malloc.h>
-# define alloca _alloca
-#else
-# ifndef HAVE_ALLOCA
+#elif !defined alloca
+# ifdef __GNUC__
+#  define alloca __builtin_alloca
+# elif defined _AIX
+#  define alloca __alloca
+# elif defined _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
+# elif !defined HAVE_ALLOCA
 #  ifdef  __cplusplus
 extern "C"
 #  endif
@@ -237,7 +237,7 @@ _try_argv(Eina_Prefix *pfx, const char *argv0)
    DBG("Try argv0 = %s", argv0);
    /* 1. is argv0 abs path? */
 #ifdef _WIN32
-   if (argv0[0] && (argv0[1] == ':'))
+   if (evil_path_is_absolute(argv0))
 #else
    if (argv0[0] == DSEP_C)
 #endif
@@ -533,7 +533,7 @@ eina_prefix_new(const char *argv0, void *symbol, const char *envprefix,
                {
                   DBG("Dlinfo dli_fname = %s", info_dl.dli_fname);
 # ifdef _WIN32
-                  if (info_dl.dli_fname[0] && (info_dl.dli_fname[1] == ':'))
+                  if (evil_path_is_absolute(info_dl.dli_fname))
 # else
                   if (info_dl.dli_fname[0] == DSEP_C)
 # endif

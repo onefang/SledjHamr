@@ -1140,8 +1140,10 @@ START_TEST(eina_value_test_array)
    fail_unless(eina_inarray_append(inarray, &c) >= 0);
    desc.subtype = EINA_VALUE_TYPE_CHAR;
    desc.step = 0;
-   desc.array = inarray; /* will be adopted and freed by value */
+   desc.array = inarray;
    fail_unless(eina_value_set(value, desc)); /* manually configure */
+   eina_inarray_free(inarray);
+
    fail_unless(eina_value_array_get(value, 0, &c));
    fail_unless(c == 11);
    fail_unless(eina_value_array_get(value, 1, &c));
@@ -1242,11 +1244,13 @@ START_TEST(eina_value_test_list)
 
    desc.subtype = EINA_VALUE_TYPE_STRING;
    desc.list = NULL;
-   desc.list = eina_list_append(desc.list, strdup("hello"));
-   desc.list = eina_list_append(desc.list, strdup("world"));
-   desc.list = eina_list_append(desc.list, strdup("eina"));
+   desc.list = eina_list_append(desc.list, "hello");
+   desc.list = eina_list_append(desc.list, "world");
+   desc.list = eina_list_append(desc.list, "eina");
    fail_unless(eina_list_count(desc.list) == 3);
    fail_unless(eina_value_set(value, desc));
+   eina_list_free(desc.list);
+
    fail_unless(eina_value_list_get(value, 0, &s));
    fail_unless(s != NULL);
    fail_unless(strcmp(s, "hello") == 0);
@@ -1351,13 +1355,16 @@ START_TEST(eina_value_test_hash)
    fail_unless(desc.hash != NULL);
    /* watch out hash pointer is to a size of subtype->value_size! */
    ptr = malloc(sizeof(char *));
-   *ptr = strdup("there");
+   *ptr = "there";
    fail_unless(eina_hash_add(desc.hash, "hi", ptr));
    ptr = malloc(sizeof(char *));
-   *ptr = strdup("y");
+   *ptr = "y";
    fail_unless(eina_hash_add(desc.hash, "x", ptr));
-
    fail_unless(eina_value_set(value, desc));
+
+   free(eina_hash_find(desc.hash, "hi"));
+   free(eina_hash_find(desc.hash, "x"));
+   eina_hash_free(desc.hash);
 
    fail_unless(eina_value_hash_get(value, "hi", &s));
    fail_unless(s != NULL);
@@ -1606,6 +1613,20 @@ START_TEST(eina_value_test_struct)
    fail_unless(eina_value_struct_get(value, "c", &c));
    fail_unless(c == 0xf);
 
+   fail_unless(eina_value_struct_member_value_get
+               (value, myst_members + 0, &other));
+   fail_unless(other.type == EINA_VALUE_TYPE_INT);
+   fail_unless(eina_value_get(&other, &i));
+   fail_unless(i == 5678);
+   eina_value_flush(&other);
+
+   fail_unless(eina_value_struct_member_value_get
+               (value, myst_members + 1, &other));
+   fail_unless(other.type == EINA_VALUE_TYPE_CHAR);
+   fail_unless(eina_value_get(&other, &c));
+   fail_unless(c = 0xf);
+   eina_value_flush(&other);
+
    str = eina_value_to_string(value);
    fail_unless(str != NULL);
    fail_unless(strcmp(str, "{i: 5678, c: 15}") == 0);
@@ -1704,6 +1725,7 @@ START_TEST(eina_value_test_struct)
    fail_unless(strcmp(str, "{a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10, k: 12, l: 13, m: 14, n: 15, o: 16, p: 17, q: 18, r: 19, s: 20, t: 21, u: 22, v: 23, x: 24}") == 0);
    free(str);
 
+   eina_value_flush(&other);
    eina_value_free(value);
    eina_shutdown();
 }
@@ -1728,7 +1750,7 @@ START_TEST(eina_value_test_array_of_struct)
      EINA_VALUE_STRUCT_OPERATIONS_BINSEARCH,
      myst_members, 4, sizeof(struct myst)
    };
-   Eina_Value *value;
+   Eina_Value *value, array_item;
    char *str;
    int i;
 
@@ -1740,20 +1762,17 @@ START_TEST(eina_value_test_array_of_struct)
    for (i = 0; i < 10; i++)
      {
         Eina_Value_Struct desc;
-        struct myst *st;
+        struct myst st;
         char buf[64];
 
         snprintf(buf, sizeof(buf), "item%02d", i);
-        st = malloc(sizeof(struct myst));
-        fail_unless(st != NULL);
-        st->a = i;
-        st->b = i * 10;
-        st->c = i * 100;
-        st->s = strdup(buf);
-        fail_unless(st->s != NULL);
+        st.a = i;
+        st.b = i * 10;
+        st.c = i * 100;
+        st.s = buf;
 
         desc.desc = &myst_desc;
-        desc.memory = st;
+        desc.memory = &st;
         fail_unless(eina_value_array_append(value, desc));
      }
 
@@ -1773,7 +1792,62 @@ START_TEST(eina_value_test_array_of_struct)
                       "]") == 0);
    free(str);
 
+   eina_value_array_value_get(value, 2, &array_item);
+   eina_value_struct_get(&array_item, "a", &i);
+   ck_assert_int_eq(i, 2);
+   eina_value_struct_get(&array_item, "b", &i);
+   ck_assert_int_eq(i, 20);
+   eina_value_struct_get(&array_item, "c", &i);
+   ck_assert_int_eq(i, 200);
+   eina_value_struct_get(&array_item, "s", &str);
+   ck_assert_str_eq(str, "item02");
+   eina_value_flush(&array_item);
+
    eina_value_free(value);
+   eina_shutdown();
+}
+END_TEST
+
+
+START_TEST(eina_value_test_model)
+{
+   Eina_Value *value, inv;
+   Eina_Model *model, *m;
+   char *str;
+
+   eina_init();
+
+   value = eina_value_new(EINA_VALUE_TYPE_MODEL);
+   fail_unless(value != NULL);
+
+   model = eina_model_new(EINA_MODEL_TYPE_GENERIC);
+   fail_unless(model != NULL);
+
+   fail_unless(eina_value_setup(&inv, EINA_VALUE_TYPE_INT));
+   fail_unless(eina_value_set(&inv, 1234));
+   fail_unless(eina_model_property_set(model, "i", &inv));
+   eina_value_flush(&inv);
+
+   fail_unless(eina_value_set(value, model));
+   fail_unless(eina_model_refcount(model) == 2);
+
+   fail_unless(eina_value_get(value, &m));
+   fail_unless(m == model);
+   fail_unless(eina_model_refcount(m) == 2);
+
+   fail_unless(eina_value_pset(value, &model));
+   fail_unless(eina_model_refcount(model) == 2);
+
+   str = eina_value_to_string(value);
+   fail_unless(str != NULL);
+   fail_unless(strcmp(str, "Eina_Model_Type_Generic({i: 1234}, [])") == 0);
+   free(str);
+
+   eina_value_free(value);
+
+   fail_unless(eina_model_refcount(model) == 1);
+   eina_model_unref(model);
+
    eina_shutdown();
 }
 END_TEST
@@ -1796,4 +1870,5 @@ eina_test_value(TCase *tc)
    tcase_add_test(tc, eina_value_test_blob);
    tcase_add_test(tc, eina_value_test_struct);
    tcase_add_test(tc, eina_value_test_array_of_struct);
+   tcase_add_test(tc, eina_value_test_model);
 }

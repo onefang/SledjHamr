@@ -184,6 +184,8 @@ EINA_LIBS = @EINA_LIBS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 GNUTLS_CFLAGS = @GNUTLS_CFLAGS@
 GNUTLS_LIBS = @GNUTLS_LIBS@
@@ -223,6 +225,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -878,18 +882,16 @@ doc:
 # Coverage report
 
 @EFL_ENABLE_COVERAGE_TRUE@lcov-reset:
-@EFL_ENABLE_COVERAGE_TRUE@	@rm -rf coverage
-@EFL_ENABLE_COVERAGE_TRUE@	@find . -name "*.gcda" -exec rm {} \;
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov --directory . --zerocounters
+@EFL_ENABLE_COVERAGE_TRUE@	@rm -rf $(top_builddir)/coverage
+@EFL_ENABLE_COVERAGE_TRUE@	@find $(top_builddir) -name "*.gcda" -delete
+@EFL_ENABLE_COVERAGE_TRUE@	@lcov --zerocounters --directory $(top_builddir)
 
 @EFL_ENABLE_COVERAGE_TRUE@lcov-report:
-@EFL_ENABLE_COVERAGE_TRUE@	@mkdir coverage
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov --compat-libtool --directory . --capture --output-file coverage/coverage.info
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov -l coverage/coverage.info |grep "\\.h"  |cut -d " " -f 2 > coverage/remove
-@EFL_ENABLE_COVERAGE_TRUE@	@lcov -r coverage/coverage.info `cat coverage/remove` > coverage/coverage.cleaned.info
-@EFL_ENABLE_COVERAGE_TRUE@	@rm coverage/remove
-@EFL_ENABLE_COVERAGE_TRUE@	@mv coverage/coverage.cleaned.info coverage/coverage.info
-@EFL_ENABLE_COVERAGE_TRUE@	@genhtml -t "$(PACKAGE_STRING)" -o coverage coverage/coverage.info
+@EFL_ENABLE_COVERAGE_TRUE@	@mkdir $(top_builddir)/coverage
+@EFL_ENABLE_COVERAGE_TRUE@	lcov --capture --compat-libtool --output-file $(top_builddir)/coverage/coverage.info --directory $(top_builddir)
+@EFL_ENABLE_COVERAGE_TRUE@	lcov --remove $(top_builddir)/coverage/coverage.info '*.h' --output-file $(top_builddir)/coverage/coverage.cleaned.info
+@EFL_ENABLE_COVERAGE_TRUE@	genhtml -t "$(PACKAGE_STRING)" -o $(top_builddir)/coverage/html $(top_builddir)/coverage/coverage.cleaned.info
+@EFL_ENABLE_COVERAGE_TRUE@	@echo "Coverage Report at $(top_builddir)/coverage/html"
 
 @EFL_ENABLE_COVERAGE_TRUE@coverage:
 @EFL_ENABLE_COVERAGE_TRUE@	@$(MAKE) lcov-reset

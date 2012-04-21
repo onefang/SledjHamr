@@ -49,6 +49,10 @@ void *alloca (size_t);
 #include <inttypes.h> /* PRId64 and PRIu64 */
 #include <sys/time.h> /* struct timeval */
 
+#ifdef HAVE_EVIL
+# include <Evil.h>
+#endif
+
 #include "eina_config.h"
 #include "eina_private.h"
 #include "eina_error.h"
@@ -60,6 +64,7 @@ void *alloca (size_t);
 /* undefs EINA_ARG_NONULL() so NULL checks are not compiled out! */
 #include "eina_safety_checks.h"
 #include "eina_value.h"
+#include "eina_model.h" /* uses eina_value.h */
 
 /*============================================================================*
 *                                  Local                                     *
@@ -168,7 +173,7 @@ _eina_value_type_uchar_convert_to(const Eina_Value_Type *type __UNUSED__, const 
         unsigned int other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
@@ -317,7 +322,7 @@ _eina_value_type_ushort_convert_to(const Eina_Value_Type *type __UNUSED__, const
         unsigned int other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
@@ -470,7 +475,7 @@ _eina_value_type_uint_convert_to(const Eina_Value_Type *type __UNUSED__, const E
         unsigned int other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
@@ -627,7 +632,7 @@ _eina_value_type_ulong_convert_to(const Eina_Value_Type *type __UNUSED__, const 
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
@@ -786,7 +791,7 @@ _eina_value_type_uint64_convert_to(const Eina_Value_Type *type __UNUSED__, const
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY((sizeof(other_mem) != sizeof(v)) &&
@@ -950,7 +955,7 @@ _eina_value_type_char_convert_to(const Eina_Value_Type *type __UNUSED__, const E
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1107,7 +1112,7 @@ _eina_value_type_short_convert_to(const Eina_Value_Type *type __UNUSED__, const 
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1270,7 +1275,7 @@ _eina_value_type_int_convert_to(const Eina_Value_Type *type __UNUSED__, const Ei
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1439,7 +1444,7 @@ _eina_value_type_long_convert_to(const Eina_Value_Type *type __UNUSED__, const E
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1612,7 +1617,7 @@ _eina_value_type_int64_convert_to(const Eina_Value_Type *type __UNUSED__, const 
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1792,7 +1797,7 @@ _eina_value_type_float_convert_to(const Eina_Value_Type *type __UNUSED__, const 
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -1978,7 +1983,7 @@ _eina_value_type_double_convert_to(const Eina_Value_Type *type __UNUSED__, const
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v;
         if (EINA_UNLIKELY(v < 0))
@@ -2146,7 +2151,7 @@ _eina_value_type_string_common_convert_to(const Eina_Value_Type *type __UNUSED__
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem;
         if ((sscanf(v, "%lu", &other_mem) != 1) &&
@@ -2248,7 +2253,11 @@ static Eina_Bool
 _eina_value_type_stringshare_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
 {
    const char **tmem = mem;
-   if (*tmem) eina_stringshare_del(*tmem);
+   if (*tmem)
+     {
+        eina_stringshare_del(*tmem);
+        *tmem = NULL;
+     }
    return EINA_TRUE;
 }
 
@@ -2257,8 +2266,7 @@ _eina_value_type_stringshare_copy(const Eina_Value_Type *type __UNUSED__, const 
 {
    const char * const*s = src;
    const char **d = dst;
-   *d = *s;
-   eina_stringshare_ref(*d);
+   *d = eina_stringshare_add(*s);
    return EINA_TRUE;
 }
 
@@ -2280,7 +2288,11 @@ static Eina_Bool
 _eina_value_type_string_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
 {
    char **tmem = mem;
-   if (*tmem) free(*tmem);
+   if (*tmem)
+     {
+        free(*tmem);
+        *tmem = NULL;
+     }
    return EINA_TRUE;
 }
 
@@ -2308,19 +2320,24 @@ _eina_value_type_string_vset(const Eina_Value_Type *type __UNUSED__, void *mem, 
 {
    char **tmem = mem;
    const char *str = va_arg(args, const char *);
-   free(*tmem);
-   if (str == NULL)
-     *tmem = NULL;
+   eina_error_set(0);
+   if (str == *tmem) return EINA_TRUE;
+   if (!str)
+     {
+        free(*tmem);
+        *tmem = NULL;
+     }
    else
      {
-        *tmem = strdup(str);
-        if (*tmem == NULL)
+        char *tmp = strdup(str);
+        if (!tmp)
           {
              eina_error_set(EINA_ERROR_OUT_OF_MEMORY);
              return EINA_FALSE;
           }
+        free(*tmem);
+        *tmem = tmp;
      }
-   eina_error_set(0);
    return EINA_TRUE;
 }
 
@@ -2329,19 +2346,24 @@ _eina_value_type_string_pset(const Eina_Value_Type *type __UNUSED__, void *mem, 
 {
    char **tmem = mem;
    const char * const *str = ptr;
-   free(*tmem);
-   if (*str == NULL)
-     *tmem = NULL;
+   eina_error_set(0);
+   if (*str == *tmem) return EINA_TRUE;
+   if (!*str)
+     {
+        free(*tmem);
+        *tmem = NULL;
+     }
    else
      {
-        *tmem = strdup(*str);
-        if (*tmem == NULL)
+        char *tmp = strdup(*str);
+        if (!tmp)
           {
              eina_error_set(EINA_ERROR_OUT_OF_MEMORY);
              return EINA_FALSE;
           }
+        free(*tmem);
+        *tmem = tmp;
      }
-   eina_error_set(0);
    return EINA_TRUE;
 }
 
@@ -2505,12 +2527,13 @@ _eina_value_type_array_convert_to(const Eina_Value_Type *type __UNUSED__, const 
        (convert == EINA_VALUE_TYPE_STRINGSHARE))
      {
         Eina_Strbuf *str = eina_strbuf_new();
+        const char *ptr;
         if (!tmem->array) eina_strbuf_append(str, "[]");
         else
           {
              const Eina_Value_Type *subtype = tmem->subtype;
              unsigned char sz;
-             const char *ptr, *ptr_end;
+             const char *ptr_end;
              Eina_Value tmp;
              Eina_Bool first = EINA_TRUE;
 
@@ -2551,10 +2574,10 @@ _eina_value_type_array_convert_to(const Eina_Value_Type *type __UNUSED__, const 
                }
 
              eina_strbuf_append_char(str, ']');
-             ptr = eina_strbuf_string_get(str);
-             ret = eina_value_type_pset(convert, convert_mem, &ptr);
-             eina_strbuf_free(str);
           }
+        ptr = eina_strbuf_string_get(str);
+        ret = eina_value_type_pset(convert, convert_mem, &ptr);
+        eina_strbuf_free(str);
      }
    else if ((tmem->array) && (tmem->array->len == 1))
      {
@@ -2606,43 +2629,51 @@ _eina_value_type_array_convert_from(const Eina_Value_Type *type, const Eina_Valu
 }
 
 static Eina_Bool
-_eina_value_type_array_pset(const Eina_Value_Type *type __UNUSED__, void *mem, const void *ptr)
+_eina_value_type_array_pset(const Eina_Value_Type *type, void *mem, const void *ptr)
 {
    Eina_Value_Array *tmem = mem;
    const Eina_Value_Array *desc = ptr;
    Eina_Inarray *desc_array;
 
+   eina_error_set(0);
    if ((!tmem->subtype) && (!desc->subtype))
      return EINA_TRUE;
 
    desc_array = desc->array;
    if (desc_array)
      {
+        Eina_Value_Array tmp;
+
         EINA_SAFETY_ON_FALSE_RETURN_VAL
           (desc_array->member_size == desc->subtype->value_size, EINA_FALSE);
+
+        if (desc_array == tmem->array)
+          {
+             tmem->subtype = desc->subtype;
+             return EINA_TRUE;
+          }
+
+        if (!_eina_value_type_array_copy(type, desc, &tmp))
+          return EINA_FALSE;
+
+        _eina_value_type_array_flush(type, tmem);
+        memcpy(tmem, &tmp, sizeof(tmp));
+        return EINA_TRUE;
      }
 
    if (tmem->array)
      {
         _eina_value_type_array_flush_elements(tmem);
-        if (desc_array)
-          eina_inarray_free(tmem->array);
-        else
-          eina_inarray_setup(tmem->array, desc->subtype->value_size,
-                             desc->step);
+        eina_inarray_setup(tmem->array, desc->subtype->value_size, desc->step);
      }
-   else if (!desc_array)
+   else
      {
         tmem->array = eina_inarray_new(desc->subtype->value_size, desc->step);
         if (!tmem->array)
           return EINA_FALSE;
      }
 
-   if (desc_array)
-     tmem->array = desc_array;
-
    tmem->subtype = desc->subtype;
-
    return EINA_TRUE;
 }
 
@@ -2821,13 +2852,13 @@ _eina_value_type_list_convert_to(const Eina_Value_Type *type __UNUSED__, const E
        (convert == EINA_VALUE_TYPE_STRINGSHARE))
      {
         Eina_Strbuf *str = eina_strbuf_new();
+        const char *s;
         if (!tmem->list) eina_strbuf_append(str, "[]");
         else
           {
              const Eina_Value_Type *subtype = tmem->subtype;
              const Eina_List *node;
              Eina_Value tmp;
-             const char *s;
              Eina_Bool first = EINA_TRUE;
 
              eina_value_setup(&tmp, EINA_VALUE_TYPE_STRING);
@@ -2867,10 +2898,10 @@ _eina_value_type_list_convert_to(const Eina_Value_Type *type __UNUSED__, const E
                }
 
              eina_strbuf_append_char(str, ']');
-             s = eina_strbuf_string_get(str);
-             ret = eina_value_type_pset(convert, convert_mem, &s);
-             eina_strbuf_free(str);
           }
+        s = eina_strbuf_string_get(str);
+        ret = eina_value_type_pset(convert, convert_mem, &s);
+        eina_strbuf_free(str);
      }
    else if ((tmem->list) && (tmem->list->next == NULL))
      {
@@ -2932,18 +2963,36 @@ _eina_value_type_list_convert_from(const Eina_Value_Type *type, const Eina_Value
 }
 
 static Eina_Bool
-_eina_value_type_list_pset(const Eina_Value_Type *type __UNUSED__, void *mem, const void *ptr)
+_eina_value_type_list_pset(const Eina_Value_Type *type, void *mem, const void *ptr)
 {
    Eina_Value_List *tmem = mem;
    const Eina_Value_List *desc = ptr;
 
+   eina_error_set(0);
    if ((!tmem->subtype) && (!desc->subtype))
      return EINA_TRUE;
 
-   _eina_value_type_list_flush_elements(tmem);
-   tmem->subtype = desc->subtype;
-   tmem->list = desc->list;
+   if ((tmem->list) && (tmem->list == desc->list))
+     {
+        tmem->subtype = desc->subtype;
+        return EINA_TRUE;
+     }
 
+   if (desc->list)
+     {
+        Eina_Value_List tmp;
+
+        if (!_eina_value_type_list_copy(type, desc, &tmp))
+          return EINA_FALSE;
+
+        _eina_value_type_list_flush(type, tmem);
+        memcpy(tmem, &tmp, sizeof(tmp));
+        return EINA_TRUE;
+     }
+
+   _eina_value_type_list_flush_elements(tmem);
+
+   tmem->subtype = desc->subtype;
    return EINA_TRUE;
 }
 
@@ -2995,6 +3044,7 @@ _eina_value_type_hash_flush_each(const Eina_Hash *hash __UNUSED__, const void *k
 {
    struct _eina_value_type_hash_flush_each_ctx *ctx = user_data;
    ctx->ret &= eina_value_type_flush(ctx->subtype, mem);
+   free(mem);
    return EINA_TRUE;
 }
 
@@ -3239,11 +3289,11 @@ _eina_value_type_hash_convert_to(const Eina_Value_Type *type __UNUSED__, const E
        (convert == EINA_VALUE_TYPE_STRINGSHARE))
      {
         Eina_Strbuf *str = eina_strbuf_new();
+        const char *s;
         if (!tmem->hash) eina_strbuf_append(str, "{}");
         else
           {
              struct _eina_value_type_hash_convert_to_string_each_ctx ctx;
-             const char *s;
 
              ctx.subtype = tmem->subtype;
              ctx.str = str;
@@ -3257,10 +3307,10 @@ _eina_value_type_hash_convert_to(const Eina_Value_Type *type __UNUSED__, const E
                                &ctx);
 
              eina_strbuf_append_char(str, '}');
-             s = eina_strbuf_string_get(str);
-             ret = eina_value_type_pset(convert, convert_mem, &s);
-             eina_strbuf_free(str);
           }
+        s = eina_strbuf_string_get(str);
+        ret = eina_value_type_pset(convert, convert_mem, &s);
+        eina_strbuf_free(str);
      }
    else if ((tmem->hash) && (eina_hash_population(tmem->hash) == 1))
      {
@@ -3288,22 +3338,38 @@ _eina_value_type_hash_convert_to(const Eina_Value_Type *type __UNUSED__, const E
 }
 
 static Eina_Bool
-_eina_value_type_hash_pset(const Eina_Value_Type *type __UNUSED__, void *mem, const void *ptr)
+_eina_value_type_hash_pset(const Eina_Value_Type *type, void *mem, const void *ptr)
 {
    Eina_Value_Hash *tmem = mem;
    const Eina_Value_Hash *desc = ptr;
 
+   eina_error_set(0);
    if ((!tmem->subtype) && (!desc->subtype))
      return EINA_TRUE;
 
-   if (tmem->hash) _eina_value_type_hash_flush_elements(tmem);
+   if ((tmem->hash) && (tmem->hash == desc->hash))
+     {
+        tmem->subtype = desc->subtype;
+        return EINA_TRUE;
+     }
 
    if (desc->hash)
-     tmem->hash = desc->hash;
-   else if (!_eina_value_type_hash_create(tmem))
-     return EINA_FALSE;
+     {
+        Eina_Value_Hash tmp;
+
+        if (!_eina_value_type_hash_copy(type, desc, &tmp))
+          return EINA_FALSE;
+
+        _eina_value_type_hash_flush(type, tmem);
+        memcpy(tmem, &tmp, sizeof(tmp));
+        return EINA_TRUE;
+     }
+
+   if (tmem->hash) _eina_value_type_hash_flush_elements(tmem);
 
    tmem->subtype = desc->subtype;
+   if (!_eina_value_type_hash_create(tmem))
+     return EINA_FALSE;
 
    return EINA_TRUE;
 }
@@ -3424,7 +3490,7 @@ _eina_value_type_timeval_convert_to(const Eina_Value_Type *type __UNUSED__, cons
           return EINA_FALSE;
         return eina_value_type_pset(convert, convert_mem, &other_mem);
      }
-   else if (convert == EINA_VALUE_TYPE_ULONG)
+   else if ((convert == EINA_VALUE_TYPE_ULONG) || (convert == EINA_VALUE_TYPE_TIMESTAMP))
      {
         unsigned long other_mem = v.tv_sec;
         if (EINA_UNLIKELY(v.tv_sec < 0))
@@ -3570,6 +3636,8 @@ _eina_value_type_blob_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
    Eina_Value_Blob *tmem = mem;
    if ((ops) && (ops->free))
      ops->free(ops, (void *)tmem->memory, tmem->size);
+   tmem->memory = NULL;
+   tmem->size = 0;
    return EINA_TRUE;
 }
 
@@ -3776,6 +3844,14 @@ _eina_value_type_blob_pset(const Eina_Value_Type *type __UNUSED__, void *mem, co
    Eina_Value_Blob *tmem = mem;
    const Eina_Value_Blob *desc = ptr;
 
+   eina_error_set(0);
+   if ((tmem->memory) && (tmem->memory == desc->memory))
+     {
+        tmem->ops = desc->ops;
+        tmem->size = desc->size;
+        return EINA_TRUE;
+     }
+
    if ((ops) && (ops->free))
      ops->free(ops, (void *)tmem->memory, tmem->size);
 
@@ -3872,6 +3948,7 @@ _eina_value_struct_operations_stringshare_find_member(const Eina_Value_Struct_Op
             return itr;
      }
 
+   itr = desc->members;
    name = eina_stringshare_add(name);
    eina_stringshare_del(name); /* we'll not use the contents, this is fine */
    /* stringshare and look again */
@@ -3955,6 +4032,13 @@ _eina_value_type_struct_setup(const Eina_Value_Type *type __UNUSED__, void *mem)
 }
 
 static Eina_Bool
+_eina_value_type_struct_setup_member(const Eina_Value_Struct_Member *member, Eina_Value_Struct *st)
+{
+   unsigned char *base = st->memory;
+   return eina_value_type_setup(member->type, base + member->offset);
+}
+
+static Eina_Bool
 _eina_value_type_struct_flush_member(const Eina_Value_Struct_Member *member, Eina_Value_Struct *st)
 {
    unsigned char *base = st->memory;
@@ -3968,6 +4052,9 @@ _eina_value_type_struct_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
    const Eina_Value_Struct_Member *itr;
    Eina_Value_Struct *tmem = mem;
    Eina_Bool ret = EINA_TRUE;
+
+   if ((!tmem->desc) || (!tmem->memory))
+     return EINA_TRUE;
 
    itr = tmem->desc->members;
    if (tmem->desc->member_count > 0)
@@ -3988,6 +4075,9 @@ _eina_value_type_struct_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
      ops->free(ops, tmem->desc, tmem->memory);
    else
      free(tmem->memory);
+
+   tmem->memory = NULL;
+   tmem->desc = NULL;
 
    return ret;
 }
@@ -4012,6 +4102,9 @@ _eina_value_type_struct_copy(const Eina_Value_Type *type __UNUSED__, const void 
 
    *d = *s;
 
+   if ((!s->desc) || (!s->memory))
+     return EINA_TRUE;
+
    ops = _eina_value_type_struct_ops_get(src);
    if ((ops) && (ops->copy))
      {
@@ -4021,7 +4114,10 @@ _eina_value_type_struct_copy(const Eina_Value_Type *type __UNUSED__, const void 
         return EINA_TRUE;
      }
 
-   d->memory = malloc(s->desc->size);
+   if ((ops) && (ops->alloc))
+     d->memory = ops->alloc(ops, s->desc);
+   else
+     d->memory = malloc(s->desc->size);
    if (!d->memory)
      {
         eina_error_set(EINA_ERROR_OUT_OF_MEMORY);
@@ -4043,14 +4139,17 @@ _eina_value_type_struct_copy(const Eina_Value_Type *type __UNUSED__, const void 
             goto error;
      }
 
-
    return EINA_TRUE;
 
  error:
    itr--;
    for (; itr >= s->desc->members; itr--)
      _eina_value_type_struct_flush_member(itr, d);
-   free(d->memory);
+
+   if ((ops) && (ops->free))
+     ops->free(ops, s->desc, d->memory);
+   else
+     free(d->memory);
    return EINA_FALSE;
 }
 
@@ -4072,7 +4171,9 @@ _eina_value_type_struct_compare(const Eina_Value_Type *type __UNUSED__, const vo
    const Eina_Value_Struct_Member *itr;
    int cmp = 0;
 
-   if (ta->desc != tb->desc)
+   if ((!ta->desc) && (!tb->desc))
+     return 0;
+   else if (ta->desc != tb->desc)
      {
         eina_error_set(EINA_ERROR_VALUE_FAILED);
         return -1;
@@ -4236,11 +4337,12 @@ _eina_value_type_struct_desc_check(const Eina_Value_Struct_Desc *desc)
 }
 
 static Eina_Bool
-_eina_value_type_struct_pset(const Eina_Value_Type *type __UNUSED__, void *mem, const void *ptr)
+_eina_value_type_struct_pset(const Eina_Value_Type *type, void *mem, const void *ptr)
 {
-   const Eina_Value_Struct_Operations *ops = _eina_value_type_struct_ops_get(mem);
+   const Eina_Value_Struct_Operations *ops;
    Eina_Value_Struct *tmem = mem;
    const Eina_Value_Struct *desc = ptr;
+   const Eina_Value_Struct_Member *itr;
 
    if (!_eina_value_type_struct_desc_check(desc->desc))
      {
@@ -4248,30 +4350,71 @@ _eina_value_type_struct_pset(const Eina_Value_Type *type __UNUSED__, void *mem, 
         return EINA_FALSE;
      }
 
+   eina_error_set(0);
+   if ((tmem->memory) && (tmem->memory == desc->memory))
+     {
+        tmem->desc = desc->desc;
+        return EINA_TRUE;
+     }
+
+   if (desc->memory)
+     {
+        Eina_Value_Struct tmp;
+
+        if (!_eina_value_type_struct_copy(type, desc, &tmp))
+          return EINA_FALSE;
+
+        _eina_value_type_struct_flush(type, tmem);
+        memcpy(tmem, &tmp, sizeof(tmp));
+        return EINA_TRUE;
+     }
+
+   if (tmem->memory) _eina_value_type_struct_flush(type, mem);
+
+   tmem->desc = desc->desc;
+
+   ops = _eina_value_type_struct_ops_get(desc);
+   if ((ops) && (ops->alloc))
+     tmem->memory = ops->alloc(ops, tmem->desc);
+   else
+     tmem->memory = malloc(tmem->desc->size);
+
+   if (!tmem->memory)
+     {
+        eina_error_set(EINA_ERROR_OUT_OF_MEMORY);
+        return EINA_FALSE;
+     }
+
+   itr = tmem->desc->members;
+   if (tmem->desc->member_count > 0)
+     {
+        const Eina_Value_Struct_Member *itr_end;
+        itr_end = itr + tmem->desc->member_count;
+        for (; itr < itr_end; itr++)
+          if (!_eina_value_type_struct_setup_member(itr, tmem))
+            goto error;
+     }
+   else
+     {
+        for (; itr->name != NULL; itr++)
+          if (!_eina_value_type_struct_setup_member(itr, tmem))
+            goto error;
+     }
+
+   return EINA_TRUE;
+
+ error:
+   itr--;
+   for (; itr >= tmem->desc->members; itr--)
+     _eina_value_type_struct_flush_member(itr, tmem);
+
    if ((ops) && (ops->free))
      ops->free(ops, tmem->desc, tmem->memory);
    else
      free(tmem->memory);
-
-   *tmem = *desc;
-
-   ops = _eina_value_type_struct_ops_get(desc);
-   if (!tmem->memory)
-     {
-        if ((ops) && (ops->alloc))
-          tmem->memory = ops->alloc(ops, tmem->desc);
-        else
-          tmem->memory = malloc(tmem->desc->size);
-
-        if (!tmem->memory)
-          {
-             eina_error_set(EINA_ERROR_OUT_OF_MEMORY);
-             return EINA_FALSE;
-          }
-     }
-
-   eina_error_set(0);
-   return EINA_TRUE;
+   tmem->memory = NULL;
+   tmem->desc = NULL;
+   return EINA_FALSE;
 }
 
 static Eina_Bool
@@ -4302,6 +4445,130 @@ static const Eina_Value_Type _EINA_VALUE_TYPE_STRUCT = {
   _eina_value_type_struct_vset,
   _eina_value_type_struct_pset,
   _eina_value_type_struct_pget
+};
+
+static Eina_Bool
+_eina_value_type_model_setup(const Eina_Value_Type *type __UNUSED__, void *mem)
+{
+   Eina_Model **tmem = mem;
+   *tmem = NULL;
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+_eina_value_type_model_flush(const Eina_Value_Type *type __UNUSED__, void *mem)
+{
+   Eina_Model **tmem = mem;
+   if (*tmem)
+     {
+        eina_model_unref(*tmem);
+        *tmem = NULL;
+     }
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+_eina_value_type_model_copy(const Eina_Value_Type *type __UNUSED__, const void *src, void *dst)
+{
+   const Eina_Model * const *s = src;
+   Eina_Model **d = dst;
+   if (*s)
+     *d = eina_model_copy(*s); /* is it better to deep-copy? */
+   else
+     *d = NULL;
+   return EINA_TRUE;
+}
+
+static int
+_eina_value_type_model_compare(const Eina_Value_Type *type __UNUSED__, const void *a, const void *b)
+{
+   const Eina_Model * const *ta = a;
+   const Eina_Model * const *tb = b;
+
+   if ((!*ta) && (!*tb)) return 0;
+   else if (!*ta) return 1;
+   else if (!*tb) return -1;
+   else return eina_model_compare(*ta, *tb);
+}
+
+static Eina_Bool
+_eina_value_type_model_convert_to(const Eina_Value_Type *type __UNUSED__, const Eina_Value_Type *convert, const void *type_mem, void *convert_mem)
+{
+   const Eina_Model *v = *(const Eina_Model **)type_mem;
+
+   eina_error_set(0);
+
+   if (convert == EINA_VALUE_TYPE_STRINGSHARE ||
+       convert == EINA_VALUE_TYPE_STRING)
+     {
+        char *other_mem = v ? eina_model_to_string(v) : NULL;
+        Eina_Bool ret = eina_value_type_pset(convert, convert_mem, &other_mem);
+        free(other_mem);
+        return ret;
+     }
+   else
+     {
+        eina_error_set(EINA_ERROR_VALUE_FAILED);
+        return EINA_FALSE;
+     }
+
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+_eina_value_type_model_vset(const Eina_Value_Type *type __UNUSED__, void *mem, va_list args)
+{
+   Eina_Model **tmem = mem, *tmp;
+
+   tmp = va_arg(args, Eina_Model *);
+
+   if (tmp) eina_model_ref(tmp);
+   if (*tmem) eina_model_unref(*tmem);
+
+   *tmem = tmp;
+
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+_eina_value_type_model_pset(const Eina_Value_Type *type __UNUSED__, void *mem, const void *ptr)
+{
+   Eina_Model **tmem = mem;
+   Eina_Model **p = (Eina_Model **)ptr;
+
+   eina_error_set(0);
+   if (*tmem == *p) return EINA_TRUE;
+
+   if (*p) eina_model_ref(*p);
+   if (*tmem) eina_model_unref(*tmem);
+
+   *tmem = *p;
+
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+_eina_value_type_model_pget(const Eina_Value_Type *type __UNUSED__, const void *mem, void *ptr)
+{
+   Eina_Model **tmem = (Eina_Model **)mem;
+   Eina_Model **p = ptr;
+   *p = *tmem;
+   return EINA_TRUE;
+}
+
+static const Eina_Value_Type _EINA_VALUE_TYPE_MODEL = {
+  EINA_VALUE_TYPE_VERSION,
+  sizeof(Eina_Model *),
+  "Eina_Model",
+  _eina_value_type_model_setup,
+  _eina_value_type_model_flush,
+  _eina_value_type_model_copy,
+  _eina_value_type_model_compare,
+  _eina_value_type_model_convert_to,
+  NULL, /* no convert from */
+  _eina_value_type_model_vset,
+  _eina_value_type_model_pset,
+  _eina_value_type_model_pget
 };
 
 /* keep all basic types inlined in an array so we can compare if it's
@@ -4506,6 +4773,20 @@ static const Eina_Value_Type _EINA_VALUE_TYPE_BASICS[] = {
     _eina_value_type_string_vset,
     _eina_value_type_string_pset,
     _eina_value_type_string_common_pget
+  },
+  {
+    EINA_VALUE_TYPE_VERSION,
+    sizeof(unsigned long),
+    "timestamp",
+    _eina_value_type_ulong_setup,
+    _eina_value_type_ulong_flush,
+    _eina_value_type_ulong_copy,
+    _eina_value_type_ulong_compare,
+    _eina_value_type_ulong_convert_to,
+    NULL, /* no convert from */
+    _eina_value_type_ulong_vset,
+    _eina_value_type_ulong_pset,
+    _eina_value_type_ulong_pget
   }
 };
 
@@ -4722,11 +5003,12 @@ eina_value_init(void)
    EINA_VALUE_TYPE_DOUBLE      = _EINA_VALUE_TYPE_BASICS + 11;
    EINA_VALUE_TYPE_STRINGSHARE = _EINA_VALUE_TYPE_BASICS + 12;
    EINA_VALUE_TYPE_STRING      = _EINA_VALUE_TYPE_BASICS + 13;
+   EINA_VALUE_TYPE_TIMESTAMP   = _EINA_VALUE_TYPE_BASICS +  14;
 
    _EINA_VALUE_TYPE_BASICS_START = _EINA_VALUE_TYPE_BASICS +  0;
-   _EINA_VALUE_TYPE_BASICS_END   = _EINA_VALUE_TYPE_BASICS + 13;
+   _EINA_VALUE_TYPE_BASICS_END   = _EINA_VALUE_TYPE_BASICS + 14;
 
-   EINA_SAFETY_ON_FALSE_RETURN_VAL((sizeof(_EINA_VALUE_TYPE_BASICS)/sizeof(_EINA_VALUE_TYPE_BASICS[0])) == 14, EINA_FALSE);
+   EINA_SAFETY_ON_FALSE_RETURN_VAL((sizeof(_EINA_VALUE_TYPE_BASICS)/sizeof(_EINA_VALUE_TYPE_BASICS[0])) == 15, EINA_FALSE);
 
 
    EINA_VALUE_TYPE_ARRAY = &_EINA_VALUE_TYPE_ARRAY;
@@ -4735,6 +5017,7 @@ eina_value_init(void)
    EINA_VALUE_TYPE_TIMEVAL = &_EINA_VALUE_TYPE_TIMEVAL;
    EINA_VALUE_TYPE_BLOB = &_EINA_VALUE_TYPE_BLOB;
    EINA_VALUE_TYPE_STRUCT = &_EINA_VALUE_TYPE_STRUCT;
+   EINA_VALUE_TYPE_MODEL = &_EINA_VALUE_TYPE_MODEL;
 
    EINA_VALUE_BLOB_OPERATIONS_MALLOC = &_EINA_VALUE_BLOB_OPERATIONS_MALLOC;
 
@@ -4800,6 +5083,7 @@ EAPI const Eina_Value_Type *EINA_VALUE_TYPE_UCHAR = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_USHORT = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_UINT = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_ULONG = NULL;
+EAPI const Eina_Value_Type *EINA_VALUE_TYPE_TIMESTAMP = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_UINT64 = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_CHAR = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_SHORT = NULL;
@@ -4816,6 +5100,7 @@ EAPI const Eina_Value_Type *EINA_VALUE_TYPE_HASH = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_TIMEVAL = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_BLOB = NULL;
 EAPI const Eina_Value_Type *EINA_VALUE_TYPE_STRUCT = NULL;
+EAPI const Eina_Value_Type *EINA_VALUE_TYPE_MODEL = NULL;
 
 EAPI const Eina_Value_Blob_Operations *EINA_VALUE_BLOB_OPERATIONS_MALLOC = NULL;
 

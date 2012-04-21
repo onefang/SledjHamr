@@ -7,9 +7,6 @@
 #include <Ecore_Input_Evas.h>
 #if defined(BUILD_ECORE_EVAS_SOFTWARE_SDL) || defined(BUILD_ECORE_EVAS_OPENGL_SDL)
 # include <Ecore_Sdl.h>
-# ifdef BUILD_ECORE_EVAS_SOFTWARE_SDL
-#  include <Evas_Engine_SDL.h>
-# endif
 # ifdef BUILD_ECORE_EVAS_OPENGL_SDL
 #  include <Evas_Engine_GL_SDL.h>
 # endif
@@ -18,10 +15,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(BUILD_ECORE_EVAS_SOFTWARE_SDL) || defined(BUILD_ECORE_EVAS_OPENGL_SDL)
+#include <SDL/SDL.h>
+#endif
+
 #include "ecore_evas_private.h"
 #include "Ecore_Evas.h"
 
-// fixme: 1 sdl window only at a time? seems wrong
+/**
+ ** SDL only handle one window at a time. That's by definition, there is nothing wrong here.
+ **
+ **/
 
 #if defined(BUILD_ECORE_EVAS_SOFTWARE_SDL) || defined(BUILD_ECORE_EVAS_OPENGL_SDL)
 
@@ -43,6 +47,13 @@ static Ecore_Evas *
 _ecore_evas_sdl_match(void)
 {
    return sdl_ee;
+}
+
+static void *
+_ecore_evas_sdl_switch_buffer(void *data, void *dest __UNUSED__)
+{
+   SDL_Flip(data);
+   return ((SDL_Surface*)data)->pixels;
 }
 
 static Eina_Bool
@@ -80,12 +91,54 @@ _ecore_evas_sdl_event_video_resize(void *data __UNUSED__, int type __UNUSED__, v
 {
    Ecore_Sdl_Event_Video_Resize *e;
    Ecore_Evas                   *ee;
+   int                           rmethod;
 
    e = event;
    ee = _ecore_evas_sdl_match();
 
    if (!ee) return ECORE_CALLBACK_PASS_ON; /* pass on event */
+
+   rmethod = evas_output_method_get(ee->evas);
+   if (rmethod == evas_render_method_lookup("buffer"))
+     {
+        Evas_Engine_Info_Buffer *einfo;
+
+        einfo = (Evas_Engine_Info_Buffer *) evas_engine_info_get(ee->evas);
+        if (einfo)
+          {
+             einfo->info.depth_type = EVAS_ENGINE_BUFFER_DEPTH_RGB32;
+             einfo->info.switch_data = SDL_SetVideoMode(e->w, e->h, 32,
+                                                        (ee->prop.hwsurface ? SDL_HWSURFACE : SDL_SWSURFACE)
+                                                        | (ee->prop.fullscreen ? SDL_FULLSCREEN : 0)
+                                                        | (ee->alpha ? SDL_SRCALPHA : 0)
+                                                        | SDL_DOUBLEBUF);
+             if (!einfo->info.switch_data)
+               {
+                  return EINA_FALSE;
+               }
+
+             SDL_SetAlpha(einfo->info.switch_data, SDL_SRCALPHA, 0);
+             SDL_FillRect(einfo->info.switch_data, NULL, 0);
+
+             einfo->info.dest_buffer = ((SDL_Surface*)einfo->info.switch_data)->pixels;
+             einfo->info.dest_buffer_row_bytes = e->w * sizeof (int);
+             einfo->info.use_color_key = 0;
+             einfo->info.alpha_threshold = 0;
+             einfo->info.func.new_update_region = NULL;
+             einfo->info.func.free_update_region = NULL;
+             einfo->info.func.switch_buffer = _ecore_evas_sdl_switch_buffer;
+             if (!evas_engine_info_set(ee->evas, (Evas_Engine_Info *) einfo))
+               {
+                  return EINA_FALSE;
+               }
+          }
+     }
+
+   ee->w = e->w;
+   ee->h = e->h;
+
    evas_output_size_set(ee->evas, e->w, e->h);
+   evas_output_viewport_set(ee->evas, 0, 0, e->w, e->h);
 
    return ECORE_CALLBACK_PASS_ON;
 }
@@ -191,7 +244,7 @@ _ecore_evas_sdl_shutdown(void)
    _ecore_evas_init_count--;
    if (_ecore_evas_init_count == 0)
      {
-        int i;
+        unsigned int i;
 
         for (i = 0; i < sizeof (ecore_evas_event_handlers) / sizeof (Ecore_Event_Handler*); i++)
           ecore_event_handler_del(ecore_evas_event_handlers[i]);
@@ -219,9 +272,47 @@ _ecore_evas_sdl_free(Ecore_Evas *ee)
 static void
 _ecore_evas_resize(Ecore_Evas *ee, int w, int h)
 {
+   int rmethod;
+
    if ((w == ee->w) && (h == ee->h)) return;
    ee->w = w;
    ee->h = h;
+
+   rmethod = evas_output_method_get(ee->evas);
+   if (rmethod == evas_render_method_lookup("buffer"))
+     {
+        Evas_Engine_Info_Buffer *einfo;
+
+        einfo = (Evas_Engine_Info_Buffer *) evas_engine_info_get(ee->evas);
+        if (einfo)
+          {
+             einfo->info.depth_type = EVAS_ENGINE_BUFFER_DEPTH_RGB32;
+             einfo->info.switch_data = SDL_SetVideoMode(w, h, 32,
+                                                        (ee->prop.hwsurface ? SDL_HWSURFACE : SDL_SWSURFACE)
+                                                        | (ee->prop.fullscreen ? SDL_FULLSCREEN : 0)
+                                                        | (ee->alpha ? SDL_SRCALPHA : 0)
+                                                        | SDL_DOUBLEBUF);
+             if (!einfo->info.switch_data)
+               {
+                  return ;
+               }
+
+             SDL_SetAlpha(einfo->info.switch_data, SDL_SRCALPHA, 0);
+             SDL_FillRect(einfo->info.switch_data, NULL, 0);
+
+             einfo->info.dest_buffer = ((SDL_Surface*)einfo->info.switch_data)->pixels;
+             einfo->info.dest_buffer_row_bytes = w * sizeof (int);
+             einfo->info.use_color_key = 0;
+             einfo->info.alpha_threshold = 0;
+             einfo->info.func.new_update_region = NULL;
+             einfo->info.func.free_update_region = NULL;
+             einfo->info.func.switch_buffer = _ecore_evas_sdl_switch_buffer;
+             if (!evas_engine_info_set(ee->evas, (Evas_Engine_Info *) einfo))
+               {
+                  return ;
+               }
+          }
+     }
 
    evas_output_size_set(ee->evas, ee->w, ee->h);
    evas_output_viewport_set(ee->evas, 0, 0, ee->w, ee->h);
@@ -342,6 +433,13 @@ static Ecore_Evas_Engine_Func _ecore_sdl_engine_func =
    NULL,
    NULL, //transparent
 
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+
    NULL, // render
    NULL  // screen_geometry_get
 };
@@ -349,7 +447,6 @@ static Ecore_Evas_Engine_Func _ecore_sdl_engine_func =
 static Ecore_Evas*
 _ecore_evas_internal_sdl_new(int rmethod, const char* name, int w, int h, int fullscreen, int hwsurface, int noframe, int alpha)
 {
-   void                 *einfo;
    Ecore_Evas           *ee;
 
    if (!name)
@@ -382,6 +479,8 @@ _ecore_evas_internal_sdl_new(int rmethod, const char* name, int w, int h, int fu
    ee->prop.withdrawn = 0;
    ee->prop.sticky = 0;
    ee->prop.window = 0;
+   ee->alpha = alpha;
+   ee->prop.hwsurface = hwsurface;
 
    /* init evas here */
    ee->evas = evas_new();
@@ -391,19 +490,47 @@ _ecore_evas_internal_sdl_new(int rmethod, const char* name, int w, int h, int fu
    evas_output_size_set(ee->evas, w, h);
    evas_output_viewport_set(ee->evas, 0, 0, w, h);
 
-   if (rmethod == evas_render_method_lookup("software_sdl") ||
-       rmethod == evas_render_method_lookup("software_16_sdl") )
+   if (rmethod == evas_render_method_lookup("buffer"))
      {
-#ifdef BUILD_ECORE_EVAS_SOFTWARE_SDL
-        einfo = evas_engine_info_get(ee->evas);
+        Evas_Engine_Info_Buffer *einfo;
+
+        einfo = (Evas_Engine_Info_Buffer *) evas_engine_info_get(ee->evas);
         if (einfo)
           {
-             ((Evas_Engine_Info_SDL *)einfo)->info.rotation = 0;
-             ((Evas_Engine_Info_SDL *)einfo)->info.fullscreen = fullscreen;
-             ((Evas_Engine_Info_SDL *)einfo)->info.hwsurface = hwsurface;
-             ((Evas_Engine_Info_SDL *)einfo)->info.noframe = noframe;
-             ((Evas_Engine_Info_SDL *)einfo)->info.alpha = alpha;
-             if (!evas_engine_info_set(ee->evas, (Evas_Engine_Info *)einfo))
+             SDL_Init(SDL_INIT_NOPARACHUTE);
+
+             if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
+               {
+                  ERR("SDL_Init failed with %s", SDL_GetError());
+                  SDL_Quit();
+                  return NULL;
+               }
+
+             einfo->info.depth_type = EVAS_ENGINE_BUFFER_DEPTH_RGB32;
+             einfo->info.switch_data = SDL_SetVideoMode(w, h, 32,
+                                                        (hwsurface ? SDL_HWSURFACE : SDL_SWSURFACE)
+                                                        | (fullscreen ? SDL_FULLSCREEN : 0)
+                                                        | (noframe ? SDL_NOFRAME : 0)
+                                                        | (alpha ? SDL_SRCALPHA : 0)
+                                                        | SDL_DOUBLEBUF);
+             if (!einfo->info.switch_data)
+               {
+                  ERR("SDL_SetVideoMode failed !");
+                  ecore_evas_free(ee);
+                  return NULL;
+               }
+
+             SDL_SetAlpha(einfo->info.switch_data, SDL_SRCALPHA, 0);
+             SDL_FillRect(einfo->info.switch_data, NULL, 0);
+
+             einfo->info.dest_buffer = ((SDL_Surface*)einfo->info.switch_data)->pixels;
+             einfo->info.dest_buffer_row_bytes = w * sizeof (int);
+             einfo->info.use_color_key = 0;
+             einfo->info.alpha_threshold = 0;
+             einfo->info.func.new_update_region = NULL;
+             einfo->info.func.free_update_region = NULL;
+             einfo->info.func.switch_buffer = _ecore_evas_sdl_switch_buffer;
+             if (!evas_engine_info_set(ee->evas, (Evas_Engine_Info *) einfo))
                {
                   ERR("evas_engine_info_set() for engine '%s' failed.", ee->driver);
                   ecore_evas_free(ee);
@@ -416,16 +543,17 @@ _ecore_evas_internal_sdl_new(int rmethod, const char* name, int w, int h, int fu
              ecore_evas_free(ee);
              return NULL;
           }
-#endif
      }
    else if (rmethod == evas_render_method_lookup("gl_sdl"))
      {
 #ifdef BUILD_ECORE_EVAS_OPENGL_SDL
-        einfo = evas_engine_info_get(ee->evas);
+        Evas_Engine_Info_GL_SDL *einfo;
+
+        einfo = (Evas_Engine_Info_GL_SDL *) evas_engine_info_get(ee->evas);
         if (einfo)
           {
-             ((Evas_Engine_Info_GL_SDL *)einfo)->flags.fullscreen = fullscreen;
-             ((Evas_Engine_Info_GL_SDL *)einfo)->flags.noframe = noframe;
+             einfo->flags.fullscreen = fullscreen;
+             einfo->flags.noframe = noframe;
              if (!evas_engine_info_set(ee->evas, (Evas_Engine_Info *)einfo))
                {
                   ERR("evas_engine_info_set() for engine '%s' failed.", ee->driver);
@@ -464,7 +592,7 @@ _ecore_evas_internal_sdl_new(int rmethod, const char* name, int w, int h, int fu
                                (Ecore_Event_Multi_Down_Cb)_ecore_evas_mouse_multi_down_process,
                                (Ecore_Event_Multi_Up_Cb)_ecore_evas_mouse_multi_up_process);
 
-   SDL_ShowCursor(SDL_DISABLE);
+   SDL_ShowCursor(SDL_ENABLE);
 
    ee->engine.func->fn_render = _ecore_evas_sdl_render;
    _ecore_evas_register(ee);
@@ -481,11 +609,10 @@ ecore_evas_sdl_new(const char* name, int w, int h, int fullscreen, int hwsurface
    Ecore_Evas          *ee;
    int                  rmethod;
 
-   rmethod = evas_render_method_lookup("software_sdl");
+   rmethod = evas_render_method_lookup("buffer");
    if (!rmethod) return NULL;
 
    ee = _ecore_evas_internal_sdl_new(rmethod, name, w, h, fullscreen, hwsurface, noframe, alpha);
-   ee->driver = "sdl";
    return ee;
 }
 #else
@@ -497,28 +624,12 @@ ecore_evas_sdl_new(const char* name __UNUSED__, int w __UNUSED__, int h __UNUSED
 }
 #endif
 
-#ifdef BUILD_ECORE_EVAS_SOFTWARE_SDL
-EAPI Ecore_Evas*
-ecore_evas_sdl16_new(const char* name, int w, int h, int fullscreen, int hwsurface, int noframe, int alpha)
-{
-   Ecore_Evas          *ee;
-   int                  rmethod;
-
-   rmethod = evas_render_method_lookup("software_16_sdl");
-   if (!rmethod) return NULL;
-
-   ee = _ecore_evas_internal_sdl_new(rmethod, name, w, h, fullscreen, hwsurface, noframe, alpha);
-   ee->driver = "software_16_sdl";
-   return ee;
-}
-#else
 EAPI Ecore_Evas*
 ecore_evas_sdl16_new(const char* name __UNUSED__, int w __UNUSED__, int h __UNUSED__, int fullscreen __UNUSED__, int hwsurface __UNUSED__, int noframe __UNUSED__, int alpha __UNUSED__)
 {
    ERR("OUTCH !");
    return NULL;
 }
-#endif
 
 #ifdef BUILD_ECORE_EVAS_OPENGL_SDL
 EAPI Ecore_Evas*

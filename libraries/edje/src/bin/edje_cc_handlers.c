@@ -106,6 +106,7 @@ static void st_collections_group_script_only(void);
 static void st_collections_group_alias(void);
 static void st_collections_group_min(void);
 static void st_collections_group_max(void);
+static void st_collections_group_broadcast_signal(void);
 static void st_collections_group_data_item(void);
 static void st_collections_group_orientation(void);
 
@@ -317,6 +318,7 @@ New_Statement_Handler statement_handlers[] =
      {"collections.group.alias", st_collections_group_alias},
      {"collections.group.min", st_collections_group_min},
      {"collections.group.max", st_collections_group_max},
+     {"collections.group.broadcast_signal", st_collections_group_broadcast_signal},
      {"collections.group.orientation", st_collections_group_orientation},
      {"collections.group.data.item", st_collections_group_data_item},
      {"collections.group.limits.horizontal", st_collections_group_limits_horizontal},
@@ -831,6 +833,39 @@ _edje_part_description_fill(Edje_Part_Description_Spec_Fill *fill)
    fill->angle = 0;
    fill->spread = 0;
    fill->type = EDJE_FILL_TYPE_SCALE;
+}
+
+static void
+_edje_part_description_image_remove(Edje_Part_Description_Image *ed)
+{
+   unsigned int j;
+
+   if (!ed) return;
+
+   data_queue_image_remove(&(ed->image.id), &(ed->image.set));
+
+   for (j = 0; j < ed->image.tweens_count; ++j)
+     data_queue_image_remove(&(ed->image.tweens[j]->id),
+                             &(ed->image.tweens[j]->set));
+}
+
+void
+part_description_image_cleanup(Edje_Part *ep)
+{
+   Edje_Part_Description_Image *ed;
+   unsigned int j;
+
+   if (ep->type != EDJE_PART_TYPE_IMAGE)
+     return ;
+
+   ed = (Edje_Part_Description_Image*) ep->default_desc;
+   _edje_part_description_image_remove(ed);
+
+   for (j = 0; j < ep->other.desc_count; j++)
+     {
+        ed = (Edje_Part_Description_Image*) ep->other.desc[j];
+        _edje_part_description_image_remove(ed);
+     }
 }
 
 static Edje_Part_Description_Common *
@@ -2118,6 +2153,7 @@ ob_collections_group(void)
    pc = mem_alloc(SZ(Edje_Part_Collection));
    edje_collections = eina_list_append(edje_collections, pc);
    pc->id = current_de->id;
+   pc->broadcast_signal = EINA_TRUE; /* This was the behaviour by default in Edje 1.1 */
 
    cd = mem_alloc(SZ(Code));
    codes = eina_list_append(codes, cd);
@@ -2139,8 +2175,10 @@ ob_collections_group(void)
 static void
 st_collections_group_name(void)
 {
+   Edje_Part_Collection_Directory_Entry *alias;
    Edje_Part_Collection_Directory_Entry *older;
    Edje_Part_Collection *current_pc;
+   Eina_List *l = NULL;
 
    check_arg_count(1);
 
@@ -2150,31 +2188,24 @@ st_collections_group_name(void)
    current_pc->part = current_de->entry;
 
    older = eina_hash_find(edje_file->collection, current_de->entry);
-
-   if (older)
-     {
-	Edje_Part_Collection *pc;
-	Eina_List *l;
-	Code *cd;
-	int i = 0;
-
-	pc = eina_list_nth(edje_collections, older->id);
-	cd = eina_list_nth(codes, older->id);
-
-	eina_hash_del(edje_file->collection, current_de->entry, older);
-	edje_collections = eina_list_remove(edje_collections, pc);
-	codes = eina_list_remove(codes, cd);
-
-	EINA_LIST_FOREACH(edje_collections, l, pc)
-	  {
-	     older = eina_hash_find(edje_file->collection, pc->part);
-
-	     pc->id = i++;
-	     if (older) older->id = pc->id;
-	  }
-     }
-
+   if (older) eina_hash_del(edje_file->collection, current_de->entry, older);
    eina_hash_direct_add(edje_file->collection, current_de->entry, current_de);
+   if (!older) return;
+
+   EINA_LIST_FOREACH(aliases, l, alias)
+     if (strcmp(alias->entry, current_de->entry) == 0)
+       {
+          Edje_Part_Collection *pc;
+
+          pc = eina_list_nth(edje_collections, older->id);
+          INF("overriding alias ('%s' => '%s') by group '%s'",
+              alias->entry, pc->part,
+              current_de->entry);
+          aliases = eina_list_remove_list(aliases, l);
+          free(alias);
+          break;
+       }
+
 }
 
 typedef struct _Edje_List_Foreach_Data Edje_List_Foreach_Data;
@@ -2240,6 +2271,14 @@ st_collections_group_inherit(void)
      {
         ERR("%s: Error. parse error %s:%i. There isn't a group with the name %s",
             progname, file_in, line - 1, parent_name);
+        exit(-1);
+     }
+   if (pc2 == pc)
+     {
+        ERR("%s: Error. parse error %s:%i. You are trying to inherit '%s' from itself. That's not possible."
+            "If there is another group of the same name, you want to inherit from that group and have the"
+            "same name as that group, there is a trick ! Just put the inherit before the directive that set"
+            "the name !", progname, file_in, line - 1, parent_name);
         exit(-1);
      }
 
@@ -2463,12 +2502,28 @@ static void
 st_collections_group_alias(void)
 {
    Edje_Part_Collection_Directory_Entry *alias;
+   Edje_Part_Collection_Directory_Entry *tmp;
+   Eina_List *l;
 
    check_arg_count(1);
 
    alias = mem_alloc(SZ(Edje_Part_Collection_Directory_Entry));
    alias->id = current_de->id;
    alias->entry = parse_str(0);
+
+   EINA_LIST_FOREACH(aliases, l, tmp)
+     if (strcmp(alias->entry, tmp->entry) == 0)
+       {
+          Edje_Part_Collection *pc;
+
+          pc = eina_list_nth(edje_collections, tmp->id);
+          INF("overriding alias ('%s' => '%s') to ('%s' => '%s')",
+              tmp->entry, pc->part,
+              alias->entry, current_de->entry);
+          aliases = eina_list_remove_list(aliases, l);
+          free(tmp);
+          break;
+       }
 
    aliases = eina_list_append(aliases, alias);
 }
@@ -2517,6 +2572,28 @@ st_collections_group_max(void)
    pc = eina_list_data_get(eina_list_last(edje_collections));
    pc->prop.max.w = parse_int_range(0, 0, 0x7fffffff);
    pc->prop.max.h = parse_int_range(1, 0, 0x7fffffff);
+}
+
+/**
+   @page edcref
+   @property
+       broadcast_signal
+   @parameters
+       [broadcast]
+   @effect
+       Signal got automatically broadcasted to all sub group part. Default to
+       true since 1.1.
+   @endproperty
+*/
+static void
+st_collections_group_broadcast_signal(void)
+{
+   Edje_Part_Collection *pc;
+
+   check_arg_count(1);
+
+   pc = eina_list_data_get(eina_list_last(edje_collections));
+   pc->broadcast_signal = parse_bool(0);
 }
 
 /**
@@ -2947,21 +3024,57 @@ st_collections_group_parts_part_name(void)
 static void
 st_collections_group_parts_part_type(void)
 {
+   unsigned int type;
+
    check_arg_count(1);
 
-   current_part->type = parse_enum(0,
-                                   "NONE", EDJE_PART_TYPE_NONE,
-                                   "RECT", EDJE_PART_TYPE_RECTANGLE,
-                                   "TEXT", EDJE_PART_TYPE_TEXT,
-                                   "IMAGE", EDJE_PART_TYPE_IMAGE,
-                                   "SWALLOW", EDJE_PART_TYPE_SWALLOW,
-                                   "TEXTBLOCK", EDJE_PART_TYPE_TEXTBLOCK,
-                                   "GROUP", EDJE_PART_TYPE_GROUP,
-                                   "BOX", EDJE_PART_TYPE_BOX,
-                                   "TABLE", EDJE_PART_TYPE_TABLE,
-                                   "EXTERNAL", EDJE_PART_TYPE_EXTERNAL,
-                                   "PROXY", EDJE_PART_TYPE_PROXY,
-                                   NULL);
+   type = parse_enum(0,
+                     "NONE", EDJE_PART_TYPE_NONE,
+                     "RECT", EDJE_PART_TYPE_RECTANGLE,
+                     "TEXT", EDJE_PART_TYPE_TEXT,
+                     "IMAGE", EDJE_PART_TYPE_IMAGE,
+                     "SWALLOW", EDJE_PART_TYPE_SWALLOW,
+                     "TEXTBLOCK", EDJE_PART_TYPE_TEXTBLOCK,
+                     "GROUP", EDJE_PART_TYPE_GROUP,
+                     "BOX", EDJE_PART_TYPE_BOX,
+                     "TABLE", EDJE_PART_TYPE_TABLE,
+                     "EXTERNAL", EDJE_PART_TYPE_EXTERNAL,
+                     "PROXY", EDJE_PART_TYPE_PROXY,
+                     NULL);
+
+   /* handle type change of inherited part */
+   if (type != current_part->type)
+     {
+        Edje_Part_Description_Common *new, *previous;
+        Edje_Part_Collection *pc;
+        Edje_Part *ep;
+        unsigned int i;
+
+        /* we don't free old part as we don't remove all reference to them */
+        part_description_image_cleanup(current_part);
+
+        pc = eina_list_data_get(eina_list_last(edje_collections));
+        ep = current_part;
+
+        previous = ep->default_desc;
+        if (previous)
+          {
+             new = _edje_part_description_alloc(type, pc->part, ep->name);
+             memcpy(new, previous, sizeof (Edje_Part_Description_Common));
+
+             ep->default_desc = new;
+          }
+
+        for (i = 0; i < ep->other.desc_count; i++)
+          {
+             previous = ep->other.desc[i];
+             new = _edje_part_description_alloc(type, pc->part, ep->name);
+             memcpy(new, previous, sizeof (Edje_Part_Description_Common));
+             ep->other.desc[i] = new;
+          }
+     }
+
+   current_part->type = type;
 }
 
 /**
@@ -4292,6 +4405,7 @@ st_collections_group_parts_part_description_inherit(void)
 
               ied->image = iparent->image;
 
+              data_queue_image_remove(&ied->image.id, &ied->image.set);
               data_queue_copied_image_lookup(&iparent->image.id, &ied->image.id, &ied->image.set);
 
               ied->image.tweens = calloc(iparent->image.tweens_count,
@@ -4303,6 +4417,7 @@ st_collections_group_parts_part_description_inherit(void)
                    iid = iparent->image.tweens[i];
 
                    iid_new = mem_alloc(SZ(Edje_Part_Image_Id));
+                   data_queue_image_remove(&ied->image.id, &ied->image.set);
                    data_queue_copied_image_lookup(&(iid->id), &(iid_new->id), &(iid_new->set));
                    ied->image.tweens[i] = iid_new;
                 }
@@ -4445,6 +4560,9 @@ st_collections_group_parts_part_description_state(void)
         if ((ep->default_desc->state.name && !strcmp(s, ep->default_desc->state.name) && ed->state.value == ep->default_desc->state.value) ||
             (!ep->default_desc->state.name && !strcmp(s, "default") && ed->state.value == ep->default_desc->state.value))
           {
+             if (ep->type == EDJE_PART_TYPE_IMAGE)
+               _edje_part_description_image_remove((Edje_Part_Description_Image*) ed);
+
              free(ed);
              ep->other.desc_count--;
              ep->other.desc = realloc(ep->other.desc,
@@ -4458,6 +4576,9 @@ st_collections_group_parts_part_description_state(void)
                {
                   if (!strcmp(s, ep->other.desc[i]->state.name) && ed->state.value == ep->other.desc[i]->state.value)
                     {
+                       if (ep->type == EDJE_PART_TYPE_IMAGE)
+                         _edje_part_description_image_remove((Edje_Part_Description_Image*) ed);
+
                        free(ed);
                        ep->other.desc_count--;
                        ep->other.desc = realloc(ep->other.desc,
@@ -4538,18 +4659,38 @@ st_collections_group_parts_part_description_fixed(void)
     @property
         min
     @parameters
-        [width] [height]
+        [width] [height] or SOURCE
     @effect
         The minimum size of the state.
+
+        When min is defined to SOURCE, it will look at the original
+        image size and enforce it minimal size to match at least the
+        original one. The part must be an IMAGE or a GROUP part.
     @endproperty
 */
 static void
 st_collections_group_parts_part_description_min(void)
 {
-   check_arg_count(2);
+   check_min_arg_count(1);
 
-   current_desc->min.w = parse_float_range(0, 0, 0x7fffffff);
-   current_desc->min.h = parse_float_range(1, 0, 0x7fffffff);
+   if (is_param(1)) {
+      current_desc->min.w = parse_float_range(0, 0, 0x7fffffff);
+      current_desc->min.h = parse_float_range(1, 0, 0x7fffffff);
+   } else {
+      char *tmp;
+
+      tmp = parse_str(0);
+      if ((current_part->type != EDJE_PART_TYPE_IMAGE && current_part->type != EDJE_PART_TYPE_GROUP) ||
+          !tmp || strcmp(tmp, "SOURCE") != 0)
+        {
+           ERR("%s: Error. parse error %s:%i. "
+               "Only IMAGE and GROUP part can have a min: SOURCE; defined",
+               progname, file_in, line - 1);
+           exit(-1);
+        }
+
+      current_desc->min.limit = EINA_TRUE;
+   }
 }
 
 /**
@@ -4578,18 +4719,38 @@ st_collections_group_parts_part_description_minmul(void)
     @property
         max
     @parameters
-        [width] [height]
+        [width] [height] or SOURCE
     @effect
         The maximum size of the state. A size of -1.0 means that it will be ignored in one direction.
+
+        When max is set to SOURCE, edje will enforce the part to be
+        not more than the original image size. The part must be an
+        IMAGE part.
     @endproperty
 */
 static void
 st_collections_group_parts_part_description_max(void)
 {
-   check_arg_count(2);
+   check_min_arg_count(1);
 
-   current_desc->max.w = parse_float_range(0, -1.0, 0x7fffffff);
-   current_desc->max.h = parse_float_range(1, -1.0, 0x7fffffff);
+   if (is_param(1)) {
+      current_desc->max.w = parse_float_range(0, -1.0, 0x7fffffff);
+      current_desc->max.h = parse_float_range(1, -1.0, 0x7fffffff);
+   } else {
+      char *tmp;
+
+      tmp = parse_str(0);
+      if (current_part->type != EDJE_PART_TYPE_IMAGE ||
+          !tmp || strcmp(tmp, "SOURCE") != 0)
+        {
+           ERR("%s: Error. parse error %s:%i. "
+               "Only IMAGE part can have a max: SOURCE; defined",
+               progname, file_in, line - 1);
+           exit(-1);
+        }
+
+      current_desc->max.limit = EINA_TRUE;
+   }
 }
 
 /**
@@ -5039,6 +5200,7 @@ st_collections_group_parts_part_description_image_normal(void)
       char *name;
 
       name = parse_str(0);
+      data_queue_image_remove(&(ed->image.id), &(ed->image.set));
       data_queue_image_lookup(name, &(ed->image.id), &(ed->image.set));
       free(name);
    }
@@ -5083,6 +5245,7 @@ st_collections_group_parts_part_description_image_tween(void)
 				 sizeof (Edje_Part_Image_Id*) * ed->image.tweens_count);
       ed->image.tweens[ed->image.tweens_count - 1] = iid;
       name = parse_str(0);
+      data_queue_image_remove(&(iid->id), &(iid->set));
       data_queue_image_lookup(name, &(iid->id), &(iid->set));
       free(name);
    }

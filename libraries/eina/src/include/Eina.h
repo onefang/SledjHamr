@@ -1,5 +1,5 @@
 /* EINA - EFL data type library
- * Copyright (C) 2008-2011 Enlightenment Developers:
+ * Copyright (C) 2008-2012 Enlightenment Developers:
  *           Albin "Lutin" Tonnerre <albin.tonnerre@gmail.com>
  *           Alexandre "diaxen" Becoulet <diaxen@free.fr>
  *           Andre Dieb <andre.dieb@gmail.com>
@@ -16,6 +16,7 @@
  *           Tilman Sauerbeck <tilman@code-monkey.de>
  *           Vincent "caro" Torri  <vtorri at univ-evry dot fr>
  *           Tom Hacohen <tom@stosb.com>
+ *           Jonas M. Gastal <jgastal@profusion.mobi>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +47,7 @@
  * @mainpage Eina
  *
  * @version 1.1
- * @date 2008-2011
+ * @date 2008-2012
  *
  * @section eina_intro_sec Introduction
  *
@@ -72,6 +73,8 @@
  * @li @ref Eina_Stringshare_Group saves memory by sharing read-only string references.
  * @li @ref Eina_Tiler_Group split, merge and navigates into 2D tiled regions.
  * @li @ref Eina_Trash_Group container of unused but allocated data.
+ * @li @ref Eina_Value_Group container for generic value storage and access.
+ * @li @ref Eina_Model_Group container for data with user defined hierarchy/structure.
  *
  * The tools that are available are (see @ref Eina_Tools_Group):
  * @li @ref Eina_Benchmark_Group helper to write benchmarks.
@@ -101,6 +104,31 @@
  * their elements with an @ref Eina_Iterator_Group, or eventually an
  * @ref Eina_Accessor_Group.
  *
+ * The containers in eina are designed with performance in mind, one consequence
+ * of this is that they @b don't check the validity of data structures given to
+ * them(@ref Eina_Magic_Group).
+ *
+ * The choice of which container to use in each situation is very important in
+ * achieving good performance and readable code. The most common container types
+ * to be used are:
+ * @li List
+ * @li Inline list
+ * @li Array
+ * @li Inline array
+ * @li Hash
+ *
+ * All types have virtues and vices. The following considerations are good
+ * starting point in deciding which container to use:
+ * @li Hashes are appropriate for datasets which will be searched often;
+ * @li arrays are good when accessing members by position;
+ * @li lists provide good versatility for adding elements in any position with
+ * minimal overhead;
+ * @li inline arrays use very little memory and don't cause fragmentation and
+ * therefore are a good option in memory constrained systems;
+ * @li inline lists are the appropriate type to use when the flexibility of a
+ * list is required but the overhead of pointer indirection is not acceptable.
+ * @warning These are general considerations, every situation is different,
+ * don't follow these recommendations blindly.
  *
  * @defgroup Eina_Tools_Group Tools
  *
@@ -120,15 +148,22 @@
  * @author Carsten Haitzler <raster@@rasterman.com>
  * @author Cedric Bail <cedric.bail@@free.fr>
  * @author Corey "atmos" Donohoe <atmos@@atmos.org>
+ * @author Vincent "caro" Torri  <vtorri at univ-evry dot fr>
  * @author Fabiano Fidêncio <fidencio@@profusion.mobi>
  * @author Gustavo Chaves <glima@@profusion.mobi>
  * @author Gustavo Sverzut Barbieri <barbieri@@profusion.mobi>
  * @author Jorge Luis "turran" Zapata <jorgeluis.zapata@@gmail.com>
+ * @author Tilman Sauerbeck <tilman@@code-monkey.de>
  * @author Peter "pfritz" Wehrfritz <peter.wehrfritz@@web.de>
  * @author Raphael Kubo da Costa <kubo@@profusion.mobi>
- * @author Tilman Sauerbeck <tilman@@code-monkey.de>
- * @author Vincent "caro" Torri  <vtorri at univ-evry dot fr>
  * @author Tom Hacohen <tom@@stosb.com>
+ * @author Brett Nash <nash@@nash.id.au>
+ * @author Sebastian Dransfeld <sd@@tango.flipp.net>
+ * @author Myungjae Lee <mjae.lee@@samsung.com>
+ * @author Youness Alaoui <kakaroto@@kakaroto.homelinux.net>
+ * @author Boris "billiob" Faure <billiob@@gmail.com>
+ * @author Sung W. Park <sungwoo@@gmail.com>
+ * @author Guillaume Friloux <guillaume.friloux@@asp64.com>
  *
  * Please contact <enlightenment-devel@lists.sourceforge.net> to get in
  * contact with the developers and maintainers.
@@ -189,6 +224,7 @@ extern "C" {
 #include "eina_mmap.h"
 #include "eina_xattr.h"
 #include "eina_value.h"
+#include "eina_model.h"
 
 #ifdef __cplusplus
 }

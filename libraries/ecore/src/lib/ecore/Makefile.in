@@ -38,7 +38,8 @@ host_triplet = @host@
 @ECORE_HAVE_WIN32_TRUE@am__append_1 = ecore_exe_win32.c
 @ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_TRUE@am__append_2 = ecore_exe_wince.c
 @ECORE_HAVE_PS3_TRUE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__append_3 = ecore_exe_ps3.c
-@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__append_4 = ecore_signal.c ecore_exe.c
+@ECORE_HAVE_EXOTIC_TRUE@@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__append_4 = 
+@ECORE_HAVE_EXOTIC_FALSE@@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__append_5 = ecore_signal.c ecore_exe.c
 subdir = src/lib/ecore
 DIST_COMMON = $(includes_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -54,16 +55,15 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_attribute.m4 \
 	$(top_srcdir)/m4/efl_path_max.m4 $(top_srcdir)/m4/efl_tests.m4 \
 	$(top_srcdir)/m4/efl_threads.m4 $(top_srcdir)/m4/gettext.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/intlmacosx.m4 \
-	$(top_srcdir)/m4/isc-posix.m4 $(top_srcdir)/m4/lib-ld.m4 \
-	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/nls.m4 \
-	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
+	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
+	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
@@ -100,15 +100,16 @@ am__libecore_la_SOURCES_DIST = ecore.c ecore_alloc.c ecore_anim.c \
 @ECORE_HAVE_WIN32_TRUE@am__objects_1 = ecore_exe_win32.lo
 @ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_TRUE@am__objects_2 = ecore_exe_wince.lo
 @ECORE_HAVE_PS3_TRUE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__objects_3 = ecore_exe_ps3.lo
-@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__objects_4 = ecore_signal.lo \
-@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@	ecore_exe.lo
+am__objects_4 =
+@ECORE_HAVE_EXOTIC_FALSE@@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@am__objects_5 = ecore_signal.lo \
+@ECORE_HAVE_EXOTIC_FALSE@@ECORE_HAVE_PS3_FALSE@@ECORE_HAVE_WIN32_FALSE@@ECORE_HAVE_WINCE_FALSE@	ecore_exe.lo
 am_libecore_la_OBJECTS = ecore.lo ecore_alloc.lo ecore_anim.lo \
 	ecore_app.lo ecore_events.lo ecore_getopt.lo \
 	ecore_idle_enterer.lo ecore_idle_exiter.lo ecore_idler.lo \
 	ecore_job.lo ecore_main.lo ecore_pipe.lo ecore_poll.lo \
 	ecore_time.lo ecore_timer.lo ecore_thread.lo ecore_glib.lo \
 	ecore_throttle.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4)
+	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 libecore_la_OBJECTS = $(am_libecore_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -211,6 +212,8 @@ EVAS_LIBS = @EVAS_LIBS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 GETTEXT_MACRO_VERSION = @GETTEXT_MACRO_VERSION@
 GLIB_CFLAGS = @GLIB_CFLAGS@
@@ -266,6 +269,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SCIM_CFLAGS = @SCIM_CFLAGS@
@@ -276,6 +281,7 @@ SDL_LIBS = @SDL_LIBS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SHM_OPEN_LIBS = @SHM_OPEN_LIBS@
 SSL_CFLAGS = @SSL_CFLAGS@
 SSL_LIBS = @SSL_LIBS@
 STRIP = @STRIP@
@@ -503,7 +509,8 @@ libecore_la_SOURCES = ecore.c ecore_alloc.c ecore_anim.c ecore_app.c \
 	ecore_idle_exiter.c ecore_idler.c ecore_job.c ecore_main.c \
 	ecore_pipe.c ecore_poll.c ecore_time.c ecore_timer.c \
 	ecore_thread.c ecore_glib.c ecore_throttle.c $(am__append_1) \
-	$(am__append_2) $(am__append_3) $(am__append_4)
+	$(am__append_2) $(am__append_3) $(am__append_4) \
+	$(am__append_5)
 libecore_la_LIBADD = @dlopen_libs@ @EINA_LIBS@ @EVIL_LIBS@ @GLIB_LIBS@ @WIN32_LIBS@ @LTLIBINTL@ @EFL_PTHREAD_LIBS@ @rt_libs@ -lm
 libecore_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -version-info @version_info@ @release_info@ @EFL_PTHREAD_LIBS@
 EXTRA_DIST = ecore_private.h

@@ -84,23 +84,23 @@ LTLIBRARIES = $(noinst_LTLIBRARIES) $(pkg_LTLIBRARIES)
 libevas_engine_software_16_sdl_la_DEPENDENCIES =
 am__libevas_engine_software_16_sdl_la_SOURCES_DIST = evas_engine.c \
 	evas_engine.h
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@am__objects_1 = evas_engine.lo
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@am_libevas_engine_software_16_sdl_la_OBJECTS = $(am__objects_1)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@am__objects_1 = evas_engine.lo
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@am_libevas_engine_software_16_sdl_la_OBJECTS = $(am__objects_1)
 libevas_engine_software_16_sdl_la_OBJECTS =  \
 	$(am_libevas_engine_software_16_sdl_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@am_libevas_engine_software_16_sdl_la_rpath =
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@module_la_DEPENDENCIES = $(top_builddir)/src/lib/libevas.la
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@am_libevas_engine_software_16_sdl_la_rpath =
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@module_la_DEPENDENCIES = $(top_builddir)/src/lib/libevas.la
 am__module_la_SOURCES_DIST = evas_engine.c evas_engine.h
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@am_module_la_OBJECTS = $(am__objects_1)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@am_module_la_OBJECTS = $(am__objects_1)
 module_la_OBJECTS = $(am_module_la_OBJECTS)
 module_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(module_la_LDFLAGS) $(LDFLAGS) -o $@
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@am_module_la_rpath = -rpath \
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@	$(pkgdir)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@am_module_la_rpath = -rpath \
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@	$(pkgdir)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -188,6 +188,8 @@ EVAS_SSE3_CFLAGS = @EVAS_SSE3_CFLAGS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
 FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
@@ -238,6 +240,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -256,8 +260,6 @@ VERSION = @VERSION@
 VMAJ = @VMAJ@
 WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
 WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
-WIN32_CFLAGS = @WIN32_CFLAGS@
-WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
 XCB_GL_CFLAGS = @XCB_GL_CFLAGS@
 XCB_GL_LIBS = @XCB_GL_LIBS@
@@ -331,8 +333,6 @@ evas_engine_software_ddraw_cflags = @evas_engine_software_ddraw_cflags@
 evas_engine_software_ddraw_libs = @evas_engine_software_ddraw_libs@
 evas_engine_software_gdi_cflags = @evas_engine_software_gdi_cflags@
 evas_engine_software_gdi_libs = @evas_engine_software_gdi_libs@
-evas_engine_software_sdl_cflags = @evas_engine_software_sdl_cflags@
-evas_engine_software_sdl_libs = @evas_engine_software_sdl_libs@
 evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
@@ -418,20 +418,20 @@ version_info = @version_info@
 AUTOMAKE_OPTIONS = 1.4 foreign
 MAINTAINERCLEANFILES = Makefile.in
 INCLUDES = -I. -I$(top_srcdir)/src/lib -I$(top_srcdir)/src/lib/include @FREETYPE_CFLAGS@ @PIXMAN_CFLAGS@ @SDL_CFLAGS@ @EINA_CFLAGS@
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@SOFTWARE_SDL_SOURCES = \
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@evas_engine.c \
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@evas_engine.h
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@SOFTWARE_SDL_SOURCES = \
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@evas_engine.c \
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@evas_engine.h
 
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@includes_HEADERS = Evas_Engine_SDL_16.h
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@includesdir = $(includedir)/evas-@VMAJ@
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@pkgdir = $(libdir)/evas/modules/engines/software_16_sdl/$(MODULE_ARCH)
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@pkg_LTLIBRARIES = module.la
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@module_la_SOURCES = $(SOFTWARE_SDL_SOURCES)
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@module_la_LIBADD = @EINA_LIBS@ @SDL_LIBS@ $(top_builddir)/src/lib/libevas.la
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_FALSE@module_la_LDFLAGS = -no-undefined -module -avoid-version -L$(top_builddir)/src/lib -L$(top_builddir)/src/lib/.libs
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@noinst_LTLIBRARIES = libevas_engine_software_16_sdl.la
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@libevas_engine_software_16_sdl_la_SOURCES = $(SOFTWARE_SDL_SOURCES)
-@BUILD_ENGINE_SOFTWARE_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@libevas_engine_software_16_sdl_la_LIBADD = @SDL_LIBS@
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@includes_HEADERS = Evas_Engine_SDL_16.h
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@includesdir = $(includedir)/evas-@VMAJ@
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@pkgdir = $(libdir)/evas/modules/engines/software_16_sdl/$(MODULE_ARCH)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@pkg_LTLIBRARIES = module.la
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@module_la_SOURCES = $(SOFTWARE_SDL_SOURCES)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@module_la_LIBADD = @EINA_LIBS@ @SDL_LIBS@ $(top_builddir)/src/lib/libevas.la
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_FALSE@module_la_LDFLAGS = -no-undefined -module -avoid-version -L$(top_builddir)/src/lib -L$(top_builddir)/src/lib/.libs
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@noinst_LTLIBRARIES = libevas_engine_software_16_sdl.la
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@libevas_engine_software_16_sdl_la_SOURCES = $(SOFTWARE_SDL_SOURCES)
+@BUILD_ENGINE_SOFTWARE_16_SDL_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@libevas_engine_software_16_sdl_la_LIBADD = @SDL_LIBS@
 EXTRA_DIST = \
 evas_engine.c \
 evas_engine.h \

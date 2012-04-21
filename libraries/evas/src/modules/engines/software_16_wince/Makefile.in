@@ -221,6 +221,8 @@ EVAS_SSE3_CFLAGS = @EVAS_SSE3_CFLAGS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
 FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
@@ -271,6 +273,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -289,8 +293,6 @@ VERSION = @VERSION@
 VMAJ = @VMAJ@
 WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
 WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
-WIN32_CFLAGS = @WIN32_CFLAGS@
-WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
 XCB_GL_CFLAGS = @XCB_GL_CFLAGS@
 XCB_GL_LIBS = @XCB_GL_LIBS@
@@ -364,8 +366,6 @@ evas_engine_software_ddraw_cflags = @evas_engine_software_ddraw_cflags@
 evas_engine_software_ddraw_libs = @evas_engine_software_ddraw_libs@
 evas_engine_software_gdi_cflags = @evas_engine_software_gdi_cflags@
 evas_engine_software_gdi_libs = @evas_engine_software_gdi_libs@
-evas_engine_software_sdl_cflags = @evas_engine_software_sdl_cflags@
-evas_engine_software_sdl_libs = @evas_engine_software_sdl_libs@
 evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
@@ -473,7 +473,6 @@ AM_CPPFLAGS = \
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@pkgdir = $(libdir)/evas/modules/engines/software_16_wince/$(MODULE_ARCH)
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@pkg_LTLIBRARIES = module.la
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@module_la_SOURCES = $(SOFTWARE_16_WINCE_SOURCE)
-@BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@module_la_CFLAGS = @WIN32_CFLAGS@
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@module_la_CXXFLAGS = -fno-rtti -fno-exceptions
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@module_la_LIBADD = @EINA_LIBS@ $(top_builddir)/src/lib/libevas.la $(SOFTWARE_16_WINCE_LIBADD)
 @BUILD_ENGINE_SOFTWARE_16_WINCE_TRUE@@EVAS_STATIC_BUILD_SOFTWARE_16_WINCE_FALSE@module_la_LDFLAGS = -no-undefined @lt_enable_auto_import@ -module -avoid-version
@@ -603,36 +602,36 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 module_la-evas_engine.lo: evas_engine.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -MT module_la-evas_engine.lo -MD -MP -MF $(DEPDIR)/module_la-evas_engine.Tpo -c -o module_la-evas_engine.lo `test -f 'evas_engine.c' || echo '$(srcdir)/'`evas_engine.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT module_la-evas_engine.lo -MD -MP -MF $(DEPDIR)/module_la-evas_engine.Tpo -c -o module_la-evas_engine.lo `test -f 'evas_engine.c' || echo '$(srcdir)/'`evas_engine.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/module_la-evas_engine.Tpo $(DEPDIR)/module_la-evas_engine.Plo
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='evas_engine.c' object='module_la-evas_engine.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -c -o module_la-evas_engine.lo `test -f 'evas_engine.c' || echo '$(srcdir)/'`evas_engine.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o module_la-evas_engine.lo `test -f 'evas_engine.c' || echo '$(srcdir)/'`evas_engine.c
 
 module_la-evas_wince_fb_buffer.lo: evas_wince_fb_buffer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_fb_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_fb_buffer.Tpo -c -o module_la-evas_wince_fb_buffer.lo `test -f 'evas_wince_fb_buffer.c' || echo '$(srcdir)/'`evas_wince_fb_buffer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_fb_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_fb_buffer.Tpo -c -o module_la-evas_wince_fb_buffer.lo `test -f 'evas_wince_fb_buffer.c' || echo '$(srcdir)/'`evas_wince_fb_buffer.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/module_la-evas_wince_fb_buffer.Tpo $(DEPDIR)/module_la-evas_wince_fb_buffer.Plo
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='evas_wince_fb_buffer.c' object='module_la-evas_wince_fb_buffer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_fb_buffer.lo `test -f 'evas_wince_fb_buffer.c' || echo '$(srcdir)/'`evas_wince_fb_buffer.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_fb_buffer.lo `test -f 'evas_wince_fb_buffer.c' || echo '$(srcdir)/'`evas_wince_fb_buffer.c
 
 module_la-evas_wince_gapi_buffer.lo: evas_wince_gapi_buffer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_gapi_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_gapi_buffer.Tpo -c -o module_la-evas_wince_gapi_buffer.lo `test -f 'evas_wince_gapi_buffer.c' || echo '$(srcdir)/'`evas_wince_gapi_buffer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_gapi_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_gapi_buffer.Tpo -c -o module_la-evas_wince_gapi_buffer.lo `test -f 'evas_wince_gapi_buffer.c' || echo '$(srcdir)/'`evas_wince_gapi_buffer.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/module_la-evas_wince_gapi_buffer.Tpo $(DEPDIR)/module_la-evas_wince_gapi_buffer.Plo
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='evas_wince_gapi_buffer.c' object='module_la-evas_wince_gapi_buffer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_gapi_buffer.lo `test -f 'evas_wince_gapi_buffer.c' || echo '$(srcdir)/'`evas_wince_gapi_buffer.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_gapi_buffer.lo `test -f 'evas_wince_gapi_buffer.c' || echo '$(srcdir)/'`evas_wince_gapi_buffer.c
 
 module_la-evas_wince_gdi_buffer.lo: evas_wince_gdi_buffer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_gdi_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_gdi_buffer.Tpo -c -o module_la-evas_wince_gdi_buffer.lo `test -f 'evas_wince_gdi_buffer.c' || echo '$(srcdir)/'`evas_wince_gdi_buffer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT module_la-evas_wince_gdi_buffer.lo -MD -MP -MF $(DEPDIR)/module_la-evas_wince_gdi_buffer.Tpo -c -o module_la-evas_wince_gdi_buffer.lo `test -f 'evas_wince_gdi_buffer.c' || echo '$(srcdir)/'`evas_wince_gdi_buffer.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/module_la-evas_wince_gdi_buffer.Tpo $(DEPDIR)/module_la-evas_wince_gdi_buffer.Plo
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='evas_wince_gdi_buffer.c' object='module_la-evas_wince_gdi_buffer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(module_la_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_gdi_buffer.lo `test -f 'evas_wince_gdi_buffer.c' || echo '$(srcdir)/'`evas_wince_gdi_buffer.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(module_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o module_la-evas_wince_gdi_buffer.lo `test -f 'evas_wince_gdi_buffer.c' || echo '$(srcdir)/'`evas_wince_gdi_buffer.c
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

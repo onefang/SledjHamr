@@ -460,7 +460,9 @@ EAPI void ecore_win32_window_lower(Ecore_Win32_Window *window);
 EAPI void ecore_win32_window_title_set(Ecore_Win32_Window *window,
                                        const char         *title);
 
-EAPI void ecore_win32_window_focus_set(Ecore_Win32_Window *window);
+EAPI void ecore_win32_window_focus(Ecore_Win32_Window *window);
+
+EAPI void *ecore_win32_window_focus_get(void);
 
 EAPI void ecore_win32_window_iconified_set(Ecore_Win32_Window *window,
                                            Eina_Bool           on);
@@ -470,11 +472,6 @@ EAPI void ecore_win32_window_borderless_set(Ecore_Win32_Window *window,
 
 EAPI void ecore_win32_window_fullscreen_set(Ecore_Win32_Window *window,
                                             Eina_Bool           on);
-
-EINA_DEPRECATED EAPI void ecore_win32_window_shape_set(Ecore_Win32_Window *window,
-                                                       unsigned short      width,
-                                                       unsigned short      height,
-                                                       unsigned char      *mask);
 
 EAPI void ecore_win32_window_cursor_set(Ecore_Win32_Window *window,
                                         Ecore_Win32_Cursor *cursor);

@@ -23,12 +23,22 @@
 
 typedef CRITICAL_SECTION       Eina_Lock;
 typedef struct _Eina_Condition Eina_Condition;
+typedef struct _Eina_RWLock    Eina_RWLock;
+typedef DWORD                  Eina_TLS;
+typedef HANDLE                 Eina_Semaphore;
 
 #if _WIN32_WINNT >= 0x0600
 struct _Eina_Condition
 {
    CRITICAL_SECTION  *mutex;
    CONDITION_VARIABLE condition;
+};
+
+struct _Eina_RWLock
+{
+   SRWLOCK  mutex;
+
+  Eina_Bool is_read_mode : 1;
 };
 #else
 struct _Eina_Condition
@@ -40,27 +50,23 @@ struct _Eina_Condition
    HANDLE            waiters_done;
    Eina_Bool         was_broadcast;
 };
-#endif
 
-typedef struct _Eina_Win32_RWLock Eina_RWLock;
-
-struct _Eina_Win32_RWLock
+struct _Eina_RWLock
 {
-   LONG readers_count;
-   LONG writers_count;
-   int readers;
-   int writers;
+   LONG           readers_count;
+   LONG           writers_count;
+   int            readers;
+   int            writers;
 
    Eina_Lock      mutex;
    Eina_Condition cond_read;
    Eina_Condition cond_write;
 };
+#endif
 
-typedef DWORD     Eina_TLS;
-
-typedef HANDLE    Eina_Semaphore;
 
 EAPI extern Eina_Bool _eina_threads_activated;
+
 
 static inline Eina_Bool
 eina_lock_new(Eina_Lock *mutex)
@@ -143,9 +149,9 @@ eina_condition_new(Eina_Condition *cond, Eina_Lock *mutex)
         CloseHandle(cond->semaphore);
         return EINA_FALSE;
      }
+#endif
 
    return EINA_TRUE;
-#endif
 }
 
 static inline void
@@ -153,6 +159,7 @@ eina_condition_free(Eina_Condition *cond)
 {
 #if _WIN32_WINNT >= 0x0600
    /* Nothing to do */
+   (void)cond;
 #else
    CloseHandle(cond->waiters_done);
    DeleteCriticalSection(&cond->waiters_count_lock);
@@ -309,19 +316,28 @@ eina_condition_signal(Eina_Condition *cond)
        if (!ReleaseSemaphore(cond->semaphore, 1, 0))
          return EINA_FALSE;
     }
+#endif
 
    return EINA_TRUE;
-#endif
 }
 
 static inline Eina_Bool
 eina_rwlock_new(Eina_RWLock *mutex)
 {
+#if _WIN32_WINNT >= 0x0600
+   InitializeSRWLock(&mutex->mutex);
+   return EINA_TRUE;
+#else
    if (!eina_lock_new(&(mutex->mutex))) return EINA_FALSE;
    if (!eina_condition_new(&(mutex->cond_read), &(mutex->mutex)))
      goto on_error1;
    if (!eina_condition_new(&(mutex->cond_write), &(mutex->mutex)))
      goto on_error2;
+
+   mutex->readers_count = 0;
+   mutex->writers_count = 0;
+   mutex->readers = 0;
+   mutex->writers = 0;
 
    return EINA_TRUE;
 
@@ -330,20 +346,29 @@ eina_rwlock_new(Eina_RWLock *mutex)
  on_error1:
    eina_lock_free(&(mutex->mutex));
    return EINA_FALSE;
+#endif
 }
 
 static inline void
 eina_rwlock_free(Eina_RWLock *mutex)
 {
+#if _WIN32_WINNT >= 0x0600
+   (void)mutex;
+#else
    eina_condition_free(&(mutex->cond_read));
    eina_condition_free(&(mutex->cond_write));
    eina_lock_free(&(mutex->mutex));
+#endif
 }
 
 static inline Eina_Lock_Result
 eina_rwlock_take_read(Eina_RWLock *mutex)
 {
-   DWORD res;
+#if _WIN32_WINNT >= 0x0600
+   AcquireSRWLockShared(&mutex->mutex);
+   mutex->is_read_mode = EINA_TRUE;
+#else
+   DWORD res = 0;
 
    if (eina_lock_take(&(mutex->mutex)) == EINA_LOCK_FAIL)
      return EINA_LOCK_FAIL;
@@ -364,6 +389,7 @@ eina_rwlock_take_read(Eina_RWLock *mutex)
    if (res == 0)
      mutex->readers++;
    eina_lock_release(&(mutex->mutex));
+#endif
 
    return EINA_LOCK_SUCCEED;
 }
@@ -371,7 +397,11 @@ eina_rwlock_take_read(Eina_RWLock *mutex)
 static inline Eina_Lock_Result
 eina_rwlock_take_write(Eina_RWLock *mutex)
 {
-   DWORD res;
+#if _WIN32_WINNT >= 0x0600
+   AcquireSRWLockExclusive(&mutex->mutex);
+   mutex->is_read_mode = EINA_FALSE;
+#else
+   DWORD res = 0;
 
    if (eina_lock_take(&(mutex->mutex)) == EINA_LOCK_FAIL)
      return EINA_LOCK_FAIL;
@@ -389,8 +419,9 @@ eina_rwlock_take_write(Eina_RWLock *mutex)
           }
         mutex->writers_count--;
      }
-   if (res == 0) mutex->writers_count = 1;
+   if (res == 0) mutex->writers = 1;
    eina_lock_release(&(mutex->mutex));
+#endif
 
    return EINA_LOCK_SUCCEED;
 }
@@ -398,6 +429,12 @@ eina_rwlock_take_write(Eina_RWLock *mutex)
 static inline Eina_Lock_Result
 eina_rwlock_release(Eina_RWLock *mutex)
 {
+#if _WIN32_WINNT >= 0x0600
+   if (mutex->is_read_mode)
+     ReleaseSRWLockShared(&mutex->mutex);
+   else
+     ReleaseSRWLockExclusive(&mutex->mutex);
+#else
    if (eina_lock_take(&(mutex->mutex)) == EINA_LOCK_FAIL)
      return EINA_LOCK_FAIL;
 
@@ -433,6 +470,7 @@ eina_rwlock_release(Eina_RWLock *mutex)
           }
      }
    eina_lock_release(&(mutex->mutex));
+#endif
 
    return EINA_LOCK_SUCCEED;
 }

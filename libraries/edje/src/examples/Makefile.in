@@ -36,14 +36,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @BUILD_EXAMPLES_TRUE@am__append_1 = $(EDJS)
-@BUILD_EXAMPLES_TRUE@examples_PROGRAMS = edje-basic$(EXEEXT) \
-@BUILD_EXAMPLES_TRUE@	edje-swallow$(EXEEXT) edje-text$(EXEEXT) \
-@BUILD_EXAMPLES_TRUE@	edje-table$(EXEEXT) edje-box$(EXEEXT) \
-@BUILD_EXAMPLES_TRUE@	edje-box2$(EXEEXT) edje-drag$(EXEEXT) \
-@BUILD_EXAMPLES_TRUE@	edje-signals-messages$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@examples_PROGRAMS = edje-animations$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@	edje-basic$(EXEEXT) edje-box$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@	edje-box2$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-color-class$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@	edje-drag$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@	edje-perspective$(EXEEXT) \
-@BUILD_EXAMPLES_TRUE@	edje-animations$(EXEEXT) sigtest$(EXEEXT)
+@BUILD_EXAMPLES_TRUE@	edje-signals-messages$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@	edje-swallow$(EXEEXT) edje-table$(EXEEXT) \
+@BUILD_EXAMPLES_TRUE@	edje-text$(EXEEXT) sigtest$(EXEEXT)
 subdir = src/examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -279,6 +280,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PYTHON = @PYTHON@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
@@ -366,6 +369,10 @@ top_srcdir = @top_srcdir@
 version_info = @version_info@
 vimdir = @vimdir@
 MAINTAINERCLEANFILES = Makefile.in
+EDJE_CC = @edje_cc@
+EDJE_CC_FLAGS_VERBOSE_0 = 
+EDJE_CC_FLAGS_VERBOSE_1 = -v
+EDJE_CC_FLAGS = $(EDJE_CC_FLAGS_$(V)) -id $(srcdir) -fd $(srcdir)
 examplesdir = $(datadir)/$(PACKAGE)/examples
 @ENABLE_MULTISENSE_TRUE@MULTISENSE_EDC_FILE = multisense.edc
 @ENABLE_MULTISENSE_TRUE@SND_DIR = -sd $(srcdir)
@@ -394,14 +401,13 @@ files_DATA = $(EDCS) bubble.png red.png test.png Vera.ttf edje-basic.c \
 	edje-perspective.c edje-animations.c sigtest.c $(am__append_1)
 EXTRA_DIST = $(files_DATA)
 @BUILD_EXAMPLES_TRUE@AM_CPPFLAGS = \
-@BUILD_EXAMPLES_TRUE@        -I. \
-@BUILD_EXAMPLES_TRUE@        -I$(top_srcdir)/src/lib \
-@BUILD_EXAMPLES_TRUE@        -I$(top_srcdir)/src/lib/include \
-@BUILD_EXAMPLES_TRUE@        -DPACKAGE_BIN_DIR=\"$(bindir)\" \
-@BUILD_EXAMPLES_TRUE@        -DPACKAGE_LIB_DIR=\"$(libdir)\" \
-@BUILD_EXAMPLES_TRUE@        -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
-@BUILD_EXAMPLES_TRUE@        -DPACKAGE_EXAMPLES_DIR=\"$(datadir)/$(PACKAGE)/examples\" \
-@BUILD_EXAMPLES_TRUE@        @EDJE_CFLAGS@
+@BUILD_EXAMPLES_TRUE@-I. \
+@BUILD_EXAMPLES_TRUE@-I$(top_srcdir)/src/lib \
+@BUILD_EXAMPLES_TRUE@-I$(top_srcdir)/src/lib/include \
+@BUILD_EXAMPLES_TRUE@-DPACKAGE_BIN_DIR=\"$(bindir)\" \
+@BUILD_EXAMPLES_TRUE@-DPACKAGE_LIB_DIR=\"$(libdir)\" \
+@BUILD_EXAMPLES_TRUE@-DPACKAGE_DATA_DIR=\"$(pkgdatadir)\" \
+@BUILD_EXAMPLES_TRUE@@EDJE_CFLAGS@
 
 @BUILD_EXAMPLES_TRUE@LDADD = $(top_builddir)/src/lib/libedje.la @EDJE_LIBS@
 all: all-am
@@ -705,7 +711,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-examplesPROGRAMS clean-generic clean-libtool \
-	mostlyclean-am
+	clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -776,8 +782,8 @@ uninstall-am: uninstall-examplesPROGRAMS uninstall-filesDATA
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean \
-	clean-examplesPROGRAMS clean-generic clean-libtool ctags \
-	distclean distclean-compile distclean-generic \
+	clean-examplesPROGRAMS clean-generic clean-libtool clean-local \
+	ctags distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am \
@@ -793,7 +799,10 @@ uninstall-am: uninstall-examplesPROGRAMS uninstall-filesDATA
 
 
 .edc.edj:
-	$(edje_cc) -v -fd $(srcdir) -id $(srcdir) $(SND_DIR) $< $(builddir)/$(@F)
+	$(EDJE_CC) $(EDJE_CC_FLAGS) $(SND_DIR) $< $(builddir)/$(@F)
+
+clean-local:
+	rm -f *.edj
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

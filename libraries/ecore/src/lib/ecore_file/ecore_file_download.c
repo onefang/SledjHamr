@@ -45,22 +45,27 @@ static Ecore_Event_Handler *_url_complete_handler = NULL;
 static Ecore_Event_Handler *_url_progress_download = NULL;
 static Eina_List           *_job_list;
 
+static int download_init = 0;
+
 #endif /* BUILD_ECORE_CON */
 
 int
 ecore_file_download_init(void)
 {
 #ifdef BUILD_ECORE_CON
-  if (!ecore_con_url_init())
-    return 0;
-
+   download_init++;
+   if (download_init > 1) return 1;
+   if (!ecore_con_init()) return 0;
+   if (!ecore_con_url_init())
+     {
+        ecore_con_shutdown();
+        return 0;
+     }
 # ifdef HAVE_CURL
-  _url_complete_handler = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE, _ecore_file_download_url_complete_cb, NULL);
-  _url_progress_download = ecore_event_handler_add(ECORE_CON_EVENT_URL_PROGRESS, _ecore_file_download_url_progress_cb, NULL);
+   _url_complete_handler = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE, _ecore_file_download_url_complete_cb, NULL);
+   _url_progress_download = ecore_event_handler_add(ECORE_CON_EVENT_URL_PROGRESS, _ecore_file_download_url_progress_cb, NULL);
 # endif
-
 #endif /* BUILD_ECORE_CON */
-
    return 1;
 }
 
@@ -68,15 +73,17 @@ void
 ecore_file_download_shutdown(void)
 {
 #ifdef BUILD_ECORE_CON
-  if (_url_complete_handler)
-    ecore_event_handler_del(_url_complete_handler);
-  if (_url_progress_download)
-    ecore_event_handler_del(_url_progress_download);
-  _url_complete_handler = NULL;
-  _url_progress_download = NULL;
-  ecore_file_download_abort_all();
-
-  ecore_con_url_shutdown();
+   download_init--;
+   if (download_init > 0) return;
+   if (_url_complete_handler)
+     ecore_event_handler_del(_url_complete_handler);
+   if (_url_progress_download)
+     ecore_event_handler_del(_url_progress_download);
+   _url_complete_handler = NULL;
+   _url_progress_download = NULL;
+   ecore_file_download_abort_all();
+   ecore_con_url_shutdown();
+   ecore_con_shutdown();
 #endif /* BUILD_ECORE_CON */
 }
 
@@ -362,7 +369,6 @@ _ecore_file_download_curl(const char *url, const char *dst,
      }
 
    if (headers) eina_hash_foreach(headers, _ecore_file_download_headers_foreach_cb, job);
-   ecore_con_url_timeout_set(job->url_con, ECORE_FILE_DOWNLOAD_TIMEOUT);
    ecore_con_url_fd_set(job->url_con, fileno(job->file));
    ecore_con_url_data_set(job->url_con, data);
 

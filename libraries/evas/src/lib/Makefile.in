@@ -83,15 +83,13 @@ host_triplet = @host@
 @EVAS_STATIC_BUILD_SOFTWARE_8_X11_TRUE@am__append_36 = ../modules/engines/software_8_x11/
 @EVAS_STATIC_BUILD_SOFTWARE_8_X11_TRUE@am__append_37 = ../modules/engines/software_8_x11/libevas_engine_software_8_x11.la
 @EVAS_STATIC_BUILD_SOFTWARE_8_X11_TRUE@am__append_38 = @evas_engine_software_8_x11_libs@
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@am__append_39 = \
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@	../modules/engines/software_16_sdl/ \
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@	../modules/engines/software_sdl/
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@am__append_39 = \
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@	../modules/engines/software_16_sdl/
 
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@am__append_40 = \
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@	../modules/engines/software_16_sdl/libevas_engine_software_16_sdl.la \
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@	../modules/engines/software_sdl/libevas_engine_software_sdl.la
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@am__append_40 = \
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@	../modules/engines/software_16_sdl/libevas_engine_software_16_sdl.la
 
-@EVAS_STATIC_BUILD_SOFTWARE_SDL_TRUE@am__append_41 = @SDL_LIBS@
+@EVAS_STATIC_BUILD_SOFTWARE_16_SDL_TRUE@am__append_41 = @SDL_LIBS@
 @EVAS_STATIC_BUILD_SOFTWARE_DDRAW_TRUE@am__append_42 = ../modules/engines/software_ddraw/
 @EVAS_STATIC_BUILD_SOFTWARE_DDRAW_TRUE@am__append_43 = ../modules/engines/software_ddraw/libevas_engine_software_ddraw.la
 @EVAS_STATIC_BUILD_SOFTWARE_DDRAW_TRUE@am__append_44 = @evas_engine_software_ddraw_libs@
@@ -346,6 +344,8 @@ EVAS_SSE3_CFLAGS = @EVAS_SSE3_CFLAGS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 FONTCONFIG_CFLAGS = @FONTCONFIG_CFLAGS@
 FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
@@ -396,6 +396,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PIXMAN_CFLAGS = @PIXMAN_CFLAGS@
 PIXMAN_LIBS = @PIXMAN_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PNG_CFLAGS = @PNG_CFLAGS@
 PNG_LIBS = @PNG_LIBS@
 RANLIB = @RANLIB@
@@ -414,8 +416,6 @@ VERSION = @VERSION@
 VMAJ = @VMAJ@
 WAYLAND_EGL_CFLAGS = @WAYLAND_EGL_CFLAGS@
 WAYLAND_EGL_LIBS = @WAYLAND_EGL_LIBS@
-WIN32_CFLAGS = @WIN32_CFLAGS@
-WIN32_CPPFLAGS = @WIN32_CPPFLAGS@
 XCB_CFLAGS = @XCB_CFLAGS@
 XCB_GL_CFLAGS = @XCB_GL_CFLAGS@
 XCB_GL_LIBS = @XCB_GL_LIBS@
@@ -489,8 +489,6 @@ evas_engine_software_ddraw_cflags = @evas_engine_software_ddraw_cflags@
 evas_engine_software_ddraw_libs = @evas_engine_software_ddraw_libs@
 evas_engine_software_gdi_cflags = @evas_engine_software_gdi_cflags@
 evas_engine_software_gdi_libs = @evas_engine_software_gdi_libs@
-evas_engine_software_sdl_cflags = @evas_engine_software_sdl_cflags@
-evas_engine_software_sdl_libs = @evas_engine_software_sdl_libs@
 evas_engine_software_xcb_cflags = @evas_engine_software_xcb_cflags@
 evas_engine_software_xcb_libs = @evas_engine_software_xcb_libs@
 evas_engine_software_xlib_cflags = @evas_engine_software_xlib_cflags@
@@ -625,7 +623,6 @@ AM_CPPFLAGS = \
 @pthread_cflags@ \
 @PIXMAN_CFLAGS@
 
-AM_CFLAGS = @WIN32_CFLAGS@
 lib_LTLIBRARIES = libevas.la
 includes_HEADERS = Evas.h Evas_GL.h
 includesdir = $(includedir)/evas-@VMAJ@

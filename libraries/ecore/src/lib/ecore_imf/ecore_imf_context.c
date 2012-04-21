@@ -143,6 +143,32 @@ ecore_imf_context_default_id_by_canvas_type_get(const char *canvas_type)
  * @return Return a #Ecore_IMF_Context_Info for the Input Method Context with @p id;
  *         on failure it returns NULL.
  * @ingroup Ecore_IMF_Context_Group
+ * 
+ * Example
+ * @code
+ *
+ * const char *ctx_id;
+ * const Ecore_IMF_Context_Info *ctx_info;
+ * Ecore_IMF_Context *imf_context;
+ * ctx_id = ecore_imf_context_default_id_get();
+ * if (ctx_id)
+ *   {
+ *      ctx_info = ecore_imf_context_info_by_id_get(ctx_id);
+ *      if (!ctx_info->canvas_type ||
+ *          strcmp(ctx_info->canvas_type, "evas") == 0)
+ *        {
+ *           imf_context = ecore_imf_context_add(ctx_id);
+ *        }
+ *      else
+ *        {
+ *           ctx_id = ecore_imf_context_default_id_by_canvas_type_get("evas");
+ *           if (ctx_id)
+ *             {
+ *                imf_context = ecore_imf_context_add(ctx_id);
+ *             }
+ *        }
+ *   }
+ * @endcode
  */
 EAPI const Ecore_IMF_Context_Info *
 ecore_imf_context_info_by_id_get(const char *id)
@@ -187,6 +213,10 @@ ecore_imf_context_add(const char *id)
    /* default input panel enabled status is EINA_TRUE, so let's make sure it's
     * set on the immodule */
    ecore_imf_context_input_panel_enabled_set(ctx, EINA_TRUE);
+
+   /* default input panel layout type is NORMAL type, so let's make sure it's
+    * set on the immodule */
+   ecore_imf_context_input_panel_layout_set(ctx, ECORE_IMF_INPUT_PANEL_LAYOUT_NORMAL);
 
    /* default input_mode is ECORE_IMF_INPUT_MODE_FULL, so let's make sure it's
     * set on the immodule */
@@ -403,7 +433,7 @@ ecore_imf_context_preedit_string_get(Ecore_IMF_Context *ctx, char **str, int *cu
 }
 
 /**
- * Retrieve the current preedit string, atrributes and
+ * Retrieve the current preedit string, attributes and
  * cursor position for the Input Method Context.
  *
  * @param ctx An #Ecore_IMF_Context.
@@ -413,6 +443,49 @@ ecore_imf_context_preedit_string_get(Ecore_IMF_Context *ctx, char **str, int *cu
  * @param cursor_pos Location to store position of cursor (in characters)
  *                   within the preedit string.
  * @ingroup Ecore_IMF_Context_Group
+ *
+ * Example
+ * @code
+ * char *preedit_string;
+ * int cursor_pos;
+ * Eina_List *attrs = NULL, *l = NULL;
+ * Ecore_IMF_Preedit_Attr *attr;
+ *
+ * ecore_imf_context_preedit_string_with_attributes_get(imf_context,
+ *                                                      &preedit_string,
+ *                                                      &attrs, &cursor_pos);
+ * if (!preedit_string) return;
+ *
+ *  if (strlen(preedit_string) > 0)
+ *    {
+ *       if (attrs)
+ *         {
+ *            EINA_LIST_FOREACH(attrs, l, attr)
+ *              {
+ *                 if (attr->preedit_type == ECORE_IMF_PREEDIT_TYPE_SUB1)
+ *                   {
+ *                      // Something to do
+ *                   }
+ *                 else if (attr->preedit_type == ECORE_IMF_PREEDIT_TYPE_SUB2)
+ *                   {
+ *                      // Something to do
+ *                   }
+ *                 else if (attr->preedit_type == ECORE_IMF_PREEDIT_TYPE_SUB3)
+ *                   {
+ *                      // Something to do
+ *                   }
+ *              }
+ *         }
+ *    }
+ * 
+ * // delete attribute list
+ * if (attrs)
+ *   {
+ *      EINA_LIST_FREE(attrs, attr) free(attr);
+ *   }
+ *
+ * free(preedit_string);
+ * @endcode
  * @since 1.1.0
  */
 EAPI void
@@ -440,6 +513,18 @@ ecore_imf_context_preedit_string_with_attributes_get(Ecore_IMF_Context *ctx, cha
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Group
+ *
+ * Example
+ * @code
+ * static void
+ * _focus_in_cb(void *data, Evas_Object *o, const char *emission, const char *source)
+ * {
+ *    ecore_imf_context_reset(imf_context);
+ *    ecore_imf_context_focus_in(imf_context);
+ * }
+ *
+ * evas_object_event_callback_add(obj, EVAS_CALLBACK_FOCUS_IN, _focus_in_cb, ed);
+ * @endcode
  */
 EAPI void
 ecore_imf_context_focus_in(Ecore_IMF_Context *ctx)
@@ -459,6 +544,18 @@ ecore_imf_context_focus_in(Ecore_IMF_Context *ctx)
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Group
+ *
+ * Example
+ * @code
+ * static void
+ * _focus_out_cb(void *data, Evas_Object *o, const char *emission, const char *source)
+ * {
+ *    ecore_imf_context_reset(imf_context);
+ *    ecore_imf_context_focus_out(imf_context);
+ * }
+ *
+ * evas_object_event_callback_add(obj, EVAS_CALLBACK_FOCUS_OUT, _focus_out_cb, ed);
+ * @endcode
  */
 EAPI void
 ecore_imf_context_focus_out(Ecore_IMF_Context *ctx)
@@ -479,6 +576,18 @@ ecore_imf_context_focus_out(Ecore_IMF_Context *ctx)
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Group
+ * 
+ * Example
+ * @code
+ * static void
+ * _focus_out_cb(void *data, Evas_Object *o, const char *emission, const char *source)
+ * {
+ *    ecore_imf_context_reset(imf_context);
+ *    ecore_imf_context_focus_out(imf_context);
+ * }
+ *
+ * evas_object_event_callback_add(obj, EVAS_CALLBACK_FOCUS_OUT, _focus_out_cb, ed);
+ * @endcode
  */
 EAPI void
 ecore_imf_context_reset(Ecore_IMF_Context *ctx)
@@ -515,10 +624,12 @@ ecore_imf_context_cursor_position_set(Ecore_IMF_Context *ctx, int cursor_pos)
 /**
  * Notify the Input Method Context that a change in the cursor
  * location has been made. The location is relative to the canvas.
+ * The cursor location can be used to determine the position of 
+ * candidate word window in the immodule.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @param x cursor x position.
- * @param x cursor y position.
+ * @param y cursor y position.
  * @param w cursor width.
  * @param h cursor height.
  * @ingroup Ecore_IMF_Context_Group
@@ -605,7 +716,7 @@ ecore_imf_context_prediction_allow_get(Ecore_IMF_Context *ctx)
 }
 
 /**
- * Set the autocapitalization type on the immodule. 
+ * Set the autocapitalization type on the immodule.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @param autocapital_type the autocapitalization type.
@@ -732,6 +843,28 @@ ecore_imf_context_input_mode_get(Ecore_IMF_Context *ctx)
  * @param event The event itself.
  * @return EINA_TRUE if the event was handled; otherwise EINA_FALSE.
  * @ingroup Ecore_IMF_Context_Group
+ *
+ * Example
+ * @code
+ * static void
+ * _key_down_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
+ * {
+ *    Evas_Event_Key_Down *ev = event_info;
+ *    if (!ev->keyname) return;
+ *
+ *    if (imf_context)
+ *      {
+ *         Ecore_IMF_Event_Key_Down ecore_ev;
+ *         ecore_imf_evas_event_key_down_wrap(ev, &ecore_ev);
+ *         if (ecore_imf_context_filter_event(imf_context,
+ *                                            ECORE_IMF_EVENT_KEY_DOWN,
+ *                                            (Ecore_IMF_Event *)&ecore_ev))
+ *           return;
+ *      }
+ * }
+ *
+ * evas_object_event_callback_add(obj, EVAS_CALLBACK_KEY_DOWN, _key_down_cb, data);
+ * @endcode
  */
 EAPI Eina_Bool
 ecore_imf_context_filter_event(Ecore_IMF_Context *ctx, Ecore_IMF_Event_Type type, Ecore_IMF_Event *event)
@@ -839,7 +972,7 @@ EAPI void *ecore_imf_context_data_get(Ecore_IMF_Context *ctx)
  *             If the function returns EINA_TRUE, then you must free
  *             the result stored in this location with free().
  * @param cursor_pos Location to store the position in characters of
- *                   the insertion cursor within @text.
+ *                   the insertion cursor within @p text.
  * @return EINA_TRUE if surrounding text was provided; otherwise EINA_FALSE.
  * @ingroup Ecore_IMF_Context_Module_Group
  */
@@ -877,6 +1010,8 @@ _ecore_imf_event_free_preedit(void *data __UNUSED__, void *event)
  * Adds ECORE_IMF_EVENT_PREEDIT_START to the event queue.
  *
  * ECORE_IMF_EVENT_PREEDIT_START should be added when a new preedit sequence starts.
+ * It's asynchronous method to put event to the event queue.
+ * ecore_imf_context_event_callback_call() can be used as synchronous method.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Module_Group
@@ -903,6 +1038,8 @@ ecore_imf_context_preedit_start_event_add(Ecore_IMF_Context *ctx)
  * Adds ECORE_IMF_EVENT_PREEDIT_END to the event queue.
  *
  * ECORE_IMF_EVENT_PREEDIT_END should be added when a new preedit sequence has been completed or canceled.
+ * It's asynchronous method to put event to the event queue.
+ * ecore_imf_context_event_callback_call() can be used as synchronous method.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Module_Group
@@ -927,6 +1064,9 @@ ecore_imf_context_preedit_end_event_add(Ecore_IMF_Context *ctx)
 
 /**
  * Adds ECORE_IMF_EVENT_PREEDIT_CHANGED to the event queue.
+ *
+ * It's asynchronous method to put event to the event queue.
+ * ecore_imf_context_event_callback_call() can be used as synchronous method.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @ingroup Ecore_IMF_Context_Module_Group
@@ -961,6 +1101,9 @@ _ecore_imf_event_free_commit(void *data __UNUSED__, void *event)
 
 /**
  * Adds ECORE_IMF_EVENT_COMMIT to the event queue.
+ *
+ * It's asynchronous method to put event to the event queue.
+ * ecore_imf_context_event_callback_call() can be used as synchronous method.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @param str The committed string.
@@ -998,6 +1141,9 @@ _ecore_imf_event_free_delete_surrounding(void *data __UNUSED__, void *event)
  * Asks the widget that the input context is attached to to delete characters around the cursor position
  * by adding the ECORE_IMF_EVENT_DELETE_SURROUNDING to the event queue.
  * Note that offset and n_chars are in characters not in bytes.
+ *
+ * It's asynchronous method to put ECORE_IMF_EVENT_DELETE_SURROUNDING event to the event queue.
+ * ecore_imf_context_event_callback_call() can be used as synchronous method.
  *
  * @param ctx An #Ecore_IMF_Context.
  * @param offset The start offset of surrounding to be deleted.
@@ -1041,8 +1187,20 @@ ecore_imf_context_delete_surrounding_event_add(Ecore_IMF_Context *ctx, int offse
  * @param func The (callback) function to be called when the event is
  *        triggered
  * @param data The data pointer to be passed to @p func
- * @ingroup Ecore_IMF_Context_Module_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.2.0
+ *
+ * Example
+ * @code
+ * static void
+ * _imf_event_commit_cb(void *data, Ecore_IMF_Context *ctx, void *event_info)
+ * {
+ *    char *commit_str = event_info;
+ *    // something to do
+ * }
+ *
+ * ecore_imf_context_event_callback_add(en->imf_context, ECORE_IMF_CALLBACK_COMMIT, _imf_event_commit_cb, data);
+ * @endcode
  */
 EAPI void
 ecore_imf_context_event_callback_add(Ecore_IMF_Context *ctx, Ecore_IMF_Callback_Type type, Ecore_IMF_Event_Cb func, const void *data)
@@ -1079,10 +1237,10 @@ ecore_imf_context_event_callback_add(Ecore_IMF_Context *ctx, Ecore_IMF_Callback_
  * @see ecore_imf_context_event_callback_add() for more details
  *
  * @param ctx Ecore_IMF_Context to remove a callback from.
- * @param type The type of event that was trigerring the callback
+ * @param type The type of event that was triggering the callback
  * @param func The (callback) function that was to be called when the event was triggered
  * @return the data pointer
- * @ingroup Ecore_IMF_Context_Module_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.2.0
  */
 EAPI void *
@@ -1096,7 +1254,7 @@ ecore_imf_context_event_callback_del(Ecore_IMF_Context *ctx, Ecore_IMF_Callback_
      {
         ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
                          "ecore_imf_context_event_callback_del");
-        return;
+        return NULL;
      }
 
    if (!func) return NULL;
@@ -1106,7 +1264,7 @@ ecore_imf_context_event_callback_del(Ecore_IMF_Context *ctx, Ecore_IMF_Callback_
      {
         if ((fn) && (fn->func == func) && (fn->type == type))
           {
-             void *tmp = fn->data;
+             void *tmp = (void *)fn->data;
              free(fn);
              ctx->callbacks = eina_list_remove_list(ctx->callbacks, l);
              return tmp;
@@ -1156,11 +1314,11 @@ ecore_imf_context_event_callback_call(Ecore_IMF_Context *ctx, Ecore_IMF_Callback
  * Ask the Input Method Context to show the control panel of using Input Method.
  *
  * @param ctx An #Ecore_IMF_Context.
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
-ecore_imf_context_control_panel_show (Ecore_IMF_Context *ctx)
+ecore_imf_context_control_panel_show(Ecore_IMF_Context *ctx)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1176,11 +1334,11 @@ ecore_imf_context_control_panel_show (Ecore_IMF_Context *ctx)
  * Ask the Input Method Context to hide the control panel of using Input Method.
  *
  * @param ctx An #Ecore_IMF_Context.
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
-ecore_imf_context_control_panel_hide (Ecore_IMF_Context *ctx)
+ecore_imf_context_control_panel_hide(Ecore_IMF_Context *ctx)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1196,7 +1354,7 @@ ecore_imf_context_control_panel_hide (Ecore_IMF_Context *ctx)
  * Ask the Input Method Context to show the input panel (virtual keyboard).
  *
  * @param ctx An #Ecore_IMF_Context.
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
@@ -1216,7 +1374,7 @@ ecore_imf_context_input_panel_show(Ecore_IMF_Context *ctx)
  * Ask the Input Method Context to hide the input panel.
  *
  * @param ctx An #Ecore_IMF_Context.
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
@@ -1236,12 +1394,12 @@ ecore_imf_context_input_panel_hide(Ecore_IMF_Context *ctx)
  * Set the layout of the input panel.
  *
  * @param ctx An #Ecore_IMF_Context.
- * @param layout see #ECORE_IMF_INPUT_PANEL_LAYOUT
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @param layout see #Ecore_IMF_Input_Panel_Layout
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
-ecore_imf_context_input_panel_layout_set (Ecore_IMF_Context *ctx, Ecore_IMF_Input_Panel_Layout layout)
+ecore_imf_context_input_panel_layout_set(Ecore_IMF_Context *ctx, Ecore_IMF_Input_Panel_Layout layout)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1261,11 +1419,11 @@ ecore_imf_context_input_panel_layout_set (Ecore_IMF_Context *ctx, Ecore_IMF_Inpu
  *
  * @param ctx An #Ecore_IMF_Context.
  * @return layout see #Ecore_IMF_Input_Panel_Layout
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI Ecore_IMF_Input_Panel_Layout
-ecore_imf_context_input_panel_layout_get (Ecore_IMF_Context *ctx)
+ecore_imf_context_input_panel_layout_get(Ecore_IMF_Context *ctx)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1275,9 +1433,7 @@ ecore_imf_context_input_panel_layout_get (Ecore_IMF_Context *ctx)
      }
 
    if (ctx->klass->input_panel_layout_get)
-     {
-        return ctx->input_panel_layout;
-     }
+     return ctx->input_panel_layout;
    else
      return ECORE_IMF_INPUT_PANEL_LAYOUT_INVALID;
 }
@@ -1288,11 +1444,11 @@ ecore_imf_context_input_panel_layout_get (Ecore_IMF_Context *ctx)
  *
  * @param ctx An #Ecore_IMF_Context.
  * @param lang the language to be set to the input panel.
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI void
-ecore_imf_context_input_panel_language_set (Ecore_IMF_Context *ctx, Ecore_IMF_Input_Panel_Lang lang)
+ecore_imf_context_input_panel_language_set(Ecore_IMF_Context *ctx, Ecore_IMF_Input_Panel_Lang lang)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1312,11 +1468,11 @@ ecore_imf_context_input_panel_language_set (Ecore_IMF_Context *ctx, Ecore_IMF_In
  *
  * @param ctx An #Ecore_IMF_Context.
  * @return Ecore_IMF_Input_Panel_Lang
- * @ingroup Ecore_IMF_Context_IMControl_Group
+ * @ingroup Ecore_IMF_Context_Group
  * @since 1.1.0
  */
 EAPI Ecore_IMF_Input_Panel_Lang
-ecore_imf_context_input_panel_language_get (Ecore_IMF_Context *ctx)
+ecore_imf_context_input_panel_language_get(Ecore_IMF_Context *ctx)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1338,7 +1494,7 @@ ecore_imf_context_input_panel_language_get (Ecore_IMF_Context *ctx)
  * @since 1.1.0
  */
 EAPI void
-ecore_imf_context_input_panel_enabled_set (Ecore_IMF_Context *ctx,
+ecore_imf_context_input_panel_enabled_set(Ecore_IMF_Context *ctx,
                                            Eina_Bool enabled)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
@@ -1360,7 +1516,7 @@ ecore_imf_context_input_panel_enabled_set (Ecore_IMF_Context *ctx,
  * @since 1.1.0
  */
 EAPI Eina_Bool
-ecore_imf_context_input_panel_enabled_get (Ecore_IMF_Context *ctx)
+ecore_imf_context_input_panel_enabled_get(Ecore_IMF_Context *ctx)
 {
    if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
      {
@@ -1370,5 +1526,193 @@ ecore_imf_context_input_panel_enabled_get (Ecore_IMF_Context *ctx)
      }
 
    return ctx->input_panel_enabled;
+}
+
+/**
+ * Set the input panel-specific data to deliver to the input panel.
+ * This API is used by applications to deliver specific data to the input panel.
+ * The data format MUST be negotiated by both application and the input panel.
+ * The size and format of data are defined by the input panel.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @param data The specific data to be set to the input panel.
+ * @param len the length of data, in bytes, to send to the input panel
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI void
+ecore_imf_context_input_panel_imdata_set(Ecore_IMF_Context *ctx, const void *data, int len)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_imdata_set");
+        return;
+     }
+
+   if (!data) return;
+
+   if (ctx->klass->input_panel_imdata_set)
+     ctx->klass->input_panel_imdata_set(ctx, data, len);
+}
+
+/**
+ * Get the specific data of the current active input panel.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @param data The specific data to be got from the input panel
+ * @param len The length of data
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI void
+ecore_imf_context_input_panel_imdata_get(Ecore_IMF_Context *ctx, void *data, int *len)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_imdata_get");
+        return;
+     }
+
+   if (!data) return;
+
+   if (ctx->klass->input_panel_imdata_get)
+     ctx->klass->input_panel_imdata_get(ctx, data, len);
+}
+
+/**
+ * Set the "return" key type. This type is used to set string or icon on the "return" key of the input panel.
+ *
+ * An input panel displays the string or icon associated with this type
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @param return_key_type The type of "return" key on the input panel
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI void
+ecore_imf_context_input_panel_return_key_type_set(Ecore_IMF_Context *ctx, Ecore_IMF_Input_Panel_Return_Key_Type return_key_type)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_return_key_type_set");
+        return;
+     }
+
+   ctx->input_panel_return_key_type = return_key_type;
+   if (ctx->klass->input_panel_return_key_type_set) ctx->klass->input_panel_return_key_type_set(ctx, return_key_type);
+}
+
+/**
+ * Get the "return" key type.
+ *
+ * @see ecore_imf_context_input_panel_return_key_type_set() for more details
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @return The type of "return" key on the input panel
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI Ecore_IMF_Input_Panel_Return_Key_Type
+ecore_imf_context_input_panel_return_key_type_get(Ecore_IMF_Context *ctx)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_return_key_type_get");
+        return EINA_FALSE;
+     }
+
+   return ctx->input_panel_return_key_type;
+}
+
+/**
+ * Set the return key on the input panel to be disabled.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @param disabled The state
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI void
+ecore_imf_context_input_panel_return_key_disabled_set(Ecore_IMF_Context *ctx, Eina_Bool disabled)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_return_key_disabled_set");
+        return;
+     }
+
+   ctx->input_panel_return_key_disabled = disabled;
+   if (ctx->klass->input_panel_return_key_disabled_set) ctx->klass->input_panel_return_key_disabled_set(ctx, disabled);
+}
+
+/**
+ * Get whether the return key on the input panel should be disabled or not.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @return EINA_TRUE if it should be disabled
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI Eina_Bool
+ecore_imf_context_input_panel_return_key_disabled_get(Ecore_IMF_Context *ctx)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_return_key_disabled_get");
+        return EINA_FALSE;
+     }
+
+   return ctx->input_panel_return_key_disabled;
+}
+
+/**
+ * Set the caps lock mode on the input panel.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @param mode Turn on caps lock on the input panel if EINA_TRUE
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI void
+ecore_imf_context_input_panel_caps_lock_mode_set(Ecore_IMF_Context *ctx, Eina_Bool mode)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_caps_lock_mode_set");
+        return;
+     }
+
+   if (ctx->klass->input_panel_caps_lock_mode_set)
+     ctx->klass->input_panel_caps_lock_mode_set(ctx, mode);
+
+   ctx->input_panel_caps_lock_mode = mode;
+}
+
+/**
+ * Get the caps lock mode on the input panel.
+ *
+ * @param ctx An #Ecore_IMF_Context.
+ * @return EINA_TRUE if the caps lock is turned on.
+ * @ingroup Ecore_IMF_Context_Group
+ * @since 1.2.0
+ */
+EAPI Eina_Bool
+ecore_imf_context_input_panel_caps_lock_mode_get(Ecore_IMF_Context *ctx)
+{
+   if (!ECORE_MAGIC_CHECK(ctx, ECORE_MAGIC_CONTEXT))
+     {
+        ECORE_MAGIC_FAIL(ctx, ECORE_MAGIC_CONTEXT,
+                         "ecore_imf_context_input_panel_caps_lock_mode_get");
+        return EINA_FALSE;
+     }
+
+   return ctx->input_panel_caps_lock_mode;
 }
 

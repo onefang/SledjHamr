@@ -8,10 +8,15 @@ Additions:
    * Textblock now supports self-closing tags, i.e <br/>. Those should be used instead of the old <br> way.
    * Shm engine for drawing in Wayland.
    * evas_object_smart_callback_del_full API.
+   * Add double buffer support to the buffer engine.
 
 Improvements:
 
    * Use Eina_File mmap infrastructure for bmp, ico, pmaps, psd, wbmp and xpm file access.
+
+Removal:
+
+   * Software_SDL engine is gone, use buffer engine directly.
 
 Evas 1.1.0
 
@@ -65,6 +70,9 @@ Additions:
     * underline dashing suport to textblock
     * API to get largest image size
     * GL Cocoa engine
+    * Evas GL support in software backend through OSMesa
+    * API to new/free Evas_GL_Config rather than user declaring it
+    * Evas GL Direct rendering option hint to allow rendering to evas' window when possible
 
 Fixes:
 

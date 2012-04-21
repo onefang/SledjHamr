@@ -6,7 +6,7 @@
    @mainpage Eet Library Documentation
 
    @version 1.5.0
-   @date 2000-2011
+   @date 2000-2012
 
    Please see the @ref authors page for contact details.
 
@@ -30,7 +30,7 @@
    Eet is extremely fast, small and simple. Eet files can be very small and
    highly compressed, making them very optimal for just sending across the
    internet without having to archive, compress or decompress and install them.
-   They allow for lightning-fast random-acess reads once created, making them
+   They allow for lightning-fast random-access reads once created, making them
    perfect for storing data that is written once (or rarely) and read many
    times, but the program does not want to have to read it all in at once.
 
@@ -577,7 +577,7 @@ EAPI Eet_File_Mode
 eet_mode_get(Eet_File *ef);
 
 /**
- * Close an eet file handle and flush and writes pending.
+ * Close an eet file handle and flush pending writes.
  * @param ef A valid eet file handle.
  *
  * This function will flush any pending writes to disk if the eet file
@@ -643,6 +643,17 @@ eet_dictionary_get(Eet_File *ef);
 EAPI int
 eet_dictionary_string_check(Eet_Dictionary *ed,
                             const char *string);
+
+/**
+ * Return the number of strings inside a dictionary
+ * @param ed A valid dictionary handle
+ * @return the number of strings inside a dictionary
+ *
+ * @since 1.6.0
+ * @ingroup Eet_File_Group
+ */
+EAPI int
+eet_dictionary_count(const Eet_Dictionary *ed);
 
 /**
  * Read a specified entry from an eet file and return data

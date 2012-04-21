@@ -9,18 +9,30 @@
 # define _GNU_SOURCE
 #endif
 
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
 #ifdef HAVE_ALLOCA_H
 # include <alloca.h>
-#elif defined __GNUC__
-# define alloca __builtin_alloca
-#elif defined _AIX
-# define alloca __alloca
-#elif defined _MSC_VER
-# include <malloc.h>
-# define alloca _alloca
-#else
-# include <stddef.h>
+#elif !defined alloca
+# ifdef __GNUC__
+#  define alloca __builtin_alloca
+# elif defined _AIX
+#  define alloca __alloca
+# elif defined _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
+# elif !defined HAVE_ALLOCA
+#  ifdef  __cplusplus
+extern "C"
+#  endif
 void *alloca (size_t);
+# endif
 #endif
 
 #include <string.h>
@@ -34,6 +46,8 @@ void *alloca (size_t);
 # include <libgen.h>
 # include <unistd.h>
 #endif
+
+#include <fcntl.h>
 
 #include <lua.h>
 #include <lualib.h>
@@ -62,7 +76,7 @@ void *alloca (size_t);
 
 #include "Edje.h"
 
-EAPI extern int _edje_default_log_dom ; 
+EAPI extern int _edje_default_log_dom ;
 
 #ifdef EDJE_DEFAULT_LOG_COLOR
 # undef EDJE_DEFAULT_LOG_COLOR
@@ -84,6 +98,10 @@ EAPI extern int _edje_default_log_dom ;
 # undef CRIT
 #endif
 #define CRIT(...) EINA_LOG_DOM_CRIT(_edje_default_log_dom, __VA_ARGS__)
+#ifdef DBG
+# undef DBG
+#endif
+#define DBG(...) EINA_LOG_DOM_DBG(_edje_default_log_dom, __VA_ARGS__)
 #ifdef __GNUC__
 # if __GNUC__ >= 4
 // BROKEN in gcc 4 on amd64
@@ -173,7 +191,7 @@ struct _Edje_Smart_Api
 /* increment this when you add new feature to edje file format without
  * breaking backward compatibility.
  */
-#define EDJE_FILE_MINOR 2
+#define EDJE_FILE_MINOR 3
 
 /* FIXME:
  *
@@ -218,6 +236,7 @@ struct _Edje_Position
 struct _Edje_Size
 {
    int w, h;
+   Eina_Bool limit; /* should we limit ourself to the size of the source */
 };
 
 struct _Edje_Rectangle
@@ -322,6 +341,7 @@ typedef struct _Edje_Var_Timer Edje_Var_Timer;
 typedef struct _Edje_Var_Pool Edje_Var_Pool;
 typedef struct _Edje_Signal_Source_Char Edje_Signal_Source_Char;
 typedef struct _Edje_Text_Insert_Filter_Callback Edje_Text_Insert_Filter_Callback;
+typedef struct _Edje_Markup_Filter_Callback Edje_Markup_Filter_Callback;
 
 #define EDJE_INF_MAX_W 100000
 #define EDJE_INF_MAX_H 100000
@@ -612,6 +632,8 @@ struct _Edje_Program /* a conditional program to be run */
       int src; /* part where parameter is being retrieved */
       int dst; /* part where parameter is being stored */
    } param;
+
+   Eina_Bool exec : 1;
 };
 
 struct _Edje_Program_Target /* the target of an action */
@@ -752,6 +774,8 @@ struct _Edje_Part_Collection
 
    unsigned char    lua_script_only;
 
+   unsigned char    broadcast_signal;
+
    unsigned char    checked : 1;
 };
 
@@ -839,7 +863,7 @@ struct _Edje_Part_Description_Common
       unsigned char have;
       FLOAT_T w, h;
    } minmul;
-   
+
    Edje_Size min, max;
    Edje_Position step; /* size stepping by n pixels, 0 = none */
    Edje_Aspect_Prefer aspect;
@@ -1074,6 +1098,7 @@ struct _Edje
    Edje_Real_Part       *focused_part;
    Eina_List            *subobjs;
    Eina_List            *text_insert_filter_callbacks;
+   Eina_List            *markup_filter_callbacks;
    void                 *script_only_data;
 
    int                   table_programs_size;
@@ -1145,6 +1170,8 @@ struct _Edje
 #endif
    unsigned int          have_mapped_part : 1;
    unsigned int          recalc_call : 1;
+   unsigned int          update_hints : 1;
+   unsigned int          recalc_hints : 1;
 };
 
 struct _Edje_Calc_Params
@@ -1179,7 +1206,7 @@ struct _Edje_Calc_Params
          int x, y, z;
       } center; // 12
       struct {
-         double x, y, z;
+         FLOAT_T x, y, z;
       } rotation; // 24
       struct {
          int x, y, z;
@@ -1331,6 +1358,13 @@ struct _Edje_Text_Insert_Filter_Callback
 {
    const char  *part;
    Edje_Text_Filter_Cb func;
+   void        *data;
+};
+
+struct _Edje_Markup_Filter_Callback
+{
+   const char  *part;
+   Edje_Markup_Filter_Cb func;
    void        *data;
 };
 
@@ -1907,10 +1941,11 @@ const Eina_List *_edje_entry_anchors_list(Edje_Real_Part *rp);
 Eina_Bool _edje_entry_item_geometry_get(Edje_Real_Part *rp, const char *item, Evas_Coord *cx, Evas_Coord *cy, Evas_Coord *cw, Evas_Coord *ch);
 const Eina_List *_edje_entry_items_list(Edje_Real_Part *rp);
 void _edje_entry_cursor_geometry_get(Edje_Real_Part *rp, Evas_Coord *cx, Evas_Coord *cy, Evas_Coord *cw, Evas_Coord *ch);
+void _edje_entry_user_insert(Edje_Real_Part *rp, const char *text);
 void _edje_entry_select_allow_set(Edje_Real_Part *rp, Eina_Bool allow);
 Eina_Bool _edje_entry_select_allow_get(const Edje_Real_Part *rp);
 void _edje_entry_select_abort(Edje_Real_Part *rp);
-
+void *_edje_entry_imf_context_get(Edje_Real_Part *rp);
 Eina_Bool _edje_entry_cursor_next(Edje_Real_Part *rp, Edje_Cursor cur);
 Eina_Bool _edje_entry_cursor_prev(Edje_Real_Part *rp, Edje_Cursor cur);
 Eina_Bool _edje_entry_cursor_up(Edje_Real_Part *rp, Edje_Cursor cur);
@@ -1925,12 +1960,25 @@ Eina_Bool _edje_entry_cursor_is_visible_format_get(Edje_Real_Part *rp, Edje_Curs
 char *_edje_entry_cursor_content_get(Edje_Real_Part *rp, Edje_Cursor cur);
 void _edje_entry_cursor_pos_set(Edje_Real_Part *rp, Edje_Cursor cur, int pos);
 int _edje_entry_cursor_pos_get(Edje_Real_Part *rp, Edje_Cursor cur);
+void _edje_entry_imf_context_reset(Edje_Real_Part *rp);
 void _edje_entry_input_panel_layout_set(Edje_Real_Part *rp, Edje_Input_Panel_Layout layout);
 Edje_Input_Panel_Layout _edje_entry_input_panel_layout_get(Edje_Real_Part *rp);
 void _edje_entry_autocapital_type_set(Edje_Real_Part *rp, Edje_Text_Autocapital_Type autocapital_type);
 Edje_Text_Autocapital_Type _edje_entry_autocapital_type_get(Edje_Real_Part *rp);
+void _edje_entry_prediction_allow_set(Edje_Real_Part *rp, Eina_Bool prediction);
+Eina_Bool _edje_entry_prediction_allow_get(Edje_Real_Part *rp);
 void _edje_entry_input_panel_enabled_set(Edje_Real_Part *rp, Eina_Bool enabled);
 Eina_Bool _edje_entry_input_panel_enabled_get(Edje_Real_Part *rp);
+void _edje_entry_input_panel_show(Edje_Real_Part *rp);
+void _edje_entry_input_panel_hide(Edje_Real_Part *rp);
+void _edje_entry_input_panel_language_set(Edje_Real_Part *rp, Edje_Input_Panel_Lang lang);
+Edje_Input_Panel_Lang _edje_entry_input_panel_language_get(Edje_Real_Part *rp);
+void _edje_entry_input_panel_imdata_set(Edje_Real_Part *rp, const void *data, int len);
+void _edje_entry_input_panel_imdata_get(Edje_Real_Part *rp, void *data, int *len);
+void _edje_entry_input_panel_return_key_type_set(Edje_Real_Part *rp, Edje_Input_Panel_Return_Key_Type return_key_type);
+Edje_Input_Panel_Return_Key_Type _edje_entry_input_panel_return_key_type_get(Edje_Real_Part *rp);
+void _edje_entry_input_panel_return_key_disabled_set(Edje_Real_Part *rp, Eina_Bool disabled);
+Eina_Bool _edje_entry_input_panel_return_key_disabled_get(Edje_Real_Part *rp);
 
 void _edje_external_init();
 void _edje_external_shutdown();

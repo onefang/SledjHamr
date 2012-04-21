@@ -19,8 +19,8 @@ extern "C"
         isf_imf_context_del,                    /* del */
         isf_imf_context_client_window_set,      /* client_window_set */
         isf_imf_context_client_canvas_set,      /* client_canvas_set */
-        NULL,                                   /* isf_imf_context_input_panel_show, - show */
-        NULL,                                   /* isf_imf_context_input_panel_hide, - hide */
+        isf_imf_context_input_panel_show,       /* input_panel_show, - show */
+        isf_imf_context_input_panel_hide,       /* input_panel_hide, - hide */
         isf_imf_context_preedit_string_get,     /* get_preedit_string */
         isf_imf_context_focus_in,               /* focus_in */
         isf_imf_context_focus_out,              /* focus_out */
@@ -38,7 +38,12 @@ extern "C"
         NULL,                                   /* isf_imf_context_input_panel_layout_get, */
         NULL,                                   /* isf_imf_context_input_panel_language_set, */
         NULL,                                   /* isf_imf_context_input_panel_language_get, */
-        isf_imf_context_cursor_location_set     /* cursor_location_set */
+        isf_imf_context_cursor_location_set,    /* cursor_location_set */
+        NULL,                                   /* input_panel_imdata_set */
+        NULL,                                   /* input_panel_imdata_get */
+        NULL,                                   /* input_panel_return_key_type_set */
+        NULL,                                   /* input_panel_return_key_disabled_set */
+        NULL                                    /* input_panel_caps_lock_mode_set */
    };
 
    static Ecore_IMF_Context *imf_module_create (void);

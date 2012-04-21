@@ -362,41 +362,15 @@ _eina_file_direct_ls_iterator_free(Eina_File_Direct_Iterator *it)
 static Eina_Bool
 _eina_file_stat_ls_iterator_next(Eina_File_Direct_Iterator *it, void **data)
 {
-   struct stat st;
+   Eina_Stat st;
 
    if (!_eina_file_direct_ls_iterator_next(it, data))
      return EINA_FALSE;
 
    if (it->info.type == EINA_FILE_UNKNOWN)
      {
-#ifdef HAVE_FSTATAT
-        int fd;
-
-        fd = dirfd(it->dirp);
-        if (fstatat(fd, it->info.path + it->info.name_start, &st, 0))
-#else
-        if (stat(it->info.path, &st))
-#endif
+        if (eina_file_statat(it->dirp, &it->info, &st) != 0)
           it->info.type = EINA_FILE_UNKNOWN;
-        else
-          {
-             if (S_ISREG(st.st_mode))
-               it->info.type = EINA_FILE_REG;
-             else if (S_ISDIR(st.st_mode))
-               it->info.type = EINA_FILE_DIR;
-             else if (S_ISCHR(st.st_mode))
-               it->info.type = EINA_FILE_CHR;
-             else if (S_ISBLK(st.st_mode))
-               it->info.type = EINA_FILE_BLK;
-             else if (S_ISFIFO(st.st_mode))
-               it->info.type = EINA_FILE_FIFO;
-             else if (S_ISLNK(st.st_mode))
-               it->info.type = EINA_FILE_LNK;
-             else if (S_ISSOCK(st.st_mode))
-               it->info.type = EINA_FILE_SOCK;
-             else
-               it->info.type = EINA_FILE_UNKNOWN;
-          }
      }
 
    return EINA_TRUE;
@@ -593,6 +567,14 @@ _eina_file_escape(const char *path, int *length)
    return result;
 }
 
+/**
+ * @endcond
+ */
+
+/*============================================================================*
+ *                                 Global                                     *
+ *============================================================================*/
+
 Eina_Bool
 eina_file_init(void)
 {
@@ -641,13 +623,60 @@ eina_file_shutdown(void)
    return EINA_TRUE;
 }
 
-/**
- * @endcond
- */
+void
+eina_file_mmap_faulty(void *addr, long page_size)
+{
+   Eina_File_Map *m;
+   Eina_File *f;
+   Eina_Iterator *itf;
+   Eina_Iterator *itm;
 
-/*============================================================================*
- *                                 Global                                     *
- *============================================================================*/
+   /* NOTE: I actually don't know if other thread are running, I will try to take the lock.
+      It may be possible that if other thread are not running and they were in the middle of
+      accessing an Eina_File this lock are still taken and we will result as a deadlock. */
+   eina_lock_take(&_eina_file_lock_cache);
+
+   itf = eina_hash_iterator_data_new(_eina_file_cache);
+   EINA_ITERATOR_FOREACH(itf, f)
+     {
+        Eina_Bool faulty = EINA_FALSE;
+
+        eina_lock_take(&f->lock);
+
+        if (f->global_map)
+          {
+             if ((unsigned char *) addr < (((unsigned char *)f->global_map) + f->length) &&
+                 (((unsigned char *) addr) + page_size) >= (unsigned char *) f->global_map)
+               {
+                  f->global_faulty = EINA_TRUE;
+                  faulty = EINA_TRUE;
+               }
+          }
+
+        if (!faulty)
+          {
+             itm = eina_hash_iterator_data_new(f->map);
+             EINA_ITERATOR_FOREACH(itm, m)
+               {
+                  if ((unsigned char *) addr < (((unsigned char *)m->map) + m->length) &&
+                      (((unsigned char *) addr) + page_size) >= (unsigned char *) m->map)
+                    {
+                       m->faulty = EINA_TRUE;
+                       faulty = EINA_TRUE;
+                       break;
+                    }
+               }
+             eina_iterator_free(itm);
+          }
+
+        eina_lock_release(&f->lock);
+
+        if (faulty) break;
+     }
+   eina_iterator_free(itf);
+
+   eina_lock_release(&_eina_file_lock_cache);
+}
 
 /*============================================================================*
  *                                   API                                      *
@@ -950,7 +979,7 @@ eina_file_open(const char *path, Eina_Bool shared)
    eina_lock_take(&_eina_file_lock_cache);
 
    file = eina_hash_find(_eina_file_cache, filename);
-   if ((file) && _eina_file_timestamp_compare(file, &file_stat))
+   if ((file) && !_eina_file_timestamp_compare(file, &file_stat))
      {
         file->delete_me = EINA_TRUE;
         eina_hash_del(_eina_file_cache, file->filename, file);
@@ -1029,7 +1058,7 @@ eina_file_close(Eina_File *file)
 
    eina_hash_del(_eina_file_cache, file->filename, file);
    _eina_file_real_close(file);
-   
+
    eina_lock_release(&_eina_file_lock_cache);
 }
 
@@ -1196,7 +1225,7 @@ eina_file_map_free(Eina_File *file, void *map)
         unsigned long int key[2];
 
         em = eina_hash_find(file->rmap, &map);
-        if (!em) return ;
+        if (!em) goto on_exit;
 
         em->refcount--;
 
@@ -1217,17 +1246,25 @@ EAPI Eina_Bool
 eina_file_map_faulted(Eina_File *file, void *map)
 {
    Eina_File_Map *em;
+   Eina_Bool r = EINA_FALSE;
 
    EINA_SAFETY_ON_NULL_RETURN_VAL(file, EINA_FALSE);
 
    eina_lock_take(&file->lock);
 
-   if (file->global_map == map) return file->global_faulty;
+   if (file->global_map == map)
+     {
+        r = file->global_faulty;
+     }
+   else
+     {
+        em = eina_hash_find(file->rmap, &map);
+        if (em) r = em->faulty;
+     }
 
-   em = eina_hash_find(file->rmap, &map);
-   if (!em) return EINA_FALSE;
+   eina_lock_release(&file->lock);
 
-   return em->faulty;
+   return r;
 }
 
 EAPI Eina_Iterator *
@@ -1246,58 +1283,77 @@ eina_file_xattr_value_get(Eina_File *file)
    return eina_xattr_value_fd_ls(file->fd);
 }
 
-void
-eina_file_mmap_faulty(void *addr, long page_size)
+EAPI int
+eina_file_statat(void *container, Eina_File_Direct_Info *info, Eina_Stat *st)
 {
-   Eina_File_Map *m;
-   Eina_File *f;
-   Eina_Iterator *itf;
-   Eina_Iterator *itm;
+   struct stat buf;
+#ifdef HAVE_FSTATAT
+   int fd;
+#endif
 
-   /* NOTE: I actually don't know if other thread are running, I will try to take the lock.
-      It may be possible that if other thread are not running and they were in the middle of
-      accessing an Eina_File this lock are still taken and we will result as a deadlock. */
-   eina_lock_take(&_eina_file_lock_cache);
+   EINA_SAFETY_ON_NULL_RETURN_VAL(info, -1);
+   EINA_SAFETY_ON_NULL_RETURN_VAL(st, -1);
 
-   itf = eina_hash_iterator_data_new(_eina_file_cache);
-   EINA_ITERATOR_FOREACH(itf, f)
+#ifdef HAVE_FSTATAT
+   fd = dirfd((DIR*) container);
+   if (fstatat(fd, info->path + info->name_start, &buf, 0))
+#else
+   (void)container;
+   if (stat(info->path, &buf))
+#endif
      {
-        Eina_Bool faulty = EINA_FALSE;
-
-        eina_lock_take(&f->lock);
-
-        if (f->global_map)
-          {
-             if ((unsigned char *) addr < (((unsigned char *)f->global_map) + f->length) &&
-                 (((unsigned char *) addr) + page_size) >= (unsigned char *) f->global_map)
-               {
-                  f->global_faulty = EINA_TRUE;
-                  faulty = EINA_TRUE;
-               }
-          }
-
-        if (!faulty)
-          {
-             itm = eina_hash_iterator_data_new(f->map);
-             EINA_ITERATOR_FOREACH(itm, m)
-               {
-                  if ((unsigned char *) addr < (((unsigned char *)m->map) + m->length) &&
-                      (((unsigned char *) addr) + page_size) >= (unsigned char *) m->map)
-                    {
-                       m->faulty = EINA_TRUE;
-                       faulty = EINA_TRUE;
-                       break;
-                    }
-               }
-             eina_iterator_free(itm);
-          }
-
-        eina_lock_release(&f->lock);
-
-        if (faulty) break;
+        if (info->type != EINA_FILE_LNK)
+          info->type = EINA_FILE_UNKNOWN;
+        return -1;
      }
-   eina_iterator_free(itf);
 
-   eina_lock_release(&_eina_file_lock_cache);
+   if (info->type == EINA_FILE_UNKNOWN)
+     {
+        if (S_ISREG(buf.st_mode))
+          info->type = EINA_FILE_REG;
+        else if (S_ISDIR(buf.st_mode))
+          info->type = EINA_FILE_DIR;
+        else if (S_ISCHR(buf.st_mode))
+          info->type = EINA_FILE_CHR;
+        else if (S_ISBLK(buf.st_mode))
+          info->type = EINA_FILE_BLK;
+        else if (S_ISFIFO(buf.st_mode))
+          info->type = EINA_FILE_FIFO;
+        else if (S_ISLNK(buf.st_mode))
+          info->type = EINA_FILE_LNK;
+        else if (S_ISSOCK(buf.st_mode))
+          info->type = EINA_FILE_SOCK;
+        else
+          info->type = EINA_FILE_UNKNOWN;
+     }
+
+   st->dev = buf.st_dev;
+   st->ino = buf.st_ino;
+   st->mode = buf.st_mode;
+   st->nlink = buf.st_nlink;
+   st->uid = buf.st_uid;
+   st->gid = buf.st_gid;
+   st->rdev = buf.st_rdev;
+   st->size = buf.st_size;
+   st->blksize = buf.st_blksize;
+   st->blocks = buf.st_blocks;
+   st->atime = buf.st_atime;
+   st->mtime = buf.st_mtime;
+   st->ctime = buf.st_ctime;
+#ifdef _STAT_VER_LINUX
+# if (defined __USE_MISC && defined st_mtime)
+   st->atimensec = buf.st_atim.tv_nsec;
+   st->mtimensec = buf.st_mtim.tv_nsec;
+   st->ctimensec = buf.st_ctim.tv_nsec;
+# else
+   st->atimensec = buf.st_atimensec;
+   st->mtimensec = buf.st_mtimensec;
+   st->ctimensec = buf.st_ctimensec;
+# endif
+#else
+   st->atimensec = 0;
+   st->mtimensec = 0;
+   st->ctimensec = 0;
+#endif
+   return 0;
 }
-

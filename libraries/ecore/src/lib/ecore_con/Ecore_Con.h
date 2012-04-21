@@ -723,10 +723,13 @@ EAPI Eina_Bool         ecore_con_ssl_client_upgrade(Ecore_Con_Client *cl, Ecore_
  */
 
 EAPI Ecore_Con_Socks *ecore_con_socks4_remote_add(const char *ip, int port, const char *username);
-EAPI void             ecore_con_socks4_lookup_set(Ecore_Con_Socks *ecs, Eina_Bool enable);
-EAPI Eina_Bool        ecore_con_socks4_lookup_get(Ecore_Con_Socks *ecs);
 EAPI Eina_Bool        ecore_con_socks4_remote_exists(const char *ip, int port, const char *username);
 EAPI void             ecore_con_socks4_remote_del(const char *ip, int port, const char *username);
+EAPI Ecore_Con_Socks *ecore_con_socks5_remote_add(const char *ip, int port, const char *username, const char *password);
+EAPI Eina_Bool        ecore_con_socks5_remote_exists(const char *ip, int port, const char *username, const char *password);
+EAPI void             ecore_con_socks5_remote_del(const char *ip, int port, const char *username, const char *password);
+EAPI void             ecore_con_socks_lookup_set(Ecore_Con_Socks *ecs, Eina_Bool enable);
+EAPI Eina_Bool        ecore_con_socks_lookup_get(Ecore_Con_Socks *ecs);
 EAPI void             ecore_con_socks_bind_set(Ecore_Con_Socks *ecs, Eina_Bool is_bind);
 EAPI Eina_Bool        ecore_con_socks_bind_get(Ecore_Con_Socks *ecs);
 EAPI unsigned int     ecore_con_socks_version_get(Ecore_Con_Socks *ecs);
@@ -744,8 +747,8 @@ EAPI void             ecore_con_socks_apply_always(Ecore_Con_Socks *ecs);
  *
  * Setting up a server is very simple: you just need to start it with
  * ecore_con_server_add() and setup some callbacks to the events
- * #ECORE_CON_EVENT_CLIENT_ADD, #ECORE_CON_EVENT_CLIENT_DEL and
- * #ECORE_CON_EVENT_CLIENT_DATA, that will be called when a client is
+ * @ref ECORE_CON_EVENT_CLIENT_ADD, @ref ECORE_CON_EVENT_CLIENT_DEL and
+ * @ref ECORE_CON_EVENT_CLIENT_DATA, that will be called when a client is
  * communicating with the server:
  *
  * @code
@@ -867,8 +870,8 @@ EAPI Ecore_Con_Server *ecore_con_server_add(Ecore_Con_Type type,
  *
  * However, even if this call returns a valid @ref Ecore_Con_Server, the
  * connection will only be successfully completed if an event of type
- * #ECORE_CON_EVENT_SERVER_ADD is received. If it fails to complete, an
- * #ECORE_CON_EVENT_SERVER_DEL will be received.
+ * @ref ECORE_CON_EVENT_SERVER_ADD is received. If it fails to complete, an
+ * @ref ECORE_CON_EVENT_SERVER_DEL will be received.
  *
  * The @p data parameter can be fetched later using ecore_con_server_data_get()
  * or changed with ecore_con_server_data_set().
@@ -1335,6 +1338,35 @@ typedef enum _Ecore_Con_Url_Time
 } Ecore_Con_Url_Time;
 
 /**
+ * @typedef Ecore_Con_Url_Http_Version
+ * @enum _Ecore_Con_Url_Http_Version
+ * The http version to use
+ * @since 1.2
+ */
+typedef enum _Ecore_Con_Url_Http_Version
+{
+   /**
+    * HTTP version 1.0
+    * @since 1.2
+    */
+   ECORE_CON_URL_HTTP_VERSION_1_0,
+   /**
+    * HTTP version 1.1 (default)
+    * @since 1.2
+    */
+   ECORE_CON_URL_HTTP_VERSION_1_1
+} Ecore_Con_Url_Http_Version;
+
+/**
+ * Change the HTTP version used for the request
+ * @param version The version to be used
+ * @return EINA_TRUE on success, EINA_FALSE on failure to change version
+ * @since 1.2
+ * @see ecore_con_url_pipeline_get()
+ */
+EAPI Eina_Bool         ecore_con_url_http_version_set(Ecore_Con_Url *url_con, Ecore_Con_Url_Http_Version version);
+   
+/**
  * Initialises the Ecore_Con_Url library.
  * @return Number of times the library has been initialised without being
  *          shut down.
@@ -1553,33 +1585,6 @@ EAPI Eina_Bool         ecore_con_url_httpauth_set(Ecore_Con_Url *url_con,
                                                   const char *username,
                                                   const char *password,
                                                   Eina_Bool safe);
-/**
- * Sends a request.
- *
- * @param url_con Connection object to perform a request on, previously created
- *                with ecore_con_url_new() or ecore_con_url_custom_new().
- * @param data    Payload (data sent on the request)
- * @param length  Payload length. If @c -1, rely on automatic length
- *                calculation via @c strlen() on @p data.
- * @param content_type Content type of the payload (e.g. text/xml)
- *
- * @return #EINA_TRUE on success, #EINA_FALSE on error.
- *
- * @see ecore_con_url_custom_new()
- * @see ecore_con_url_additional_headers_clear()
- * @see ecore_con_url_additional_header_add()
- * @see ecore_con_url_data_set()
- * @see ecore_con_url_data_get()
- * @see ecore_con_url_response_headers_get()
- * @see ecore_con_url_time()
- * @see ecore_con_url_get()
- * @see ecore_con_url_post()
- *
- * @deprecated Use ecore_con_url_post() instead of this.
- */
-EINA_DEPRECATED EAPI Eina_Bool         ecore_con_url_send(Ecore_Con_Url *url_con,
-                                                          const void *data, long length,
-                                                          const char *content_type);
 /**
  * Sends a get request.
  *
@@ -1912,6 +1917,16 @@ EAPI Eina_Bool ecore_con_url_proxy_password_set(Ecore_Con_Url *url_con, const ch
  */
 EAPI void ecore_con_url_timeout_set(Ecore_Con_Url *url_con, double timeout);
 
+/**
+ * Get the returned HTTP STATUS code
+ *
+ * This is used to, at any time, try to return the status code for a transmission.
+ * @param url_con Connection object
+ * @return A valid HTTP STATUS code, or 0 on failure
+ *
+ * @since 1.2
+ */
+EAPI int ecore_con_url_status_code_get(Ecore_Con_Url *url_con);
 /**
  * @}
  */

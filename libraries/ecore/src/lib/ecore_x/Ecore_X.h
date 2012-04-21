@@ -1104,6 +1104,28 @@ typedef enum _Ecore_X_Illume_Quickpanel_State
    ECORE_X_ILLUME_QUICKPANEL_STATE_ON
 } Ecore_X_Illume_Quickpanel_State;
 
+typedef enum _Ecore_X_Illume_Indicator_State
+{
+   ECORE_X_ILLUME_INDICATOR_STATE_UNKNOWN = 0,
+   ECORE_X_ILLUME_INDICATOR_STATE_OFF,
+   ECORE_X_ILLUME_INDICATOR_STATE_ON
+} Ecore_X_Illume_Indicator_State;
+
+typedef enum _Ecore_X_Illume_Clipboard_State
+{
+   ECORE_X_ILLUME_CLIPBOARD_STATE_UNKNOWN = 0,
+   ECORE_X_ILLUME_CLIPBOARD_STATE_OFF,
+   ECORE_X_ILLUME_CLIPBOARD_STATE_ON
+} Ecore_X_Illume_Clipboard_State;
+
+typedef enum _Ecore_X_Illume_Indicator_Opacity_Mode
+{
+   ECORE_X_ILLUME_INDICATOR_OPACITY_UNKNOWN = 0,
+   ECORE_X_ILLUME_INDICATOR_OPAQUE,
+   ECORE_X_ILLUME_INDICATOR_TRANSLUCENT,
+   ECORE_X_ILLUME_INDICATOR_TRANSPARENT
+} Ecore_X_Illume_Indicator_Opacity_Mode;
+
 /* Window layer constants */
 #define ECORE_X_WINDOW_LAYER_BELOW  2
 #define ECORE_X_WINDOW_LAYER_NORMAL 4
@@ -2159,6 +2181,11 @@ ecore_x_netwm_strut_partial_get(Ecore_X_Window win,
                                 int *bottom_start_x,
                                 int *bottom_end_x);
 
+EAPI void
+ecore_x_netwm_icons_set(Ecore_X_Window win,
+                        Ecore_X_Icon *icon,
+                        int num);
+       
 EAPI Eina_Bool
 ecore_x_netwm_icons_get(Ecore_X_Window win,
                         Ecore_X_Icon **icon,
@@ -2398,6 +2425,25 @@ EAPI void
 EAPI void
  ecore_x_e_illume_quickpanel_position_update_send(Ecore_X_Window win);
 
+EAPI void
+ecore_x_e_illume_clipboard_state_set(Ecore_X_Window win,
+                                     Ecore_X_Illume_Clipboard_State state);
+
+EAPI Ecore_X_Illume_Clipboard_State
+ecore_x_e_illume_clipboard_state_get(Ecore_X_Window win);
+
+EAPI void
+ecore_x_e_illume_clipboard_geometry_set(Ecore_X_Window win,
+                                        int x,
+                                        int y,
+                                        int w,
+                                        int h);
+EAPI Eina_Bool
+ecore_x_e_illume_clipboard_geometry_get(Ecore_X_Window win,
+                                        int *x,
+                                        int *y,
+                                        int *w,
+                                        int *h);
 EAPI void
 ecore_x_e_comp_sync_counter_set(Ecore_X_Window win,
                                 Ecore_X_Sync_Counter counter);
@@ -2657,7 +2703,7 @@ ecore_x_xregion_rect_contain(Ecore_X_XRegion *region,
 /* The usage of 'Ecore_X_Randr_None' or 'Ecore_X_Randr_Unset'
  * depends on the context. In most cases 'Ecore_X_Randr_Unset'
  * can be used, but in some cases -1 is a special value to
- * functions, thus 'Ecore_X_Randr_None' (=0) musst be used.
+ * functions, thus 'Ecore_X_Randr_None' (=0) must be used.
  */
 
 typedef short Ecore_X_Randr_Refresh_Rate;
@@ -2749,6 +2795,11 @@ EAPI Eina_Bool
 EAPI Ecore_X_Randr_Mode_Info **
 ecore_x_randr_modes_info_get(Ecore_X_Window root,
                              int *num);
+EAPI Ecore_X_Randr_Mode
+ecore_x_randr_mode_info_add(Ecore_X_Window root,
+                            Ecore_X_Randr_Mode_Info *mode_info);
+EAPI void
+ecore_x_randr_mode_del(Ecore_X_Randr_Mode mode);
 EAPI Ecore_X_Randr_Mode_Info *
 ecore_x_randr_mode_info_get(Ecore_X_Window root,
                             Ecore_X_Randr_Mode mode);
@@ -2762,9 +2813,12 @@ EAPI Ecore_X_Randr_Output *ecore_x_randr_outputs_get(Ecore_X_Window root,
 EAPI Ecore_X_Randr_Output *
 ecore_x_randr_window_outputs_get(Ecore_X_Window window,
                                  int *num);
-EINA_DEPRECATED EAPI Ecore_X_Randr_Output *
+EAPI Ecore_X_Randr_Output *
 ecore_x_randr_current_output_get(Ecore_X_Window window,
                                  int *num);
+EAPI Ecore_X_Randr_Crtc *
+ecore_x_randr_window_crtcs_get(Ecore_X_Window window,
+                               int *num);
 EAPI Ecore_X_Randr_Crtc *
 ecore_x_randr_current_crtc_get(Ecore_X_Window window,
                                int *num);
@@ -2840,6 +2894,12 @@ ecore_x_randr_crtc_pos_relative_set(Ecore_X_Window root,
                                     Ecore_X_Randr_Crtc crtc_r2,
                                     Ecore_X_Randr_Output_Policy policy,
                                     Ecore_X_Randr_Relative_Alignment alignment);
+EAPI Eina_Bool
+ecore_x_randr_output_mode_add(Ecore_X_Randr_Output output,
+                              Ecore_X_Randr_Mode mode);
+EAPI void
+ecore_x_randr_output_mode_del(Ecore_X_Randr_Output output,
+                              Ecore_X_Randr_Mode mode);
 EAPI Ecore_X_Randr_Mode *
 ecore_x_randr_output_modes_get(Ecore_X_Window root,
                                Ecore_X_Randr_Output output,
@@ -3408,6 +3468,13 @@ EAPI Eina_Bool
 EAPI const char *
  ecore_x_keysym_string_get(int keysym);
 
+/**
+ * Given a keyname, return the keycode representing that key
+ *
+ * @since 1.2.0
+ */
+EAPI int ecore_x_keysym_keycode_get(const char *keyname);
+
 typedef struct _Ecore_X_Image Ecore_X_Image;
 
 EAPI Ecore_X_Image *
@@ -3616,6 +3683,26 @@ EAPI Eina_Bool
 ecore_x_gesture_event_ungrab(Ecore_X_Window win,
                              Ecore_X_Gesture_Event_Type type,
                              int num_fingers);
+
+EAPI void
+ecore_x_e_illume_indicator_state_set(Ecore_X_Window win,
+                                     Ecore_X_Illume_Indicator_State state);
+EAPI Ecore_X_Illume_Indicator_State
+ecore_x_e_illume_indicator_state_get(Ecore_X_Window win);
+EAPI void
+ecore_x_e_illume_indicator_state_send(Ecore_X_Window win,
+                                      Ecore_X_Illume_Indicator_State state);
+
+EAPI void
+ecore_x_e_illume_indicator_opacity_set(Ecore_X_Window win,
+                                     Ecore_X_Illume_Indicator_Opacity_Mode mode);
+
+EAPI Ecore_X_Illume_Indicator_Opacity_Mode
+ecore_x_e_illume_indicator_opacity_get(Ecore_X_Window win);
+
+EAPI void
+ecore_x_e_illume_indicator_opacity_send(Ecore_X_Window win,
+                                      Ecore_X_Illume_Indicator_Opacity_Mode mode);
 
 #ifdef __cplusplus
 }

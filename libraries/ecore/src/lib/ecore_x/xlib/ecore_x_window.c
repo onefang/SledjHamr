@@ -224,7 +224,7 @@ ecore_x_window_input_new(Ecore_X_Window parent,
  * @c _NET_WM_PID.
  *
  * @param   win The given window.
- * @ingroup Ecore_X_Window_Properties_Groups
+ * @ingroup Ecore_X_Window_Properties_Group
  */
 EAPI void
 ecore_x_window_defaults_set(Ecore_X_Window win)
@@ -597,7 +597,7 @@ ecore_x_window_focus_at_time(Ecore_X_Window win,
 }
 
 /**
- * gets the focus to the window @p win.
+ * gets the window that has focus.
  * @return  The window that has focus.
  * @ingroup Ecore_X_Window_Focus_Functions
  */

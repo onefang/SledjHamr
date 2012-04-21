@@ -198,3 +198,46 @@
 2012-01-19  Shinwoo Kim
 
 	* Fix compilation of eina_semaphore_lock() (Windows port)
+
+2012-01-20  Gustavo Barbieri
+
+	* Add eina_model data type (generic hierarchy data access).
+
+2011-12-30  Vincent Torri
+
+	* Fix Eina_RWLock code on Windows > XP.
+
+2012-01-29  Tom Hacohen
+
+	* Added EINA_C_ARRAY_LENGTH, a macro that returns  the length of a
+	standard C array.
+
+2012-01-31  Tom Hacohen
+
+	* Added an Eina_Stringshare type. It's just a typedef of "const char"
+	this is a same kind of visual hint for the purpose of the pointer,
+	but again, the two types are interchangeable.
+
+2012-02-17  Cedric Bail
+
+	* Fix forgotten initialization of eina list count during eina_list_split_list.
+
+2012-02-22  Cedric Bail
+
+	* Add eina_file_stat.
+
+2012-02-27  Alexandre Becoulet
+
+	* Add faster implementation of Eina_Rbtree.
+
+2012-03-07  Cedric Bail
+
+	* Fix leak of Eina_File.
+
+2012-03-14  Cedric Bail
+
+	* Fix a dead lock in Eina_File.
+
+2012-03-16  Raphael Kubo da Costa
+
+	* Adjust Valgrind's CFLAGS to fix the build when it is in a non-default location.

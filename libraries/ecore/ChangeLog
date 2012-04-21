@@ -364,7 +364,7 @@
 2011-12-02 Carsten Haitzler (The Rasterman)
 
         1.1.0 release
-        
+
 2011-12-02 Mike Blumenkrantz
 
         * Use mempools for allocations
@@ -465,3 +465,124 @@
         using "Plug" image object. Before only one to one communication 
         is possible, but now many "plug"s can show socket's canvas.
 
+2011-12-26  Christopher Michael (devilhorns)
+
+        * Add Ecore_X function to return the keycode from a given keyname.
+
+2012-02-06  Jihoon Kim (jihoon)
+
+        * Set ECORE_IMF_INPUT_PANEL_LAYOUT_NORMAL as default layout in ecore_imf_context_add.
+        * Add Ecore_IMF function to set or get the input panel-specific data.
+
+2012-02-07  Jihoon Kim (jihoon)
+
+        * Support ecore_imf_context_input_panel_show/hide in XIM and SCIM module.
+
+2012-02-08 Carsten Haitzler (The Rasterman)
+
+        * Add ecore_con_url_http_version_set() to set url request version
+
+2012-02-09  Jihoon Kim (jihoon)
+
+        * Provide compose, string in key down/up event in case of scim-input-pad.
+
+2012-02-10  Christopher Michael (devilhorns)
+
+        * Add Ecore_Evas function to allow setting a mouse pointer from efl/elm wayland clients.
+
+2012-02-15  Jihoon Kim (jihoon)
+
+        * Add ecore_imf APIs to set return key type, disable return key.
+
+2012-02-16  Leif Middelschulte (T_UNIX)
+
+        * Add ecore_x_randr_mode_add to add a mode to a display
+        * Add ecore_x_randr_mode_del to remove a mode from the display
+        * Add ecore_x_randr_output_mode_add to add a mode to an output
+        * Add ecore_x_randr_output_mode_del to remove a mode from an output
+
+2012-02-10  Jérémy Zurcher
+
+        * Improve callbacks in ecore_evas to use typedefs for readability.
+
+2012-02-20  Cedric Bail
+
+	* Rewrite internal of Ecore_Thread to use Eina_Lock and ecore_main_loop_thread_safe_call_async.
+
+2012-02-23  Cedric Bail
+
+	* Move to Evas buffer engine for Ecore_Evas SDL software backend.
+
+2012-02-23  Leif Middelschulte (T_UNIX)
+
+        * Add ecore_x_randr_window_crtcs_get to get the crtcs that display a
+		window.
+        * Deprecate ecore_x_randr_current_output_get. Use
+		ecore_x_randr_window_crtcs_get instead.
+
+2012-02-24  Doyun Kang
+
+	* Add indicator controls to ecore_x
+
+2012-02-26 Carsten Haitzler (The Rasterman)
+
+        * Fix ecore_file_download to not limit downloads to 30sec.
+
+2012-02-28 Carsten Haitzler (The Rasterman)
+
+        * Add ecore_x_netwm_icons_set()
+        * Add ecore_evas_window_group_set() ecore_evas_window_group_get()
+          ecore_evas_aspect_set() ecore_evas_aspect_get()
+          ecore_evas_urgent_set() ecore_evas_urgent_get()
+          ecore_evas_modal_set() ecore_evas_modal_get()
+          ecore_evas_demand_attention_set()
+          ecore_evas_demand_attention_get()
+          ecore_evas_focus_skip_set() ecore_evas_focus_skip_get()
+          ecore_evas_callback_state_change_set()
+
+2012-02-28 Christopher Michael (devilhorns)
+
+        * Refactor Ecore_Wayland code to improve running EFL
+          applications as Wayland Clients.
+        * Refactor Ecore_Evas Wayland code to match changes in 
+          Ecore_Wayland
+
+2012-02-29  Jihoon Kim (jihoon)
+
+        * Add ecore_imf_context_input_panel_caps_lock_mode_set/get to set the caps lock mode on the input panel
+
+2012-03-07  ChunEon Park (Hermet)
+
+        * Add ecore_x_illume_clipboard_state_set()
+              ecore_x_illume_clipboard_state_get()
+              ecore_x_illume_clipboard_geometry_set()
+              ecore_x_illume_clipboard_geometry_get()
+
+2012-03-07  Carsten Haitzler (The Rasterman)
+
+        * Add atoms and api for rotation and indicator transparency in
+          ecore_x/ecore_evas
+
+2012-03-07  Mike Blumenkrantz (discomfitor/zmike)
+
+        * Add ecore_con_url_status_code_get() to check return code at any time
+
+2012-03-09  Carsten Haitzler (The Rasterman)
+
+	* Fix ecore_thread_feedback_run to work as the documentation and logic tell us.
+
+2012-03-10  Cedric Bail
+
+	* Fix double free at end of execution of Ecore_Thread with feedback.
+
+2012-03-13  Leif Middelschulte (T_UNIX)
+
+        * Fix ecore_x_randr_modes_info_get to not cut off the trailing '\0'
+		anymore
+
+2012-03-20  Vincent Torri
+
+        * Rename ecore_win32_window_focus_set() to ecore_win32_window_focus()
+	to match ecore_x API.
+	* Add ecore_wince_window_focus(), ecore_wince_window_focus_get()
+	and ecore_win32_window_focus_get().

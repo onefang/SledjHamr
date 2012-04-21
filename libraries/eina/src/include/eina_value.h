@@ -19,12 +19,244 @@
 #ifndef EINA_VALUE_H_
 #define EINA_VALUE_H_
 
+#include <stdarg.h>
+
 #include "eina_types.h"
 #include "eina_fp.h" /* defines int64_t and uint64_t */
 #include "eina_inarray.h"
 #include "eina_list.h"
 #include "eina_hash.h"
-#include <stdarg.h>
+
+/**
+ * @page eina_value_example_01_page Eina_Value usage
+ * @dontinclude eina_value_01.c
+ *
+ * This very simple example shows how to use some of the basic features of eina
+ * value: setting and getting values, converting between types and printing a
+ * value as a string.
+ *
+ * Our main function starts out with the basic, declaring some variables and
+ * initializing eina:
+ * @until eina_init
+ *
+ * Now we can jump into using eina value. We set a value, get this value and
+ * then print it:
+ * @until printf
+ *
+ * In the above snippet of code we printed an @c int value, we can however print
+ * the value as a string:
+ * @until free
+ *
+ * And once done with a value it's good practice to destroy it:
+ * @until eina_value_flush
+ *
+ * We now reuse @c v to store a string, get its value and print it:
+ * @until printf
+ * @note Since @c s is the value and not returned by @c eina_value_to_string()
+ * we don't need to free it.
+ *
+ * Just because we stored a string doesn't mean we can't use the @c
+ * eina_value_to_string() function, we can and it's important to note that it
+ * will return not the stored string but rather a copy of it(one we have to
+ * free):
+ * @until eina_value_flush
+ *
+ * And now to explore conversions between two type we'll create another value:
+ * @until eina_value_setup
+ *
+ * And make sure @c v and @c otherv have different types:
+ * @until eina_value_setup
+ *
+ * We then set a value to @c v and have it converted, to do this we don't need
+ * to tell to which type we want to convert, we just say were we want to store
+ * the converted value and eina value will figure out what to convert to, and
+ * how:
+ * @until eina_value_convert
+ *
+ * And now let's check the conversion worked:
+ * @until printf
+ *
+ * But converting to strings is not particularly exciting, @c
+ * eina_value_to_string() already did that, so now let's make the conversion the
+ * other way around, from string to @c int:
+ * @until printf
+ *
+ * And once done, destroy the values:
+ * @until }
+ *
+ * Full source code: @ref eina_value_01_c
+ */
+
+/**
+ * @page eina_value_01_c eina_value_01.c
+ * @include eina_value_01.c
+ * @example eina_value_01.c
+ */
+
+/**
+ * @page eina_value_example_02_page Eina_Value struct usage
+ * @dontinclude eina_value_02.c
+ *
+ * This example will examine a hypothetical situation in which we had a
+ * structure(which represented parameters) with two fields, and then need to add
+ * a third field to our structure. If using structs directly we'd need to
+ * rewrite every piece of code that touches the struct, by using eina value, and
+ * thus having the compiler not even know the struct, we can reduce the amount
+ * of changes needed and retain interoperability between the old and new format.
+ *
+ * Our example will start with a function that creates descriptions of both of
+ * our structs for eina value usage. The first step is to create a struct and
+ * describe its members:
+ * @until v1_members[1]
+ * @note We can't pass the types of the members to EINA_VALUE_STRUCT_MEMBER
+ * macro because they are not constant initializers.
+ *
+ * So far it should be pretty easy to understand, we said @c My_Struct_V1 has
+ * two members, one of type @c int and another of type @c char. We now create
+ * the description of the actual struct, again nothing overly complex, we signal
+ * which version of EINA_VALUE_STRUCT we're using, we declare no special
+ * operations, our members and our size:
+ * @until V1_DESC
+ *
+ * We now repeat the process for the second version of our struct, the only
+ * difference is the addition of a third parameter of type @c int :
+ * @until V2_DESC
+ * @until }
+ *
+ * We'll now look at a function that sets the values of our structs. For
+ * simplicity's sake we initialize it we random values, a real world case would
+ * read these values from a file, a database or even from the network. The
+ * fundamental detail here is that this function works for both V1 and V2
+ * structs, this is because setting a parameter that a struct that doesn't have
+ * does nothing without throwing any errors:
+ * @until }
+ * @note While using eina_value_struct_set() with an in-existing parameter
+ * causes no error, it does return #EINA_FALSE, to notify it was not possible
+ * to set the value. This could be used to determine that we're handling a V1
+ * struct and take some action based on that.
+ *
+ * The next thing is to do is see what a function that uses the values of the
+ * struct looks like. We'll again be very simplistic in our usage, we'll just
+ * print the values, but a real world case, might send these values to another
+ * process use them to open a network/database connection or anything else.
+ * Since all versions of the struct have @c param1 and @c param2 we'll
+ * unconditionally use them:
+ * @until printf
+ *
+ * The next step is to conditionally use @c param3, which can fortunately be
+ * done in the same step in which we get it's value:
+ * @until }
+ *
+ * There we've now got functions that can both populate and use values from both
+ * our structs, so now let's actually use them in our main function by creating
+ * a struct of each type, initializing them and them using them:
+ * @until }
+ *
+ * This concludes our example. For the full source code see @ref
+ * eina_value_02_c.
+ */
+
+/**
+ * @page eina_value_02_c eina_value_02.c
+ * @include eina_value_02.c
+ * @example eina_value_02.c
+ */
+
+/**
+ * @page eina_value_example_03_page Eina value custom type example
+ * @dontinclude eina_value_03.c
+ *
+ * For this example we'll be creating our own custom type of eina value. Eina
+ * value can already store struct timeval(man gettimeofday for more information)
+ * but it has no type to store struct timezone, so that's what this example will
+ * do.
+ * @note struct timezone is actually obsolete, so using it in real world
+ * programs is probably not a good idea, but this is an example so, bear with
+ * us.
+ *
+ * To create our own custom eina value type we need to define functions to
+ * do the following operations on it:
+ * @li Setup
+ * @li Flush
+ * @li Copy
+ * @li Compare
+ * @li Set
+ * @li Get
+ * @li Conversion
+ *
+ * Most of this functions are very simple, so let's look at them, starting with
+ * setup which only clear the memory so that we can be certain we won't be using
+ * stale data:
+ * @until }
+ *
+ * Now the flush function, which is even simpler, it does nothing, that's
+ * because there is nothing we need to do, all the necessary steps are taken by
+ * eina value itself:
+ * @until }
+ *
+ * Our next function, copy, is a bit more interesting, but not much, it just
+ * casts our void pointers to struct timezone pointers and does the copy:
+ * @until }
+ * @note By now you might be wondering why our functions receive void pointers
+ * instead of pointers to struct timezone, and this is a good point. The reason
+ * for this is that eina value doesn't know anything about our type so it must
+ * use a generic void pointer, casting that pointer into a proper value is the
+ * job of the implementor of the new type.
+ *
+ * Next we have the comparison function, which compares the @c tz_minuteswest
+ * field of struct timezone, we don't compare @c tz_dsttime because that field
+ * is not used in linux:
+ * @until }
+ *
+ * Next we have setting, this however requires not one but rather two functions,
+ * the reason for this is because to be able to receive arguments of any type
+ * eina value uses @ref https://wikipedia.org/wiki/Variadic_functions "variadic
+ * functions", so we need a function to get the argument from a va_list and
+ * another to actually to the setting.
+ *
+ * Lets first look at the pset function which sets the received value to a
+ * pointer:
+ * @until }
+ *
+ * Next we have the vset function which get the argument from the va_list and
+ * passes it to the pset function:
+ * @until }
+ *
+ * And now the function to get the value, a very simple copying of the value to
+ * the given pointer:
+ * @until }
+ *
+ * And finally our conversion function, this is our longest and most interesting
+ * one. For numeric type we simply assign the value of @c tz_minuteswest to the
+ * new type and call a set function using it:
+ * @until EINA_VALUE_TYPE_DOUBLE
+ * @until return
+ * @note It would be a good idea to add checks for over and underflow for these
+ * types and return #EINA_FALSE in thoses cases, we omit this here for brevity.
+ *
+ * For string types we use @c snprintf() to format our @c tz_minuteswest field
+ * and put it in a string(again @c tz_dsttime is ignored because it's not used):
+ * @until }
+ *
+ * Finally we handle any other types by returning an error in that case:
+ * @until }
+ *
+ * Now that we have all the functions, we can populate an @c Eina_Value_Type to
+ * later use it with @c eina_value_setup():
+ * @until }
+ *
+ * We can now finally use our new TZ_TYPE with eina value, so lets conclude our
+ * example by practicing that by setting its value and printing it:
+ * @until }
+ *
+ * For the full source code see @ref eina_value_03_c.
+ */
+
+/**
+ * @page eina_value_03_c eina_value_03.c
+ * @include eina_value_03.c
+ * @example eina_value_03.c
+ */
 
 /**
  * @addtogroup Eina_Data_Types_Group Data Types
@@ -42,6 +274,24 @@
 
 /**
  * @defgroup Eina_Value_Group Generic Value Storage
+ *
+ * Abstracts generic data storage and access to it in an extensible
+ * and efficient way.
+ *
+ * It comes with pre-defined types for numbers, array, list, hash,
+ * blob and structs. It is able to convert between data types,
+ * including to string.
+ *
+ * It is meant for simple data types, providing uniform access and
+ * release functions, useful to exchange data preserving their
+ * types. For more complex hierarchical data, with properties and
+ * children, reference counting, inheritance and interfaces, see @ref
+ * Eina_Model_Group.
+ *
+ * Examples of usage of the Eina_Value API:
+ * @li @ref eina_value_example_01_page
+ * @li @ref eina_value_example_02_page
+ * @li @ref eina_value_example_03_page
  *
  * @{
  */
@@ -67,6 +317,9 @@ typedef struct _Eina_Value_Type Eina_Value_Type;
  * @typedef Eina_Value_Union
  * Union of all known value types.
  *
+ * This is only used to specify the minimum payload memory for #Eina_Value.
+ *
+ * @internal
  * @since 1.2
  */
 typedef union _Eina_Value_Union Eina_Value_Union;
@@ -75,6 +328,9 @@ typedef union _Eina_Value_Union Eina_Value_Union;
  * @union _Eina_Value_Union
  * All possible value types.
  *
+ * This is only used to specify the minimum payload memory for #Eina_Value.
+ *
+ * @internal
  * @since 1.2
  */
 union _Eina_Value_Union
@@ -115,6 +371,15 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_UINT;
  * @since 1.2
  */
 EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_ULONG;
+
+/**
+ * @var EINA_VALUE_TYPE_TIMESTAMP
+ * manages unsigned long type used for timestamps.
+ * @note this is identical in function to EINA_VALUE_TYPE_ULONG
+ *
+ * @since 1.2
+ */
+EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_TIMESTAMP;
 
 /**
  * @var EINA_VALUE_TYPE_UINT64
@@ -206,10 +471,11 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_STRING;
  *  @li eina_value_array_pget() and eina_value_array_pset()
  *
  * eina_value_set() takes an #Eina_Value_Array where just @c subtype
- * and @c step are used. If there is an @c array, it will be adopted
- * and its contents must be properly configurable as @c subtype
- * expects. eina_value_pset() takes a pointer to an #Eina_Value_Array.
- * For your convenience, use eina_value_array_setup().
+ * and @c step are used. If there is an @c array, it will be copied
+ * (including each item) and its contents must be properly
+ * configurable as @c subtype expects. eina_value_pset() takes a
+ * pointer to an #Eina_Value_Array.  For your convenience, use
+ * eina_value_array_setup().
  *
  * eina_value_get() and eina_value_pget() takes a pointer to
  * #Eina_Value_Array, it's an exact copy of the current structure in
@@ -228,10 +494,11 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_ARRAY;
  *  @li eina_value_list_pget() and eina_value_list_pset()
  *
  * eina_value_set() takes an #Eina_Value_List where just @c subtype is
- * used. If there is an @c list, it will be adopted and its contents
- * must be properly configurable as @c subtype
- * expects. eina_value_pset() takes a pointer to an #Eina_Value_List.
- * For your convenience, use eina_value_list_setup().
+ * used. If there is an @c list, it will be copied (including each
+ * item) and its contents must be properly configurable as @c
+ * subtype expects. eina_value_pset() takes a pointer to an
+ * #Eina_Value_List.  For your convenience, use
+ * eina_value_list_setup().
  *
  * eina_value_get() and eina_value_pget() takes a pointer to
  * #Eina_Value_List, it's an exact copy of the current structure in
@@ -251,9 +518,9 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_LIST;
  *
  * eina_value_set() takes an #Eina_Value_Hash where just @c subtype
  * and @c buckets_power_size are used. If there is an @c hash, it will
- * be adopted and its contents must be properly configurable as @c
- * subtype expects. eina_value_pset() takes a pointer to an
- * #Eina_Value_Hash.  For your convenience, use
+ * be copied (including each item) and its contents must be
+ * properly configurable as @c subtype expects. eina_value_pset()
+ * takes a pointer to an #Eina_Value_Hash.  For your convenience, use
  * eina_value_hash_setup().
  *
  * eina_value_get() and eina_value_pget() takes a pointer to
@@ -310,9 +577,10 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_BLOB;
  *  @li eina_value_struct_pget() and eina_value_struct_pset()
  *
  * eina_value_set() takes an #Eina_Value_Struct where just @c desc is
- * used. If there is an @c memory, it will be adopted and its contents
- * must be properly configurable as @c desc expects. eina_value_pset()
- * takes a pointer to an #Eina_Value_Struct.  For your convenience, use
+ * used. If there is an @c memory, it will be copied (including each
+ * member) and its contents must be properly configurable as @c desc
+ * expects. eina_value_pset() takes a pointer to an
+ * #Eina_Value_Struct.  For your convenience, use
  * eina_value_struct_setup().
  *
  * eina_value_get() and eina_value_pget() takes a pointer to
@@ -322,6 +590,23 @@ EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_BLOB;
  * @since 1.2
  */
 EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_STRUCT;
+
+/**
+ * @var EINA_VALUE_TYPE_MODEL
+ *
+ * manages Eina_Model type. Use the value get/set to change the model
+ * in use, it will increase the reference while in use by the value.
+ *
+ * eina_value_set() takes a pointer to #Eina_Model, increasing the
+ * reference.
+ *
+ * eina_value_get() takes a pointer to pointer to #Eina_Model, it's an
+ * exact copy of the current model, no copies are done, no references
+ * are increased.
+ *
+ * @since 1.2
+ */
+EAPI extern const Eina_Value_Type *EINA_VALUE_TYPE_MODEL;
 
 /**
  * @var EINA_ERROR_VALUE_FAILED
@@ -435,7 +720,7 @@ static inline void eina_value_flush(Eina_Value *value) EINA_ARG_NONNULL(1);
  * @param copy destination value object
  * @return #EINA_TRUE on success, #EINA_FALSE otherwise.
  *
- * The @a copy object is considered internalized and its existing
+ * The @a copy object is considered uninitialized and its existing
  * contents are overwritten (just as if eina_value_flush() was called on
  * it).
  *
@@ -812,8 +1097,9 @@ static inline const Eina_Value_Type *eina_value_type_get(const Eina_Value *value
 
 /**
  * @typedef Eina_Value_Array
- * Value type for #EINA_VALUE_TYPE_ARRAY
+ * Value type for #EINA_VALUE_TYPE_ARRAY.
  *
+ * @see #_Eina_Value_Array explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Array Eina_Value_Array;
@@ -821,6 +1107,7 @@ typedef struct _Eina_Value_Array Eina_Value_Array;
 /**
  * @struct _Eina_Value_Array
  * Used to store the array and its subtype.
+ * @since 1.2
  */
 struct _Eina_Value_Array
 {
@@ -1433,6 +1720,22 @@ static inline Eina_Bool eina_value_array_pappend(Eina_Value *value,
                                                  const void *ptr) EINA_ARG_NONNULL(1);
 
 /**
+ * @brief Retrieves a value from the array as an Eina_Value copy.
+ * @param value source value object
+ * @param position index of the member
+ * @param dst where to return the array member
+ * @return #EINA_TRUE on success, #EINA_FALSE otherwise.
+ *
+ * The argument @a dst is considered uninitialized and it's setup to
+ * the type of the member.
+ *
+ * @since 1.2
+ */
+static inline Eina_Bool eina_value_array_value_get(const Eina_Value *src,
+                                                   unsigned int position,
+                                                   Eina_Value *dst) EINA_ARG_NONNULL(1, 3);
+
+/**
  * @}
  */
 
@@ -1446,8 +1749,9 @@ static inline Eina_Bool eina_value_array_pappend(Eina_Value *value,
 
 /**
  * @typedef Eina_Value_List
- * Value type for #EINA_VALUE_TYPE_LIST
+ * Value type for #EINA_VALUE_TYPE_LIST.
  *
+ * @see #_Eina_Value_List explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_List Eina_Value_List;
@@ -1455,6 +1759,7 @@ typedef struct _Eina_Value_List Eina_Value_List;
 /**
  * @struct _Eina_Value_List
  * Used to store the list and its subtype.
+ * @since 1.2
  */
 struct _Eina_Value_List
 {
@@ -2067,8 +2372,9 @@ static inline Eina_Bool eina_value_list_pappend(Eina_Value *value,
 
 /**
  * @typedef Eina_Value_Hash
- * Value type for #EINA_VALUE_TYPE_HASH
+ * Value type for #EINA_VALUE_TYPE_HASH.
  *
+ * @see #_Eina_Value_Hash explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Hash Eina_Value_Hash;
@@ -2076,6 +2382,7 @@ typedef struct _Eina_Value_Hash Eina_Value_Hash;
 /**
  * @struct _Eina_Value_Hash
  * Used to store the hash and its subtype.
+ * @since 1.2
  */
 struct _Eina_Value_Hash
 {
@@ -2409,9 +2716,16 @@ static inline Eina_Bool eina_value_hash_pget(const Eina_Value *value,
 /**
  * @typedef Eina_Value_Blob_Operations
  * How to manage blob. Any @c NULL callback is ignored.
+ * @see #_Eina_Value_Blob_Operations explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Blob_Operations Eina_Value_Blob_Operations;
+
+/**
+ * @def EINA_VALUE_BLOB_OPERATIONS_VERSION
+ * Current API version, used to validate #_Eina_Value_Blob_Operations.
+ */
+#define EINA_VALUE_BLOB_OPERATIONS_VERSION (1)
 
 /**
  * @struct _Eina_Value_Blob_Operations
@@ -2420,8 +2734,7 @@ typedef struct _Eina_Value_Blob_Operations Eina_Value_Blob_Operations;
  */
 struct _Eina_Value_Blob_Operations
 {
-#define EINA_VALUE_BLOB_OPERATIONS_VERSION (1)
-   unsigned int version; /**< must be EINA_VALUE_BLOB_OPERATIONS_VERSION */
+   unsigned int version; /**< must be #EINA_VALUE_BLOB_OPERATIONS_VERSION */
    void (*free)(const Eina_Value_Blob_Operations *ops, void *memory, size_t size);
    void *(*copy)(const Eina_Value_Blob_Operations *ops, const void *memory, size_t size);
    int (*compare)(const Eina_Value_Blob_Operations *ops, const void *data1, size_t size_data1, const void *data2, size_t size_data2);
@@ -2441,12 +2754,16 @@ EAPI extern const Eina_Value_Blob_Operations *EINA_VALUE_BLOB_OPERATIONS_MALLOC;
 
 /**
  * @typedef Eina_Value_Blob
+ * Value type for #EINA_VALUE_TYPE_BLOB.
+ *
+ * @see #_Eina_Value_Blob explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Blob Eina_Value_Blob;
 
 /**
  * @struct _Eina_Value_Blob
+ * Used to store the blob information and management operations.
  * @since 1.2
  */
 struct _Eina_Value_Blob
@@ -2469,6 +2786,11 @@ struct _Eina_Value_Blob
 /**
  * @typedef Eina_Value_Struct_Operations
  * How to manage struct. Any @c NULL callback is ignored.
+ *
+ * A structure can specify alternative methods to allocate, free and
+ * copy itself. See structure definition for all methods.
+ *
+ * @see #_Eina_Value_Struct_Operations explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Struct_Operations Eina_Value_Struct_Operations;
@@ -2476,6 +2798,12 @@ typedef struct _Eina_Value_Struct_Operations Eina_Value_Struct_Operations;
 /**
  * @typedef Eina_Value_Struct_Member
  * Describes a single member of struct.
+ *
+ * The member holds a name, type and its byte offset within the struct
+ * memory. Most Eina_Value_Struct functions takes the member name as
+ * parameter, as in eina_value_struct_set().
+ *
+ * @see #_Eina_Value_Struct_Member explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Struct_Member Eina_Value_Struct_Member;
@@ -2483,15 +2811,25 @@ typedef struct _Eina_Value_Struct_Member Eina_Value_Struct_Member;
 /**
  * @typedef Eina_Value_Struct_Desc
  * Describes the struct by listing its size, members and operations.
+ * @see #_Eina_Value_Struct_Desc explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Struct_Desc Eina_Value_Struct_Desc;
 
 /**
  * @typedef Eina_Value_Struct
+ * Value type for #EINA_VALUE_TYPE_STRUCT.
+ *
+ * @see #_Eina_Value_Struct explains fields.
  * @since 1.2
  */
 typedef struct _Eina_Value_Struct Eina_Value_Struct;
+
+/**
+ * @def EINA_VALUE_STRUCT_OPERATIONS_VERSION
+ * Current API version, used to validate #_Eina_Value_Struct_Operations.
+ */
+#define EINA_VALUE_STRUCT_OPERATIONS_VERSION (1)
 
 /**
  * @struct _Eina_Value_Struct_Operations
@@ -2500,13 +2838,12 @@ typedef struct _Eina_Value_Struct Eina_Value_Struct;
  */
 struct _Eina_Value_Struct_Operations
 {
-#define EINA_VALUE_STRUCT_OPERATIONS_VERSION (1)
-   unsigned int version; /**< must be EINA_VALUE_STRUCT_OPERATIONS_VERSION */
-   void *(*alloc)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc);
-   void (*free)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, void *memory);
-   void *(*copy)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const void *memory);
-   int (*compare)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const void *data1, const void *data2);
-   const Eina_Value_Struct_Member *(*find_member)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const char *name); /**< replace the function to find description for member. For huge structures consider using binary search, stringshared, hash or gperf. The default function does linear search using strcmp(). */
+   unsigned int version; /**< must be #EINA_VALUE_STRUCT_OPERATIONS_VERSION */
+   void *(*alloc)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc); /**< How to allocate struct memory to be managed by the Eina_Value */
+   void (*free)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, void *memory); /**< How to release memory managed by the Eina_Value */
+   void *(*copy)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const void *memory); /**< How to copy struct memory from an existing Eina_Value, if not provided alloc() will be used, then every member is copied using eina_value_type_copy() with member's type. */
+   int (*compare)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const void *data1, const void *data2); /**< How to compare two struct memories */
+   const Eina_Value_Struct_Member *(*find_member)(const Eina_Value_Struct_Operations *ops, const Eina_Value_Struct_Desc *desc, const char *name); /**< How to find description for member. For huge structures consider using binary search, stringshared, hash or gperf. The default function does linear search using strcmp(). */
 };
 
 /**
@@ -2539,23 +2876,48 @@ EAPI extern const Eina_Value_Struct_Operations *EINA_VALUE_STRUCT_OPERATIONS_STR
 
 /**
  * @struct _Eina_Value_Struct_Member
+ * Describes a single member of struct.
+ *
+ * The name is used to lookup the member description. This is done as
+ * specified as _Eina_Value_Struct_Operations::find_member(). For
+ * structures with huge number of members, consider using a better
+ * find_member function to quickly finding it! There are two helper
+ * operations provided to help this:
+ * #EINA_VALUE_STRUCT_OPERATIONS_BINSEARCH and
+ * #EINA_VALUE_STRUCT_OPERATIONS_STRINGSHARE, both depend on properly
+ * set #_Eina_Value_Struct_Desc and #_Eina_Value_Struct_Member.
+ *
+ * @see #EINA_VALUE_STRUCT_MEMBER
+ * @see #EINA_VALUE_STRUCT_MEMBER_SENTINEL
+ *
  * @since 1.2
  */
 struct _Eina_Value_Struct_Member
 {
-   const char *name;
-   const Eina_Value_Type *type;
-   unsigned int offset;
+   const char *name; /**< member name, used in lookups such as eina_value_struct_get() */
+   const Eina_Value_Type *type; /**< how to use this member */
+   unsigned int offset; /**< where this member is located within the structure memory */
 };
 
 /**
+ * @def EINA_VALUE_STRUCT_DESC_VERSION
+ * Current API version, used to validate #_Eina_Value_Struct_Desc.
+ */
+#define EINA_VALUE_STRUCT_DESC_VERSION (1)
+
+/**
  * @struct _Eina_Value_Struct_Desc
+ * Describes the struct by listing its size, members and operations.
+ *
+ * This is the root of Eina_Value knowledge about the memory it's
+ * handling as a structure. It adds introspection, saying the byte
+ * size of the structure, its members and how to manage such members.
+ *
  * @since 1.2
  */
 struct _Eina_Value_Struct_Desc
 {
-#define EINA_VALUE_STRUCT_DESC_VERSION (1)
-   unsigned int version; /**< must be EINA_VALUE_STRUCT_DESC_VERSION */
+   unsigned int version; /**< must be #EINA_VALUE_STRUCT_DESC_VERSION */
    const Eina_Value_Struct_Operations *ops; /**< operations, if @c NULL defaults will be used. You may use operations to optimize member lookup using binary search or gperf hash. */
    const Eina_Value_Struct_Member *members; /**< array of member descriptions, if @c member_count is zero, then it must be @c NULL terminated. */
    unsigned int member_count; /**< if > 0, specifies number of members. If zero then @c members must be NULL terminated. */
@@ -2586,12 +2948,13 @@ struct _Eina_Value_Struct_Desc
 
 /**
  * @struct _Eina_Value_Struct
+ * Used to store the memory and its description.
  * @since 1.2
  */
 struct _Eina_Value_Struct
 {
-   const Eina_Value_Struct_Desc *desc;
-   void *memory;
+   const Eina_Value_Struct_Desc *desc; /**< How to manage the structure */
+   void *memory; /**< The managed structure memory */
 };
 
 /**
@@ -2702,7 +3065,7 @@ static inline Eina_Bool eina_value_struct_setup(Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_set(Eina_Value *value,
                                               const char *name,
-                                              ...) EINA_ARG_NONNULL(1);
+                                              ...) EINA_ARG_NONNULL(1, 2);
 
 /**
  * @brief Get the generic value from an struct member.
@@ -2770,7 +3133,7 @@ static inline Eina_Bool eina_value_struct_set(Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_get(const Eina_Value *value,
                                               const char *name,
-                                              ...) EINA_ARG_NONNULL(1);
+                                              ...) EINA_ARG_NONNULL(1, 2);
 
 /**
  * @brief Set the generic value in an struct member.
@@ -2786,7 +3149,7 @@ static inline Eina_Bool eina_value_struct_get(const Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_vset(Eina_Value *value,
                                                const char *name,
-                                               va_list args) EINA_ARG_NONNULL(1);
+                                               va_list args) EINA_ARG_NONNULL(1, 2);
 
 /**
  * @brief Get the generic value from an struct member.
@@ -2808,7 +3171,7 @@ static inline Eina_Bool eina_value_struct_vset(Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_vget(const Eina_Value *value,
                                                const char *name,
-                                               va_list args) EINA_ARG_NONNULL(1);
+                                               va_list args) EINA_ARG_NONNULL(1, 2);
 
 /**
  * @brief Set the generic value in an struct member from pointer.
@@ -2875,7 +3238,7 @@ static inline Eina_Bool eina_value_struct_vget(const Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_pset(Eina_Value *value,
                                                const char *name,
-                                               const void *ptr) EINA_ARG_NONNULL(1, 3);
+                                               const void *ptr) EINA_ARG_NONNULL(1, 2, 3);
 
 /**
  * @brief Get the generic value to pointer from an struct member.
@@ -2944,7 +3307,62 @@ static inline Eina_Bool eina_value_struct_pset(Eina_Value *value,
  */
 static inline Eina_Bool eina_value_struct_pget(const Eina_Value *value,
                                                const char *name,
-                                               void *ptr) EINA_ARG_NONNULL(1, 3);
+                                               void *ptr) EINA_ARG_NONNULL(1, 2, 3);
+
+/**
+ * @brief Get the member as Eina_Value copy
+ * @param src source value object
+ * @param name name to find the member
+ * @param dst where to return the member value.
+ *
+ * The argument @a dst is considered uninitialized and it's setup to
+ * the type of the member.
+ *
+ * @since 1.2
+ */
+static inline Eina_Bool eina_value_struct_value_get(const Eina_Value *src,
+                                                    const char *name,
+                                                    Eina_Value *dst) EINA_ARG_NONNULL(1, 2, 3);
+
+/**
+ * @brief Set the member from Eina_Value source
+ * @param dst destination value object
+ * @param name name to find the member
+ * @param src source value
+ *
+ * @since 1.2
+ */
+static inline Eina_Bool eina_value_struct_value_set(Eina_Value *dst,
+                                                    const char *name,
+                                                    const Eina_Value *src) EINA_ARG_NONNULL(1, 2, 3);
+
+/**
+ * @brief Get the member as Eina_Value copy given its member description.
+ * @param src source value object
+ * @param member the member description to use
+ * @param dst where to return the member value.
+ *
+ * The argument @a dst is considered uninitialized and it's setup to
+ * the type of the member.
+ *
+ * @since 1.2
+ */
+static inline Eina_Bool eina_value_struct_member_value_get(const Eina_Value *src,
+                                                           const Eina_Value_Struct_Member *member,
+                                                           Eina_Value *dst) EINA_ARG_NONNULL(1, 2, 3);
+
+/**
+ * @brief Set the member from Eina_Value source
+ * @param dst destination value object
+ * @param member the member description to use
+ * @param src source value
+ *
+ * @since 1.2
+ */
+static inline Eina_Bool eina_value_struct_member_value_set(Eina_Value *dst,
+                                                           const Eina_Value_Struct_Member *member,
+                                                           const Eina_Value *src) EINA_ARG_NONNULL(1, 2, 3);
+
 
 /**
  * @}
@@ -2958,6 +3376,12 @@ static inline Eina_Bool eina_value_struct_pget(const Eina_Value *value,
  */
 
 /**
+ * @def EINA_VALUE_TYPE_VERSION
+ * Current API version, used to validate type.
+ */
+#define EINA_VALUE_TYPE_VERSION (1)
+
+/**
  * @struct _Eina_Value_Type
  * API to access values.
  *
@@ -2965,11 +3389,6 @@ static inline Eina_Bool eina_value_struct_pget(const Eina_Value *value,
  */
 struct _Eina_Value_Type
 {
-   /**
-    * @def EINA_VALUE_TYPE_VERSION
-    * Current API version, used to validate type.
-    */
-#define EINA_VALUE_TYPE_VERSION (1)
    unsigned int version; /**< must be #EINA_VALUE_TYPE_VERSION */
    unsigned int value_size; /**< byte size of value */
    const char *name; /**< name for debug and introspection */

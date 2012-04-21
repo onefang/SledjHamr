@@ -9,7 +9,7 @@
 
 #ifdef BUILD_ECORE_EVAS_OPENGL_COCOA
 #include <Ecore_Cocoa.h>
-#include <Evas_Engine_Gl_Cocoa.h>
+#include <Evas_Engine_GL_Cocoa.h>
 #endif
 
 #include "ecore_evas_private.h"
@@ -463,6 +463,14 @@ static Ecore_Evas_Engine_Func _ecore_cocoa_engine_func =
     NULL,
     NULL,
     NULL, //transparent    
+     
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+
     NULL, // render
     NULL
   };

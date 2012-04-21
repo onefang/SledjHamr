@@ -110,7 +110,10 @@ _ecore_con_client_kill(Ecore_Con_Client *cl)
    if (cl->delete_me)
      DBG("Multi kill request for client %p", cl);
    else
-     ecore_con_event_client_del(cl);
+     {
+        ecore_con_event_client_del(cl);
+        if (cl->buf) return;
+     }
    INF("Lost client %s", (cl->ip) ? cl->ip : "");
    if (cl->fd_handler)
      ecore_main_fd_handler_del(cl->fd_handler);
@@ -461,7 +464,7 @@ ecore_con_server_connect(Ecore_Con_Type compl_type,
                  (!ecore_con_lookup(svr->name, (Ecore_Con_Dns_Cb)ecore_con_socks_dns_cb, svr)))
                goto error;
              if (svr->ecs->lookup)
-               svr->ecs_state = ECORE_CON_SOCKS_STATE_RESOLVED;
+               svr->ecs_state = ECORE_CON_PROXY_STATE_RESOLVED;
           }
      }
    if (ecore_con_ssl_server_prepare(svr, compl_type & ECORE_CON_SSL))
@@ -1031,7 +1034,7 @@ ecore_con_event_server_del(Ecore_Con_Server *svr)
     e->server = svr;
     if (svr->ecs)
       {
-         svr->ecs_state = svr->ecs->lookup ? ECORE_CON_SOCKS_STATE_RESOLVED : ECORE_CON_SOCKS_STATE_DONE;
+         svr->ecs_state = svr->ecs->lookup ? ECORE_CON_PROXY_STATE_RESOLVED : ECORE_CON_PROXY_STATE_DONE;
          eina_stringshare_replace(&svr->proxyip, NULL);
          svr->proxyport = 0;
       }
@@ -1320,7 +1323,7 @@ _ecore_con_client_free(Ecore_Con_Client *cl)
    if (cl->event_count) return;
    ECORE_MAGIC_SET(cl, ECORE_MAGIC_NONE);
 
-   free(cl->buf);
+   if (cl->buf) eina_binbuf_free(cl->buf);
 
    if (cl->host_server->type & ECORE_CON_SSL)
      ecore_con_ssl_client_shutdown(cl);
@@ -1736,7 +1739,7 @@ svr_try_connect_plain(Ecore_Con_Server *svr)
    if (so_err)
      {
         /* we lost our server! */
-        ecore_con_event_server_error(svr, strerror(errno));
+        ecore_con_event_server_error(svr, strerror(so_err));
         ERR("Connection lost: %s", strerror(so_err));
         _ecore_con_server_kill(svr);
         return ECORE_CON_DISCONNECTED;
@@ -1971,9 +1974,9 @@ _ecore_con_cl_handler(void             *data,
           ecore_con_event_server_add(svr);
         return ECORE_CALLBACK_RENEW;
      }
-   if (svr->ecs && svr->ecs_state && (svr->ecs_state < ECORE_CON_SOCKS_STATE_READ) && (!svr->ecs_buf))
+   if (svr->ecs && svr->ecs_state && (svr->ecs_state < ECORE_CON_PROXY_STATE_READ) && (!svr->ecs_buf))
      {
-        if (svr->ecs_state < ECORE_CON_SOCKS_STATE_INIT)
+        if (svr->ecs_state < ECORE_CON_PROXY_STATE_INIT)
           {
              INF("PROXY STATE++");
              svr->ecs_state++;
@@ -2271,7 +2274,7 @@ _ecore_con_server_flush(Ecore_Con_Server *svr)
 static void
 _ecore_con_client_flush(Ecore_Con_Client *cl)
 {
-   int num, count = 0;
+   int num = 0, count = 0;
 
 #ifdef _WIN32
    if (ecore_con_local_win32_client_flush(cl))
@@ -2314,7 +2317,7 @@ _ecore_con_client_flush(Ecore_Con_Client *cl)
      }
 
    if (count) ecore_con_event_client_write(cl, count);
-   cl->buf_offset += count;
+   cl->buf_offset += count, num -= count;
    if (cl->buf_offset >= eina_binbuf_length_get(cl->buf))
      {
         cl->buf_offset = 0;
@@ -2332,7 +2335,7 @@ _ecore_con_client_flush(Ecore_Con_Client *cl)
         if (cl->fd_handler)
           ecore_main_fd_handler_active_set(cl->fd_handler, ECORE_FD_READ);
      }
-   else if ((count < num) && cl->fd_handler)
+   else if (cl->fd_handler && (num >= 0))
      ecore_main_fd_handler_active_set(cl->fd_handler, ECORE_FD_WRITE);
 }
 

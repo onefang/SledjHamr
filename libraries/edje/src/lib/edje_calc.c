@@ -66,7 +66,7 @@ _edje_part_pos_set(Edje *ed, Edje_Real_Part *ep, int mode, FLOAT_T pos, FLOAT_T 
         break;
       case EDJE_TWEEN_MODE_DECELERATE:
         npos = FROM_DOUBLE(ecore_animator_pos_map(TO_DOUBLE(pos),
-                                                  ECORE_POS_MAP_DECELERATE, 
+                                                  ECORE_POS_MAP_DECELERATE,
                                                   0.0, 0.0));
         break;
       case EDJE_TWEEN_MODE_LINEAR:
@@ -110,7 +110,7 @@ _edje_part_pos_set(Edje *ed, Edje_Real_Part *ep, int mode, FLOAT_T pos, FLOAT_T 
         npos = fp_pos;
         break;
      }
-#endif   
+#endif
    if (npos == ep->description_pos) return;
 
    ep->description_pos = npos;
@@ -564,7 +564,7 @@ _edje_part_description_apply(Edje *ed, Edje_Real_Part *ep, const char *d1, doubl
 
 	_edje_real_part_rel_to_apply(ed, ep, ep->param2);
 
-	if (ep->description_pos != 0.0)
+	if (ep->description_pos > FROM_DOUBLE(0.0))
 	  ep->chosen_description = epd2;
      }
 
@@ -572,6 +572,7 @@ _edje_part_description_apply(Edje *ed, Edje_Real_Part *ep, const char *d1, doubl
        ep->part->type == EDJE_PART_TYPE_EXTERNAL)
      _edje_external_recalc_apply(ed, ep, NULL, chosen_desc);
 
+   ed->recalc_hints = 1;
    ed->dirty = 1;
    ed->recalc_call = 1;
 #ifdef EDJE_CALC_CACHE
@@ -650,6 +651,16 @@ _edje_recalc_do(Edje *ed)
    else
      evas_object_smart_need_recalculate_set(ed->obj, need_calc);
    ed->recalc_call = 0;
+
+   if (ed->update_hints && ed->recalc_hints && !ed->calc_only)
+     {
+        Evas_Coord w, h;
+
+        ed->recalc_hints = 0;
+
+        edje_object_size_min_calc(ed->obj, &w, &h);
+        evas_object_size_hint_min_set(ed->obj, w, h);
+     }
 }
 
 void
@@ -1746,7 +1757,6 @@ _edje_part_recalc_single_min_max(FLOAT_T sc,
           }
      }
 
-
    /* XXX TODO: remove need of EDJE_INF_MAX_H, see edje_util.c */
    if ((ep->swallow_params.max.h <= 0) ||
        (ep->swallow_params.max.h == EDJE_INF_MAX_H))
@@ -1810,9 +1820,9 @@ _edje_part_recalc_single_map(Edje *ed,
      }
    params->map.center.z = 0;
 
-   params->map.rotation.x = TO_DOUBLE(desc->map.rot.x);
-   params->map.rotation.y = TO_DOUBLE(desc->map.rot.y);
-   params->map.rotation.z = TO_DOUBLE(desc->map.rot.z);
+   params->map.rotation.x = desc->map.rot.x;
+   params->map.rotation.y = desc->map.rot.y;
+   params->map.rotation.z = desc->map.rot.z;
 
    if (light)
      {
@@ -1907,7 +1917,7 @@ _edje_part_recalc_single(Edje *ed,
    sc = ed->scale;
    if (sc == ZERO) sc = _edje_scale;
    _edje_part_recalc_single_min_max(sc, ep, desc, &minw, &minh, &maxw, &maxh);
-   
+
    /* relative coords of top left & bottom right */
    _edje_part_recalc_single_rel(ed, ep, desc, rel1_to_x, rel1_to_y, rel2_to_x, rel2_to_y, params);
 
@@ -1957,6 +1967,29 @@ _edje_part_recalc_single(Edje *ed,
         if (((Edje_Part_Description_Box *)chosen_desc)->box.min.v)
           {
              if (lminh > minh) minh = lminh;
+          }
+     }
+   else if ((ep->part->type == EDJE_PART_TYPE_IMAGE) &&
+	    (chosen_desc->min.limit || chosen_desc->max.limit))
+     {
+        Evas_Coord w, h;
+
+        /* We only need pos to find the right image that would be displayed */
+        /* Yes, if someone set aspect preference to SOURCE and also max,min
+           to SOURCE, it will be under efficient, but who cares at the
+           moment. */
+        _edje_real_part_image_set(ed, ep, pos);
+        evas_object_image_size_get(ep->object, &w, &h);
+
+        if (chosen_desc->min.limit)
+          {
+             if (w > minw) minw = w;
+             if (h > minh) minh = h;
+          }
+        if (chosen_desc->max.limit)
+          {
+             if ((maxw <= 0) || (w < maxw)) maxw = w;
+             if ((maxh <= 0) || (h < maxh)) maxh = h;
           }
      }
 
@@ -2259,6 +2292,23 @@ _edje_part_recalc(Edje *ed, Edje_Real_Part *ep, int flags, Edje_Calc_Params *sta
 #endif
 	return;
      }
+
+   if (ep->part->scale &&
+       ep->part->type == EDJE_PART_TYPE_GROUP &&
+       ep->swallowed_object)
+     {
+        edje_object_scale_set(ep->swallowed_object, TO_DOUBLE(ed->scale));
+
+        if (ep->description_pos > FROM_DOUBLE(0.5) && ep->param2)
+          {
+             edje_object_update_hints_set(ep->swallowed_object, ep->param2->description->min.limit);
+          }
+        else
+          {
+             edje_object_update_hints_set(ep->swallowed_object, ep->param1.description->min.limit);
+          }
+     }
+
 #ifdef EDJE_CALC_CACHE
    if (ep->state == ed->state && !state)
      return ;
@@ -2426,7 +2476,8 @@ _edje_part_recalc(Edje *ed, Edje_Real_Part *ep, int flags, Edje_Calc_Params *sta
  				      p1, pos);
 
 #ifdef EDJE_CALC_CACHE
- 	     ep->param1.state = ed->state;
+	     if (flags == FLAG_XY)
+	       ep->param1.state = ed->state;
 #endif
  	  }
      }
@@ -2478,7 +2529,8 @@ _edje_part_recalc(Edje *ed, Edje_Real_Part *ep, int flags, Edje_Calc_Params *sta
  				      confine_to,
 				      p2, pos);
 #ifdef EDJE_CALC_CACHE
- 	     ep->param2->state = ed->state;
+	     if (flags == FLAG_XY)
+	       ep->param2->state = ed->state;
 #endif
  	  }
 
@@ -2806,7 +2858,7 @@ _edje_part_recalc(Edje *ed, Edje_Real_Part *ep, int flags, Edje_Calc_Params *sta
                }
 
              evas_map_util_3d_rotate(map,
-                                     pf->map.rotation.x, pf->map.rotation.y, pf->map.rotation.z,
+                                     TO_DOUBLE(pf->map.rotation.x), TO_DOUBLE(pf->map.rotation.y), TO_DOUBLE(pf->map.rotation.z),
                                      pf->map.center.x, pf->map.center.y, pf->map.center.z);
 
              // calculate light color & position etc. if there is one

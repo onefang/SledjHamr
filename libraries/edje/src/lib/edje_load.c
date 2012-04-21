@@ -132,7 +132,7 @@ edje_file_group_exists(const char *file, const char *glob)
    edf = _edje_cache_file_coll_open(file, NULL, &error_ret, NULL);
    if (!edf)
       return EINA_FALSE;
-   
+
    for (p = glob; *p; p++)
      {
        if ((*p == '*') || (*p == '?') || (*p == '['))
@@ -141,7 +141,7 @@ edje_file_group_exists(const char *file, const char *glob)
            break;
          }
      }
-  
+
    if (is_glob)
      {
        if (!edf->collection_patterns)
@@ -149,18 +149,18 @@ edje_file_group_exists(const char *file, const char *glob)
            Edje_Part_Collection_Directory_Entry *ce;
            Eina_Iterator *i;
            Eina_List *l = NULL;
-           
+
            i = eina_hash_iterator_data_new(edf->collection);
-           
+
            EINA_ITERATOR_FOREACH(i, ce)
              l = eina_list_append(l, ce);
-           
+
            eina_iterator_free(i);
-           
+
            edf->collection_patterns = edje_match_collection_dir_init(l);
            eina_list_free(l);
          }
-       
+
        succeed = edje_match_collection_dir_exec(edf->collection_patterns, glob);
        if (edf->collection_patterns)
          {
@@ -225,6 +225,20 @@ _edje_programs_patterns_init(Edje *ed)
 
    if (ssp->signals_patterns)
      return;
+
+   if (getenv("EDJE_DUMP_PROGRAMS"))
+     {
+       INF("Group '%s' programs:", ed->group);
+#define EDJE_DUMP_PROGRAM(Section)					\
+       for (i = 0; i < ed->collection->programs.Section##_count; i++)	\
+	 INF(#Section" for ('%s', '%s')", ed->collection->programs.Section[i]->signal, ed->collection->programs.Section[i]->source);
+
+       EDJE_DUMP_PROGRAM(strcmp);
+       EDJE_DUMP_PROGRAM(strncmp);
+       EDJE_DUMP_PROGRAM(strrncmp);
+       EDJE_DUMP_PROGRAM(fnmatch);
+       EDJE_DUMP_PROGRAM(nocmp);
+     }
 
    edje_match_program_hash_build(ed->collection->programs.strcmp,
 				 ed->collection->programs.strcmp_count,
@@ -294,6 +308,7 @@ _edje_object_file_set_internal(Evas_Object *obj, const char *file, const char *g
 
    ed->load_error = EDJE_LOAD_ERROR_NONE;
    _edje_file_add(ed);
+   ed->block_break = 0;
 
    if (ed->file && ed->file->external_dir)
      {

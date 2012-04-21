@@ -107,8 +107,8 @@ ecore_win32_window_internal_new(Ecore_Win32_Window *parent,
    w->min_height  = 0;
    w->max_width   = 32767;
    w->max_height  = 32767;
-   w->base_width  = 0;
-   w->base_height = 0;
+   w->base_width  = -1;
+   w->base_height = -1;
    w->step_width  = 1;
    w->step_height = 1;
 
@@ -249,6 +249,8 @@ ecore_win32_window_free(Ecore_Win32_Window *window)
  *
  * This function returns the window HANDLE associated to @p window. If
  * @p window is @c NULL, this function returns @c NULL.
+ *
+ * @note The returned value is of type HWND.
  */
 EAPI void *
 ecore_win32_window_hwnd_get(Ecore_Win32_Window *window)
@@ -755,140 +757,6 @@ ecore_win32_window_size_step_get(Ecore_Win32_Window *window,
    if (step_height) *step_height = window->step_height;
 }
 
-EAPI void
-ecore_win32_window_shape_set(Ecore_Win32_Window *window,
-                             unsigned short      width,
-                             unsigned short      height,
-                             unsigned char      *mask)
-{
-   HRGN          rgn;
-   int           x;
-   int           y;
-   OSVERSIONINFO version_info;
-
-   if (!window)
-      return;
-
-   if (!mask)
-     {
-        window->shape.enabled = 0;
-        if (window->shape.layered != 0)
-          {
-             window->shape.layered = 0;
-#if defined(WS_EX_LAYERED)
-             SetLastError(0);
-             if (!SetWindowLongPtr(window->window, GWL_EXSTYLE,
-                                   GetWindowLong(window->window, GWL_EXSTYLE) & (~WS_EX_LAYERED)) &&
-                 (GetLastError() != 0))
-               {
-                  ERR("SetWindowLongPtr() failed");
-                  return;
-               }
-             if (!RedrawWindow(window->window, NULL, NULL,
-                               RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN))
-               {
-                  ERR("RedrawWindow() failed");
-                  return;
-               }
-#endif
-          }
-        else
-          if (!SetWindowRgn(window->window, NULL, TRUE))
-            {
-               ERR("SetWindowRgn() failed");
-            }
-        return;
-     }
-
-   if (width == 0 || height == 0)
-     return;
-
-   window->shape.enabled = 1;
-
-   if (width != window->shape.width || height != window->shape.height)
-     {
-       window->shape.width = width;
-       window->shape.height = height;
-       if (window->shape.mask)
-         {
-           free(window->shape.mask);
-           window->shape.mask = NULL;
-         }
-       window->shape.mask = malloc(width * height);
-     }
-   memcpy(window->shape.mask, mask, width * height);
-
-   window->shape.layered = 0;
-
-#if defined(WS_EX_LAYERED)
-   version_info.dwOSVersionInfoSize = sizeof(version_info);
-   if (GetVersionEx(&version_info) == TRUE && version_info.dwMajorVersion == 5)
-     {
-       SetLastError(0);
-       if (!SetWindowLongPtr(window->window, GWL_EXSTYLE,
-                             GetWindowLong(window->window, GWL_EXSTYLE) | WS_EX_LAYERED) &&
-           (GetLastError() != 0))
-            {
-               ERR("SetWindowLongPtr() failed");
-               return;
-            }
-       window->shape.layered = 1;
-       return;
-     }
-#endif
-
-   if (!(rgn = CreateRectRgn(0, 0, 0, 0)))
-     {
-        ERR("CreateRectRgn() failed");
-        return;
-     }
-   for (y = 0; y < height; y++)
-     {
-        HRGN rgnLine;
-
-        if (!(rgnLine = CreateRectRgn(0, 0, 0, 0)))
-          {
-             ERR("CreateRectRgn() failed");
-             return;
-          }
-        for (x = 0; x < width; x++)
-          {
-             if (mask[y * width + x] > 0)
-               {
-                  HRGN rgnDot;
-
-                  if (!(rgnDot = CreateRectRgn(x, y, x + 1, y + 1)))
-                    {
-                       ERR("CreateRectRgn() failed");
-                       return;
-                    }
-                  if (CombineRgn(rgnLine, rgnLine, rgnDot, RGN_OR) == ERROR)
-                    {
-                       ERR("CombineRgn() has not created a new region");
-                    }
-                  if (!DeleteObject(rgnDot))
-                    {
-                       ERR("DeleteObject() failed");
-                       return;
-                    }
-               }
-          }
-        if (CombineRgn(rgn, rgn, rgnLine, RGN_OR) == ERROR)
-          {
-             ERR("CombineRgn() has not created a new region");
-          }
-        if (!DeleteObject(rgnLine))
-          {
-             ERR("DeleteObject() failed");
-             return;
-          }
-     }
-   if (!SetWindowRgn(window->window, rgn, TRUE))
-     {
-        ERR("SetWindowRgn() failed");
-     }
-}
-
 /**
  * @brief Show the given window.
  *
@@ -1011,7 +879,7 @@ ecore_win32_window_title_set(Ecore_Win32_Window *window,
  * @c NULL, this function does nothing.
  */
 EAPI void
-ecore_win32_window_focus_set(Ecore_Win32_Window *window)
+ecore_win32_window_focus(Ecore_Win32_Window *window)
 {
    if (!window) return;
 
@@ -1021,6 +889,37 @@ ecore_win32_window_focus_set(Ecore_Win32_Window *window)
      {
         ERR("SetFocus() failed");
      }
+}
+
+/**
+ * @brief Get the current focused window.
+ *
+ * @return The window that has focus.
+ *
+ * This function returns the window that has focus. If the calling
+ * thread's message queue does not have an associated window with the
+ * keyboard focus, the return value is @c NULL.
+ *
+ * @note Even if the returned value is @c NULL, another thread's queue
+ * may be associated with a window that has the keyboard focus.
+ *
+ * @note The returned value is of type HWND.
+ */
+EAPI void *
+ecore_win32_window_focus_get(void)
+{
+   HWND focused;
+
+   INF("getting focused window");
+
+   focused = GetFocus();
+   if (!focused)
+     {
+        ERR("GetFocus() failed");
+        return NULL;
+     }
+
+   return focused;
 }
 
 /**

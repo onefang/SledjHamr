@@ -37,20 +37,24 @@ host_triplet = @host@
 subdir = src/modules/mp/one_big
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/efl_attribute.m4 \
-	$(top_srcdir)/m4/efl_benchmark.m4 \
-	$(top_srcdir)/m4/efl_compiler_flag.m4 \
-	$(top_srcdir)/m4/efl_coverage.m4 $(top_srcdir)/m4/efl_cpu.m4 \
-	$(top_srcdir)/m4/efl_doxygen.m4 \
-	$(top_srcdir)/m4/efl_examples.m4 \
-	$(top_srcdir)/m4/efl_fnmatch.m4 \
-	$(top_srcdir)/m4/efl_path_max.m4 $(top_srcdir)/m4/efl_tests.m4 \
-	$(top_srcdir)/m4/efl_threads.m4 \
-	$(top_srcdir)/m4/efl_voltron.m4 $(top_srcdir)/m4/eina_bench.m4 \
-	$(top_srcdir)/m4/eina_check.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/eina/eina_bench.m4 \
+	$(top_srcdir)/m4/eina/eina_check.m4 \
+	$(top_srcdir)/m4/common/efl_attribute.m4 \
+	$(top_srcdir)/m4/common/efl_benchmark.m4 \
+	$(top_srcdir)/m4/common/efl_compiler_flag.m4 \
+	$(top_srcdir)/m4/common/efl_coverage.m4 \
+	$(top_srcdir)/m4/common/efl_cpu.m4 \
+	$(top_srcdir)/m4/common/efl_doxygen.m4 \
+	$(top_srcdir)/m4/common/efl_examples.m4 \
+	$(top_srcdir)/m4/common/efl_fnmatch.m4 \
+	$(top_srcdir)/m4/common/efl_path_max.m4 \
+	$(top_srcdir)/m4/common/efl_tests.m4 \
+	$(top_srcdir)/m4/common/efl_threads.m4 \
+	$(top_srcdir)/m4/common/efl_voltron.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -166,13 +170,13 @@ EINA_CONFIGURE_DEFAULT_MEMPOOL = @EINA_CONFIGURE_DEFAULT_MEMPOOL@
 EINA_CONFIGURE_ENABLE_LOG = @EINA_CONFIGURE_ENABLE_LOG@
 EINA_CONFIGURE_HAVE_DEBUG_THREADS = @EINA_CONFIGURE_HAVE_DEBUG_THREADS@
 EINA_CONFIGURE_HAVE_DIRENT_H = @EINA_CONFIGURE_HAVE_DIRENT_H@
+EINA_CONFIGURE_HAVE_EXOTIC = @EINA_CONFIGURE_HAVE_EXOTIC@
 EINA_CONFIGURE_HAVE_INTTYPES_H = @EINA_CONFIGURE_HAVE_INTTYPES_H@
 EINA_CONFIGURE_HAVE_ON_OFF_THREADS = @EINA_CONFIGURE_HAVE_ON_OFF_THREADS@
 EINA_CONFIGURE_HAVE_STDINT_H = @EINA_CONFIGURE_HAVE_STDINT_H@
 EINA_CONFIGURE_HAVE_THREADS = @EINA_CONFIGURE_HAVE_THREADS@
 EINA_CONFIGURE_MAGIC_DEBUG = @EINA_CONFIGURE_MAGIC_DEBUG@
 EINA_CONFIGURE_SAFETY_CHECKS = @EINA_CONFIGURE_SAFETY_CHECKS@
-EINA_CPPFLAGS = @EINA_CPPFLAGS@
 EINA_LIBS = @EINA_LIBS@
 EINA_SIZEOF_WCHAR_T = @EINA_SIZEOF_WCHAR_T@
 EMEMOA_CFLAGS = @EMEMOA_CFLAGS@
@@ -182,6 +186,8 @@ ESCAPE_LIBS = @ESCAPE_LIBS@
 EVIL_CFLAGS = @EVIL_CFLAGS@
 EVIL_LIBS = @EVIL_LIBS@
 EXEEXT = @EXEEXT@
+EXOTIC_CFLAGS = @EXOTIC_CFLAGS@
+EXOTIC_LIBS = @EXOTIC_LIBS@
 FGREP = @FGREP@
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_LIBS = @GLIB_LIBS@
@@ -217,6 +223,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -297,7 +305,6 @@ AM_CPPFLAGS = \
 -I$(top_builddir)/src/include \
 -I$(top_srcdir)/src/lib \
 -I$(top_builddir)/src/lib \
-@EINA_CPPFLAGS@ \
 @EFL_EINA_BUILD@ \
 @VALGRIND_CFLAGS@
 

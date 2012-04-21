@@ -2,35 +2,37 @@
 # include <config.h>
 #endif
 
-#include <stdlib.h>
-#include <unistd.h>
-
-#include <Ecore.h>
-#include "ecore_private.h"
-#include <Ecore_Input.h>
-
-#ifdef BUILD_ECORE_IPC
-# ifdef BUILD_ECORE_EVAS_SOFTWARE_BUFFER
-#  define EXTN_ENABLED 1
-# endif
-#endif
-
-#include "ecore_evas_private.h"
-#include "Ecore_Evas.h"
-#ifdef EXTN_ENABLED
-#include "Ecore_Ipc.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
-#include <sys/mman.h>
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sys/file.h>
+#include <unistd.h>
+
+#include <Ecore.h>
+#include "ecore_private.h"
+#include <Ecore_Input.h>
+
+#ifdef BUILD_ECORE_EVAS_EXTN
+
+#include <Ecore_Ipc.h>
+
+#endif
+
+#include "ecore_evas_private.h"
+#include "Ecore_Evas.h"
+
+
+#ifdef BUILD_ECORE_EVAS_EXTN
+
 
 typedef struct _Shmfile Shmfile;
 
@@ -1102,6 +1104,13 @@ static const Ecore_Evas_Engine_Func _ecore_extn_plug_engine_func =
    NULL,
    NULL, //transparent
 
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+
    NULL, // render
    NULL  // screen_geometry_get
 };
@@ -1286,12 +1295,13 @@ void
 _ecore_evas_extn_shutdown(void)
 {
 }
-#endif
+
+#endif /* BUILD_ECORE_EVAS_EXTN */
 
 EAPI Evas_Object *
 ecore_evas_extn_plug_new(Ecore_Evas *ee_target)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Evas_Object *o;
    Ecore_Evas *ee;
    int w = 1, h = 1;
@@ -1408,7 +1418,7 @@ ecore_evas_extn_plug_new(Ecore_Evas *ee_target)
 EAPI Eina_Bool
 ecore_evas_extn_plug_connect(Evas_Object *obj, const char *svcname, int svcnum, Eina_Bool svcsys)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Extn *extn;
    Ecore_Evas *ee = NULL;
 
@@ -1459,7 +1469,7 @@ ecore_evas_extn_plug_connect(Evas_Object *obj, const char *svcname, int svcnum, 
 EAPI void
 ecore_evas_extn_plug_object_data_lock(Evas_Object *obj)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Ecore_Evas *ee;
 
    ee = ecore_evas_object_ecore_evas_get(obj);
@@ -1471,7 +1481,7 @@ ecore_evas_extn_plug_object_data_lock(Evas_Object *obj)
 EAPI void
 ecore_evas_extn_plug_object_data_unlock(Evas_Object *obj)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Ecore_Evas *ee;
 
    ee = ecore_evas_object_ecore_evas_get(obj);
@@ -1480,7 +1490,7 @@ ecore_evas_extn_plug_object_data_unlock(Evas_Object *obj)
 #endif
 }
 
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
 static void
 _ecore_evas_socket_resize(Ecore_Evas *ee, int w, int h)
 {
@@ -1830,7 +1840,7 @@ _ipc_client_data(void *data, int type __UNUSED__, void *event)
 
 #define STRGET(val) \
          do { \
-              if ((ipc->val) && (ipc->val < (char *)(e->size - 1))) \
+              if ((ipc->val) && (ipc->val < (char *)(long)(e->size - 1))) \
               ipc->val = ((char *)ipc) + (long)ipc->val; \
               else \
               ipc->val = NULL; \
@@ -1978,6 +1988,13 @@ static const Ecore_Evas_Engine_Func _ecore_extn_socket_engine_func =
    _ecore_evas_extn_socket_alpha_set,
    NULL, //transparent
 
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   
    _ecore_evas_extn_socket_render, // render
    NULL  // screen_geometry_get
 };
@@ -1987,7 +2004,7 @@ static const Ecore_Evas_Engine_Func _ecore_extn_socket_engine_func =
 EAPI Ecore_Evas *
 ecore_evas_extn_socket_new(int w, int h)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Evas_Engine_Info_Buffer *einfo;
    Ecore_Evas *ee;
    int rmethod;
@@ -2077,7 +2094,7 @@ ecore_evas_extn_socket_new(int w, int h)
 EAPI Eina_Bool
 ecore_evas_extn_socket_listen(Ecore_Evas *ee, const char *svcname, int svcnum, Eina_Bool svcsys)
 {
-#ifdef EXTN_ENABLED
+#ifdef BUILD_ECORE_EVAS_EXTN
    Extn *extn;
 
    extn = calloc(1, sizeof(Extn));

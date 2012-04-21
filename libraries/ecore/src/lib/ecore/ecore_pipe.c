@@ -36,14 +36,12 @@
 # include <Escape.h>
 #endif
 
+#ifdef HAVE_EXOTIC
+# include <Exotic.h>
+#endif
+
 #include "Ecore.h"
 #include "ecore_private.h"
-
-#ifdef _WIN32
-# define FMT_SSIZE_T "%Id"
-#else
-# define FMT_SSIZE_T "%zd"
-#endif
 
 /* How of then we should retry to write to the pipe */
 #define ECORE_PIPE_WRITE_RETRY 6
@@ -79,6 +77,9 @@
 # define PIPE_FD_ERROR   -1
 
 #endif /* ! _WIN32 */
+
+#include <Ecore.h>
+#include "ecore_private.h"
 
 struct _Ecore_Pipe
 {
@@ -414,7 +415,7 @@ ecore_pipe_write(Ecore_Pipe  *p,
           ;
         else
           {
-             ERR("An unhandled error (ret: " FMT_SSIZE_T " errno: %d)"
+             ERR("An unhandled error (ret: %zd errno: %d)"
                  "occurred while writing to the pipe the length",
                  ret, errno);
           }
@@ -448,7 +449,7 @@ ecore_pipe_write(Ecore_Pipe  *p,
           ;
         else
           {
-             ERR("An unhandled error (ret: " FMT_SSIZE_T " errno: %d)"
+             ERR("An unhandled error (ret: %zd errno: %d)"
                  "occurred while writing to the pipe the length",
                  ret, errno);
           }

@@ -22,6 +22,7 @@
 
 #include <limits.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #include "eina_types.h"
 #include "eina_array.h"
@@ -91,6 +92,13 @@
 typedef struct _Eina_File_Direct_Info Eina_File_Direct_Info;
 
 /**
+ * @typedef Eina_Stat
+ * A typedef to #_Eina_Stat.
+ * @since 1.2
+ */
+typedef struct _Eina_Stat Eina_Stat;
+
+/**
  * @typedef Eina_File_Dir_List_Cb
  * Type for a callback to be called when iterating over the files of a
  * directory.
@@ -146,6 +154,31 @@ struct _Eina_File_Direct_Info
    size_t               name_start; /**< where the filename/basename component starts */
    Eina_File_Type       type; /**< file type */
    char                 path[EINA_PATH_MAX]; /**< the path */
+};
+
+/**
+ * @struct _Eina_Stat
+ * A structure to store informations of a path.
+ * @since 1.2
+ */
+struct _Eina_Stat
+{
+   unsigned long int    dev;
+   unsigned long int    ino;
+   unsigned int         mode;
+   unsigned int         nlink;
+   unsigned int         uid;
+   unsigned int         gid;
+   unsigned long int    rdev;
+   unsigned long int    size;
+   unsigned long int    blksize;
+   unsigned long int    blocks;
+   unsigned long int    atime;
+   unsigned long int    atimensec;
+   unsigned long int    mtime;
+   unsigned long int    mtimensec;
+   unsigned long int    ctime;
+   unsigned long int    ctimensec;
 };
 
 /**
@@ -245,6 +278,24 @@ EAPI Eina_Iterator *eina_file_ls(const char *dir) EINA_WARN_UNUSED_RESULT EINA_A
  * @see eina_file_direct_ls()
  */
 EAPI Eina_Iterator *eina_file_stat_ls(const char *dir) EINA_WARN_UNUSED_RESULT EINA_ARG_NONNULL(1) EINA_MALLOC;
+
+/**
+ * @brief Use information provided by Eina_Iterator of eina_file_stat_ls or eina_file_direct_ls
+ * to call stat in the most efficient way on your system.
+ *
+ * @param container The container returned by the Eina_Iterator using eina_iterator_container_get().
+ * @param info The content of the current Eina_File_Direct_Info provided by the Eina_Iterator
+ * @param buf Where to put the result of the stat
+ * @return On success 0 is returned, On error -1 is returned and errno is set appropriately.
+ *
+ * This function calls fstatat or stat depending on what your system supports. This makes it efficient and simple
+ * to use on your side without complex detection already done inside Eina on what the system can do.
+ *
+ * @see eina_file_direct_ls()
+ * @see eina_file_stat_ls()
+ * @since 1.2
+ */
+EAPI int eina_file_statat(void *container, Eina_File_Direct_Info *info, Eina_Stat *buf) EINA_WARN_UNUSED_RESULT EINA_ARG_NONNULL(1, 2, 3);
 
 /**
  * @brief Get an iterator to list the content of a directory, with direct

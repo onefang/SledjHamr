@@ -30,6 +30,9 @@
    */
 #undef BUILD_ECORE_EVAS_EWS
 
+/* Support for Extn Engine in Ecore_Evas */
+#undef BUILD_ECORE_EVAS_EXTN
+
 /* Support for Linux Framebuffer Engine in Ecore_Evas */
 #undef BUILD_ECORE_EVAS_FB
 
@@ -331,6 +334,9 @@
 /* Define to 1 if you have the `execvp' function. */
 #undef HAVE_EXECVP
 
+/* Define to 1 if you have Exotic. */
+#undef HAVE_EXOTIC
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -402,6 +408,9 @@
 
 /* File monitoring with polling */
 #undef HAVE_POLL
+
+/* Have shm_open() call */
+#undef HAVE_SHM_OPEN
 
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H

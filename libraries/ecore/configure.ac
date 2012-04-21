@@ -1,12 +1,12 @@
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 m4_define([v_maj], [1])
-m4_define([v_min], [1])
-m4_define([v_mic], [99])
+m4_define([v_min], [2])
+m4_define([v_mic], [0])
 m4_define([v_rev], m4_esyscmd([(svnversion "${SVN_REPO_PATH:-.}" | grep -v '\(export\|Unversioned directory\)' || echo 0) | awk -F : '{printf("%s\n", $1);}' | tr -d ' :MSP\n' | sed 's/Unversioneddirectory/0/' | tr -d '\n']))
 m4_if(v_rev, [0], [m4_define([v_rev], m4_esyscmd([git log 2> /dev/null | (grep -m1 git-svn-id || echo 0) | sed -e 's/.*@\([0-9]*\).*/\1/' | tr -d '\n']))])
 ##--   When released, remove the dnl on the below line
-dnl m4_undefine([v_rev])
+m4_undefine([v_rev])
 ##--   When doing snapshots - change soname. remove dnl on below line
 dnl m4_define([relname], [ver-pre-svn-07])
 dnl m4_define([v_rel], [-release relname])
@@ -18,7 +18,7 @@ m4_define([lt_age], v_min)
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 
-AC_INIT([ecore], [v_ver], [enlightenment-devel@lists.sourceforge.net])
+AC_INIT([ecore], [v_ver]-alpha, [enlightenment-devel@lists.sourceforge.net])
 AC_PREREQ([2.52])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
@@ -174,6 +174,7 @@ want_ecore_evas_directfb="no"
 want_ecore_evas_fb="no"
 want_ecore_evas_software_16_wince="no"
 want_ecore_evas_ews="yes"
+want_ecore_evas_extn="yes"
 want_ecore_evas_wayland_shm="no"
 want_ecore_evas_wayland_egl="no"
 
@@ -182,11 +183,12 @@ want_ecore_imf_xim="no"
 want_ecore_imf_scim="no"
 
 case "$host_os" in
-   mingw32ce* | cegcc*)
+   mingw32ce*)
       want_ecore_con="no"
       want_ecore_ipc="no"
       want_ecore_wince="yes"
       want_ecore_evas_software_16_wince="yes"
+      want_ecore_evas_extn="no"
       ;;
    mingw*)
       want_notify_win32="yes"
@@ -273,30 +275,6 @@ requirements_ecore_imf_xim=""
 requirements_ecore_imf_scim=""
 requirements_ecore_wayland=""
 
-AC_CHECK_DECL([MAXHOSTNAMELEN],[FOUND_MAXHOSTNAMELEN=yes])
-
-if test x$FOUND_MAXHOSTNAMELEN != xyes ; then
-  AC_MSG_CHECKING([for header that defines MAXHOSTNAMELEN])
-
-  FOUND_MAXHOSTNAMELEN='not found'
-
-  AC_COMPILE_IFELSE(
-	AC_LANG_PROGRAM([#include <sys/param.h>],
-		[int h = MAXHOSTNAMELEN;]),
-	[FOUND_MAXHOSTNAMELEN='sys/param.h'
-	   AC_DEFINE(NEED_SYS_PARAM_H,1,
-	     [Define to 1 if you need <sys/param.h> to define MAXHOSTNAMELEN])])
-
-	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([#include <netdb.h>],
-			    [int h = MAXHOSTNAMELEN;]),
-	    [FOUND_MAXHOSTNAMELEN='netdb.h'
-	     AC_DEFINE(NEED_NETDB_H,1,
-	       [Define to 1 if you need <netdb.h> to define MAXHOSTNAMELEN])])
-
-  AC_MSG_RESULT([$FOUND_MAXHOSTNAMELEN])
-fi
-
 ### Additional options to configure
 
 want_glib_integration_always=no
@@ -376,10 +354,6 @@ AC_ARG_ENABLE([xim],
 if test "x${want_xim}" = "xyes" ; then
    AC_DEFINE([ENABLE_XIM], [1], [Enable X Input Method])
 fi
-
-# Unit tests
-
-EFL_CHECK_TESTS([enable_tests="yes"], [enable_tests="no"])
 
 ### Checks for programs
 
@@ -499,6 +473,21 @@ case "$host_vendor" in
       ;;
 esac
 
+
+### Checks for portability layer
+
+PKG_CHECK_MODULES([EXOTIC],
+   [exotic],
+   [enable_exotic="yes"],
+   [enable_exotic="no"])
+
+if test "x${enable_exotic}" = "xyes"; then
+    requirements_ecore="exotic ${requirements_ecore}"
+
+    AC_DEFINE([HAVE_EXOTIC], [1], [Define to 1 if you have Exotic.])
+fi
+AM_CONDITIONAL([ECORE_HAVE_EXOTIC], [test "x${enable_exotic}" = "xyes"])
+
 AC_SUBST(EFL_ECORE_BUILD)
 AC_SUBST(EFL_ECORE_CON_BUILD)
 AC_SUBST(EFL_ECORE_EVAS_BUILD)
@@ -549,26 +538,26 @@ AC_SUBST(rt_libs)
 
 # Eina library
 
-PKG_CHECK_MODULES(EINA, [eina >= 1.1.0])
+PKG_CHECK_MODULES(EINA, [eina >= 1.2.0])
 #FIXME check all the requirements when the eina move will be finished
-requirements_ecore="eina >= 1.1.0 ${requirements_ecore}"
-requirements_ecore_con="ecore >= 1.1.0 eina >= 1.1.0 ${requirements_ecore_con}"
-#requirements_ecore_config="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_config}"
-requirements_ecore_directfb="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_directfb}"
-requirements_ecore_evas="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_evas}"
-requirements_ecore_fb="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_fb}"
-requirements_ecore_file="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_file}"
-requirements_ecore_imf="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_imf}"
-requirements_ecore_imf_evas="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_imf_evas}"
-requirements_ecore_input="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_input}"
-requirements_ecore_input_evas="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_input_evas}"
-requirements_ecore_ipc="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_ipc}"
-requirements_ecore_cocoa="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_cocoa}"
-requirements_ecore_sdl="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_sdl}"
-requirements_ecore_psl1ght="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_sdl}"
-requirements_ecore_win32="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_win32}"
-requirements_ecore_wince="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_wince}"
-requirements_ecore_x="ecore >= 1.1.99 eina >= 1.1.0 ${requirements_ecore_x}"
+requirements_ecore="eina >= 1.2.0 ${requirements_ecore}"
+requirements_ecore_con="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_con}"
+#requirements_ecore_config="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_config}"
+requirements_ecore_directfb="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_directfb}"
+requirements_ecore_evas="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_evas}"
+requirements_ecore_fb="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_fb}"
+requirements_ecore_file="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_file}"
+requirements_ecore_imf="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_imf}"
+requirements_ecore_imf_evas="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_imf_evas}"
+requirements_ecore_input="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_input}"
+requirements_ecore_input_evas="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_input_evas}"
+requirements_ecore_ipc="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_ipc}"
+requirements_ecore_cocoa="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_cocoa}"
+requirements_ecore_sdl="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_sdl}"
+requirements_ecore_psl1ght="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_sdl}"
+requirements_ecore_win32="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_win32}"
+requirements_ecore_wince="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_wince}"
+requirements_ecore_x="ecore >= 1.2.0 eina >= 1.2.0 ${requirements_ecore_x}"
 
 
 # glib support (main loop integration)
@@ -636,6 +625,45 @@ PKG_CHECK_MODULES([DIRECTFB],
 
 
 # Xlib and XCB (ecore_x)
+
+AC_CHECK_DECL([MAXHOSTNAMELEN], [FOUND_MAXHOSTNAMELEN=yes])
+
+if test "x${FOUND_MAXHOSTNAMELEN}" != "xyes" ; then
+   AC_MSG_CHECKING([for header that defines MAXHOSTNAMELEN])
+   FOUND_MAXHOSTNAMELEN="not found"
+
+   AC_COMPILE_IFELSE(
+      [
+       AC_LANG_PROGRAM(
+          [[
+#include <sys/param.h>
+          ]],
+          [[
+int h = MAXHOSTNAMELEN;
+          ]])
+      ],
+      [
+       FOUND_MAXHOSTNAMELEN="sys/param.h"
+       AC_DEFINE([NEED_SYS_PARAM_H], [1], [Define to 1 if you need <sys/param.h> to define MAXHOSTNAMELEN])
+      ])
+
+   AC_COMPILE_IFELSE(
+      [
+       AC_LANG_PROGRAM(
+          [[
+#include <netdb.h>
+          ]],
+          [[
+int h = MAXHOSTNAMELEN;
+          ]])
+      ],
+      [
+       FOUND_MAXHOSTNAMELEN="netdb.h"
+       AC_DEFINE([NEED_NETDB_H], [1], [Define to 1 if you need <netdb.h> to define MAXHOSTNAMELEN])
+      ])
+
+   AC_MSG_RESULT([$FOUND_MAXHOSTNAMELEN])
+fi
 
 have_x="no"
 have_ecore_x="no"
@@ -1171,7 +1199,7 @@ AM_CONDITIONAL(BUILD_ECORE_X_XCB, test $have_ecore_x_xcb = yes)
 
 # Evas library (ecore_config, ecore_input_evas, ecore_imf_evas and ecore_evas)
 
-PKG_CHECK_MODULES([EVAS], [evas >= 1.1.99],
+PKG_CHECK_MODULES([EVAS], [evas >= 1.2.0],
    [have_evas="yes"],
    [have_evas="no"])
 
@@ -1200,7 +1228,23 @@ esac
 
 # ecore_con
 
-AC_CHECK_HEADERS([arpa/inet.h arpa/nameser.h netinet/tcp.h net/if.h netinet/in.h sys/socket.h sys/un.h ws2tcpip.h netdb.h])
+AC_CHECK_HEADERS([sys/socket.h])
+AC_CHECK_HEADERS([net/if.h], [], [],
+[
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+])
+AC_CHECK_HEADERS([sys/un.h arpa/inet.h arpa/nameser.h netinet/tcp.h netinet/in.h ws2tcpip.h netdb.h])
 
 if test "x${ac_cv_header_netdb_h}" = "xyes" ; then
    have_addrinfo="yes"
@@ -1390,6 +1434,60 @@ if ! test "x${have_atfile_source}" = "xno" ; then
       ])
 fi
 
+SHM_OPEN_LIBS=""
+
+AC_MSG_CHECKING([whether shm_open is in libc])
+AC_LINK_IFELSE(
+   [AC_LANG_PROGRAM(
+       [[
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+       ]],
+       [[
+int fd;
+fd = shm_open("/", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+shm_unlink("/");
+       ]])],
+   [
+    have_shm_open="yes"
+    AC_DEFINE(HAVE_SHM_OPEN, 1, [Have shm_open() call])
+   ],
+   [have_shm_open="no"])
+LIBS="${LIBS_save}"
+AC_MSG_RESULT([${have_shm_open}])
+
+if ! test "x${have_shm_open}" = "xyes" ; then
+   AC_MSG_CHECKING([whether shm_open is in librt])
+   LIBS_save="${LIBS}"
+   LIBS="${LIBS} -lrt"
+   AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+          ]],
+          [[
+int fd;
+fd = shm_open("/", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+shm_unlink("/");
+          ]])],
+      [
+       have_shm_open="yes"
+       AC_DEFINE(HAVE_SHM_OPEN, 1, [Have shm_open() call])
+       SHM_OPEN_LIBS="-lrt"
+      ],
+      [have_shm_open="no"])
+   LIBS="${LIBS_save}"
+   AC_MSG_RESULT([${have_shm_open}])
+fi
+
+AC_SUBST([SHM_OPEN_LIBS])
+
+AC_MSG_CHECKING([whether shm_open is available])
+AC_MSG_RESULT([${have_shm_open}])
+
 ### Checks for optionnal feature
 AC_CHECK_FUNC([mallinfo],
    [
@@ -1485,8 +1583,8 @@ AM_CONDITIONAL([HAVE_CARES], [test "x${have_cares}" = "xyes"])
 # ecore_ipc
 ECORE_CHECK_MODULE([ipc], [${want_ecore_ipc}], [Ipc], [${have_ecore_con}],
    [
-     requirements_ecore_ipc="ecore-con >= 1.1.99 ${requirements_ecore_ipc}"
-     requirements_ecore_evas="ecore-ipc >= 1.1.99 ${requirements_ecore_evas}"
+     requirements_ecore_ipc="ecore-con >= 1.2.0 ${requirements_ecore_ipc}"
+     requirements_ecore_evas="ecore-ipc >= 1.2.0 ${requirements_ecore_evas}"
    ])
 
 # ecore_file
@@ -1501,7 +1599,7 @@ if test "x${have_ecore_file}" = "xyes" ; then
    ECORE_CHECK_NOTIFY_WIN32([${want_notify_win32}], [have_notify_win32="yes"], [have_notify_win32="no"])
 
    if test "x${have_ecore_con}" = "xyes" ; then
-      requirements_ecore_file="ecore-con >= 1.1.99 ${requirements_ecore_file}"
+      requirements_ecore_file="ecore-con >= 1.2.0 ${requirements_ecore_file}"
    else
       ECORE_CHECK_CURL([${want_curl}],
          [
@@ -1520,7 +1618,7 @@ fi
 #fi
 
 #ECORE_CHECK_MODULE([config], [${want_ecore_config}], [Config], [${ecore_config_deps}],
-#   [requirements_ecore_config="ecore-ipc >= 1.1.99 evas >= 1.1.99 eet >= 1.5.0 ${requirements_ecore_config}"])
+#   [requirements_ecore_config="ecore-ipc >= 1.2.0 evas >= 1.2.0 eet >= 1.6.0 ${requirements_ecore_config}"])
 
 AM_CONDITIONAL(BUILD_ECORE_CONFIG, false)
 
@@ -1536,12 +1634,12 @@ if test "x${have_ecore_imf}" = "xyes" -a "x${have_evas}" = "xyes" ; then
 fi
 
 ECORE_CHECK_MODULE([imf-evas], [${want_ecore_imf}], [Imf_Evas], [${ecore_imf_evas_deps}],
-   [requirements_ecore_imf_evas="ecore-imf >= 1.1.99 evas >= 1.1.99 ${requirements_ecore_imf_evas}"])
+   [requirements_ecore_imf_evas="ecore-imf >= 1.2.0 evas >= 1.2.0 ${requirements_ecore_imf_evas}"])
 
 # ecore_input{_evas}
 ECORE_CHECK_MODULE([input], [${want_ecore_input}], [Input])
 ECORE_CHECK_MODULE([input-evas], [${want_ecore_input}], [Input_Evas], [${have_evas}],
-   [requirements_ecore_input_evas="ecore-input >= 1.1.99 evas >= 1.1.99 ${requirements_ecore_input}"])
+   [requirements_ecore_input_evas="ecore-input >= 1.2.0 evas >= 1.2.0 ${requirements_ecore_input}"])
 
 # ecore_imf_xim
 AM_CONDITIONAL(BUILD_ECORE_IMF_XIM, false)
@@ -1555,7 +1653,7 @@ if test    "x${have_ecore_imf}" = "xyes" \
 fi
 
 ECORE_CHECK_MODULE([imf-xim], [${want_ecore_imf}], [Imf_XIM], [${ecore_imf_xim_deps}],
-   [requirements_ecore_imf_xim="ecore-imf >= 1.1.99 ecore-x >= 1.1.99 ecore-input >= 1.1.99 ${requirements_ecore_imf_xim}"])
+   [requirements_ecore_imf_xim="ecore-imf >= 1.2.0 ecore-x >= 1.2.0 ecore-input >= 1.2.0 ${requirements_ecore_imf_xim}"])
 
 # ecore_imf_scim
 PKG_CHECK_MODULES([SCIM], [scim], [have_scim="yes"], [have_scim="no"])
@@ -1571,7 +1669,7 @@ if test    "x${have_ecore_imf}" = "xyes" \
 fi
 
 ECORE_CHECK_MODULE([imf-scim], [${want_ecore_imf}], [Imf_SCIM], [${ecore_imf_scim_deps}],
-   [requirements_ecore_imf_scim="ecore-imf >= 1.1.0 ecore-x >= 1.1.0 ecore-input >= 1.1.0 ${requirements_ecore_imf_scim}"])
+   [requirements_ecore_imf_scim="ecore-imf >= 1.2.0 ecore-x >= 1.2.0 ecore-input >= 1.2.0 ${requirements_ecore_imf_scim}"])
 
 ## Graphic systems
 
@@ -1586,7 +1684,7 @@ fi
 ECORE_CHECK_MODULE([x], [${want_ecore_x}], [X], [${ecore_x_deps}],
   [
    ecore_x_libs="$ecore_x_libs $x_libs"
-   requirements_ecore_x="ecore-input >= 1.1.99 ${requirements_ecore_x}"
+   requirements_ecore_x="ecore-input >= 1.2.0 ${requirements_ecore_x}"
   ])
 
 # ecore_win32
@@ -1594,7 +1692,7 @@ ECORE_CHECK_MODULE([x], [${want_ecore_x}], [X], [${ecore_x_deps}],
 ECORE_CHECK_MODULE([win32], [${want_ecore_win32}], [Win32], [${have_ecore_input}],
    [
     ecore_win32_libs="-lole32 -lgdi32"
-    requirements_ecore_win32="ecore-input >= 1.1.99 ${requirements_ecore_win32}"
+    requirements_ecore_win32="ecore-input >= 1.2.0 ${requirements_ecore_win32}"
    ])
 AC_SUBST(ecore_win32_libs)
 
@@ -1606,7 +1704,7 @@ if test "x${have_ecore_input}" = "xyes" -a "x${have_cocoa}" = "xyes" ; then
 fi
 
 ECORE_CHECK_MODULE([cocoa], [${want_ecore_cocoa}], [Cocoa], [${ecore_cocoa_deps}],
-   [requirements_ecore_cocoa="ecore-input >= 1.1.99 ${requirements_ecore_cocoa}"])
+   [requirements_ecore_cocoa="ecore-input >= 1.2.0 ${requirements_ecore_cocoa}"])
 
 # ecore_sdl
 
@@ -1616,10 +1714,10 @@ if test "x${have_sdl}" = "xyes" -a "x${have_ecore_input}" = "xyes" ; then
 fi
 
 ECORE_CHECK_MODULE([sdl], [${want_ecore_sdl}], [Sdl], [${ecore_sdl_deps}],
-   [requirements_ecore_sdl="ecore-input >= 1.1.99 ${requirements_ecore_sdl}"])
+   [requirements_ecore_sdl="ecore-input >= 1.2.0 ${requirements_ecore_sdl}"])
 
 ECORE_CHECK_MODULE([psl1ght], [${want_ecore_psl1ght}], [psl1ght], [${ecore_psl1ght_deps}],
-   [requirements_ecore_psl1ght="ecore-input >= 1.1.99 ${requirements_ecore_psl1ght}"])
+   [requirements_ecore_psl1ght="ecore-input >= 1.2.0 ${requirements_ecore_psl1ght}"])
 
 # ecore_fb
 ECORE_CHECK_MODULE([fb], [${want_ecore_fb}], [FB], [$have_fb])
@@ -1641,19 +1739,19 @@ ECORE_CHECK_MODULE([directfb], [${want_ecore_directfb}], [DirectFB], [${have_dir
 # ecore_wince
 
 ECORE_CHECK_MODULE([wince], [${want_ecore_wince}], [WinCE], [${have_ecore_input}],
-   [requirements_ecore_win32="ecore-input >= 1.1.99 ${requirements_ecore_win32}"])
+   [requirements_ecore_win32="ecore-input >= 1.2.0 ${requirements_ecore_win32}"])
 
 ## Ecore Evas
 
 # ecore_evas
 
 ecore_evas_deps="no"
-if test "x${have_evas}" = "xyes" -a "x${have_ecore_input}" = "xyes" -a "x${have_ecore_input_evas}" = "xyes" ; then
+if test "x${have_evas}" = "xyes" && test "x${have_ecore_input}" = "xyes" && test "x${have_ecore_input_evas}" = "xyes" ; then
    ecore_evas_deps="yes"
 fi
 
 ECORE_CHECK_MODULE([evas], [${want_ecore_evas}], [Evas], [${ecore_evas_deps}],
-  [requirements_ecore_evas="ecore-input >= 1.1.99 ecore-input-evas >= 1.1.99 evas >= 1.1.99 ${requirements_ecore_evas}"])
+  [requirements_ecore_evas="ecore-input >= 1.2.0 ecore-input-evas >= 1.2.0 evas >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_buffer
 
@@ -1743,7 +1841,7 @@ if test "x$have_ecore_evas_software_x11" = "xyes" -o \
         "x$have_ecore_evas_software_16_x11" = "xyes" -o \
         "x$have_ecore_evas_software_xcb" = "xyes"; then
    AC_DEFINE(BUILD_ECORE_EVAS_X11, 1, [Support for X Window Engines in Ecore_Evas])
-   requirements_ecore_evas="ecore-x >= 1.1.99 ${requirements_ecore_evas}"
+   requirements_ecore_evas="ecore-x >= 1.2.0 ${requirements_ecore_evas}"
 fi
 
 # ecore_evas_win32
@@ -1779,16 +1877,18 @@ if test "x${have_ecore_evas_software_gdi}" = "xyes" -o \
         "x${have_ecore_evas_opengl_glew}" = "xyes" -o \
         "x${have_ecore_evas_software_16_ddraw}" = "xyes" ; then
    AC_DEFINE(BUILD_ECORE_EVAS_WIN32, 1, [Support for Win32 Engine in Ecore_Evas])
-   requirements_ecore_evas="ecore-win32 >= 1.1.99 ${requirements_ecore_evas}"
+   requirements_ecore_evas="ecore-win32 >= 1.2.0 ${requirements_ecore_evas}"
 fi
 
 # ecore_evas_software_sdl
 
-ECORE_EVAS_CHECK_MODULE([software-sdl],
-   [${want_ecore_evas_software_sdl}],
-   [Software SDL],
-   [${have_ecore_sdl}],
-   [requirements_ecore_evas="ecore-sdl >= 1.1.99 ${requirements_ecore_evas}"])
+have_ecore_evas_software_sdl="no"
+if test "x${have_ecore_sdl}" = "xyes"; then
+   requirements_ecore_evas="ecore-sdl >= 1.2.0 ${requirements_ecore_evas}"
+   have_ecore_evas_software_sdl="yes"
+   AC_DEFINE(BUILD_ECORE_EVAS_SOFTWARE_SDL, 1, [Support for Software SDL Engine in Ecore_Evas])
+   requirements_ecore_evas="ecore-sdl >= 1.2.0 ${requirements_ecore_evas}"
+fi
 
 # ecore_evas_gl_sdl
 
@@ -1796,7 +1896,7 @@ ECORE_EVAS_CHECK_MODULE([opengl-sdl],
    [${want_ecore_evas_gl_sdl}],
    [OpenGL SDL],
    [${have_ecore_sdl}],
-   [requirements_ecore_evas="ecore-sdl >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-sdl >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_cocoa
 
@@ -1804,7 +1904,7 @@ ECORE_EVAS_CHECK_MODULE([opengl-cocoa],
    [${want_ecore_evas_gl_cocoa}],
    [OpenGL Cocoa],
    [${have_ecore_cocoa}],
-   [requirements_ecore_evas="ecore-cocoa >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-cocoa >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_directfb
 
@@ -1812,7 +1912,7 @@ ECORE_EVAS_CHECK_MODULE([directfb],
    [${want_ecore_evas_directfb}],
    [DirectFB],
    [${have_ecore_directfb}],
-   [requirements_ecore_evas="ecore-directfb >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-directfb >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_fb
 
@@ -1820,7 +1920,7 @@ ECORE_EVAS_CHECK_MODULE([fb],
    [${want_ecore_evas_fb}],
    [Linux Framebuffer],
    [${have_ecore_fb}],
-   [requirements_ecore_evas="ecore-fb >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-fb >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_wince
 
@@ -1828,7 +1928,7 @@ ECORE_EVAS_CHECK_MODULE([software-16-wince],
    [${want_ecore_evas_software_16_wince}],
    [16 bpp Software Windows CE],
    [${have_ecore_wince}],
-   [requirements_ecore_evas="ecore-wince >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-wince >= 1.2.0 ${requirements_ecore_evas}"])
 
 # ecore_evas_ews
 
@@ -1837,20 +1937,38 @@ ECORE_EVAS_CHECK_MODULE_FULL([ews], [software-buffer],
    [Ecore Evas Single Process Windowing System],
    [yes], [])
 
+# ecore_evas_extn
+
+have_extn="yes"
+if test "x${have_ecore_ipc}" = "xno" || \
+   test "x${have_ecore_evas_software_buffer}" = "xno" || \
+   test "x${have_shm_open}" = "xno" ; then
+   have_extn="no"
+fi
+
+dnl THIS IS SPECIAL - dont use normal ECORE_EVAS_CHECK_MODULE
+have_ecore_evas_extn="no"
+if test "x${want_ecore_evas_extn}" = "xyes" && \
+   test "x${have_extn}" = "xyes" && \
+   test "x${have_ecore_evas}" = "xyes"; then
+   AC_DEFINE([BUILD_ECORE_EVAS_EXTN], [1], [Support for Extn Engine in Ecore_Evas])
+   have_ecore_evas_extn="yes"
+fi
+
 # ecore_evas_psl1ght
 
 ECORE_EVAS_CHECK_MODULE([psl1ght],
    [${want_ecore_evas_psl1ght}],
    [PSL1GHT],
    [${have_ecore_psl1ght}],
-   [requirements_ecore_evas="ecore-psl1ght >= 1.1.99 ${requirements_ecore_evas}"])
+   [requirements_ecore_evas="ecore-psl1ght >= 1.2.0 ${requirements_ecore_evas}"])
 
 ### WAYLAND
 
 ecore_wayland_deps="no"
 have_wayland="no"
 if test "x${want_ecore_wayland}" = "xyes" ; then
-  PKG_CHECK_MODULES([WAYLAND], [wayland-client xkbcommon], [have_wayland="yes"], [have_wayland="no"])
+  PKG_CHECK_MODULES([WAYLAND], [egl wayland-egl wayland-client xkbcommon], [have_wayland="yes"], [have_wayland="no"])
 fi
 if test "x${have_ecore_input}" = "xyes" -a "x${have_wayland}" = "xyes" ; then
   ecore_wayland_deps="yes"
@@ -1858,7 +1976,7 @@ fi
 
 ECORE_CHECK_MODULE([wayland], [${want_ecore_wayland}], [Wayland], [${ecore_wayland_deps}])
 if test "x${have_ecore_wayland}" = "xyes" ; then
-  requirements_ecore_wayland="ecore-input >= 1.1.0 wayland-client xkbcommon ${requirements_ecore_wayland}"
+  requirements_ecore_wayland="ecore-input >= 1.2.0 egl wayland-egl wayland-client xkbcommon ${requirements_ecore_wayland}"
 fi
 
 ECORE_EVAS_CHECK_MODULE_FULL([wayland-shm], [wayland-shm], 
@@ -1867,7 +1985,7 @@ ECORE_EVAS_CHECK_MODULE_FULL([wayland-shm], [wayland-shm],
    [${have_ecore_wayland}],
    [requirements_ecore_evas="${requirements_ecore_wayland} ${requirements_ecore_evas}"])
 
-ECORE_EVAS_CHECK_MODULE_FULL([wayland-egl], [wayland-egl], 
+ECORE_EVAS_CHECK_MODULE_FULL([wayland-egl], [wayland-egl egl], 
    [${want_ecore_evas_wayland_egl}],
    [Wayland Egl],
    [${have_ecore_wayland}],
@@ -1877,6 +1995,10 @@ ECORE_EVAS_CHECK_MODULE_FULL([wayland-egl], [wayland-egl],
          requirements_ecore_evas="wayland-egl egl ${requirements_ecore_wayland} ${requirements_ecore_evas}"
       fi
    ])
+
+### Unit tests
+
+EFL_CHECK_TESTS([enable_tests="yes"], [enable_tests="no"])
 
 ### install and build examples
 
@@ -2112,6 +2234,7 @@ if test "x${have_ecore_evas}" = "xyes" ; then
   echo "    Sing.Proc. Windowing System: $have_ecore_evas_ews"
   echo "    Wayland Shm................: $have_ecore_evas_wayland_shm"
   echo "    Wayland Egl................: $have_ecore_evas_wayland_egl"
+  echo "    Extn (Plug/socket Extn)....: $have_ecore_evas_extn"
 fi
 echo
 echo "  Tests................: ${enable_tests}"

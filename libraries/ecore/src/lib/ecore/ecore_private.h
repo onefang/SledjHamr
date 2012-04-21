@@ -174,7 +174,7 @@ void      *_ecore_main_fd_handler_del(Ecore_Fd_Handler *fd_handler);
 
 void       _ecore_main_shutdown(void);
 
-#if defined (_WIN32) || defined (__lv2ppu__)
+#if defined (_WIN32) || defined (__lv2ppu__) || defined (HAVE_EXOTIC)
 static inline void _ecore_signal_shutdown(void) { }
 
 static inline void _ecore_signal_init(void) { }
@@ -237,14 +237,14 @@ _ecore_lock(void)
    EINA_MAIN_LOOP_CHECK_RETURN;
 #endif
    _ecore_main_lock_count++;
-   assert(_ecore_main_lock_count == 1);
+   /* assert(_ecore_main_lock_count == 1); */
 }
 
 static inline void
 _ecore_unlock(void)
 {
    _ecore_main_lock_count--;
-   assert(_ecore_main_lock_count == 0);
+   /* assert(_ecore_main_lock_count == 0); */
 #ifdef HAVE_THREAD_SAFETY
    eina_lock_release(&_ecore_main_loop_lock);
 #endif
