@@ -686,8 +686,8 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
     ezGrid *thisGrid = data;
     char buf[PATH_MAX];
 
-//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
-    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
+//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s &", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
+    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
     printf("%s   ### genlist obj [%p], item pointer [%p]\n", buf, obj, event_info);
     system(buf);
 }
