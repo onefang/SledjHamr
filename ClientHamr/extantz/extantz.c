@@ -85,10 +85,9 @@ static Elm_Genlist_Item_Class *account_gic = NULL;
 static int x, y, w, h;
 
 
-static const char *img0 = PACKAGE_DATA_DIR "/images/logo.png";
 static const char *img1 = PACKAGE_DATA_DIR "/images/plant_01.jpg";
-static const char *img2 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
-static const char *img3 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
+static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
+static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
 
 
 typedef struct _Gear Gear;
