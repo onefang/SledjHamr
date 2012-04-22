@@ -777,10 +777,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     account_gic->func.del = NULL;
 
     list = elm_genlist_add(win);
-    tab = list;					tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     tab = _content_image_new(win, img1);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Accounts", _promote, tab_it);
     tab = _content_image_new(win, img2);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
     tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = list;					tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
 
     grids = eina_hash_stringshared_new(free);
     for (i = 0; NULL != gridTest[i][0]; i++)
