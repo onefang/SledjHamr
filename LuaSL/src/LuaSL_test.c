@@ -307,7 +307,7 @@ int main(int argc, char **argv)
     int result = EXIT_FAILURE;
 
     memset(&game, 0, sizeof(gameGlobals));
-    game.address = "127.0.01";
+    game.address = "127.0.0.1";
     game.port = 8211;
 
     if (eina_init())
