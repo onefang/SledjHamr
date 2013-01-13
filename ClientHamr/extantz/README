@@ -116,7 +116,8 @@ right now.  At the opposite of the spectrum is dillo, which is not quite
 up to spec enough for login pages that have fancy stuff.  There does not
 appear to be any middle ground.  So right now, I'll work on using random
 web browsers as external windows.  That will suffice for everything but
-MOAP, which I can leave until later.
+MOAP, which I can leave until later.  Just discovered netsurf, a little
+smaller than dillo, but perhaps better featured?  Might be useful.
 
 The web is a bloated mess, so it's not surprising that a fully featured
 web browser component like WebKit is also a bloated mess.
