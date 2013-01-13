@@ -30,9 +30,9 @@ $command
 
 # Test if edje is already available, build EFL up to edje if not.
 # TODO - Check EFL version.
-# TODO - grab release tarballs from enlightenment.org, then build those.
 hash edje_cc 2>&- || {
 
+# TODO - grab release tarballs from enlightenment.org, then build those.
     echo "_______________ BUILDING eina _______________"
 #    cd $wd/libraries/eina
 #    ./configure && make
@@ -74,5 +74,3 @@ cd $wd/LuaSL
 echo "_______________ BUILDING extantz _______________"
 cd $wd/ClientHamr/extantz
 ./build.sh
-
-

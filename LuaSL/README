@@ -1,4 +1,4 @@
-Refer to - http://wiki.infinitegrid.org/index.php/LuaSL_-_New_scripting_engine
+Refer to - http://www.infinitegrid.org/drupal/content/LuaSL_New_scripting_engine
 
 LuaSL is a Lua based LSL scripting engine that will aim for LSL
 compatability first, then adding Lua extensions.  It aims to replace the
@@ -8,8 +8,7 @@ client side scripting engine.
 To compile this, you will need Enlightenment Foundation Libraries (EFL)
 installed in either /opt/e17 or /usr.  These are typical places it get's
 installed in.  You will also need flex.  The rest of the dependencies
-are in the ../libraries directory, including the source code for the
-version of EFL this is tested with.
+are in the ../libraries directory.
 
 
 Design.
@@ -36,6 +35,8 @@ change to edje messaging.  Note - luaproc has been extensively rewritten
 for this project, mostly converting it to use EFL.  That rewrite
 substantially shrunk the source code.  More might be rewritten in
 future.
+
+THIS IS WHERE WE ARE RIGHT NOW.
 
 Nails will be used to pump commands in and out of the LuaSL system. 
 Incoming commands invoke LSL events via the LuaSL state metatable.  LL

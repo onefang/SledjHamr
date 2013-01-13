@@ -10,6 +10,11 @@ viewer up into modules that do simpler tasks, and do them well.  So that
 means that meta-impy will eventually loose it's login screen, to be
 replaced by extantz.
 
+Also, during this experimental phase of development, this will be a test
+bed for all the GUI stuff.  This could end up being the front end for
+the entire system, but still having the various bits split off into
+separate programs.
+
 Extantz is a made up word.  The challenge was to find a word beginning
 with E, is as traditional with EFL (Enlightenment Foundation Library)
 projects, that has not been done to death, and thus has some reasonable
@@ -160,5 +165,6 @@ Log file management features, including viewer stdout, check if only
 Linux viewers do that.  Including chat logs.
 
 Dillo and uzbl can insert themselves into the windows of others.  Should
-check that out.
+check that out.  Netsurf is allegedly easy to port to things, might be
+able to port it to EFL.
 
