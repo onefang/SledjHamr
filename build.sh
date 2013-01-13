@@ -71,4 +71,8 @@ echo "_______________ BUILDING LuaSL _______________"
 cd $wd/LuaSL
 ./build.sh
 
+echo "_______________ BUILDING extantz _______________"
+cd $wd/ClientHamr/extantz
+./build.sh
+
 

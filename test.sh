@@ -6,6 +6,11 @@ wd=$(pwd)
 
 ./build.sh || exit
 
+echo "_______________ TESTING extantz _______________"
+cd $wd/ClientHamr/extantz
+./extantz &
+sleep 1
+
 echo "_______________ TESTING LuaSL _______________"
 # Kill any left overs.
 killall -KILL LuaSL
@@ -26,8 +31,10 @@ case $@ in
 	;;
 
     *)
+	echo "_______________ STARTING LuaSL _______________"
 	../LuaSL &
 	sleep 1
+	echo "_______________ STARTING LuaSL_test _______________"
 	../LuaSL_test
 	;;
 
