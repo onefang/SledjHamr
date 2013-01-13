@@ -30,36 +30,37 @@ $command
 
 # Test if edje is already available, build EFL up to edje if not.
 # TODO - Check EFL version.
+# TODO - grab release tarballs from enlightenment.org, then build those.
 hash edje_cc 2>&- || {
 
     echo "_______________ BUILDING eina _______________"
-    cd $wd/libraries/eina
-    ./configure && make
+#    cd $wd/libraries/eina
+#    ./configure && make
 
 
     echo "_______________ BUILDING eet _______________"
-    cd $wd/libraries/eet
-    ./configure && make
+#    cd $wd/libraries/eet
+#    ./configure && make
 
 
     echo "_______________ BUILDING evas _______________"
-    cd $wd/libraries/evas
-    ./configure && make
+#    cd $wd/libraries/evas
+#    ./configure && make
 
 
     echo "_______________ BUILDING ecore _______________"
-    cd $wd/libraries/ecore
-    ./configure && make
+#    cd $wd/libraries/ecore
+#    ./configure && make
 
 
     echo "_______________ BUILDING embryo _______________"
-    cd $wd/libraries/embryo
-    ./configure && make
+#    cd $wd/libraries/embryo
+#    ./configure && make
 
 
     echo "_______________ BUILDING edje _______________"
-    cd $wd/libraries/edje
-    ./configure && make
+#    cd $wd/libraries/edje
+#    ./configure && make
 
 
 # TODO - Install this EFL version, and/or get the rest of the system to use it.

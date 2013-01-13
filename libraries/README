@@ -9,3 +9,5 @@ documented.
 luaproc has been hacked up a bit, and will continue to be hacked up. 
 Merged it into LuaSL, so it's no longer here.
 
+EFL has been released, so not including that anymore.  You can find it
+in distro repos, PPA's, etc.  Or http://enlightenment.org/
