@@ -48,6 +48,7 @@ typedef struct
     char	*icon;
     uint16_t	tag;		// The UUID of the texture used in the avatar bake hack.
     uint8_t	r, g, b;	// Colour used for the in world tag.
+    Elm_Object_Item *item;
 } ezViewer;
 
 typedef struct

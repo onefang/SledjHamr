@@ -23,8 +23,19 @@ static char *accountTest[][3] =
 };
 
 
+static char *viewerTest[][3] =
+{
+    {"Imprudence",	"1.4.0 beta 3", ""},
+    {"Kokua",		"3.4.4.25633", ""},
+    {"meta-impy",	"1.4.0 beta 1.5", ""},
+    {"SL",		"v3", ""},
+    {NULL, NULL, NULL}
+};
+
+
 static Elm_Genlist_Item_Class *grid_gic = NULL;
 static Elm_Genlist_Item_Class *account_gic = NULL;
+static Elm_Genlist_Item_Class *viewer_gic = NULL;
 
 static int x, y, w, h;
 
@@ -695,6 +706,31 @@ static Evas_Object *_account_content_get(void *data, Evas_Object *obj, const cha
     return ic;
 }
 
+static char *_viewer_label_get(void *data, Evas_Object *obj, const char *part)
+{
+    ezViewer *thisViewer = data;
+    char buf[256];
+
+    if (!strcmp(part, "elm.text"))
+	snprintf(buf, sizeof(buf), "%s", thisViewer->name);
+    else
+	snprintf(buf, sizeof(buf), "%s", thisViewer->version);
+    return strdup(buf);
+}
+
+static Evas_Object *_viewer_content_get(void *data, Evas_Object *obj, const char *part)
+{
+    ezViewer *thisViewer = data;
+    Evas_Object *ic = elm_icon_add(obj);
+
+    if (!strcmp(part, "elm.swallow.icon"))
+	elm_icon_standard_set(ic, thisViewer->icon);
+
+    evas_object_size_hint_aspect_set(ic, EVAS_ASPECT_CONTROL_VERTICAL, 1, 1);
+    return ic;
+}
+
+
 static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 {
     ezGrid *thisGrid = data;
@@ -708,7 +744,7 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *bg, *tb, *bt, *menu, *nf, *tab, *list;
+    Evas_Object *bg, *tb, *bt, *menu, *nf, *tab, *gridList, *viewerList;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
     EPhysics_Body *boundary;
     EPhysics_World *world;
@@ -789,10 +825,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld->win);
     elm_toolbar_menu_parent_set(tb, gld->win);
 
-    nf = elm_naviframe_add(gld->win);
-    evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(nf);
+    // Grids stuff
+    gridList = elm_genlist_add(gld->win);
+    grids = eina_hash_stringshared_new(free);
 
     grid_gic = elm_genlist_item_class_new();
     grid_gic->item_style = "double_label";
@@ -800,21 +835,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     grid_gic->func.content_get = _grid_content_get;
     grid_gic->func.state_get = NULL;
     grid_gic->func.del = NULL;
-
-    account_gic = elm_genlist_item_class_new();
-    account_gic->item_style = "default";
-    account_gic->func.text_get = _account_label_get;
-    account_gic->func.content_get = _account_content_get;
-    account_gic->func.state_get = NULL;
-    account_gic->func.del = NULL;
-
-    list = elm_genlist_add(gld->win);
-    tab = _content_image_new(gld->win, img1);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Accounts", _promote, tab_it);
-    tab = _content_image_new(gld->win, img2);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(gld->win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
-    tab = list;					tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
-
-    grids = eina_hash_stringshared_new(free);
     for (i = 0; NULL != gridTest[i][0]; i++)
     {
 	ezGrid *thisGrid = calloc(1, sizeof(ezGrid));
@@ -827,11 +847,17 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	    thisGrid->loginURI		= gridTest[i][1];
 	    thisGrid->splashPage 	= gridTest[i][2];
 	    thisGrid->icon		= "folder";
-	    thisGrid->item = elm_genlist_item_append(list, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
+	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
 	    eina_hash_add(grids, thisGrid->name, thisGrid);
 	}
     }
 
+    account_gic = elm_genlist_item_class_new();
+    account_gic->item_style = "default";
+    account_gic->func.text_get = _account_label_get;
+    account_gic->func.content_get = _account_content_get;
+    account_gic->func.state_get = NULL;
+    account_gic->func.del = NULL;
     for (i = 0; NULL != accountTest[i][0]; i++)
     {
 	ezAccount *thisAccount = calloc(1, sizeof(ezAccount));
@@ -842,10 +868,41 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	    thisAccount->name		= accountTest[i][1];
 	    thisAccount->password 	= accountTest[i][2];
 	    thisAccount->icon		= "file";
-	    elm_genlist_item_append(list, account_gic, thisAccount, grid->item, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+	    elm_genlist_item_append(gridList, account_gic, thisAccount, grid->item, ELM_GENLIST_ITEM_NONE, NULL, NULL);
 	    eina_clist_add_tail(&(grid->accounts), &(thisAccount->grid));
 	}
     }
+
+    // Viewers stuff
+    viewerList = elm_genlist_add(gld->win);
+    viewer_gic = elm_genlist_item_class_new();
+    viewer_gic->item_style = "double_label";
+    viewer_gic->func.text_get = _viewer_label_get;
+    viewer_gic->func.content_get = _viewer_content_get;
+    viewer_gic->func.state_get = NULL;
+    viewer_gic->func.del = NULL;
+    for (i = 0; NULL != viewerTest[i][0]; i++)
+    {
+	ezViewer *thisViewer = calloc(1, sizeof(ezViewer));
+	
+	if (thisViewer)
+	{
+	    thisViewer->name		= viewerTest[i][0];
+	    thisViewer->version		= viewerTest[i][1];
+	    thisViewer->path		= viewerTest[i][2];
+	    thisViewer->icon		= "file";
+	    thisViewer->item = elm_genlist_item_append(viewerList, viewer_gic, thisViewer, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+	}
+    }
+
+    // Toolbar pages
+    nf = elm_naviframe_add(gld->win);
+    evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_show(nf);
+    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    tab = _content_image_new(gld->win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
 
     bt = elm_button_add(gld->win);
     elm_object_text_set(bt, "Login");
