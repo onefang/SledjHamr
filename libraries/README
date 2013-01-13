@@ -6,6 +6,9 @@ should go here to.  Makes it easy to compile it all.
 Note that in some cases, there might be changes.  Such changes should be
 documented.
 
+Irrlicht has been slightly modified to get it to use externally created
+GL stuff.
+
 luaproc has been hacked up a bit, and will continue to be hacked up. 
 Merged it into LuaSL, so it's no longer here.
 
