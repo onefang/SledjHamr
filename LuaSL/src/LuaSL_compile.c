@@ -673,7 +673,7 @@ LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *
 	    if (func)
 	    {
 		list->value.functionValue = func;
-		eina_inarray_setup(&(func->vars), sizeof(LSL_Leaf), 3);
+		eina_inarray_step_set(&(func->vars), sizeof(Eina_Inarray), sizeof(LSL_Leaf), 3);
 	    }
 	}
 
@@ -685,9 +685,9 @@ LSL_Leaf *collectParameters(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *
 		{
 		    // Stash the comma for diff later.
 		    if (comma)
-			eina_inarray_append(&(func->vars), comma);
+			eina_inarray_push(&(func->vars), comma);
 		}
-		eina_inarray_append(&(func->vars), newParam);
+		eina_inarray_push(&(func->vars), newParam);
 		// At this point, pointers to newParams are not pointing to the one in func->vars, AND newParam is no longer needed.
 	    }
 	}
@@ -770,7 +770,7 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 	    if (call)
 	    {
 		list->value.functionCallValue = call;
-		eina_inarray_setup(&(call->params), sizeof(LSL_Leaf), 3);
+		eina_inarray_step_set(&(call->params), sizeof(Eina_Inarray), sizeof(LSL_Leaf), 3);
 	    }
 	}
 
@@ -782,9 +782,9 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 		{
 		    // Stash the comma for diff later.
 		    if (comma)
-			eina_inarray_append(&(call->params), comma);
+			eina_inarray_push(&(call->params), comma);
 		}
-		eina_inarray_append(&(call->params), arg);
+		eina_inarray_push(&(call->params), arg);
 		// At this point, pointers to arg are not pointing to the one in call->params, AND arg is no longer needed.
 	    }
 	}
