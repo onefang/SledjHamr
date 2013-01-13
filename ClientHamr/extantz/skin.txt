@@ -1,0 +1,37 @@
+skang vs edje vs LL shit.
+
+
+EDJE
+Verbose, complex.
+Used to place and decorate widget parts.
+Can be used to place entire widgets through externals and swallows.
+Basic parts relative to each other.
+Signals and messages.
+Embryo scripts.
+Lua scripts.
+
+
+SKANG
+Tight, simple.
+Used to place widgets, and describe actions.
+Can include some really basic scripting.
+Widgets in a fixed position, but included stuff for relative placement in the TODO.
+Automated associations between widget name and variable (and method?) via introspection.
+Actions.
+Looks (could easily be extended to edje groups).
+Extensible.
+Can be used to pass values around.
+
+
+LL SHIT
+Verbose, even worse, XML, more crap than is needed.
+Menus.
+Windows with widgets relative to each other.
+    Basically nested rectangles.
+Manual association of widgets to methods.
+Can include tool tip string, enabled, visible, hover cursor, bounding rectangle?, mouse opaque?, tab groups, font (name, size, style, and alignment).
+    More stuff, typically hidden in the OO somewhere.  sigh
+Generally uses fixed image and colour names, which skins overide.
+Skins can also overide the XML files.
+Translations provide override XML files that need only override the text bits.
+

@@ -1,63 +1,7 @@
-#include <Elementary.h>
-#ifndef M_PI
-#define M_PI 3.14159265
-#endif
+#include "extantz.h"
 
-typedef enum
-{
-    EZP_NONE,
-    EZP_AURORA,
-    EZP_OPENSIM,
-    EZP_SECOND_LIFE,
-    EZP_SLEDJHAMR,
-    EZP_TRITIUM
-} ezPlatform;
 
-typedef struct
-{
-    char	*name;
-    char	*version;	// Version string.
-    char	*path;		// OS filesystem path to the viewer install.
-    char	*icon;
-    uint16_t	tag;		// The UUID of the texture used in the avatar bake hack.
-    uint8_t	r, g, b;	// Colour used for the in world tag.
-} ezViewer;
-
-typedef struct
-{
-    Eina_Clist  accounts;
-    Eina_Clist  landmarks;
-    char	*name;
-    char	*loginURI;
-    char	*splashPage;
-    char	*helperURI;
-    char	*website;
-    char	*supportPage;
-    char	*registerPage;
-    char	*passwordPage;
-    char	*icon;
-    ezPlatform	platform;
-    ezViewer	*viewer;
-    Elm_Object_Item *item;
-} ezGrid;
-
-typedef struct
-{
-    Eina_Clist	 grid;
-    char	*name;
-    char	*password;	// Think we need to pass unencrypted passwords to the viewer.  B-(
-    char	*icon;
-    ezViewer	*viewer;
-} ezAccount;
-
-typedef struct
-{
-    Eina_Clist	 grid;
-    char	*name;
-    char	*sim;
-    char	*screenshot;
-    short	x, y, z;
-} ezLandmark;
+#define DO_GEARS 0
 
 Eina_Hash *grids;
 Eina_Hash *viewers;
@@ -90,51 +34,14 @@ static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
 static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
 
 
-typedef struct _Gear Gear;
-typedef struct _GLData GLData;
-struct _Gear
-{
-   GLfloat *vertices;
-   GLuint vbo;
-   int count;
-};
+#define EPHYSICS_TEST_THEME "extantz"
 
-// GL related data here..
-struct _GLData
-{
-   Evas_GL_API *glapi;
-   GLuint       program;
-   GLuint       vtx_shader;
-   GLuint       fgmt_shader;
-   int          initialized : 1;
-   int          mouse_down : 1;
 
-   // Gear Stuff
-   GLfloat      view_rotx;
-   GLfloat      view_roty;
-   GLfloat      view_rotz;
-
-   Gear        *gear1;
-   Gear        *gear2;
-   Gear        *gear3;
-
-   GLfloat      angle;
-
-   GLuint       proj_location;
-   GLuint       light_location;
-   GLuint       color_location;
-
-   GLfloat      proj[16];
-   GLfloat      light[3];
-};
-
-static void gears_init(GLData *gld);
 static void free_gear(Gear *gear);
-static void gears_reshape(GLData *gld, int width, int height);
-static void render_gears(GLData *gld);
 
 //--------------------------------//
-// Gear Stuff....
+// Gear Stuff.
+
 static GLfloat *vert(GLfloat *p, GLfloat x, GLfloat y, GLfloat z, GLfloat *n)
 {
    p[0] = x;
@@ -325,57 +232,22 @@ static void draw_gear(GLData *gld, Gear *gear, GLfloat *m, GLfloat x, GLfloat y,
    gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, gear->count);
 }
 
-static void gears_draw(GLData *gld)
+static void gldata_init(GLData *gld)
 {
-   Evas_GL_API *gl = gld->glapi;
+    gld->useEGL = USE_EGL;
+    gld->useIrr = USE_IRR;
 
-   static const GLfloat red[4] = { 0.8, 0.1, 0.0, 1.0 };
-   static const GLfloat green[4] = { 0.0, 0.8, 0.2, 1.0 };
-   static const GLfloat blue[4] = { 0.2, 0.2, 1.0, 1.0 };
-   GLfloat m[16];
+    gld->view_rotx = -20.0;
+    gld->view_roty = -30.0;
+    gld->view_rotz = 0.0;
+    gld->angle = 0.0;
 
-   gl->glClearColor(0.8, 0.8, 0.1, 0.5);
-   gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-   memcpy(m, gld->proj, sizeof m);
-   rotate(m, 2 * M_PI * gld->view_rotx / 360.0, 1, 0, 0);
-   rotate(m, 2 * M_PI * gld->view_roty / 360.0, 0, 1, 0);
-   rotate(m, 2 * M_PI * gld->view_rotz / 360.0, 0, 0, 1);
-
-   draw_gear(gld, gld->gear1, m, -3.0, -2.0, gld->angle, red);
-   draw_gear(gld, gld->gear2, m, 3.1, -2.0, -2 * gld->angle - 9.0, green);
-   draw_gear(gld, gld->gear3, m, -3.1, 4.2, -2 * gld->angle - 25.0, blue);
+    gld->light[0] = 1.0;
+    gld->light[1] = 1.0;
+    gld->light[2] = -5.0;
 }
 
-static void render_gears(GLData *gld)
-{
-   gears_draw(gld);
-
-   gld->angle += 2.0;
-}
-
-/* new window size or exposure */
-static void gears_reshape(GLData *gld, int width, int height)
-{
-   Evas_GL_API *gl = gld->glapi;
-
-   GLfloat ar, m[16] = {
-      1.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 0.1, 0.0,
-      0.0, 0.0, 0.0, 1.0
-   };
-
-   if (width < height)
-     ar = width;
-   else
-     ar = height;
-
-   m[0] = 0.1 * ar / width;
-   m[5] = 0.1 * ar / height;
-   memcpy(gld->proj, m, sizeof gld->proj);
-   gl->glViewport(0, 0, (GLint) width, (GLint) height);
-}
+//-------------------------//
 
 static const char vertex_shader[] =
    "uniform mat4 proj;\n"
@@ -408,207 +280,350 @@ static const char vertex_shader[] =
    "   gl_FragColor = color + white * dot(light_direction, rotated_normal);\n"
    "}\n";
 
-static void gears_init(GLData *gld)
+static GLuint
+load_shader(GLData *gld, GLenum type, const char *shader_src)
+{
+   Evas_GL_API *gl = gld->glapi;
+   GLuint shader;
+   GLint compiled = 0;
+
+   // Create the shader object
+   if (!(shader = gl->glCreateShader(type))) return 0;
+   gl->glShaderSource(shader, 1, &shader_src, NULL);
+   // Compile the shader
+   gl->glCompileShader(shader);
+   gl->glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+
+   if (!compiled)
+     {
+        GLint len = 0;
+
+        gl->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+        if (len > 1)
+          {
+             char *info = malloc(sizeof(char) * len);
+
+             if (info)
+               {
+                  gl->glGetShaderInfoLog(shader, len, NULL, info);
+                  printf("Error compiling shader:\n"
+                         "%s\n", info);
+                  free(info);
+               }
+          }
+        gl->glDeleteShader(shader);
+        return 0;
+     }
+   return shader;
+}
+
+static void _resize_gears(GLData *gld, int w, int h)
 {
    Evas_GL_API *gl = gld->glapi;
 
-   const char *p;
-   char msg[512];
+#if DO_GEARS
+   GLfloat ar, m[16] = {
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 0.1, 0.0,
+      0.0, 0.0, 0.0, 1.0
+   };
 
-   gl->glEnable(GL_CULL_FACE);
-   gl->glEnable(GL_DEPTH_TEST);
+   // GL Viewport stuff. you can avoid doing this if viewport is all the
+   // same as last frame if you want
+   if (w < h)
+     ar = w;
+   else
+     ar = h;
 
-   p = vertex_shader;
-   gld->vtx_shader = gl->glCreateShader(GL_VERTEX_SHADER);
-   gl->glShaderSource(gld->vtx_shader, 1, &p, NULL);
-   gl->glCompileShader(gld->vtx_shader);
-   gl->glGetShaderInfoLog(gld->vtx_shader, sizeof msg, NULL, msg);
-   printf("vertex shader info: %s\n", msg);
-
-   p = fragment_shader;
-   gld->fgmt_shader = gl->glCreateShader(GL_FRAGMENT_SHADER);
-   gl->glShaderSource(gld->fgmt_shader, 1, &p, NULL);
-   gl->glCompileShader(gld->fgmt_shader);
-   gl->glGetShaderInfoLog(gld->fgmt_shader, sizeof msg, NULL, msg);
-   printf("fragment shader info: %s\n", msg);
-
-   gld->program = gl->glCreateProgram();
-   gl->glAttachShader(gld->program, gld->vtx_shader);
-   gl->glAttachShader(gld->program, gld->fgmt_shader);
-   gl->glBindAttribLocation(gld->program, 0, "position");
-   gl->glBindAttribLocation(gld->program, 1, "normal");
-
-   gl->glLinkProgram(gld->program);
-   gl->glGetProgramInfoLog(gld->program, sizeof msg, NULL, msg);
-   printf("info: %s\n", msg);
-
-   gl->glUseProgram(gld->program);
-   gld->proj_location  = gl->glGetUniformLocation(gld->program, "proj");
-   gld->light_location = gl->glGetUniformLocation(gld->program, "light");
-   gld->color_location = gl->glGetUniformLocation(gld->program, "color");
-
-   /* make the gears */
-   gld->gear1 = make_gear(gld, 1.0, 4.0, 1.0, 20, 0.7);
-   gld->gear2 = make_gear(gld, 0.5, 2.0, 2.0, 10, 0.7);
-   gld->gear3 = make_gear(gld, 1.3, 2.0, 0.5, 10, 0.7);
+   m[0] = 0.1 * ar / w;
+   m[5] = 0.1 * ar / h;
+   memcpy(gld->proj, m, sizeof gld->proj);
+#endif
+//   gl->glViewport(0, 0, (GLint) w, (GLint) h);
 }
 
-static void gldata_init(GLData *gld)
+static void on_pixels(void *data, Evas_Object *obj)
 {
-   gld->initialized = 0;
-   gld->mouse_down = 0;
+    static int count = 0;
+    int w, h;
+    GLData *gld = data;
+    if (!gld)
+	return;
 
-   gld->view_rotx = -20.0;
-   gld->view_roty = -30.0;
-   gld->view_rotz = 0.0;
-   gld->angle = 0.0;
+    Evas_GL_API *gl = gld->glapi;
 
-   gld->light[0] = 1.0;
-   gld->light[1] = 1.0;
-   gld->light[2] = -5.0;
+    // get the image size in case it changed with evas_object_image_size_set()
+    if (gld->r1)
+	evas_object_image_size_get(gld->r1, &w, &h);
+
+    if (gld->useEGL)
+    {
+	// Yes, we DO need to do our own make current, coz aparently the Irrlicht one is useless.
+	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+//	gl->glViewport(0, 0, (GLint) w/2, (GLint) h);
+    }
+
+    if (!gld->doneIrr)
+	gld->doneIrr = startIrr(gld);	// Needs to be after gld->win is shown, and needs to be done in the render thread.
+
+    drawIrr_start(gld);
+
+    if (gld->useEGL)
+    {
+#if DO_GEARS
+	static const GLfloat red[4] = { 0.8, 0.1, 0.0, 1.0 };
+	static const GLfloat green[4] = { 0.0, 0.8, 0.2, 1.0 };
+	static const GLfloat blue[4] = { 0.2, 0.2, 1.0, 1.0 };
+	GLfloat m[16];
+
+	// set up the context and surface as the current one
+//	if (!gld->useIrr)
+//	    evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+
+	// GL Viewport stuff. you can avoid doing this if viewport is all the
+	// same as last frame if you want
+	// TODO - might want to do this in response to some sort of resize event instead.  Looks like it's needed to run once at least anyway.
+//	if (count == 0)
+	    _resize_gears(gld, w, h/2);
+
+	// Draw the gears.
+//	if (!gld->useIrr)
+//	    gl->glClearColor(0.8, 0.8, 0.1, 0.1);
+//	if (!gld->useIrr)
+//	    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	memcpy(m, gld->proj, sizeof m);
+	rotate(m, 2 * M_PI * gld->view_rotx / 360.0, 1, 0, 0);
+	rotate(m, 2 * M_PI * gld->view_roty / 360.0, 0, 1, 0);
+	rotate(m, 2 * M_PI * gld->view_rotz / 360.0, 0, 0, 1);
+
+	draw_gear(gld, gld->gear1, m, -3.0, -2.0, gld->angle, red);
+	draw_gear(gld, gld->gear2, m, 3.1, -2.0, -2 * gld->angle - 9.0, green);
+	draw_gear(gld, gld->gear3, m, -3.1, 4.2, -2 * gld->angle - 25.0, blue);
+	gld->angle += 2.0;
+#endif
+    }
+
+    drawIrr_end(gld);
+    count++;
+}
+
+static void
+on_del(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+   // on delete of our object clean up some things that don't get auto
+   // deleted for us as they are not intrinsically bound to the image
+   // object as such (you could use the same context and surface across
+   // multiple image objects and re-use the evasgl handle too multiple times.
+   // here we bind them to 1 object only though by doing this.
+   GLData *gld = data;
+   if (!gld) return;
+   Evas_GL_API *gl = gld->glapi;
+
+    ecore_animator_del(gld->animator);
+
+    if (gld->useEGL)
+    {
+	// Do a make_current before deleting all the GL stuff.
+	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+
+#if DO_GEARS
+	gl->glDeleteShader(gld->vtx_shader);
+	gl->glDeleteShader(gld->fgmt_shader);
+	gl->glDeleteProgram(gld->program);
+
+	gl->glDeleteBuffers(1, &gld->gear1->vbo);
+	gl->glDeleteBuffers(1, &gld->gear2->vbo);
+	gl->glDeleteBuffers(1, &gld->gear3->vbo);
+
+	free_gear(gld->gear1);
+	free_gear(gld->gear2);
+	free_gear(gld->gear3);
+#endif
+
+	// Irrlicht wants to destroy the context and surface, so only do this if Irrlicht wont.
+	if (!gld->doneIrr)
+	{
+	    evas_gl_surface_destroy(gld->evasgl, gld->sfc);
+	    evas_gl_context_destroy(gld->evasgl, gld->ctx);
+	}
+	// TODO - hope this is OK, considering the context and surface might get dealt with by Irrlicht.
+	// Might be better to teach Irrlicht to not destroy shit it did not create.
+	evas_gl_config_free(gld->cfg);
+	evas_gl_free(gld->evasgl);
+    }
+
+    // TODO - Since this is created on the render thread, better hope this is being deleted on the render thread.
+    finishIrr(gld);
+
+   free(gld);
+}
+
+static Eina_Bool doFrame(void *data)
+{
+    GLData *gld = data;
+
+    // Mark the pixels as dirty, so they get rerendered each frame, then Irrlicht can draw it's stuff each frame.
+    // This causes on_pixel to be triggered by Evas_GL.
+    if (gld->r1)
+	evas_object_image_pixels_dirty_set(gld->r1, EINA_TRUE);
+
+    // If not using Evas_GL, we need to call on_pixel() manually.
+    if (!gld->useEGL)
+	on_pixels(gld, gld->r1);
+
+    return EINA_TRUE;
+}
+
+static void init_evas_gl(GLData *gld, int w, int h)
+{
+   Ecore_Evas  *ee;
+   Evas *canvas;
+   Evas_Native_Surface ns;
+
+    if (!gld->useEGL)
+	return;
+
+    w -= 10;
+    h -= 10;
+    h = h / 2;
+
+    ee = ecore_evas_ecore_evas_get(evas_object_evas_get(gld->win));
+    canvas = ecore_evas_get(ee);
+
+    //-//-//-// THIS IS WHERE GL INIT STUFF HAPPENS (ALA EGL)
+    //-//
+    // get the evas gl handle for doing gl things
+    gld->evasgl = evas_gl_new(canvas);
+    gld->glapi = evas_gl_api_get(gld->evasgl);
+
+    // Set a surface config
+    gld->cfg = evas_gl_config_new();
+    gld->cfg->color_format = EVAS_GL_RGBA_8888;
+    gld->cfg->depth_bits   = EVAS_GL_DEPTH_BIT_32;
+    gld->cfg->stencil_bits = EVAS_GL_STENCIL_NONE;
+    gld->cfg->options_bits = EVAS_GL_OPTIONS_DIRECT;
+
+    // create a surface and context
+    gld->sfc_w = w;
+    gld->sfc_h = h;
+    gld->sfc = evas_gl_surface_create(gld->evasgl, gld->cfg, w, h);
+    gld->ctx = evas_gl_context_create(gld->evasgl, NULL);		// The second NULL is for sharing contexts I think, which might be what we want to do with Irrlicht.
+    //-//
+    //-//-//-// END GL INIT BLOB
+
+   // set up the image object. a filled one by default
+   gld->r1 = evas_object_image_filled_add(canvas);
+    evas_object_size_hint_align_set(gld->r1, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_size_hint_weight_set(gld->r1, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   // when the object is deleted - call the on_del callback. like the above,
+   // this is just being clean
+   evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_DEL, on_del, gld);
+   // set up an actual pixel size fot the buffer data. it may be different
+   // to the output size. any windowing system has something like this, just
+   // evas has 2 sizes, a pixel size and the output object size
+   evas_object_image_size_set(gld->r1, w, h);
+   // set up the native surface info to use the context and surface created
+   // above
+
+    // The ELM version does these as well.
+//    elm_glview_resize_policy_set(gld->gl, ELM_GLVIEW_RESIZE_POLICY_RECREATE);			// Destroy the current surface on a resize and create a new one.
+//    elm_glview_render_policy_set(gld->gl, ELM_GLVIEW_RENDER_POLICY_ALWAYS);			// Always render, even if not visible.
+
+    //-//-//-// THIS IS WHERE GL INIT STUFF HAPPENS (ALA EGL)
+    //-//
+    evas_gl_native_surface_get(gld->evasgl, gld->sfc, &ns);
+    evas_object_image_native_surface_set(gld->r1, &ns);
+    evas_object_image_pixels_get_callback_set(gld->r1, on_pixels, gld);
+    //-//
+    //-//-//-// END GL INIT BLOB
+
+    evas_object_show(gld->r1);
+    elm_box_pack_end(gld->bx, gld->r1);
+
+    evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+
+    gld->glapi->glEnable(GL_CULL_FACE);
+    gld->glapi->glEnable(GL_DEPTH_TEST);
+    gld->glapi->glEnable(GL_BLEND);
+    gld->glapi->glViewport(0, 0, (GLint) w, (GLint) h);
+
+#if DO_GEARS
+    GLint linked = 0;
+
+    // Load the vertex/fragment shaders
+    gld->vtx_shader  = load_shader(gld, GL_VERTEX_SHADER, vertex_shader);
+    gld->fgmt_shader = load_shader(gld, GL_FRAGMENT_SHADER, fragment_shader);
+
+    // Create the program object
+    if (!(gld->program = gld->glapi->glCreateProgram()))
+	return;
+
+    gld->glapi->glAttachShader(gld->program, gld->vtx_shader);
+    gld->glapi->glAttachShader(gld->program, gld->fgmt_shader);
+
+    // Bind shader attributes.
+    gld->glapi->glBindAttribLocation(gld->program, 0, "position");
+    gld->glapi->glBindAttribLocation(gld->program, 1, "normal");
+    // Link the program
+    gld->glapi->glLinkProgram(gld->program);
+    gld->glapi->glGetProgramiv(gld->program, GL_LINK_STATUS, &linked);
+
+    if (!linked)
+    {
+	GLint len = 0;
+
+	gld->glapi->glGetProgramiv(gld->program, GL_INFO_LOG_LENGTH, &len);
+	if (len > 1)
+	{
+	    char *info = malloc(sizeof(char) * len);
+
+	    if (info)
+	    {
+		gld->glapi->glGetProgramInfoLog(gld->program, len, NULL, info);
+		printf("Error linking program:\n%s\n", info);
+		free(info);
+	    }
+	}
+	gld->glapi->glDeleteProgram(gld->program);
+    }
+
+    gld->glapi->glUseProgram(gld->program);
+    gld->proj_location  = gld->glapi->glGetUniformLocation(gld->program, "proj");
+    gld->light_location = gld->glapi->glGetUniformLocation(gld->program, "light");
+    gld->color_location = gld->glapi->glGetUniformLocation(gld->program, "color");
+
+    /* make the gears */
+    gld->gear1 = make_gear(gld, 1.0, 4.0, 1.0, 20, 0.7);
+    gld->gear2 = make_gear(gld, 0.5, 2.0, 2.0, 10, 0.7);
+    gld->gear3 = make_gear(gld, 1.3, 2.0, 0.5, 10, 0.7);
+#endif
+
+    // NOTE: if you delete r1, this animator will keep running trying to access
+    // r1 so you'd better delete this animator with ecore_animator_del() or
+    // structure how you do animation differently. you can also attach it like
+    // evasgl, sfc, etc. etc. if this animator is specific to this object
+    // only and delete it in the del handler for the obj.
+    //
+    // TODO - apparently the proper way to deal with the new async rendering is to have this animator do the dirty thing, and call the Irrlicht rendering stuff in the on_pixel call set above.
+    //        That still leaves the problem of the Irrlicht setup being in the main thread.  Which also should be done in on_pixel, as that's done in the correct thread.
+//    ecore_animator_frametime_set(1.0);
+    gld->animator = ecore_animator_add(doFrame, gld);	// This animator will be called every frame tick, which defaults to 1/30 seconds.
+
+    return;
 }
 
 
 //-------------------------//
 
-static void _init_gl(Evas_Object *obj)
-{
-   GLData *gld = evas_object_data_get(obj, "gld");
-
-   gears_init(gld);
-}
-
-static void _del_gl(Evas_Object *obj)
-{
-   GLData *gld = evas_object_data_get(obj, "gld");
-   if (!gld)
-     {
-        printf("Unable to get GLData. \n");
-        return;
-     }
-   Evas_GL_API *gl = gld->glapi;
-
-   gl->glDeleteShader(gld->vtx_shader);
-   gl->glDeleteShader(gld->fgmt_shader);
-   gl->glDeleteProgram(gld->program);
-   gl->glDeleteBuffers(1, &gld->gear1->vbo);
-   gl->glDeleteBuffers(1, &gld->gear2->vbo);
-   gl->glDeleteBuffers(1, &gld->gear3->vbo);
-
-   free_gear(gld->gear1);
-   free_gear(gld->gear2);
-   free_gear(gld->gear3);
-
-   evas_object_data_del((Evas_Object*)obj, "..gld");
-   free(gld);
-}
-
-static void _resize_gl(Evas_Object *obj)
-{
-   int w, h;
-   GLData *gld = evas_object_data_get(obj, "gld");
-
-   elm_glview_size_get(obj, &w, &h);
-
-   // GL Viewport stuff. you can avoid doing this if viewport is all the
-   // same as last frame if you want
-   gears_reshape(gld, w, h);
-}
-
-static void _draw_gl(Evas_Object *obj)
-{
-   Evas_GL_API *gl = elm_glview_gl_api_get(obj);
-   GLData *gld = evas_object_data_get(obj, "gld");
-   if (!gld) return;
-
-   render_gears(gld);
-   gl->glFinish();
-}
-
-static Eina_Bool _anim(void *data)
-{
-   elm_glview_changed_set(data);
-   return EINA_TRUE;
-}
-
-static void _del(void *data , Evas *evas , Evas_Object *obj, void *event_info )
-{
-   Ecore_Animator *ani = evas_object_data_get(obj, "ani");
-   ecore_animator_del(ani);
-}
-
-static void _key_down(void *data , Evas *e , Evas_Object *obj, void *event_info)
-{
-   Evas_Event_Key_Down *ev;
-   ev = (Evas_Event_Key_Down *)event_info;
-   GLData *gld = evas_object_data_get(obj, "gld");
-
-   if (strcmp(ev->keyname, "Left") == 0)
-     {
-        gld->view_roty += 5.0;
-        return;
-     }
-
-   if (strcmp(ev->keyname, "Right") == 0)
-     {
-        gld->view_roty -= 5.0;
-        return;
-     }
-
-   if (strcmp(ev->keyname, "Up") == 0)
-     {
-        gld->view_rotx += 5.0;
-        return;
-     }
-
-   if (strcmp(ev->keyname, "Down") == 0)
-     {
-        gld->view_rotx -= 5.0;
-        return;
-     }
-   if ((strcmp(ev->keyname, "Escape") == 0) ||
-       (strcmp(ev->keyname, "Return") == 0))
-     {
-        //_on_done(data, obj, event_info);
-        return;
-     }
-}
-
-static void _mouse_down(void *data , Evas *e , Evas_Object *obj, void *event_info )
-{
-   GLData *gld = evas_object_data_get(obj, "gld");
-   gld->mouse_down = 1;
-}
-
-static void _mouse_move(void *data , Evas *e , Evas_Object *obj, void *event_info )
-{
-   Evas_Event_Mouse_Move *ev;
-   ev = (Evas_Event_Mouse_Move *)event_info;
-   GLData *gld = evas_object_data_get(obj, "gld");
-   float dx = 0, dy = 0;
-
-   if (gld->mouse_down)
-     {
-        dx = ev->cur.canvas.x - ev->prev.canvas.x;
-        dy = ev->cur.canvas.y - ev->prev.canvas.y;
-
-        gld->view_roty += -1.0 * dx;
-        gld->view_rotx += -1.0 * dy;
-     }
-}
-
-static void _mouse_up(void *data , Evas *e , Evas_Object *obj, void *event_info )
-{
-   GLData *gld = evas_object_data_get(obj, "gld");
-   gld->mouse_down = 0;
-}
 
 static Evas_Object *_content_image_new(Evas_Object *parent, const char *img)
 {
    Evas_Object *ic;
 
    ic = elm_icon_add(parent);
-   elm_icon_file_set(ic, img, NULL);
+   elm_image_file_set(ic, img, NULL);
    return ic;
 }
 
@@ -655,7 +670,7 @@ static Evas_Object *_grid_content_get(void *data, Evas_Object *obj, const char *
     evas_object_size_hint_aspect_set(ic, EVAS_ASPECT_CONTROL_VERTICAL, 1, 1);
     return ic;
 }
-                
+
 static char * _account_label_get(void *data, Evas_Object *obj, const char *part)
 {
     ezAccount *thisAccount = data;
@@ -679,7 +694,7 @@ static Evas_Object *_account_content_get(void *data, Evas_Object *obj, const cha
     evas_object_size_hint_aspect_set(ic, EVAS_ASPECT_CONTROL_VERTICAL, 1, 1);
     return ic;
 }
-                
+
 static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 {
     ezGrid *thisGrid = data;
@@ -691,23 +706,26 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
     system(buf);
 }
 
-
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *win, *bg, *bx, *mn, *tb, *bt, *menu, *gl, *nf, *tab, *list;
+    Evas_Object *bg, *tb, *bt, *menu, *nf, *tab, *list;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
-    Ecore_Animator *ani;
+    EPhysics_Body *boundary;
+    EPhysics_World *world;
+    EPhysics_Body *box_body1, *box_body2;
+    Evas_Object *box1, *box2;
     GLData *gld = NULL;
     int i;
     Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
-/* raster says doing this is a good idea...
+/* raster says doing this is a good idea... 
     // if you want efl to handle finding your bin/lib/data dirs for u, you must do this below.
     elm_app_info_set(elm_main, "datadir", "some-data-file");
     elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
     elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
 */
 
+// Raster says these are set via the elementary_config tool, which is hard to find.
     elm_config_finger_size_set(0);
     elm_config_scale_set(1.0);
 
@@ -715,31 +733,39 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     if (!(gld = calloc(1, sizeof(GLData)))) return;
     gldata_init(gld);
 
-    // new window - do the usual and give it a name, title and delete handler
     // Set the engine to opengl_x11
-    elm_config_preferred_engine_set("opengl_x11");
-    win = elm_win_util_standard_add("extantz", "GLView");
+    if (gld->useEGL)
+	elm_config_preferred_engine_set("opengl_x11");
+    else
+	elm_config_preferred_engine_set("software_x11");
+    gld->win = elm_win_util_standard_add("extantz", "GLView");
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
-    elm_win_title_set(win, "extantz virtual world manager");
-    evas_object_smart_callback_add(win, "delete,request", _on_done, NULL);
+    if (!ephysics_init())
+	return 1;
 
-    elm_win_screen_size_get(win, &x, &y, &w, &h);
+    elm_win_title_set(gld->win, "extantz virtual world manager");
+    evas_object_smart_callback_add(gld->win, "delete,request", _on_done, NULL);
 
-    bg = elm_bg_add(win);
-    elm_win_resize_object_add(win, bg);
+    elm_win_screen_size_get(gld->win, &x, &y, &w, &h);
+    w = w / 5;
+    h = h - 30;
+
+    bg = elm_bg_add(gld->win);
+    elm_win_resize_object_add(gld->win, bg);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_show(bg);
 
-    bx = elm_box_add(win);
-    elm_win_resize_object_add(win, bx);
-    evas_object_size_hint_weight_set(bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(bx);
+
+    gld->bx = elm_box_add(gld->win);
+    elm_win_resize_object_add(gld->win, gld->bx);
+    evas_object_size_hint_weight_set(gld->bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(gld->bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_show(gld->bx);
 
     // A tab thingy.
-    tb = elm_toolbar_add(win);
+    tb = elm_toolbar_add(gld->win);
     evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(tb);
@@ -760,10 +786,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_menu_item_separator_add(menu, menu_it);
     elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
     elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, win);
-    elm_toolbar_menu_parent_set(tb, win);
+    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld->win);
+    elm_toolbar_menu_parent_set(tb, gld->win);
 
-    nf = elm_naviframe_add(win);
+    nf = elm_naviframe_add(gld->win);
     evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(nf);
@@ -782,10 +808,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     account_gic->func.state_get = NULL;
     account_gic->func.del = NULL;
 
-    list = elm_genlist_add(win);
-    tab = _content_image_new(win, img1);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Accounts", _promote, tab_it);
-    tab = _content_image_new(win, img2);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    list = elm_genlist_add(gld->win);
+    tab = _content_image_new(gld->win, img1);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Accounts", _promote, tab_it);
+    tab = _content_image_new(gld->win, img2);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    tab = _content_image_new(gld->win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
     tab = list;					tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
 
     grids = eina_hash_stringshared_new(free);
@@ -821,54 +847,85 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	}
     }
 
-    // Add a GLView
-    gl = elm_glview_add(win);
-    evas_object_size_hint_align_set(gl, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_size_hint_weight_set(gl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_glview_mode_set(gl, ELM_GLVIEW_ALPHA|ELM_GLVIEW_DEPTH);
-    elm_glview_resize_policy_set(gl, ELM_GLVIEW_RESIZE_POLICY_RECREATE);
-    elm_glview_render_policy_set(gl, ELM_GLVIEW_RENDER_POLICY_ALWAYS);
-    elm_glview_init_func_set(gl, _init_gl);
-    elm_glview_del_func_set(gl, _del_gl);
-    elm_glview_resize_func_set(gl, _resize_gl);
-    elm_glview_render_func_set(gl, (Elm_GLView_Func_Cb)_draw_gl);
-    evas_object_show(gl);
-
-    // Add Mouse/Key Event Callbacks
-    elm_object_focus_set(gl, EINA_TRUE);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_KEY_DOWN, _key_down, gl);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_DOWN, _mouse_down, gl);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_UP, _mouse_up, gl);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_MOUSE_MOVE, _mouse_move, gl);
- 
-    // Animator and other vars
-    ani = ecore_animator_add(_anim, gl);
-    gld->glapi = elm_glview_gl_api_get(gl);
-    evas_object_data_set(gl, "ani", ani);
-    evas_object_data_set(gl, "gld", gld);
-    evas_object_event_callback_add(gl, EVAS_CALLBACK_DEL, _del, gl);
-
-    bt = elm_button_add(win);
+    bt = elm_button_add(gld->win);
     elm_object_text_set(bt, "Login");
     evas_object_size_hint_align_set(bt, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.0);
     evas_object_show(bt);
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
 
-    elm_box_pack_end(bx, mn);
-    elm_box_pack_end(bx, tb);
-    elm_box_pack_end(bx, nf);
-    elm_box_pack_end(bx, bt);
-    elm_box_pack_end(bx, gl);
+#if USE_PHYSICS
+    // ePhysics stuff.
+    world = ephysics_world_new();
+    ephysics_world_render_geometry_set(world, 0, 0, -50, w, h, 100);
 
-    evas_object_move(win, x, y);
-    evas_object_resize(win, w / 5, h - 30);
-    evas_object_show(win);
+    boundary = ephysics_body_bottom_boundary_add(world);
+    ephysics_body_restitution_set(boundary, 1);
+    ephysics_body_friction_set(boundary, 0);
+
+    boundary = ephysics_body_top_boundary_add(world);
+    ephysics_body_restitution_set(boundary, 1);
+    ephysics_body_friction_set(boundary, 0);
+
+    boundary = ephysics_body_left_boundary_add(world);
+    ephysics_body_restitution_set(boundary, 1);
+    ephysics_body_friction_set(boundary, 0);
+
+    boundary = ephysics_body_right_boundary_add(world);
+    ephysics_body_restitution_set(boundary, 1);
+    ephysics_body_friction_set(boundary, 0);
+
+    box1 = elm_image_add(gld->win);
+    elm_image_file_set(box1, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
+    evas_object_move(box1, w / 2 - 80, h - 200);
+    evas_object_resize(box1, 70, 70);
+    evas_object_show(box1);
+
+    box_body1 = ephysics_body_box_add(world);
+    ephysics_body_evas_object_set(box_body1, box1, EINA_TRUE);
+    ephysics_body_restitution_set(box_body1, 0.7);
+    ephysics_body_friction_set(box_body1, 0);
+    ephysics_body_linear_velocity_set(box_body1, -150, 200, 0);
+    ephysics_body_angular_velocity_set(box_body1, 0, 0, 36);
+    ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
+
+    box2 = elm_image_add(gld->win);
+    elm_image_file_set(box2, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
+    evas_object_move(box2, w / 2 + 10, h - 200);
+    evas_object_resize(box2, 70, 70);
+    evas_object_show(box2);
+
+    box_body2 = ephysics_body_box_add(world);
+    ephysics_body_evas_object_set(box_body2, box2, EINA_TRUE);
+    ephysics_body_restitution_set(box_body2, 0.7);
+    ephysics_body_friction_set(box_body2, 0);
+    ephysics_body_linear_velocity_set(box_body2, 80, -60, 0);
+    ephysics_body_angular_velocity_set(box_body2, 0, 0, 360);
+    ephysics_body_sleeping_threshold_set(box_body2, 0.1, 0.1);
+
+    ephysics_world_gravity_set(world, 0, 0, 0);
+#endif
+
+    elm_box_pack_end(gld->bx, tb);
+    elm_box_pack_end(gld->bx, nf);
+    elm_box_pack_end(gld->bx, bt);
+
+    // This does an elm_box_pack_end(), so needs to be after the others.
+    init_evas_gl(gld, w, h);
+
+    evas_object_move(gld->win, x, y);
+    evas_object_resize(gld->win, w, h);
+    evas_object_show(gld->win);
 
     elm_run();
+
+#if USE_PHYSICS
+    ephysics_world_del(world);
+    ephysics_shutdown();
+#endif
+
     elm_shutdown();
 
     return 0;
 }
 ELM_MAIN()
-

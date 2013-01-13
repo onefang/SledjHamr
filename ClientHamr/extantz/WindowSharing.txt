@@ -1,0 +1,84 @@
+EnLichtIrrnment.  B-)
+
+Elementary and Irrlicht don't like to share windows.
+
+Irrlicht can be told to create a device from a pre existing window, but this is Windows only.
+    Perhaps it already works for Linux, just the docs are out of date?
+    It works, sorta.
+
+IVideoDriver::getExposedVideoData() can provide a structure with raw OS level window pointers.
+    This implies that it's theoretically possible to create a device from things other than Windows windows.
+    Wont provide any valid info when using the software renderer.
+
+Elementary can provide an Ecore_Wl_Window or an Ecore_X_Window of one of it's windows.  elm_win_wl_window_get() and elm_win_xwindow_get().
+
+Ecore_evas can provide an Ecore_Window with ecore_evas_window_get().
+
+Ecore_X_Window ecore_x_window_new()
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=2&t=31350&sid=0eb6d64c84ec7043fd48103f8e63e930 may help.  A little.
+
+
+"For using OpenGL with an Evas canvas, there is two possibilities in my
+opinion. Either put the canvas in a texture and give it to the 3D
+engine, or use EvasGL API and make the 3D engine integrate inside
+Evas. It is possible to have a direct rendering path with EvasGL and
+so have a fastest possible path.
+--
+Cedric BAIL"
+
+
+Apparently Irrlicht's method of providing an external window actually works.  Mostly. -
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=7&t=32647
+http://sourceforge.net/tracker/index.php?func=detail&aid=2655876&group_id=74339&atid=540676
+
+Though seems that bug was marked as a duplicate with the duplicate having a better patch, but NO FUCKING LINK to that duplicate.  What a horrid bug tracker.
+
+
+There is also this which gives clues -http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=26506
+
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=2&t=39872
+http://irrlicht.sourceforge.net/forum//viewtopic.php?t=39719
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=35197
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=2&t=46087
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=42450
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=35251
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=5&t=15338
+http://irrlicht.sourceforge.net/forum//viewtopic.php?f=7&t=12697
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=5&t=44599
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=5&t=18941 I think is ancient and might just be similar to what's in there already.
+
+---------------------------------------------------------
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=26141
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=33845
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=35984
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=34527
+
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=38656 may be of some interest.
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=30943
+http://irrlicht.sourceforge.net/forum/viewtopic.php?f=4&t=46983 where the question I want is not answered.
+
+---------------------------------------------------------
+
+I could run sed over COpenGLDriver.cpp to turn it into CEvasGLDriver.cpp, then tweak it a bit.
+
+evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+glFoo() -> glapi->glFoo()
+
+
+Hmm, there will be some source files with random gl() calls, and I'd
+need to tweak a few other things to suit.  So this wont be a clean "just
+drop in this source file" patch.  B-(
+
+Probably a lot easier to just figure out what what brand of glue to use
+to get Irrlicht using Evas created GL surface and context.
