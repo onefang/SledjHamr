@@ -9,6 +9,7 @@
 #include "EDeviceTypes.h"
 #include "dimension2d.h"
 #include "ILogger.h"
+#include "SExposedVideoData.h"
 
 namespace irr
 {
@@ -37,6 +38,7 @@ namespace irr
 			HighPrecisionFPU(false),
 			EventReceiver(0),
 			WindowId(0),
+			VideoData(0),
 #ifdef _DEBUG
 			LoggingLevel(ELL_DEBUG),
 #else
@@ -72,6 +74,7 @@ namespace irr
 			HighPrecisionFPU = other.HighPrecisionFPU;
 			EventReceiver = other.EventReceiver;
 			WindowId = other.WindowId;
+			VideoData = other.VideoData;
 			LoggingLevel = other.LoggingLevel;
 			DriverMultithreaded = other.DriverMultithreaded;
 			DisplayAdapter = other.DisplayAdapter;
@@ -257,6 +260,8 @@ namespace irr
 		However, there is no need to draw the picture this often. Just
 		do it how you like. */
 		void* WindowId;
+
+		video::SExposedVideoData *VideoData;
 
 		//! Specifies the logging level used in the logging interface.
 		/** The default value is ELL_INFORMATION. You can access the ILogger interface

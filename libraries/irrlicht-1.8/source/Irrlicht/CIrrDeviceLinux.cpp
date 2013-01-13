@@ -375,7 +375,10 @@ bool CIrrDeviceLinux::createWindow()
 	XSetErrorHandler(IrrPrintXError);
 #endif
 
-	display = XOpenDisplay(0);
+	if (CreationParams.VideoData)
+		display = (Display *) CreationParams.VideoData->OpenGLLinux.X11Display;
+	if (!display)
+		display = XOpenDisplay(0);
 	if (!display)
 	{
 		os::Printer::log("Error: Need running XServer to start Irrlicht Engine.", ELL_ERROR);
@@ -719,7 +722,17 @@ bool CIrrDeviceLinux::createWindow()
 	Context=0;
 	if (isAvailableGLX && CreationParams.DriverType==video::EDT_OPENGL)
 	{
-	if (UseGLXWindow)
+	if (CreationParams.VideoData)
+		Context = (GLXContext) CreationParams.VideoData->OpenGLLinux.X11Context;
+	if (Context)
+	{
+		if (!glXMakeCurrent(display, window, Context))
+		{
+			os::Printer::log("Could not make context current.", ELL_WARNING);
+			glXDestroyContext(display, Context);
+		}
+	}
+	else if (UseGLXWindow)
 	{
 		glxWin=glXCreateWindow(display,glxFBConfig,window,NULL);
 		if (glxWin)
