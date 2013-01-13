@@ -233,42 +233,50 @@ int main(int argc, char **argv)
 	game.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_con_init())
 	{
-	    if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
+	    if (ecore_con_init())
 	    {
-		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
-		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &game);
-		ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
-		ecore_con_server_timeout_set(game.server, 0);
-		ecore_con_server_client_limit_set(game.server, -1, 0);
-		clientStream = eina_strbuf_new();
-
-		if (edje_init())
+		if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
 		{
-		    int i;
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &game);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
+		    ecore_con_server_timeout_set(game.server, 0);
+		    ecore_con_server_client_limit_set(game.server, -1, 0);
+		    ecore_con_server_timeout_set(game.server, 10);
+		    ecore_con_server_client_limit_set(game.server, 3, 0);
+		    clientStream = eina_strbuf_new();
 
-		    result = 0;
-		    compilerSetup(&game);
-		    luaprocInit();
-		    for (i = 0; i < CPUs; i++)
+		    if (edje_init())
 		    {
-			if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
-			    PEm("Error creating luaproc worker thread.");
-		    }
-		    ecore_main_loop_begin();
+			int i;
 
-		    // TODO - this is what hangs the system, should change from raw pthreads to ecare threads.
-		    sched_join_workerthreads();
-		    edje_shutdown();
+			result = 0;
+			compilerSetup(&game);
+			luaprocInit();
+			for (i = 0; i < CPUs; i++)
+			{
+			    if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
+				PEm("Error creating luaproc worker thread.");
+			}
+			ecore_main_loop_begin();
+
+			// TODO - this is what hangs the system, should change from raw pthreads to ecore threads.
+			sched_join_workerthreads();
+			edje_shutdown();
+		    }
+		    else
+			PCm("Failed to init edje!");
 		}
 		else
-		    PCm("Failed to init edje!");
+		    PCm("Failed to add server!");
+		ecore_con_shutdown();
 	    }
 	    else
-		PCm("Failed to add server!");
-	    ecore_con_shutdown();
+		PCm("Failed to init ecore_con!");
+	    ecore_shutdown();
 	}
 	else
-	    PCm("Failed to init ecore_con!");
+	    PCm("Failed to init ecore!");
     }
     else
 	fprintf(stderr, "Failed to init eina!");
