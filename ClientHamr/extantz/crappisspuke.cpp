@@ -51,6 +51,7 @@ EAPI int startIrr(GLData *gld)
 	if (!gld->useIrr)
 	    return 0;
 
+#if USE_IRR
 	void *display = NULL;
 	unsigned long sfc = 0;
 	void *ctx = NULL;
@@ -174,6 +175,7 @@ EAPI int startIrr(GLData *gld)
 	smgr->addCameraSceneNode(0, vector3df(0, 30, -40), vector3df(0, 5, 0));
 
 	then = device->getTimer()->getTime();
+#endif
     return 1;
 }
 
