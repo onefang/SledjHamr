@@ -789,10 +789,13 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     h = h - 30;
 
     bg = elm_bg_add(gld->win);
-    elm_win_resize_object_add(gld->win, bg);
+    elm_bg_load_size_set(bg, w, h);
+    elm_bg_option_set(bg, ELM_BG_OPTION_CENTER);
+    snprintf(buf, sizeof(buf), "%s/images/sky_03.jpg", elm_app_data_dir_get());
+    elm_bg_file_set(bg, buf, NULL);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(gld->win, bg);
     evas_object_show(bg);
-
 
     gld->bx = elm_box_add(gld->win);
     elm_win_resize_object_add(gld->win, gld->bx);
