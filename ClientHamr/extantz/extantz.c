@@ -751,6 +751,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     EPhysics_Body *box_body1, *box_body2;
     Evas_Object *box1, *box2;
     GLData *gld = NULL;
+    char buf[PATH_MAX];
     int i;
     Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
