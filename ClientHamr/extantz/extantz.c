@@ -755,14 +755,16 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     int i;
     Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
-/* raster says doing this is a good idea... 
-    // if you want efl to handle finding your bin/lib/data dirs for u, you must do this below.
-    elm_app_info_set(elm_main, "datadir", "some-data-file");
+    // If you want efl to handle finding your bin/lib/data dirs, you must do this below.
     elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
     elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
-*/
+    elm_app_info_set(elm_main, "datadir", "images/sky_03.jpg");
+    fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
+    fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
+    fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
+    fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
 
-// Raster says these are set via the elementary_config tool, which is hard to find.
+    // These are set via the elementary_config tool, which is hard to find.
     elm_config_finger_size_set(0);
     elm_config_scale_set(1.0);
 
