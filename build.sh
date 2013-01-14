@@ -27,6 +27,9 @@ command="gcc $CFLAGS -o lemon $objects $LDFLAGS $libs"
 echo $command
 $command
 
+echo "_______________ BUILDING Irrlicht _______________"
+cd $wd/libraries/irrlicht-1.8/source/Irrlicht 
+make
 
 # Test if edje is already available, build EFL up to edje if not.
 # TODO - Check EFL version.
