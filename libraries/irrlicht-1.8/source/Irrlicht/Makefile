@@ -54,15 +54,12 @@ BZIP2OBJ = bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o 
 
 # Next variable is for additional scene nodes etc. of customized Irrlicht versions
 EXTRAOBJ =
-LINKOBJ = $(IRRMESHOBJ) $(IRROBJ) $(IRRPARTICLEOBJ) $(IRRANIMOBJ) \
-	$(IRRVIDEOOBJ) $(IRRSWRENDEROBJ) $(IRRIOOBJ) $(IRROTHEROBJ) \
-	$(IRRGUIOBJ) $(ZLIBOBJ) $(JPEGLIBOBJ) $(LIBPNGOBJ) $(LIBAESGM) \
-	$(BZIP2OBJ) $(EXTRAOBJ)
+LINKOBJ = $(IRRMESHOBJ) $(IRROBJ) $(IRRPARTICLEOBJ) $(IRRANIMOBJ) $(IRRVIDEOOBJ) $(IRRSWRENDEROBJ) $(IRRIOOBJ) $(IRROTHEROBJ) $(LIBAESGM) $(EXTRAOBJ)
 
 ###############
 #Compiler flags
-CXXINCS = -I../../include -Izlib -Ijpeglib -Ilibpng
-CPPFLAGS += $(CXXINCS) -DIRRLICHT_EXPORTS=1
+CXXINCS = -I../../include
+CPPFLAGS += $(CXXINCS) -DIRRLICHT_EXPORTS=1 -DNO_IRR_COMPILE_WITH_GUI_=1 -DNO_IRR_USE_NON_SYSTEM_JPEG_LIB_=1 -DNO_IRR_USE_NON_SYSTEM_LIB_PNG_=1 -DNO_IRR_USE_NON_SYSTEM_BZIP2_=1 -DNO_IRR_USE_NON_SYSTEM_ZLIB_=1
 CXXFLAGS += -Wall -pipe -fno-exceptions -fno-rtti -fstrict-aliasing
 ifndef NDEBUG
 CXXFLAGS += -g -D_DEBUG
