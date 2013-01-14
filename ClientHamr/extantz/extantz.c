@@ -970,6 +970,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     // This does an elm_box_pack_end(), so needs to be after the others.
     init_evas_gl(gld, w, h);
 
+    // Menu should be above everything else.
+    // Which apparently wont work.
+    evas_object_raise(menu);
+
     evas_object_move(gld->win, x, y);
     evas_object_resize(gld->win, w, h);
     evas_object_show(gld->win);
