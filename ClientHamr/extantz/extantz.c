@@ -742,10 +742,221 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
     system(buf);
 }
 
+static void
+fill(Evas_Object *win)
+{
+    Evas_Object *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
+    Elm_Object_Item *tb_it, *menu_it, *tab_it;
+    char buf[PATH_MAX];
+    int i;
+
+    // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
+    // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
+    bg = evas_object_rectangle_add(evas_object_evas_get(win));
+    evas_object_color_set(bg, 200, 0, 200, 200);
+    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(win, bg);
+    evas_object_show(bg);
+
+    bx = elm_box_add(win);
+    elm_win_resize_object_add(win, bx);
+    evas_object_size_hint_weight_set(bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
+
+    // A tab thingy.
+    tb = elm_toolbar_add(win);
+    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
+    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_show(tb);
+    elm_box_pack_end(bx, tb);
+
+    // Menu.
+    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
+    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    tb_it = elm_toolbar_item_append(tb, NULL, "Menu", NULL, NULL);	elm_toolbar_item_menu_set(tb_it, EINA_TRUE);	menu = elm_toolbar_item_menu_get(tb_it);
+    elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
+    menu_it = elm_menu_item_add(menu, NULL, NULL, "advanced", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
+    elm_menu_item_separator_add(menu, NULL);
+    menu_it = elm_menu_item_add(menu, NULL, NULL, "help", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "grid help", NULL, NULL);
+    elm_menu_item_separator_add(menu, menu_it);
+    elm_menu_item_add(menu, menu_it, NULL, "extantz blogs", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "extantz forum", NULL, NULL);
+    elm_menu_item_separator_add(menu, menu_it);
+    elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
+    elm_menu_item_separator_add(menu, menu_it);
+    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, win);
+    elm_toolbar_menu_parent_set(tb, win);
+
+    gridList = elm_genlist_add(win);
+    grids = eina_hash_stringshared_new(free);
+
+    grid_gic = elm_genlist_item_class_new();
+    grid_gic->item_style = "double_label";
+    grid_gic->func.text_get = _grid_label_get;
+    grid_gic->func.content_get = _grid_content_get;
+    grid_gic->func.state_get = NULL;
+    grid_gic->func.del = NULL;
+    for (i = 0; NULL != gridTest[i][0]; i++)
+    {
+	ezGrid *thisGrid = calloc(1, sizeof(ezGrid));
+	
+	if (thisGrid)
+	{
+	    eina_clist_init(&(thisGrid->accounts));
+	    eina_clist_init(&(thisGrid->landmarks));
+	    thisGrid->name		= gridTest[i][0];
+	    thisGrid->loginURI		= gridTest[i][1];
+	    thisGrid->splashPage 	= gridTest[i][2];
+	    thisGrid->icon		= "folder";
+	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
+	    eina_hash_add(grids, thisGrid->name, thisGrid);
+	}
+    }
+
+    account_gic = elm_genlist_item_class_new();
+    account_gic->item_style = "default";
+    account_gic->func.text_get = _account_label_get;
+    account_gic->func.content_get = _account_content_get;
+    account_gic->func.state_get = NULL;
+    account_gic->func.del = NULL;
+    for (i = 0; NULL != accountTest[i][0]; i++)
+    {
+	ezAccount *thisAccount = calloc(1, sizeof(ezAccount));
+	ezGrid *grid = eina_hash_find(grids, accountTest[i][0]);
+	
+	if (thisAccount && grid)
+	{
+	    thisAccount->name		= accountTest[i][1];
+	    thisAccount->password 	= accountTest[i][2];
+	    thisAccount->icon		= "file";
+	    elm_genlist_item_append(gridList, account_gic, thisAccount, grid->item, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+	    eina_clist_add_tail(&(grid->accounts), &(thisAccount->grid));
+	}
+    }
+
+    // Viewers stuff
+    viewerList = elm_genlist_add(win);
+    viewer_gic = elm_genlist_item_class_new();
+    viewer_gic->item_style = "double_label";
+    viewer_gic->func.text_get = _viewer_label_get;
+    viewer_gic->func.content_get = _viewer_content_get;
+    viewer_gic->func.state_get = NULL;
+    viewer_gic->func.del = NULL;
+    for (i = 0; NULL != viewerTest[i][0]; i++)
+    {
+	ezViewer *thisViewer = calloc(1, sizeof(ezViewer));
+	
+	if (thisViewer)
+	{
+	    thisViewer->name		= viewerTest[i][0];
+	    thisViewer->version		= viewerTest[i][1];
+	    thisViewer->path		= viewerTest[i][2];
+	    thisViewer->icon		= "file";
+	    thisViewer->item = elm_genlist_item_append(viewerList, viewer_gic, thisViewer, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+	}
+    }
+
+    // Toolbar pages
+    nf = elm_naviframe_add(win);
+    evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_show(nf);
+    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
+    elm_box_pack_end(bx, nf);
+
+    bt = elm_button_add(win);
+    elm_object_text_set(bt, "Login");
+    evas_object_size_hint_align_set(bt, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.0);
+    evas_object_show(bt);
+//    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
+    elm_box_pack_end(bx, bt);
+
+   evas_object_show(bx);
+}
+
+static void
+cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+   Evas_Event_Mouse_Down *ev = event_info;
+
+   if (ev->button == 1) elm_object_focus_set(obj, EINA_TRUE);
+}
+
+static void
+cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+   Evas_Event_Mouse_Move *ev = event_info;
+   Evas_Object *orig = data;
+   Evas_Coord x, y;
+   Evas_Map *p;
+   int i, w, h;
+
+   if (!ev->buttons) return;
+   evas_object_geometry_get(obj, &x, &y, NULL, NULL);
+   evas_object_move(obj,
+                    x + (ev->cur.canvas.x - ev->prev.output.x),
+                    y + (ev->cur.canvas.y - ev->prev.output.y));
+   evas_object_image_size_get(orig, &w, &h);
+   p = evas_map_new(4);
+   evas_object_map_enable_set(orig, EINA_TRUE);
+//   evas_object_raise(orig);
+   for (i = 0; i < 4; i++)
+     {
+        Evas_Object *hand;
+        char key[32];
+
+        snprintf(key, sizeof(key), "h-%i\n", i);
+        hand = evas_object_data_get(orig, key);
+        evas_object_raise(hand);
+        evas_object_geometry_get(hand, &x, &y, NULL, NULL);
+        x += 15;
+        y += 15;
+        evas_map_point_coord_set(p, i, x, y, 0);
+        if (i == 0) evas_map_point_image_uv_set(p, i, 0, 0);
+        else if (i == 1) evas_map_point_image_uv_set(p, i, w, 0);
+        else if (i == 2) evas_map_point_image_uv_set(p, i, w, h);
+        else if (i == 3) evas_map_point_image_uv_set(p, i, 0, h);
+     }
+   evas_object_map_set(orig, p);
+   evas_map_free(p);
+}
+
+static void
+create_handles(Evas_Object *obj)
+{
+   int i;
+   Evas_Coord x, y, w, h;
+
+   evas_object_geometry_get(obj, &x, &y, &w, &h);
+   for (i = 0; i < 4; i++)
+     {
+        Evas_Object *hand;
+        char buf[PATH_MAX];
+        char key[32];
+
+        hand = evas_object_image_filled_add(evas_object_evas_get(obj));
+        evas_object_resize(hand, 31, 31);
+        snprintf(buf, sizeof(buf), "%s/images/pt.png", elm_app_data_dir_get());
+        evas_object_image_file_set(hand, buf, NULL);
+        if (i == 0)      evas_object_move(hand, x     - 15, y     - 15);
+        else if (i == 1) evas_object_move(hand, x + w - 15, y     - 15);
+        else if (i == 2) evas_object_move(hand, x + w - 15, y + h - 15);
+        else if (i == 3) evas_object_move(hand, x     - 15, y + h - 15);
+        evas_object_event_callback_add(hand, EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+        evas_object_show(hand);
+        snprintf(key, sizeof(key), "h-%i\n", i);
+        evas_object_data_set(obj, key, hand);
+     }
+}
+
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *bg, *tb, *bt, *menu, *nf, *tab, *gridList, *viewerList;
-    Elm_Object_Item *tb_it, *menu_it, *tab_it;
+    Evas_Object *bg, *win3;
     EPhysics_Body *boundary;
     EPhysics_World *world;
     EPhysics_Body *box_body1, *box_body2;
@@ -806,116 +1017,17 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     evas_object_size_hint_align_set(gld->bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(gld->bx);
 
-    // A tab thingy.
-    tb = elm_toolbar_add(gld->win);
-    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
-    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(tb);
-
-    // Menu.
-    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
-    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    tb_it = elm_toolbar_item_append(tb, NULL, "Menu", NULL, NULL);	elm_toolbar_item_menu_set(tb_it, EINA_TRUE);	menu = elm_toolbar_item_menu_get(tb_it);
-    elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
-    menu_it = elm_menu_item_add(menu, NULL, NULL, "advanced", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
-    elm_menu_item_separator_add(menu, NULL);
-    menu_it = elm_menu_item_add(menu, NULL, NULL, "help", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "grid help", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz blogs", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz forum", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld->win);
-    elm_toolbar_menu_parent_set(tb, gld->win);
-
-    // Grids stuff
-    gridList = elm_genlist_add(gld->win);
-    grids = eina_hash_stringshared_new(free);
-
-    grid_gic = elm_genlist_item_class_new();
-    grid_gic->item_style = "double_label";
-    grid_gic->func.text_get = _grid_label_get;
-    grid_gic->func.content_get = _grid_content_get;
-    grid_gic->func.state_get = NULL;
-    grid_gic->func.del = NULL;
-    for (i = 0; NULL != gridTest[i][0]; i++)
-    {
-	ezGrid *thisGrid = calloc(1, sizeof(ezGrid));
-	
-	if (thisGrid)
-	{
-	    eina_clist_init(&(thisGrid->accounts));
-	    eina_clist_init(&(thisGrid->landmarks));
-	    thisGrid->name		= gridTest[i][0];
-	    thisGrid->loginURI		= gridTest[i][1];
-	    thisGrid->splashPage 	= gridTest[i][2];
-	    thisGrid->icon		= "folder";
-	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
-	    eina_hash_add(grids, thisGrid->name, thisGrid);
-	}
-    }
-
-    account_gic = elm_genlist_item_class_new();
-    account_gic->item_style = "default";
-    account_gic->func.text_get = _account_label_get;
-    account_gic->func.content_get = _account_content_get;
-    account_gic->func.state_get = NULL;
-    account_gic->func.del = NULL;
-    for (i = 0; NULL != accountTest[i][0]; i++)
-    {
-	ezAccount *thisAccount = calloc(1, sizeof(ezAccount));
-	ezGrid *grid = eina_hash_find(grids, accountTest[i][0]);
-	
-	if (thisAccount && grid)
-	{
-	    thisAccount->name		= accountTest[i][1];
-	    thisAccount->password 	= accountTest[i][2];
-	    thisAccount->icon		= "file";
-	    elm_genlist_item_append(gridList, account_gic, thisAccount, grid->item, ELM_GENLIST_ITEM_NONE, NULL, NULL);
-	    eina_clist_add_tail(&(grid->accounts), &(thisAccount->grid));
-	}
-    }
-
-    // Viewers stuff
-    viewerList = elm_genlist_add(gld->win);
-    viewer_gic = elm_genlist_item_class_new();
-    viewer_gic->item_style = "double_label";
-    viewer_gic->func.text_get = _viewer_label_get;
-    viewer_gic->func.content_get = _viewer_content_get;
-    viewer_gic->func.state_get = NULL;
-    viewer_gic->func.del = NULL;
-    for (i = 0; NULL != viewerTest[i][0]; i++)
-    {
-	ezViewer *thisViewer = calloc(1, sizeof(ezViewer));
-	
-	if (thisViewer)
-	{
-	    thisViewer->name		= viewerTest[i][0];
-	    thisViewer->version		= viewerTest[i][1];
-	    thisViewer->path		= viewerTest[i][2];
-	    thisViewer->icon		= "file";
-	    thisViewer->item = elm_genlist_item_append(viewerList, viewer_gic, thisViewer, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
-	}
-    }
-
-    // Toolbar pages
-    nf = elm_naviframe_add(gld->win);
-    evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(nf);
-    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(gld->win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
-    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
-
-    bt = elm_button_add(gld->win);
-    elm_object_text_set(bt, "Login");
-    evas_object_size_hint_align_set(bt, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.0);
-    evas_object_show(bt);
-//    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
+    win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
+    elm_win_title_set(win3, "world manager");
+    evas_object_event_callback_add(elm_win_inlined_image_object_get(win3), EVAS_CALLBACK_MOUSE_DOWN, cb_mouse_down, NULL);
+    elm_win_alpha_set(win3, EINA_TRUE);
+    fill(win3);
+    // Odd, it needs to be resized twice?
+    evas_object_resize(win3, w - 26, h / 4);
+    evas_object_move(elm_win_inlined_image_object_get(win3), 13, 13);
+    evas_object_resize(elm_win_inlined_image_object_get(win3), w - 26, h / 4);
+    evas_object_show(win3);
+    create_handles(elm_win_inlined_image_object_get(win3));
 
 #if USE_PHYSICS
     // ePhysics stuff.
@@ -969,16 +1081,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_world_gravity_set(world, 0, 0, 0);
 #endif
 
-    elm_box_pack_end(gld->bx, tb);
-    elm_box_pack_end(gld->bx, nf);
-    elm_box_pack_end(gld->bx, bt);
-
     // This does an elm_box_pack_end(), so needs to be after the others.
     init_evas_gl(gld, w, h);
-
-    // Menu should be above everything else.
-    // Which apparently wont work.
-    evas_object_raise(menu);
 
     evas_object_move(gld->win, x, y);
     evas_object_resize(gld->win, w, h);
