@@ -172,7 +172,7 @@ EAPI int startIrr(GLData *gld)
 	(0, 30, -40). The camera looks from there to (0,5,0), which is
 	approximately the place where our md2 model is.
 	*/
-	smgr->addCameraSceneNode(0, vector3df(0, 30, -40), vector3df(0, 5, 0));
+	smgr->addCameraSceneNode(0, vector3df(50, 70, -65), vector3df(0, 50, 0));
 
 	then = device->getTimer()->getTime();
 #endif
