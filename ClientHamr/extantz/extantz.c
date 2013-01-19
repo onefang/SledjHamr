@@ -1011,7 +1011,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     evas_object_smart_callback_add(gld->win, "delete,request", _on_done, NULL);
 
     elm_win_screen_size_get(gld->win, &x, &y, &w, &h);
-    w = w / 5;
+    w = w / 2;
     h = h - 30;
 
     bg = elm_bg_add(gld->win);
@@ -1035,9 +1035,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_alpha_set(win3, EINA_TRUE);
     fill(win3);
     // Odd, it needs to be resized twice?
-    evas_object_resize(win3, w - 26, h / 4);
+    evas_object_resize(win3, w / 3, h / 4);
     evas_object_move(elm_win_inlined_image_object_get(win3), 13, 13);
-    evas_object_resize(elm_win_inlined_image_object_get(win3), w - 26, h / 4);
+    evas_object_resize(elm_win_inlined_image_object_get(win3), w / 3, h / 4);
     evas_object_show(win3);
     create_handles(elm_win_inlined_image_object_get(win3));
 
