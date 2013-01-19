@@ -1,11 +1,14 @@
 
 #include <irrlicht.h>
 #include "extantz.h"
+#include "CDemo.h"
 
+#define USE_DEMO 1
 
 SExposedVideoData videoData;
 
-IAnimatedMeshSceneNode* node;
+IAnimatedMeshSceneNode *node;
+CDemo *myDemo;
 // This is the movemen speed in units per second.
 const f32 MOVEMENT_SPEED = 5.f;
 // In order to do framerate independent movement, we have to know
@@ -22,6 +25,7 @@ EAPI int startIrr(GLData *gld)
 	IrrlichtDevice	*device;
 	IVideoDriver	*driver;
 	ISceneManager	*smgr;
+	bool additive = true;
 
 	if (!gld->useIrr)
 	    return 0;
@@ -30,6 +34,10 @@ EAPI int startIrr(GLData *gld)
 	void *display = NULL;
 	unsigned long sfc = 0;
 	void *ctx = NULL;
+
+#if USE_DEMO
+	myDemo = new CDemo(gld, additive);
+#endif
 
 	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
 
@@ -88,9 +96,10 @@ EAPI int startIrr(GLData *gld)
 	params.Fullscreen = false;	// The default anyway.
 	params.Stencilbuffer = false;	// For shadows.
 	params.Vsync = false;
+	params.AntiAlias=true;
 	params.WithAlphaChannel = true;
 	params.IgnoreInput = true;
-	params.EventReceiver = 0;
+	params.EventReceiver = myDemo;	// Probably useless, EFL might not let Irrlicht grab the input.
 	params.WindowId = (void *) videoData.OpenGLLinux.X11Window;
 	params.VideoData = &videoData;
 
@@ -109,6 +118,10 @@ EAPI int startIrr(GLData *gld)
 
 	// set ambient light
 	smgr->setAmbientLight (video::SColorf(0x00c0c0c0));
+
+#if USE_DEMO
+	myDemo->setup(gld);
+#else
 	/*
 	To show something interesting, we load a Quake 2 model and display it.
 	We only have to get the Mesh from the Scene Manager with getMesh() and add
@@ -150,6 +163,7 @@ EAPI int startIrr(GLData *gld)
 	approximately the place where our md2 model is.
 	*/
 	smgr->addCameraSceneNode(0, vector3df(50, 70, -65), vector3df(0, 50, 0));
+#endif
 
 	then = device->getTimer()->getTime();
 #endif
@@ -172,9 +186,13 @@ EAPI void drawIrr_start(GLData *gld)
 	const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 	then = now;
 
+#if USE_DEMO
+	myDemo->preDraw(gld, now);
+#else
 	core::vector3df nodePosition = node->getPosition();
 //	nodePosition.Y -= MOVEMENT_SPEED * frameDeltaTime;
 	node->setPosition(nodePosition);
+#endif
 
 	/*
 	Anything can be drawn between a beginScene() and an endScene()
