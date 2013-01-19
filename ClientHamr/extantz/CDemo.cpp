@@ -95,19 +95,14 @@ void CDemo::switchToNextScene()
 	scene::ICameraSceneNode* camera = 0;
 
 	camera = sm->getActiveCamera();
-	if (camera)
-	{
-		sm->setActiveCamera(0);
-		camera->remove();
-		camera = 0;
-	}
 
 	switch(currentScene)
 	{
 	case 1: // panorama camera
 		{
-			core::array<core::vector3df> points;
+			core::array<core::vector3df> points, points2;
 
+			points.push_back(core::vector3df(-931.473755f, 900.0f, 2000.0f)); // -49873
 			points.push_back(core::vector3df(-931.473755f, 900.0f, 2000.0f)); // -49873
 			points.push_back(core::vector3df(-931.473755f, 700.0f, 1750.0f)); // -49873
 			points.push_back(core::vector3df(-931.473755f, 500.0f, 1500.0f)); // -49873
@@ -150,16 +145,16 @@ void CDemo::switchToNextScene()
 			points.push_back(core::vector3df(96.783348f, 181.639481f, 648.188110f));
 			points.push_back(core::vector3df(97.865623f, 138.905975f, 484.812561f));
 			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
+			points.push_back(core::vector3df(99.0f, 95.0f, 347.0f));
 			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-
-			timeForThisScene = (points.size() - 1) * 1000;
-
+			points.push_back(core::vector3df(99.0f, 85.0f, 347.0f));
+			points.push_back(core::vector3df(99.0f, 80.0f, 347.0f));
+			points.push_back(core::vector3df(99.0f, 75.0f, 347.0f));
+			points.push_back(core::vector3df(99.0f, 75.0f, 347.0f));
+			points.push_back(core::vector3df(99.0f, 75.0f, 347.0f));
+			timeForThisScene = (points.size() - 2) * 1000;
 			camera = sm->addCameraSceneNode(0, points[0], core::vector3df(0, 400, 0));
-
-			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(),
-				points);
+			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(), points, 1.0f, 0.6f, false, false);
 			camera->addAnimator(sa);
 			sa->drop();
 		}
@@ -169,22 +164,23 @@ void CDemo::switchToNextScene()
 		{
 			core::array<core::vector3df> points;
 
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(99.0f, 90.0f, 347.0f));
-			points.push_back(core::vector3df(108.0f, 90.0f, -140.0f));
-			points.push_back(core::vector3df(108.0f, 90.0f, -140.0f));
-			points.push_back(core::vector3df(108.0f, 90.0f, -140.0f));
-			points.push_back(core::vector3df(108.0f, 90.0f, -140.0f));
-			points.push_back(core::vector3df(108.0f, 90.0f, -140.0f));
+			camera->setTarget(core::vector3df(100, 145, -80));
 
-			timeForThisScene = (points.size() - 1) * 500;
-
-			camera = sm->addCameraSceneNode(0, points[0], core::vector3df(108, 90, -140));
-
-			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(),
-				points);
+			points.push_back(core::vector3df(99.0f, 75.0f, 347.0f));
+			points.push_back(core::vector3df(100.0f, 75.0f, 347.0f));
+			points.push_back(core::vector3df(105.0f, 75.0f, 347.0f));
+			points.push_back(core::vector3df(110.0f, 70.0f, 347.0f));
+			points.push_back(core::vector3df(115.0f, 70.0f, -160.0f));
+			points.push_back(core::vector3df(120.0f, 70.0f, -160.0f));
+			points.push_back(core::vector3df(125.0f, 65.0f, -160.0f));
+			points.push_back(core::vector3df(130.0f, 65.0f, -160.0f));
+			points.push_back(core::vector3df(135.0f, 65.0f, -160.0f));
+			points.push_back(core::vector3df(150.0f, 170.0f, -160.0f));
+			points.push_back(core::vector3df(150.0f, 170.0f, -160.0f));
+			points.push_back(core::vector3df(150.0f, 170.0f, -160.0f));
+			timeForThisScene = (points.size() - 2) * 1000;
+//			camera = sm->addCameraSceneNode(0, points[0], core::vector3df(108, 90, -140));
+			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(), points, 1.0f, 0.6f, false, false);
 			camera->addAnimator(sa);
 			sa->drop();
 		}
@@ -192,6 +188,12 @@ void CDemo::switchToNextScene()
 
 	case 3: // interactive, go around
 		{
+			if (camera)
+			{
+			    sm->setActiveCamera(0);
+			    camera->remove();
+			    camera = 0;
+			}
 			timeForThisScene = -1;
 
 			SKeyMap keyMap[9];
@@ -219,11 +221,11 @@ void CDemo::switchToNextScene()
 			keyMap[8].KeyCode = KEY_KEY_J;
 
 			camera = sm->addCameraSceneNodeFPS(0, 100.0f, .4f, -1, keyMap, 9, false, 3.f);
-			camera->setPosition(core::vector3df(108, 90, -140));
+			camera->setPosition(core::vector3df(150, 170, -160));
 			camera->setFarValue(5000.0f);
 
 			scene::ISceneNodeAnimatorCollisionResponse* collider =
-				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(50, 100, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
+				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 100, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
 			camera->addAnimator(collider);
 			collider->drop();
 		}
