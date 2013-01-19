@@ -51,7 +51,7 @@ void CDemo::setup(GLData *gld)
 
 void CDemo::preDraw(GLData *gld, u32 now)
 {
-	if (now - sceneStartTime > timeForThisScene && timeForThisScene!=-1)
+	if (((now - sceneStartTime) > timeForThisScene) && (timeForThisScene != -1))
 		switchToNextScene();
 
 	createParticleImpacts();
@@ -63,14 +63,9 @@ bool CDemo::OnEvent(const SEvent& event)
 	if (!device)
 		return false;
 
-	if (((event.EventType == EET_KEY_INPUT_EVENT &&
-		event.KeyInput.Key == KEY_SPACE &&
-		event.KeyInput.PressedDown == false) ||
-		(event.EventType == EET_MOUSE_INPUT_EVENT &&
-		 event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)) &&
-		currentScene == 3)
+	if ((	((event.EventType == EET_KEY_INPUT_EVENT)   && (event.KeyInput.Key == KEY_SPACE) && (event.KeyInput.PressedDown == false)) ||
+		((event.EventType == EET_MOUSE_INPUT_EVENT) && (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)) ) && (currentScene == 3))
 	{
-		// shoot
 		shoot();
 	}
 	else
@@ -179,7 +174,6 @@ void CDemo::switchToNextScene()
 			points.push_back(core::vector3df(150.0f, 170.0f, -160.0f));
 			points.push_back(core::vector3df(150.0f, 170.0f, -160.0f));
 			timeForThisScene = (points.size() - 2) * 1000;
-//			camera = sm->addCameraSceneNode(0, points[0], core::vector3df(108, 90, -140));
 			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(), points, 1.0f, 0.6f, false, false);
 			camera->addAnimator(sa);
 			sa->drop();
@@ -256,23 +250,21 @@ void CDemo::loadSceneData()
 		core::matrix4 m;
 		m.setTranslation(core::vector3df(-1300,-70,-1249));
 
-		for ( i = 0; i != scene::quake3::E_Q3_MESH_SIZE; ++i )
+		for (i = 0; i != scene::quake3::E_Q3_MESH_SIZE; ++i)
 			sm->getMeshManipulator()->transform(quakeLevelMesh->getMesh(i), m);
 
-		quakeLevelNode = sm->addOctreeSceneNode(
-				quakeLevelMesh->getMesh( scene::quake3::E_Q3_MESH_GEOMETRY));
+		quakeLevelNode = sm->addOctreeSceneNode(quakeLevelMesh->getMesh( scene::quake3::E_Q3_MESH_GEOMETRY));
 		if (quakeLevelNode)
 		{
-			//quakeLevelNode->setPosition(core::vector3df(-1300,-70,-1249));
+			//quakeLevelNode->setPosition(core::vector3df(-1300, -70, -1249));
 			quakeLevelNode->setVisible(true);
 
 			// create map triangle selector
-			mapSelector = sm->createOctreeTriangleSelector(quakeLevelMesh->getMesh(0),
-				quakeLevelNode, 128);
+			mapSelector = sm->createOctreeTriangleSelector(quakeLevelMesh->getMesh(0), quakeLevelNode, 128);
 
 			// if not using shader and no gamma it's better to use more lighting, because
 			// quake3 level are usually dark
-			quakeLevelNode->setMaterialType ( video::EMT_LIGHTMAP_M4 );
+			quakeLevelNode->setMaterialType(video::EMT_LIGHTMAP_M4);
 
 			// set additive blending if wanted
 			if (additive)
@@ -280,30 +272,30 @@ void CDemo::loadSceneData()
 		}
 
 		// the additional mesh can be quite huge and is unoptimized
-		scene::IMesh * additional_mesh = quakeLevelMesh->getMesh ( scene::quake3::E_Q3_MESH_ITEMS );
+		scene::IMesh *additional_mesh = quakeLevelMesh->getMesh(scene::quake3::E_Q3_MESH_ITEMS);
 
-		for ( i = 0; i!= additional_mesh->getMeshBufferCount (); ++i )
+		for (i = 0; i != additional_mesh->getMeshBufferCount(); ++i)
 		{
-			scene::IMeshBuffer *meshBuffer = additional_mesh->getMeshBuffer ( i );
+			scene::IMeshBuffer *meshBuffer = additional_mesh->getMeshBuffer(i);
 			const video::SMaterial &material = meshBuffer->getMaterial();
 
 			//! The ShaderIndex is stored in the material parameter
 			s32 shaderIndex = (s32) material.MaterialTypeParam2;
 
 			// the meshbuffer can be rendered without additional support, or it has no shader
-			const scene::quake3::IShader *shader = quakeLevelMesh->getShader ( shaderIndex );
-			if ( 0 == shader )
+			const scene::quake3::IShader *shader = quakeLevelMesh->getShader(shaderIndex);
+			if (0 == shader)
 			{
 				continue;
 			}
 			// Now add the MeshBuffer(s) with the current Shader to the Manager
-			sm->addQuake3SceneNode ( meshBuffer, shader );
+			sm->addQuake3SceneNode(meshBuffer, shader);
 		}
 	}
 
 	// load sydney model and create 2 instances
 
-	scene::IAnimatedMesh* mesh = 0;
+	scene::IAnimatedMesh *mesh = 0;
 	mesh = sm->getMesh("media/sydney.md2");
 	if (mesh)
 	{
@@ -311,8 +303,8 @@ void CDemo::loadSceneData()
 		if (model1)
 		{
 			model1->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
-			model1->setPosition(core::vector3df(100,40,-80));
-			model1->setScale(core::vector3df(2,2,2));
+			model1->setPosition(core::vector3df(100, 40, -80));
+			model1->setScale(core::vector3df(2, 2, 2));
 			model1->setMD2Animation(scene::EMAT_STAND);
 			model1->setMaterialFlag(video::EMF_LIGHTING, true);
 			model1->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
@@ -323,8 +315,8 @@ void CDemo::loadSceneData()
 		if (model2)
 		{
 			model2->setMaterialTexture(0, driver->getTexture("media/spheremap.jpg"));
-			model2->setPosition(core::vector3df(180,15,-60));
-			model2->setScale(core::vector3df(2,2,2));
+			model2->setPosition(core::vector3df(180, 15, -60));
+			model2->setScale(core::vector3df(2, 2, 2));
 			model2->setMD2Animation(scene::EMAT_RUN);
 			model2->setMaterialFlag(video::EMF_LIGHTING, false);
 			model2->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
@@ -333,7 +325,7 @@ void CDemo::loadSceneData()
 		}
 	}
 
-	scene::ISceneNodeAnimator* anim = 0;
+	scene::ISceneNodeAnimator *anim = 0;
 
 	// create sky box
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
@@ -347,41 +339,35 @@ void CDemo::loadSceneData()
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	// create walk-between-portals animation
-
 	core::vector3df waypoint[2];
-	waypoint[0].set(-150,40,100);
-	waypoint[1].set(350,40,100);
+	waypoint[0].set(-150, 40, 100);
+	waypoint[1].set(350, 40, 100);
 
 	if (model2)
 	{
-		anim = device->getSceneManager()->createFlyStraightAnimator(
-			waypoint[0], waypoint[1], 2000, true);
+		anim = device->getSceneManager()->createFlyStraightAnimator(waypoint[0], waypoint[1], 2000, true);
 		model2->addAnimator(anim);
 		anim->drop();
 	}
 
 	// create animation for portals;
-
 	core::array<video::ITexture*> textures;
 	for (s32 g=1; g<8; ++g)
 	{
 		core::stringc tmp("media/portal");
 		tmp += g;
 		tmp += ".bmp";
-		video::ITexture* t = driver->getTexture( tmp );
+		video::ITexture* t = driver->getTexture(tmp);
 		textures.push_back(t);
 	}
 
 	anim = sm->createTextureAnimator(textures, 100);
 
 	// create portals
-
 	scene::IBillboardSceneNode* bill = 0;
-
-	for (int r=0; r<2; ++r)
+	for (int r = 0; r < 2; ++r)
 	{
-		bill = sm->addBillboardSceneNode(0, core::dimension2d<f32>(100,100),
-			waypoint[r]+ core::vector3df(0,20,0));
+		bill = sm->addBillboardSceneNode(0, core::dimension2d<f32>(100, 100), waypoint[r]+ core::vector3df(0, 20, 0));
 		bill->setMaterialFlag(video::EMF_LIGHTING, false);
 		bill->setMaterialTexture(0, driver->getTexture("media/portal1.bmp"));
 		bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
@@ -390,21 +376,16 @@ void CDemo::loadSceneData()
 
 	anim->drop();
 
-	// create cirlce flying dynamic light with transparent billboard attached
+	// create circle flying dynamic light with transparent billboard attached
+	scene::ILightSceneNode *light = 0;
 
-	scene::ILightSceneNode* light = 0;
-
-	light = sm->addLightSceneNode(0,
-		core::vector3df(0,0,0),	video::SColorf(1.0f, 1.0f, 1.f, 1.0f), 500.f);
-
-	anim = sm->createFlyCircleAnimator(
-		core::vector3df(100,150,80), 80.0f, 0.0005f);
+	light = sm->addLightSceneNode(0, core::vector3df(0, 0, 0), video::SColorf(1.0f, 1.0f, 1.f, 1.0f), 500.f);
+	anim = sm->createFlyCircleAnimator(core::vector3df(100, 150, 80), 80.0f, 0.0005f);
 
 	light->addAnimator(anim);
 	anim->drop();
 
-	bill = device->getSceneManager()->addBillboardSceneNode(
-		light, core::dimension2d<f32>(40,40));
+	bill = device->getSceneManager()->addBillboardSceneNode(light, core::dimension2d<f32>(40, 40));
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
 	bill->setMaterialTexture(0, driver->getTexture("media/particlewhite.bmp"));
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
@@ -414,22 +395,17 @@ void CDemo::loadSceneData()
 	metaSelector->addTriangleSelector(mapSelector);
 
 	// create camp fire
-
 	campFire = sm->addParticleSystemSceneNode(false);
-	campFire->setPosition(core::vector3df(100,120,600));
-	campFire->setScale(core::vector3df(2,2,2));
+	campFire->setPosition(core::vector3df(100, 120, 600));
+	campFire->setScale(core::vector3df(2, 2, 2));
 
-	scene::IParticleEmitter* em = campFire->createBoxEmitter(
-		core::aabbox3d<f32>(-7,0,-7,7,1,7),
-		core::vector3df(0.0f,0.06f,0.0f),
-		80,100, video::SColor(1,255,255,255),video::SColor(1,255,255,255), 800,2000);
-
+	scene::IParticleEmitter *em = campFire->createBoxEmitter(core::aabbox3d<f32>(-7, 0, -7, 7, 1, 7), core::vector3df(0.0f, 0.06f, 0.0f), 80, 100, video::SColor(1, 255, 255, 255), video::SColor(1, 255, 255, 255), 800, 2000);
 	em->setMinStartSize(core::dimension2d<f32>(20.0f, 10.0f));
 	em->setMaxStartSize(core::dimension2d<f32>(20.0f, 10.0f));
 	campFire->setEmitter(em);
 	em->drop();
 
-	scene::IParticleAffector* paf = campFire->createFadeOutParticleAffector();
+	scene::IParticleAffector *paf = campFire->createFadeOutParticleAffector();
 	campFire->addAffector(paf);
 	paf->drop();
 
@@ -442,21 +418,20 @@ void CDemo::loadSceneData()
 
 void CDemo::shoot()
 {
-	scene::ISceneManager* sm = device->getSceneManager();
-	scene::ICameraSceneNode* camera = sm->getActiveCamera();
+	scene::ISceneManager *sm = device->getSceneManager();
+	scene::ICameraSceneNode *camera = sm->getActiveCamera();
 
-	if (!camera || !mapSelector)
+	if ((!camera) || (!mapSelector))
 		return;
 
 	SParticleImpact imp;
 	imp.when = 0;
 
 	// get line of camera
-
 	core::vector3df start = camera->getPosition();
 	core::vector3df end = (camera->getTarget() - start);
 	end.normalize();
-	start += end*8.0f;
+	start += end * 8.0f;
 	end = start + (end * camera->getFarValue());
 
 	core::triangle3df triangle;
@@ -465,8 +440,7 @@ void CDemo::shoot()
 
 	// get intersection point with map
 	scene::ISceneNode* hitNode;
-	if (sm->getSceneCollisionManager()->getCollisionPoint(
-		line, mapSelector, end, triangle, hitNode))
+	if (sm->getSceneCollisionManager()->getCollisionPoint(line, mapSelector, end, triangle, hitNode))
 	{
 		// collides with wall
 		core::vector3df out = triangle.getNormal();
@@ -482,14 +456,13 @@ void CDemo::shoot()
 		core::vector3df start = camera->getPosition();
 		core::vector3df end = (camera->getTarget() - start);
 		end.normalize();
-		start += end*8.0f;
+		start += end * 8.0f;
 		end = start + (end * camera->getFarValue());
 	}
 
 	// create fire ball
-	scene::ISceneNode* node = 0;
-	node = sm->addBillboardSceneNode(0,
-		core::dimension2d<f32>(25,25), start);
+	scene::ISceneNode *node = 0;
+	node = sm->addBillboardSceneNode(0, core::dimension2d<f32>(25, 25), start);
 
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
 	node->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/fireball.bmp"));
@@ -497,12 +470,11 @@ void CDemo::shoot()
 
 	f32 length = (f32)(end - start).getLength();
 	const f32 speed = 0.6f;
-	u32 time = (u32)(length / speed);
+	u32 time = (u32) (length / speed);
 
-	scene::ISceneNodeAnimator* anim = 0;
+	scene::ISceneNodeAnimator *anim = 0;
 
 	// set flight line
-
 	anim = sm->createFlyStraightAnimator(start, end, time);
 	node->addAnimator(anim);
 	anim->drop();
@@ -523,27 +495,23 @@ void CDemo::shoot()
 void CDemo::createParticleImpacts()
 {
 	u32 now = device->getTimer()->getTime();
-	scene::ISceneManager* sm = device->getSceneManager();
+	scene::ISceneManager *sm = device->getSceneManager();
 
-	for (s32 i=0; i<(s32)Impacts.size(); ++i)
+	for (s32 i = 0; i < (s32) Impacts.size(); ++i)
 		if (now > Impacts[i].when)
 		{
 			// create smoke particle system
-			scene::IParticleSystemSceneNode* pas = 0;
+			scene::IParticleSystemSceneNode *pas = 0;
 
 			pas = sm->addParticleSystemSceneNode(false, 0, -1, Impacts[i].pos);
 
 			pas->setParticleSize(core::dimension2d<f32>(10.0f, 10.0f));
 
-			scene::IParticleEmitter* em = pas->createBoxEmitter(
-				core::aabbox3d<f32>(-5,-5,-5,5,5,5),
-				Impacts[i].outVector, 20,40, video::SColor(50,255,255,255),video::SColor(50,255,255,255),
-				1200,1600, 20);
-
+			scene::IParticleEmitter* em = pas->createBoxEmitter(core::aabbox3d<f32>(-5, -5, -5, 5, 5, 5), Impacts[i].outVector, 20, 40, video::SColor(50, 255, 255, 255), video::SColor(50, 255, 255, 255), 1200, 1600, 20);
 			pas->setEmitter(em);
 			em->drop();
 
-			scene::IParticleAffector* paf = campFire->createFadeOutParticleAffector();
+			scene::IParticleAffector *paf = campFire->createFadeOutParticleAffector();
 			pas->addAffector(paf);
 			paf->drop();
 
@@ -552,7 +520,7 @@ void CDemo::createParticleImpacts()
 			pas->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/smoke.bmp"));
 			pas->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
-			scene::ISceneNodeAnimator* anim = sm->createDeleteAnimator(2000);
+			scene::ISceneNodeAnimator *anim = sm->createDeleteAnimator(2000);
 			pas->addAnimator(anim);
 			anim->drop();
 
