@@ -302,25 +302,25 @@ void CDemo::loadSceneData()
 		model1 = sm->addAnimatedMeshSceneNode(mesh);
 		if (model1)
 		{
-			model1->setMaterialTexture(0, driver->getTexture("media/spheremap.jpg"));
+			model1->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 			model1->setPosition(core::vector3df(100,40,-80));
 			model1->setScale(core::vector3df(2,2,2));
 			model1->setMD2Animation(scene::EMAT_STAND);
-			model1->setMaterialFlag(video::EMF_LIGHTING, false);
+			model1->setMaterialFlag(video::EMF_LIGHTING, true);
 			model1->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
-			model1->setMaterialType(video::EMT_SPHERE_MAP);
 			model1->addShadowVolumeSceneNode();
 		}
 
 		model2 = sm->addAnimatedMeshSceneNode(mesh);
 		if (model2)
 		{
+			model2->setMaterialTexture(0, driver->getTexture("media/spheremap.jpg"));
 			model2->setPosition(core::vector3df(180,15,-60));
 			model2->setScale(core::vector3df(2,2,2));
 			model2->setMD2Animation(scene::EMAT_RUN);
-			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/sydney.bmp"));
-			model2->setMaterialFlag(video::EMF_LIGHTING, true);
+			model2->setMaterialFlag(video::EMF_LIGHTING, false);
 			model2->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
+			model2->setMaterialType(video::EMT_SPHERE_MAP);
 			model2->addShadowVolumeSceneNode();
 		}
 	}
