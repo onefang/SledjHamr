@@ -107,6 +107,8 @@ EAPI int startIrr(GLData *gld)
 	driver = device->getVideoDriver();	gld->driver = driver;
 	smgr = device->getSceneManager();	gld->smgr   = smgr;
 
+	// set ambient light
+	smgr->setAmbientLight (video::SColorf(0x00c0c0c0));
 	/*
 	To show something interesting, we load a Quake 2 model and display it.
 	We only have to get the Mesh from the Scene Manager with getMesh() and add
@@ -137,7 +139,7 @@ EAPI int startIrr(GLData *gld)
 	*/
 	if (node)
 	{
-		node->setMaterialFlag(EMF_LIGHTING, false);
+//		node->setMaterialFlag(EMF_LIGHTING, false);
 		node->setMD2Animation(scene::EMAT_STAND);
 		node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 	}
