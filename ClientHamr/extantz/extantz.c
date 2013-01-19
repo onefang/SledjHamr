@@ -753,7 +753,7 @@ fill(Evas_Object *win)
     // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
     // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
     bg = evas_object_rectangle_add(evas_object_evas_get(win));
-    evas_object_color_set(bg, 200, 0, 200, 200);
+    evas_object_color_set(bg, 100, 0, 200, 200);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(win, bg);
     evas_object_show(bg);
