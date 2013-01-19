@@ -58,6 +58,9 @@ linking to non GPL stuff is fine.
 
 --------------------------------------------------------------------------------
 
+Note, for early development, example code from Irrlicht has been pulled
+into extantz and modified.
+
 Irrlicht includes this -
 
 The license of the Irrlicht Engine is based on the zlib/libpng license.
