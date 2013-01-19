@@ -158,10 +158,6 @@ void CDemo::switchToNextScene()
 				points);
 			camera->addAnimator(sa);
 			sa->drop();
-
-			model1->setVisible(false);
-			model2->setVisible(false);
-			campFire->setVisible(false);
 		}
 		break;
 
@@ -171,17 +167,11 @@ void CDemo::switchToNextScene()
 			core::vector3df(108, 15, -60), 10000, true);
 		camera->addAnimator(sa);
 		timeForThisScene = 9900;
-		model1->setVisible(true);
-		model2->setVisible(false);
-		campFire->setVisible(false);
 		sa->drop();
 		break;
 
 	case 3: // interactive, go around
 		{
-			model1->setVisible(true);
-			model2->setVisible(true);
-			campFire->setVisible(true);
 			timeForThisScene = -1;
 
 			SKeyMap keyMap[9];
