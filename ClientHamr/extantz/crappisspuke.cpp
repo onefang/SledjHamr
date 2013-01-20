@@ -116,6 +116,11 @@ EAPI int startIrr(GLData *gld)
 	driver = device->getVideoDriver();	gld->driver = driver;
 	smgr = device->getSceneManager();	gld->smgr   = smgr;
 
+	device->setResizable(true);
+	driver->OnResize(dimension2d<u32>(gld->sfc_w, gld->sfc_h));
+	// Just gives me a blank screen.  grrrr
+//	driver->setViewPort(rect<s32>(0, 0, gld->sfc_w, gld->sfc_h));
+
 	// set ambient light
 	smgr->setAmbientLight (video::SColorf(0x00c0c0c0));
 
@@ -202,6 +207,7 @@ EAPI void drawIrr_start(GLData *gld)
 	call everything is presented on the screen.
 	*/
 	driver->beginScene(true, true, SColor(255, 100, 101, 140), videoData, NULL);	// This does the context change, then clearBuffers()
+
 	smgr->drawAll();
     }
 }

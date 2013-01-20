@@ -136,10 +136,13 @@ struct _GLData
     GLuint	program;
     GLuint	vtx_shader;
     GLuint	fgmt_shader;
+    int		scr_w, scr_h;
     int		sfc_w, sfc_h;
+    int		img_w, img_h;
     int		useEGL : 1;
     int		useIrr : 1;
     int		doneIrr : 1;
+    int		resized : 1;
 
     Evas_Object	*bx, *r1;
     Ecore_Animator  *animator;

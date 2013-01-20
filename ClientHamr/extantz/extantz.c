@@ -329,7 +329,7 @@ load_shader(GLData *gld, GLenum type, const char *shader_src)
    return shader;
 }
 
-static void _resize_gears(GLData *gld, int w, int h)
+static void _resize(GLData *gld)
 {
    Evas_GL_API *gl = gld->glapi;
 
@@ -343,22 +343,21 @@ static void _resize_gears(GLData *gld, int w, int h)
 
    // GL Viewport stuff. you can avoid doing this if viewport is all the
    // same as last frame if you want
-   if (w < h)
-     ar = w;
+   if (gld->img_w < gld->img_h)
+     ar = gld->img_w;
    else
-     ar = h;
+     ar = gld->img_h;
 
-   m[0] = 0.1 * ar / w;
-   m[5] = 0.1 * ar / h;
+   m[0] = 0.1 * ar / gld->img_w;
+   m[5] = 0.1 * ar / gld->img_h;
    memcpy(gld->proj, m, sizeof gld->proj);
 #endif
-//   gl->glViewport(0, 0, (GLint) w, (GLint) h);
+//   gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
 }
 
 static void on_pixels(void *data, Evas_Object *obj)
 {
     static int count = 0;
-    int w, h;
     GLData *gld = data;
     if (!gld)
 	return;
@@ -367,13 +366,29 @@ static void on_pixels(void *data, Evas_Object *obj)
 
     // get the image size in case it changed with evas_object_image_size_set()
     if (gld->r1)
-	evas_object_image_size_get(gld->r1, &w, &h);
+    {
+	Evas_Coord    w, h;
+
+	// Poor mans resize check. coz Elm wont do it easily.
+	evas_object_geometry_get(gld->r1, NULL, NULL, &w, &h);
+	if ((gld->img_w != w) || (gld->img_h != h))
+	{
+	    float new_w = ((float) gld->scr_w / ((float) gld->scr_w * (float) w));
+	    float new_h = ((float) gld->scr_h / ((float) gld->scr_h * (float) h));
+	
+	    gld->img_w = new_w;
+	    gld->img_h = new_h;
+	    evas_object_image_fill_set(gld->r1, 0, 0, gld->img_w, gld->img_h);
+	    gld->resized = 1;
+	}
+    }
 
     if (gld->useEGL)
     {
 	// Yes, we DO need to do our own make current, coz aparently the Irrlicht one is useless.
 	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
-//	gl->glViewport(0, 0, (GLint) w/2, (GLint) h);
+	if (gld->resized)
+	    _resize(gld);
     }
 
     if (!gld->doneIrr)
@@ -389,21 +404,13 @@ static void on_pixels(void *data, Evas_Object *obj)
 	static const GLfloat blue[4] = { 0.2, 0.2, 1.0, 1.0 };
 	GLfloat m[16];
 
-	// set up the context and surface as the current one
-//	if (!gld->useIrr)
-//	    evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
-
-	// GL Viewport stuff. you can avoid doing this if viewport is all the
-	// same as last frame if you want
-	// TODO - might want to do this in response to some sort of resize event instead.  Looks like it's needed to run once at least anyway.
-//	if (count == 0)
-	    _resize_gears(gld, w, h/2);
 
 	// Draw the gears.
-//	if (!gld->useIrr)
-//	    gl->glClearColor(0.8, 0.8, 0.1, 0.1);
-//	if (!gld->useIrr)
-//	    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (!gld->useIrr)
+	{
+	    gl->glClearColor(0.8, 0.8, 0.1, 0.1);
+	    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
 	memcpy(m, gld->proj, sizeof m);
 	rotate(m, 2 * M_PI * gld->view_rotx / 360.0, 1, 0, 0);
@@ -419,6 +426,7 @@ static void on_pixels(void *data, Evas_Object *obj)
 
     drawIrr_end(gld);
     count++;
+    gld->resized = 0;
 }
 
 static void
@@ -497,9 +505,9 @@ static void init_evas_gl(GLData *gld, int w, int h)
     if (!gld->useEGL)
 	return;
 
-    w -= 10;
-    h -= 10;
-    h = h / 2;
+    w *= 2;	// Compensate for the original halving of the window.
+    w -= 1;
+    h -= 1;
 
     ee = ecore_evas_ecore_evas_get(evas_object_evas_get(gld->win));
     canvas = ecore_evas_get(ee);
@@ -518,24 +526,27 @@ static void init_evas_gl(GLData *gld, int w, int h)
     gld->cfg->options_bits = EVAS_GL_OPTIONS_DIRECT;
 
     // create a surface and context
-    gld->sfc_w = w;
-    gld->sfc_h = h;
-    gld->sfc = evas_gl_surface_create(gld->evasgl, gld->cfg, w, h);
+    gld->sfc_w = gld->scr_w;
+    gld->sfc_h = gld->scr_h;
+    gld->sfc = evas_gl_surface_create(gld->evasgl, gld->cfg, gld->sfc_w, gld->sfc_h);
     gld->ctx = evas_gl_context_create(gld->evasgl, NULL);		// The second NULL is for sharing contexts I think, which might be what we want to do with Irrlicht.
     //-//
     //-//-//-// END GL INIT BLOB
 
    // set up the image object. a filled one by default
-   gld->r1 = evas_object_image_filled_add(canvas);
+    gld->r1 = evas_object_image_add(canvas);
+    evas_object_image_filled_set(gld->r1, EINA_FALSE);
     evas_object_size_hint_align_set(gld->r1, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_size_hint_weight_set(gld->r1, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(gld->win, gld->r1);
    // when the object is deleted - call the on_del callback. like the above,
    // this is just being clean
    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_DEL, on_del, gld);
-   // set up an actual pixel size fot the buffer data. it may be different
+   // set up an actual pixel size for the buffer data. it may be different
    // to the output size. any windowing system has something like this, just
    // evas has 2 sizes, a pixel size and the output object size
-   evas_object_image_size_set(gld->r1, w, h);
+   evas_object_image_size_set(gld->r1, gld->scr_w, gld->scr_h);
+   evas_object_image_fill_set(gld->r1, 0, 0, w, h);
    // set up the native surface info to use the context and surface created
    // above
 
@@ -552,14 +563,15 @@ static void init_evas_gl(GLData *gld, int w, int h)
     //-//-//-// END GL INIT BLOB
 
     evas_object_show(gld->r1);
-    elm_box_pack_end(gld->bx, gld->r1);
+    // Might be good to pack it when I get the menu / address / indicator bar working.
+//    elm_box_pack_end(gld->bx, gld->r1);
 
     evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
 
     gld->glapi->glEnable(GL_CULL_FACE);
     gld->glapi->glEnable(GL_DEPTH_TEST);
     gld->glapi->glEnable(GL_BLEND);
-    gld->glapi->glViewport(0, 0, (GLint) w, (GLint) h);
+    gld->glapi->glViewport(0, 0, (GLint) gld->sfc_w, (GLint) gld->sfc_h);
 
 #if DO_GEARS
     GLint linked = 0;
@@ -1010,9 +1022,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_title_set(gld->win, "extantz virtual world manager");
     evas_object_smart_callback_add(gld->win, "delete,request", _on_done, NULL);
 
-    elm_win_screen_size_get(gld->win, &x, &y, &w, &h);
-    w = w / 2;
-    h = h - 30;
+    elm_win_screen_size_get(gld->win, &x, &y, &gld->scr_w, &gld->scr_h);
+    w = gld->scr_w / 2;
+    h = gld->scr_h - 30;
 
     bg = elm_bg_add(gld->win);
     elm_bg_load_size_set(bg, w, h);
