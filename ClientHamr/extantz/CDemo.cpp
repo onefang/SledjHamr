@@ -3,6 +3,7 @@
 
 #include <irrlicht.h>
 #include "extantz.h"
+#include "extantzCamera.h"
 #include "CDemo.h"
 
 
@@ -214,7 +215,7 @@ void CDemo::switchToNextScene()
 			keyMap[8].Action = EKA_JUMP_UP;
 			keyMap[8].KeyCode = KEY_KEY_J;
 
-			camera = sm->addCameraSceneNodeFPS(0, 100.0f, .4f, -1, keyMap, 9, false, 3.f);
+			camera = addExtantzCamera(sm, 0, 100.0f, .4f, -1, keyMap, 9, false, 3.f, false, true);
 			camera->setPosition(core::vector3df(150, 170, -160));
 			camera->setFarValue(5000.0f);
 
