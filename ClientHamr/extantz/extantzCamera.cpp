@@ -9,6 +9,9 @@
 // As such, I expect lots of Nikolaus Gebhardt's code to go away.
 // To be replaced by my code, which will be copyright and licensed under the same license as the rest of extantz.
 
+// Initally I'll make it SecondLife like, coz that's what my muscle memory is used to.
+// It will get extended and made generic though.
+
 #include "extantzCamera.h"
 #include "IVideoDriver.h"
 #include "ISceneManager.h"
@@ -23,14 +26,14 @@ namespace scene
 {
 
 // Irrlicht hard codes a reference to the original FPS camera code inside it's scene manager.  This is that code extracted so we can be more flexible.
-// Hmmm, Where's CursorControl come from?  Ah, passed to the scene manager constructor, it's a GUI thing that we need to replace with an EFL thing.
-ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, SKeyMap* keyMapArray, s32 keyMapSize, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive)
+// TODO - Hmmm, Where's CursorControl come from?  Ah, passed to the scene manager constructor, it's a GUI thing that we need to replace with an EFL thing.
+ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive)
 {
 	ICameraSceneNode* node = sm->addCameraSceneNode(parent, core::vector3df(), core::vector3df(0, 0, 100), id, makeActive);
 	if (node)
 	{
-//		ISceneNodeAnimator* anm = new extantzCamera(CursorControl, rotateSpeed, moveSpeed, jumpSpeed, keyMapArray, keyMapSize, noVerticalMovement, invertMouseY);
-		ISceneNodeAnimator* anm = new extantzCamera(NULL, rotateSpeed, moveSpeed, jumpSpeed, keyMapArray, keyMapSize, noVerticalMovement, invertMouseY);
+//		ISceneNodeAnimator* anm = new extantzCamera(CursorControl, rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
+		ISceneNodeAnimator* anm = new extantzCamera(NULL, rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
 
 		// Bind the node's rotation to its target. This is consistent with 1.4.2 and below.
 		node->bindTargetAndRotation(true);
@@ -43,9 +46,9 @@ ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 ro
 
 
 //! constructor
-extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, SKeyMap* keyMapArray, u32 keyMapSize, bool noVerticalMovement, bool invertY)
+extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
     : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-    MouseYDirection(invertY ? -1.0f : 1.0f), LastAnimationTime(0), firstUpdate(true), firstInput(true), NoVerticalMovement(noVerticalMovement)
+    MouseYDirection(invertY ? -1.0f : 1.0f), LastAnimationTime(0), firstUpdate(true), NoVerticalMovement(noVerticalMovement)
 {
 	#ifdef _DEBUG
 	setDebugName("extantzCamera");
@@ -55,22 +58,6 @@ extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed
 //		CursorControl->grab();
 
 	allKeysUp();
-
-	// create key map
-	if (!keyMapArray || !keyMapSize)
-	{
-		// create default key map
-		KeyMap.push_back(SKeyMap(EKA_MOVE_FORWARD, irr::KEY_UP));
-		KeyMap.push_back(SKeyMap(EKA_MOVE_BACKWARD, irr::KEY_DOWN));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_LEFT, irr::KEY_LEFT));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_RIGHT, irr::KEY_RIGHT));
-		KeyMap.push_back(SKeyMap(EKA_JUMP_UP, irr::KEY_KEY_J));
-	}
-	else
-	{
-		// create custom key map
-		setKeyMap(keyMapArray, keyMapSize);
-	}
 }
 
 
@@ -82,11 +69,9 @@ extantzCamera::~extantzCamera()
 }
 
 
-//! It is possible to send mouse and key events to the camera. Most cameras
-//! may ignore this input, but camera scene nodes which are created for
-//! example with scene::ISceneManager::addMayaCameraSceneNode or
-//! scene::ISceneManager::addFPSCameraSceneNode, may want to get this input
-//! for changing their position, look at target or whatever.
+#if 0
+// TODO - get rid of this, it's an Irrlicht callback, and I'm replacing it all with EFL.
+// Leaving it here for the moment as an example.
 bool extantzCamera::OnEvent(const SEvent& evt)
 {
 	switch(evt.EventType)
@@ -116,7 +101,7 @@ bool extantzCamera::OnEvent(const SEvent& evt)
 
 	return false;
 }
-
+#endif
 
 void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 {
@@ -142,14 +127,8 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 	// If the camera isn't the active camera, and receiving input, then don't process it.
 	if(!camera->isInputReceiverEnabled())
 	{
-		firstInput = true;
-		return;
-	}
-
-	if ( firstInput )
-	{
 		allKeysUp();
-		firstInput = false;
+		return;
 	}
 
 	scene::ISceneManager * smgr = camera->getSceneManager();
@@ -237,6 +216,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	movedir.normalize();
 
+	// TODO - There is no turning left or right, or the other things I'll need.  So might as well create my own thing to replace this.
 	if (CursorKeys[EKA_MOVE_FORWARD])
 		pos += movedir * timeDiff * MoveSpeed;
 
@@ -324,30 +304,6 @@ f32 extantzCamera::getMoveSpeed() const
 }
 
 
-//! Sets the keyboard mapping for this animator
-void extantzCamera::setKeyMap(SKeyMap *map, u32 count)
-{
-	// clear the keymap
-	KeyMap.clear();
-
-	// add actions
-	for (u32 i=0; i<count; ++i)
-	{
-		KeyMap.push_back(map[i]);
-	}
-}
-
-void extantzCamera::setKeyMap(const core::array<SKeyMap>& keymap)
-{
-	KeyMap=keymap;
-}
-
-const core::array<SKeyMap>& extantzCamera::getKeyMap() const
-{
-	return KeyMap;
-}
-
-
 //! Sets whether vertical movement should be allowed.
 void extantzCamera::setVerticalMovement(bool allow)
 {
@@ -367,8 +323,7 @@ void extantzCamera::setInvertMouse(bool invert)
 
 ISceneNodeAnimator* extantzCamera::createClone(ISceneNode* node, ISceneManager* newManager)
 {
-	extantzCamera *newAnimator = new extantzCamera(CursorControl, RotateSpeed, MoveSpeed, JumpSpeed, 0, 0, NoVerticalMovement);
-	newAnimator->setKeyMap(KeyMap);
+	extantzCamera *newAnimator = new extantzCamera(CursorControl, RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
 	return newAnimator;
 }
 

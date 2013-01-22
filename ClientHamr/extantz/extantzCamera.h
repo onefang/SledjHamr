@@ -24,23 +24,20 @@ namespace gui
 namespace scene
 {
 
-    ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, SKeyMap* keyMapArray, s32 keyMapSize, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive);
+    ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive);
 
 	class extantzCamera : public ISceneNodeAnimator
 	{
 	public:
 
 		//! Constructor
-		extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, SKeyMap* keyMapArray=0, u32 keyMapSize=0, bool noVerticalMovement=false, bool invertY=false);
+		extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
 
 		//! Destructor
 		virtual ~extantzCamera();
 
 		//! Animates the scene node, currently only works on cameras
 		virtual void animateNode(ISceneNode* node, u32 timeMs);
-
-		//! Event receiver
-		virtual bool OnEvent(const SEvent& event);
 
 		//! Returns the speed of movement in units per second
 		virtual f32 getMoveSpeed() const;
@@ -54,18 +51,6 @@ namespace scene
 		//! Set the rotation speed
 		virtual void setRotateSpeed(f32 rotateSpeed);
 
-		//! Sets the keyboard mapping for this animator (old style)
-		//! \param keymap: an array of keyboard mappings, see SKeyMap
-		//! \param count: the size of the keyboard map array
-		virtual void setKeyMap(SKeyMap *map, u32 count);
-
-		//! Sets the keyboard mapping for this animator
-		//!	\param keymap The new keymap array 
-		virtual void setKeyMap(const core::array<SKeyMap>& keymap);
-
-		//! Gets the keyboard mapping for this animator
-		virtual const core::array<SKeyMap>& getKeyMap() const;
-
 		//! Sets whether vertical movement should be allowed.
 		virtual void setVerticalMovement(bool allow);
 
@@ -77,7 +62,7 @@ namespace scene
 		//! This animator will receive events when attached to the active camera
 		virtual bool isEventReceiverEnabled() const
 		{
-			return true;
+			return false;
 		}
 
 		//! Returns the type of this animator
@@ -107,13 +92,11 @@ namespace scene
 
 		s32 LastAnimationTime;
 
-		core::array<SKeyMap> KeyMap;
 		core::position2d<f32> CenterCursor, CursorPos;
 
 		bool CursorKeys[EKA_COUNT];
 
 		bool firstUpdate;
-		bool firstInput;
 		bool NoVerticalMovement;
 	};
 
