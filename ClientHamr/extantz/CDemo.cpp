@@ -10,7 +10,7 @@
 CDemo::CDemo(GLData *gld, bool a)
 : additive(a),
  device(gld->device),
- currentScene(0),
+ currentScene(2),
  quakeLevelMesh(0), quakeLevelNode(0), skyboxNode(0), model1(0), model2(0),
  campFire(0), metaSelector(0), mapSelector(0), sceneStartTime(0),
  timeForThisScene(0)
@@ -53,7 +53,7 @@ void CDemo::setup(GLData *gld)
 void CDemo::preDraw(GLData *gld, u32 now)
 {
 	if (((now - sceneStartTime) > timeForThisScene) && (timeForThisScene != -1))
-		switchToNextScene();
+		switchToNextScene(gld);
 
 	createParticleImpacts();
 }
@@ -80,7 +80,7 @@ bool CDemo::OnEvent(const SEvent& event)
 }
 
 
-void CDemo::switchToNextScene()
+void CDemo::switchToNextScene(GLData *gld)
 {
 	currentScene++;
 	if (currentScene > 3)
@@ -191,12 +191,15 @@ void CDemo::switchToNextScene()
 			}
 			timeForThisScene = -1;
 
-			camera = addExtantzCamera(sm, 0, 100.0f, .4f, -1, false, 3.f, false, true);
+			gld->camera = addExtantzCamera(sm, 0, 100.0f, .4f, -1, false, 3.f, false, true);
+			camera = gld->camera;
 			camera->setPosition(core::vector3df(150, 170, -160));
 			camera->setFarValue(5000.0f);
+			gld->move = getCameraMove(gld->camera);
 
 			scene::ISceneNodeAnimatorCollisionResponse* collider =
-				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 100, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
+//				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 100, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
+				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 50, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
 			camera->addAnimator(collider);
 			collider->drop();
 		}

@@ -5,6 +5,8 @@
 #ifndef __EXTANTZ_CAMERA_H_INCLUDED__
 #define __EXTANTZ_CAMERA_H_INCLUDED__
 
+
+#ifdef __cplusplus
 #include <ISceneNodeAnimator.h>
 #include <vector2d.h>
 #include <position2d.h>
@@ -12,18 +14,38 @@
 #include <irrArray.h>
 #include <ICameraSceneNode.h>
 
+using namespace irr;
+using namespace scene;
+
+extern "C"{
+#else
+typedef struct extantzCamera extantzCamera;
+typedef struct ICameraSceneNode ICameraSceneNode;
+#endif
+
+typedef struct
+{
+    float	x, y, z;
+    float	r, s, t;
+    float	jump;
+} cameraMove;
+
+cameraMove *getCameraMove(ICameraSceneNode *camera);
+
+#ifdef __cplusplus
+}
+
+
+//namespace irr::gui
+//{
+//	class ICursorControl;
+//}
 
 
 namespace irr
 {
-namespace gui
-{
-	class ICursorControl;
-}
-
 namespace scene
 {
-
     ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive);
 
 	class extantzCamera : public ISceneNodeAnimator
@@ -31,7 +53,8 @@ namespace scene
 	public:
 
 		//! Constructor
-		extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
+//		extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
+		extantzCamera(f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
 
 		//! Destructor
 		virtual ~extantzCamera();
@@ -77,11 +100,9 @@ namespace scene
 		done with it. */
 		virtual ISceneNodeAnimator* createClone(ISceneNode* node, ISceneManager* newManager=0);
 
+		cameraMove	move;
+
 	private:
-		void allKeysUp();
-
-		gui::ICursorControl *CursorControl;
-
 		f32 MaxVerticalAngle;
 
 		f32 MoveSpeed;
@@ -94,14 +115,13 @@ namespace scene
 
 		core::position2d<f32> CenterCursor, CursorPos;
 
-		bool CursorKeys[EKA_COUNT];
-
 		bool firstUpdate;
 		bool NoVerticalMovement;
 	};
+};
+};
+#endif
 
-} // end namespace scene
-} // end namespace irr
 
 #endif // __EXTANTZ_CAMERA_H_INCLUDED__
 

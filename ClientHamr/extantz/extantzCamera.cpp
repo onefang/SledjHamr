@@ -33,7 +33,7 @@ ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 ro
 	if (node)
 	{
 //		ISceneNodeAnimator* anm = new extantzCamera(CursorControl, rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
-		ISceneNodeAnimator* anm = new extantzCamera(NULL, rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
+		ISceneNodeAnimator* anm = new extantzCamera(rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
 
 		// Bind the node's rotation to its target. This is consistent with 1.4.2 and below.
 		node->bindTargetAndRotation(true);
@@ -46,8 +46,10 @@ ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 ro
 
 
 //! constructor
-extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
-    : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
+//extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
+//    : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
+extantzCamera::extantzCamera(f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
+    : MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
     MouseYDirection(invertY ? -1.0f : 1.0f), LastAnimationTime(0), firstUpdate(true), NoVerticalMovement(noVerticalMovement)
 {
 	#ifdef _DEBUG
@@ -56,8 +58,6 @@ extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed
 
 //	if (CursorControl)
 //		CursorControl->grab();
-
-	allKeysUp();
 }
 
 
@@ -69,39 +69,16 @@ extantzCamera::~extantzCamera()
 }
 
 
-#if 0
-// TODO - get rid of this, it's an Irrlicht callback, and I'm replacing it all with EFL.
-// Leaving it here for the moment as an example.
-bool extantzCamera::OnEvent(const SEvent& evt)
-{
-	switch(evt.EventType)
-	{
-	case EET_KEY_INPUT_EVENT:
-		for (u32 i=0; i<KeyMap.size(); ++i)
-		{
-			if (KeyMap[i].KeyCode == evt.KeyInput.Key)
-			{
-				CursorKeys[KeyMap[i].Action] = evt.KeyInput.PressedDown;
-				return true;
-			}
-		}
-		break;
-
-	case EET_MOUSE_INPUT_EVENT:
-		if (evt.MouseInput.Event == EMIE_MOUSE_MOVED)
-		{
-//			CursorPos = CursorControl->getRelativePosition();
-			return true;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	return false;
-}
-#endif
+/* Have a moveRotate array of floats.
+ * X, Y, Z, and whatever the usual letters are for rotations.  lol
+ * Each one means "move or rotate this much in this direction".
+ * Where 1.0 means "what ever the standard move is if that key is held down".
+ * So a keyboard move would just change it's part to 1.0 or -1.0 on key down,
+ *   and back to 0.0 on key up.  Or 2.0 / -2.0 if in run mode.
+ *   Which would even work in fly mode.
+ * A joystick could be set to range over -2.0 to 2.0, and just set it's part directly.
+ * A mouse look rotate, well will come to that when we need to.  B-)
+ */
 
 void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 {
@@ -127,8 +104,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 	// If the camera isn't the active camera, and receiving input, then don't process it.
 	if(!camera->isInputReceiverEnabled())
 	{
-		allKeysUp();
-		return;
+//		return;
 	}
 
 	scene::ISceneManager * smgr = camera->getSceneManager();
@@ -216,15 +192,10 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	movedir.normalize();
 
-	// TODO - There is no turning left or right, or the other things I'll need.  So might as well create my own thing to replace this.
-	if (CursorKeys[EKA_MOVE_FORWARD])
-		pos += movedir * timeDiff * MoveSpeed;
-
-	if (CursorKeys[EKA_MOVE_BACKWARD])
-		pos -= movedir * timeDiff * MoveSpeed;
+	// TODO - There is no turning left or right, flying, or the other things I'll need.  So might as well create my own thing to replace the original FPS camera.
+	pos += movedir * timeDiff * MoveSpeed * move.x;
 
 	// strafing
-
 	core::vector3df strafevect = target;
 	strafevect = strafevect.crossProduct(camera->getUpVector());
 
@@ -233,15 +204,11 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	strafevect.normalize();
 
-	if (CursorKeys[EKA_STRAFE_LEFT])
-		pos += strafevect * timeDiff * MoveSpeed;
-
-	if (CursorKeys[EKA_STRAFE_RIGHT])
-		pos -= strafevect * timeDiff * MoveSpeed;
+	pos += strafevect * timeDiff * MoveSpeed * move.y;
 
 	// For jumping, we find the collision response animator attached to our camera
 	// and if it's not falling, we tell it to jump.
-	if (CursorKeys[EKA_JUMP_UP])
+	if (0.0 < move.jump)
 	{
 		const ISceneNodeAnimatorList& animators = camera->getAnimators();
 		ISceneNodeAnimatorList::ConstIterator it = animators.begin();
@@ -266,13 +233,6 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 	// write right target
 	target += pos;
 	camera->setTarget(target);
-}
-
-
-void extantzCamera::allKeysUp()
-{
-	for (u32 i=0; i<EKA_COUNT; ++i)
-		CursorKeys[i] = false;
 }
 
 
@@ -323,9 +283,42 @@ void extantzCamera::setInvertMouse(bool invert)
 
 ISceneNodeAnimator* extantzCamera::createClone(ISceneNode* node, ISceneManager* newManager)
 {
-	extantzCamera *newAnimator = new extantzCamera(CursorControl, RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
+//	extantzCamera *newAnimator = new extantzCamera(CursorControl, RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
+	extantzCamera *newAnimator = new extantzCamera(RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
 	return newAnimator;
 }
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+cameraMove *getCameraMove(ICameraSceneNode *camera)
+{
+    cameraMove *cm = NULL;
+
+    if (camera)
+    {
+	const ISceneNodeAnimatorList &animators = camera->getAnimators();
+	ISceneNodeAnimatorList::ConstIterator it = animators.begin();
+	while(it != animators.end())
+	{
+		// TODO - We assume FPS == extantzCamera, coz Irrlicht hard codes the camera types in an enum, which is a pain to add to from outside.
+		if(ESNAT_CAMERA_FPS == (*it)->getType())
+		{
+			extantzCamera *ec = static_cast<extantzCamera *>(*it);
+
+			cm = &(ec->move);
+		}
+
+		it++;
+	}
+    }
+    return cm;
+}
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 } // namespace scene

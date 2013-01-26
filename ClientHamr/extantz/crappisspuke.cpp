@@ -9,7 +9,7 @@ SExposedVideoData videoData;
 
 IAnimatedMeshSceneNode *node;
 CDemo *myDemo;
-// This is the movemen speed in units per second.
+// This is the movement speed in units per second.
 const f32 MOVEMENT_SPEED = 5.f;
 // In order to do framerate independent movement, we have to know
 // how long it was since the last frame

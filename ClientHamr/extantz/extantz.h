@@ -2,6 +2,7 @@
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
 #include <EPhysics.h>
+#include "extantzCamera.h"
 
 
 #ifdef GL_GLES
@@ -44,6 +45,7 @@ extern "C"{
 typedef struct IrrlichtDevice IrrlichtDevice;
 typedef struct IVideoDriver IVideoDriver;
 typedef struct ISceneManager ISceneManager;
+typedef struct ICameraSceneNode ICameraSceneNode;
 
 #endif
 
@@ -143,13 +145,17 @@ struct _GLData
     int		useIrr : 1;
     int		doneIrr : 1;
     int		resized : 1;
+    int		camFocus : 1;
 
     Evas_Object	*bx, *r1;
     Ecore_Animator  *animator;
 
-    IrrlichtDevice	*device;	// IrrlichtDevice
-    IVideoDriver	*driver;	// IVideoDriver
-    ISceneManager	*smgr;		// ISceneManager
+    IrrlichtDevice	*device;
+    IVideoDriver	*driver;
+    ISceneManager	*smgr;
+    ICameraSceneNode	*camera;
+
+    cameraMove		*move;
 
    // Gear Stuff
    GLfloat      view_rotx;

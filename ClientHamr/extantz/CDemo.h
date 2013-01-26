@@ -27,7 +27,7 @@ private:
 
 	void createLoadingScreen();
 	void loadSceneData();
-	void switchToNextScene();
+	void switchToNextScene(GLData *gld);
 	void shoot();
 	void createParticleImpacts();
 
