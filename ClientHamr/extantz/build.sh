@@ -1,7 +1,7 @@
 export PKG_CONFIG_PATH="/opt/e17/lib/pkgconfig"
 
 echo "clean"
-rm -f extantz crappisspuke.o extantz.edj
+rm -f extantz crappisspuke.o CDemo.o extantzCamera.o extantz.edj
 echo "edje"
 edje_cc -id images extantz.edc extantz.edj
 echo "Irrlicht"
