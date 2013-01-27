@@ -28,6 +28,7 @@ typedef struct
     float	x, y, z;
     float	r, s, t;
     float	jump;
+    float	JumpSpeed, RotateSpeed, MoveSpeed;
 } cameraMove;
 
 cameraMove *getCameraMove(ICameraSceneNode *camera);
@@ -46,41 +47,21 @@ namespace irr
 {
 namespace scene
 {
-    ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive);
+    ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, s32 id);
 
 	class extantzCamera : public ISceneNodeAnimator
 	{
 	public:
 
 		//! Constructor
-//		extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
-		extantzCamera(f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f, bool noVerticalMovement=false, bool invertY=false);
+//		extantzCamera(gui::ICursorControl* cursorControl);
+		extantzCamera();
 
 		//! Destructor
 		virtual ~extantzCamera();
 
 		//! Animates the scene node, currently only works on cameras
 		virtual void animateNode(ISceneNode* node, u32 timeMs);
-
-		//! Returns the speed of movement in units per second
-		virtual f32 getMoveSpeed() const;
-
-		//! Sets the speed of movement in units per second
-		virtual void setMoveSpeed(f32 moveSpeed);
-
-		//! Returns the rotation speed
-		virtual f32 getRotateSpeed() const;
-
-		//! Set the rotation speed
-		virtual void setRotateSpeed(f32 rotateSpeed);
-
-		//! Sets whether vertical movement should be allowed.
-		virtual void setVerticalMovement(bool allow);
-
-		//! Sets whether the Y axis of the mouse should be inverted.
-		/** If enabled then moving the mouse down will cause
-		the camera to look up. It is disabled by default. */
-		virtual void setInvertMouse(bool invert);
 
 		//! This animator will receive events when attached to the active camera
 		virtual bool isEventReceiverEnabled() const
@@ -100,23 +81,16 @@ namespace scene
 		done with it. */
 		virtual ISceneNodeAnimator* createClone(ISceneNode* node, ISceneManager* newManager=0);
 
+		bool NoVerticalMovement;
+		// -1.0f for inverted mouse, defaults to 1.0f
+		f32 MouseYDirection;
+
 		cameraMove	move;
 
 	private:
 		f32 MaxVerticalAngle;
-
-		f32 MoveSpeed;
-		f32 RotateSpeed;
-		f32 JumpSpeed;
-		// -1.0f for inverted mouse, defaults to 1.0f
-		f32 MouseYDirection;
-
 		s32 LastAnimationTime;
-
-		core::position2d<f32> CenterCursor, CursorPos;
-
-		bool firstUpdate;
-		bool NoVerticalMovement;
+//		core::position2d<f32> CenterCursor, CursorPos;
 	};
 };
 };

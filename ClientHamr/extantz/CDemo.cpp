@@ -191,7 +191,7 @@ void CDemo::switchToNextScene(GLData *gld)
 			}
 			timeForThisScene = -1;
 
-			gld->camera = addExtantzCamera(sm, 0, 100.0f, .4f, -1, false, 3.f, false, true);
+			gld->camera = addExtantzCamera(sm, NULL, -1);
 			camera = gld->camera;
 			camera->setPosition(core::vector3df(108, 140, -140));
 			camera->setFarValue(5000.0f);

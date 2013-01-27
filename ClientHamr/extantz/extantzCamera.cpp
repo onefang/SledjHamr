@@ -27,13 +27,13 @@ namespace scene
 
 // Irrlicht hard codes a reference to the original FPS camera code inside it's scene manager.  This is that code extracted so we can be more flexible.
 // TODO - Hmmm, Where's CursorControl come from?  Ah, passed to the scene manager constructor, it's a GUI thing that we need to replace with an EFL thing.
-ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 rotateSpeed, f32 moveSpeed, s32 id, bool noVerticalMovement, f32 jumpSpeed, bool invertMouseY, bool makeActive)
+ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, s32 id)
 {
-	ICameraSceneNode* node = sm->addCameraSceneNode(parent, core::vector3df(), core::vector3df(0, 0, 100), id, makeActive);
+	ICameraSceneNode* node = sm->addCameraSceneNode(parent, core::vector3df(), core::vector3df(0, 0, 100), id, true);
 	if (node)
 	{
-//		ISceneNodeAnimator* anm = new extantzCamera(CursorControl, rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
-		ISceneNodeAnimator* anm = new extantzCamera(rotateSpeed, moveSpeed, jumpSpeed, noVerticalMovement, invertMouseY);
+//		ISceneNodeAnimator* anm = new extantzCamera(CursorControl);
+		ISceneNodeAnimator* anm = new extantzCamera();
 
 		// Bind the node's rotation to its target. This is consistent with 1.4.2 and below.
 		node->bindTargetAndRotation(true);
@@ -46,15 +46,18 @@ ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, f32 ro
 
 
 //! constructor
-//extantzCamera::extantzCamera(gui::ICursorControl* cursorControl, f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
-//    : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-extantzCamera::extantzCamera(f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed, bool noVerticalMovement, bool invertY)
-    : MaxVerticalAngle(88.0f), MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-    MouseYDirection(invertY ? -1.0f : 1.0f), LastAnimationTime(0), firstUpdate(true), NoVerticalMovement(noVerticalMovement)
+//extantzCamera::extantzCamera(gui::ICursorControl* cursorControl)
+//    : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(0.4f), RotateSpeed(100.0f), JumpSpeed(3.0f),
+extantzCamera::extantzCamera()
+    : MaxVerticalAngle(88.0f), MouseYDirection(1.0f), LastAnimationTime(0), NoVerticalMovement(false)
 {
 	#ifdef _DEBUG
 	setDebugName("extantzCamera");
 	#endif
+
+	move.MoveSpeed = 0.1f;
+	move.RotateSpeed = 1.0f;
+	move.JumpSpeed = 3.0f;
 
 //	if (CursorControl)
 //		CursorControl->grab();
@@ -87,7 +90,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	ICameraSceneNode* camera = static_cast<ICameraSceneNode*>(node);
 
-	if (firstUpdate)
+	if (0 == LastAnimationTime)
 	{
 		camera->updateAbsolutePosition();
 //		if (CursorControl )
@@ -97,11 +100,10 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 //		}
 
 		LastAnimationTime = timeMs;
-
-		firstUpdate = false;
 	}
 
 	// If the camera isn't the active camera, and receiving input, then don't process it.
+	// TODO - it never is, coz we are bypassing that, but can we replace this with something else?
 	if(!camera->isInputReceiverEnabled())
 	{
 //		return;
@@ -112,7 +114,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 		return;
 
 	// get time
-	f32 timeDiff = (f32) ( timeMs - LastAnimationTime );
+	f32 timeDiff = (f32) (timeMs - LastAnimationTime);
 	LastAnimationTime = timeMs;
 
 	// update position
@@ -127,8 +129,8 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 	{
 		if (CursorPos != CenterCursor)
 		{
-			relativeRotation.Y -= (0.5f - CursorPos.X) * RotateSpeed;
-			relativeRotation.X -= (0.5f - CursorPos.Y) * RotateSpeed * MouseYDirection;
+			relativeRotation.Y -= (0.5f - CursorPos.X) * move.RotateSpeed;
+			relativeRotation.X -= (0.5f - CursorPos.Y) * move.RotateSpeed * MouseYDirection;
 
 			// X < MaxVerticalAngle or X > 360-MaxVerticalAngle
 
@@ -192,8 +194,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	movedir.normalize();
 
-	// TODO - There is no turning left or right, flying, or the other things I'll need.  So might as well create my own thing to replace the original FPS camera.
-	pos += movedir * timeDiff * MoveSpeed * move.x;
+	pos += movedir * timeDiff * move.MoveSpeed * move.x;
 
 	// strafing
 	core::vector3df strafevect = target;
@@ -204,7 +205,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 
 	strafevect.normalize();
 
-	pos += strafevect * timeDiff * MoveSpeed * move.y;
+	pos += strafevect * timeDiff * move.MoveSpeed * move.y;
 
 	// For jumping, we find the collision response animator attached to our camera
 	// and if it's not falling, we tell it to jump.
@@ -220,7 +221,7 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 					static_cast<ISceneNodeAnimatorCollisionResponse *>(*it);
 
 				if(!collisionResponse->isFalling())
-					collisionResponse->jump(JumpSpeed);
+					collisionResponse->jump(move.JumpSpeed);
 			}
 
 			it++;
@@ -236,55 +237,10 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 }
 
 
-//! Sets the rotation speed
-void extantzCamera::setRotateSpeed(f32 speed)
-{
-	RotateSpeed = speed;
-}
-
-
-//! Sets the movement speed
-void extantzCamera::setMoveSpeed(f32 speed)
-{
-	MoveSpeed = speed;
-}
-
-
-//! Gets the rotation speed
-f32 extantzCamera::getRotateSpeed() const
-{
-	return RotateSpeed;
-}
-
-
-// Gets the movement speed
-f32 extantzCamera::getMoveSpeed() const
-{
-	return MoveSpeed;
-}
-
-
-//! Sets whether vertical movement should be allowed.
-void extantzCamera::setVerticalMovement(bool allow)
-{
-	NoVerticalMovement = !allow;
-}
-
-
-//! Sets whether the Y axis of the mouse should be inverted.
-void extantzCamera::setInvertMouse(bool invert)
-{
-	if (invert)
-		MouseYDirection = -1.0f;
-	else
-		MouseYDirection = 1.0f;
-}
-
-
 ISceneNodeAnimator* extantzCamera::createClone(ISceneNode* node, ISceneManager* newManager)
 {
-//	extantzCamera *newAnimator = new extantzCamera(CursorControl, RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
-	extantzCamera *newAnimator = new extantzCamera(RotateSpeed, MoveSpeed, JumpSpeed, NoVerticalMovement);
+//	extantzCamera *newAnimator = new extantzCamera(CursorControl);
+	extantzCamera *newAnimator = new extantzCamera();
 	return newAnimator;
 }
 
