@@ -193,12 +193,11 @@ void CDemo::switchToNextScene(GLData *gld)
 
 			gld->camera = addExtantzCamera(sm, 0, 100.0f, .4f, -1, false, 3.f, false, true);
 			camera = gld->camera;
-			camera->setPosition(core::vector3df(150, 170, -160));
+			camera->setPosition(core::vector3df(108, 140, -140));
 			camera->setFarValue(5000.0f);
 			gld->move = getCameraMove(gld->camera);
 
 			scene::ISceneNodeAnimatorCollisionResponse* collider =
-//				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 100, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
 				sm->createCollisionResponseAnimator(metaSelector, camera, core::vector3df(25, 50, 25), core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f, 0), core::vector3df(0, 45, 0), 0.005f);
 			camera->addAnimator(collider);
 			collider->drop();
