@@ -350,86 +350,95 @@ static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *e
     {
 	gld->camFocus = 0;
 	// TODO - Yes we really DO need to figure out what was clicked on and set focus to it.  sigh
-	// For now, we only got one window, focus on it's box.
-	elm_object_focus_set(gld->bx, EINA_TRUE);
+//	elm_object_focus_set(gld->bx, EINA_TRUE);
 	printf("ELM object focused.\n");
     }
 }
 
-static Eina_Bool _on_camera_input(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
+// These do not work as elm callbacks, coz Elm is grabbing the Left, Right, Up, and Down KEY_DOWNs.  Something else is messing up Home + PgUp / PgDn.
+// It's a purely Evas object anyway.
+static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
     GLData *gld = data;
+    Evas_Event_Key_Down *ev = event_info;
 
     if (gld->camFocus)
     {
 	if (gld->move)
 	{
 	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't now at what point the camera animate routine is actually called.
-	    Evas_Event_Key_Down *ev = event_info;
 
 	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
 	    // TODO - make this a hash lookup dammit.
-	    // TODO - these are not working, coz Elm is grabbing the Left, Right, Up, and Down KEY_DOWNs.
-	    // TODO - no idea why yet, but can't do Home and Prior / Next at the same time.  Don't seem to be a bug in the Irrlicht original at least.
-	    if (EVAS_CALLBACK_KEY_DOWN == type)
+	    if (0 == strcmp(ev->key, "Escape"))
 	    {
-		if (0 == strcmp(ev->keyname, "Escape"))
-		{
-		}
-		else if  (0 == strcmp(ev->key, "Left"))
-		    gld->move->r = 1.0;
-		else if  (0 == strcmp(ev->key, "Right"))
-		    gld->move->r = -1.0;
-		else if  (0 == strcmp(ev->key, "Up"))
-		    gld->move->x = 1.0;
-		else if  (0 == strcmp(ev->key, "Down"))
-		    gld->move->x = -1.0;
-		else if  (0 == strcmp(ev->key, "Prior"))
-		    gld->move->x = 1.0;
-		else if  (0 == strcmp(ev->key, "Next"))
-		    gld->move->x = -1.0;
-		else if  (0 == strcmp(ev->key, "Home"))
-		    gld->move->r = 1.0;
-		else if  (0 == strcmp(ev->key, "End"))
-		    gld->move->r = -1.0;
-		else if  (0 == strcmp(ev->key, "space"))
-		    gld->move->jump = 1.0;
-		else
-		    printf("Unexpected down keystroke - %s\n", ev->key);
 	    }
-	    else if (EVAS_CALLBACK_KEY_UP == type)
-	    {
-		if (0 == strcmp(ev->keyname, "Escape"))
-		{
-		}
-		else if  (0 == strcmp(ev->key, "Left"))
-		    gld->move->r = 0.0;
-		else if  (0 == strcmp(ev->key, "Right"))
-		    gld->move->r = 0.0;
-		else if  (0 == strcmp(ev->key, "Up"))
-		    gld->move->x = 0.0;
-		else if  (0 == strcmp(ev->key, "Down"))
-		    gld->move->x = 0.0;
-		else if  (0 == strcmp(ev->key, "Prior"))
-		    gld->move->x = 0.0;
-		else if  (0 == strcmp(ev->key, "Next"))
-		    gld->move->x = 0.0;
-		else if  (0 == strcmp(ev->key, "Home"))
-		    gld->move->r = 0.0;
-		else if  (0 == strcmp(ev->key, "End"))
-		    gld->move->r = 0.0;
-		else if  (0 == strcmp(ev->key, "space"))
-		    gld->move->jump = 0.0;
-		else
-		    printf("Unexpected up keystroke - %s\n", ev->key);
-	    }
-	    return EINA_TRUE;
+	    else if  (0 == strcmp(ev->key, "Left"))
+		gld->move->r = 1.0;
+	    else if  (0 == strcmp(ev->key, "Right"))
+		gld->move->r = -1.0;
+	    else if  (0 == strcmp(ev->key, "Up"))
+		gld->move->x = 1.0;
+	    else if  (0 == strcmp(ev->key, "Down"))
+		gld->move->x = -1.0;
+	    else if  (0 == strcmp(ev->key, "Prior"))
+		;
+	    else if  (0 == strcmp(ev->key, "Next"))
+		;
+	    else if  (0 == strcmp(ev->key, "Home"))
+		;
+	    else if  (0 == strcmp(ev->key, "End"))
+		;
+	    else if  (0 == strcmp(ev->key, "space"))
+		gld->move->jump = 1.0;
+	    else
+		printf("Unexpected down keystroke - %s\n", ev->key);
 	}
 	else
 	    printf("Camera input not ready\n");
     }
+}
 
-    return EINA_FALSE;	// TRUE = event was processed here, don't propagate.  FALSE = propagate event, not processed here.
+static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+    GLData *gld = data;
+    Evas_Event_Key_Up *ev = event_info;
+
+    if (gld->camFocus)
+    {
+	if (gld->move)
+	{
+	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't now at what point the camera animate routine is actually called.
+
+	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
+	    // TODO - make this a hash lookup dammit.
+	    if (0 == strcmp(ev->key, "Escape"))
+	    {
+	    }
+	    else if  (0 == strcmp(ev->key, "Left"))
+		gld->move->r = 0.0;
+	    else if  (0 == strcmp(ev->key, "Right"))
+		gld->move->r = 0.0;
+	    else if  (0 == strcmp(ev->key, "Up"))
+		gld->move->x = 0.0;
+	    else if  (0 == strcmp(ev->key, "Down"))
+		gld->move->x = 0.0;
+	    else if  (0 == strcmp(ev->key, "Prior"))
+		;
+	    else if  (0 == strcmp(ev->key, "Next"))
+		;
+	    else if  (0 == strcmp(ev->key, "Home"))
+		;
+	    else if  (0 == strcmp(ev->key, "End"))
+		;
+	    else if  (0 == strcmp(ev->key, "space"))
+		gld->move->jump = 0.0;
+	    else
+		printf("Unexpected up keystroke - %s\n", ev->key);
+	}
+	else
+	    printf("Camera input not ready\n");
+    }
 }
 
 static void _resize(GLData *gld)
@@ -544,7 +553,6 @@ on_del(void *data, Evas *e, Evas_Object *obj, void *event_info)
    if (!gld) return;
    Evas_GL_API *gl = gld->glapi;
 
-    elm_object_event_callback_del(gld->r1, _on_camera_input, gld);
     ecore_animator_del(gld->animator);
 
     if (gld->useEGL)
@@ -740,7 +748,8 @@ static void init_evas_gl(GLData *gld, int w, int h)
     gld->animator = ecore_animator_add(doFrame, gld);	// This animator will be called every frame tick, which defaults to 1/30 seconds.
 
     // In this code, we are making our own camera, so grab it's input when we are focused.
-    elm_object_event_callback_add(gld->win, _on_camera_input, gld);
+    evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
+    evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
     evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
     gld->camFocus = 1;	// Start with the GL camera focused.
 
@@ -1012,6 +1021,7 @@ fill(Evas_Object *win)
 
    evas_object_show(bx);
 }
+
 static void
 cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
