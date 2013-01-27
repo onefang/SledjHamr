@@ -370,15 +370,16 @@ static Eina_Bool _on_camera_input(void *data, Evas_Object *obj, Evas_Object *src
 	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
 	    // TODO - make this a hash lookup dammit.
 	    // TODO - these are not working, coz Elm is grabbing the Left, Right, Up, and Down KEY_DOWNs.
+	    // TODO - no idea why yet, but can't do Home and Prior / Next at the same time.  Don't seem to be a bug in the Irrlicht original at least.
 	    if (EVAS_CALLBACK_KEY_DOWN == type)
 	    {
 		if (0 == strcmp(ev->keyname, "Escape"))
 		{
 		}
 		else if  (0 == strcmp(ev->key, "Left"))
-		    gld->move->y = 1.0;
+		    gld->move->r = 1.0;
 		else if  (0 == strcmp(ev->key, "Right"))
-		    gld->move->y = -1.0;
+		    gld->move->r = -1.0;
 		else if  (0 == strcmp(ev->key, "Up"))
 		    gld->move->x = 1.0;
 		else if  (0 == strcmp(ev->key, "Down"))
@@ -388,9 +389,9 @@ static Eina_Bool _on_camera_input(void *data, Evas_Object *obj, Evas_Object *src
 		else if  (0 == strcmp(ev->key, "Next"))
 		    gld->move->x = -1.0;
 		else if  (0 == strcmp(ev->key, "Home"))
-		    gld->move->y = 1.0;
+		    gld->move->r = 1.0;
 		else if  (0 == strcmp(ev->key, "End"))
-		    gld->move->y = -1.0;
+		    gld->move->r = -1.0;
 		else if  (0 == strcmp(ev->key, "space"))
 		    gld->move->jump = 1.0;
 		else
@@ -402,9 +403,9 @@ static Eina_Bool _on_camera_input(void *data, Evas_Object *obj, Evas_Object *src
 		{
 		}
 		else if  (0 == strcmp(ev->key, "Left"))
-		    gld->move->y = 0.0;
+		    gld->move->r = 0.0;
 		else if  (0 == strcmp(ev->key, "Right"))
-		    gld->move->y = 0.0;
+		    gld->move->r = 0.0;
 		else if  (0 == strcmp(ev->key, "Up"))
 		    gld->move->x = 0.0;
 		else if  (0 == strcmp(ev->key, "Down"))
@@ -414,14 +415,15 @@ static Eina_Bool _on_camera_input(void *data, Evas_Object *obj, Evas_Object *src
 		else if  (0 == strcmp(ev->key, "Next"))
 		    gld->move->x = 0.0;
 		else if  (0 == strcmp(ev->key, "Home"))
-		    gld->move->y = 0.0;
+		    gld->move->r = 0.0;
 		else if  (0 == strcmp(ev->key, "End"))
-		    gld->move->y = 0.0;
+		    gld->move->r = 0.0;
 		else if  (0 == strcmp(ev->key, "space"))
 		    gld->move->jump = 0.0;
 		else
 		    printf("Unexpected up keystroke - %s\n", ev->key);
 	    }
+	    return EINA_TRUE;
 	}
 	else
 	    printf("Camera input not ready\n");

@@ -171,6 +171,16 @@ void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 			CursorPos = CenterCursor;
  		}
 	}
+#else
+	relativeRotation.Y -= move.r * move.RotateSpeed;
+	relativeRotation.X -= move.s * move.RotateSpeed * MouseYDirection;
+
+	// X < MaxVerticalAngle or X > 360-MaxVerticalAngle
+
+	if ((relativeRotation.X > (MaxVerticalAngle * 2)) && (relativeRotation.X < (360.0f - MaxVerticalAngle)))
+		relativeRotation.X = 360.0f - MaxVerticalAngle;
+	else if ((relativeRotation.X > MaxVerticalAngle) && (relativeRotation.X < (360.0f - MaxVerticalAngle)))
+		relativeRotation.X = MaxVerticalAngle;
 #endif
 
 	// set target
