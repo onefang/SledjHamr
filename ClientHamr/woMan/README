@@ -1,0 +1,148 @@
+WoMan is a virtual world account and viewer manager, mostly of the SL
+(Second Life) variety since that's my focus.  Most SL style virtual
+world viewers can be invoked with options to start them logging on, and
+skipping the login screen.  So this project aims to be that login
+screen, doing all the things that can be done from the meta-impy login
+screen, plus more.  Once the user hits the login button, woMan figures
+out what parameters to pass to what viewer, then starts it up and gets
+out of the way.  Following the ClientHamr philosophy of breaking the
+viewer up into modules that do simpler tasks, and do them well.  So that
+means that meta-impy will eventually loose it's login screen, to be
+replaced by woMan.
+
+WoMan starts off looking like any other viewers login screen, showing
+the login page of the default, or last visited grid, a small menu at the
+top with the usual functions, and the usual login buttons at the bottom. 
+Added to that will be a better grid manager, with proper user
+management, suitable for people with more than one account per grid. 
+The user will have the ability to choose a virtual world viewer to be
+the default, and even to associate a particular viewer with a particular
+grid.  This is useful, for instance, for grids that have their own
+custom viewers, but the user wants to use a more generic viewer for all
+the other grids.  Or if the user wants to use one viewer for OpenSim
+grids, but another for LL (Linden Labs) grids.  Coz perhaps their chosen
+viewer is not TPVP (Third Party Viewer Policy, an LL thing) compliant,
+and LL are just more anal than the rest of the universe.
+
+NOTE: since I started this, LL in their *cough* infinite wisdom *cough*,
+decided that support of OpenSIm was a Really Bad Thing, so their viewers
+are no longer capable of dealing with other grids.  LL have even gone as
+far as try to get other viewers to not support other grids.  As far as
+woMan is concerned, this just means that LL viewers, and viewers that
+drank the LL koolaid, are less functional.  shrugs
+
+The grid manager will also include some sort of search capability, as is
+currently being discussed by various people in the OpenSim universe. 
+There might even be several search systems in place, so supporting
+existing ones, and the ability to add more might be useful.  WoMan
+should be the only thing registered to handle hop:// and other such URLs
+in whatever web browsers you are using.  Though most viewers want to
+register themselves, so tends to be that which ever one you started up
+last, or first, gets that privilege.  That's a whole can of worms, sane
+policy and code should help.
+
+It might be useful to have woMan be able to download viewers,
+including checking for updates and offering to download them.  As well
+as updates to common things like viewer tag definition files.
+
+WoMan, unlike the LL viewer code base, will be designed for relogging. 
+Once the viewer it starts quits (or crashes), WoMan, which was still
+running, can pop again and let the user relog, or log to some other
+grid, or same grid as different a user, or even same grid as same user
+with a different viewer.
+
+Viewers can be made woMan aware, like meta-impy will be (since it's
+handing it's login screen functionality to woMan).  A few more things
+make sense to be added in this case.  For instance, you might want to
+have some or all of your LMs (LandMarks) be usable at the log in
+screen, so you can log directly to them.  The user might want the choice
+when they HG (HyperGrid teleport) to actually start up a new viewer and
+just login to the other grid instead (if they already have an account
+there).  While HGed to some new grid, the user might want to add that
+grid to the woMan grid manager at a simple click of a button, perhaps
+complete with an LM for their current position.  The grid searching
+capabilities mentioned earlier might be needed while in world. 
+Certainly the grid manager functions in meta-impy will be handled by
+woMan, even if in world.
+
+In order to display the login page of a grid, which is a web page, a web
+browser will be built into woMan.  It could be used to display web
+pages within an woMan aware viewer.  Though perhaps not for MOAP
+(Media On A Prim), unless woMan grows the ability to incorporate
+itself into the viewers 3D landscape as part of a prim.  Which is a good
+idea, then meta-impy no longer needs a web browser.  Though other things
+in the viewer are implemented as web pages, and LL are moving more stuff
+to the web.
+
+One of the things on the login screen is the menu option to start up the
+preferences window and change the viewers preferences.  Viewers use XML
+files that not only store the preferences, but also a description of
+them.  The preferences window and it's various parts are also stored as
+XML files.  There is a bit missing that is in the viewer source code
+that ties all of this together.  So it might not be possible to do this
+for all viewers.  WoMan aware viewers can naturally provide the
+missing bits to woMan, even if not running, or even pass that entire
+functionality to woMan, just like meta-impy will do.
+
+For the purposes of keeping resource usage low, it should be possible
+for the user to configure woMan to go away when it starts a viewer. 
+Might be a good idea even for woMan aware viewers, that can start it
+up again if it's functionality is needed while in world.  Note this "go
+away" means to stop running and free up any resources it was using;
+which is different from the "gets out of the way" it usually does, still
+running, just not on screen.
+
+
+The problem with the web.
+-------------------------
+
+At least that's the theory.  In practice, a web browser takes up almost
+one third of the viewer, and is only used for three things.  Login
+pages, simple built in browser window, and MOAP (Media On A Prim).  For
+the first two full blown web browsers are massive overkill.  MOAP is not
+supported by meta-impy yet anyway.
+
+WebKit is a pain to compile at the moment, for reasons I wont go into
+right now.  At the opposite of the spectrum is dillo, which is not quite
+up to spec enough for login pages that have fancy stuff.  There does not
+appear to be any middle ground.  So right now, I'll work on using random
+web browsers as external windows.  That will suffice for everything but
+MOAP, which I can leave until later.  Just discovered netsurf, a little
+smaller than dillo, but perhaps better featured?  Might be useful.
+
+The web is a bloated mess, so it's not surprising that a fully featured
+web browser component like WebKit is also a bloated mess.
+
+
+Design.
+-------
+
+A thin window on the left.
+
+Menus across the top.
+View tabs.
+    Grids  Accounts  Viewers  Landmarks
+
+Grids tab is the grid manager, though you can also drill down / tree out
+the accounts list per grid.
+
+Accounts shows accounts, though can drill down to grid list per account. 
+Also consider launching thin viewers, text only ones and such.  The
+account view is almost a natural for extending into a IM style thingy.
+
+Viewers lists the installed viewers, can install more, and allows
+preferences editing.  It can handle viewer installs, upgrades, even
+compiling them from source.
+
+Landmarks manages LMs from viewers, or log in spots, or SLURLs etc.
+
+A user configurable web browser can open up to fill the right of the
+screen.
+
+Log file management features, including viewer stdout, check if only
+Linux viewers do that.  Including chat logs.
+
+Dillo and uzbl can insert themselves into the windows of others.  Should
+check that out.  Netsurf is allegedly easy to port to things, might be
+able to port it to EFL.
+

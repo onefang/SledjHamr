@@ -1,2 +1,58 @@
-GuiLua is basically a redo of my ancient Java based matrix-RAD system to
-Lua and EFL.
+GuiLua is basically a redo of my ancient Java based matrix-RAD system,
+but using Lua and EFL.  The ultimate goal is for the various ClientHamr
+parts to be able to either host their own UI, or have it hosted in the
+in world 3D window.  Matrix-RAD's ability to run either server or client
+side, with no change to the code, is great for this sort of thing.  If I
+can manage the ability to "tear off" windows, in other words, pull them
+out of the 3D window to be real windows, then that's something people
+have been asking for from LL forever.
+
+
+old notes
+---------
+
+Might be good to allow Lua scripting.  One way of dealing with viewer
+prefs perhaps?  Certainly think about Lua for the UI, and a built in
+editor, etc. ala skang.  All the fancy stuff like development and such
+should be kept in some sort of module, so as not to bloat the main
+proggy.  See if it's possible to disable the Emerald/Phoenix/Firestorm
+LSL bridge when connecting to OpenSim.  See if we can do it from Lua,
+with some sort of generic Lua system for munging things.
+
+
+skang vs edje vs LL shit
+------------------------
+
+EDJE
+Verbose, complex.
+Used to place and decorate widget parts.
+Can be used to place entire widgets through externals and swallows.
+Basic parts relative to each other.
+Signals and messages.
+Embryo scripts.
+Lua scripts (sandboxed).
+
+
+SKANG
+Tight, simple.
+Used to place widgets, and describe actions.
+Can include some really basic scripting.
+Widgets in a fixed position, but included stuff for relative placement in the TODO.
+Automated associations between widget name and variable (and method?) via introspection.
+Actions.
+Looks (could easily be extended to edje groups).
+Extensible.
+Can be used to pass values around.
+
+
+LL SHIT
+Verbose, even worse, XML, more crap than is needed.
+Menus.
+Windows with widgets relative to each other.
+    Basically nested rectangles.
+Manual association of widgets to methods.
+Can include tool tip string, enabled, visible, hover cursor, bounding rectangle?, mouse opaque?, tab groups, font (name, size, style, and alignment).
+    More stuff, typically hidden in the OO somewhere.  sigh
+Generally uses fixed image and colour names, which skins overide.
+Skins can also overide the XML files.
+Translations provide override XML files that need only override the text bits.
