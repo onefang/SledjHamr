@@ -10,7 +10,7 @@
 CDemo::CDemo(GLData *gld, bool a)
 : additive(a),
  device(gld->device),
- currentScene(2),
+ currentScene(0),
  quakeLevelMesh(0), quakeLevelNode(0), skyboxNode(0), model1(0), model2(0),
  campFire(0), metaSelector(0), mapSelector(0), sceneStartTime(0),
  timeForThisScene(0)

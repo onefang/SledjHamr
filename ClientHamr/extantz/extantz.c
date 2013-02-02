@@ -337,7 +337,7 @@ static void _cb_mouse_down_GL(void *data, Evas *evas, Evas_Object *obj, void *ev
     if (1 == ev->button)
     {
 	gld->camFocus = 1;
-	printf("Background GL object focused.\n");
+	// TODO, figure out how to unfocus elm.
     }
 }
 
@@ -351,7 +351,6 @@ static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *e
 	gld->camFocus = 0;
 	// TODO - Yes we really DO need to figure out what was clicked on and set focus to it.  sigh
 //	elm_object_focus_set(gld->bx, EINA_TRUE);
-	printf("ELM object focused.\n");
     }
 }
 

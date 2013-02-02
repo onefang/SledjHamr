@@ -26,7 +26,7 @@ namespace scene
 {
 
 // Irrlicht hard codes a reference to the original FPS camera code inside it's scene manager.  This is that code extracted so we can be more flexible.
-// TODO - Hmmm, Where's CursorControl come from?  Ah, passed to the scene manager constructor, it's a GUI thing that we need to replace with an EFL thing.
+// TODO - Hmmm, Where's CursorControl come from?  Ah, passed to the scene manager constructor, it's a GUI thing that we need to replace with an EFL thing.  But only for mouselook mode.
 ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, s32 id)
 {
 	ICameraSceneNode* node = sm->addCameraSceneNode(parent, core::vector3df(), core::vector3df(0, 0, 100), id, true);
@@ -81,6 +81,8 @@ extantzCamera::~extantzCamera()
  *   Which would even work in fly mode.
  * A joystick could be set to range over -2.0 to 2.0, and just set it's part directly.
  * A mouse look rotate, well will come to that when we need to.  B-)
+ *   I think setting the x or y to be the window position of the mouse (-1.0 to 1.0) should do it.
+ *   Or not.  meh
  */
 
 void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
