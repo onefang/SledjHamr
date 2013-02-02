@@ -7,17 +7,35 @@ can manage the ability to "tear off" windows, in other words, pull them
 out of the 3D window to be real windows, then that's something people
 have been asking for from LL forever.
 
+Stdin/out might be good to use.  Extantz starts up "client" programs,
+with a "use stdin/out" argument, the clients pass skang commands (open
+this internal window with these widgets) to extantz through their
+stdout, extantz passes skang commands (these values where set by these
+widgets) back through their stdin.  With no "use stdin/out" argument,
+the programs host their own UI.  Perhaps extantz can just pass the UI
+skang stuff back to the client, which will mean "draw your own window",
+to support the "tear off" feature.  If I remember skang had suitable
+serialization stuff to support this.  Lua does anyway.  B-)
 
-old notes
----------
+Naturally, like matrix-RAD, all this UI stuff can happen across a socket
+as well as through stdin/out.  Should be transparent to the user proggy.
 
-Might be good to allow Lua scripting.  One way of dealing with viewer
-prefs perhaps?  Certainly think about Lua for the UI, and a built in
-editor, etc. ala skang.  All the fancy stuff like development and such
-should be kept in some sort of module, so as not to bloat the main
-proggy.  See if it's possible to disable the Emerald/Phoenix/Firestorm
-LSL bridge when connecting to OpenSim.  See if we can do it from Lua,
-with some sort of generic Lua system for munging things.
+I can redesign skang to be more Lua like, to take advantage of Lua's
+meta language capabilities.  Since no one used skang anyway, I can get
+away with this.  Also should add a Lua friendly wrapper around nails, so
+that addons for Extantz can be supplied entirely as Lua scripts.  In
+other words, LuaSL scripts.  On top of all that, should also allow
+access to the Edje Lua stuff I've already written, but drag it outside
+of an edje file.
+
+This pretty much means that GuiLua should be a shared library, coz in
+the ClientHamr use case, several programs are gonna be using it at once. 
+Should also be separate modules for development stuff like the skin
+editor, which could be just another proggy using GuiLua.
+
+Initially GuiLua can wrap elementary / evas, with the goal of wrapping
+NAWS, just like matrix-RAD was originally planned.  Then I can put off
+writing NAWS for another decade.  lol
 
 
 skang vs edje vs LL shit
@@ -56,3 +74,11 @@ Can include tool tip string, enabled, visible, hover cursor, bounding rectangle?
 Generally uses fixed image and colour names, which skins overide.
 Skins can also overide the XML files.
 Translations provide override XML files that need only override the text bits.
+
+
+old notes
+---------
+
+See if it's possible to disable the Emerald/Phoenix/Firestorm LSL bridge
+when connecting to OpenSim.  Actually, they finally came to their senses
+and support OpenSim now, so that should be sorted already.
