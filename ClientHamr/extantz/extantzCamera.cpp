@@ -72,19 +72,6 @@ extantzCamera::~extantzCamera()
 }
 
 
-/* Have a moveRotate array of floats.
- * X, Y, Z, and whatever the usual letters are for rotations.  lol
- * Each one means "move or rotate this much in this direction".
- * Where 1.0 means "what ever the standard move is if that key is held down".
- * So a keyboard move would just change it's part to 1.0 or -1.0 on key down,
- *   and back to 0.0 on key up.  Or 2.0 / -2.0 if in run mode.
- *   Which would even work in fly mode.
- * A joystick could be set to range over -2.0 to 2.0, and just set it's part directly.
- * A mouse look rotate, well will come to that when we need to.  B-)
- *   I think setting the x or y to be the window position of the mouse (-1.0 to 1.0) should do it.
- *   Or not.  meh
- */
-
 void extantzCamera::animateNode(ISceneNode* node, u32 timeMs)
 {
 	if (!node || node->getType() != ESNT_CAMERA)
