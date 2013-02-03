@@ -38,6 +38,228 @@ NAWS, just like matrix-RAD was originally planned.  Then I can put off
 writing NAWS for another decade.  lol
 
 
+Design notes
+------------
+
+Edje Lua does not wrap elementary widgets, and is not likely to due to
+elementary being compiled after edje.  Smart objects and swallows
+probably can deal with that though, I'm not familiar enough with them to
+know.  Eo on the other hand allegedly offers introspection, which was
+always the corner stone of matrix-RAD.  So access to elementary widgets
+via Eo might be possible.  That's kinda the entire hook I'm hoping will
+help to make matrix-RAD style stuff work as well as it did there.
+
+Edje Lua is restricted to scripts in edje files, AND sandboxed to those
+edje files as well.  We want to step outside that sandbox, and run stand
+alone Lua scripts, as well as GuiLua / LuaSL scripts internal to
+extantz.  Some merging of LUaSL and Edje Lua, leaving room for GuiLua,
+would be great, but I might have to convince Raster.  Note that the
+socket idea wont work in sandboxed edje LUa scripts, unless the socket
+is in C code, that uses edje messages as the internal transport.
+
+Just so it's easier to find, I'll repeat a bit from the Enlightenment
+mailing list here, the result of discussions with raster and other
+interested parties -
+
+"First step is to write edje functions for generically bundling up one
+or more Lua tables into a message, sending that message, then unpacking
+it again. This will be able to be done from edje, from C, and from Lua
+directly. Perhaps adding that as one more edje messege type.  This is
+for sending Lua tables between threads.  A later addition will be to
+send them through the 'net, probably as eet.
+
+Host apps can register arbitrary functions with edje Lua, using a more
+generic version of the code I already wrote for letting edje register
+lua functions.  These host functions are by default not thread safe.
+Edje puts a wrapper function around the host app, and registers that
+wrapper function with Lua.  The wrapper function, when called from Lua,
+does this -
+
+ecore_thread_main_loop_begin();
+call the host app callback();
+ecore_thread_main_loop_end();
+
+The first alternative, which the host app must request, is for the
+wrapper function to use the table message functions to marshal the
+arguments, send it to the main thread, wait for the response (or do
+something else), then unmarshal the result before sending it back to
+Lua.
+
+The second alternative, which the host app must REALLY request, is for
+the host app to say "I'm REALLY going out of my way to be threadsafe,
+just call me direct".  No edje wrapper function, BUT the host app still
+has to use edje to register this function.
+
+The first two might be done this way -
+
+host_cb = edje_lua2_functions_add(...);
+edje_lua2_function_marshal_set(host_cb, function);
+
+The last one could be -
+
+host_cb = edje_lua2_threadsafe_function_add(...);
+
+Note the difference between _functions_ and _function_.  The first call
+registers an entire metatable full of functions, in the same way that
+edje does for it's functions.  These are the default sort of
+functions.  The second call references one of those previously
+registered functions, and makes it marshal arguments and results.  The
+third one registers a single function, but it could be added to an
+existing metatable registered by the first function."
+
+and -
+
+"We are actually half way there.  Anticipating that there would be way
+more edje and evas stuff to add to the edje Lua API in the future, I
+created generic wrapper functions to make that easier.  Implementing
+this would mean exposing those static functions, and writing more of
+these generic wrapper stuff.
+
+Lua already provides a mechanism for this sort of thing, but we
+currently sandbox that out.  We can provide a very limited version of
+the package module, that only lets the Lua script load modules that the
+host app explicitly provides.  This keeps edje Lua in it's strictly
+sandboxed state."
+
+Raster also wants to thread lots of edje, likely including having edje
+Lua scripts as threads, much like I'm doing with LuaSL already.  Plus
+LuaJIT SPEEEEED!!.  B-)
+
+
+extantz
+    GuiLua front end for other programs it starts
+    3D rendering of multiple virtual worlds in tabs
+	    including the same virtual world logged in more than once with different accounts
+    Nails interface to virtual world backend modules.  Each module converts nails commands to / from it's own network protocol.
+	A SledjHamr grid, which definately should be running independantly, 
+	    so others can log on and stay on when extantz closes down
+	    which may be a local or remote grid
+	    might be part of some other grid (a sim)
+	A local only SledjHamr grid, with no other logins.
+	    loaded from an on disk SledjHamr grid, or even across the 'net
+	    which can be persisted as a SledjHamr grid on disk
+	An OS/SL module that connects up to OS/SL grids and translates between OS/SL networking protocols and nails / GuiLua.
+	    sending OS/SL network crap to the grid in response to nails commands
+	    getting OS/SL network crap from the grid
+		translating and sending nails commands to extantz so it can update it's 3D models
+		  including nails encapsulated GuiLUa commands to deal the with OS/SL GUI stuff
+	An Open Croquet module.
+    importer / exporter
+	Which basically grabs an area / selected objects from the current tabs world,
+	then sends them as nails commands to -
+	    a file
+	    across the 'net
+	    the inventory browser
+	    the IAR & OAR file writer
+	or grabs one of those things listed before, and sends it as nails commands to the current tabs world
+
+LuaSL
+    socket for other programs to send scripts and other info through
+    LSL -> LuaSL compiler
+    LuaSL script runner - likely to be running thousands of scripts
+	LuaJIT to speed it up, EFL luaproc to run them as worker threads
+    LSL constants and functions implemented as a Lua library
+	The functions want to use nails to talk to the server backend.
+	Currently just sending Lua function() call strings instead.
+	The "server backend" could be OpenSim (with a shim), an actual SledjHamr server (direct nails), or extantz (direct nails).
+	The server backend is whatever is on the other end of the socket.
+	    it should be able to deal with multiple socket users, but may have to fix it if it does not
+	LuaSL scripts might include LSL style GUI elements (very few, very limited)
+	    convert them to and from nails encapsulated GuiLua
+		if what's on the other end of the socket is extantz, no worries
+		otherwise the other end is OpenSim, the OS end can translate GuiLua into OS/SL viewer network stuff
+		    let the OS end deal with the issues.  It's their fault.  :-P
+	LuaSL (but not LSL) scripts could include GuiLua and other nails stuff directly.
+	    Note, OpenSim being the server backend wont know what to do with GuiLua, and will only know about nails later.
+		This is just a temporary thingy anyway.
+    Might be able to convert it to use more generalised message parsing, PLUS teach Edje some of LuaSL's message parsing tricks.  Find a happy medium.
+
+GuiLua
+    library of all the matrix-RAD type stuffs, so others can use it
+    should include the code so that proggies using it can be client, server, or both
+    including the GuiLua script runner
+	Should only be running dozens at most, and at human speeds (maybe).
+	In the end Lua is lean on resources by design, so we can afford to have lots of proggies using it all over.
+    matrix-RAD style -
+	server creates skang GUI, sends it to client
+	client deals with GUI stuff, sends values back to server
+	server stores values and does things
+	client can do things to
+
+nails command pump
+    library, including C and Lua bindings, so all can use it as client, or server, or both
+    dedicate one nails command to encapsulate GuiLua skang commands
+	"G", so GuiLua skang can look like "GuiLua.widget("name", "Button", 0, _0, 100, 4, 0, "label");"
+    could even have a nails command for Lua / LuaSL / LSL commands or scripts.  This might help with the OpenSim nails shim, we can start with that, and expand it later.  B-)
+	"L" and "l", though currently LuaSL is using SID.foo(), where SID is the UUID of the script.  Easy enough to whack an L in front of that.
+	The LuaSL scripts are using _LSL as the table name, but that's just using _ as an "internal variable" marker.  Also easy to change.
+    SledHamr grids / sims are stored on disk or sent across the 'net as nails commands.
+
+IAR & OAR file reader / writer
+    loads up the file, sending it as nails commands
+    converts and stores incoming nails commands as an IAR or OAR file
+
+Edje Lua
+    Lua embedded in edje files, and sandboxed to them.
+    add table marshalling into an edje message
+    add host proggy supplied Lua functions
+	So we can add nails.foo(), GuiLua.foo(), and even LSL.foo().
+	LuaSL adds these to their generated scripts -
+	    local _bit = require("bit")
+	    local _LSL = require("LSL")
+	But require() is part of the package library that Edje Lua disables.
+	    Tweak Edje Lua so that we can use it for external GuiLua and LuaSL scripts.
+		Edje Lua can add the bit library if it detects LuaJIT or 5.2.
+		This new host function thingy can be used to add GuiLua and nails ourselves.  All users of it probably want to be sandboxed, the scripts should be loaded up by extantz, OpenSim, or SledjHamr, not run from the operating system.
+		LuaSL stuff needs to be sandboxed as well, maybe we can use this new host function thingy to add LSL to?
+		Really should investigate if this shit being duplicated in thousands of LuaSL scripts soaks up lots of memory?  And require("LSL") versus this new host function thingy.
+		On the other hand, a lot oy this LSL library would end up being wrappers around nails in the future, which is a shared library.
+    LuaJIT?  Optional?
+	Need to sort out it's memory allocator, coz apparently the one Edje uses is not thread safe, but the LuaJIT one does not limit memory per script like Edje does.
+	    Maybe Edje can use an Eina allocator?
+	    LuaSL uses luaL_newstate() for now, which uses the default Lua allocator (which might be the LuaJIT one if that's in use).
+	    Edje uses lua_newstate(_elua_alloc, &ela) instead.
+    merge the actual script threading code from LuaSL into Edje Lua?
+	once this code is in Edje Lua, both LuaSL and GuiLua can use that
+
+in world object editor
+    Good to be separate, coz often you spend a lot of time NOT editing.
+    GuiLua based, so it can even be replaced / hacked up / tweaked.
+    Probably not much point dealing with GUI itself, as you want a 3D rendering of what you are editing, thus need extantz as the front end.
+    sending nails to extantz to render the results
+	extantz sends nails to the virtual world backend modules, which deal with translating and sending them on
+	also gotta deal with OS/SL backends that prefer to send the entire thing round robin and only update the screen once it's hit the server
+
+woMan
+    account manager
+	GuiLua for dealing with the account info
+	either sending the GuiLua to extantz, or dealing with it itself
+    settings manager
+	reading legacy viewer XML GUI files for preferences
+	reading legacy viewer XML settings files
+	translating that to GuiLua
+	either sending the GuiLua to extantz, or dealing with it itself
+	writing changed settings to legacy viewer XML settings files
+
+inventory browser
+    Good to be separate, coz often you spend a lot of time NOT dealing with inventory.
+	On the other hand, people might have their inventory window open all the time, I do.  lol
+    handles local inventory as the usual nails files
+
+IM client
+    Separate coz it could also be used as a normal IM client.
+    either sending the GuiLua to extantz, or dealing with it itself
+    calls libpurple for the hard work
+    needs stuff for extantz / woMan to feed it IM / group / local chat stuffs from grids
+	gotta be modular, perhaps same module that handles other grid stuff for extantz?
+	or a libpurple module for OS/SL, and have authentication credentials for those grids passed from elsewhere (woMan?)
+
+web browser
+    We may have to deal with external web proggies, which may in the end be the best way.
+    Except for MOAP.  lol
+    Maybe later we can have a HTML to GuiLua translater module?  Muahahaha
+
+
 skang vs edje vs LL shit
 ------------------------
 
