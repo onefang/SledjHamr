@@ -292,8 +292,7 @@ static const char vertex_shader[] =
    "   gl_FragColor = color + white * dot(light_direction, rotated_normal);\n"
    "}\n";
 
-static GLuint
-load_shader(GLData *gld, GLenum type, const char *shader_src)
+static GLuint load_shader(GLData *gld, GLenum type, const char *shader_src)
 {
    Evas_GL_API *gl = gld->glapi;
    GLuint shader;
@@ -365,7 +364,7 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     {
 	if (gld->move)
 	{
-	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't now at what point the camera animate routine is actually called.
+	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
 	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
 	    // TODO - make this a hash lookup dammit.
@@ -467,7 +466,7 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     {
 	if (gld->move)
 	{
-	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't now at what point the camera animate routine is actually called.
+	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
 	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
 	    // TODO - make this a hash lookup dammit.
@@ -600,8 +599,7 @@ static void on_pixels(void *data, Evas_Object *obj)
     gld->resized = 0;
 }
 
-static void
-on_del(void *data, Evas *e, Evas_Object *obj, void *event_info)
+static void on_del(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
    // on delete of our object clean up some things that don't get auto
    // deleted for us as they are not intrinsically bound to the image
@@ -933,8 +931,7 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 //    system(buf);
 }
 
-static void
-fill(Evas_Object *win)
+static void fill(Evas_Object *win)
 {
     Evas_Object *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
@@ -1081,8 +1078,7 @@ fill(Evas_Object *win)
    evas_object_show(bx);
 }
 
-static void
-cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
    Evas_Event_Mouse_Move *ev = event_info;
    Evas_Object *orig = data;
@@ -1120,8 +1116,7 @@ cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
    evas_map_free(p);
 }
 
-static void
-create_handles(Evas_Object *obj)
+static void create_handles(Evas_Object *obj)
 {
    int i;
    Evas_Coord x, y, w, h;
