@@ -4,6 +4,8 @@
 #define DO_GEARS 0
 #define USE_EO 0
 
+int _log_domain = -1;
+
 Eina_Hash *grids;
 Eina_Hash *viewers;
 
@@ -955,13 +957,16 @@ static void fill(Evas_Object *win)
     tb = elm_toolbar_add(win);
     evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_show(tb);
-    elm_box_pack_end(bx, tb);
+    elm_toolbar_shrink_mode_set(tb, ELM_TOOLBAR_SHRINK_SCROLL);
 
     // Menu.
-    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
-    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    tb_it = elm_toolbar_item_append(tb, NULL, "Menu", NULL, NULL);	elm_toolbar_item_menu_set(tb_it, EINA_TRUE);	menu = elm_toolbar_item_menu_get(tb_it);
+    tb_it = elm_toolbar_item_append(tb, NULL, "Menu", NULL, NULL);
+    elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
+    // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
+    elm_toolbar_item_priority_set(tb_it, 9999);
+    elm_toolbar_menu_parent_set(tb, win);
+    menu = elm_toolbar_item_menu_get(tb_it);
+
     elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
     menu_it = elm_menu_item_add(menu, NULL, NULL, "advanced", NULL, NULL);
     elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
@@ -975,7 +980,10 @@ static void fill(Evas_Object *win)
     elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
     elm_menu_item_separator_add(menu, menu_it);
     elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, win);
-    elm_toolbar_menu_parent_set(tb, win);
+
+    // The toolbar needs to be packed into the box AFTER the menus are added.
+    elm_box_pack_end(bx, tb);
+    evas_object_show(tb);
 
     gridList = elm_genlist_add(win);
     grids = eina_hash_stringshared_new(free);
@@ -1153,7 +1161,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     GLData *gld = NULL;
     char buf[PATH_MAX];
     int i;
-    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
+//    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
+
+    _log_domain = eina_log_domain_register("extantz", NULL);
 
     // If you want efl to handle finding your bin/lib/data dirs, you must do this below.
     elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
@@ -1175,9 +1185,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     // Set the engine to opengl_x11
     if (gld->useEGL)
 	elm_config_preferred_engine_set("opengl_x11");
-    else
-	elm_config_preferred_engine_set("software_x11");
-    gld->win = elm_win_util_standard_add("extantz", "GLView");
+//    else
+//	elm_config_preferred_engine_set("software_x11");
+    gld->win = elm_win_add(NULL, "extantz", ELM_WIN_BASIC);
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
@@ -1207,12 +1217,13 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     evas_object_show(gld->bx);
 
     win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
-    elm_win_title_set(win3, "world manager");
     evas_object_event_callback_add(elm_win_inlined_image_object_get(win3), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
     elm_win_alpha_set(win3, EINA_TRUE);
     fill(win3);
     // Odd, it needs to be resized twice?
     evas_object_resize(win3, w / 3, h / 4);
+   // image object for win3 is unlinked to its pos/size - so manual control
+   // this allows also for using map and other things with it.
     evas_object_move(elm_win_inlined_image_object_get(win3), 13, 13);
     evas_object_resize(elm_win_inlined_image_object_get(win3), w / 3, h / 4);
     evas_object_show(win3);
