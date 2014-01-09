@@ -1164,6 +1164,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
     _log_domain = eina_log_domain_register("extantz", NULL);
+    // Don't do this, we need to clean up other stuff do, so set a cleat up function below.
+    //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
 
     // If you want efl to handle finding your bin/lib/data dirs, you must do this below.
     elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
@@ -1214,6 +1216,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(gld->win, gld->bx);
     evas_object_size_hint_weight_set(gld->bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(gld->bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
+//    elm_win_resize_object_add(gld->bx, bg);
     evas_object_show(gld->bx);
 
     win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
