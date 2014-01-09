@@ -50,9 +50,9 @@ typedef struct ICameraSceneNode ICameraSceneNode;
 #endif
 
 
-#define USE_PHYSICS 1
-#define USE_EGL     1
-#define USE_IRR     1
+#define USE_PHYSICS 0
+#define USE_EGL     0
+#define USE_IRR     0
 
 
 typedef enum
