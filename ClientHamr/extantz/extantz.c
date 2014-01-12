@@ -1,9 +1,6 @@
 #include "extantz.h"
 
 
-#define DO_GEARS 0
-#define USE_EO 0
-
 int _log_domain = -1;
 
 Eina_Hash *grids;
@@ -40,9 +37,6 @@ static Elm_Genlist_Item_Class *grid_gic = NULL;
 static Elm_Genlist_Item_Class *account_gic = NULL;
 static Elm_Genlist_Item_Class *viewer_gic = NULL;
 
-static int x, y, w, h;
-
-
 static const char *img1 = PACKAGE_DATA_DIR "/images/plant_01.jpg";
 static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
 static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
@@ -50,8 +44,6 @@ static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
 
 #define EPHYSICS_TEST_THEME "extantz"
 
-
-static void free_gear(Gear *gear);
 
 //--------------------------------//
 // Gear Stuff.
@@ -87,7 +79,7 @@ static Gear *make_gear(GLData *gld, GLfloat inner_radius, GLfloat outer_radius, 
    double s[5], c[5];
    GLfloat normal[3];
    const int tris_per_tooth = 20;
-   Evas_GL_API *gl = gld->glapi;
+   Evas_GL_API *gl = gld->glApi;
 
    gear = (Gear*)malloc(sizeof(Gear));
    if (gear == NULL)
@@ -227,7 +219,7 @@ static void translate(GLfloat *m, GLfloat x, GLfloat y, GLfloat z)
 
 static void draw_gear(GLData *gld, Gear *gear, GLfloat *m, GLfloat x, GLfloat y, GLfloat angle, const GLfloat *color)
 {
-   Evas_GL_API *gl = gld->glapi;
+   Evas_GL_API *gl = gld->glApi;
    GLfloat tmp[16];
 
    memcpy(tmp, m, sizeof tmp);
@@ -296,7 +288,7 @@ static const char vertex_shader[] =
 
 static GLuint load_shader(GLData *gld, GLenum type, const char *shader_src)
 {
-   Evas_GL_API *gl = gld->glapi;
+   Evas_GL_API *gl = gld->glApi;
    GLuint shader;
    GLint compiled = 0;
 
@@ -328,6 +320,68 @@ static GLuint load_shader(GLData *gld, GLenum type, const char *shader_src)
         return 0;
      }
    return shader;
+}
+
+static void gears_init(GLData *gld)
+{
+    Evas_GL_API *gl = gld->glApi;
+    GLint linked = 0;
+
+    char msg[512];
+
+    gl->glEnable(GL_CULL_FACE);
+    gl->glEnable(GL_DEPTH_TEST);
+    gl->glEnable(GL_BLEND);
+
+    // Load the vertex/fragment shaders
+    gld->vtx_shader  = load_shader(gld, GL_VERTEX_SHADER, vertex_shader);
+    gld->fgmt_shader = load_shader(gld, GL_FRAGMENT_SHADER, fragment_shader);
+
+    // Create the program object
+    if (!(gld->program = gl->glCreateProgram()))
+	return;
+
+    gl->glAttachShader(gld->program, gld->vtx_shader);
+    gl->glAttachShader(gld->program, gld->fgmt_shader);
+
+    // Bind shader attributes.
+    gl->glBindAttribLocation(gld->program, 0, "position");
+    gl->glBindAttribLocation(gld->program, 1, "normal");
+
+    // Link the program
+    gl->glLinkProgram(gld->program);
+    gld->glApi->glGetProgramiv(gld->program, GL_LINK_STATUS, &linked);
+
+    if (!linked)
+    {
+	GLint len = 0;
+
+	gld->glApi->glGetProgramiv(gld->program, GL_INFO_LOG_LENGTH, &len);
+	if (len > 1)
+	{
+	    char *info = malloc(sizeof(char) * len);
+
+	    if (info)
+	    {
+		gld->glApi->glGetProgramInfoLog(gld->program, len, NULL, info);
+		printf("Error linking program:\n%s\n", info);
+		free(info);
+	    }
+	}
+	gld->glApi->glDeleteProgram(gld->program);
+    }
+
+    gl->glUseProgram(gld->program);
+    gld->proj_location  = gl->glGetUniformLocation(gld->program, "proj");
+    gld->light_location = gl->glGetUniformLocation(gld->program, "light");
+    gld->color_location = gl->glGetUniformLocation(gld->program, "color");
+
+    /* make the gears */
+    gld->gear1 = make_gear(gld, 1.0, 4.0, 1.0, 20, 0.7);
+    gld->gear2 = make_gear(gld, 0.5, 2.0, 2.0, 10, 0.7);
+    gld->gear3 = make_gear(gld, 1.3, 2.0, 0.5, 10, 0.7);
+
+    gld->gearsInited = EINA_TRUE;
 }
 
 static void _cb_mouse_down_GL(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -501,9 +555,11 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     }
 }
 
+
+// Called from on_pixels (), or the Elm_gliew resize callback.
 static void _resize(GLData *gld)
 {
-   Evas_GL_API *gl = gld->glapi;
+   Evas_GL_API *gl = gld->glApi;
 
 #if DO_GEARS
    GLfloat ar, m[16] = {
@@ -524,17 +580,25 @@ static void _resize(GLData *gld)
    m[5] = 0.1 * ar / gld->img_h;
    memcpy(gld->proj, m, sizeof gld->proj);
 #endif
-//   gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
+   gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
+}
+
+static void _resize_gl(Evas_Object *obj)
+{
+   int w, h;
+   GLData *gld = evas_object_data_get(obj, "gld");
+
+   elm_glview_size_get(obj, &w, &h);
+
+   gld->img_w = w;
+   gld->img_h = h;
+   _resize(gld);
 }
 
 static void on_pixels(void *data, Evas_Object *obj)
 {
-    static int count = 0;
     GLData *gld = data;
-    if (!gld)
-	return;
-
-    Evas_GL_API *gl = gld->glapi;
+    Evas_GL_API *gl = gld->glApi;
 
     // get the image size in case it changed with evas_object_image_size_set()
     if (gld->r1)
@@ -542,15 +606,18 @@ static void on_pixels(void *data, Evas_Object *obj)
 	Evas_Coord    w, h;
 
 	// Poor mans resize check. coz Elm wont do it easily.
-	evas_object_geometry_get(gld->r1, NULL, NULL, &w, &h);
+	evas_object_image_size_get(gld->r1, &w, &h);
 	if ((gld->img_w != w) || (gld->img_h != h))
 	{
-	    float new_w = ((float) gld->scr_w / ((float) gld->scr_w * (float) w));
-	    float new_h = ((float) gld->scr_h / ((float) gld->scr_h * (float) h));
+	    // No idea where this crap came from.
+	    //float new_w = ((float) gld->scr_w / ((float) gld->scr_w * (float) w));
+	    //float new_h = ((float) gld->scr_h / ((float) gld->scr_h * (float) h));
 	
-	    gld->img_w = new_w;
-	    gld->img_h = new_h;
-	    evas_object_image_fill_set(gld->r1, 0, 0, gld->img_w, gld->img_h);
+	    //gld->sfc_w = new_w;
+	    //gld->sfc_h = new_h;
+	    //evas_object_image_fill_set(gld->r1, 0, 0, gld->sfc_w, gld->sfc_h);
+	    gld->img_w = w;
+	    gld->img_h = h;
 	    gld->resized = 1;
 	}
     }
@@ -558,29 +625,36 @@ static void on_pixels(void *data, Evas_Object *obj)
     if (gld->useEGL)
     {
 	// Yes, we DO need to do our own make current, coz aparently the Irrlicht one is useless.
-	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
-	if (gld->resized)
-	    _resize(gld);
+	// Hopefully Elm_GL has done this for us by now.
+	// Evas_GL needs it to.
+	if (gld->ctx)
+	    evas_gl_make_current(gld->evasGl, gld->sfc, gld->ctx);
     }
 
     if (!gld->doneIrr)
 	gld->doneIrr = startIrr(gld);	// Needs to be after gld->win is shown, and needs to be done in the render thread.
+#if DO_GEARS
+    if (!gld->gearsInited)
+	gears_init(gld);
+#endif
+
+    if (gld->resized)
+	_resize(gld);
 
     drawIrr_start(gld);
 
+#if DO_GEARS
     if (gld->useEGL)
     {
-#if DO_GEARS
 	static const GLfloat red[4] = { 0.8, 0.1, 0.0, 1.0 };
 	static const GLfloat green[4] = { 0.0, 0.8, 0.2, 1.0 };
 	static const GLfloat blue[4] = { 0.2, 0.2, 1.0, 1.0 };
 	GLfloat m[16];
 
-
 	// Draw the gears.
 	if (!gld->useIrr)
 	{
-	    gl->glClearColor(0.8, 0.8, 0.1, 0.1);
+	    gl->glClearColor(0.7, 0.0, 1.0, 1.0);
 	    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -593,101 +667,163 @@ static void on_pixels(void *data, Evas_Object *obj)
 	draw_gear(gld, gld->gear2, m, 3.1, -2.0, -2 * gld->angle - 9.0, green);
 	draw_gear(gld, gld->gear3, m, -3.1, 4.2, -2 * gld->angle - 25.0, blue);
 	gld->angle += 2.0;
-#endif
     }
+#endif
 
     drawIrr_end(gld);
-    count++;
+
+#if USE_IR
+#else
+   // This might get done deep within drawIrr_end, but only if we are using Irrlicht.
+
+   // Optional - Flush the GL pipeline
+   gl->glFlush();
+//   gl->glFinish();
+#endif
+
     gld->resized = 0;
 }
 
-static void on_del(void *data, Evas *e, Evas_Object *obj, void *event_info)
+static void _draw_gl(Evas_Object *obj)
 {
-   // on delete of our object clean up some things that don't get auto
-   // deleted for us as they are not intrinsically bound to the image
-   // object as such (you could use the same context and surface across
-   // multiple image objects and re-use the evasgl handle too multiple times.
-   // here we bind them to 1 object only though by doing this.
-   GLData *gld = data;
+   Evas_GL_API *gl = elm_glview_gl_api_get(obj);
+   GLData *gld = evas_object_data_get(obj, "gld");
    if (!gld) return;
-   Evas_GL_API *gl = gld->glapi;
+
+   on_pixels(gld, obj);
+}
+
+// Callback from Evas, also used as the general callback for deleting the GL stuff.
+static void _clean_gl(void *data, Evas *e EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+    GLData *gld = data;
+    Evas_GL_API *gl = gld->glApi;
 
     ecore_animator_del(gld->animator);
 
     if (gld->useEGL)
     {
 	// Do a make_current before deleting all the GL stuff.
-	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
+	evas_gl_make_current(gld->evasGl, gld->sfc, gld->ctx);
 
-#if DO_GEARS
-	gl->glDeleteShader(gld->vtx_shader);
-	gl->glDeleteShader(gld->fgmt_shader);
-	gl->glDeleteProgram(gld->program);
+    }
 
-	gl->glDeleteBuffers(1, &gld->gear1->vbo);
-	gl->glDeleteBuffers(1, &gld->gear2->vbo);
-	gl->glDeleteBuffers(1, &gld->gear3->vbo);
+    gl->glDeleteShader(gld->vtx_shader);
+    gl->glDeleteShader(gld->fgmt_shader);
+    gl->glDeleteProgram(gld->program);
 
-	free_gear(gld->gear1);
-	free_gear(gld->gear2);
-	free_gear(gld->gear3);
-#endif
-
+    if (gld->evasGl)
+    {
 	// Irrlicht wants to destroy the context and surface, so only do this if Irrlicht wont.
 	if (!gld->doneIrr)
 	{
-	    evas_gl_surface_destroy(gld->evasgl, gld->sfc);
-	    evas_gl_context_destroy(gld->evasgl, gld->ctx);
+	    evas_gl_surface_destroy(gld->evasGl, gld->sfc);
+	    evas_gl_context_destroy(gld->evasGl, gld->ctx);
 	}
 	// TODO - hope this is OK, considering the context and surface might get dealt with by Irrlicht.
 	// Might be better to teach Irrlicht to not destroy shit it did not create.
 	evas_gl_config_free(gld->cfg);
-	evas_gl_free(gld->evasgl);
+	evas_gl_free(gld->evasGl);
     }
 
     // TODO - Since this is created on the render thread, better hope this is being deleted on the render thread.
     finishIrr(gld);
 
-   free(gld);
+#if DO_GEARS
+   gl->glDeleteBuffers(1, &gld->gear1->vbo);
+   gl->glDeleteBuffers(1, &gld->gear2->vbo);
+   gl->glDeleteBuffers(1, &gld->gear3->vbo);
+
+   free_gear(gld->gear1);
+   free_gear(gld->gear2);
+   free_gear(gld->gear3);
+#endif
 }
 
+// Callback from Elm, coz they do shit different.
+static void _del_gl(Evas_Object *obj)
+{
+   GLData *gld = evas_object_data_get(obj, "gld");
+   if (!gld)
+     {
+        printf("Unable to get GLData. \n");
+        return;
+     }
+
+    _clean_gl(gld, NULL, NULL, NULL);
+
+   evas_object_data_del((Evas_Object*)obj, "gld");
+}
+
+// Callback for when the app quits.
+static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+    GLData *gld = data;
+
+    evas_object_del(gld->win);
+    free(gld);
+    elm_exit();
+}
+
+// Callback from the animator.
 static Eina_Bool doFrame(void *data)
 {
     GLData *gld = data;
 
     // Mark the pixels as dirty, so they get rerendered each frame, then Irrlicht can draw it's stuff each frame.
-    // This causes on_pixel to be triggered by Evas_GL.
+    // This causes on_pixel to be triggered by Evas_GL, and _draw_gl for Elm_glview.
     if (gld->r1)
 	evas_object_image_pixels_dirty_set(gld->r1, EINA_TRUE);
+    if (gld->elmGl)
+	elm_glview_changed_set(gld->elmGl);
 
     // If not using Evas_GL, we need to call on_pixel() manually.
     if (!gld->useEGL)
 	on_pixels(gld, gld->r1);
 
-    return EINA_TRUE;
+    return EINA_TRUE;	// Keep calling us.
 }
 
-static void init_evas_gl(GLData *gld, int w, int h)
+static void init_evas_gl(GLData *gld)
 {
-   Ecore_Evas  *ee;
-   Evas *canvas;
-   Evas_Native_Surface ns;
-
     if (!gld->useEGL)
 	return;
 
-    w *= 2;	// Compensate for the original halving of the window.
-    w -= 1;
-    h -= 1;
+    gld->sfc_w = gld->win_w;
+    gld->sfc_h = gld->win_h;
 
-    ee = ecore_evas_ecore_evas_get(evas_object_evas_get(gld->win));
-    canvas = ecore_evas_get(ee);
+    // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
+    gld->canvas = evas_object_evas_get(gld->win);
+    // An Ecore_Evas holds an Evas.
+    // Get the Ecore_Evas that wraps an Evas.
+    gld->ee = ecore_evas_ecore_evas_get(gld->canvas);	// Only use this on Evas that was created with Ecore_Evas.
 
-    //-//-//-// THIS IS WHERE GL INIT STUFF HAPPENS (ALA EGL)
-    //-//
+#if USE_ELM_GL
+    // Add a GLView
+    gld->elmGl = elm_glview_add(gld->win);
+    evas_object_size_hint_align_set(gld->elmGl, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_size_hint_weight_set(gld->elmGl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_glview_mode_set(gld->elmGl, 0 | ELM_GLVIEW_ALPHA | ELM_GLVIEW_DEPTH | ELM_GLVIEW_DIRECT);
+    elm_glview_resize_policy_set(gld->elmGl, ELM_GLVIEW_RESIZE_POLICY_RECREATE);		// Destroy the current surface on a resize and create a new one.
+    elm_glview_render_policy_set(gld->elmGl, ELM_GLVIEW_RENDER_POLICY_ON_DEMAND);
+//    elm_glview_render_policy_set(gld->elmGl, ELM_GLVIEW_RENDER_POLICY_ALWAYS);
+    // These get called in the render thread I think.
+    //elm_glview_init_func_set(gld->elmGl, _init_gl);	// Not actually needed, it gets done in on_pixels.
+    elm_glview_del_func_set(gld->elmGl, _del_gl);
+    elm_glview_resize_func_set(gld->elmGl, _resize_gl);
+    elm_glview_render_func_set(gld->elmGl, (Elm_GLView_Func_Cb) _draw_gl);
+
+    elm_box_pack_end(gld->bx, gld->elmGl);
+    elm_win_resize_object_add(gld->win, gld->elmGl);
+    evas_object_show(gld->elmGl);
+
+    elm_object_focus_set(gld->elmGl, EINA_TRUE);
+    gld->glApi = elm_glview_gl_api_get(gld->elmGl);
+    evas_object_data_set(gld->elmGl, "gld", gld);
+#else
     // get the evas gl handle for doing gl things
-    gld->evasgl = evas_gl_new(canvas);
-    gld->glapi = evas_gl_api_get(gld->evasgl);
+    gld->evasGl = evas_gl_new(gld->canvas);
+    gld->glApi = evas_gl_api_get(gld->evasGl);
 
     // Set a surface config
     gld->cfg = evas_gl_config_new();
@@ -697,120 +833,68 @@ static void init_evas_gl(GLData *gld, int w, int h)
     gld->cfg->options_bits = EVAS_GL_OPTIONS_DIRECT;
 
     // create a surface and context
-    gld->sfc_w = gld->scr_w;
-    gld->sfc_h = gld->scr_h;
-    gld->sfc = evas_gl_surface_create(gld->evasgl, gld->cfg, gld->sfc_w, gld->sfc_h);
-    gld->ctx = evas_gl_context_create(gld->evasgl, NULL);		// The second NULL is for sharing contexts I think, which might be what we want to do with Irrlicht.
-    //-//
-    //-//-//-// END GL INIT BLOB
+    gld->sfc = evas_gl_surface_create(gld->evasGl, gld->cfg, gld->sfc_w, gld->sfc_h);
+    gld->ctx = evas_gl_context_create(gld->evasGl, NULL);		// The second NULL is for sharing contexts I think, which might be what we want to do with Irrlicht.  It's not documented.
 
-   // set up the image object. a filled one by default
-    gld->r1 = evas_object_image_add(canvas);
-    evas_object_image_filled_set(gld->r1, EINA_FALSE);
+    // Set up the image object, a filled one by default.
+    gld->r1 = evas_object_image_filled_add(gld->canvas);
+
+   // attach important data we need to the object using key names. This just
+   // avoids some global variables and means we can do nice cleanup. You can
+   // avoid this if you are lazy
+   // Not actually needed, with evas we can pass data pointers to stuff.
+    //evas_object_data_set(gld->r1, "gld", gld);
+
+    // when the object is deleted - call the on_del callback. like the above,
+    // this is just being clean
+    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_DEL, _clean_gl, gld);
+
+    // set up an actual pixel size for the buffer data. it may be different
+    // to the output size. any windowing system has something like this, just
+    // evas has 2 sizes, a pixel size and the output object size
+    evas_object_image_size_set(gld->r1, gld->sfc_w, gld->sfc_h);
+    // Not actualy needed, as we create the image already filled.
+    //evas_object_image_fill_set(gld->r1, 0, 0, gld->sfc_w, gld->sfc_h);
+
+    // These two are not in the original example, but I get black r1 when I leave them out.
     evas_object_size_hint_align_set(gld->r1, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_size_hint_weight_set(gld->r1, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(gld->win, gld->r1);
-   // when the object is deleted - call the on_del callback. like the above,
-   // this is just being clean
-   evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_DEL, on_del, gld);
-   // set up an actual pixel size for the buffer data. it may be different
-   // to the output size. any windowing system has something like this, just
-   // evas has 2 sizes, a pixel size and the output object size
-   evas_object_image_size_set(gld->r1, gld->scr_w, gld->scr_h);
-   evas_object_image_fill_set(gld->r1, 0, 0, w, h);
-   // set up the native surface info to use the context and surface created
-   // above
 
-    // The ELM version does these as well.
-//    elm_glview_resize_policy_set(gld->gl, ELM_GLVIEW_RESIZE_POLICY_RECREATE);			// Destroy the current surface on a resize and create a new one.
-//    elm_glview_render_policy_set(gld->gl, ELM_GLVIEW_RENDER_POLICY_ALWAYS);			// Always render, even if not visible.
-
-    //-//-//-// THIS IS WHERE GL INIT STUFF HAPPENS (ALA EGL)
-    //-//
-    evas_gl_native_surface_get(gld->evasgl, gld->sfc, &ns);
-    evas_object_image_native_surface_set(gld->r1, &ns);
+    // set up the native surface info to use the context and surface created
+    // above
+    evas_gl_native_surface_get(gld->evasGl, gld->sfc, &(gld->ns));
+    evas_object_image_native_surface_set(gld->r1, &(gld->ns));
     evas_object_image_pixels_get_callback_set(gld->r1, on_pixels, gld);
-    //-//
-    //-//-//-// END GL INIT BLOB
 
+   // move the image object somewhere, resize it and show it. any windowing
+   // system would need this kind of thing - place a child "window"
+   // Hmm, no need to resize it anyway, it's sized above.
+    evas_object_move(gld->r1, 0, 0);
+    //evas_object_resize(gld->r1, gld->sfc_w, gld->sfc_h);
+    elm_win_resize_object_add(gld->win, gld->r1);
     evas_object_show(gld->r1);
-    // Might be good to pack it when I get the menu / address / indicator bar working.
-//    elm_box_pack_end(gld->bx, gld->r1);
+    elm_box_pack_end(gld->bx, gld->r1);
 
-    evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
-
-    gld->glapi->glEnable(GL_CULL_FACE);
-    gld->glapi->glEnable(GL_DEPTH_TEST);
-    gld->glapi->glEnable(GL_BLEND);
-    gld->glapi->glViewport(0, 0, (GLint) gld->sfc_w, (GLint) gld->sfc_h);
-
-#if DO_GEARS
-    GLint linked = 0;
-
-    // Load the vertex/fragment shaders
-    gld->vtx_shader  = load_shader(gld, GL_VERTEX_SHADER, vertex_shader);
-    gld->fgmt_shader = load_shader(gld, GL_FRAGMENT_SHADER, fragment_shader);
-
-    // Create the program object
-    if (!(gld->program = gld->glapi->glCreateProgram()))
-	return;
-
-    gld->glapi->glAttachShader(gld->program, gld->vtx_shader);
-    gld->glapi->glAttachShader(gld->program, gld->fgmt_shader);
-
-    // Bind shader attributes.
-    gld->glapi->glBindAttribLocation(gld->program, 0, "position");
-    gld->glapi->glBindAttribLocation(gld->program, 1, "normal");
-    // Link the program
-    gld->glapi->glLinkProgram(gld->program);
-    gld->glapi->glGetProgramiv(gld->program, GL_LINK_STATUS, &linked);
-
-    if (!linked)
-    {
-	GLint len = 0;
-
-	gld->glapi->glGetProgramiv(gld->program, GL_INFO_LOG_LENGTH, &len);
-	if (len > 1)
-	{
-	    char *info = malloc(sizeof(char) * len);
-
-	    if (info)
-	    {
-		gld->glapi->glGetProgramInfoLog(gld->program, len, NULL, info);
-		printf("Error linking program:\n%s\n", info);
-		free(info);
-	    }
-	}
-	gld->glapi->glDeleteProgram(gld->program);
-    }
-
-    gld->glapi->glUseProgram(gld->program);
-    gld->proj_location  = gld->glapi->glGetUniformLocation(gld->program, "proj");
-    gld->light_location = gld->glapi->glGetUniformLocation(gld->program, "light");
-    gld->color_location = gld->glapi->glGetUniformLocation(gld->program, "color");
-
-    /* make the gears */
-    gld->gear1 = make_gear(gld, 1.0, 4.0, 1.0, 20, 0.7);
-    gld->gear2 = make_gear(gld, 0.5, 2.0, 2.0, 10, 0.7);
-    gld->gear3 = make_gear(gld, 1.3, 2.0, 0.5, 10, 0.7);
+//    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
 #endif
-
-    // NOTE: if you delete r1, this animator will keep running trying to access
-    // r1 so you'd better delete this animator with ecore_animator_del() or
-    // structure how you do animation differently. you can also attach it like
-    // evasgl, sfc, etc. etc. if this animator is specific to this object
-    // only and delete it in the del handler for the obj.
-    //
-    // TODO - apparently the proper way to deal with the new async rendering is to have this animator do the dirty thing, and call the Irrlicht rendering stuff in the on_pixel call set above.
-    //        That still leaves the problem of the Irrlicht setup being in the main thread.  Which also should be done in on_pixel, as that's done in the correct thread.
-//    ecore_animator_frametime_set(1.0);
-    gld->animator = ecore_animator_add(doFrame, gld);	// This animator will be called every frame tick, which defaults to 1/30 seconds.
 
     // In this code, we are making our own camera, so grab it's input when we are focused.
     evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
     evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
-    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
     gld->camFocus = 1;	// Start with the GL camera focused.
+
+    // NOTE: if you delete r1, this animator will keep running trying to access
+    // r1 so you'd better delete this animator with ecore_animator_del() or
+    // structure how you do animation differently. you can also attach it like
+    // evasGl, sfc, etc. etc. if this animator is specific to this object
+    // only and delete it in the del handler for the obj.
+    //
+    // TODO - apparently the proper way to deal with the new async rendering is to have this animator do the dirty thing, and call the Irrlicht rendering stuff in the on_pixel call set above.
+    //        That still leaves the problem of the Irrlicht setup being in the main thread.  Which also should be done in on_pixel, as that's done in the correct thread.
+    
+    // Jiggling this seems to produce a trade off between flickering and frame rate.  Nothing else changed the flickering.
+    ecore_animator_frametime_set(0.04);	// Default is 1/30, or 0.033333
+    gld->animator = ecore_animator_add(doFrame, gld);	// This animator will be called every frame tick, which defaults to 1/30 seconds.
 
     return;
 }
@@ -831,12 +915,6 @@ static Evas_Object *_content_image_new(Evas_Object *parent, const char *img)
 static void _promote(void *data, Evas_Object *obj , void *event_info )
 {
    elm_naviframe_item_promote(data);
-}
-
-static void _on_done(void *data, Evas_Object *obj, void *event_info)
-{
-    evas_object_del((Evas_Object*)data);
-    elm_exit();
 }
 
 static char *_grid_label_get(void *data, Evas_Object *obj, const char *part)
@@ -924,16 +1002,17 @@ static Evas_Object *_viewer_content_get(void *data, Evas_Object *obj, const char
 static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 {
     ezGrid *thisGrid = data;
+    GLData *gld = thisGrid->gld;
     char buf[PATH_MAX];
 
-//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s &", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
-    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", w - (w / 5), h - 30, w / 5, y, thisGrid->splashPage);
+//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s &", gld->win_w - (gld->win_w / 5), gld->win_h - 30, gld->win_w / 5, gld->win_y, thisGrid->splashPage);
+    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", gld->win_w - (gld->win_w / 5), gld->win_h - 30, gld->win_w / 5, gld->win_y, thisGrid->splashPage);
     printf("%s   ### genlist obj [%p], item pointer [%p]\n", buf, obj, event_info);
 // comment this out for now, busy dealing with input stuff, don't want to trigger this multiple times.
 //    system(buf);
 }
 
-static void fill(Evas_Object *win)
+static void fill(GLData *gld, Evas_Object *win)
 {
     Evas_Object *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
@@ -943,7 +1022,7 @@ static void fill(Evas_Object *win)
     // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
     // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
     bg = evas_object_rectangle_add(evas_object_evas_get(win));
-    evas_object_color_set(bg, 100, 0, 200, 200);
+    evas_object_color_set(bg, 50, 0, 100, 100);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(win, bg);
     evas_object_show(bg);
@@ -979,7 +1058,7 @@ static void fill(Evas_Object *win)
     elm_menu_item_separator_add(menu, menu_it);
     elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
     elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, win);
+    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
     // The toolbar needs to be packed into the box AFTER the menus are added.
     elm_box_pack_end(bx, tb);
@@ -1006,6 +1085,7 @@ static void fill(Evas_Object *win)
 	    thisGrid->loginURI		= gridTest[i][1];
 	    thisGrid->splashPage 	= gridTest[i][2];
 	    thisGrid->icon		= "folder";
+	    thisGrid->gld		= gld;
 	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
 	    eina_hash_add(grids, thisGrid->name, thisGrid);
 	}
@@ -1066,9 +1146,11 @@ static void fill(Evas_Object *win)
 
 #if USE_EO
     // Not ready for prime time yet, or I'm missing a step.  Causes it to hang after closing the window.
+    // Slightly better now, it bitches instead of hanging.
     bt = eo_add(ELM_OBJ_BUTTON_CLASS, win);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
     eo_do(bt, 
+//		evas_obj_text_set("Login"),
 		evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 		evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 		evas_obj_visibility_set(EINA_TRUE)
@@ -1184,58 +1266,65 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     if (!(gld = calloc(1, sizeof(GLData)))) return;
     gldata_init(gld);
 
-    // Set the engine to opengl_x11
+    // Set the engine to opengl_x11, then open our window.
     if (gld->useEGL)
 	elm_config_preferred_engine_set("opengl_x11");
-//    else
-//	elm_config_preferred_engine_set("software_x11");
     gld->win = elm_win_add(NULL, "extantz", ELM_WIN_BASIC);
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
+#if USE_PHYSICS
     if (!ephysics_init())
 	return 1;
+#endif
 
     elm_win_title_set(gld->win, "extantz virtual world manager");
-    evas_object_smart_callback_add(gld->win, "delete,request", _on_done, NULL);
+    evas_object_smart_callback_add(gld->win, "delete,request", _on_done, gld);
 
-    elm_win_screen_size_get(gld->win, &x, &y, &gld->scr_w, &gld->scr_h);
-    w = gld->scr_w / 2;
-    h = gld->scr_h - 30;
+    // Get the screen size.
+    elm_win_screen_size_get(gld->win, &gld->win_x, &gld->win_y, &gld->scr_w, &gld->scr_h);
+    gld->win_w = gld->scr_w / 2;
+    gld->win_h = gld->scr_h - 30;
 
+    // Note, we don't need an Elm_bg, the entire thing gets covered with the GL rendering surface anyway.
+#if 0
     bg = elm_bg_add(gld->win);
-    elm_bg_load_size_set(bg, w, h);
+    elm_bg_load_size_set(bg, gld->win_w, gld->win_h);
     elm_bg_option_set(bg, ELM_BG_OPTION_CENTER);
     snprintf(buf, sizeof(buf), "%s/images/sky_03.jpg", elm_app_data_dir_get());
     elm_bg_file_set(bg, buf, NULL);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(gld->win, bg);
     evas_object_show(bg);
+#endif
 
     gld->bx = elm_box_add(gld->win);
-    elm_win_resize_object_add(gld->win, gld->bx);
     evas_object_size_hint_weight_set(gld->bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(gld->bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
-//    elm_win_resize_object_add(gld->bx, bg);
+    elm_win_resize_object_add(gld->win, gld->bx);
     evas_object_show(gld->bx);
 
+// TODO - add the main menu here, in a toolbar, in the box.  The windows still need their own menus, just different from the ones we have now.
+
+#if 1
     win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
     evas_object_event_callback_add(elm_win_inlined_image_object_get(win3), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
     elm_win_alpha_set(win3, EINA_TRUE);
-    fill(win3);
-    // Odd, it needs to be resized twice?
-    evas_object_resize(win3, w / 3, h / 4);
-   // image object for win3 is unlinked to its pos/size - so manual control
-   // this allows also for using map and other things with it.
+    fill(gld, win3);
+    // image object for win3 is unlinked to its pos/size - so manual control
+    // this allows also for using map and other things with it.
     evas_object_move(elm_win_inlined_image_object_get(win3), 13, 13);
-    evas_object_resize(elm_win_inlined_image_object_get(win3), w / 3, h / 4);
+    // Odd, it needs to be resized twice.  WTF?
+    evas_object_resize(win3, gld->win_w / 3, gld->win_h / 3);
+    evas_object_resize(elm_win_inlined_image_object_get(win3), gld->win_w / 3, gld->win_h / 3);
     evas_object_show(win3);
     create_handles(elm_win_inlined_image_object_get(win3));
+#endif
 
 #if USE_PHYSICS
     // ePhysics stuff.
     world = ephysics_world_new();
-    ephysics_world_render_geometry_set(world, 0, 0, -50, w, h, 100);
+    ephysics_world_render_geometry_set(world, 0, 0, -50, gld->win_w, gld->win_h, 100);
 
     boundary = ephysics_body_bottom_boundary_add(world);
     ephysics_body_restitution_set(boundary, 1);
@@ -1255,7 +1344,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     box1 = elm_image_add(gld->win);
     elm_image_file_set(box1, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
-    evas_object_move(box1, w / 2 - 80, h - 200);
+    evas_object_move(box1, gld->win_w / 2 - 80, gld->win_h - 200);
     evas_object_resize(box1, 70, 70);
     evas_object_show(box1);
 
@@ -1269,7 +1358,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     box2 = elm_image_add(gld->win);
     elm_image_file_set(box2, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
-    evas_object_move(box2, w / 2 + 10, h - 200);
+    evas_object_move(box2, gld->win_w / 2 + 10, gld->win_h - 200);
     evas_object_resize(box2, 70, 70);
     evas_object_show(box2);
 
@@ -1284,11 +1373,12 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_world_gravity_set(world, 0, 0, 0);
 #endif
 
-    // This does an elm_box_pack_end(), so needs to be after the others.
-    init_evas_gl(gld, w, h);
+    // This does a elm_box_pack_end(), so needs to be after the others.
+    init_evas_gl(gld);
+    evas_object_show(gld->win);
 
-    evas_object_move(gld->win, x, y);
-    evas_object_resize(gld->win, w, h);
+    evas_object_move(gld->win, gld->win_x, gld->win_y);
+    evas_object_resize(gld->win, gld->win_w, gld->win_h);
     evas_object_show(gld->win);
 
     elm_run();

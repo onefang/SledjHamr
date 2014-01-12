@@ -3,7 +3,6 @@
 #include "extantz.h"
 #include "CDemo.h"
 
-#define USE_DEMO 1
 
 SExposedVideoData videoData;
 
@@ -28,7 +27,7 @@ EAPI int startIrr(GLData *gld)
 	bool additive = true;
 
 	if (!gld->useIrr)
-	    return 0;
+	    return 1;		// Return 1 so that the caller stops asking on each frame.
 
 #if USE_IRR
 	void *display = NULL;
@@ -39,12 +38,9 @@ EAPI int startIrr(GLData *gld)
 	myDemo = new CDemo(gld, additive);
 #endif
 
-	evas_gl_make_current(gld->evasgl, gld->sfc, gld->ctx);
-
 	display = glXGetCurrentDisplay();
-	sfc     = ecore_evas_window_get(ecore_evas_ecore_evas_get(evas_object_evas_get(gld->win)));
+	sfc     = ecore_evas_window_get(gld->ee);
 	ctx     = glXGetCurrentContext();
-
 	/* For using a pre existing X11 window (with optional OpenGL). */
 	videoData = SExposedVideoData();
 	videoData.OpenGLLinux.X11Display = display;	// void * - Connection to the X server.
@@ -116,10 +112,11 @@ EAPI int startIrr(GLData *gld)
 	driver = device->getVideoDriver();	gld->driver = driver;
 	smgr = device->getSceneManager();	gld->smgr   = smgr;
 
-	device->setResizable(true);
-	driver->OnResize(dimension2d<u32>(gld->sfc_w, gld->sfc_h));
+	// FIXME - this is what makes the window vanish in EFL 1.8, but worked fine in 1.7 I think.
+//	device->setResizable(true);
+	driver->OnResize(dimension2d<u32>(gld->img_w, gld->img_h));
 	// Just gives me a blank screen.  grrrr
-//	driver->setViewPort(rect<s32>(0, 0, gld->sfc_w, gld->sfc_h));
+//	driver->setViewPort(rect<s32>(0, 0, gld->img_w, gld->img_h));
 
 	// set ambient light
 	smgr->setAmbientLight (video::SColorf(0x00c0c0c0));
@@ -191,6 +188,7 @@ EAPI void drawIrr_start(GLData *gld)
 	const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 	then = now;
 
+
 #if USE_DEMO
 	myDemo->preDraw(gld, now);
 #else
@@ -206,7 +204,7 @@ EAPI void drawIrr_start(GLData *gld)
 	the GUI Environment draw their content. With the endScene()
 	call everything is presented on the screen.
 	*/
-	driver->beginScene(true, true, SColor(255, 100, 101, 140), videoData, NULL);	// This does the context change, then clearBuffers()
+	driver->beginScene(true, true, SColor(255, 255, 255, 255), videoData, NULL);	// This does the context change, then clearBuffers()
 
 	smgr->drawAll();
     }

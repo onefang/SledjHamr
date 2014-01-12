@@ -1,3 +1,18 @@
+#define USE_EO      0
+#define USE_PHYSICS 1
+#define USE_EGL     1	// If using Evas_GL, though it might be via Elm.
+#define USE_ELM_GL  1
+#define USE_IRR     1
+#define USE_DEMO    1
+#define DO_GEARS    0
+
+#if USE_EO
+    /* Enable access to unstable EFL API that are still in beta */
+    #define EFL_BETA_API_SUPPORT 1
+    /* Enable access to unstable EFL EO API. */
+    #define EFL_EO_API_SUPPORT 1
+#endif
+
 #include <Elementary.h>
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
@@ -50,10 +65,17 @@ typedef struct ICameraSceneNode ICameraSceneNode;
 #endif
 
 
-#define USE_PHYSICS 0
-#define USE_EGL     0
-#define USE_IRR     0
+#define CRI(...)      EINA_LOG_DOM_CRIT(_log_domain, _VA_ARGS__)
+#define ERR(...)      EINA_LOG_DOM_ERR(_log_domain, __VA_ARGS__)
+#define WRN(...)      EINA_LOG_DOM_WARN(_log_domain, __VA_ARGS__)
+#define INF(...)      EINA_LOG_DOM_INFO(_log_domain, __VA_ARGS__)
+#define DBG(...)      EINA_LOG_DOM_DBG(_log_domain, __VA_ARGS__)
 
+extern int _log_domain;
+
+
+typedef struct _Gear Gear;
+typedef struct _GLData GLData;
 
 typedef enum
 {
@@ -92,6 +114,7 @@ typedef struct
     ezPlatform	platform;
     ezViewer	*viewer;
     Elm_Object_Item *item;
+GLData	*gld;		// Just a temporary evil hack to pass gld to _grid_sel_cb().
 } ezGrid;
 
 typedef struct
@@ -113,9 +136,6 @@ typedef struct
 } ezLandmark;
 
 
-typedef struct _Gear Gear;
-typedef struct _GLData GLData;
-
 
 struct _Gear
 {
@@ -129,21 +149,29 @@ struct _GLData
 {
     Evas_Object	*win;
 
+    Ecore_Evas  *ee;
+    Evas *canvas;
+    Evas_Native_Surface ns;
+
     Evas_GL_Context	*ctx;
     Evas_GL_Surface	*sfc;
     Evas_GL_Config 	*cfg;
-    Evas_GL		*evasgl;
-    Evas_GL_API		*glapi;
+    Evas_GL		*evasGl;	// The Evas way.
+    Evas_Object		*elmGl;		// The Elm way.
+    Evas_GL_API		*glApi;
 
     GLuint	program;
     GLuint	vtx_shader;
     GLuint	fgmt_shader;
-    int		scr_w, scr_h;
-    int		sfc_w, sfc_h;
-    int		img_w, img_h;
+    int		scr_w, scr_h;	// The size of the screen.
+    int		win_w, win_h;	// The size of the window.
+    int		win_x, win_y;	// The position of the window.
+    int		sfc_w, sfc_h;	// This is what Irrlicht is using, size of the GL image surface / glview.
+    int		img_w, img_h;	// Size of the viewport.  DON'T reuse sfc_* here.  Despite the fach that sfc_* is only used in the init when Irricht is disabled?  WTF?
     int		useEGL : 1;
     int		useIrr : 1;
     int		doneIrr : 1;
+    int		gearsInited : 1;
     int		resized : 1;
     int		camFocus : 1;
 
