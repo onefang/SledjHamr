@@ -38,6 +38,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
+[Note, EFL is no longer included, but it's source is still in the git history.]
+
 The Enlightenment Foundation Libraries are mostly BSD, and copyright by
 the various people mentioned in their respective AUTHORS files, except -
 
@@ -54,7 +56,6 @@ test harness.  So the viral nature of GPL does not apply.
 Note that eina is the only GPL thing that is linked, and it's LGPL, so
 linking to non GPL stuff is fine.
 
-[Note, EFL is no longer included, but it's source is still in the git history.]
 
 --------------------------------------------------------------------------------
 
@@ -172,6 +173,9 @@ Julian Seward, jseward@bzip.org
 bzip2/libbzip2 version 1.0.6 of 6 September 2010
 
 ===============================================================================
+
+[Note, Irrlicht's version of jpeglib is no longer included, but it's source is still in the git history.]
+
 [ Irrlicht includes code from jpeglib, which has this license statement: ]
 
 LEGAL ISSUES
@@ -252,6 +256,9 @@ We are required to state that
     CompuServe Incorporated."
 
 ===============================================================================
+
+[Note, Irrlicht's version of libpng is no longer included, but it's source is still in the git history.]
+
 [ Irrlicht includes code from libpng, which has this license statement: ]
 
 /*
@@ -355,6 +362,9 @@ We are required to state that
 2010-10-09 : Igor Pavlov : Public domain
 
 ===============================================================================
+
+[Note, Irrlicht's version of zlib is no longer included, but it's source is still in the git history.]
+
 [ Irrlicht includes code from zlib, which has this license statement: ]
 
 Copyright notice:
@@ -396,6 +406,8 @@ The lemon parser includes this -
 The author of this program disclaims copyright.
 
 --------------------------------------------------------------------------------
+
+[Note, LuaJIT is no longer included, but it's source is still in the git history.]
 
 LuaJIT includes this -
 
