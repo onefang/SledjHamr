@@ -1,0 +1,92 @@
+FIXES -
+Irrlicht is flickering like crazy.
+
+LuaSL grew a couple of bugs when I upgraded to LuaJIT 2.0.1 package.
+
+Finish the basic camera stuff, seems to be a bit glitched right now,
+though it worked a few times.
+
+GL viewport aspect ratio shtould remain stable through resizes.
+
+
+FEATURES -
+
+Er, all of them I think.  B-)
+
+Make the existing toolbar / tab thingy a bit more tab like, and have the
+scroll in effect be position / direction aware.  Combining window title,
+menu, top level tabs, and toolbar widgets might be good.  Perhaps auto
+spreading across two lines (menu + tools / tabs) on window shrinkage
+first before going to the "More.." thing (for both tabs and tools).
+
+Need pie menus!
+
+Generic scrolling text area, with time stamps, clickable URLs (including
+internal links to profiles and stuff), logging to file, reading history
+from file (both a few dozen lines, or the entire thing).  EFL log
+domains should be able to feed into these, with colours, and should be
+able to split / filter bits to different areas.
+
+IM tabs should show a very faded version of the others profile image/s.
+
+
+IDEAS -
+
+Internal window manager.
+------------------------
+
+Write my own, use ePhysics.  Hopefully ePhysics has some sort of
+magnetism / attraction thingy.  See the forces demo, should be doable. 
+Collision restraints and impulses?
+
+See if Evas allows detaching stuff from one canvas and adding it to
+another canvas.  This allows things like tearing off tabs from windows,
+tearing off sub menus, and switching windows between internal and
+external windows, without having to entirely recreate the UI stack
+within.  Hmm, think this is what swallow / unswallow is all about. 
+Think that only covers stuff in the same Evas though.  Not sure this can
+be done currently.
+
+An internal window has a title bar, with a centered title, and the usual
+widgets.  The title part is split into three, if you grab and drag from
+the middle bit, it moves as normal.  If you grab and drag from the
+others, it dangles from that corner as you move it.  ePhysics magnetism
+can be used for the usual "snap to nearby window" thingy.
+
+Grabbing and flicking a window means it will move as a physics object,
+bouncing off stuff until it looses enough energy to stick magnetically
+to something, or lay on the bottom.
+
+Minimised windows could be small transparent ePhysics buttons showing
+just the title.  Can be dragged, flicked, or maybe double clicked to
+open.  Right click for menu as usual.
+
+Windows need title bar, close, minimize, and if they are resizable,
+resize grab edges/corners, and bottom right corner resize.  Some need
+menus.  They need to remember their size, position, minimized state,
+closed state.  Try to put top toolbar style widgets in the title, and /
+or menus.  Have the toolbar "Menu" flip down on hover.  Also add the
+"tear out of window" widget for making an internal window external,
+again with drag and drop or widget to bring them back in again.
+
+All tabs should be tear off?  All menus are.  Currently menus reattach
+when you close their windows.  Currently tabs re attach when you click
+on their tear off button again.  Hmmm, maybe should re atach both if you
+drag and drop them?  With some sort of quivering with anticipation
+effect when they are in the drop zone?  Menu window can start to shrink
+towards their origin menu when dragged close.  Dragging the tab button
+should tear them off.  Though they currently can be dragged to re
+arrange them, so that will be dragging them in the other axis then I
+guess?  Tearing off should have some sort of rip and wobble effect,
+maybe an ePhysics soft body?
+
+Windows like the edit window should do like Elm toolbars when resized
+too small, low priority widgets shrink down to a "More.." button.
+
+Optional hover focus on windows, maybe even on some widget types. 
+Focused windows should be not quite as transparent as unfocused ones. 
+Allow control over transparency levels (press on scroll wheel and wiggle it?).
+
+Current windows use the horrid "click anywhere to focus and raise", should have an
+option for proper layering.  :-P
+
