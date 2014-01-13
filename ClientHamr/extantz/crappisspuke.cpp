@@ -33,14 +33,67 @@ EAPI int startIrr(GLData *gld)
 	void *display = NULL;
 	unsigned long sfc = 0;
 	void *ctx = NULL;
+	Evas_GL_API *gl = gld->glApi;
 
 #if USE_DEMO
 	myDemo = new CDemo(gld, additive);
 #endif
 
-	display = glXGetCurrentDisplay();
+/* Raster says -
+4. evas exposes an opengl-es2 api. any existing engine needs to be adapted to
+use this. that's pretty much the end of that. if the engine doesn't have a
+gles2 port.. it will need one. once it has one, then it is a simple matter of
+replacing all the gl calls as follows:
+
+glDrawArrays() -> api->glDrawArrays()
+glBindBuffer() -> api->glBindBuffer()
+
+you could make the port switchable with a macro:
+
+#ifdef EVASGL
+#define EG() my_evas_gl_api->
+#else
+#define EG()
+#endif
+
+then fix up all the gl calls to be
+
+EG()glDrawArrays()
+EG()glBindBuffer()
+
+etc.
+
+doing the above allows evas to decide how to share context. it may allocate a
+separate context or share its own. either way as far as the evasgl api user is
+concerned.. they get their own private context to play with. if it does NOT do
+the above (use the api exposed by evas gl) then wrapping can't context switches
+can't work. all gl calls HAVE to go through the wrapped api to work right. this
+is because we can't REPLACE the internals of the gl driver which otherwise
+would be managing context and state all internally and we have zero access to
+that - especially with closed drivers. we'd end up writing a proxy gl library
+which conflicts with real gl symbol-wise (thus taking over and replacing
+normal gl calls) and i know i have no interest in maintaining a separate
+libGLwhatever.so that is an exact copy of gl and it's api's just to wrap it
+when we expose that wrapper without symbol complications via evas gl.
+
+5. the engine will need to be adapted so the draw function is callable - eg by
+elm_glview. then it's easy to switch where rendering happens. evas offers a fast
+path to avoid buffer copies and make the gl view draw part of the evas
+rendering path directly. this would offer almost zero overhead vs doing it
+directly with egl/gles etc. to your backbuffer yourself, BUT gets you the bonus
+of having your 3d view as part of a larger scenegraph. combine 2 or 3 of them
+in a single window. overlay with evas objects or elm widgets for hud etc. all
+for free. this also implies the engine has to integrate to the efl mainloop
+etc. of course.
+*/
+
+
 	sfc     = ecore_evas_window_get(gld->ee);
+	// This is the way Raster wants me to do things, but these functions are not actually available.  Pffft
+//	ctx     = gl->glGetCurrentContext();
+//	display = gl->glGetCurrentDisplay();
 	ctx     = glXGetCurrentContext();
+	display = glXGetCurrentDisplay();
 	/* For using a pre existing X11 window (with optional OpenGL). */
 	videoData = SExposedVideoData();
 	videoData.OpenGLLinux.X11Display = display;	// void * - Connection to the X server.
