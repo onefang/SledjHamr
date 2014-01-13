@@ -1,17 +1,21 @@
 There are some base libraries that should be used in common.  Notable
-the Enlightenment Foundation Libraries (EFL), LuaJIT, luaproc, and
-lemon.  Other external open source projects that we just use directly
-should go here to.  Makes it easy to compile it all.
+the Enlightenment Foundation Libraries (EFL), Irrlicht, lemon, LuaJIT,
+and luaproc.  Other external open source projects that we just use
+directly should go here to.  Makes it easy to compile it all.
 
 Note that in some cases, there might be changes.  Such changes should be
 documented, and marked with "// onefang changes".
+
+EFL has been released, so not including that anymore.  You can find it
+in distro repos, PPA's, etc.  Or http://enlightenment.org/
 
 Irrlicht has been slightly modified to get it to use externally created
 GL stuff, and not use their internal copies of bzip, jpeglib, libpng,
 and zlib.
 
+LuaJIT 2.0 has been released for Ubuntu 13.04 and later, try using
+https://launchpad.net/~mwild1/+archive/ppa for 12.04.  Not including
+that anymore.
+
 luaproc has been hacked up a bit, and will continue to be hacked up. 
 Merged it into LuaSL, so it's no longer here.
-
-EFL has been released, so not including that anymore.  You can find it
-in distro repos, PPA's, etc.  Or http://enlightenment.org/

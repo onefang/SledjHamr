@@ -19,7 +19,8 @@ fi
 
 CFLAGS="-g -Wall -Wunreachable-code -I include -I $LOCALDIR/src"
 CFLAGS="$CFLAGS -I ../../libraries"
-CFLAGS="$CFLAGS -I ../../libraries/luajit-2.0/src"
+#CFLAGS="$CFLAGS -I ../../libraries/LuaJIT-2.0.2/src"
+CFLAGS="$CFLAGS $(pkg-config --cflags luajit)"
 #CFLAGS="$CFLAGS -I /usr/include/lua5.1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eo-1"
 CFLAGS="$CFLAGS -I $E17DIR/include/eina-1"
@@ -36,8 +37,10 @@ CFLAGS="$CFLAGS -I $E17DIR/include/ecore-file-1"
 CFLAGS="$CFLAGS -I $E17DIR/include"
 CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
 
-LDFLAGS="-L ../../libraries/luajit-2.0/src -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
-libs="-leo -lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
+#LDFLAGS="-L ../../libraries/LuaJIT-2.0.2/src -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+#libs="-leo -lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
+LDFLAGS="$(pkg-config --libs-only-L luajit) -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+libs="-leo -lecore -levas -ledje -lembryo -leet -leina $(pkg-config --libs-only-L luajit) -lpthread -lm"
 #LDFLAGS="-L /usr/lib/lua/5.1 -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 #libs="-lecore -levas -ledje -lembryo -leet -leina -llua5.1 -lpthread -lm"
 # These need to be added to libs if linking staticaly, though some parts of EFL don't like that.
@@ -52,7 +55,8 @@ libs="-leo -lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
 
 LFLAGS="-d"
 EDJE_FLAGS="-id images -fd fonts"
-LD_RUN_PATH="../../libraries/luajit-2.0/src:"
+# Dunno why I needed this, not gonna work with a packaged LuaJIT anyway.
+#LD_RUN_PATH="../../libraries/LuaJIT-2.0.2/src:"
 
 
 # Run lemon first, flex depends on it to define the symbol values.

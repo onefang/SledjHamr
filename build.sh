@@ -2,10 +2,6 @@
 
 wd=$(pwd)
 
-echo "_______________ BUILDING LuaJIT _______________"
-cd $wd/libraries/luajit-2.0
-make amalg PREFIX=$()/src
-
 echo "_______________ BUILDING lemon _______________"
 cd $wd/libraries/lemon
 rm -f *.o lemon
@@ -30,45 +26,6 @@ $command
 echo "_______________ BUILDING Irrlicht _______________"
 cd $wd/libraries/irrlicht-1.8.1/source/Irrlicht 
 make
-
-# Test if edje is already available, build EFL up to edje if not.
-# TODO - Check EFL version.
-hash edje_cc 2>&- || {
-
-# TODO - grab release tarballs from enlightenment.org, then build those.
-    echo "_______________ BUILDING eina _______________"
-#    cd $wd/libraries/eina
-#    ./configure && make
-
-
-    echo "_______________ BUILDING eet _______________"
-#    cd $wd/libraries/eet
-#    ./configure && make
-
-
-    echo "_______________ BUILDING evas _______________"
-#    cd $wd/libraries/evas
-#    ./configure && make
-
-
-    echo "_______________ BUILDING ecore _______________"
-#    cd $wd/libraries/ecore
-#    ./configure && make
-
-
-    echo "_______________ BUILDING embryo _______________"
-#    cd $wd/libraries/embryo
-#    ./configure && make
-
-
-    echo "_______________ BUILDING edje _______________"
-#    cd $wd/libraries/edje
-#    ./configure && make
-
-
-# TODO - Install this EFL version, and/or get the rest of the system to use it.
-}
-
 
 echo "_______________ BUILDING LuaSL _______________"
 cd $wd/LuaSL
