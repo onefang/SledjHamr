@@ -1307,6 +1307,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 // TODO - add the main menu here, in a toolbar, in the box.  The windows still need their own menus, just different from the ones we have now.
 
 #if 1
+    // In theory this should create an EWS window, in practice, I'm not seeing any difference.
+    // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
+//    elm_config_engine_set("ews");
     win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
     evas_object_event_callback_add(elm_win_inlined_image_object_get(win3), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
     elm_win_alpha_set(win3, EINA_TRUE);
