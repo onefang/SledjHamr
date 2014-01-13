@@ -28,7 +28,7 @@ echo $command
 $command
 
 echo "_______________ BUILDING Irrlicht _______________"
-cd $wd/libraries/irrlicht-1.8/source/Irrlicht 
+cd $wd/libraries/irrlicht-1.8.1/source/Irrlicht 
 make
 
 # Test if edje is already available, build EFL up to edje if not.
