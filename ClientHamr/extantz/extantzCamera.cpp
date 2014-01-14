@@ -55,6 +55,7 @@ extantzCamera::extantzCamera()
 	setDebugName("extantzCamera");
 	#endif
 
+	move.jump = 0.0;	// Coz otherwise we start in jumping mode.
 	move.MoveSpeed = 0.1f;
 	move.RotateSpeed = 1.0f;
 	move.JumpSpeed = 3.0f;
