@@ -147,7 +147,7 @@ struct _Gear
 // GL related data here.
 struct _GLData
 {
-    Evas_Object	*win;
+    Evas_Object	*win, *winwin;
 
     Ecore_Evas  *ee;
     Evas *canvas;
@@ -173,7 +173,6 @@ struct _GLData
     int		doneIrr : 1;
     int		gearsInited : 1;
     int		resized : 1;
-    int		camFocus : 1;
 
     Evas_Object	*bx, *r1;
     Ecore_Animator  *animator;

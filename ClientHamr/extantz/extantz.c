@@ -384,73 +384,43 @@ static void gears_init(GLData *gld)
     gld->gearsInited = EINA_TRUE;
 }
 
-static void _cb_mouse_down_GL(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-    GLData *gld = data;
-    Evas_Event_Mouse_Down *ev = event_info;
-
-    if (1 == ev->button)
-    {
-	gld->camFocus = 1;
-	// TODO, figure out how to unfocus elm.
-    }
-}
-
-static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-    GLData *gld = data;
-    Evas_Event_Mouse_Down *ev = event_info;
-
-    if (1 == ev->button)
-    {
-	gld->camFocus = 0;
-	// TODO - Yes we really DO need to figure out what was clicked on and set focus to it.  sigh
-//	elm_object_focus_set(gld->bx, EINA_TRUE);
-    }
-}
-
-// These do not work as elm callbacks, coz Elm is grabbing the Left, Right, Up, and Down KEY_DOWNs.  Something else is messing up Home + PgUp / PgDn.
-// It's a purely Evas object anyway.
 static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
     GLData *gld = data;
     Evas_Event_Key_Down *ev = event_info;
 
-    if (gld->camFocus)
+    if (gld->move)
     {
-	if (gld->move)
-	{
-	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
+	// TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
-	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
-	    // TODO - make this a hash lookup dammit.
-	    if (0 == strcmp(ev->key, "Escape"))
-	    {
-	    }
-	    else if  (0 == strcmp(ev->key, "Left"))
-		gld->move->r = 1.0;
-	    else if  (0 == strcmp(ev->key, "Right"))
-		gld->move->r = -1.0;
-	    else if  (0 == strcmp(ev->key, "Up"))
-		gld->move->x = 1.0;
-	    else if  (0 == strcmp(ev->key, "Down"))
-		gld->move->x = -1.0;
-	    else if  (0 == strcmp(ev->key, "Prior"))
-		;
-	    else if  (0 == strcmp(ev->key, "Next"))
-		;
-	    else if  (0 == strcmp(ev->key, "Home"))
-		;
-	    else if  (0 == strcmp(ev->key, "End"))
-		;
-	    else if  (0 == strcmp(ev->key, "space"))
-		gld->move->jump = 1.0;
-	    else
-		printf("Unexpected down keystroke - %s\n", ev->key);
+	// Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
+	// TODO - make this a hash lookup dammit.
+	if (0 == strcmp(ev->key, "Escape"))
+	{
 	}
+	else if  (0 == strcmp(ev->key, "Left"))
+	    gld->move->r = 2.0;
+	else if  (0 == strcmp(ev->key, "Right"))
+	    gld->move->r = -2.0;
+	else if  (0 == strcmp(ev->key, "Up"))
+	    gld->move->x = 2.0;
+	else if  (0 == strcmp(ev->key, "Down"))
+	    gld->move->x = -2.0;
+//	else if  (0 == strcmp(ev->key, "Prior"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "Next"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "Home"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "End"))
+//	    ;
+	else if  (0 == strcmp(ev->key, "space"))
+	    gld->move->jump = 1.0;
 	else
-	    printf("Camera input not ready\n");
+	    printf("Unexpected down keystroke - %s\n", ev->key);
     }
+    else
+	printf("Camera input not ready\n");
 }
 
 /* SL / OS camera controls
@@ -511,6 +481,8 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
  * A joystick could be set to range over -2.0 to 2.0, and just set it's part directly.
  * A mouse look rotate, well will come to that when we need to.  B-)
  *   Setting the x or y to be the DIFFERENCE in window position of the mouse (-1.0 to 1.0) since the last frame.
+ *
+ * TODO - In the Elm_glview version, 2.0 seems to be correct speed for walking, but I thought 1.0 was in Evas_GL.
  */
 
 static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -518,48 +490,95 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     GLData *gld = data;
     Evas_Event_Key_Up *ev = event_info;
 
-    if (gld->camFocus)
+    if (gld->move)
     {
-	if (gld->move)
-	{
-	    // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
+	// TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
-	    // Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
-	    // TODO - make this a hash lookup dammit.
-	    if (0 == strcmp(ev->key, "Escape"))
-	    {
-	    }
-	    else if  (0 == strcmp(ev->key, "Left"))
-		gld->move->r = 0.0;
-	    else if  (0 == strcmp(ev->key, "Right"))
-		gld->move->r = 0.0;
-	    else if  (0 == strcmp(ev->key, "Up"))
-		gld->move->x = 0.0;
-	    else if  (0 == strcmp(ev->key, "Down"))
-		gld->move->x = 0.0;
-	    else if  (0 == strcmp(ev->key, "Prior"))
-		;
-	    else if  (0 == strcmp(ev->key, "Next"))
-		;
-	    else if  (0 == strcmp(ev->key, "Home"))
-		;
-	    else if  (0 == strcmp(ev->key, "End"))
-		;
-	    else if  (0 == strcmp(ev->key, "space"))
-		gld->move->jump = 0.0;
-	    else
-		printf("Unexpected up keystroke - %s\n", ev->key);
+	// Yes, we are dealing with the horrid Evas keyboard handling FUCKING STRING COMPARES!  Soooo ...
+	// TODO - make this a hash lookup dammit.
+	if (0 == strcmp(ev->key, "Escape"))
+	{
 	}
+	else if  (0 == strcmp(ev->key, "Left"))
+	    gld->move->r = 0.0;
+	else if  (0 == strcmp(ev->key, "Right"))
+	    gld->move->r = 0.0;
+	else if  (0 == strcmp(ev->key, "Up"))
+	    gld->move->x = 0.0;
+	else if  (0 == strcmp(ev->key, "Down"))
+	    gld->move->x = 0.0;
+//	   else if  (0 == strcmp(ev->key, "Prior"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "Next"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "Home"))
+//	    ;
+//	else if  (0 == strcmp(ev->key, "End"))
+//	    ;
+	else if  (0 == strcmp(ev->key, "space"))
+	    gld->move->jump = 0.0;
 	else
-	    printf("Camera input not ready\n");
+	    printf("Unexpected up keystroke - %s\n", ev->key);
     }
+    else
+	printf("Camera input not ready\n");
 }
 
+// Elm style event callback.
+static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
+{
+    GLData *gld = data;
+    Eina_Bool processed = EINA_FALSE;
+
+    switch (type)
+    {
+	case EVAS_CALLBACK_KEY_DOWN :
+	{
+	    _on_camera_input_down(gld, evas_object_evas_get(obj), obj, event_info);
+	    processed = EINA_TRUE;
+	    break;
+	}
+
+	case EVAS_CALLBACK_KEY_UP :
+	{
+	    _on_camera_input_up(gld, evas_object_evas_get(obj), obj, event_info);
+	    processed = EINA_TRUE;
+	    break;
+	}
+
+	default :
+	    printf("Unknown GL input event.\n");
+    }
+
+    return processed;
+}
+
+// Elm inlined image windows needs this to change focus on mouse click.
+// Evas style event callback.
+static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+    GLData *gld = data;
+    Evas_Event_Mouse_Down *ev = event_info;
+
+    if (1 == ev->button)
+	elm_object_focus_set(obj, EINA_TRUE);
+}
+
+static void _resize_winwin(GLData *gld)
+{
+    Evas_Coord x, y, w, h;
+
+    evas_object_geometry_get(gld->elmGl, &x, &y, &w, &h);
+    evas_object_move(elm_win_inlined_image_object_get (gld->winwin), x, y);
+    evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), w, h);
+}
 
 // Called from on_pixels (), or the Elm_gliew resize callback.
 static void _resize(GLData *gld)
 {
    Evas_GL_API *gl = gld->glApi;
+
+    _resize_winwin(gld);
 
 #if DO_GEARS
    GLfloat ar, m[16] = {
@@ -580,6 +599,7 @@ static void _resize(GLData *gld)
    m[5] = 0.1 * ar / gld->img_h;
    memcpy(gld->proj, m, sizeof gld->proj);
 #endif
+
    gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
 }
 
@@ -808,18 +828,19 @@ static void init_evas_gl(GLData *gld)
     elm_glview_render_policy_set(gld->elmGl, ELM_GLVIEW_RENDER_POLICY_ON_DEMAND);
 //    elm_glview_render_policy_set(gld->elmGl, ELM_GLVIEW_RENDER_POLICY_ALWAYS);
     // These get called in the render thread I think.
+    // None let me pass data, so this is why we are adding "gld" data to the object below.
+    // Maybe we can use  elm_object_signal_callback_add or elm_object_item_signal_callback_add (edje signals)?
     //elm_glview_init_func_set(gld->elmGl, _init_gl);	// Not actually needed, it gets done in on_pixels.
     elm_glview_del_func_set(gld->elmGl, _del_gl);
     elm_glview_resize_func_set(gld->elmGl, _resize_gl);
     elm_glview_render_func_set(gld->elmGl, (Elm_GLView_Func_Cb) _draw_gl);
 
-    elm_box_pack_end(gld->bx, gld->elmGl);
-    elm_win_resize_object_add(gld->win, gld->elmGl);
-    evas_object_show(gld->elmGl);
-
-    elm_object_focus_set(gld->elmGl, EINA_TRUE);
+    // Not needed, the resize callback above deals with that.
+    //elm_win_resize_object_add(gld->win, gld->elmGl);
     gld->glApi = elm_glview_gl_api_get(gld->elmGl);
     evas_object_data_set(gld->elmGl, "gld", gld);
+    evas_object_show(gld->elmGl);
+    elm_box_pack_end(gld->bx, gld->elmGl);
 #else
     // get the evas gl handle for doing gl things
     gld->evasGl = evas_gl_new(gld->canvas);
@@ -875,13 +896,10 @@ static void init_evas_gl(GLData *gld)
     evas_object_show(gld->r1);
     elm_box_pack_end(gld->bx, gld->r1);
 
-//    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
+    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
+//    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
+//    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
 #endif
-
-    // In this code, we are making our own camera, so grab it's input when we are focused.
-    evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
-    evas_object_event_callback_add(gld->win, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
-    gld->camFocus = 1;	// Start with the GL camera focused.
 
     // NOTE: if you delete r1, this animator will keep running trying to access
     // r1 so you'd better delete this animator with ecore_animator_del() or
@@ -1012,12 +1030,98 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 //    system(buf);
 }
 
-static void fill(GLData *gld, Evas_Object *win)
+static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-    Evas_Object *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
-    Elm_Object_Item *tb_it, *menu_it, *tab_it;
-    char buf[PATH_MAX];
-    int i;
+   Evas_Event_Mouse_Move *ev = event_info;
+   Evas_Object *orig = data;
+   Evas_Coord x, y;
+   Evas_Map *p;
+   int i, w, h;
+
+   if (!ev->buttons) return;
+   evas_object_geometry_get(obj, &x, &y, NULL, NULL);
+   evas_object_move(obj,
+                    x + (ev->cur.canvas.x - ev->prev.output.x),
+                    y + (ev->cur.canvas.y - ev->prev.output.y));
+   evas_object_image_size_get(orig, &w, &h);
+   p = evas_map_new(4);
+   evas_object_map_enable_set(orig, EINA_TRUE);
+//   evas_object_raise(orig);
+   for (i = 0; i < 4; i++)
+     {
+        Evas_Object *hand;
+        char key[32];
+
+        snprintf(key, sizeof(key), "h-%i\n", i);
+        hand = evas_object_data_get(orig, key);
+        evas_object_raise(hand);
+        evas_object_geometry_get(hand, &x, &y, NULL, NULL);
+        x += 15;
+        y += 15;
+        evas_map_point_coord_set(p, i, x, y, 0);
+        if (i == 0) evas_map_point_image_uv_set(p, i, 0, 0);
+        else if (i == 1) evas_map_point_image_uv_set(p, i, w, 0);
+        else if (i == 2) evas_map_point_image_uv_set(p, i, w, h);
+        else if (i == 3) evas_map_point_image_uv_set(p, i, 0, h);
+     }
+   evas_object_map_set(orig, p);
+   evas_map_free(p);
+}
+
+static void create_handles(Evas_Object *obj)
+{
+   int i;
+   Evas_Coord x, y, w, h;
+
+   evas_object_geometry_get(obj, &x, &y, &w, &h);
+   for (i = 0; i < 4; i++)
+     {
+        Evas_Object *hand;
+        char buf[PATH_MAX];
+        char key[32];
+
+        hand = evas_object_image_filled_add(evas_object_evas_get(obj));
+        evas_object_resize(hand, 31, 31);
+        snprintf(buf, sizeof(buf), "%s/images/pt.png", elm_app_data_dir_get());
+        evas_object_image_file_set(hand, buf, NULL);
+        if (i == 0)      evas_object_move(hand, x     - 15, y     - 15);
+        else if (i == 1) evas_object_move(hand, x + w - 15, y     - 15);
+        else if (i == 2) evas_object_move(hand, x + w - 15, y + h - 15);
+        else if (i == 3) evas_object_move(hand, x     - 15, y + h - 15);
+        evas_object_event_callback_add(hand, EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+        evas_object_show(hand);
+        snprintf(key, sizeof(key), "h-%i\n", i);
+        evas_object_data_set(obj, key, hand);
+     }
+}
+
+static Evas_Object *_toolbar_menu_add(Evas_Object *win, Evas_Object *tb, char *label)
+{
+    Evas_Object *menu= NULL;
+    Elm_Object_Item *tb_it, *menu_it;
+
+    tb_it = elm_toolbar_item_append(tb, NULL, label, NULL, NULL);
+    elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
+    // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
+    elm_toolbar_item_priority_set(tb_it, 9999);
+    elm_toolbar_menu_parent_set(tb, win);
+    menu = elm_toolbar_item_menu_get(tb_it);
+
+    return menu;
+}
+
+static Evas_Object *fang_win_add(GLData *gld)
+{
+    Evas_Object *win, *bg;
+
+    // In theory this should create an EWS window, in practice, I'm not seeing any difference.
+    // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
+//    elm_config_engine_set("ews");
+    win = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
+    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
+    // According to the Elm inlined image window example, this is what's needed to.
+    evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+    elm_win_alpha_set(win, EINA_TRUE);
 
     // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
     // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
@@ -1026,6 +1130,109 @@ static void fill(GLData *gld, Evas_Object *win)
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(win, bg);
     evas_object_show(bg);
+
+    return win;
+}
+
+static void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h)
+{
+    // image object for win is unlinked to its pos/size - so manual control
+    // this allows also for using map and other things with it.
+    evas_object_move(elm_win_inlined_image_object_get(win), x, y);
+    // Odd, it needs to be resized twice.  WTF?
+    evas_object_resize(win, w, h);
+    evas_object_resize(elm_win_inlined_image_object_get(win), w, h);
+    evas_object_show(win);
+    create_handles(elm_win_inlined_image_object_get(win));
+}
+
+static void overlay_add(GLData *gld)
+{
+    Evas_Object *bg, *bx, *tb, *menu;
+    Elm_Object_Item *tb_it, *menu_it;
+
+    // There many are reasons for this window.
+    // The first is to cover the GL and provide something to click on to change focus.
+    // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through,we catch the clicks here.
+    //   So we can probably avoid the following issue -
+    //     How to do click through?  evas_object_pass_events_set(rectangle, EINA_TRUE), and maybe need to do that to the underlaying window to?
+    //     Though if the rectangle is entirely transparent, or even hidden, events might pass through anyway.
+    //   Gotta have click through on the parts where there's no other window.
+    // The third is to have the other windows live here.
+    //   This idea doesn't work, as it breaks the damn focus again.
+    //   Don't think it's needed anyway.
+    // While on the subject of layers, need a HUD layer of some sort, but Irrlicht might support that itself.
+
+    gld->winwin = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
+    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
+    // According to the Elm inlined image window example, this is what's needed to.
+    evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+    // In this code, we are making our own camera, so grab it's input when we are focused.
+    evas_object_event_callback_add(gld->winwin, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
+    evas_object_event_callback_add(gld->winwin, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
+    elm_object_event_callback_add(gld->winwin, _cb_event_GL, gld);
+
+    elm_win_alpha_set(gld->winwin, EINA_TRUE);
+    // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
+    // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
+    bg = evas_object_rectangle_add(evas_object_evas_get(gld->winwin));
+    evas_object_color_set(bg, 0, 0, 0, 0);
+    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(gld->winwin, bg);
+    evas_object_show(bg);
+
+    // image object for win is unlinked to its pos/size - so manual control
+    // this allows also for using map and other things with it.
+    evas_object_move(elm_win_inlined_image_object_get(gld->winwin), 0, 0);
+    // Odd, it needs to be resized twice.  WTF?
+    evas_object_resize(gld->winwin, gld->win_w, gld->win_h);
+    evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), gld->win_w, gld->win_h);
+    evas_object_show(gld->winwin);
+}
+
+static void chat_add(GLData *gld)
+{
+    Evas_Object *win, *bx, *en;
+
+    win = fang_win_add(gld);
+
+    bx = elm_box_add(win);
+    elm_win_resize_object_add(win, bx);
+    evas_object_size_hint_weight_set(bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
+
+    en = elm_entry_add(win);
+    elm_entry_scrollable_set(en, EINA_TRUE);
+    evas_object_size_hint_weight_set(en, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(en, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_object_text_set(en, "History is shown here");
+    elm_entry_editable_set(en, EINA_FALSE);
+    evas_object_show(en);
+    elm_box_pack_end(bx, en);
+
+    en = elm_entry_add(win);
+    elm_entry_scrollable_set(en, EINA_TRUE);
+    evas_object_size_hint_weight_set(en, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(en, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_object_text_set(en, "");
+    elm_entry_editable_set(en, EINA_TRUE);
+    evas_object_show(en);
+    elm_box_pack_end(bx, en);
+
+    evas_object_show(bx);
+
+    fang_win_complete(gld, win, 30, 500, gld->win_w / 3, gld->win_h / 3);
+}
+
+
+static void woMan_add(GLData *gld)
+{
+    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
+    Elm_Object_Item *tb_it, *menu_it, *tab_it;
+    char buf[PATH_MAX];
+    int i;
+
+    win = fang_win_add(gld);
 
     bx = elm_box_add(win);
     elm_win_resize_object_add(win, bx);
@@ -1046,19 +1253,13 @@ static void fill(GLData *gld, Evas_Object *win)
     elm_toolbar_menu_parent_set(tb, win);
     menu = elm_toolbar_item_menu_get(tb_it);
 
-    elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
+    menu_it = elm_menu_item_add(menu, NULL, NULL, "edit", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "preferences", NULL, NULL);
+    menu_it = elm_menu_item_add(menu, NULL, NULL, "help", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "about woMan", NULL, NULL);
+    elm_menu_item_separator_add(menu, NULL);
     menu_it = elm_menu_item_add(menu, NULL, NULL, "advanced", NULL, NULL);
     elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
-    elm_menu_item_separator_add(menu, NULL);
-    menu_it = elm_menu_item_add(menu, NULL, NULL, "help", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "grid help", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz blogs", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz forum", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
     // The toolbar needs to be packed into the box AFTER the menus are added.
     elm_box_pack_end(bx, tb);
@@ -1164,78 +1365,15 @@ static void fill(GLData *gld, Evas_Object *win)
 #endif
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
     elm_box_pack_end(bx, bt);
+    evas_object_show(bx);
 
-   evas_object_show(bx);
-}
-
-static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-   Evas_Event_Mouse_Move *ev = event_info;
-   Evas_Object *orig = data;
-   Evas_Coord x, y;
-   Evas_Map *p;
-   int i, w, h;
-
-   if (!ev->buttons) return;
-   evas_object_geometry_get(obj, &x, &y, NULL, NULL);
-   evas_object_move(obj,
-                    x + (ev->cur.canvas.x - ev->prev.output.x),
-                    y + (ev->cur.canvas.y - ev->prev.output.y));
-   evas_object_image_size_get(orig, &w, &h);
-   p = evas_map_new(4);
-   evas_object_map_enable_set(orig, EINA_TRUE);
-//   evas_object_raise(orig);
-   for (i = 0; i < 4; i++)
-     {
-        Evas_Object *hand;
-        char key[32];
-
-        snprintf(key, sizeof(key), "h-%i\n", i);
-        hand = evas_object_data_get(orig, key);
-        evas_object_raise(hand);
-        evas_object_geometry_get(hand, &x, &y, NULL, NULL);
-        x += 15;
-        y += 15;
-        evas_map_point_coord_set(p, i, x, y, 0);
-        if (i == 0) evas_map_point_image_uv_set(p, i, 0, 0);
-        else if (i == 1) evas_map_point_image_uv_set(p, i, w, 0);
-        else if (i == 2) evas_map_point_image_uv_set(p, i, w, h);
-        else if (i == 3) evas_map_point_image_uv_set(p, i, 0, h);
-     }
-   evas_object_map_set(orig, p);
-   evas_map_free(p);
-}
-
-static void create_handles(Evas_Object *obj)
-{
-   int i;
-   Evas_Coord x, y, w, h;
-
-   evas_object_geometry_get(obj, &x, &y, &w, &h);
-   for (i = 0; i < 4; i++)
-     {
-        Evas_Object *hand;
-        char buf[PATH_MAX];
-        char key[32];
-
-        hand = evas_object_image_filled_add(evas_object_evas_get(obj));
-        evas_object_resize(hand, 31, 31);
-        snprintf(buf, sizeof(buf), "%s/images/pt.png", elm_app_data_dir_get());
-        evas_object_image_file_set(hand, buf, NULL);
-        if (i == 0)      evas_object_move(hand, x     - 15, y     - 15);
-        else if (i == 1) evas_object_move(hand, x + w - 15, y     - 15);
-        else if (i == 2) evas_object_move(hand, x + w - 15, y + h - 15);
-        else if (i == 3) evas_object_move(hand, x     - 15, y + h - 15);
-        evas_object_event_callback_add(hand, EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
-        evas_object_show(hand);
-        snprintf(key, sizeof(key), "h-%i\n", i);
-        evas_object_data_set(obj, key, hand);
-     }
+    fang_win_complete(gld, win, 30, 30, gld->win_w / 3, gld->win_h / 3);
 }
 
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *bg, *win3;
+    Evas_Object *bg, *menu, *bt, *tb;
+    Elm_Object_Item *tb_it, *menu_it;
     EPhysics_Body *boundary;
     EPhysics_World *world;
     EPhysics_Body *box_body1, *box_body2;
@@ -1283,6 +1421,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     // Get the screen size.
     elm_win_screen_size_get(gld->win, &gld->win_x, &gld->win_y, &gld->scr_w, &gld->scr_h);
+    gld->win_x = gld->win_x + (gld->scr_w / 3);
     gld->win_w = gld->scr_w / 2;
     gld->win_h = gld->scr_h - 30;
 
@@ -1304,25 +1443,64 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(gld->win, gld->bx);
     evas_object_show(gld->bx);
 
-// TODO - add the main menu here, in a toolbar, in the box.  The windows still need their own menus, just different from the ones we have now.
+    overlay_add(gld);
+    woMan_add(gld);
+    chat_add(gld);
 
-#if 1
-    // In theory this should create an EWS window, in practice, I'm not seeing any difference.
-    // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
-//    elm_config_engine_set("ews");
-    win3 = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
-    evas_object_event_callback_add(elm_win_inlined_image_object_get(win3), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
-    elm_win_alpha_set(win3, EINA_TRUE);
-    fill(gld, win3);
-    // image object for win3 is unlinked to its pos/size - so manual control
-    // this allows also for using map and other things with it.
-    evas_object_move(elm_win_inlined_image_object_get(win3), 13, 13);
-    // Odd, it needs to be resized twice.  WTF?
-    evas_object_resize(win3, gld->win_w / 3, gld->win_h / 3);
-    evas_object_resize(elm_win_inlined_image_object_get(win3), gld->win_w / 3, gld->win_h / 3);
-    evas_object_show(win3);
-    create_handles(elm_win_inlined_image_object_get(win3));
-#endif
+    // Gotta do this after adding the windows, otherwise the menu renders under the window.
+    //   This sucks, gotta redefine this menu each time we create a new window?
+    // Also, GL focus gets lost when any menu is used.  sigh
+
+    // A toolbar thingy.
+    tb = elm_toolbar_add(gld->win);
+    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
+    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_toolbar_shrink_mode_set(tb, ELM_TOOLBAR_SHRINK_SCROLL);
+    elm_toolbar_align_set(tb, 0.0);
+
+    // Menus.
+    menu = _toolbar_menu_add(gld->win, tb, "file");
+    elm_menu_item_add(menu, menu_it, NULL, "quit", _on_done, gld);
+
+    menu = _toolbar_menu_add(gld->win, tb, "edit");
+    elm_menu_item_add(menu, menu_it, NULL, "preferences", NULL, NULL);
+
+    menu = _toolbar_menu_add(gld->win, tb, "view");
+    menu = _toolbar_menu_add(gld->win, tb, "world");
+    menu = _toolbar_menu_add(gld->win, tb, "tools");
+
+    menu = _toolbar_menu_add(gld->win, tb, "help");
+    elm_menu_item_add(menu, menu_it, NULL, "grid help", NULL, NULL);
+    elm_menu_item_separator_add(menu, menu_it);
+    elm_menu_item_add(menu, menu_it, NULL, "extantz blogs", NULL, NULL);
+    elm_menu_item_add(menu, menu_it, NULL, "extantz forum", NULL, NULL);
+    elm_menu_item_separator_add(menu, menu_it);
+    elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
+
+    menu = _toolbar_menu_add(gld->win, tb, "advanced");
+    elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
+
+    menu = _toolbar_menu_add(gld->win, tb, "god");
+
+    // Other stuff in the toolbar.
+    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
+    elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
+    tb_it = elm_toolbar_item_append(tb, NULL, "restriction icons", NULL, NULL);
+    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
+    elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
+    tb_it = elm_toolbar_item_append(tb, NULL, "hop://localhost/Anarchadia 152, 155, 51 - Lost plot (Adult)", NULL, NULL);
+    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
+    elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
+    tb_it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
+
+    // The toolbar needs to be packed into the box AFTER the menus are added.
+    evas_object_show(tb);
+    elm_box_pack_start(gld->bx, tb);
+
+    // This does elm_box_pack_end(), so needs to be after the others.
+    init_evas_gl(gld);
+
+    evas_object_show(gld->bx);
 
 #if USE_PHYSICS
     // ePhysics stuff.
@@ -1376,13 +1554,11 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_world_gravity_set(world, 0, 0, 0);
 #endif
 
-    // This does a elm_box_pack_end(), so needs to be after the others.
-    init_evas_gl(gld);
-    evas_object_show(gld->win);
-
     evas_object_move(gld->win, gld->win_x, gld->win_y);
     evas_object_resize(gld->win, gld->win_w, gld->win_h);
     evas_object_show(gld->win);
+
+    _resize_winwin(gld);
 
     elm_run();
 
