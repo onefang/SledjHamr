@@ -6,7 +6,7 @@ LuaSL grew a couple of bugs when I upgraded to LuaJIT 2.0.1 package.
 Finish the basic camera stuff, seems to be a bit glitched right now,
 though it worked a few times.
 
-GL viewport aspect ratio shtould remain stable through resizes.
+GL viewport aspect ratio should remain stable through resizes.
 
 
 FEATURES -
@@ -71,7 +71,7 @@ again with drag and drop or widget to bring them back in again.
 
 All tabs should be tear off?  All menus are.  Currently menus reattach
 when you close their windows.  Currently tabs re attach when you click
-on their tear off button again.  Hmmm, maybe should re atach both if you
+on their tear off button again.  Hmmm, maybe should re attach both if you
 drag and drop them?  With some sort of quivering with anticipation
 effect when they are in the drop zone?  Menu window can start to shrink
 towards their origin menu when dragged close.  Dragging the tab button
