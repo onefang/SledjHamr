@@ -1,10 +1,10 @@
 FIXES -
-Irrlicht is flickering like crazy.
+
+Irrlicht is flickering like crazy.  Hmm, might be Irlicht's fault,
+mostly it flickers to black, but I've seen it flicker to the first frame
+of the GL demo.  On the other hand, it shows the Alm background usually.
 
 LuaSL grew a couple of bugs when I upgraded to LuaJIT 2.0.1 package.
-
-Finish the basic camera stuff, seems to be a bit glitched right now,
-though it worked a few times.
 
 GL viewport aspect ratio should remain stable through resizes.
 
@@ -25,7 +25,8 @@ Generic scrolling text area, with time stamps, clickable URLs (including
 internal links to profiles and stuff), logging to file, reading history
 from file (both a few dozen lines, or the entire thing).  EFL log
 domains should be able to feed into these, with colours, and should be
-able to split / filter bits to different areas.
+able to split / filter bits to different areas.  Two Elm_entry's, one
+not editable.  See "Entry 7" test.
 
 IM tabs should show a very faded version of the others profile image/s.
 
@@ -45,7 +46,13 @@ tearing off sub menus, and switching windows between internal and
 external windows, without having to entirely recreate the UI stack
 within.  Hmm, think this is what swallow / unswallow is all about. 
 Think that only covers stuff in the same Evas though.  Not sure this can
-be done currently.
+be done currently.  Maybe the Elm socket and plug thingy can be used? 
+Some or all of the windows could be external processes anyway.  The
+socket seems to be some sort of server, which can share it's content to
+other plugs (processes), each one sees identical stuff, including
+interactions.  The plugs can come and go as they please.  Or perhaps
+elm_object_part_content_set/get/unset or
+elm_object_item_part_content_set/get/unset might work for this.
 
 An internal window has a title bar, with a centered title, and the usual
 widgets.  The title part is split into three, if you grab and drag from
@@ -80,8 +87,9 @@ arrange them, so that will be dragging them in the other axis then I
 guess?  Tearing off should have some sort of rip and wobble effect,
 maybe an ePhysics soft body?
 
-Windows like the edit window should do like Elm toolbars when resized
-too small, low priority widgets shrink down to a "More.." button.
+Windows like the prim edit window should do like Elm toolbars when
+resized too small, low priority widgets shrink down to a "More.."
+button.
 
 Optional hover focus on windows, maybe even on some widget types. 
 Focused windows should be not quite as transparent as unfocused ones. 
@@ -89,4 +97,25 @@ Allow control over transparency levels (press on scroll wheel and wiggle it?).
 
 Current windows use the horrid "click anywhere to focus and raise", should have an
 option for proper layering.  :-P
+
+
+ELM -
+
+What is -
+    Conformant?
+	Squeezes things to make room for virtual keyboards and other mobile stuff.
+    CTX popup?
+	A pop up simple list of items.
+    Mapbuf?
+	Used in the launcher tests, so that might provide a clue.
+	I think it just stuffs the entire container widget into a single image so that resizing and moving is faster.
+	A performance tweak.
+    Store (under helpers)?
+	Threaded content getter for genlist, and other widgets in future.
+	Basically the content of a genlist is fetched in the background, to slowly populate a genlist.
+	The store can do any sort of arbitrary mapping of what it fetches to genlist item content.
+	Currently this is file system based.
+	Might be useful for inventory, though we really need a tree widget, which happily genlist does.
+    Stored surface buffer (Launcher tests)?
+	Just the mapbuf thingy above I think.
 
