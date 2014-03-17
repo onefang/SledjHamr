@@ -52,7 +52,7 @@ help to make matrix-RAD style stuff work as well as it did there.
 Edje Lua is restricted to scripts in edje files, AND sandboxed to those
 edje files as well.  We want to step outside that sandbox, and run stand
 alone Lua scripts, as well as GuiLua / LuaSL scripts internal to
-extantz.  Some merging of LUaSL and Edje Lua, leaving room for GuiLua,
+extantz.  Some merging of LuaSL and Edje Lua, leaving room for GuiLua,
 would be great, but I might have to convince Raster.  Note that the
 socket idea wont work in sandboxed edje Lua scripts, unless the socket
 is in C code, that uses edje messages as the internal transport.
