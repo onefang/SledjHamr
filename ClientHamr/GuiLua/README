@@ -54,7 +54,7 @@ edje files as well.  We want to step outside that sandbox, and run stand
 alone Lua scripts, as well as GuiLua / LuaSL scripts internal to
 extantz.  Some merging of LUaSL and Edje Lua, leaving room for GuiLua,
 would be great, but I might have to convince Raster.  Note that the
-socket idea wont work in sandboxed edje LUa scripts, unless the socket
+socket idea wont work in sandboxed edje Lua scripts, unless the socket
 is in C code, that uses edje messages as the internal transport.
 
 Just so it's easier to find, I'll repeat a bit from the Enlightenment
