@@ -125,6 +125,167 @@ Raster also wants to thread lots of edje, likely including having edje
 Lua scripts as threads, much like I'm doing with LuaSL already.  Plus
 LuaJIT SPEEEEED!!.  B-)
 
+Skang notes
+-----------
+
+So, what will this variation of skang look like?  For a start, the
+syntax will have to be more Lua like, so that's a real basic change. 
+Can't use a space as an argument separator, Lua allows only ',' and
+';'.  Strings can still use single or double quotes.
+
+The magic "_123" system I used before to specify "position / size in
+characters instead of pixels" just wont work in Lua.  Using _ as a table
+name with a meta table means that this syntax now becomes "_.123", which
+is kinda acceptable.  Note that _.123 is syntax sugar for _["123"], so
+I'm not sure if using a number there works.  An alternative is to just
+use a string -
+
+foo = widget.label(0, "1", 100, 0, 'Text goes here")
+
+Uses as many characters, and ends up being a value instead of an index,
+which is the right thing to do.  While on this subject, anything less
+than 1, but more than 0, can be used as a percentage, maybe combined
+with "character" mode (this is a new thing) -
+
+foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here")
+
+"widget" would be a table with functions for dealing with widgets.  It
+would include metatable stuff for widget set introspection.  So
+"widget.label" would introspect in our widget set for a widget type of
+"label", and return a widget type table.  So we could do -
+
+foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here :")
+foo:colour(255, 255, 255, 0, 0, 100, 255, 0)
+foo:hide()
+foo:action("skang.load(some/skang/file.skang)")
+
+Also allow access via table elements -
+
+foo.action = "skang.load('some/skang/file.skang')"
+foo.colour.r = 123
+foo.look('some/edje/file/somewhere.edj')
+foo.help = 'This is a widget for labelling some foo.'
+
+We can use the concat operator (..) to append things to widgets, like
+adding choices in a drop down, rows in a grid, etc.
+
+Hmm, need a skang table as well -
+
+skang.module(Evas)
+skang.module(Elementary)
+skang.clear()
+skang.load('some/skang/file.skang')
+
+
+I don't think we need variable introspection as much, since in this case
+Lua is both the skang and the underlaying language, the variables can
+just be accessed directly.  Not sure on this, need to experiment.  This
+is what we normally need variable introspection for -
+
+foo = 'bar'	-- Using the metatable to override '=' to set the actual value of the widget, say the text of a label or edit widget.
+bar = foo	-- The reverse of the above.  Though perhaps these can't be done?
+foo = foo .. 'stuff' .. 'more stuff' .. 'another line of the dropdown or whatever'
+
+OK, first two can't be done, metatable only overides that for table elements.  The third one can only be -
+
+foo.value = 'stuff' .. 'more stuff'
+foo.value = foo.value .. 'another line of the dropdown or whatever'
+
+Skang relied on the use of the set command to make sure that any
+matching widgets and variables got updated.  And the get command.
+
+foo:set('stuff')
+bar = foo:get()
+
+On the other hand, given the module / package stuff mentioned below, and
+some metatable magic, we could do -
+
+local other = require('otherPackageName')
+other.foo = 'stuff'
+bar = other.foo
+
+Sooo, how does that squeeze into a "skang" file?
+
+#!skang myApp.skang     -- This is Lua, so this might not work.
+-- There's an implied local this = require('myApp')
+-- There's an implied local skang = require('skang')
+local widget = require('EvasWidgets')
+local other = require('otherPackageName')
+skang.clear
+skang.window(200, 200, "G'day planet.")
+quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
+quitter:action('quit')   -- 'quit' is looked up in ThingSpcae.commands, and translated into the Lua 'skang.quit()'.
+other.foo = 'stuff'
+this.bar = other.foo
+
+
+Original Skang infrastructure
+-----------------------------
+
+Skang starts with a Thing as the base.  In Java it's a base object for
+everything else, with a bunch of methods and elements.  We can probably
+use a Thing metatable and replicate most of it.  The widget used in the
+previous section is built on top of Thing.  Things are stored in
+ThingSpace, which is a BonsaiTree of LeafLike Things.  Java's version of
+multiple inheritance was used.  Commands are a Thing.
+
+ThingSpace is per users session.  classCache stores ... , command stores
+commands, module stores loaded modules, param stores variables and their
+values, widget stores widgets and their value / state.
+
+Skanglet is a generated mapping between actual methods / variables in a
+class, and skang.  Each method or variable that ends up in the skanglet
+was marked by special javadoc tags.  It also included some meta data
+like version and the default skang.  For variables it defined -
+
+"Name", "Field/Method()", "Required", "Shortcut", "Default", "Help text"
+
+... and for methods -
+
+"Name", "Method", "Syntax", "Help text"
+
+In both cases the "Name" was the skang name, it could be different from
+the Java name specified in the second field.  Likely we can do away with
+the need to generate these skanglet files, and just add stuff to the
+Thing.  Modules wrap Skanglets, and takes care of loading them into ThingSpace.
+
+Module are used for -
+    loading the Skanglet for the Thing currently running (match java class name to skang file name).
+    loading the AWT interface in skang files.
+    loading OTHER skanglet based Things
+    loading Squeal, StuffSkang, and Who from java when needed.
+
+So in Lua, we can use the package system.  First require(moduleName) to
+load up the skang module.  Require can return a table, the Lua package
+called ends with "return someTable".  See LuaLSL for an example.  This
+package is actually run, so it can figure out what to put in the
+returned table.  So for instance it could use inlined methods and such -
+
+local skang = require skang
+local result = {};
+result.author = 'onefang'
+result.version = '0.72 alpha 2004-11-19 16:28:00'
+local foo
+-- The first argument would be the name of a local variable / method.  Which could be accessed via _G?
+-- Not sure if we could use a global foo, AND use it directly.
+result.foo = skang.newParam(foo, "Required", "Shortcut", "Default", "Help text")
+result.func = skang.newCommand('arg1_type,arg2_type', 'Help Text', function (arg1, arg2)
+...
+end)
+return result;
+
+
+Stuff is the base class used to track database rows and other multi
+value things.  Would still need to deal with variable sub things, though
+that's likely just using tables.  SquealStuff is the database version,
+using Squeal as the database driver wrapper.  Squeal could wrap
+esskyuehl?
+
+
+The pre tokenized structure thingy I had planned in the TODO just wont
+work, as it uses symbols.  On the other hand, we will be using Lua
+tables anyway.  B-)
+
 
 EO notes
 --------
