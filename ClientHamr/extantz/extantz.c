@@ -469,6 +469,8 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     Print Screen / SysRq, Pause / Break, other oddball keys, also not interested.
     NOTE - gonna have an easily programmable "bind key to command" thingy, like E17s, so that can deal with other keys.
 	Should even let them be saveable so people can swap them with other people easily.
+
+    TODO - implement things like space mouse, sixaxis, phone as controller, joysticks, data gloves, etc.
 */
 
 /* A moveRotate array of floats.
