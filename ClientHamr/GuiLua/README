@@ -126,6 +126,131 @@ Lua scripts as threads, much like I'm doing with LuaSL already.  Plus
 LuaJIT SPEEEEED!!.  B-)
 
 
+EO notes
+--------
+
+tl;dr - eo introspection doesn't actually exist, even though it was
+"promised" years ago, but looks trivial to add.
+
+object = eo_add(EVAS_OBJ_LINE_CLASS, canvas);
+    evas_line.eo.h	-> #define EVAS_OBJ_LINE_CLASS evas_obj_line_class_get()
+			-> const Eo_Class *evas_obj_line_class_get(void) EINA_CONST;
+    evas_line.eo.c	-> EO_DEFINE_CLASS(evas_obj_line_class_get, &_evas_line_class_desc, EVAS_OBJ_CLASS, NULL);
+    Eo.h		-> EO_DEFINE_CLASS is a macro that basically wraps eo_class_new(), and returns it's result.
+
+So Eo_Class is the type of a class, but it's A) opaque, B) deprecated! 
+It includes a pointor to the Eo_Class_Description, which includes the
+actual name.  I'm not seeing anywhere the names of the get/set
+paramaters being passed into the system, or any way to look up a class
+based on name.  Not even a way to get to the public Eo_Class_Description
+from the opaque Eo_Class.
+
+Eo_Class_Description is at least public.  It includes
+Eo_Op_Description's and Eo_Evenet_Description's.  Eo_Op_ and Eo_Event_
+include the name and documentation of the op / event.  The macro used to
+generate Eo_Op_ does NOT pass the name, just the ID number as a string. 
+There is also Eo_Op_Func_Description, which does not include a name, it
+seems to be generated in the constructor.  The same Eo_Op_ ID number is
+used to index it.  Seems to be no direct link between Eo_Class and
+Eo_Op_func_, just the same Eo_Op_ ID numbers used internally somehow.
+
+eo_do(obj, evas_obj_line_xy_set(200, 200, 300, 300));
+    evas_line.eo.h	-> #define evas_obj_line_xy_set(x1, y1, x2, y2) EVAS_OBJ_LINE_ID(EVAS_OBJ_LINE_SUB_ID_XY_SET), EO_TYPECHECK(Evas_Coord , x1), EO_TYPECHECK(Evas_Coord , y1), EO_TYPECHECK(Evas_Coord , x2), EO_TYPECHECK(Evas_Coord , y2)
+			   #define EVAS_OBJ_LINE_ID(sub_id) (EVAS_OBJ_LINE_BASE_ID + sub_id)
+			   extern EAPI Eo_Op EVAS_OBJ_LINE_BASE_ID;
+
+			   enum
+			   {
+			      EVAS_OBJ_LINE_SUB_ID_XY_SET,
+			      EVAS_OBJ_LINE_SUB_ID_XY_GET,
+			      EVAS_OBJ_LINE_SUB_ID_LAST
+			   };
+    evas_line.eo.c	-> EAPI Eo_Op EVAS_OBJ_LINE_BASE_ID = EO_NOOP;
+			    static void _gen_evas_line_class_constructor(Eo_Class *klass)
+			    {
+			       const Eo_Op_Func_Description func_desc[] = {
+			            EO_OP_FUNC(EO_BASE_ID(EO_BASE_SUB_ID_CONSTRUCTOR), _eo_obj_evas_line_constructor),
+			            EO_OP_FUNC(EVAS_OBJ_LINE_ID(EVAS_OBJ_LINE_SUB_ID_XY_SET), _eo_obj_evas_line_xy_set),
+			            EO_OP_FUNC(EVAS_OBJ_LINE_ID(EVAS_OBJ_LINE_SUB_ID_XY_GET), _eo_obj_evas_line_xy_get),
+			            EO_OP_FUNC_SENTINEL
+			       };
+			       eo_class_funcs_set(klass, func_desc);
+			    }
+
+			    static void
+			    _eo_obj_evas_line_xy_set(Eo *obj, void *_pd, va_list *list)
+			    {
+			       Evas_Coord x1 = va_arg(*list, Evas_Coord);
+			       Evas_Coord y1 = va_arg(*list, Evas_Coord);
+			       Evas_Coord x2 = va_arg(*list, Evas_Coord);
+			       Evas_Coord y2 = va_arg(*list, Evas_Coord);
+			       _evas_line_xy_set(obj, _pd, x1, y1, x2, y2);
+			    }
+
+			    void _evas_line_xy_set(Eo *obj, Evas_Line_Data *pd, Evas_Coord x1, Evas_Coord y1, Evas_Coord x2, Evas_Coord y2);
+
+    evas_object_line.c	-> EOLIAN static void _evas_line_xy_set(Eo *eo_obj, Evas_Line_Data *_pd, Evas_Coord x1, Evas_Coord y1, Evas_Coord x2, Evas_Coord y2)
+
+
+Evas_Object_Line *o = eo_data_scope_get(obj, EVAS_OBJ_LINE_CLASS);
+Evas_Object_Line *o = eo_data_ref(obj, EVAS_OBJ_LINE_CLASS);
+
+
+.. evas_line.eo
+
+class Evas_Line (Evas_Object)
+{
+   legacy_prefix: evas_object_line;
+   eo_prefix: evas_obj_line;
+   properties {
+      xy {
+         set {
+            /*@
+            @since 1.8
+
+            Sets the coordinates of the end points of the given evas line object. */
+         }
+         get {
+            /*@
+            Retrieves the coordinates of the end points of the given evas line object.
+            second end point. */
+         }
+         values {
+            Evas_Coord x1; /*@ The X coordinate of the first point. */
+            Evas_Coord y1; /*@ The Y coordinate of the first point. */
+            Evas_Coord x2; /*@ The X coordinate of the second point. */
+            Evas_Coord y2; /*@ The Y coordinate of the second point. */
+         }
+      }
+   }
+   implements {
+      Eo_Base::constructor;
+   }
+
+}
+
+... evas_line.eo.c
+
+EAPI void
+evas_object_line_xy_set(Evas_Object *obj, Evas_Coord x1, Evas_Coord y1, Evas_Coord x2, Evas_Coord y2)
+{
+   eo_do((Eo *) obj, evas_obj_line_xy_set(x1, y1, x2, y2));
+   return ;
+}
+
+
+static const Eo_Class_Description _evas_line_class_desc = {
+     EO_VERSION,
+     "Evas_Line",
+     EO_CLASS_TYPE_REGULAR,
+     EO_CLASS_DESCRIPTION_OPS(&EVAS_OBJ_LINE_BASE_ID, _evas_line_op_desc, EVAS_OBJ_LINE_SUB_ID_LAST),
+     _evas_line_event_desc,
+     sizeof(Evas_Line_Data),
+     _gen_evas_line_class_constructor,
+     NULL
+};
+
+
 skang vs edje vs LL shit
 ------------------------
 
