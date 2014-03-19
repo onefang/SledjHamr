@@ -229,9 +229,10 @@ previous section is built on top of Thing.  Things are stored in
 ThingSpace, which is a BonsaiTree of LeafLike Things.  Java's version of
 multiple inheritance was used.  Commands are a Thing.
 
-ThingSpace is per users session.  classCache stores ... , command stores
-commands, module stores loaded modules, param stores variables and their
-values, widget stores widgets and their value / state.
+ThingSpace is per users session.  classCache stores cached class
+lookukps, command stores commands, module stores loaded modules, param
+stores variables and their values, widget stores widgets and their value
+/ state.
 
 Skanglet is a generated mapping between actual methods / variables in a
 class, and skang.  Each method or variable that ends up in the skanglet
@@ -261,14 +262,14 @@ called ends with "return someTable".  See LuaLSL for an example.  This
 package is actually run, so it can figure out what to put in the
 returned table.  So for instance it could use inlined methods and such -
 
-local skang = require skang
+local skang = require('skang')
 local result = {};
 result.author = 'onefang'
 result.version = '0.72 alpha 2004-11-19 16:28:00'
 local foo
 -- The first argument would be the name of a local variable / method.  Which could be accessed via _G?
 -- Not sure if we could use a global foo, AND use it directly.
-result.foo = skang.newParam(foo, "Required", "Shortcut", "Default", "Help text")
+result.foo = skang.newParam('foo', "Required", "Shortcut", "Default", "Help text")
 result.func = skang.newCommand('arg1_type,arg2_type', 'Help Text', function (arg1, arg2)
 ...
 end)
@@ -307,7 +308,7 @@ based on name.  Not even a way to get to the public Eo_Class_Description
 from the opaque Eo_Class.
 
 Eo_Class_Description is at least public.  It includes
-Eo_Op_Description's and Eo_Evenet_Description's.  Eo_Op_ and Eo_Event_
+Eo_Op_Description's and Eo_Event_Description's.  Eo_Op_ and Eo_Event_
 include the name and documentation of the op / event.  The macro used to
 generate Eo_Op_ does NOT pass the name, just the ID number as a string. 
 There is also Eo_Op_Func_Description, which does not include a name, it
