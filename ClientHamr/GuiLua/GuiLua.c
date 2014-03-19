@@ -34,8 +34,10 @@ scripts can have a poper GUI for a change.
 
 NOTES and TODOs -
 
+Making these packages all a sub package of skang seems like a great idea.
+
 See if I can use LuaJIT FFI here.  Since this will be a library, and
-skang apps could be writte nin C or Lua, perhaps writing this library to
+skang apps could be written in C or Lua, perhaps writing this library to
 be FFI friendly instead of the usual Lua C binding might be the way to
 go?
 
@@ -108,12 +110,24 @@ thing.  Java inheritance and interfaces where used.  There's quite a few
 variations of OO support has been written for Lua, maybe some of that
 could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
 
+Other useful links -
+
+http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
+http://lua-users.org/wiki/MetamethodsTutorial
+http://lua-users.org/wiki/MetatableEvents
+
+http://lua-users.org/wiki/MechanismNotPolicy
+http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
+http://lua-users.org/lists/lua-l/2011-10/msg00485.html
+http://lua-users.org/wiki/LuaModuleFunctionCritiqued
+
 Each "users session" (matrix-RAD term that came from Java
 applets/servlets) has a ThingSpace, which is a tree that holds
 everything else.  It holds the class cache, commands, loaded modules,
 variables and their values, widgets and their states.  In matrix-RAD I
 built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
-Perhaps some combination of the two will work here?
+Perhaps some combination of the two will work here?  On the other hand,
+with Lua tables, who needs trees?  lol
 
 Get/set variables would be done here, though the widget package, for
 instance, would override this to deal with the UI side, and call the
