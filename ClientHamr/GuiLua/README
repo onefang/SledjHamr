@@ -125,6 +125,7 @@ Raster also wants to thread lots of edje, likely including having edje
 Lua scripts as threads, much like I'm doing with LuaSL already.  Plus
 LuaJIT SPEEEEED!!.  B-)
 
+
 Skang notes
 -----------
 
@@ -148,6 +149,11 @@ than 1, but more than 0, can be used as a percentage, maybe combined
 with "character" mode (this is a new thing) -
 
 foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here")
+
+This could even allow relative placement as mentioned in the skang TODO -
+
+foo = widget.label(0, "otherWidget+0.1", 0.5, 0, 'Text goes here")
+
 
 "widget" would be a table with functions for dealing with widgets.  It
 would include metatable stuff for widget set introspection.  So
@@ -186,7 +192,7 @@ foo = 'bar'	-- Using the metatable to override '=' to set the actual value of th
 bar = foo	-- The reverse of the above.  Though perhaps these can't be done?
 foo = foo .. 'stuff' .. 'more stuff' .. 'another line of the dropdown or whatever'
 
-OK, first two can't be done, metatable only overides that for table elements.  The third one can only be -
+OK, first two can't be done, metatable only overides that for table elements.  The third one can only be (I might be wrong there) -
 
 foo.value = 'stuff' .. 'more stuff'
 foo.value = foo.value .. 'another line of the dropdown or whatever'
@@ -288,11 +294,107 @@ work, as it uses symbols.  On the other hand, we will be using Lua
 tables anyway.  B-)
 
 
+NAWS
+----
+
+NAWS was always planned, but never actually written.  Though some stuff
+was kinda prototyped, especially UberMatrix stuff.  I think this time
+around, NAWS should be written in C, based on pure Evas + Edje.  Perhaps
+with direct support for introspection?  After EO settles down, I might
+use that to.
+
+
+Edje_Lua notes
+--------------
+
+Edje_Lua is sandboxed firmly inside of edje files.  This makes it
+unsuitable for our use, as we want to step outside that sandbox. 
+However, we still want to wrap Lua around EFL stuff, preferably using
+the same API.  Raster fought against using this new eolian stuff to
+generate edje_lua2.c, and seems to be against having a "no sandbox" flag
+in edje_lua2.c.  For now I'll let q66 go ahead with his Edje Lua via
+LuaJIT FFI conversion that uses a variation of eolian written in Lua. 
+Seems like much more work than my way of doing it.  shrugs
+
+Unfortunately, this might not be ready soon enough for me, AND it might
+not even be suitable.  While I agree that LuaJIT FFI stuff might be a
+good idea, if I read the docs correctly FFI simply wraps around C
+headers and libraries directly, making it less suitable for sandboxes
+and other environments where you want to wrap those library functions
+differently.
+
+So, I might have to go ahead with my own plan anyway.  On the other
+hand, for skang, I want to wrap things a bit differently.  Might be best
+to do that wrapping C side.  In other words, the skang and widget Lua
+packages get written in C, and are different from edje_lua2.c.
+
+On the gripping hand, there might be use in including edje_lua2.c style
+bindings in GuiLua as an edje package, evas package, elementary package,
+etc.  This could be done by going ahead with my plans to modify
+edje_lua2.c to include the "no sandbox" flag, then compile it with that
+flag turned on to produce a standard Lua package.  Then get eolian to
+produce evas_lua.c, elementary_lua.c, etc.
+
+Another idea worth investigating is to rewrite edje_lua2.c to use
+introspection directly to figure out it's "combined set and get" style
+bindings.
+
+
+Introspected EFL notes
+----------------------
+
+See below for the basic EO notes, where I come to the conclusion that
+the other EFL devs wont be adding introspection to EO themselves.  It's
+all too hard they say.  Pffft
+
+So, I might have to do this myself, call it "entro"....
+
+Write a patch against eolian that outputs introspection data.  That data
+is C code for a hash of EO class names.  Each hash points to a data
+structure that includes a hash of method names for that class, and a
+pointer to the class description.  Each of those hashes points to a data
+structure that includes an array of argument types and names.  The
+method ID should be in that structure to, and maybe even the doc text. 
+Might even include an Eo internal data structure that links Op IDs to
+that method structure (I dunno what they call that).  The final output
+is a library of that C code, that includes functions for doing the
+actual introspection.
+
+See?  Not to hard at all, all described in a paragraph. lol
+
+One function we could include is a way to "compile" eo_do arguments. 
+That would be an array (va_list actually) of method ID's followed by the
+arguments for that method.  Some of those arguments might be pointers to
+memory structures, so this is not suitable for storing on disk. 
+Instead, it could be used for "compiling" commonly used code or hot
+paths to get the introspection overhead out of the way early.  Could
+also compile parameterized versions, with numbered place holders that
+get filled in later.  Certainly we need a Lua interface to eo_do of some
+sort.
+
+In the same way that Java skang cached the results of introspection in
+ThingSpace.CLASS, we could use cache introspection lookups to speed
+things up.  Not a great saving, one hash lookup versus two.  Caching the
+"class.method" string that points to the method structure for any method
+we have used already.
+
+NAWS could use the compile function to create eo_do commands needed to
+create each of it's widget types, and the window.  Yes, I know, NAWS
+only has two "widget types".  B-)
+
+
+For quick and dirty early testing, I'll probably write a widget package
+that has hard coded mappings between some basic "label", "button", etc.
+and ordinary elementary widgets.  Proper introspection can come later.
+
+
 EO notes
 --------
 
 tl;dr - eo introspection doesn't actually exist, even though it was
-"promised" years ago, but looks trivial to add.
+"promised" years ago, but looks trivial to add.  On the other hand, the
+other EFL devs seem to be fighting against it, so I might need to write
+my own.  sigh
 
 object = eo_add(EVAS_OBJ_LINE_CLASS, canvas);
     evas_line.eo.h	-> #define EVAS_OBJ_LINE_CLASS evas_obj_line_class_get()
