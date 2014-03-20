@@ -64,8 +64,10 @@ local skangModuleBegin = function (name, author, copyright, version, timestamp, 
     _M._M = _M			-- So that references to _M below the setfenv() actually go to the real _M.
     _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
 
+    -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
     _M.AUTHOR = author
     _M.COPYRIGHT = copyright .. ' ' .. author
+    -- TODO - Translate the version number into a version string.
     _M.VERSION = version .. ' lookup version here ' .. timestamp
     -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
     _M.DEFAULT_SKANG = skin
@@ -136,17 +138,29 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
 end
 
 
+--[[
+Thing = {}
+Thing.__index = Thing	-- So this can be used as the metatable for Things.
+So in newParam and newCommand -
+    setmetatable(module, Thing)
+]]
+
+
+
 -- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
 -- Actually, if it's not required, and there's no default, then skip setting _M['bar'].
 -- Could even use _index to skip setting it if it's not required and there is a default.
 -- Also should add a metatable, and __newindex() that passes all setting of this variable to skang so it can update other stuff like linked widgets.
+-- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
+-- TODO - Could even use __index to skip setting it if it's not required and there is a default.
+-- TODO - Should add a metatable, and __newindex() that passes all setting of this variable to skang so it can update other stuff like linked widgets.
 -- TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
 --   Not unless skang.newParam() knows about a and b, which it wont.
 --   Both a and b get the same table, not different copies of it.
 --   Perhaps clone the table if it exists?  There is no Lua table cloner, would have to write one.  Only clone the parameters, the rest can be linked back to the original.
 --   Then we have to deal with widgets linking to specific clones.
 --   Actually, not sure matrix-RAD solved that either.  lol
--- This could even be done with an array of these arguments, not including the _M.
+-- TODO - This could even be done with an array of these arguments, not including the _M.
 newParam = function (module, name, required, shortcut, default, help, acl, boss)
     module[name] = default
     ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, acl = acl, boss = boss, }
@@ -154,7 +168,7 @@ newParam = function (module, name, required, shortcut, default, help, acl, boss)
 end
 
 -- skang.newCommand stashes the function into _M['func'], and stashes it all (including the function) into ThingSpace.commands['func'].
--- TODO - Could use _call so that ThingSpace.commands['foo'](arg) works.
+-- TODO - Could use __call so that ThingSpace.commands['foo'](arg) works.
 newCommand = function (module, name, types, help, func, acl, boss)
     module[name] = func
     ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, acl = acl, boss = boss, }
