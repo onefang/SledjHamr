@@ -206,7 +206,106 @@ moduleEnd(_M)
 
 end
 
+-- NOTE - We have swapped acl and boss around from the Java version, since boss was usually blank.
+-- Boss is the person that owns a Thing.
 
+--[[  The original Skang parameters and commands.
+	public final static String MY_USAGE[][] = 
+	{
+		{"skinURL", "skinURL", "Y", "s", null, "URL of skin file.", "", "RI-"},
+		{"debug", "debug", "N", "", "0", "Set debugging level to :\n\t-1 - errors and warnings only (-q)\n\t0 - basic information\n\t1 - advanced information (-v)\n\t2 - trace functions\n\t3 - trace protocol\n\t4 - dump packets + stuff\n\t5 - detail", "", ""},
+		{"browser", "browser", "N", "", "mozilla %f", "Browser to run.", "", ""},
+		{"downloaddir", "downloadDir", "N", "", "download", "Download directory.", "", ""},
+		{"sessionID", "sessionID", "N", "", null, "SessionID from servlet.", "", ""},
+		{"JSESSIONID", "JSESSIONID", "N", "", null, "JSESSIONID from servlet engine.", "", ""},
+		{"servletpath", "servletPath", "N", "", "matrix_rad", "Servlet path.", "", ""},
+		{"servletport", "servletPort", "N", "", null, "Servlet port.", "", ""},
+		{"servletsslport", "servletSSLPort", "N", "", null, "Servlet SSL port.", "", ""},
+		{"HTML", "HTML", "N", "", "false", "Output to HTML?", "", ""},
+		{"PHP", "PHP", "N", "", "false", "Output though the PHP wrapper", "", ""},
+		{"inbrowser", "inBrowser", "N", "", "true", "Run in browser window?", "", ""},
+		{"SSL", "SSL", "N", "", null, "Dummy to avoid a web server bug.", "", ""},
+		{"NOSSL", "NOSSL", "N", "", null, "Dummy to avoid a web server bug.", "", ""},
+		{"corporate", "corporate", "N", "", null, "Are we doing corporate shit?", "", ""},
+		{"", "", "", "", "", "", "", ""}
+	};
+	public final static String MY_SKANG[][] = 
+	{
+--		{"module", "addModule", "file,data", "Load a module.", "", ""},
+		{"append", "appendThing", "name,data", "Append to the current value of a Thing.", "", ""},
+		{"#!java", "bash", "name,name,name,name,name,name,name", "A not so clever unix script compatability hack.", "", ""},
+		{"pending", "pendingDoThing", "action", "Do an action when you are ready.", "", ""},
+		{"applet", "doIfApplet", "action", "Only do this if we are an applet.", "", ""},
+		{"application", "doIfApplication", "action", "Only do this if we are an application.", "", ""},
+		{"corporateshit", "doIfCorporateShit", "action", "Only do this if we are doing corporate shit.", "", ""},
+		{"realworld", "doIfRealWorld", "action", "Only do this if we are in the real world.", "", ""},
+		{"servlet", "doIfServlet", "action", "Only do this if we are a servlet.", "", ""},
+		{"do", "doThing", "action", "Do this action.", "", ""},
+		{"grab", "getFile", "URL", "Grab a file from a URL.", "", ""},
+--		{"get", "getThing", "name", "Get the current value of an existing thing.", "", ""},
+		{"gimmeskin", "gimmeSkin", "", "Returns the modules default skin.", "", ""},
+		{"help", "helpThing", "file", "Show help page.", "", ""},
+		{"nada", "nothing", "data", "Does nothing B-).", "", ""},
+		{"postshow", "postShowThings", "URL,name", "POST the values of all Things to the URL, show the returned content.", "", ""},
+		{"post", "postThings", "URL", "POST the values of all Things to the URL, return the content.", "", ""},
+		{"postparse", "postParseThings", "URL", "POST the values of all Things to the URL, parse the returned content.", "", ""},
+		{"quiet", "quiet", "", "Output errors and warnings only.", "", ""},
+		{"remove", "removeThing", "name", "Remove an existing thing.", "", ""},
+		{"sethelp", "setHelp", "name,data", "Change the help for something.", "", ""},
+--		{"set", "setThing", "name,data", "Set the current value of an existing Thing.", "", ""},
+--		{"skang", "skangRead", "URL", "Parse the contents of a skang file or URL.", "", ""},
+--		{"quit", "startQuit", "", "Quit, exit, remove thyself.", "", ""},
+		{"stopwhinging", "stopWhinging", "", "Clear all messages.", "", ""},
+		{"tell", "tellThing", "name", "Returns details of an existing Thing.", "", ""},
+		{"togglebug", "toggleIgnoreBrowserBug", "", "Toggle ignorance of a certain browser bug.", "", ""},
+		{"verbose", "verbose", "", "Output advanced information.", "", ""},
+		{"", "", "", "", "", ""}
+]]
+
+--[[ The original SkangAWT parameters and commands.
+	public final static String MY_USAGE[][] = 
+	{
+		{"", "", "", "", "", "", "", ""}
+	};
+	public final static String MY_SKANG[][] = 
+	{
+		{"taction", "tactionWidget", "name,action", "Set the alternative action for a widget.", "", ""},
+		{"action", "actionWidget", "name,action", "Set the action for a widget.", "", ""},
+		{"pane", "addPane", "name,x,y,w,h,data", "Add a pane to the current module.", "", ""},
+		{"widget", "addWidget", "name,type,lx,ly,lw,lh,data,data", "Add a widget to the current skin.", "", ""},
+		{"checkboxgroup", "checkBoxGroup", "number", "Make the next 'number' Checkboxes part of a check box group.", "", ""},
+--		{"clear", "clearWidgets", "", "The current skin is cleared of all widgets.", "", ""},
+		{"colour", "colourWidget", "name,r,g,b,alpha,r,g,b,alpha", "Set widget's background and foreground colour.", "", "GGG"},
+		{"doaction", "doWidget", "name", "Do a widgets action.", "", "GGG"},
+		{"disable", "disableWidget", "name", "Disable a widget.", "", "GGG"},
+		{"enable", "enableWidget", "name", "Enable a widget.", "", "GGG"},
+		{"hide", "hideWidget", "name", "Hide a widget.", "", "GGG"},
+		{"hideall", "hideAllWidgets", "name,lx,ly,lw,lh", "Hide all widgets.", "", "GGG"},
+		{"look", "lookWidget", "name,normal,ghost,active,toggle", "Set the current look of an existing widget.", "", "GGG"},
+		{"mask", "maskWidget", "name,data", "Set the mask for a widget.", "", ""},
+		{"onmouse", "onMouse", "name,data", "Do something on mouse hover.", "", ""},
+		{"offmouse", "offMouse", "name,data", "Do something off mouse hover.", "", ""},
+		{"popup", "popupWidget", "name,data,data,data,data", "Create a popup.", "", "GGG"},
+		{"readonly", "readOnlyWidget", "name", "Make a widget read only.", "", "GGG"},
+		{"writeonly", "writeOnlyWidget", "name", "Make a widget write only.", "", "GGG"},
+		{"satori", "satori", "x,y", "Give me the developers menu.", "", "GGG"},
+		{"showloginwindow", "showLoginWindow", "", "Show user login window.", "", "GGG"},
+		{"show", "showWidget", "name", "Show a widget.", "", "GGG"},
+--		{"window", "setSkangFrame", "x,y,name", "Specifies the size and title of the application Frame.", "", "GGG"},
+		{"stuff", "stuffWidget", "name,data", "Set the stuff for a widget's pane.", "", ""},
+		{"stufflet", "stuffWidget", "name,data,data", "Set the stufflet for a widget.", "", ""},
+		{"stufflist", "stuffListWidget", "name,data", "List the stuff in this widget.", "", ""},
+		{"stuffload", "stuffLoadWidget", "name,data,data", "Load the stuff for a widget.", "", ""},
+		{"stuffsave", "stuffSaveWidget", "name,data,data", "Save the stuff for a widget.", "", ""},
+		{"stuffdelete", "stuffDeleteWidget", "name,data,data", "Delete the stuff for a widget.", "", "SSS"},
+		{"stuffclear", "stuffClearWidget", "name,data", "Clear the stuff for a widget.", "", "SSS"},
+		{"rowtowidgets", "rowToWidgets", "name", "Copy Grid row to matching widgets.", "", ""},
+		{"widgetstorow", "widgetsToRow", "name,data", "Copy matching widgets to Grid row.", "", ""},
+		{"clearrow", "clearRow", "name", "Clear Grid row and matching widgets.", "", ""},
+		{"clearrowwidgets", "clearRowWidgets", "name", "Clear only the Grid row matching widgets.", "", ""},
+		{"", "", "", "", "", ""}
+	};
+]]
 
 
 -- Gotta check out this _ENV thing, 5.2 only.  Seems to replace the need for setfenv().  Seems like setfenv should do what we want, and is more backward compatible.
