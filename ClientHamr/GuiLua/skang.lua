@@ -1,3 +1,55 @@
+-- TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
+--[[
+In here should live all the internals of matrix-RAD that don't
+specifically relate to widgets.  This would include the "window" though.
+
+skang.module(Evas)
+skang.module(Elementary)
+skang.skang('some/skang/file.skang')
+
+This package is also what "apps" that use the system should "inherit"
+from, in the same way matrix-RAD apps did.  Skang "apps" could be Lua
+modules.  They could also be C code, like the extantz modules are likely
+to be.  Skang "apps" would automatically be associated with skang files
+of the same name.
+
+For a .skang file, the skang command (written in C) would strip off the
+first line, add the two implied lines, then run it as Lua.  The
+skang.load() command would do the same.  So that skang C comand would
+just pass the file name to skang.load() in this library.  B-)
+
+The old skang argument types are -
+
+		{"name",   "java.lang.String"},
+		{"action", "java.lang.String"},
+		{"type",   "java.lang.String"},
+		{"data",   "java.lang.String"},
+		{"URL",    "java.lang.String"},
+		{"file",   "java.lang.String"},
+		{"method", "java.lang.String"},
+		{"lx",     "java.lang.String"},
+		{"ly",     "java.lang.String"},
+		{"lw",     "java.lang.String"},
+		{"lh",     "java.lang.String"},
+		{"normal", "java.lang.String"},
+		{"ghost",  "java.lang.String"},
+		{"active", "java.lang.String"},
+		{"toggle", "java.lang.String"},
+		{"boolean","java.lang.Boolean"},
+		{"number", "java.lang.Integer"},
+		{"int",    "java.lang.Integer"},
+		{"x",      "java.lang.Integer"},
+		{"y",      "java.lang.Integer"},
+		{"w",      "java.lang.Integer"},
+		{"h",      "java.lang.Integer"},
+		{"r",      "java.lang.Integer"},
+		{"g",      "java.lang.Integer"},
+		{"b",      "java.lang.Integer"},
+		{"alpha",  "java.lang.Integer"},
+		{"acl",    "net.matrix_rad.security.ACL"},
+]]
+
+
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
 
 -- Wrapping the entire module in do .. end helps if people just join a bunch of modules together, which apparently is popular.
