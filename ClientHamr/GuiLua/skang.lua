@@ -54,14 +54,32 @@ The old skang argument types are -
 
 -- Wrapping the entire module in do .. end helps if people just join a bunch of modules together, which apparently is popular.
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
---   TODO - Except for the "passing the name in as ..." part.  B-(
 do	-- Only I'm not gonna indent this.
 
-
+-- This needs to start as local, then get wrapped a couple of times, eventually being made public as moduleBegin().
 local skangModuleBegin = function (name, author, copyright, version, timestamp, skin)
-    local _M = {}			-- This is what we return to require().
-    _M._NAME = name			-- Catch the module name passed in from require(), so that the file name can change.
-    _M._M = _M			-- So that references to _M below the setfenv() actually go to the real _M.
+    local _M = {}	-- This is what we return to require().
+
+    package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
+			-- Returning it at the end does the same thing.
+			-- This is so that we can have all the module stuff at the top, in this function.
+			-- Should do this before any further require(), so that circular references don't blow out.
+
+    -- Save the callers environment.
+    local savedEnvironment = getfenv(3)
+
+    -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
+    --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
+		local _G = _G	-- Only sets a local _G for this function.
+		_M._G = _G	-- This clone loop might do this, but we don't want to be able to access the old _G from outside via this leak.
+	In Lua 5.1 at least, _G was special.  In 5.2, _ENV sorta replaces setfenv(), but no idea if this clone loop stomps on that.
+    ]]
+    for k, v in pairs(savedEnvironment) do
+	_M[k] = v
+    end
+
+    _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
+    _M._NAME = name
     _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
 
     -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
@@ -72,46 +90,19 @@ local skangModuleBegin = function (name, author, copyright, version, timestamp, 
     -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
     _M.DEFAULT_SKANG = skin
 
-    package.loaded[_M._NAME] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
-				-- Returning it at the end does the same thing.
-				-- This is so that we can have all the module stuff at the top.
-				-- Should do this before any further require(), so that circular references don't blow out.
 
-    --_G[_M._NAME] = _M		-- Stuff it into a global of the same name.
-				-- Not such a good idea to stomp on global name space.
-				-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
-				-- This is why module() is broken.
+    --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
+			-- Not such a good idea to stomp on global name space.
+			-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
+			-- This is why module() is broken.
 
-    --local _G = _G			-- Stop stuff from here leaking into the callers _G.
-				-- Also works around the setfenv() below discarding all the old globals.
-				-- Though now we have to use _G.foo to access globals.
-
-    -- An alternative to the local _G is to declare as local ALL our imports here.  May be worthwhile to do both this and local _G?
-    -- basic, is it called "basic", might be called "base"?  Might have to include individual names.
-    _M.print = print
-    _M.getfenv = getfenv
-    _M.setfenv = setfenv
-    _M.require = require
-    _M.coroutine = coroutine	-- Apparently this is part of basic, but it comes in it's own table anyway.
-    _M.package = package
-    _M.string = string
-    _M.table = table
-    _M.math = math
-    _M.io = io
-    _M.os = os
-    _M.debug = debug
-
-    _M.savedEnvironment = getfenv(3)
-    -- setfenv() sets the environment for the FUNCTION, but we are not in a function.
-    -- Though if we are being require()ed, then require() calls a loader, which calls us, hence we are the function.
+    _M.savedEnvironment = savedEnvironment
+    -- setfenv() sets the environment for the FUNCTION, stack level deep.
     -- The number is the stack level -
     --   0 running thread, 1 current function, 2 function that called this function, etc
-    setfenv(3, _M)			-- Use the result for our internal global environment, so we don't need to qualify our internal names.
-				-- So the below "_M.bar" becomes "bar".  Which might not be what we want, since we are using 
-				-- _M.bar for the Thing, not the local bar the Thing wraps.  So we leave _M.bar as is, coz we have _M._M above.  B-)
-				-- Since _M is empty at this point, we loose the other globals, but that's we why declare local copies of stuff above.
-				-- Dunno if this causes problems with the do ... end style of joining modules.  It does.
-				-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
+    setfenv(3, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
+			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
+			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
 
     return _M
 end
@@ -122,7 +113,8 @@ local smb = function (name, author, copyright, version, timestamp, skin)
     return result
 end
 
-local _M = smb(..., 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00', nil)
+-- Call this now, via the above wrapper, so that from now on, this is like any other module.
+local _M = smb('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
 ThingSpace = {}
 ThingSpace.cache = {}
@@ -130,13 +122,20 @@ ThingSpace.commands = {}
 ThingSpace.modules = {}
 ThingSpace.parameters = {}
 ThingSpace.widgets = {}
+-- Actually stuff ourself into ThingSpace.
+ThingSpace.modules[_NAME] = {module = _M, name = _NAME, }
 
+-- This is the final version that we export.  Finally we can include the ThingSpace stuff.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
     local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
-    ThingSpace.modules[name] = {module = _M, name = name, }
+    ThingSpace.modules[name] = {module = result, name = name, }
     return result
 end
 
+-- Restore the environment.
+moduleEnd = function (module)
+    setfenv(2, module.savedEnvironment)
+end
 
 --[[
 Thing = {}
@@ -148,9 +147,6 @@ So in newParam and newCommand -
 
 
 -- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
--- Actually, if it's not required, and there's no default, then skip setting _M['bar'].
--- Could even use _index to skip setting it if it's not required and there is a default.
--- Also should add a metatable, and __newindex() that passes all setting of this variable to skang so it can update other stuff like linked widgets.
 -- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
 -- TODO - Could even use __index to skip setting it if it's not required and there is a default.
 -- TODO - Should add a metatable, and __newindex() that passes all setting of this variable to skang so it can update other stuff like linked widgets.
@@ -200,11 +196,6 @@ newCommand(_M, 'get',		'name',		'Get the current value of an existing thing.',	g
 newCommand(_M, 'set',		'name,data',	'Set the current value of an existing Thing.',	set)	-- This should be in the modules, not actually here?
 newCommand(_M, 'quit',		'',		'Quit, exit, remove thyself.',	quit)
 
-
--- Restore the environment.
-moduleEnd = function (module)
-    setfenv(2, module.savedEnvironment)
-end
 
 moduleEnd(_M)
 
@@ -315,4 +306,3 @@ end
 -- Gotta check out this _ENV thing, 5.2 only.  Seems to replace the need for setfenv().  Seems like setfenv should do what we want, and is more backward compatible.
 --   "_ENV is not supported directly in 5.1, so its use can prevent a module from remaining compatible with 5.1.
 --   Maybe you can simulate _ENV with setfenv and trapping gets/sets to it via __index/__newindex metamethods, or just avoid _ENV."
---[[ This is a Lua version of what module() does.  Apparently the _LOADED stuff is needed somehow, even though it's a local?  Think that was bogus.
