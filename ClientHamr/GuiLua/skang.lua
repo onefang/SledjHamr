@@ -135,16 +135,6 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
     return result
 end
 
-module = function ()
-end
-load = function ()
-end
-clear = function ()
-end
-window = function (width, height, title)
-end
-quit = function ()
-end
 
 -- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
 -- Actually, if it's not required, and there's no default, then skip setting _M['bar'].
@@ -157,17 +147,17 @@ end
 --   Then we have to deal with widgets linking to specific clones.
 --   Actually, not sure matrix-RAD solved that either.  lol
 -- This could even be done with an array of these arguments, not including the _M.
-newParam = function (module, name, required, shortcut, default, help)
+newParam = function (module, name, required, shortcut, default, help, acl, boss)
     module[name] = default
-    ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, }
+    ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, acl = acl, boss = boss, }
     print(name .. ' -> ' .. shortcut .. ' -> ' .. help)
 end
 
 -- skang.newCommand stashes the function into _M['func'], and stashes it all (including the function) into ThingSpace.commands['func'].
 -- TODO - Could use _call so that ThingSpace.commands['foo'](arg) works.
-newCommand = function (module, name, types, help, func)
+newCommand = function (module, name, types, help, func, acl, boss)
     module[name] = func
-    ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, }
+    ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, acl = acl, boss = boss, }
     print(name .. '(' .. types ..  ') -> ' .. help)
 end
 
@@ -179,7 +169,7 @@ clear = function ()
 end
 window = function (width, height, title)
 end
-load = function (name)
+skang = function (name)
 end
 get = function (name)
 end
@@ -188,13 +178,13 @@ end
 quit = function ()
 end
 
-newCommand(_M, 'module',	'name',		'',	module)
-newCommand(_M, 'clear',		'',		'',	clear)
-newCommand(_M, 'window',	'w,h,name',	'',	window)
-newCommand(_M, 'load',		'name',		'',	load)
-newCommand(_M, 'get',		'name',		'',	get)	-- This should be in the modules, not actually here.
-newCommand(_M, 'set',		'name,data',	'',	set)	-- This should be in the modules, not actually here.
-newCommand(_M, 'quit',		'',		'',	quit)
+newCommand(_M, 'module',	'file,acl',	'Load a module.',	module)
+newCommand(_M, 'clear',		'',		'The current skin is cleared of all widgets.',			clear)	-- Was in SkangAWT in Java.
+newCommand(_M, 'window',	'x,y,name',	'Specifies the size and title of the application Frame.',	window, 'GGG')	-- Was in SkangAWT in Java.
+newCommand(_M, 'skang',		'URL',		'Parse the contents of a skang file or URL.',	skang)
+newCommand(_M, 'get',		'name',		'Get the current value of an existing thing.',	get)	-- This should be in the modules, not actually here?
+newCommand(_M, 'set',		'name,data',	'Set the current value of an existing Thing.',	set)	-- This should be in the modules, not actually here?
+newCommand(_M, 'quit',		'',		'Quit, exit, remove thyself.',	quit)
 
 
 -- Restore the environment.
