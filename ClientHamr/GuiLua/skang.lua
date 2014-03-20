@@ -1,5 +1,4 @@
 -- TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
---[[
 
 --[[ Skang package
 
@@ -213,12 +212,11 @@ moduleEnd = function (module)
     setfenv(2, module.savedEnvironment)
 end
 
---[[
 
 -- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
 -- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
 -- TODO - Could even use __index to skip setting it if it's not required and there is a default.
--- TODO - Should add a metatable, and __newindex() that passes all setting of this variable to skang so it can update other stuff like linked widgets.
+-- TODO - if default is a function, or a pre existing module[name] is a function, then set the Thing .func to that function.
 -- TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
 --   Not unless skang.newParam() knows about a and b, which it wont.
 --   Both a and b get the same table, not different copies of it.
@@ -226,6 +224,7 @@ end
 --   Then we have to deal with widgets linking to specific clones.
 --   Actually, not sure matrix-RAD solved that either.  lol
 -- TODO - This could even be done with an array of these arguments, not including the _M.
+-- TODO - Maybe combine name and shortcut - 'name,s'.  Make it generic, add aliases to.  Any that are single characters can be shortcuts.
 newParam = function (module, name, required, shortcut, default, help, acl, boss)
     module[name] = default
     ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, acl = acl, boss = boss, }
@@ -233,8 +232,25 @@ newParam = function (module, name, required, shortcut, default, help, acl, boss)
     print(name .. ' -> ' .. shortcut .. ' -> ' .. help)
 end
 
+--[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
+        Merging widgets might work to.  B-)
+
+        Parameter gets a type, which might help since Lua is untyped, versus Java being strongly typed.
+        Widgets get a type as well, which would be label, button, edit, grid, etc.
+	    A grid could even have sub types - grid,number,string,button,date.  B-)
+
+	Required commands makes no sense, but can just be ignored.
+	A required widget might mean that the window HAS to have one.
+
+	Default for a command would be the actual function.
+	Default being a function makes this Thing a command.
+	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
+
+	Or we could merge the other way -
+	Each Thing has names (including shortcuts and aliases), type, required, widget default arguments, default value, function, help text.
+]]
+
 -- skang.newCommand stashes the function into _M['func'], and stashes it all (including the function) into ThingSpace.commands['func'].
--- TODO - Could use __call so that ThingSpace.commands['foo'](arg) works.
 newCommand = function (module, name, types, help, func, acl, boss)
     module[name] = func
     ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, acl = acl, boss = boss, }
