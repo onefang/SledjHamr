@@ -173,27 +173,29 @@ end
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.
-module = function (name)
-end
-clear = function ()
-end
-window = function (width, height, title)
-end
-skang = function (name)
-end
 get = function (name)
 end
 set = function (name, value)
 end
+
+clear = function ()
+end
+window = function (width, height, title)
+end
+
+module = function (name)
+end
+skang = function (name)
+end
 quit = function ()
 end
 
-newCommand(_M, 'module',	'file,acl',	'Load a module.',	module)
+newCommand(_M, 'get',		'name',		'Get the current value of an existing thing.',	get)	-- This should be in Thing, not actually here?
+newCommand(_M, 'set',		'name,data',	'Set the current value of an existing Thing.',	set)	-- This should be in Thing, not actually here?
 newCommand(_M, 'clear',		'',		'The current skin is cleared of all widgets.',			clear)	-- Was in SkangAWT in Java.
 newCommand(_M, 'window',	'x,y,name',	'Specifies the size and title of the application Frame.',	window, 'GGG')	-- Was in SkangAWT in Java.
+newCommand(_M, 'module',	'file,acl',	'Load a module.',	module)
 newCommand(_M, 'skang',		'URL',		'Parse the contents of a skang file or URL.',	skang)
-newCommand(_M, 'get',		'name',		'Get the current value of an existing thing.',	get)	-- This should be in the modules, not actually here?
-newCommand(_M, 'set',		'name,data',	'Set the current value of an existing Thing.',	set)	-- This should be in the modules, not actually here?
 newCommand(_M, 'quit',		'',		'Quit, exit, remove thyself.',	quit)
 
 
