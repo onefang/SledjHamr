@@ -248,6 +248,17 @@ end
 
 	Or we could merge the other way -
 	Each Thing has names (including shortcuts and aliases), type, required, widget default arguments, default value, function, help text.
+	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
+	    skang.newThing(_M, 'foo,s,fooAlias', 'string', 'Nope', '"button", "The foo :"' 1, 1, 10, 50', 'Default', function () print(_M.foo) end, 'Foo is a bar, not the drinking type.')
+	    myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
+	    myButton:colour(1, 2, 3, 4)
+	    myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
+	    myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
+	    myButton = 'Not default'		-- myEditor and _M.foo change to.
+	    -- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
+	    -- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
+	    quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+	    quitter:action('quit')
 ]]
 
 -- skang.newCommand stashes the function into _M['func'], and stashes it all (including the function) into ThingSpace.commands['func'].
