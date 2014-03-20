@@ -163,6 +163,23 @@ module semantics -
 local other = require('otherPackageName')
 other.foo = 'stuff'
 bar = other.foo
+
+Other Thing things are (should add defaults for some of these to Thing) -
+    number	No idea how this was useful.
+    skang	The owning object, a Skang (actually got this, called module for now).
+    owner	The owning object, a String (module._NAME).
+    clas	Class of the Thing, a Class.  (pointless)
+    type	Class of the Thing, a String.  (pointless)
+    realType	Real Class of the Thing, a String.  (pointless)
+    action	An optional action to perform, a String.
+    tell	The skang command that created this Thing, a String.
+    get/set/append/isValid/remove	Various Methods.
+    errors	A list of errors returned by isValid().
+    isReadOnly/isServer/isStub/isStubbed	Various booleans.
+    hasCrashed	How many times this Thing has crashed, an Integer.
+    myRoot	ThingSpace we are in, a ThingSpace.
+
+    Also various functions to wrap checking the security, like canDo, canRead, etc.
 ]]
 
 ThingSpace = {}
