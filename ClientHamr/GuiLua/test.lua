@@ -1,6 +1,5 @@
 -- Wrapping the entire module in do .. end helps if people just join a bunch of modules together, which apparently is popular.
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
---   TODO - Except for the "passing the name in as ..." part.  B-(
 do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
@@ -35,7 +34,7 @@ skang.newParam(_M, 'bar', "Required", "Shortcut", "Default", "Help text")
 
 -- We can use inline functions if we don't need the function internally.
 skang.newCommand(_M, 'func', 'number,data', 'Help Text', function (arg1, arg2)
--- do something here
+    print('Inside test.func ' .. arg1 .. ', ' .. arg2)
 end)
 
 
@@ -48,5 +47,7 @@ end
 
 -- Test it.
 local skang = require 'skang'
-local test = package.loaded['test']
+local test = require 'test'
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.ThingSpace.commands.func.help)
+test.func('one', 2)
+skang.ThingSpace.commands.func.func(3, 'four')
