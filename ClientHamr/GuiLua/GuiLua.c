@@ -121,6 +121,10 @@ http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
 http://lua-users.org/lists/lua-l/2011-10/msg00485.html
 http://lua-users.org/wiki/LuaModuleFunctionCritiqued
 
+On the other hand, Thing as such might just vanish and merge into
+various Lua and metatable things.  Seems that's what is going on.  We
+didn't really need much OO beyond this anyway.
+
 Each "users session" (matrix-RAD term that came from Java
 applets/servlets) has a ThingSpace, which is a tree that holds
 everything else.  It holds the class cache, commands, loaded modules,
