@@ -34,7 +34,11 @@ scripts can have a poper GUI for a change.
 
 NOTES and TODOs -
 
-Making these packages all a sub package of skang seems like a great idea.
+Making these packages all a sub package of skang seems like a great
+idea.  On the other hand, looks like most things are just getting folded
+into skang anyway.  See
+http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf part 15.5 for
+package details.
 
 See if I can use LuaJIT FFI here.  Since this will be a library, and
 skang apps could be written in C or Lua, perhaps writing this library to
@@ -76,76 +80,16 @@ we will be using Lua tables anyway.  B-)
 */
 
 
-/* coordinates and sizes
+/* thing package
 
-Originally skang differentiated between pixels and character cells,
-using plain integers to represent pixels, and _123 to represent
-character cells.  The skang TODO wanted to expand that to percentages
-and relative numbers.  We can't use _123 in Lua, so some other method
-needs to be used.  Should include those TODO items in this new design.
-
-Specifying character cells should be done as strings - "123"
-
-Percentages can be done as small floating point numbers between 0 and 1,
-which is similar to Edje.  Since Lua only has a floating point number
-type, both 0 and 1 should still represent pixels / character cells -
-
-0.1, 0.5, "0.2", "0.9"
-
-Relative numbers could be done as strings, with the widget to be
-relative to, a + or -, then the number.  This still leaves the problem
-of telling if the number is pixels or character cells.  Also, relative
-to what part of the other widget?  Some more thought needs to be put
-into this.
+Currently this is in skang.lua, but should bring this in here later.
 
 */
 
 
-/* thing package
+/* skang package
 
-matrix-RAD had Thing as the base class of everything.  Lua doesn't have
-inheritance as such, but an inheritance structure can be built using
-Lua's meta language capabilities.  I think we still need this sort of
-thing.  Java inheritance and interfaces where used.  There's quite a few
-variations of OO support has been written for Lua, maybe some of that
-could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
-
-Other useful links -
-
-http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
-http://lua-users.org/wiki/MetamethodsTutorial
-http://lua-users.org/wiki/MetatableEvents
-
-http://lua-users.org/wiki/MechanismNotPolicy
-http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
-http://lua-users.org/lists/lua-l/2011-10/msg00485.html
-http://lua-users.org/wiki/LuaModuleFunctionCritiqued
-
-On the other hand, Thing as such might just vanish and merge into
-various Lua and metatable things.  Seems that's what is going on.  We
-didn't really need much OO beyond this anyway.
-
-Each "users session" (matrix-RAD term that came from Java
-applets/servlets) has a ThingSpace, which is a tree that holds
-everything else.  It holds the class cache, commands, loaded modules,
-variables and their values, widgets and their states.  In matrix-RAD I
-built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
-Perhaps some combination of the two will work here?  On the other hand,
-with Lua tables, who needs trees?  lol
-
-Get/set variables would be done here, though the widget package, for
-instance, would override this to deal with the UI side, and call the
-parents function to deal with the variable side -
-
-foo:set('stuff')
-bar = foo:get()
-
-Also, since skang Lua scripts should be defined as modules, we can use
-module semantics -
-
-local other = require('otherPackageName')
-other.foo = 'stuff'
-bar = other.foo
+Currently this is in skang.lua, but should bring this in here later.
 
 */
 
@@ -158,13 +102,6 @@ I'm not sure this is needed here, since Lua has nice tables.  B-)
 Squeal was the database driver interface for SquealStuff, the database
 version of Stuff.  Maybe we could wrap esskyuehl?  Not really in need of
 database stuff for now, but should keep it in mind.
-
-*/
-
-
-/* skang package
-
-Currently this is in skang.lua, but should bring this in here later.
 
 */
 
@@ -198,6 +135,30 @@ this.bar = 'new first choice' .. this.bar
 
 */
 
+
+/* coordinates and sizes
+
+Originally skang differentiated between pixels and character cells,
+using plain integers to represent pixels, and _123 to represent
+character cells.  The skang TODO wanted to expand that to percentages
+and relative numbers.  We can't use _123 in Lua, so some other method
+needs to be used.  Should include those TODO items in this new design.
+
+Specifying character cells should be done as strings - "123"
+
+Percentages can be done as small floating point numbers between 0 and 1,
+which is similar to Edje.  Since Lua only has a floating point number
+type, both 0 and 1 should still represent pixels / character cells -
+
+0.1, 0.5, "0.2", "0.9"
+
+Relative numbers could be done as strings, with the widget to be
+relative to, a + or -, then the number.  This still leaves the problem
+of telling if the number is pixels or character cells.  Also, relative
+to what part of the other widget?  Some more thought needs to be put
+into this.
+
+*/
 
 
 /* introspection

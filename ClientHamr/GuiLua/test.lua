@@ -51,3 +51,4 @@ local test = require 'test'
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.ThingSpace.commands.func.help)
 test.func('one', 2)
 skang.ThingSpace.commands.func.func(3, 'four')
+skang.ThingSpace.commands.func('five', 'six')

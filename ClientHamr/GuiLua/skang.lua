@@ -1,5 +1,8 @@
 -- TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
 --[[
+
+--[[ Skang package
+
 In here should live all the internals of matrix-RAD that don't
 specifically relate to widgets.  This would include the "window" though.
 
@@ -116,19 +119,92 @@ end
 -- Call this now, via the above wrapper, so that from now on, this is like any other module.
 local _M = smb('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
+--[[ Thing package
+
+matrix-RAD had Thing as the base class of everything.  Lua doesn't have
+inheritance as such, but an inheritance structure can be built using
+Lua's meta language capabilities.  I think we still need this sort of
+thing.  Java inheritance and interfaces where used.  There's quite a few
+variations of OO support has been written for Lua, maybe some of that
+could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
+
+Other useful links -
+
+http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
+http://lua-users.org/wiki/MetamethodsTutorial
+http://lua-users.org/wiki/MetatableEvents
+
+http://lua-users.org/wiki/MechanismNotPolicy
+http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
+http://lua-users.org/lists/lua-l/2011-10/msg00485.html
+http://lua-users.org/wiki/LuaModuleFunctionCritiqued
+
+On the other hand, Thing as such might just vanish and merge into
+various Lua and metatable things.  Seems that's what is going on.  We
+didn't really need much OO beyond this anyway.
+
+Each "users session" (matrix-RAD term that came from Java
+applets/servlets) has a ThingSpace, which is a tree that holds
+everything else.  It holds the class cache, commands, loaded modules,
+variables and their values, widgets and their states.  In matrix-RAD I
+built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
+Perhaps some combination of the two will work here?  On the other hand,
+with Lua tables, who needs trees?  lol
+
+Get/set variables would be done here, though the widget package, for
+instance, would override this to deal with the UI side, and call the
+parents function to deal with the variable side -
+
+foo:set('stuff')
+bar = foo:get()
+
+Also, since skang Lua scripts should be defined as modules, we can use
+module semantics -
+
+local other = require('otherPackageName')
+other.foo = 'stuff'
+bar = other.foo
+]]
+
 ThingSpace = {}
 ThingSpace.cache = {}
 ThingSpace.commands = {}
 ThingSpace.modules = {}
 ThingSpace.parameters = {}
 ThingSpace.widgets = {}
+
+Thing = 
+{
+    __index = function (table, key)
+	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+	return ThingSpace.parameters[key].default
+    end,
+
+    __newindex = function (table, key, value)
+	-- TODO - maybe if this is trying to set a command to a non function value, bitch and don't do it?
+	rawset(table, key, value)
+	local command = ThingSpace.commands[key]
+	-- TODO - If found, and value is a function, then command.func = value
+	local param = ThingSpace.parameters[key]
+	-- TODO - If found, go through it's linked things and set them to.
+	local widget = ThingSpace.widgets[key]
+	-- TODO - If found, go through it's linked things and set them to.
+    end,
+
+    __call = function (func, ...)
+	return func.func(...)
+    end,
+}
+
 -- Actually stuff ourself into ThingSpace.
 ThingSpace.modules[_NAME] = {module = _M, name = _NAME, }
+setmetatable(_M, {__index=Thing})
 
 -- This is the final version that we export.  Finally we can include the ThingSpace stuff.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
     local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
     ThingSpace.modules[name] = {module = result, name = name, }
+    setmetatable(result, {__index=Thing})
     return result
 end
 
@@ -138,13 +214,6 @@ moduleEnd = function (module)
 end
 
 --[[
-Thing = {}
-Thing.__index = Thing	-- So this can be used as the metatable for Things.
-So in newParam and newCommand -
-    setmetatable(module, Thing)
-]]
-
-
 
 -- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
 -- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
@@ -160,6 +229,7 @@ So in newParam and newCommand -
 newParam = function (module, name, required, shortcut, default, help, acl, boss)
     module[name] = default
     ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, acl = acl, boss = boss, }
+    setmetatable(ThingSpace.parameters[name], Thing)
     print(name .. ' -> ' .. shortcut .. ' -> ' .. help)
 end
 
@@ -168,6 +238,7 @@ end
 newCommand = function (module, name, types, help, func, acl, boss)
     module[name] = func
     ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, acl = acl, boss = boss, }
+    setmetatable(ThingSpace.commands[name], Thing)
     print(name .. '(' .. types ..  ') -> ' .. help)
 end
 
