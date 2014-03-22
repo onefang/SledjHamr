@@ -153,7 +153,7 @@ Thing =
 	local thing = things[key]
 
 	-- First see if this is a Thing.
-	if thing then return table[thing.names[1] ] end
+	if thing and (key ~= thing.names[1]) then return table[thing.names[1] ] end
 
 	-- Then see if we can inherit it from Thing.
 	thing = Thing[key]
