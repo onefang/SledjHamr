@@ -199,29 +199,12 @@ Thing =
 	-- First see if this is a Thing.
 	if thing then return thing.default end
 
-	-- Look up aliases.  Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
-	for k, thing in pairs(ThingSpace.things) do
-	    for i, v in ipairs(thing.names) do
-		if v == key then return table[ thing.names[1] ] end
-	    end
-	end
-
 	-- If all else fails, return nil.
 	return nil
     end,
 
     __newindex = function (table, key, value)
 	local thing = ThingSpace.things[key]
-
-	-- NOTE - This is really slow when setting stuff that is in the module that is NOT a Thing.  Wont scale well.
-	if not thing then
-	    -- Look up aliases.  Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
-	    for k, thng in pairs(ThingSpace.things) do
-		for i, v in ipairs(thng.names) do
-		    if v == key then thing = thng; break end
-		end
-	    end
-	end
 
 	-- NOTE - A Thing is either a command or a parameter, not both.
 	if thing then
@@ -344,7 +327,11 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
 
     -- Set it all up.
     -- TODO - might want to merge into pre existing Thing instead of over writing like this.
-    ThingSpace.things[name] = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
+    local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
+    -- Stash the Thing under all of it's names.
+    for i, v in ipairs(thing.names) do
+	ThingSpace.things[v] = thing
+    end
     -- This triggers the Thing.__newindex metamethod above.
     module[name] = default
 end
