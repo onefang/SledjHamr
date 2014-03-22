@@ -30,16 +30,15 @@ print('code')
 -- A variable that is private to this module.
 local foo
 
-skang.newParam(_M, 'bar', "Required", "Shortcut", "Default", "Help text")
+skang.thing(_M, 'fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50')
+skang.thing(_M, 'bar', 'Help text', "Default")
 
 -- We can use inline functions if we don't need the function internally.
-skang.newCommand(_M, 'func', 'number,data', 'Help Text', function (arg1, arg2)
+skang.thing(_M, 'func', 'Help Text', function (arg1, arg2)
     print('Inside test.func ' .. arg1 .. ', ' .. arg2)
-end)
-
+end, 'number,string')
 
 print('Ending soon')
-
 skang.moduleEnd(_M)
 
 end
@@ -50,5 +49,6 @@ local skang = require 'skang'
 local test = require 'test'
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.ThingSpace.commands.func.help)
 test.func('one', 2)
+skang.ThingSpace.things.func('seven', 'aight')
 skang.ThingSpace.commands.func.func(3, 'four')
 skang.ThingSpace.commands.func('five', 'six')

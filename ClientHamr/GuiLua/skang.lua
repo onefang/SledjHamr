@@ -187,6 +187,7 @@ ThingSpace.cache = {}
 ThingSpace.commands = {}
 ThingSpace.modules = {}
 ThingSpace.parameters = {}
+ThingSpace.things = {}
 ThingSpace.widgets = {}
 
 Thing = 
@@ -230,27 +231,9 @@ moduleEnd = function (module)
 end
 
 
--- skang.newParam stashes the default value into _M['bar'], and the details into ThingSpace.parameters['bar'].
--- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
--- TODO - Could even use __index to skip setting it if it's not required and there is a default.
--- TODO - if default is a function, or a pre existing module[name] is a function, then set the Thing .func to that function.
--- TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
---   Not unless skang.newParam() knows about a and b, which it wont.
---   Both a and b get the same table, not different copies of it.
---   Perhaps clone the table if it exists?  There is no Lua table cloner, would have to write one.  Only clone the parameters, the rest can be linked back to the original.
---   Then we have to deal with widgets linking to specific clones.
---   Actually, not sure matrix-RAD solved that either.  lol
--- TODO - This could even be done with an array of these arguments, not including the _M.
--- TODO - Maybe combine name and shortcut - 'name,s'.  Make it generic, add aliases to.  Any that are single characters can be shortcuts.
-newParam = function (module, name, required, shortcut, default, help, acl, boss)
-    module[name] = default
-    ThingSpace.parameters[name] = {module = module, name = name, required = required, shortcut = shortcut, default = default, help = help, acl = acl, boss = boss, }
-    setmetatable(ThingSpace.parameters[name], Thing)
-    print(name .. ' -> ' .. shortcut .. ' -> ' .. help)
-end
-
 --[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
         Merging widgets might work to.  B-)
+	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
 
         Parameter gets a type, which might help since Lua is untyped, versus Java being strongly typed.
         Widgets get a type as well, which would be label, button, edit, grid, etc.
@@ -263,29 +246,75 @@ end
 	Default being a function makes this Thing a command.
 	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
 
-	Or we could merge the other way -
-	Each Thing has names (including shortcuts and aliases), type, required, widget default arguments, default value, function, help text.
-	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
-	    skang.newThing(_M, 'foo,s,fooAlias', 'string', 'Nope', '"button", "The foo :"' 1, 1, 10, 50', 'Default', function () print(_M.foo) end, 'Foo is a bar, not the drinking type.')
-	    myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
-	    myButton:colour(1, 2, 3, 4)
-	    myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
-	    myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
-	    myButton = 'Not default'		-- myEditor and _M.foo change to.
-	    -- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
-	    -- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
-	    quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
-	    quitter:action('quit')
+	skang.newThing(_M, 'foo,s,fooAlias', 'string', 'Nope', '"button", "The foo :"' 1, 1, 10, 50', 'Default', function () print(_M.foo) end, 'Foo is a bar, not the drinking type.')
+	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
+	myButton:colour(1, 2, 3, 4)
+	myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
+	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
+	myButton = 'Not default'		-- myEditor and _M.foo change to.
+	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
+	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
+	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+	quitter:action('quit')
 ]]
 
--- skang.newCommand stashes the function into _M['func'], and stashes it all (including the function) into ThingSpace.commands['func'].
-newCommand = function (module, name, types, help, func, acl, boss)
-    module[name] = func
-    ThingSpace.commands[name] = {module = module, name = name, help = help, func = func, acl = acl, boss = boss, }
-    setmetatable(ThingSpace.commands[name], Thing)
-    print(name .. '(' .. types ..  ') -> ' .. help)
-end
 
+-- skang.newThing stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
+-- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
+-- TODO - Could even use __index to skip setting it if it's not required and there is a default.
+-- TODO - if default is a function, or a pre existing module[name] is a function, then set the Thing .func to that function.
+-- TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
+--   Not unless skang.newParam() knows about a and b, which it wont.
+--   Both a and b get the same table, not different copies of it.
+--   Perhaps clone the table if it exists?  There is no Lua table cloner, would have to write one.  Only clone the parameters, the rest can be linked back to the original.
+--   Then we have to deal with widgets linking to specific clones.
+--   Actually, not sure matrix-RAD solved that either.  lol
+-- TODO - This could even be done with an array of these arguments, not including the _M.
+
+-- names	- a comma seperated list of names, aliasas, and shortcuts.  The first one is the official name.
+-- help		- help text describing this Thing.
+-- default	- the default value.  This could be a funcion, making this a command.
+-- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for functions.
+-- widget	- default widget command arguments for creating this Thing as a widget.
+-- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
+-- acl		- Access Control List defining security restrains.
+-- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
+thing = function (module, names, help, default, types, widget, required, acl, boss)
+    -- Break out the names.
+    local n = {}
+    local i = 1
+    for v in string.gmatch(names, '([^,]+)') do
+	n[i] = v
+	i = i + 1
+    end
+    local name = n[1]
+
+    -- Find type, default to string, then break out the other types.
+    local t = {type(default)}
+    if 'nil' == t[1] then t[1] = 'string' end
+    i = 2
+    if types then
+	for v in string.gmatch(types, '([^,]+)') do
+	    t[i] = v
+	    i = i + 1
+	end
+    else
+	types = ''
+    end
+
+    -- Set it all up.
+    module[name] = default
+    ThingSpace.things[name] = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
+    setmetatable(ThingSpace.things[name], Thing)
+    if 'function' == t[1] then
+	ThingSpace.things[name].func = default
+	ThingSpace.commands[name] = ThingSpace.things[name]
+	print(name .. '(' .. types ..  ') -> ' .. help)
+    else
+	ThingSpace.parameters[name] = ThingSpace.things[name]
+	print(t[1] .. ' ' .. name .. ' -> ' .. help)
+    end
+end
 
 -- TODO - Some function stubs, for now.  Fill them up later.
 get = function (name)
@@ -305,13 +334,13 @@ end
 quit = function ()
 end
 
-newCommand(_M, 'get',		'name',		'Get the current value of an existing thing.',	get)	-- This should be in Thing, not actually here?
-newCommand(_M, 'set',		'name,data',	'Set the current value of an existing Thing.',	set)	-- This should be in Thing, not actually here?
-newCommand(_M, 'clear',		'',		'The current skin is cleared of all widgets.',			clear)	-- Was in SkangAWT in Java.
-newCommand(_M, 'window',	'x,y,name',	'Specifies the size and title of the application Frame.',	window, 'GGG')	-- Was in SkangAWT in Java.
-newCommand(_M, 'module',	'file,acl',	'Load a module.',	module)
-newCommand(_M, 'skang',		'URL',		'Parse the contents of a skang file or URL.',	skang)
-newCommand(_M, 'quit',		'',		'Quit, exit, remove thyself.',	quit)
+thing(_M, 'get',	'Get the current value of an existing thing.',	get,	'name')		-- This should be in Thing, not actually here?
+thing(_M, 'set',	'Set the current value of an existing Thing.',	set,	'name,data')	-- This should be in Thing, not actually here?
+thing(_M, 'clear',	'The current skin is cleared of all widgets.',	clear)
+thing(_M, 'window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
+thing(_M, 'module',	'Load a module.',				module, 'file,acl')
+thing(_M, 'skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
+thing(_M, 'quit',	'Quit, exit, remove thyself.',			quit)
 
 
 moduleEnd(_M)
