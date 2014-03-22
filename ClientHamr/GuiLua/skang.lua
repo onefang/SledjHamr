@@ -134,6 +134,7 @@ Thing =
     end,
     isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
 	self.errors = {}
+	-- TODO - Should check for required, matching mask, matching type, etc.
 	return true
     end,
     remove = function (self)	-- Delete this Thing.
@@ -153,7 +154,13 @@ Thing =
 	local thing = things[key]
 
 	-- First see if this is a Thing.
-	if thing and (key ~= thing.names[1]) then return table[thing.names[1] ] end
+	if thing then
+	    local result = nil
+	    if key ~= thing.names[1] then
+		result = table[thing.names[1] ]
+	    end
+	    return result or thing.default
+	end
 
 	-- Then see if we can inherit it from Thing.
 	thing = Thing[key]
