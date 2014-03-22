@@ -176,19 +176,17 @@ Other Thing things are -
     Also various functions to wrap checking the security, like canDo, canRead, etc.
 ]]
 
-ThingSpace = {}
-ThingSpace.cache = {}
-ThingSpace.commands = {}
-ThingSpace.modules = {}
-ThingSpace.parameters = {}
-ThingSpace.things = {}
-ThingSpace.widgets = {}
+
+-- There is no ThingSpace, now it's just in these tables -
+things = {}
+modules = {}
+
 
 Thing =
 {
     __index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	local thing = ThingSpace.things[key]
+	local thing = things[key]
 
 	-- First see if this is a Thing.
 	if thing then return thing.default end
@@ -202,28 +200,18 @@ Thing =
     end,
 
     __newindex = function (table, key, value)
-	local thing = ThingSpace.things[key]
+	local thing = things[key]
 
-	-- NOTE - A Thing is either a command or a parameter, not both.
 	if thing then
 	    local name = thing.names[1]
 	    if 'function' == type(value) then
-		thing.default = nil
 		thing.func = value
-		ThingSpace.commands[name] = thing
-	        ThingSpace.parameters[name] = nil
-		setmetatable(thing, {__call = Thing._call, __index=Thing.__index})
 	        local types = ''
 		for i, v in ipairs(thing.types) do
 		    if 1 ~= i then types = types .. v .. ', ' end
 	        end
 		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
 	    else
-		if ThingSpace.parameters[name] ~= thing then
-		    ThingSpace.commands[name] = nil
-		    ThingSpace.parameters[name] = thing
-		    setmetatable(thing, {__index=Thing.__index})
-		end
 		thing:isValid()
 		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. value .. ' -> ' .. thing.help)
 		-- TODO - Go through it's linked things and set them to.
@@ -249,6 +237,8 @@ Thing =
     append = function (self,data)	-- Append to the value of this Thing.
     end,
     isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
+	self.errors = {}
+	return true
     end,
     remove = function (self)	-- Delete this Thing.
     end,
@@ -264,13 +254,13 @@ Thing =
 }
 
 -- Actually stuff ourself into ThingSpace.
-ThingSpace.modules[_NAME] = {module = _M, name = _NAME, }
+modules[_NAME] = {module = _M, name = _NAME, }
 setmetatable(_M, {Thing})
 
 -- This is the final version that we export.  Finally we can include the ThingSpace stuff.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
     local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
-    ThingSpace.modules[name] = {module = result, name = name, }
+    modules[name] = {module = result, name = name, }
     setmetatable(result, Thing)
     return result
 end
@@ -316,7 +306,7 @@ end
 	quitter:action('quit')
 ]]
 
--- skang.thing() stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
+-- skang.thing() stashes the default value into _M['bar'], and the details into things['bar'].
 -- names	- a comma seperated list of names, aliasas, and shortcuts.  The first one is the official name.
 -- help		- help text describing this Thing.
 -- default	- the default value.  This could be a funcion, making this a command.
@@ -351,9 +341,10 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
     -- Set it all up.
     -- TODO - might want to merge into pre existing Thing instead of over writing like this.
     local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
+    setmetatable(thing, {__call = Thing._call, __index=Thing.__index})
     -- Stash the Thing under all of it's names.
     for i, v in ipairs(thing.names) do
-	ThingSpace.things[v] = thing
+	things[v] = thing
     end
     -- This triggers the Thing.__newindex metamethod above.
     module[name] = default

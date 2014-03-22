@@ -47,8 +47,6 @@ end
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
-print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.ThingSpace.commands.func.help .. ' ->> ' .. test.action .. ' ' .. skang.ThingSpace.things.f.action)
+print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.func.help .. ' ->> ' .. test.action .. ' ' .. skang.things.f.action)
 test.func('one', 2)
-skang.ThingSpace.things.func('seven', 'aight')
-skang.ThingSpace.commands.func.func(3, 'four')
-skang.ThingSpace.commands.func('five', 'six')
+skang.things.func('seven', 'aight')
