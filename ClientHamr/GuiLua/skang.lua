@@ -236,7 +236,7 @@ Thing =
 
 -- Actually stuff ourself into ThingSpace.
 ThingSpace.modules[_NAME] = {module = _M, name = _NAME, }
-setmetatable(_M, {__index=Thing})
+setmetatable(_M, {Thing})
 
 -- This is the final version that we export.  Finally we can include the ThingSpace stuff.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
