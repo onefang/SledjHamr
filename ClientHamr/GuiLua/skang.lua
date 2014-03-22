@@ -190,42 +190,65 @@ ThingSpace.parameters = {}
 ThingSpace.things = {}
 ThingSpace.widgets = {}
 
-Thing = 
+Thing =
 {
     __index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	-- TODO - Should allow looking up via alias as well somehow.
-	--        Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
-	return ThingSpace.things[key].default
+	local thing = ThingSpace.things[key]
+
+	-- First see if this is a Thing.
+	if thing then return thing.default end
+
+	-- Look up aliases.  Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
+	for k, thing in pairs(ThingSpace.things) do
+	    for i, v in ipairs(thing.names) do
+		if v == key then return table[ thing.names[1] ] end
+	    end
+	end
+
+	-- If all else fails, return nil.
+	return nil
     end,
 
     __newindex = function (table, key, value)
-	local thing   = ThingSpace.things[key]
+	local thing = ThingSpace.things[key]
 
-	if 'function' == type(value) then
-	    thing.default = nil
-	    thing.func = value
-	    ThingSpace.commands[key] = thing
-	    ThingSpace.parameters[key] = nil
-	    setmetatable(thing, {__call = Thing._call})
-	    local types = ''
-	    for i, v in ipairs(thing.types) do
-		if 1 ~= i then types = types .. v .. ', ' end
+	-- NOTE - This is really slow when setting stuff that is in the module that is NOT a Thing.  Wont scale well.
+	if not thing then
+	    -- Look up aliases.  Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
+	    for k, thng in pairs(ThingSpace.things) do
+		for i, v in ipairs(thng.names) do
+		    if v == key then thing = thng; break end
+		end
 	    end
-	    print(thing.module._NAME .. '.' .. key .. '(' .. types ..  ') -> ' .. thing.help)
-	else
-	    if ThingSpace.parameters[key] ~= thing then
-		ThingSpace.commands[key] = nil
-		ThingSpace.parameters[key] = thing
-		setmetatable(thing, nil)
-	    end
-	    print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. thing.names[1] .. ' = ' .. value .. ' -> ' .. thing.help)
-	    -- TODO - Go through it's linked things and set them to.
 	end
-	-- TODO - Should set all aliases here, then __index doesn't have to do a linear search through all of ThingSpace.
-	--        Uses more memory, and allows bypassing the Thing by setting the alias.
-	--        Which is a problem anyway, so have to deal with twiddling aliases.
-	rawset(table, thing.names[1], value)
+
+	-- NOTE - A Thing is either a command or a parameter, not both.
+	if thing then
+	    if 'function' == type(value) then
+		thing.default = nil
+		thing.func = value
+		ThingSpace.commands[key] = thing
+	        ThingSpace.parameters[key] = nil
+		setmetatable(thing, {__call = Thing._call})
+	        local types = ''
+		for i, v in ipairs(thing.types) do
+		    if 1 ~= i then types = types .. v .. ', ' end
+	        end
+		print(thing.module._NAME .. '.' .. key .. '(' .. types ..  ') -> ' .. thing.help)
+	    else
+		if ThingSpace.parameters[key] ~= thing then
+		    ThingSpace.commands[key] = nil
+		    ThingSpace.parameters[key] = thing
+		    setmetatable(thing, nil)
+		end
+		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. thing.names[1] .. ' = ' .. value .. ' -> ' .. thing.help)
+		-- TODO - Go through it's linked things and set them to.
+	    end
+	    rawset(table, thing.names[1], value)
+	else
+	    rawset(table, key, value)
+	end
     end,
 
     -- Not an actual metatable event until it gets set as the metatable above.
