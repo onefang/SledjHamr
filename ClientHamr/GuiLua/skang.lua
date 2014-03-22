@@ -164,19 +164,13 @@ local other = require('otherPackageName')
 other.foo = 'stuff'
 bar = other.foo
 
-Other Thing things are (should add defaults for some of these to Thing) -
+Other Thing things are -
     number	No idea how this was useful.
     skang	The owning object, a Skang (actually got this, called module for now).
     owner	The owning object, a String (module._NAME).
     clas	Class of the Thing, a Class.  (pointless)
     type	Class of the Thing, a String.  (pointless)
     realType	Real Class of the Thing, a String.  (pointless)
-    action	An optional action to perform, a String.
-    tell	The skang command that created this Thing, a String.
-    get/set/append/isValid/remove	Various Methods.
-    errors	A list of errors returned by isValid().
-    isReadOnly/isServer/isStub/isStubbed	Various booleans.
-    hasCrashed	How many times this Thing has crashed, an Integer.
     myRoot	ThingSpace we are in, a ThingSpace.
 
     Also various functions to wrap checking the security, like canDo, canRead, etc.
@@ -199,6 +193,10 @@ Thing =
 	-- First see if this is a Thing.
 	if thing then return thing.default end
 
+	-- Then see if we can inherit it from Thing.
+	thing = Thing[key]
+	if thing then return thing end
+
 	-- If all else fails, return nil.
 	return nil
     end,
@@ -208,27 +206,29 @@ Thing =
 
 	-- NOTE - A Thing is either a command or a parameter, not both.
 	if thing then
+	    local name = thing.names[1]
 	    if 'function' == type(value) then
 		thing.default = nil
 		thing.func = value
-		ThingSpace.commands[key] = thing
-	        ThingSpace.parameters[key] = nil
-		setmetatable(thing, {__call = Thing._call})
+		ThingSpace.commands[name] = thing
+	        ThingSpace.parameters[name] = nil
+		setmetatable(thing, {__call = Thing._call, __index=Thing.__index})
 	        local types = ''
 		for i, v in ipairs(thing.types) do
 		    if 1 ~= i then types = types .. v .. ', ' end
 	        end
-		print(thing.module._NAME .. '.' .. key .. '(' .. types ..  ') -> ' .. thing.help)
+		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
 	    else
-		if ThingSpace.parameters[key] ~= thing then
-		    ThingSpace.commands[key] = nil
-		    ThingSpace.parameters[key] = thing
-		    setmetatable(thing, nil)
+		if ThingSpace.parameters[name] ~= thing then
+		    ThingSpace.commands[name] = nil
+		    ThingSpace.parameters[name] = thing
+		    setmetatable(thing, {__index=Thing.__index})
 		end
-		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. thing.names[1] .. ' = ' .. value .. ' -> ' .. thing.help)
+		thing:isValid()
+		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. value .. ' -> ' .. thing.help)
 		-- TODO - Go through it's linked things and set them to.
 	    end
-	    rawset(table, thing.names[1], value)
+	    rawset(table, name, value)
 	else
 	    rawset(table, key, value)
 	end
@@ -238,6 +238,29 @@ Thing =
     _call = function (func, ...)
 	return func.func(...)
     end,
+
+    action = 'nada',		-- An optional action to perform.
+    tell = '',			-- The skang command that created this Thing.
+
+    get = function (self)	-- Get the value of this Thing.
+    end,
+    set = function (self)	-- Set the value of this Thing.
+    end,
+    append = function (self,data)	-- Append to the value of this Thing.
+    end,
+    isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
+    end,
+    remove = function (self)	-- Delete this Thing.
+    end,
+
+    errors = {},		-- A list of errors returned by isValid().
+
+    isReadOnly = false,		-- Is this Thing read only?
+    isServer = false,		-- Is this Thing server side?
+    isStub = false,		-- Is this Thing a stub?
+    isStubbed = false,		-- Is this Thing stubbed elsewhere?
+
+    hasCrashed = 0,		-- How many times this Thing has crashed.
 }
 
 -- Actually stuff ourself into ThingSpace.
@@ -337,6 +360,7 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
 end
 
 -- TODO - Some function stubs, for now.  Fill them up later.
+nada = function () end
 get = function (name)
 end
 set = function (name, value)
@@ -354,8 +378,9 @@ end
 quit = function ()
 end
 
-thing(_M, 'get',	'Get the current value of an existing thing.',	get,	'name')		-- This should be in Thing, not actually here?
-thing(_M, 'set',	'Set the current value of an existing Thing.',	set,	'name,data')	-- This should be in Thing, not actually here?
+thing(_M, 'nada',	'Do nothing.',					nada)
+thing(_M, 'get',	'Get the current value of an existing thing.',	get,	'name')
+thing(_M, 'set',	'Set the current value of an existing Thing.',	set,	'name,data')
 thing(_M, 'clear',	'The current skin is cleared of all widgets.',	clear)
 thing(_M, 'window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
 thing(_M, 'module',	'Load a module.',				module, 'file,acl')
