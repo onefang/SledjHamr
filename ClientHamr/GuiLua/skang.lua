@@ -259,7 +259,7 @@ end
 ]]
 
 
--- skang.newThing stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
+-- skang.thing stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
 -- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
 -- TODO - Could even use __index to skip setting it if it's not required and there is a default.
 -- TODO - if default is a function, or a pre existing module[name] is a function, then set the Thing .func to that function.
