@@ -194,21 +194,42 @@ Thing =
 {
     __index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	return ThingSpace.parameters[key].default
+	-- TODO - Should allow looking up via alias as well somehow.
+	--        Very slow, but uses less memory.  Would only need to be done if an alias is used, and they are mostly for shortcuts.
+	return ThingSpace.things[key].default
     end,
 
     __newindex = function (table, key, value)
-	-- TODO - maybe if this is trying to set a command to a non function value, bitch and don't do it?
-	rawset(table, key, value)
-	local command = ThingSpace.commands[key]
-	-- TODO - If found, and value is a function, then command.func = value
-	local param = ThingSpace.parameters[key]
-	-- TODO - If found, go through it's linked things and set them to.
-	local widget = ThingSpace.widgets[key]
-	-- TODO - If found, go through it's linked things and set them to.
+	local thing   = ThingSpace.things[key]
+
+	if 'function' == type(value) then
+	    thing.default = nil
+	    thing.func = value
+	    ThingSpace.commands[key] = thing
+	    ThingSpace.parameters[key] = nil
+	    setmetatable(thing, {__call = Thing._call})
+	    local types = ''
+	    for i, v in ipairs(thing.types) do
+		if 1 ~= i then types = types .. v .. ', ' end
+	    end
+	    print(thing.module._NAME .. '.' .. key .. '(' .. types ..  ') -> ' .. thing.help)
+	else
+	    if ThingSpace.parameters[key] ~= thing then
+		ThingSpace.commands[key] = nil
+		ThingSpace.parameters[key] = thing
+		setmetatable(thing, nil)
+	    end
+	    print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. thing.names[1] .. ' = ' .. value .. ' -> ' .. thing.help)
+	    -- TODO - Go through it's linked things and set them to.
+	end
+	-- TODO - Should set all aliases here, then __index doesn't have to do a linear search through all of ThingSpace.
+	--        Uses more memory, and allows bypassing the Thing by setting the alias.
+	--        Which is a problem anyway, so have to deal with twiddling aliases.
+	rawset(table, thing.names[1], value)
     end,
 
-    __call = function (func, ...)
+    -- Not an actual metatable event until it gets set as the metatable above.
+    _call = function (func, ...)
 	return func.func(...)
     end,
 }
@@ -221,7 +242,7 @@ setmetatable(_M, {__index=Thing})
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
     local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
     ThingSpace.modules[name] = {module = result, name = name, }
-    setmetatable(result, {__index=Thing})
+    setmetatable(result, Thing)
     return result
 end
 
@@ -229,6 +250,14 @@ end
 moduleEnd = function (module)
     setfenv(2, module.savedEnvironment)
 end
+
+--[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
+    Not unless skang.thing() knows about a and b, which it wont.
+    Both a and b get the same table, not different copies of it.
+    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
+    Then we have to deal with widgets linking to specific clones.
+    Actually, not sure matrix-RAD solved that either.  lol
+]]
 
 
 --[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
@@ -246,31 +275,19 @@ end
 	Default being a function makes this Thing a command.
 	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
 
-	skang.newThing(_M, 'foo,s,fooAlias', 'string', 'Nope', '"button", "The foo :"' 1, 1, 10, 50', 'Default', function () print(_M.foo) end, 'Foo is a bar, not the drinking type.')
+	skang.thing(_M, 'foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, nil, '"button", "The foo :"' 1, 1, 10, 50')
 	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
 	myButton:colour(1, 2, 3, 4)
 	myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
 	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
-	myButton = 'Not default'		-- myEditor and _M.foo change to.
+	myButton = 'Not default'	-- myEditor and _M.foo change to.  Though now _M.foo is a command, not a parameter, so maybe don't change that.
 	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
 	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
 	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
 	quitter:action('quit')
 ]]
 
-
--- skang.thing stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
--- TODO - If it's not required, and there's no default, then skip setting _M['bar'].
--- TODO - Could even use __index to skip setting it if it's not required and there is a default.
--- TODO - if default is a function, or a pre existing module[name] is a function, then set the Thing .func to that function.
--- TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
---   Not unless skang.newParam() knows about a and b, which it wont.
---   Both a and b get the same table, not different copies of it.
---   Perhaps clone the table if it exists?  There is no Lua table cloner, would have to write one.  Only clone the parameters, the rest can be linked back to the original.
---   Then we have to deal with widgets linking to specific clones.
---   Actually, not sure matrix-RAD solved that either.  lol
--- TODO - This could even be done with an array of these arguments, not including the _M.
-
+-- skang.thing() stashes the default value into _M['bar'], and the details into ThingSpace.things['bar'].
 -- names	- a comma seperated list of names, aliasas, and shortcuts.  The first one is the official name.
 -- help		- help text describing this Thing.
 -- default	- the default value.  This could be a funcion, making this a command.
@@ -303,17 +320,10 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
     end
 
     -- Set it all up.
-    module[name] = default
+    -- TODO - might want to merge into pre existing Thing instead of over writing like this.
     ThingSpace.things[name] = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
-    setmetatable(ThingSpace.things[name], Thing)
-    if 'function' == t[1] then
-	ThingSpace.things[name].func = default
-	ThingSpace.commands[name] = ThingSpace.things[name]
-	print(name .. '(' .. types ..  ') -> ' .. help)
-    else
-	ThingSpace.parameters[name] = ThingSpace.things[name]
-	print(t[1] .. ' ' .. name .. ' -> ' .. help)
-    end
+    -- This triggers the Thing.__newindex metamethod above.
+    module[name] = default
 end
 
 -- TODO - Some function stubs, for now.  Fill them up later.
