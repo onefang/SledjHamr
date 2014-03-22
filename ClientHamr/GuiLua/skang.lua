@@ -52,69 +52,11 @@ The old skang argument types are -
 ]]
 
 
--- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
 
 -- Wrapping the entire module in do .. end helps if people just join a bunch of modules together, which apparently is popular.
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
 do	-- Only I'm not gonna indent this.
 
-moduleBegin = function (name, author, copyright, version, timestamp, skin)
-    local _M = {}	-- This is what we return to require().
-
-    package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
-			-- Returning it at the end does the same thing.
-			-- This is so that we can have all the module stuff at the top, in this function.
-			-- Should do this before any further require(), so that circular references don't blow out.
-
-    -- Save the callers environment.
-    local savedEnvironment = getfenv(3)
-
-    -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
-    --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
-		local _G = _G	-- Only sets a local _G for this function.
-		_M._G = _G	-- This clone loop might do this, but we don't want to be able to access the old _G from outside via this leak.
-	In Lua 5.1 at least, _G was special.  In 5.2, _ENV sorta replaces setfenv(), but no idea if this clone loop stomps on that.
-    ]]
-    for k, v in pairs(savedEnvironment) do
-	_M[k] = v
-    end
-
-    _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
-    _M._NAME = name
-    _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
-
-    -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
-    _M.AUTHOR = author
-    _M.COPYRIGHT = copyright .. ' ' .. author
-    -- TODO - Translate the version number into a version string.
-    _M.VERSION = version .. ' lookup version here ' .. timestamp
-    -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
-    _M.DEFAULT_SKANG = skin
-
-
-    --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
-			-- Not such a good idea to stomp on global name space.
-			-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
-			-- This is why module() is broken.
-
-    _M.savedEnvironment = savedEnvironment
-    -- setfenv() sets the environment for the FUNCTION, stack level deep.
-    -- The number is the stack level -
-    --   0 running thread, 1 current function, 2 function that called this function, etc
-    setfenv(2, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
-			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
-			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
-
-    return _M
-end
-
--- Call this now so that from now on, this is like any other module.
-local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
-
--- Restore the environment.
-moduleEnd = function (module)
-    setfenv(2, module.savedEnvironment)
-end
 
 --[[ Thing package
 
@@ -148,21 +90,15 @@ built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees.
 Perhaps some combination of the two will work here?  On the other hand,
 with Lua tables, who needs trees?  lol
 
-Get/set variables would be done here, though the widget package, for
-instance, would override this to deal with the UI side, and call the
-parents function to deal with the variable side -
-
-foo:set('stuff')
-bar = foo:get()
-
-Also, since skang Lua scripts should be defined as modules, we can use
-module semantics -
+Since skang Lua scripts should be defined as modules, we can use
+module semantics instead of get/set -
 
 local other = require('otherPackageName')
 other.foo = 'stuff'
 bar = other.foo
 
 Other Thing things are -
+    get/set	The getter and setter.
     number	No idea how this was useful.
     skang	The owning object, a Skang (actually got this, called module for now).
     owner	The owning object, a String (module._NAME).
@@ -174,17 +110,50 @@ Other Thing things are -
     Also various functions to wrap checking the security, like canDo, canRead, etc.
 ]]
 
+
+--[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
+    Not unless skang.thing() knows about a and b, which it wont.
+    Both a and b get the same table, not different copies of it.
+    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
+    Then we have to deal with widgets linking to specific clones.
+    Actually, not sure matrix-RAD solved that either.  lol
+]]
+
+
 -- There is no ThingSpace, now it's just in this table -
-things = {}
+things = 
+{
+}
 
 Thing =
 {
+    action = 'nada',		-- An optional action to perform.
+    tell = '',			-- The skang command that created this Thing.
+
+    append = function (self,data)	-- Append to the value of this Thing.
+    end,
+    isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
+	self.errors = {}
+	return true
+    end,
+    remove = function (self)	-- Delete this Thing.
+    end,
+
+    errors = {},		-- A list of errors returned by isValid().
+
+    isReadOnly = false,		-- Is this Thing read only?
+    isServer = false,		-- Is this Thing server side?
+    isStub = false,		-- Is this Thing a stub?
+    isStubbed = false,		-- Is this Thing stubbed elsewhere?
+
+    hasCrashed = 0,		-- How many times this Thing has crashed.
+
     __index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 	local thing = things[key]
 
 	-- First see if this is a Thing.
-	if thing then return thing.default end
+	if thing then return table[thing.names[1] ] end
 
 	-- Then see if we can inherit it from Thing.
 	thing = Thing[key]
@@ -217,45 +186,73 @@ Thing =
 	end
     end,
 
-    -- Not an actual metatable event until it gets set as the metatable above.
-    _call = function (func, ...)
-	return func.func(...)
-    end,
-
-    action = 'nada',		-- An optional action to perform.
-    tell = '',			-- The skang command that created this Thing.
-
-    get = function (self)	-- Get the value of this Thing.
-    end,
-    set = function (self)	-- Set the value of this Thing.
-    end,
-    append = function (self,data)	-- Append to the value of this Thing.
-    end,
-    isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
-	self.errors = {}
-	return true
-    end,
-    remove = function (self)	-- Delete this Thing.
-    end,
-
-    errors = {},		-- A list of errors returned by isValid().
-
-    isReadOnly = false,		-- Is this Thing read only?
-    isServer = false,		-- Is this Thing server side?
-    isStub = false,		-- Is this Thing a stub?
-    isStubbed = false,		-- Is this Thing stubbed elsewhere?
-
-    hasCrashed = 0,		-- How many times this Thing has crashed.
+    -- TODO - Seemed like a good idea at the time, but do we really need it?
+--    __call = function (func, ...)
+--	return func.func(...)
+--    end,
 }
 
 
---[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
-    Not unless skang.thing() knows about a and b, which it wont.
-    Both a and b get the same table, not different copies of it.
-    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
-    Then we have to deal with widgets linking to specific clones.
-    Actually, not sure matrix-RAD solved that either.  lol
-]]
+-- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
+moduleBegin = function (name, author, copyright, version, timestamp, skin)
+    local _M = {}	-- This is what we return to require().
+    local level = 2
+
+    package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
+			-- Returning it at the end does the same thing.
+			-- This is so that we can have all the module stuff at the top, in this function.
+			-- Should do this before any further require(), so that circular references don't blow out.
+
+    -- Save the callers environment.
+    local savedEnvironment = getfenv(level)
+
+    -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
+    --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
+		local _G = _G	-- Only sets a local _G for this function.
+		_M._G = _G	-- This clone loop might do this, but we don't want to be able to access the old _G from outside via this leak.
+	In Lua 5.1 at least, _G was special.  In 5.2, _ENV sorta replaces setfenv(), but no idea if this clone loop stomps on that.
+    ]]
+    for k, v in pairs(savedEnvironment) do
+	_M[k] = v
+    end
+
+    _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
+    _M._NAME = name
+    _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
+
+    -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
+    _M.AUTHOR = author
+    _M.COPYRIGHT = copyright .. ' ' .. author
+    -- TODO - Translate the version number into a version string.
+    _M.VERSION = version .. ' lookup version here ' .. timestamp
+    -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
+    _M.DEFAULT_SKANG = skin
+
+
+    --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
+			-- Not such a good idea to stomp on global name space.
+			-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
+			-- This is why module() is broken.
+
+    setmetatable(_M, Thing)
+    _M.savedEnvironment = savedEnvironment
+    -- setfenv() sets the environment for the FUNCTION, stack level deep.
+    -- The number is the stack level -
+    --   0 running thread, 1 current function, 2 function that called this function, etc
+    setfenv(level, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
+			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
+			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
+
+    return _M
+end
+
+-- Restore the environment.
+moduleEnd = function (module)
+    setfenv(2, module.savedEnvironment)
+end
+
+-- Call this now so that from now on, this is like any other module.
+local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
 
 --[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
@@ -320,7 +317,7 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
     -- Set it all up.
     -- TODO - might want to merge into pre existing Thing instead of over writing like this.
     local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
-    setmetatable(thing, {__call = Thing._call, __index=Thing.__index})
+    setmetatable(thing, Thing)
     -- Stash the Thing under all of it's names.
     for i, v in ipairs(thing.names) do
 	things[v] = thing
@@ -331,10 +328,6 @@ end
 
 -- TODO - Some function stubs, for now.  Fill them up later.
 nada = function () end
-get = function (name)
-end
-set = function (name, value)
-end
 
 clear = function ()
 end
@@ -349,8 +342,6 @@ quit = function ()
 end
 
 thing(_M, 'nada',	'Do nothing.',					nada)
-thing(_M, 'get',	'Get the current value of an existing thing.',	get,	'name')
-thing(_M, 'set',	'Set the current value of an existing Thing.',	set,	'name,data')
 thing(_M, 'clear',	'The current skin is cleared of all widgets.',	clear)
 thing(_M, 'window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
 thing(_M, 'module',	'Load a module.',				module, 'file,acl')
@@ -398,7 +389,7 @@ end
 		{"servlet", "doIfServlet", "action", "Only do this if we are a servlet.", "", ""},
 		{"do", "doThing", "action", "Do this action.", "", ""},
 		{"grab", "getFile", "URL", "Grab a file from a URL.", "", ""},
---		{"get", "getThing", "name", "Get the current value of an existing thing.", "", ""},
+		{"get", "getThing", "name", "Get the current value of an existing thing.", "", ""},
 		{"gimmeskin", "gimmeSkin", "", "Returns the modules default skin.", "", ""},
 		{"help", "helpThing", "file", "Show help page.", "", ""},
 		{"nada", "nothing", "data", "Does nothing B-).", "", ""},
@@ -408,7 +399,7 @@ end
 		{"quiet", "quiet", "", "Output errors and warnings only.", "", ""},
 		{"remove", "removeThing", "name", "Remove an existing thing.", "", ""},
 		{"sethelp", "setHelp", "name,data", "Change the help for something.", "", ""},
---		{"set", "setThing", "name,data", "Set the current value of an existing Thing.", "", ""},
+		{"set", "setThing", "name,data", "Set the current value of an existing Thing.", "", ""},
 --		{"skang", "skangRead", "URL", "Parse the contents of a skang file or URL.", "", ""},
 --		{"quit", "startQuit", "", "Quit, exit, remove thyself.", "", ""},
 		{"stopwhinging", "stopWhinging", "", "Clear all messages.", "", ""},

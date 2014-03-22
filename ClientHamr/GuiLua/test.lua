@@ -34,8 +34,8 @@ skang.thing(_M, 'fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:
 skang.thing(_M, 'bar', 'Help text', "Default")
 
 -- We can use inline functions if we don't need the function internally.
-skang.thing(_M, 'func', 'Help Text', function (arg1, arg2)
-    print('Inside test.func ' .. arg1 .. ', ' .. arg2)
+skang.thing(_M, 'ffunc', 'Help Text', function (arg1, arg2)
+    print('Inside test.ffunc ' .. arg1 .. ', ' .. arg2)
 end, 'number,string')
 
 print('Ending soon')
@@ -47,6 +47,8 @@ end
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
-print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.func.help .. ' ->> ' .. skang.things.f.action)
-test.func('one', 2)
-skang.things.func('seven', 'aight')
+print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
+test.ffunc('one', 2)
+--skang.things.ffunc('seven', 'aight')
+test.f = 42
+print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
