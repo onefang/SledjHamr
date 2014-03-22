@@ -58,8 +58,7 @@ The old skang argument types are -
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
 do	-- Only I'm not gonna indent this.
 
--- This needs to start as local, then get wrapped a couple of times, eventually being made public as moduleBegin().
-local skangModuleBegin = function (name, author, copyright, version, timestamp, skin)
+moduleBegin = function (name, author, copyright, version, timestamp, skin)
     local _M = {}	-- This is what we return to require().
 
     package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
@@ -102,21 +101,20 @@ local skangModuleBegin = function (name, author, copyright, version, timestamp, 
     -- setfenv() sets the environment for the FUNCTION, stack level deep.
     -- The number is the stack level -
     --   0 running thread, 1 current function, 2 function that called this function, etc
-    setfenv(3, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
+    setfenv(2, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
 
     return _M
 end
 
--- This is so the setfenv() stack count above is correct, and we can access ThingSpace in the final moduleBegin() version below, and STILL use this for ourselves.  lol
-local smb = function (name, author, copyright, version, timestamp, skin)
-    local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
-    return result
-end
+-- Call this now so that from now on, this is like any other module.
+local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
--- Call this now, via the above wrapper, so that from now on, this is like any other module.
-local _M = smb('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
+-- Restore the environment.
+moduleEnd = function (module)
+    setfenv(2, module.savedEnvironment)
+end
 
 --[[ Thing package
 
@@ -176,11 +174,8 @@ Other Thing things are -
     Also various functions to wrap checking the security, like canDo, canRead, etc.
 ]]
 
-
--- There is no ThingSpace, now it's just in these tables -
+-- There is no ThingSpace, now it's just in this table -
 things = {}
-modules = {}
-
 
 Thing =
 {
@@ -253,22 +248,6 @@ Thing =
     hasCrashed = 0,		-- How many times this Thing has crashed.
 }
 
--- Actually stuff ourself into ThingSpace.
-modules[_NAME] = {module = _M, name = _NAME, }
-setmetatable(_M, {Thing})
-
--- This is the final version that we export.  Finally we can include the ThingSpace stuff.
-moduleBegin = function (name, author, copyright, version, timestamp, skin)
-    local result = skangModuleBegin(name, author, copyright, version, timestamp, skin)
-    modules[name] = {module = result, name = name, }
-    setmetatable(result, Thing)
-    return result
-end
-
--- Restore the environment.
-moduleEnd = function (module)
-    setfenv(2, module.savedEnvironment)
-end
 
 --[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
     Not unless skang.thing() knows about a and b, which it wont.
