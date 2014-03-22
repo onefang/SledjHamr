@@ -184,7 +184,7 @@ Thing =
 		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
 	    else
 		thing:isValid()
-		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. value .. ' -> ' .. thing.help)
+		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
 		-- TODO - Go through it's linked things and set them to.
 	    end
 	    rawset(table, name, value)
