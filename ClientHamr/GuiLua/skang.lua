@@ -76,6 +76,7 @@ local versions = {
 }
 
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
+-- TODO - Should parse in license type to.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
   local _M = {}	-- This is what we return to require().
   local level = 2
