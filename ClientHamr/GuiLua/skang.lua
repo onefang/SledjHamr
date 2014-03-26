@@ -213,7 +213,6 @@ Other Thing things are -
 ]]
 
 --[[  ideas
-use a Lua pattern instead of a mask, with ^ and $ automatically added at the ends.
 __newindex could catch a table being assigned - test.foo = {widget = '...', acl='...'}
     though that interferes with using tables for Stuff
       test.someStuff = {key='blah', field0='something', field1=1, ...}
@@ -259,14 +258,20 @@ Thing.errors = {}		-- A list of errors returned by isValid().
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
   local value = self.value
+  local t = type(value)
   self.errors = {}
   -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
-  if 'nil' == type(value) then
+  if 'nil' == t then
     if self.required then table.insert(self.errors, self.names[1] .. ' is required!') end
   else
-    if self.types[1] ~= type(value) then table.insert(self.errors, self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!') end
+    if self.types[1] ~= t then table.insert(self.errors, self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
+    else
+      if 'number' == t then value = '' .. value end
+      if ('number' == t) or ('string' == t) then
+        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, self.names[1] .. ' does not match pattern "' .. self.pattern .. '"!') end
+      end
+    end
   end
-  -- TODO - Should check for matching mask, and anything else.
   return #(self.errors) == 0
 end
 
