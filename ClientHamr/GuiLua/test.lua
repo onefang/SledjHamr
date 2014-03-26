@@ -27,7 +27,7 @@ this.func(1, 'two')
 print('code')
 
 -- A variable that is private to this module.
-local foo
+local fool
 
 skang.thing('fooble,f', 'Help text goes here', 1, 'number', '"edit", "The fooble:", 1, 1, 10, 50', true)
 skang.thing('bar', 'Help text', "Default")
