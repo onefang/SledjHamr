@@ -172,6 +172,12 @@ of telling if the number is pixels or character cells.  Also, relative
 to what part of the other widget?  Some more thought needs to be put
 into this.
 
+Another idea for relative numbers could be to have a coord object with
+various methods, so we could have something like -
+
+widget:bottom(-10):right(5)	-- 10 pixels below the bottom of widget, 5 pixels to the right of the right edge of widget.
+widget:width("12")		-- 12 characters longer than the width of widget.
+
 */
 
 

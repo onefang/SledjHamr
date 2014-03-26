@@ -212,6 +212,26 @@ Other Thing things are -
     Actually, not sure matrix-RAD solved that either.  lol
 ]]
 
+--[[  ideas
+use a Lua pattern instead of a mask, with ^ and $ automatically added at the ends.
+__newindex could catch a table being assigned - test.foo = {widget = '...', acl='...'}
+    though that interferes with using tables for Stuff
+      test.someStuff = {key='blah', field0='something', field1=1, ...}
+      test.someStuff.key
+    happily Lua function call syntax supports test.foo{ ... } as a function call with a table argument.  B-)
+    so maybe a use for __call after all, if the argument is that table
+    the table itself is passed to __call as the first argument, the rest of the arguments follow.
+    test.foo(1, 'two')  ->  __call(foo, 1, 'two')
+      foo has to be a table value though, with a metatable
+      and the rest of skang is treating test.foo as a nil value so that __index and __newindex work.  B-(
+    test itself is a table, so all is not lost -
+      test{'foo', widget='...', acl='..'}  ->  __call(test, {'foo', ...})
+      which would assign stuff to skang.things.foo.widget and skang.things.foo.acl
+      as opposed to -
+      skang.things.foo = {widget='...', acl='...'}
+      which blanks out the other stuff.
+]]
+
 -- Default things values.
 Thing.help = 'No description supplied.'
 Thing.types = {'string'}
@@ -221,6 +241,7 @@ Thing.required = false
 
 Thing.action = 'nada'		-- An optional action to perform.
 Thing.tell = ''			-- The skang command that created this Thing.
+Thing.pattern = '.*'		-- A pattern to restrict values.
 
 Thing.isReadOnly = false	-- Is this Thing read only?
 Thing.isServer = false		-- Is this Thing server side?
@@ -256,6 +277,7 @@ Thing.__index = function (table, key)
   -- First see if this is a Thing.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   --        Ah, it was doing isValid() on setStufflet().
+  -- TODO - Call thing.func() if it exists.
   if thing then return thing.value or thing.default end
 
   -- Then see if we can inherit it from Thing.
@@ -322,6 +344,7 @@ thing = function (names, help, default, types, widget, required, acl, boss)
     n[i] = v
     i = i + 1
   end
+  -- TODO - Should bitch and return if no names, has to be at least one name.
   local name = n[1]
 
   -- Find type, default to string, then break out the other types.
