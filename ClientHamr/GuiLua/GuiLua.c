@@ -103,6 +103,20 @@ Squeal was the database driver interface for SquealStuff, the database
 version of Stuff.  Maybe we could wrap esskyuehl?  Not really in need of
 database stuff for now, but should keep it in mind.
 
+Stuff is an abstract class that gets extended by other classes, like
+SquealStuff, which was the only thing extending it.  It dealt with the
+basic "collection of things" stuff.  Each individual thing was called a
+stufflet.  A final fooStuff would extend S_juealStuff, and include an
+array of strings called "stufflets" that at least named the stufflets,
+but could also include metadata and links to other Stuffs.  For
+SquealStuff, the metadata would be read from the SQL database
+autamatically.
+
+There was varies infrastructure for reading and writing Stuff, throwing
+rows of Stuff into grids, having choices of Stuff, linking stufflets to
+individual widgets, having default Stuffs for windows, validating
+Stuffs, etc.
+
 */
 
 

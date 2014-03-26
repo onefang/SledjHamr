@@ -248,6 +248,7 @@ Thing.__index = function (table, key)
   local thing = things[key]
   -- First see if this is a Thing.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
+  --        Ah, it was doing isValid() on setStufflet().
   if thing then return thing.value or thing.default end
 
   -- Then see if we can inherit it from Thing.
