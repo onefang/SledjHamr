@@ -334,7 +334,7 @@ end
 -- acl		- Access Control List defining security restrains.
 -- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
 thing = function (names, help, default, types, widget, required, acl, boss)
-  -- Grad the environment of the calling function, so this new thing automatically becomes a global in it.
+  -- Grab the environment of the calling function, so this new thing automatically becomes a global in it.
   module = getfenv(2)
 
   -- Break out the names.
