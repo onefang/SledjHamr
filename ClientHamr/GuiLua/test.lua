@@ -48,6 +48,8 @@ end
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
+
+print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
 test.ffunc('one', 2)
 --skang.things.ffunc('seven', 'aight')

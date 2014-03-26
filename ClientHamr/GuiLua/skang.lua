@@ -234,6 +234,7 @@ __newindex could catch a table being assigned - test.foo = {widget = '...', acl=
 
 -- Default things values.
 Thing.help = 'No description supplied.'
+Thing.default = ''
 Thing.types = {'string'}
 Thing.required = false
 --Thing.acl = ''
