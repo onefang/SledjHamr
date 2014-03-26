@@ -237,15 +237,8 @@ Thing.hasCrashed = 0		-- How many times this Thing has crashed.
 Thing.__index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 	local thing = things[key]
-
 	-- First see if this is a Thing.
-	if thing then
-	    local result = nil
-	    if key ~= thing.names[1] then
-		result = table[thing.names[1] ]		-- This might be recursive.
-	    end
-	    return result or thing.default
-	end
+	if thing then return thing.value or thing.default end
 
 	-- Then see if we can inherit it from Thing.
 	thing = Thing[key]
@@ -256,11 +249,13 @@ Thing.__index = function (table, key)
     end
 
 Thing.__newindex = function (table, key, value)
+	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 	local thing = things[key]
 
 	if thing then
 	    local name = thing.names[1]
-	    rawset(table, name, value)		-- Only stuff it under the first name, the rest are left as nil.
+	    -- This is a proxy table, the values never exist in the real table.
+	    thing.value = value
 	    if 'function' == type(value) then
 		thing.func = value
 	        local types = ''
