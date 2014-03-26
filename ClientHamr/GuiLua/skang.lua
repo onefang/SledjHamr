@@ -52,155 +52,14 @@ The old skang argument types are -
 ]]
 
 
-
 -- Wrapping the entire module in do .. end helps if people just join a bunch of modules together, which apparently is popular.
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
 do	-- Only I'm not gonna indent this.
 
 
---[[ Thing package
-
-matrix-RAD had Thing as the base class of everything.  Lua doesn't have
-inheritance as such, but an inheritance structure can be built using
-Lua's meta language capabilities.  I think we still need this sort of
-thing.  Java inheritance and interfaces where used.  There's quite a few
-variations of OO support has been written for Lua, maybe some of that
-could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
-
-Other useful links -
-
-http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
-http://lua-users.org/wiki/MetamethodsTutorial
-http://lua-users.org/wiki/MetatableEvents
-
-http://lua-users.org/wiki/MechanismNotPolicy
-http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
-http://lua-users.org/lists/lua-l/2011-10/msg00485.html
-http://lua-users.org/wiki/LuaModuleFunctionCritiqued
-
-On the other hand, Thing as such might just vanish and merge into
-various Lua and metatable things.  Seems that's what is going on.  We
-didn't really need much OO beyond this anyway.
-
-Each "users session" (matrix-RAD term that came from Java
-applets/servlets) has a ThingSpace, which is a tree that holds
-everything else.  It holds the class cache, commands, loaded modules,
-variables and their values, widgets and their states.  In matrix-RAD I
-built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
-Perhaps some combination of the two will work here?  On the other hand,
-with Lua tables, who needs trees?  lol
-
-Since skang Lua scripts should be defined as modules, we can use
-module semantics instead of get/set -
-
-local other = require('otherPackageName')
-other.foo = 'stuff'
-bar = other.foo
-
-Other Thing things are -
-    get/set	The getter and setter.
-    number	No idea how this was useful.
-    skang	The owning object, a Skang (actually got this, called module for now).
-    owner	The owning object, a String (module._NAME).
-    clas	Class of the Thing, a Class.  (pointless)
-    type	Class of the Thing, a String.  (pointless)
-    realType	Real Class of the Thing, a String.  (pointless)
-    myRoot	ThingSpace we are in, a ThingSpace.
-
-    Also various functions to wrap checking the security, like canDo, canRead, etc.
-]]
-
-
---[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
-    Not unless skang.thing() knows about a and b, which it wont.
-    Both a and b get the same table, not different copies of it.
-    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
-    Then we have to deal with widgets linking to specific clones.
-    Actually, not sure matrix-RAD solved that either.  lol
-]]
-
-
--- There is no ThingSpace, now it's just in this table -
-things = 
-{
-}
-
-Thing =
-{
-    action = 'nada',		-- An optional action to perform.
-    tell = '',			-- The skang command that created this Thing.
-
-    append = function (self,data)	-- Append to the value of this Thing.
-    end,
-    isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
-	self.errors = {}
-	-- TODO - Should check for required, matching mask, matching type, etc.
-	return true
-    end,
-    remove = function (self)	-- Delete this Thing.
-    end,
-
-    errors = {},		-- A list of errors returned by isValid().
-
-    isReadOnly = false,		-- Is this Thing read only?
-    isServer = false,		-- Is this Thing server side?
-    isStub = false,		-- Is this Thing a stub?
-    isStubbed = false,		-- Is this Thing stubbed elsewhere?
-
-    hasCrashed = 0,		-- How many times this Thing has crashed.
-
-
-    __index = function (table, key)
-	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	local thing = things[key]
-
-	-- First see if this is a Thing.
-	if thing then
-	    local result = nil
-	    if key ~= thing.names[1] then
-		result = table[thing.names[1] ]
-	    end
-	    return result or thing.default
-	end
-
-	-- Then see if we can inherit it from Thing.
-	thing = Thing[key]
-	if thing then return thing end
-
-	-- If all else fails, return nil.
-	return nil
-    end,
-
-
-    __newindex = function (table, key, value)
-	local thing = things[key]
-
-	if thing then
-	    local name = thing.names[1]
-	    if 'function' == type(value) then
-		thing.func = value
-	        local types = ''
-		for i, v in ipairs(thing.types) do
-		    if 1 ~= i then types = types .. v .. ', ' end
-	        end
-		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
-	    else
-		thing:isValid()
-		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
-		-- TODO - Go through it's linked things and set them to.
-	    end
-	    rawset(table, name, value)
-	else
-	    rawset(table, key, value)
-	end
-    end,
-
-
-    -- TODO - Seemed like a good idea at the time, but do we really need it?
---    __call = function (func, ...)
---	return func.func(...)
---    end,
-}
+-- There is no ThingSpace, now it's all just in this table, and meta table.  Predefined here coz moduleBegin references Thing.
+things = {}
+Thing = {}
 
 
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
@@ -265,38 +124,147 @@ end
 local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
 
---[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
-        Merging widgets might work to.  B-)
-	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
 
-        Parameter gets a type, which might help since Lua is untyped, versus Java being strongly typed.
-        Widgets get a type as well, which would be label, button, edit, grid, etc.
-	    A grid could even have sub types - grid,number,string,button,date.  B-)
+--[[ Thing package
 
-	Required commands makes no sense, but can just be ignored.
-	A required widget might mean that the window HAS to have one.
+matrix-RAD had Thing as the base class of everything.  Lua doesn't have
+inheritance as such, but an inheritance structure can be built using
+Lua's meta language capabilities.  I think we still need this sort of
+thing.  Java inheritance and interfaces where used.  There's quite a few
+variations of OO support has been written for Lua, maybe some of that
+could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
 
-	Default for a command would be the actual function.
-	Default being a function makes this Thing a command.
-	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
+Other useful links -
 
-	skang.thing(_M, 'foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, nil, '"button", "The foo :"' 1, 1, 10, 50')
-	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
-	myButton:colour(1, 2, 3, 4)
-	myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
-	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
-	myButton = 'Not default'	-- myEditor and _M.foo change to.  Though now _M.foo is a command, not a parameter, so maybe don't change that.
-	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
-	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
-	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
-	quitter:action('quit')
+http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
+http://lua-users.org/wiki/MetamethodsTutorial
+http://lua-users.org/wiki/MetatableEvents
+
+http://lua-users.org/wiki/MechanismNotPolicy
+http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
+http://lua-users.org/lists/lua-l/2011-10/msg00485.html
+http://lua-users.org/wiki/LuaModuleFunctionCritiqued
+
+On the other hand, Thing as such might just vanish and merge into
+various Lua and metatable things.  Seems that's what is going on.  We
+didn't really need much OO beyond this anyway.
+
+Each "users session" (matrix-RAD term that came from Java
+applets/servlets) has a ThingSpace, which is a tree that holds
+everything else.  It holds the class cache, commands, loaded modules,
+variables and their values, widgets and their states.  In matrix-RAD I
+built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
+Perhaps some combination of the two will work here?  On the other hand,
+with Lua tables, who needs trees?  lol
+
+Since skang Lua scripts should be defined as modules, we can use
+module semantics instead of get/set -
+
+local other = require('otherPackageName')
+other.foo = 'stuff'
+bar = other.foo
+
+Other Thing things are -
+    get/set	The getter and setter.
+    number	No idea how this was useful.
+    skang	The owning object, a Skang (actually got this, called module for now).
+    owner	The owning object, a String (module._NAME).
+    clas	Class of the Thing, a Class.  (pointless)
+    type	Class of the Thing, a String.  (pointless)
+    realType	Real Class of the Thing, a String.  (pointless)
+    myRoot	ThingSpace we are in, a ThingSpace.
+
+    Also various functions to wrap checking the security, like canDo, canRead, etc.
 ]]
+
+
+--[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
+    Not unless skang.thing() knows about a and b, which it wont.
+    Both a and b get the same table, not different copies of it.
+    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
+    Then we have to deal with widgets linking to specific clones.
+    Actually, not sure matrix-RAD solved that either.  lol
+]]
+
+Thing.action = 'nada'		-- An optional action to perform.
+Thing.tell = ''			-- The skang command that created this Thing.
+
+Thing.append = function (self,data)	-- Append to the value of this Thing.
+    end
+
+Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
+	self.errors = {}
+	-- TODO - Should check for required, matching mask, matching type, etc.
+	return true
+    end
+
+Thing.remove = function (self)	-- Delete this Thing.
+    end
+
+Thing.errors = {}		-- A list of errors returned by isValid().
+
+Thing.isReadOnly = false	-- Is this Thing read only?
+Thing.isServer = false		-- Is this Thing server side?
+Thing.isStub = false		-- Is this Thing a stub?
+Thing.isStubbed = false		-- Is this Thing stubbed elsewhere?
+
+Thing.hasCrashed = 0		-- How many times this Thing has crashed.
+
+Thing.__index = function (table, key)
+	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+	local thing = things[key]
+
+	-- First see if this is a Thing.
+	if thing then
+	    local result = nil
+	    if key ~= thing.names[1] then
+		result = table[thing.names[1] ]		-- This might be recursive.
+	    end
+	    return result or thing.default
+	end
+
+	-- Then see if we can inherit it from Thing.
+	thing = Thing[key]
+	if thing then return thing end
+
+	-- If all else fails, return nil.
+	return nil
+    end
+
+Thing.__newindex = function (table, key, value)
+	local thing = things[key]
+
+	if thing then
+	    local name = thing.names[1]
+	    rawset(table, name, value)		-- Only stuff it under the first name, the rest are left as nil.
+	    if 'function' == type(value) then
+		thing.func = value
+	        local types = ''
+		for i, v in ipairs(thing.types) do
+		    if 1 ~= i then types = types .. v .. ', ' end
+	        end
+		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
+	    else
+		thing:isValid()
+		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
+		-- TODO - Go through it's linked things and set them to.
+	    end
+	else
+	    rawset(table, key, value)		-- Stuff it normally.
+	end
+    end
+
+    -- TODO - Seemed like a good idea at the time, but do we really need it?
+--Thing.__call = function (func, ...)
+--	return func.func(...)
+--    end
+
 
 -- skang.thing() stashes the default value into _M['bar'], and the details into things['bar'].
 -- names	- a comma seperated list of names, aliasas, and shortcuts.  The first one is the official name.
 -- help		- help text describing this Thing.
 -- default	- the default value.  This could be a funcion, making this a command.
--- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for functions.
+-- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
 -- widget	- default widget command arguments for creating this Thing as a widget.
 -- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
 -- acl		- Access Control List defining security restrains.
@@ -335,6 +303,34 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
     -- This triggers the Thing.__newindex metamethod above.
     module[name] = default
 end
+
+--[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
+        Merging widgets might work to.  B-)
+	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
+
+        Parameter gets a type, which might help since Lua is untyped, versus Java being strongly typed.
+        Widgets get a type as well, which would be label, button, edit, grid, etc.
+	    A grid could even have sub types - grid,number,string,button,date.  B-)
+
+	Required commands makes no sense, but can just be ignored.
+	A required widget might mean that the window HAS to have one.
+
+	Default for a command would be the actual function.
+	Default being a function makes this Thing a command.
+	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
+
+	skang.thing(_M, 'foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, nil, '"button", "The foo :"' 1, 1, 10, 50')
+	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
+	myButton:colour(1, 2, 3, 4)
+	myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
+	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
+	myButton = 'Not default'	-- myEditor and _M.foo change to.  Though now _M.foo is a command, not a parameter, so maybe don't change that.
+	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
+	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
+	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+	quitter:action('quit')
+]]
+
 
 -- TODO - Some function stubs, for now.  Fill them up later.
 nada = function () end
