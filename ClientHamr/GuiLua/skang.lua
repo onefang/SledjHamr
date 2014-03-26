@@ -212,6 +212,13 @@ Other Thing things are -
     Actually, not sure matrix-RAD solved that either.  lol
 ]]
 
+-- Default things values.
+Thing.help = 'No description supplied.'
+Thing.types = {'string'}
+Thing.required = false
+--Thing.acl = ''
+--Thing.boss = ''
+
 Thing.action = 'nada'		-- An optional action to perform.
 Thing.tell = ''			-- The skang command that created this Thing.
 
