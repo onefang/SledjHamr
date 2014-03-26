@@ -247,6 +247,7 @@ Thing.__index = function (table, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
   local thing = things[key]
   -- First see if this is a Thing.
+  -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   if thing then return thing.value or thing.default end
 
   -- Then see if we can inherit it from Thing.
