@@ -465,6 +465,64 @@ end
 ]]
 
 
+--[[ security package
+
+Java skang could run as a stand alone applicion, as an applet in a web
+page, or as a servlet on a web server.  This was pretty much all
+transparent to the user.  The security system reflected that.  Lua skang
+wont run in web pages, but can still have client / server behaviour. 
+The general idea was, and still is, that the GUI is the client side (in
+web page, in extantz GUI) that sends values back to the server side
+(servlet, actual Lua package running as a separate process, or the world
+server for in world scripts).  Client side can request that server side
+runs commands.  Serevr side can send values and commands back to the
+client.  Mostly it all happenes automatically through the ACLs.
+
+Bouncer is the Java skang security manager, it extended the Java
+SecurityManager.  Lua has no such thing, though C code running stuff in
+a sandbox does a similar job.  Fascist is the Java security supervisor,
+again should go inot the C sandbox.
+
+Human is used for authenticating a human, Puter for authenticating a
+computer, Suits for corporate style authentication, and they all
+extended Who, the base authentication module.
+
+For now, I have no idea how this all translates into Lua, but putting
+this here for a reminder to think about security during the design
+stage.
+
+
+This is the old Java ACL definition -
+	acl - access control list.
+Owner is usually the person running the Thingspace.
+RWX~,---,Rwxgroup1,r--group2,r-xgroup3,rw-group4,--X~user1
+rwx~ is for the owner.  The second one is the default.  The rest are per group or per user.
+Capital letters mean that they get access from the network to.
+--- No access at all.
+RWX Full access.
+R-- Read only access.
+r-x Read and execute, but only locally.
+rw- Read and write a field, but don't execute a method.
+-w- A password.
+-a- An append only log file.
+-A- An append only log file on the server.
+Ri- read, but only set from init (ei. skinURL not set from properties or skang files).
+RI- As above, but applet.init() can set it too.
+--x Thing is both method and field, only execution of the method is allowed.
+--p Run as owner (Pretend).
+--P Run across the network as owner (can run in applet triggered by server).
+s-- Read only, but not even visible to applets.
+sss Only visible to servlets and applications.
+--S Send to servlet to execute if applet, otherwise execute normally.
+S-- Read only, but ignore local version and get it from server.
+ggg GUI Thing, only visible to Applets and applications.
+GGG GUI Thing, but servlets can access them across the net.
+
+For servlet only modules from an applet, the applet only loads the skanglet class, using it for all
+access to the module.
+]]
+
+
 -- Gotta check out this _ENV thing, 5.2 only.  Seems to replace the need for setfenv().  Seems like setfenv should do what we want, and is more backward compatible.
 --   "_ENV is not supported directly in 5.1, so its use can prevent a module from remaining compatible with 5.1.
 --   Maybe you can simulate _ENV with setfenv and trapping gets/sets to it via __index/__newindex metamethods, or just avoid _ENV."
