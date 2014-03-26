@@ -124,6 +124,30 @@ end
 local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
 
 
+-- My clever boolean check, this is the third language I've written this in.  B-)
+-- true   1 yes ack  ok   one  positive absolutely affirmative  'ah ha' 'shit yeah' 'why not'
+local isTrue  = 't1aopswy'
+-- false  0 no  nack nope zero negative nah 'no way' 'get real' 'uh uh' 'fuck off' 'bugger off'
+local isFalse = 'f0bgnuz'
+isBoolean = function (aBoolean)
+    local result = false
+
+    if type(aBoolean) ~= 'nil' then
+      -- The default case, presence of a value means it's true.
+      result = true
+      if     type(aBoolean) == 'boolean'  then result = aBoolean
+      elseif type(aBoolean) == 'function' then result = aBoolean()
+      elseif type(aBoolean) == 'number'   then result = (aBoolean ~= 0)
+      elseif type(aBoolean) == 'string'   then
+	if '' == aBoolean then result = false else
+	    if 1 == string.find(string.lower(aBoolean), '^[' .. isTrue  .. ']') then result = true end
+	    if 1 == string.find(string.lower(aBoolean), '^[' .. isFalse .. ']') then result = false end
+	end
+      end
+    end
+    return result
+end
+
 
 --[[ Thing package
 
