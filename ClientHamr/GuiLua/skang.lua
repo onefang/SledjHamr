@@ -64,60 +64,60 @@ Thing = {}
 
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
-    local _M = {}	-- This is what we return to require().
-    local level = 2
+  local _M = {}	-- This is what we return to require().
+  local level = 2
 
-    package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
+  package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
 			-- Returning it at the end does the same thing.
 			-- This is so that we can have all the module stuff at the top, in this function.
 			-- Should do this before any further require(), so that circular references don't blow out.
 
-    -- Save the callers environment.
-    local savedEnvironment = getfenv(level)
+  -- Save the callers environment.
+  local savedEnvironment = getfenv(level)
 
-    -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
-    --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
-		local _G = _G	-- Only sets a local _G for this function.
-		_M._G = _G	-- This clone loop might do this, but we don't want to be able to access the old _G from outside via this leak.
+  -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
+  --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
+	local _G = _G	-- Only sets a local _G for this function.
+	_M._G = _G	-- This clone loop might do this, but we don't want to be able to access the old _G from outside via this leak.
 	In Lua 5.1 at least, _G was special.  In 5.2, _ENV sorta replaces setfenv(), but no idea if this clone loop stomps on that.
-    ]]
-    for k, v in pairs(savedEnvironment) do
-	_M[k] = v
-    end
+  ]]
+  for k, v in pairs(savedEnvironment) do
+    _M[k] = v
+  end
 
-    _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
-    _M._NAME = name
-    _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
+  _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
+  _M._NAME = name
+  _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
 
-    -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
-    _M.AUTHOR = author
-    _M.COPYRIGHT = copyright .. ' ' .. author
-    -- TODO - Translate the version number into a version string.
-    _M.VERSION = version .. ' lookup version here ' .. timestamp
-    -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
-    _M.DEFAULT_SKANG = skin
+  -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
+  _M.AUTHOR = author
+  _M.COPYRIGHT = copyright .. ' ' .. author
+  -- TODO - Translate the version number into a version string.
+  _M.VERSION = version .. ' lookup version here ' .. timestamp
+  -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
+  _M.DEFAULT_SKANG = skin
 
 
-    --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
+  --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
 			-- Not such a good idea to stomp on global name space.
 			-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
 			-- This is why module() is broken.
 
-    setmetatable(_M, Thing)
-    _M.savedEnvironment = savedEnvironment
-    -- setfenv() sets the environment for the FUNCTION, stack level deep.
-    -- The number is the stack level -
-    --   0 running thread, 1 current function, 2 function that called this function, etc
-    setfenv(level, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
+  setmetatable(_M, Thing)
+  _M.savedEnvironment = savedEnvironment
+  -- setfenv() sets the environment for the FUNCTION, stack level deep.
+  -- The number is the stack level -
+  --   0 running thread, 1 current function, 2 function that called this function, etc
+  setfenv(level, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
 
-    return _M
+  return _M
 end
 
 -- Restore the environment.
 moduleEnd = function (module)
-    setfenv(2, module.savedEnvironment)
+  setfenv(2, module.savedEnvironment)
 end
 
 -- Call this now so that from now on, this is like any other module.
@@ -130,22 +130,24 @@ local isTrue  = 't1aopswy'
 -- false  0 no  nack nope zero negative nah 'no way' 'get real' 'uh uh' 'fuck off' 'bugger off'
 local isFalse = 'f0bgnuz'
 isBoolean = function (aBoolean)
-    local result = false
+  local result = false
 
-    if type(aBoolean) ~= 'nil' then
-      -- The default case, presence of a value means it's true.
-      result = true
-      if     type(aBoolean) == 'boolean'  then result = aBoolean
-      elseif type(aBoolean) == 'function' then result = aBoolean()
-      elseif type(aBoolean) == 'number'   then result = (aBoolean ~= 0)
-      elseif type(aBoolean) == 'string'   then
-	if '' == aBoolean then result = false else
-	    if 1 == string.find(string.lower(aBoolean), '^[' .. isTrue  .. ']') then result = true end
-	    if 1 == string.find(string.lower(aBoolean), '^[' .. isFalse .. ']') then result = false end
-	end
+  if type(aBoolean) ~= 'nil' then
+    -- The default case, presence of a value means it's true.
+    result = true
+    if     type(aBoolean) == 'boolean'  then result = aBoolean
+    elseif type(aBoolean) == 'function' then result = aBoolean()
+    elseif type(aBoolean) == 'number'   then result = (aBoolean ~= 0)
+    elseif type(aBoolean) == 'string'   then
+      if '' == aBoolean then
+        result = false
+      else
+	if 1 == string.find(string.lower(aBoolean), '^[' .. isTrue  .. ']') then result = true end
+	if 1 == string.find(string.lower(aBoolean), '^[' .. isFalse .. ']') then result = false end
       end
     end
-    return result
+  end
+  return result
 end
 
 
@@ -214,7 +216,7 @@ Thing.action = 'nada'		-- An optional action to perform.
 Thing.tell = ''			-- The skang command that created this Thing.
 
 Thing.append = function (self,data)	-- Append to the value of this Thing.
-    end
+end
 
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
@@ -230,7 +232,7 @@ Thing.isValid = function (self)	-- Check if this Thing is valid, return resultin
 end
 
 Thing.remove = function (self)	-- Delete this Thing.
-    end
+end
 
 Thing.errors = {}		-- A list of errors returned by isValid().
 
@@ -242,48 +244,48 @@ Thing.isStubbed = false		-- Is this Thing stubbed elsewhere?
 Thing.hasCrashed = 0		-- How many times this Thing has crashed.
 
 Thing.__index = function (table, key)
-	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	local thing = things[key]
-	-- First see if this is a Thing.
-	if thing then return thing.value or thing.default end
+  -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+  local thing = things[key]
+  -- First see if this is a Thing.
+  if thing then return thing.value or thing.default end
 
-	-- Then see if we can inherit it from Thing.
-	thing = Thing[key]
-	if thing then return thing end
+  -- Then see if we can inherit it from Thing.
+  thing = Thing[key]
+  if thing then return thing end
 
-	-- If all else fails, return nil.
-	return nil
-    end
+  -- If all else fails, return nil.
+  return nil
+end
 
 Thing.__newindex = function (table, key, value)
-	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-	local thing = things[key]
+  -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+  local thing = things[key]
 
-	if thing then
-	    local name = thing.names[1]
-	    -- This is a proxy table, the values never exist in the real table.
-	    thing.value = value
-	    if 'function' == type(value) then
-		thing.func = value
-	        local types = ''
-		for i, v in ipairs(thing.types) do
-		    if 1 ~= i then types = types .. v .. ', ' end
-	        end
-		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
-	    else
-		-- NOTE - invalid values are still stored, this is by design.
-		if not thing:isValid() then
-		    for i, v in ipairs(thing.errors) do
-			print('ERROR - ' .. v)
-		    end
-		end
---		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
-		-- TODO - Go through it's linked things and set them to.
-	    end
-	else
-	    rawset(table, key, value)		-- Stuff it normally.
+  if thing then
+    local name = thing.names[1]
+    -- This is a proxy table, the values never exist in the real table.
+    thing.value = value
+    if 'function' == type(value) then
+      thing.func = value
+      local types = ''
+      for i, v in ipairs(thing.types) do
+	if 1 ~= i then types = types .. v .. ', ' end
+      end
+      print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
+    else
+      -- NOTE - invalid values are still stored, this is by design.
+      if not thing:isValid() then
+	for i, v in ipairs(thing.errors) do
+	  print('ERROR - ' .. v)
 	end
+      end
+--      print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
+      -- TODO - Go through it's linked things and set them to.
     end
+  else
+    rawset(table, key, value)		-- Stuff it normally.
+  end
+end
 
     -- TODO - Seemed like a good idea at the time, but do we really need it?
 --Thing.__call = function (func, ...)
@@ -301,38 +303,38 @@ Thing.__newindex = function (table, key, value)
 -- acl		- Access Control List defining security restrains.
 -- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
 thing = function (module, names, help, default, types, widget, required, acl, boss)
-    -- Break out the names.
-    local n = {}
-    local i = 1
-    for v in string.gmatch(names, '([^,]+)') do
-	n[i] = v
-	i = i + 1
-    end
-    local name = n[1]
+  -- Break out the names.
+  local n = {}
+  local i = 1
+  for v in string.gmatch(names, '([^,]+)') do
+    n[i] = v
+    i = i + 1
+  end
+  local name = n[1]
 
-    -- Find type, default to string, then break out the other types.
-    local t = {type(default)}
-    if 'nil' == t[1] then t[1] = 'string' end
-    i = 2
-    if types then
-	for v in string.gmatch(types, '([^,]+)') do
-	    t[i] = v
-	    i = i + 1
-	end
-    else
-	types = ''
+  -- Find type, default to string, then break out the other types.
+  local t = {type(default)}
+  if 'nil' == t[1] then t[1] = 'string' end
+  i = 2
+  if types then
+    for v in string.gmatch(types, '([^,]+)') do
+      t[i] = v
+      i = i + 1
     end
+  else
+    types = ''
+  end
 
-    -- Set it all up.
-    -- TODO - might want to merge into pre existing Thing instead of over writing like this.
-    local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = isBoolean(required), acl = acl, boss = boss, }
-    setmetatable(thing, Thing)
-    -- Stash the Thing under all of it's names.
-    for i, v in ipairs(thing.names) do
-	things[v] = thing
-    end
-    -- This triggers the Thing.__newindex metamethod above.
-    module[name] = default
+  -- Set it all up.
+  -- TODO - might want to merge into pre existing Thing instead of over writing like this.
+  local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = isBoolean(required), acl = acl, boss = boss, }
+  setmetatable(thing, Thing)
+  -- Stash the Thing under all of it's names.
+  for i, v in ipairs(thing.names) do
+    things[v] = thing
+  end
+  -- This triggers the Thing.__newindex metamethod above.
+  module[name] = default
 end
 
 --[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
