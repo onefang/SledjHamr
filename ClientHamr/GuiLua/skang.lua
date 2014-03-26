@@ -259,6 +259,7 @@ Thing.isValid = function (self)	-- Check if this Thing is valid, return resultin
   -- Anything that overrides this method, should call this super method first.
   local value = self.value
   self.errors = {}
+  -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
   if 'nil' == type(value) then
     if self.required then table.insert(self.errors, self.names[1] .. ' is required!') end
   else
