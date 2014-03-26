@@ -318,7 +318,7 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
 
     -- Set it all up.
     -- TODO - might want to merge into pre existing Thing instead of over writing like this.
-    local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = required, acl = acl, boss = boss, }
+    local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = isBoolean(required), acl = acl, boss = boss, }
     setmetatable(thing, Thing)
     -- Stash the Thing under all of it's names.
     for i, v in ipairs(thing.names) do
