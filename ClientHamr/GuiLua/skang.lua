@@ -117,6 +117,8 @@ end
 
 -- Restore the environment.
 moduleEnd = function (module)
+  -- TODO - Look for _NAME.properties, and load it into the modules Things.
+  -- TODO - Parse command line parameters at some point.
   setfenv(2, module.savedEnvironment)
 end
 
