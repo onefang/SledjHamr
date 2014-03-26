@@ -215,8 +215,17 @@ Other Thing things are -
 Thing.action = 'nada'		-- An optional action to perform.
 Thing.tell = ''			-- The skang command that created this Thing.
 
+Thing.isReadOnly = false	-- Is this Thing read only?
+Thing.isServer = false		-- Is this Thing server side?
+Thing.isStub = false		-- Is this Thing a stub?
+Thing.isStubbed = false		-- Is this Thing stubbed elsewhere?
+
+Thing.hasCrashed = 0		-- How many times this Thing has crashed.
+
 Thing.append = function (self,data)	-- Append to the value of this Thing.
 end
+
+Thing.errors = {}		-- A list of errors returned by isValid().
 
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
@@ -233,15 +242,6 @@ end
 
 Thing.remove = function (self)	-- Delete this Thing.
 end
-
-Thing.errors = {}		-- A list of errors returned by isValid().
-
-Thing.isReadOnly = false	-- Is this Thing read only?
-Thing.isServer = false		-- Is this Thing server side?
-Thing.isStub = false		-- Is this Thing a stub?
-Thing.isStubbed = false		-- Is this Thing stubbed elsewhere?
-
-Thing.hasCrashed = 0		-- How many times this Thing has crashed.
 
 Thing.__index = function (table, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
