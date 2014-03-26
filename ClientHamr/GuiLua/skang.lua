@@ -22,33 +22,33 @@ just pass the file name to skang.load() in this library.  B-)
 
 The old skang argument types are -
 
-		{"name",   "java.lang.String"},
-		{"action", "java.lang.String"},
-		{"type",   "java.lang.String"},
-		{"data",   "java.lang.String"},
-		{"URL",    "java.lang.String"},
-		{"file",   "java.lang.String"},
-		{"method", "java.lang.String"},
-		{"lx",     "java.lang.String"},
-		{"ly",     "java.lang.String"},
-		{"lw",     "java.lang.String"},
-		{"lh",     "java.lang.String"},
-		{"normal", "java.lang.String"},
-		{"ghost",  "java.lang.String"},
-		{"active", "java.lang.String"},
-		{"toggle", "java.lang.String"},
-		{"boolean","java.lang.Boolean"},
-		{"number", "java.lang.Integer"},
-		{"int",    "java.lang.Integer"},
-		{"x",      "java.lang.Integer"},
-		{"y",      "java.lang.Integer"},
-		{"w",      "java.lang.Integer"},
-		{"h",      "java.lang.Integer"},
-		{"r",      "java.lang.Integer"},
-		{"g",      "java.lang.Integer"},
-		{"b",      "java.lang.Integer"},
-		{"alpha",  "java.lang.Integer"},
-		{"acl",    "net.matrix_rad.security.ACL"},
+{"name",   "java.lang.String"},
+{"action", "java.lang.String"},
+{"type",   "java.lang.String"},
+{"data",   "java.lang.String"},
+{"URL",    "java.lang.String"},
+{"file",   "java.lang.String"},
+{"method", "java.lang.String"},
+{"lx",     "java.lang.String"},
+{"ly",     "java.lang.String"},
+{"lw",     "java.lang.String"},
+{"lh",     "java.lang.String"},
+{"normal", "java.lang.String"},
+{"ghost",  "java.lang.String"},
+{"active", "java.lang.String"},
+{"toggle", "java.lang.String"},
+{"boolean","java.lang.Boolean"},
+{"number", "java.lang.Integer"},
+{"int",    "java.lang.Integer"},
+{"x",      "java.lang.Integer"},
+{"y",      "java.lang.Integer"},
+{"w",      "java.lang.Integer"},
+{"h",      "java.lang.Integer"},
+{"r",      "java.lang.Integer"},
+{"g",      "java.lang.Integer"},
+{"b",      "java.lang.Integer"},
+{"alpha",  "java.lang.Integer"},
+{"acl",    "net.matrix_rad.security.ACL"},
 ]]
 
 
@@ -149,6 +149,7 @@ Thing =
 
     hasCrashed = 0,		-- How many times this Thing has crashed.
 
+
     __index = function (table, key)
 	-- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 	local thing = things[key]
@@ -169,6 +170,7 @@ Thing =
 	-- If all else fails, return nil.
 	return nil
     end,
+
 
     __newindex = function (table, key, value)
 	local thing = things[key]
@@ -192,6 +194,7 @@ Thing =
 	    rawset(table, key, value)
 	end
     end,
+
 
     -- TODO - Seemed like a good idea at the time, but do we really need it?
 --    __call = function (func, ...)
