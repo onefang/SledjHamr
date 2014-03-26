@@ -62,6 +62,19 @@ things = {}
 Thing = {}
 
 
+-- TODO - This needs to be expanded a bit to cover things like 1.42
+local versions = {
+  '0%.0',  'unwritten',	'Just a stub, no code at all, or completely non-existant.',
+  '0%.1',  'prototype',	'Stuff that has only been prototyped, or partly written.  There is some code, and it may even work, but it is not even close to the finished product.',
+  '%d%.3', 'written',	'Stuff that has already been written.  It may not be perfect, but it is considered an aproximation of the finished product.',
+  '%d%.5', 'alpha',	'Version being tested by official alpha testers.',
+  '%d%.9', 'beta',	'Version passed alpha testing, but not ready for final release.',
+  '1%.0',  'final',	'Version ready for final release, fully tested.',
+  '3%.0',  'poetry',	'Near perfection has been acheived.',
+  '5%.0',  'nirvana',	'Perfection has been acheived.',
+  '9%.0',  'bible',	'This is the Whord of Ghod.',
+}
+
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
 moduleBegin = function (name, author, copyright, version, timestamp, skin)
   local _M = {}	-- This is what we return to require().
@@ -89,11 +102,21 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
   _M._NAME = name
   _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
 
-  -- TODO - Should parse in an entire copyright message, and strip that down into bits, to put back together.
-  _M.AUTHOR = author
-  _M.COPYRIGHT = copyright .. ' ' .. author
-  -- TODO - Translate the version number into a version string.
-  _M.VERSION = version .. ' lookup version here ' .. timestamp
+  -- Parse in an entire copyright message, and strip that down into bits, to put back together.
+  local date, owner = string.match(copyright, '[Cc]opyright (%d%d%d%d) (.*)')
+  _M.AUTHOR = author or owner
+  _M.COPYRIGHT = 'Copyright ' .. date .. ' ' .. _M.AUTHOR
+  -- Translate the version number into a version string.
+  local versionName, versionDesc = ' ', ''
+  for i = 1, #versions / 3 do
+    if 1 == string.find(version, versions[i]) then
+      versionName = ' ' .. versions[i + 1] .. ' '
+      versionDesc = versions[i + 2]
+      break
+    end
+  end
+  _M.VERSION = version .. versionName .. timestamp
+  _M.VERSION_DESC = versionDesc
   -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
   _M.DEFAULT_SKANG = skin
 
@@ -123,7 +146,7 @@ moduleEnd = function (module)
 end
 
 -- Call this now so that from now on, this is like any other module.
-local _M = moduleBegin('skang', 'David Seikel', '2014', '0.0', '2014-03-19 19:01:00')
+local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
 
 
 -- My clever boolean check, this is the third language I've written this in.  B-)

@@ -3,8 +3,7 @@
 do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
---On the other hand, having 'Copyright 2014 David Seikel' here makes the copyright self documenting.  B-)
-local _M = skang.moduleBegin('test', 'David Seikel', '2014', '0.0', '2014-03-19 14:01:00', [[
+local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
 #!skang test.skang     -- This is Lua, so this might not work.
 
 -- There's an implied local this = require 'test'
@@ -48,6 +47,8 @@ end
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
+
+print('MODULE ' .. test._NAME .. ', ' .. test.COPYRIGHT .. ' Version: ' .. test.VERSION .. '\n' .. test.VERSION_DESC .. '\n')
 
 print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
