@@ -304,7 +304,10 @@ end
 -- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
 -- acl		- Access Control List defining security restrains.
 -- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
-thing = function (module, names, help, default, types, widget, required, acl, boss)
+thing = function (names, help, default, types, widget, required, acl, boss)
+  -- Grad the environment of the calling function, so this new thing automatically becomes a global in it.
+  module = getfenv(2)
+
   -- Break out the names.
   local n = {}
   local i = 1
@@ -382,12 +385,12 @@ end
 quit = function ()
 end
 
-thing(_M, 'nada',	'Do nothing.',					nada)
-thing(_M, 'clear',	'The current skin is cleared of all widgets.',	clear)
-thing(_M, 'window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
-thing(_M, 'module',	'Load a module.',				module, 'file,acl')
-thing(_M, 'skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
-thing(_M, 'quit',	'Quit, exit, remove thyself.',			quit)
+thing('nada',	'Do nothing.',					nada)
+thing('clear',	'The current skin is cleared of all widgets.',	clear)
+thing('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
+thing('module',	'Load a module.',				module, 'file,acl')
+thing('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
+thing('quit',	'Quit, exit, remove thyself.',			quit)
 
 
 moduleEnd(_M)

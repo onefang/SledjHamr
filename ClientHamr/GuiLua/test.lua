@@ -30,11 +30,12 @@ print('code')
 -- A variable that is private to this module.
 local foo
 
-skang.thing(_M, 'fooble,f', 'Help text goes here', 1, 'number', '"edit", "The fooble:", 1, 1, 10, 50', true)
-skang.thing(_M, 'bar', 'Help text', "Default")
+skang.thing('fooble,f', 'Help text goes here', 1, 'number', '"edit", "The fooble:", 1, 1, 10, 50', true)
+skang.thing('bar', 'Help text', "Default")
+skang.thing('foo')
 
 -- We can use inline functions if we don't need the function internally.
-skang.thing(_M, 'ffunc', 'Help Text', function (arg1, arg2)
+skang.thing('ffunc', 'Help Text', function (arg1, arg2)
   print('Inside test.ffunc ' .. arg1 .. ', ' .. arg2)
 end, 'number,string')
 
