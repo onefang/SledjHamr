@@ -327,14 +327,12 @@ thing = function (names, help, default, types, widget, required, acl, boss)
   -- Find type, default to string, then break out the other types.
   local t = {type(default)}
   if 'nil' == t[1] then t[1] = 'string' end
-  i = 2
   if types then
+    i = 2
     for v in string.gmatch(types, '([^,]+)') do
       t[i] = v
       i = i + 1
     end
-  else
-    types = ''
   end
 
   -- Set it all up.
