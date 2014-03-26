@@ -293,7 +293,7 @@ Thing.__newindex = function (table, key, value)
   local thing = things[key]
 
   if thing then
-    local name = thing.names[1]
+--    local name = thing.names[1]
     -- This is a proxy table, the values never exist in the real table.
     thing.value = value
     if 'function' == type(value) then
@@ -302,7 +302,7 @@ Thing.__newindex = function (table, key, value)
       for i, v in ipairs(thing.types) do
 	if 1 ~= i then types = types .. v .. ', ' end
       end
-      print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
+--      print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
     else
       -- NOTE - invalid values are still stored, this is by design.
       if not thing:isValid() then
