@@ -30,7 +30,7 @@ print('code')
 -- A variable that is private to this module.
 local foo
 
-skang.thing(_M, 'fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50')
+skang.thing(_M, 'fooble,f', 'Help text goes here', 1, 'number', '"edit", "The fooble:", 1, 1, 10, 50', true)
 skang.thing(_M, 'bar', 'Help text', "Default")
 
 -- We can use inline functions if we don't need the function internally.
@@ -58,3 +58,14 @@ test.fooble = 42
 print('f is now ' .. test.fooble .. ' ' .. test.f)
 test.fooble = nil
 print('f is now ' .. test.fooble .. ' ' .. test.f)
+-- First, disable the default value, so we see "is required" errors.
+skang.things.f.default = nil
+test.fooble = 42
+test.fooble = 'Should fail.'
+test.fooble = 42
+test.fooble = nil
+test.fooble = nil
+test.fooble = 42
+test.fooble = true
+test.f = 42
+test.f = nil

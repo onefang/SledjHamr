@@ -217,10 +217,17 @@ Thing.append = function (self,data)	-- Append to the value of this Thing.
     end
 
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
-	self.errors = {}
-	-- TODO - Should check for required, matching mask, matching type, etc.
-	return true
-    end
+  -- Anything that overrides this method, should call this super method first.
+  local value = self.module[self.names[1] ]
+  self.errors = {}
+  if 'nil' == type(value) then
+    if self.required then table.insert(self.errors, self.names[1] .. ' is required!') end
+  else
+    if self.types[1] ~= type(value) then table.insert(self.errors, self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!') end
+  end
+  -- TODO - Should check for matching mask, and anything else.
+  return #(self.errors) == 0
+end
 
 Thing.remove = function (self)	-- Delete this Thing.
     end
@@ -264,8 +271,13 @@ Thing.__newindex = function (table, key, value)
 	        end
 		print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
 	    else
-		thing:isValid()
-		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
+		-- NOTE - invalid values are still stored, this is by design.
+		if not thing:isValid() then
+		    for i, v in ipairs(thing.errors) do
+			print('ERROR - ' .. v)
+		    end
+		end
+--		print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
 		-- TODO - Go through it's linked things and set them to.
 	    end
 	else
