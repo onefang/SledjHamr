@@ -229,7 +229,7 @@ Thing.errors = {}		-- A list of errors returned by isValid().
 
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
-  local value = self.module[self.names[1] ]
+  local value = self.value
   self.errors = {}
   if 'nil' == type(value) then
     if self.required then table.insert(self.errors, self.names[1] .. ' is required!') end
