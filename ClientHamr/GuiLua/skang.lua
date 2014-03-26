@@ -327,7 +327,7 @@ thing = function (module, names, help, default, types, widget, required, acl, bo
   end
 
   -- Set it all up.
-  -- TODO - might want to merge into pre existing Thing instead of over writing like this.
+  -- TODO - might want to merge into pre existing Thing instead of over writing like this.  OOOR clone so there's a second copy.
   local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = isBoolean(required), acl = acl, boss = boss, }
   setmetatable(thing, Thing)
   -- Stash the Thing under all of it's names.
