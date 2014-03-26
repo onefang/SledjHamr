@@ -50,6 +50,8 @@ local test = require 'test'
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
 test.ffunc('one', 2)
 --skang.things.ffunc('seven', 'aight')
+print('')
+
 test.f = 42
 print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
 test.f = nil
@@ -58,6 +60,27 @@ test.fooble = 42
 print('f is now ' .. test.fooble .. ' ' .. test.f)
 test.fooble = nil
 print('f is now ' .. test.fooble .. ' ' .. test.f)
+print('')
+
+print(skang.isBoolean(true))
+print(skang.isBoolean(1))
+print(skang.isBoolean('1'))
+print(skang.isBoolean('true'))
+print(skang.isBoolean('Yep'))
+print(skang.isBoolean('?'))
+print(skang.isBoolean(test))
+print(skang.isBoolean(function (a) return true end))
+print('')
+print(skang.isBoolean(false))
+print(skang.isBoolean(nil))
+print(skang.isBoolean(0))
+print(skang.isBoolean(''))
+print(skang.isBoolean('0'))
+print(skang.isBoolean('false'))
+print(skang.isBoolean('Nope'))
+print(skang.isBoolean(function (a) return false end))
+print('')
+
 -- First, disable the default value, so we see "is required" errors.
 skang.things.f.default = nil
 test.fooble = 42
