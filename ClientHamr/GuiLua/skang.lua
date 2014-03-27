@@ -148,7 +148,7 @@ end
 
 -- Call this now so that from now on, this is like any other module.
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
-
+print('Skang loaded, running under Lua version ' .. _VERSION)
 
 -- My clever boolean check, this is the third language I've written this in.  B-)
 -- true   1 yes ack  ok   one  positive absolutely affirmative  'ah ha' 'shit yeah' 'why not'
