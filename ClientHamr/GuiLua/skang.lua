@@ -269,6 +269,8 @@ __newindex could catch a table being assigned - test.foo = {widget = '...', acl=
       as opposed to -
       skang.things.foo = {widget='...', acl='...'}
       which blanks out the other stuff.
+    Use generic positional / named arguments for widget to, then we can do -
+      widget.button{'Cancel', 0.5, 0.5, 1, 0, look='cancel.edj', colour={1, 2, 3, 4}, action='...'}
 ]]
 
 -- Default things values.
@@ -378,13 +380,6 @@ end
 --    end
 
 
--- skang.thing() stashes the default value into _M['bar'], and the details into things['bar'].
--- names	- a comma seperated list of names, aliasas, and shortcuts.  The first one is the official name.
--- help		- help text describing this Thing.
--- default	- the default value.  This could be a funcion, making this a command.
--- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
--- widget	- default widget command arguments for creating this Thing as a widget.
--- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
 -- skang.thing() Creates a new Thing, or changes an existing one.
 -- It can be called with positional arguments - (names, help, default, types, widget, required, acl, boss)
 -- Or it can be called with a table           - {names, help, pattern='...', acl='rwx'}
