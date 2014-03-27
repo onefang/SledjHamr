@@ -272,6 +272,13 @@ __newindex could catch a table being assigned - test.foo = {widget = '...', acl=
 ]]
 
 -- Default things values.
+-- help		- help text describing this Thing.
+-- default	- the default value.  This could be a funcion, making this a command.
+-- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
+-- widget	- default widget command arguments for creating this Thing as a widget.
+-- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
+-- acl		- Access Control List defining security restrains.
+-- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
 Thing.help = 'No description supplied.'
 Thing.default = ''
 Thing.types = {'string'}
@@ -378,43 +385,80 @@ end
 -- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
 -- widget	- default widget command arguments for creating this Thing as a widget.
 -- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
--- acl		- Access Control List defining security restrains.
--- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
-thing = function (names, help, default, types, widget, required, acl, boss)
-  -- Grab the environment of the calling function, so this new thing automatically becomes a global in it.
-  module = getfenv(2)
+-- skang.thing() Creates a new Thing, or changes an existing one.
+-- It can be called with positional arguments - (names, help, default, types, widget, required, acl, boss)
+-- Or it can be called with a table           - {names, help, pattern='...', acl='rwx'}
+-- names	- a comma seperated list of names, aliases, and shortcuts.  The first one is the official name.
+--                If this is not a new thing, then only the first one is used to look it up.
+--                So to change names, use skang.thing{'oldName', names='newName,otherNewName'}
+thing = function (names, ...)
+  local params = {...}
+  local new = false
+
+  -- Check if it was called as a table, and pull the names out of the table.
+  if 'table' == type(names) then
+    params = names
+    names = params[1]
+    table.remove(params, 1)
+  end
 
   -- Break out the names.
-  local n = {}
-  local i = 1
-  for v in string.gmatch(names, '([^,]+)') do
-    n[i] = v
-    i = i + 1
-  end
-  -- TODO - Should bitch and return if no names, has to be at least one name.
-  local name = n[1]
+  names = csv2table(names)
+  local name = names[1]
+  local oldNames = {}
 
-  -- Find type, default to string, then break out the other types.
-  local t = {type(default)}
-  if 'nil' == t[1] then t[1] = 'string' end
-  if types then
-    i = 2
-    for v in string.gmatch(types, '([^,]+)') do
-      t[i] = v
-      i = i + 1
+  -- No need to bitch and return if no names, this will crash for us.
+  local thing = things[name]
+  if not thing then	-- This is a new Thing.
+    new = true
+    thing = {}
+    -- Grab the environment of the calling function, so this new thing automatically becomes a global in it.
+    thing.module = getfenv(2)
+    thing.names = names
+  end
+
+  -- Pull out positional arguments.
+  thing.help		= params[1] or thing.help
+  thing.default		= params[2] or thing.default
+  local types		= params[3] or table.concat(thing.types or {}, ',')
+  thing.widget		= params[4] or thing.widget
+  thing.required	= params[5] or thing.required
+  thing.acl		= params[6] or thing.acl
+  thing.boss		= params[7] or thing.boss
+
+  -- PUll out named arguments.
+  for k, v in pairs(params) do
+    if 'string' == type(k) then
+      if     'types' == k then types = v
+      elseif 'names' == k then
+        oldNames = thing.names
+        thing.names = cvs2table(v)
+      else                  thing[k] = v
+      end
     end
   end
 
-  -- Set it all up.
-  -- TODO - might want to merge into pre existing Thing instead of over writing like this.  OOOR clone so there's a second copy.
-  local thing = {module = module, names = n, help = help, default = default, types = t, widget = widget, required = isBoolean(required), acl = acl, boss = boss, }
-  setmetatable(thing, Thing)
-  -- Stash the Thing under all of it's names.
+  thing.required = isBoolean(thing.required)
+
+  -- Find type, default to string, then break out the other types.
+  local typ = type(thing.default)
+  if 'nil' == typ then typ = 'string' end
+  thing.types = {}
+  if types then types = typ .. ',' .. types else types = typ end
+  thing.types = csv2table(types)
+
+  if new then setmetatable(thing, Thing) end
+
+  -- Remove old names, then stash the Thing under all of it's new names.
+  for i, v in ipairs(oldNames) do
+    things[v] = nil
+  end
   for i, v in ipairs(thing.names) do
     things[v] = thing
   end
-  -- This triggers the Thing.__newindex metamethod above.
-  module[name] = default
+
+  -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thing.isValid()
+  if new then thing.module[name] = thing.default end
 end
 
 --[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.

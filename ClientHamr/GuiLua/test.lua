@@ -87,7 +87,10 @@ print(skang.isBoolean('Nope'))
 print(skang.isBoolean(function (a) return false end))
 print('')
 
+-- Make it required, even though it was anyway.
+skang.thing{'f', required = true}
 -- First, disable the default value, so we see "is required" errors.
+-- Coz using the above syntax means that default is never passed to skang.thing, since it's nil.
 skang.things.f.default = nil
 test.fooble = 42
 test.fooble = 'Should fail.'
