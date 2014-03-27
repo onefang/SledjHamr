@@ -266,7 +266,7 @@ __newindex could catch a table being assigned - test.foo = {widget = '...', acl=
       foo has to be a table value though, with a metatable
       and the rest of skang is treating test.foo as a nil value so that __index and __newindex work.  B-(
     test itself is a table, so all is not lost -
-      test{'foo', widget='...', acl='..'}  ->  __call(test, {'foo', ...})
+      test{'foo', widget='...', acl='..'}  ->  __call(test, {'foo', ...})  ->  skang.thing{'foo', ...}
       which would assign stuff to skang.things.foo.widget and skang.things.foo.acl
       as opposed to -
       skang.things.foo = {widget='...', acl='...'}
