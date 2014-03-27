@@ -4,7 +4,7 @@ do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
-#!skang test.skang     -- This is Lua, so this might not work.
+#!/usr/bin/env skang     -- Lua allows this shell hack.
 
 -- There's an implied local this = require 'test'
 -- There's an implied local skang = require 'skang'
