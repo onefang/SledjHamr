@@ -1,5 +1,16 @@
 /* Should be a Lua skang module, roughly the same as test.lua
 
+
+Seems to be several problems with linking in various OSes, heres some
+possibly helpful links -
+
+http://lua.2524044.n2.nabble.com/C-Lua-modules-not-compatible-with-every-Lua-interpreter-td7647522.html
+http://lua-users.org/wiki/LuaProxyDllFour
+http://stackoverflow.com/questions/11492194/how-do-you-create-a-lua-plugin-that-calls-the-c-lua-api?rq=1
+http://lua-users.org/lists/lua-l/2008-01/msg00671.html
+
+
+
 */
 
 

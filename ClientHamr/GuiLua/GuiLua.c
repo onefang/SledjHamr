@@ -77,6 +77,9 @@ The pre tokenized widget structure thingy I had planned in the
 matrix-RAD TODO just wont work, as it uses symbols.  On the other hand,
 we will be using Lua tables anyway.  B-)
 
+The last half of http://passingcuriosity.com/2009/extending-lua-in-c/
+might be of use.
+
 */
 
 

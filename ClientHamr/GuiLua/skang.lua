@@ -143,6 +143,7 @@ end
 moduleEnd = function (module)
   -- TODO - Look for _NAME.properties, and load it into the modules Things.
   -- TODO - Parse command line parameters at some point.
+  --        http://stackoverflow.com/questions/3745047/help-locate-c-sample-code-to-read-lua-command-line-arguments
   setfenv(2, module.savedEnvironment)
 end
 
