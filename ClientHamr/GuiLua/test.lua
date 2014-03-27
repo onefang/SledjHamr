@@ -49,8 +49,6 @@ local skang = require 'skang'
 local test = require 'test'
 local test_c = require 'test_c'
 
-print('MODULE ' .. test._NAME .. ', ' .. test.COPYRIGHT .. ' Version: ' .. test.VERSION .. '\n' .. test.VERSION_DESC .. '\n')
-
 print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
 test.ffunc('one', 2)

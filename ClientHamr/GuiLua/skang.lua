@@ -136,6 +136,8 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
 
+  print('Loaded module ' .. _M._NAME .. ' version ' .. _M.VERSION .. ', ' .. _M.COPYRIGHT .. '.\n  ' .. _M.VERSION_DESC)
+
   return _M
 end
 
@@ -149,7 +151,7 @@ end
 
 -- Call this now so that from now on, this is like any other module.
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
-print('Skang loaded, running under Lua version ' .. _VERSION)
+print('Skang is running under Lua version ' .. _VERSION)
 
 
 csv2table = function (csv)
