@@ -19,4 +19,7 @@ hyphen and the bit before it.
 
 Though it seems that chapter 26 is not in the same place?
 
+http://www.lua.org/pil/26.2.html  doesn't say much really, and is for
+Lua 5.0
+
 */
