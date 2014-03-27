@@ -1,78 +1,79 @@
-/* Should be a Lua module, roughly the same as test.lua
+/* Should be a Lua skang module, roughly the same as test.lua
 
 */
 
 
-
-/* NOTES -
-
-From http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
-
-"Well-behaved C libraries should export one function called
-luaopen_modname, which is the function that require tries to call after
-linking the library.  In Section 26.2 we will discuss how to write C
-libraries."
-
-The "modname" bit is replaced by the name of the module.  Though if the
-module name includes a hyphen, the "require" function strips out the
-hyphen and the bit before it.
-
-Though it seems that chapter 26 is not in the same place?
-
-http://www.lua.org/pil/26.2.html  doesn't say much really, and is for
-Lua 5.0
-
-
-
-An example -
-
-// build@ gcc -shared -I/home/sdonovan/lua/include -o mylib.so mylib.c
-// includes for your code
-#include <string.h>
-#include <math.h>
-
-// includes for Lua
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
+//#include <lualib.h>
 
-// defining functions callable from Lua
-static int l_createtable (lua_State *L) {
-  int narr = luaL_optint(L,1,0);         // initial array slots, default 0
-  int nrec = luaL_optint(L,2,0);   // intialof hash slots, default 0
-  lua_createtable(L,narr,nrec);
-  return 1;
+
+static int ffunc (lua_State *L)
+{
+  double arg1 = luaL_checknumber(L, 1);
+  const char *arg2 = luaL_checkstring(L, 2);
+
+  printf("Inside test_c.ffunc(%f, %s)\n", arg1, arg2);
+  return 0;
 }
 
-static int l_solve (lua_State *L) {
-    double a = lua_tonumber(L,1);  // coeff of x*x
-    double b = lua_tonumber(L,2);  // coef of x
-    double c = lua_tonumber(L,3);  // constant
-    double abc = b*b - 4*a*c;
-    if (abc < 0.0) {
-        lua_pushnil(L);
-        lua_pushstring(L,"imaginary roots!");
-        return 2;
-    } else {
-        abc = sqrt(abc);
-        a = 2*a;
-        lua_pushnumber(L,(-b + abc)/a);
-        lua_pushnumber(L,(+b - abc)/a);
-        return 2;
-    }
-}
 
-static const luaL_reg mylib[] = {
-    {"createtable",l_createtable},
-    {"solve",l_solve},
-    {NULL,NULL}
+static const struct luaL_reg test_c [] =
+{
+  {"ffunc", ffunc},
+  {NULL, NULL}
 };
 
-int luaopen_mylib(lua_State *L)
-{
-    luaL_register (L, "mylib", mylib);
-    return 1;
-}
 
+/* local test_c = require 'test_c'
+
+Lua's require() function will strip any stuff from the front of the name
+separated by a hypen, so 'GuiLua-test_c' -> 'test_c'.  Then it will
+search through a path, and eventually find this test_c.so (or test_c.dll
+or whatever), then call luaopen_test_c(), which should return a table.
+
+Normally luaL_register() creates a table of functions, that is the table
+returned, but we want to do something different with skang.
 
 */
+int luaopen_test_c(lua_State *L)
+{
+// This is a moving target, old ways get deperecated, new ways get added, 
+// would have to check version before doing any of these.
+//  luaL_openlib(L, "test_c", test_c, 0);		// Lua 5.0 way.
+//  luaL_register (L, "test_c", test_c);		// Lua 5.1 way.
+//  luaL_newlib() or luaL_setfuncs()			// Lua 5.2 way.
+    // Creates a global table "test_c", does the package.loaded[test_c] thing.
+  lua_newtable(L);
+  luaL_register (L, NULL, test_c);		// Lua 5.1 way.
+  // Puts the funcions in a table on top of the stack.
+
+/* BUT REALLY ...
+
+We are in fact NOT putting any functions into the returned table.
+
+skang.moduleBegin() returns the table we need to send back to Lua.
+    it saves getfenv(2) as the old environment, which should in theory be L
+    and setfenv(_M, 2) to set the tbale to be it's own environment
+    it does the package.loaded[test_c] thing for us
+    it returns the table it created, so we should just leave that on the stack as our result
+
+skang.thing() also uses getfenv(2) to grab the module's table
+
+*/
+
+/* TODO - load skang, create things, etc.
+
+local skang = require "skang"
+local _M = skang.moduleBegin("test_c", nil, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00")
+
+skang.thing("fooble,f", "Help text goes here", 1, "number", "'edit', 'The fooble:', 1, 1, 10, 50", true)
+skang.thing("bar", "Help text", "Default")
+skang.thing("foo")
+skang.thing("ffunc", "Help Text", ffunc, "number,string")
+
+skang.moduleEnd(_M)
+
+*/
+  return 1;
+}

@@ -35,7 +35,7 @@ skang.thing('foo')
 
 -- We can use inline functions if we don't need the function internally.
 skang.thing('ffunc', 'Help Text', function (arg1, arg2)
-  print('Inside test.ffunc ' .. arg1 .. ', ' .. arg2)
+  print('Inside test.ffunc(' .. arg1 .. ', ' .. arg2 .. ')')
 end, 'number,string')
 
 print('Ending soon')
@@ -47,12 +47,14 @@ end
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
+local test_c = require 'test_c'
 
 print('MODULE ' .. test._NAME .. ', ' .. test.COPYRIGHT .. ' Version: ' .. test.VERSION .. '\n' .. test.VERSION_DESC .. '\n')
 
 print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
 test.ffunc('one', 2)
+test_c.ffunc(0, 'zero')
 --skang.things.ffunc('seven', 'aight')
 print('')
 

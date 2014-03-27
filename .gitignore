@@ -310,6 +310,7 @@
 *.backup
 *.edj
 *.o
+*.so
 *.out
 *.output
 *.diff
