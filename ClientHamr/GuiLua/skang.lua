@@ -151,6 +151,19 @@ end
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
 print('Skang loaded, running under Lua version ' .. _VERSION)
 
+
+csv2table = function (csv)
+  local result = {}
+  local i = 1
+
+  for v in string.gmatch(csv, ' *([^,]+)') do
+    result[i] = v
+    i = i + 1
+  end
+  return result
+end
+
+
 -- My clever boolean check, this is the third language I've written this in.  B-)
 -- true   1 yes ack  ok   one  positive absolutely affirmative  'ah ha' 'shit yeah' 'why not'
 local isTrue  = 't1aopswy'
