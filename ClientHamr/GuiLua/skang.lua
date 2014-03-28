@@ -254,31 +254,60 @@ Other Thing things are -
 ]]
 
 
---[[ TODO - Users might want to use two or more copies of this module.  Keep that in mind.  local a = require 'test', b = require 'test' might handle that though?
-    Not unless skang.thing() knows about a and b, which it wont.
-    Both a and b get the same table, not different copies of it.
-    Perhaps clone the table if it exists?  Only clone the parameters, the rest can be linked back to the original.
-    Then we have to deal with widgets linking to specific clones.
-    Actually, not sure matrix-RAD solved that either.  lol
-]]
+--[[ TODO
+  NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
---[[  ideas
-__newindex could catch a table being assigned - test.foo = {widget = '...', acl='...'}
-    though that interferes with using tables for Stuff
-      test.someStuff = {key='blah', field0='something', field1=1, ...}
-      test.someStuff.key
-    happily Lua function call syntax supports test.foo{ ... } as a function call with a table argument.  B-)
-    so maybe a use for __call after all, if the argument is that table
-    the table itself is passed to __call as the first argument, the rest of the arguments follow.
-    test.foo(1, 'two')  ->  __call(foo, 1, 'two')
-      foo has to be a table value though, with a metatable
-      and the rest of skang is treating test.foo as a nil value so that __index and __newindex work.  B-(
-    test itself is a table, so all is not lost -
-      test{'foo', widget='...', acl='..'}  ->  __call(test, {'foo', ...})  ->  skang.thing{'foo', ...}
-      which would assign stuff to skang.things.foo.widget and skang.things.foo.acl
-      as opposed to -
-      skang.things.foo = {widget='...', acl='...'}
-      which blanks out the other stuff.
+  Multiple copies of modules -
+    skang.new(test, 'pre')
+      local result = {}
+      setmetatable(result, test)
+      result.pre = 'pre'
+      -- loop through the Things in test
+      -- Will have to be a deeper copy if it's a Stuff.
+        skang.things['pre' .. '_' .. 'foo'] = skang.things.foo
+        skang.things['pre' .. '_' .. 'foo'].module = result
+      return result
+    end
+
+    __index
+      local aKey = key
+      if table.pre then aKey = table.pre .. '_' .. key end
+      local thing = things[aKey]
+      ...
+      -- Then see if we can inherit it from Thing.
+      thing = Thing[key]
+
+
+    __newindex
+      local aKey = key
+      if table.pre then aKey = table.pre .. '_' .. key end
+      local thing = things[aKey]
+      ...
+
+    skang.things.foo.value
+    skang.things.pre_foo.value
+
+  Stuff -
+      test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
+      test{'foo', bar='...', baz='..'}  ->  __call(test, {'foo', ...})  ->  skang.stuff{'foo', ...}
+    What we really want though is something like (if foo is defined as a table) -
+      ->  skang.things.foo.value = {key='blah', field0='something', field1=1, ...}
+    or even (if foo is defined as a Stuff) -
+      ->  skang.things.foo.value[blah] = {key = 'blah', field0='something', field1=1, ...}
+    Stuff is kinda rigid though, it's fields are fixed, not an everything goes Lua table.  So it needs to be defined.
+    Reusing Thing semantics, with aliases.
+    Also, let's NOT mix skang.thing{} semantics with test{} semantics, make it a different function.
+    Then we can avoid conflicts with Thing.* names, and having to sort out where to put things.
+      skang.thing{'foo', stuff={{'key', 'The Stuff key', types='string', required=true},
+                                {'field0,b' ... other Thing like stuff ... acl=''},
+                                {'field1', 'field1 is a stufflet', 42, 'number'}} }
+      skang.thing('foo', stuff=someOtherThing)
+      skang.thing('foo', stuff=skang.new(someOtherThing, 'pre'))
+      skang.things.foo.things.field0
+      skang.things.foo.things.field1
+      test.foo[blah].field1
+
+  Widgets -
     Use generic positional / named arguments for widget to, then we can do -
       widget.button{'Cancel', 0.5, 0.5, 1, 0, look='cancel.edj', colour={1, 2, 3, 4}, action='...'}
     Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
@@ -314,6 +343,7 @@ Thing.hasCrashed = 0		-- How many times this Thing has crashed.
 Thing.append = function (self,data)	-- Append to the value of this Thing.
 end
 
+Thing.things = {}		-- The sub things this Thing has, for modules and Stuff.
 Thing.errors = {}		-- A list of errors returned by isValid().
 
 Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
