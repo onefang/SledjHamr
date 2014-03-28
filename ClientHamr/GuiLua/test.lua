@@ -49,10 +49,11 @@ local skang = require 'skang'
 local test = require 'test'
 local test_c = require 'test_c'
 
-print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
+print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
+print('cfunc  ->> ' .. skang.things.cfunc.help)
 test.ffunc('one', 2)
-test_c.ffunc(0, 'zero')
+test_c.cfunc(0, 'zero')
 --skang.things.ffunc('seven', 'aight')
 print('')
 

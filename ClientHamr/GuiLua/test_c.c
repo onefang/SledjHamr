@@ -8,9 +8,6 @@ http://lua.2524044.n2.nabble.com/C-Lua-modules-not-compatible-with-every-Lua-int
 http://lua-users.org/wiki/LuaProxyDllFour
 http://stackoverflow.com/questions/11492194/how-do-you-create-a-lua-plugin-that-calls-the-c-lua-api?rq=1
 http://lua-users.org/lists/lua-l/2008-01/msg00671.html
-
-
-
 */
 
 
@@ -19,72 +16,160 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 //#include <lualib.h>
 
 
-static int ffunc (lua_State *L)
+static const char *ourName = "test_c";
+int skang, _M;
+
+static int cfunc (lua_State *L)
 {
   double arg1 = luaL_checknumber(L, 1);
   const char *arg2 = luaL_checkstring(L, 2);
 
-  printf("Inside test_c.ffunc(%f, %s)\n", arg1, arg2);
+  printf("Inside %s.cfunc(%f, %s)\n", ourName, arg1, arg2);
   return 0;
 }
 
 
-static const struct luaL_reg test_c [] =
+static void dumpStack(lua_State *L, int i)
 {
-  {"ffunc", ffunc},
-  {NULL, NULL}
-};
+  int type = lua_type(L, i);
 
+  switch (type)
+  {
+    case LUA_TNONE		:  printf("Stack %d is empty\n", i);  break;
+    case LUA_TNIL		:  printf("Stack %d is a nil\n", i);  break;
+    case LUA_TBOOLEAN		:  printf("Stack %d is a boolean\n", i);  break;
+    case LUA_TNUMBER		:  printf("Stack %d is a number\n", i);  break;
+    case LUA_TSTRING		:  printf("Stack %d is a string - %s\n", i, lua_tostring(L, i));  break;
+    case LUA_TFUNCTION		:  printf("Stack %d is a function\n", i);  break;
+    case LUA_TTHREAD		:  printf("Stack %d is a thread\n", i);  break;
+    case LUA_TTABLE		:  printf("Stack %d is a table\n", i);  break;
+    case LUA_TUSERDATA		:  printf("Stack %d is a userdata\n", i);  break;
+    case LUA_TLIGHTUSERDATA	:  printf("Stack %d is a light userdata\n", i);  break;
+    default			:  printf("Stack %d is unknown\n", i);  break;
+  }
+}
 
 /* local test_c = require 'test_c'
 
 Lua's require() function will strip any stuff from the front of the name
-separated by a hypen, so 'GuiLua-test_c' -> 'test_c'.  Then it will
+separated by a hyphen, so 'GuiLua-test_c' -> 'test_c'.  Then it will
 search through a path, and eventually find this test_c.so (or test_c.dll
-or whatever), then call luaopen_test_c(), which should return a table.
+or whatever), then call luaopen_test_c(), which should return a table. 
+The argument (only thing on the stack) for this function will be
+'test_c'.
 
 Normally luaL_register() creates a table of functions, that is the table
 returned, but we want to do something different with skang.
-
 */
 int luaopen_test_c(lua_State *L)
 {
-// This is a moving target, old ways get deperecated, new ways get added, 
-// would have to check version before doing any of these.
-//  luaL_openlib(L, "test_c", test_c, 0);		// Lua 5.0 way.
-//  luaL_register (L, "test_c", test_c);		// Lua 5.1 way.
-//  luaL_newlib() or luaL_setfuncs()			// Lua 5.2 way.
-    // Creates a global table "test_c", does the package.loaded[test_c] thing.
-  lua_newtable(L);
-  luaL_register (L, NULL, test_c);		// Lua 5.1 way.
-  // Puts the funcions in a table on top of the stack.
 
-/* BUT REALLY ...
+  // In theory, the only thing on the stack now is 'test_c' from the require() call.
 
-We are in fact NOT putting any functions into the returned table.
+// pseudo-indices, special tables that can be accessed like the stack -
+//    LUA_GLOBALSINDEX - thread environment, where globals are
+//    LUA_ENVIRONINDEX - C function environment, in this case luaopen_test_c() is the C function
+//    LUA_REGISTRYINDEX - C registry, global, for unique keys use the module name as a string, or a lightuserdata address to a C object in our module.
+//    lua_upvalueindex(n) - C function upvalues
 
-skang.moduleBegin() returns the table we need to send back to Lua.
-    it saves getfenv(2) as the old environment, which should in theory be L
-    and setfenv(_M, 2) to set the tbale to be it's own environment
-    it does the package.loaded[test_c] thing for us
-    it returns the table it created, so we should just leave that on the stack as our result
+// The only locals we care about are skang and _M.
+// All modules go into package.loaded[name] as well.
+// skang is essentially a global anyway.
+// _M we pass back as the result, and our functions get added to it by skang.thing()
+//   Not entirely true, skang.things is a proxy table, skang.things.ffunc.func would be our function.
+//   skang.things.ffunc.module is our _M ('environment of our calling function', so that's the 'environment' right here, since we call skang.thing().
+// test_c.ffunc()  ->  test_c.__index(test_c, 'ffunc')  ->  skang.things[ffunc].value()  ->  test_c.c->ffunc()
+//                                                          this is a C function, not a Lua function
 
-skang.thing() also uses getfenv(2) to grab the module's table
+// local skang = require 'skang'
+  lua_getglobal(L, "require");
+  lua_pushstring(L, "skang");
+  lua_call(L, 1, 1);
+  skang = lua_gettop(L);
+//  dumpStack(L, skang);
 
+// local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, true)
+  lua_getfield(L, skang, "moduleBegin");
+  lua_pushstring(L, ourName);
+  lua_pushnil(L);				// Author comes from copyright.
+  lua_pushstring(L, "Copyright 2014 David Seikel");
+  lua_pushstring(L, "0.1");
+  lua_pushstring(L, "2014-03-27 03:57:00");
+  lua_pushnil(L);				// No skin.
+  lua_pushboolean(L, 0);			// We are not a Lua module.
+  lua_call(L, 7, 1);				// call 'skang.moduleBegin' with 7 arguments and 1 result.
+  _M = lua_gettop(L);
+//  dumpStack(L, _M);
+
+  // At this point the stack should be - 'test_c', skang, _M.  Let's test that.
+/*
+  int top = 0, i;
+
+  top = lua_gettop(L);
+  printf("MODULE test_c has %d stack items.\n", top);
+  for (i = 1; i <= top; i++)
+    dumpStack(L, i);
 */
 
-/* TODO - load skang, create things, etc.
+  // Save this module in the C registry.
+  lua_setfield(L, LUA_REGISTRYINDEX, ourName);
 
-local skang = require "skang"
-local _M = skang.moduleBegin("test_c", nil, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00")
+// skang.thing('cfooble,c', 'Help text goes here', 1, 'number', \"'edit', 'The fooble:', 1, 1, 10, 50\", true)
+  lua_getfield(L, skang, "thing");
+  lua_pushstring(L, "cfooble,c");
+  lua_pushstring(L, "Help text");
+  lua_pushnumber(L, 1);
+  lua_pushstring(L, "number");
+  lua_pushstring(L, "'edit', 'The cfooble:', 1, 1, 10, 50");
+  lua_pushboolean(L, 1);			// Is required.
+  lua_pushnil(L);				// Default ACL.
+  lua_pushnil(L);				// No boss.
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
+  lua_call(L, 9, 0);
 
-skang.thing("fooble,f", "Help text goes here", 1, "number", "'edit', 'The fooble:', 1, 1, 10, 50", true)
-skang.thing("bar", "Help text", "Default")
-skang.thing("foo")
-skang.thing("ffunc", "Help Text", ffunc, "number,string")
+// skang.thing('cbar', 'Help text', 'Default')
+  lua_getfield(L, skang, "thing");
+  lua_pushstring(L, "cbar");
+  lua_pushstring(L, "Help text");
+  lua_pushstring(L, "Default");
+  lua_pushnil(L);				// No type.
+  lua_pushnil(L);				// No widget.
+  lua_pushnil(L);				// Not required.
+  lua_pushnil(L);				// Default ACL.
+  lua_pushnil(L);				// No boss.
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
+  lua_call(L, 9, 0);
 
-skang.moduleEnd(_M)
+// skang.thing('cfoo')
+  lua_getfield(L, skang, "thing");
+  lua_pushstring(L, "cfoo");
+  lua_pushnil(L);				// No help.
+  lua_pushnil(L);				// No default.
+  lua_pushnil(L);				// No type.
+  lua_pushnil(L);				// No widget.
+  lua_pushnil(L);				// Not required.
+  lua_pushnil(L);				// Default ACL.
+  lua_pushnil(L);				// No boss.
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
+  lua_call(L, 9, 0);
 
-*/
+// skang.thing('cfunc', 'Help Text', ffunc, 'number,string')
+  lua_getfield(L, skang, "thing");
+  lua_pushstring(L, "cfunc");
+  lua_pushstring(L, "cfunc does nothing really");
+  lua_pushcfunction(L, cfunc);
+  lua_pushstring(L, "number,string");
+  lua_pushnil(L);				// No widget.
+  lua_pushnil(L);				// Not required.
+  lua_pushnil(L);				// Default ACL.
+  lua_pushnil(L);				// No boss.
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
+  lua_call(L, 9, 0);
+
+// skang.moduleEnd(_M)
+  lua_getfield(L, skang, "moduleEnd");
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
+  lua_call(L, 1, 1);
+
   return 1;
 }

@@ -77,9 +77,11 @@ local versions = {
 
 -- Trying to capture best practices here for creating modules, especially since module() is broken and deprecated.
 -- TODO - Should parse in license type to.
-moduleBegin = function (name, author, copyright, version, timestamp, skin)
+moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua)
   local _M = {}	-- This is what we return to require().
   local level = 2
+
+  if 'nil' == type(isLua) then isLua = true end
 
   package.loaded[name] = _M	-- Stuff the result into where require() can find it, instead of returning it at the end.
 			-- Returning it at the end does the same thing.
@@ -102,6 +104,7 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
   _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
   _M._NAME = name
   _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
+  _M.isLua = isLua
 
   -- Parse in an entire copyright message, and strip that down into bits, to put back together.
   local date, owner = string.match(copyright, '[Cc]opyright (%d%d%d%d) (.*)')
@@ -129,12 +132,15 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin)
 
   setmetatable(_M, Thing)
   _M.savedEnvironment = savedEnvironment
-  -- setfenv() sets the environment for the FUNCTION, stack level deep.
-  -- The number is the stack level -
-  --   0 running thread, 1 current function, 2 function that called this function, etc
-  setfenv(level, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
+  -- NOTE - setfenv() wont work if the environment it refers to is a C function.  Worse, getfenv() returns the global environment, so we can't tell.
+  if isLua then
+    -- setfenv() sets the environment for the FUNCTION, stack level deep.
+    -- The number is the stack level -
+    --   0 running thread, 1 current function, 2 function that called this function, etc
+    setfenv(level, _M)	-- Use the result for the modules internal global environment, so they don't need to qualify internal names.
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
+  end
 
   print('Loaded module ' .. _M._NAME .. ' version ' .. _M.VERSION .. ', ' .. _M.COPYRIGHT .. '.\n  ' .. _M.VERSION_DESC)
 
@@ -146,7 +152,7 @@ moduleEnd = function (module)
   -- TODO - Look for _NAME.properties, and load it into the modules Things.
   -- TODO - Parse command line parameters at some point.
   --        http://stackoverflow.com/questions/3745047/help-locate-c-sample-code-to-read-lua-command-line-arguments
-  setfenv(2, module.savedEnvironment)
+  if module.isLua then setfenv(2, module.savedEnvironment) end
 end
 
 -- Call this now so that from now on, this is like any other module.
@@ -424,6 +430,7 @@ thing = function (names, ...)
   thing.required	= params[5] or thing.required
   thing.acl		= params[6] or thing.acl
   thing.boss		= params[7] or thing.boss
+  thing.module		= params[8] or thing.module	-- Mostly for things like C functions, where get/setfenv() wont do what we need.
 
   -- PUll out named arguments.
   for k, v in pairs(params) do
