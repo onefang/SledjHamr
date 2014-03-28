@@ -273,6 +273,8 @@ __newindex could catch a table being assigned - test.foo = {widget = '...', acl=
       which blanks out the other stuff.
     Use generic positional / named arguments for widget to, then we can do -
       widget.button{'Cancel', 0.5, 0.5, 1, 0, look='cancel.edj', colour={1, 2, 3, 4}, action='...'}
+    Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
+      widget.button{'Cancel', 0.5, 0.5, 1, 0, l='cancel.edj', c={b=20}, a='...'}
 ]]
 
 -- Default things values.
