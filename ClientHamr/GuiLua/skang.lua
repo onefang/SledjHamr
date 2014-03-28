@@ -257,6 +257,7 @@ Other Thing things are -
 --[[ TODO
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
+
   Multiple copies of modules -
     skang.new(test, 'pre')
       local result = {}
@@ -287,6 +288,7 @@ Other Thing things are -
     skang.things.foo.value
     skang.things.pre_foo.value
 
+
   Stuff -
       test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
       test{'foo', bar='...', baz='..'}  ->  __call(test, {'foo', ...})  ->  skang.stuff{'foo', ...}
@@ -307,11 +309,29 @@ Other Thing things are -
       skang.things.foo.things.field1
       test.foo[blah].field1
 
-  Widgets -
-    Use generic positional / named arguments for widget to, then we can do -
-      widget.button{'Cancel', 0.5, 0.5, 1, 0, look='cancel.edj', colour={1, 2, 3, 4}, action='...'}
-    Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
-      widget.button{'Cancel', 0.5, 0.5, 1, 0, l='cancel.edj', c={b=20}, a='...'}
+
+  Widget -
+    Merging widgets might work to.  B-)
+    This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
+
+    Widgets get a type as well, which would be label, button, edit, grid, etc.
+    A grid could even have sub types - grid,number,string,button,date.  B-)
+    A required widget might mean that the window HAS to have one.
+    Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'.
+
+	skang.thing('foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, '', '"button", "The foo :"' 1, 1, 10, 50')
+	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
+	myButton:colour(1, 2, 3, 4)
+	-- Use generic positional / named arguments for widget to, then we can do -
+	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, look='edit.edj', colour={blue=20}, action='...'}
+	-- Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
+	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, l='edit.edj', c={b=20}, a='...'}
+	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
+	myButton = 'Not default'	-- myEditor and foo change to.  Though now foo is a command, not a parameter, so maybe don't change that.
+	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
+	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
+	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+	quitter:action('quit')
 ]]
 
 -- Default things values.
@@ -500,33 +520,6 @@ thing = function (names, ...)
   -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thing.isValid()
   if new then thing.module[name] = thing.default end
 end
-
---[[ TODO - It might be worth it to combine parameters and commands, since in Lua, functions are first class types like numbers and strings.
-        Merging widgets might work to.  B-)
-	This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
-
-        Parameter gets a type, which might help since Lua is untyped, versus Java being strongly typed.
-        Widgets get a type as well, which would be label, button, edit, grid, etc.
-	    A grid could even have sub types - grid,number,string,button,date.  B-)
-
-	Required commands makes no sense, but can just be ignored.
-	A required widget might mean that the window HAS to have one.
-
-	Default for a command would be the actual function.
-	Default being a function makes this Thing a command.
-	Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'
-
-	skang.thing(_M, 'foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, nil, '"button", "The foo :"' 1, 1, 10, 50')
-	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
-	myButton:colour(1, 2, 3, 4)
-	myEditor = skang.widget('foo', "edit", "Edit foo :", 5, 15, 10, 100)
-	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
-	myButton = 'Not default'	-- myEditor and _M.foo change to.  Though now _M.foo is a command, not a parameter, so maybe don't change that.
-	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
-	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
-	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
-	quitter:action('quit')
-]]
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.
