@@ -434,7 +434,7 @@ thing = function (names, ...)
   thing.boss		= params[7] or thing.boss
   thing.module		= params[8] or thing.module	-- Mostly for things like C functions, where get/setfenv() wont do what we need.
 
-  -- PUll out named arguments.
+  -- Pull out named arguments.
   for k, v in pairs(params) do
     if 'string' == type(k) then
       if     'types' == k then types = v
