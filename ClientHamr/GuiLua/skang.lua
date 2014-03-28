@@ -489,9 +489,11 @@ thing = function (names, ...)
 
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
+    thing.things[v] = nil
     things[v] = nil
   end
   for i, v in ipairs(thing.names) do
+    thing.things[v] = thing
     things[v] = thing
   end
 
