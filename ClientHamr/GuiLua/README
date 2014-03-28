@@ -388,6 +388,15 @@ that has hard coded mappings between some basic "label", "button", etc.
 and ordinary elementary widgets.  Proper introspection can come later.
 
 
+LuaJIT FFI notes
+----------------
+
+LuaJIT 2.0 FFI needs to have cleaned up versions of C header files
+included in the Lua scripts that use it.  This is messy.  Version 2.1
+(or perhaps 3.0) has on it's road map to include a C pre processor,
+which should help that problem.
+
+
 EO notes
 --------
 

@@ -157,6 +157,8 @@ end
 
 -- Call this now so that from now on, this is like any other module.
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
+-- TODO - While it is possible to get LuaJIT version info, need to load the 'jit' module, which wont work so well if we are not in LuaJIT.
+--        local jit = require 'jit';  jit.version;  jit.version_num;  jit.os;  jit.arch
 print('Skang is running under Lua version ' .. _VERSION)
 
 
@@ -685,3 +687,4 @@ access to the module.
 -- Gotta check out this _ENV thing, 5.2 only.  Seems to replace the need for setfenv().  Seems like setfenv should do what we want, and is more backward compatible.
 --   "_ENV is not supported directly in 5.1, so its use can prevent a module from remaining compatible with 5.1.
 --   Maybe you can simulate _ENV with setfenv and trapping gets/sets to it via __index/__newindex metamethods, or just avoid _ENV."
+--   LuaJIT doesn't support _ENV anyway.

@@ -114,6 +114,9 @@ int luaopen_test_c(lua_State *L)
   // Save this module in the C registry.
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
 
+// TODO - This is too verbose.  I've had an idea for writing some sort of generic wrapper, though others have done the same.
+//          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
+
 // skang.thing('cfooble,c', 'Help text goes here', 1, 'number', \"'edit', 'The fooble:', 1, 1, 10, 50\", true)
   lua_getfield(L, skang, "thing");
   lua_pushstring(L, "cfooble,c");
