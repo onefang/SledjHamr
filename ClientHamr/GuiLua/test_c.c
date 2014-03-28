@@ -1,5 +1,7 @@
 /* Should be a Lua skang module, roughly the same as test.lua
 
+TODO - see if this still works if it's an app instead of a library.
+
 
 Seems to be several problems with linking in various OSes, heres some
 possibly helpful links -
