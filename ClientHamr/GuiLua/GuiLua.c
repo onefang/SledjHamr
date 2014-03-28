@@ -62,7 +62,7 @@ Somehow access to the edje_lua2.c bindings should be provided.  And
 bindings to the rest of EFL when they are done.  Assuming the other EFL
 developers do proper introspection stuff, or let me do it.
 
-The generic Lua binding helper functions I wrote for edje?lua2.c could
+The generic Lua binding helper functions I wrote for edje_lua2.c could
 be used here as well, and expanded as discussed on the E devs mailing
 list.  This would include the thread safe Lua function stuff copied
 into the README.
