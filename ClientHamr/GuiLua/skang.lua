@@ -418,8 +418,8 @@ Thing.isValid = function (self, module)	-- Check if this Thing is valid, return 
   -- Anything that overrides this method, should call this super method first.
   local name = self.names[1]
   local modThing = getmetatable(module)
-  local thing = modThing.__stuff[name]
-  local key = thing.names[1];
+  local thingy = modThing.__stuff[name]
+  local key = thingy.names[1];
   local value = modThing.__values[key]
 
   local t = type(value)
@@ -448,26 +448,23 @@ Thing.__index = function (module, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   --        Ah, it was doing isValid() on setStufflet().
-  -- TODO - Call thing.func() if it exists.
+  -- TODO - Call thingy.func() if it exists.
 
   -- First see if this is a Thing.
   local modThing = getmetatable(module)
+  local thingy
 
   if modThing then
-    local thing = modThing.__stuff[key]
-
-    if thing then
-      local name = thing.names[1];
-      return modThing.__values[name] or thing.__stuff[name].default
+    thingy = modThing.__stuff[key]
+    if thingy then
+      local name = thingy.names[1];
+      return modThing.__values[name] or thingy.default
     end
   end
 
   -- Then see if we can inherit it from Thing.
-  thing = Thing[key]
-  if thing then return thing end
-
-  -- If all else fails, return nil.
-  return nil
+  thingy = Thing[key]
+  return thingy
 end
 
 Thing.__newindex = function (module, key, value)
@@ -476,20 +473,21 @@ Thing.__newindex = function (module, key, value)
 
   if modThing then
     -- This is a proxy table, the values never exist in the real table.
-    local thing = modThing.__stuff[key]
-    local name = thing.names[1]
-    modThing.__values[name] = value
-    if 'function' == type(value) then
-      thing.func = value
-      local types = ''
-    else
-      -- NOTE - invalid values are still stored, this is by design.
-      if not thing:isValid(module) then
-	for i, v in ipairs(thing.errors) do
-	  print('ERROR - ' .. v)
-	end
+    local thingy = modThing.__stuff[key]
+    if thingy then
+      local name = thingy.names[1]
+      modThing.__values[name] = value
+      if 'function' == type(value) then
+        thingy.func = value
+      else
+        -- NOTE - invalid values are still stored, this is by design.
+        if not thingy:isValid(module) then
+	  for i, v in ipairs(thingy.errors) do
+	    print('ERROR - ' .. v)
+	  end
+        end
+        -- TODO - Go through it's linked things and set them to.
       end
-      -- TODO - Go through it's linked things and set them to.
     end
   else
     rawset(module, key, value)		-- Stuff it normally.
@@ -538,77 +536,76 @@ thing = function (names, ...)
       modThing[k] = modThing[k] or v
     end
   end
-  local thing = modThing.__stuff[name]
-  if not thing then	-- This is a new Thing.
+
+  local thingy = modThing.__stuff[name]
+  if not thingy then	-- This is a new Thing.
     new = true
-    thing = {}
-    -- Grab the environment of the calling function, so this new thing automatically becomes a global in it.
-    thing.module = module
-    thing.names = names
-    setmetatable(thing, {__index = Thing})
+    thingy = {}
+    thingy.module = module
+    thingy.names = names
+    setmetatable(thingy, {__index = Thing})
   end
 
   -- Pull out positional arguments.
-  thing.help		= params[1] or thing.help
-  thing.default		= params[2] or thing.default
-  local types		= params[3] or table.concat(thing.types or {}, ',')
-  thing.widget		= params[4] or thing.widget
-  thing.required	= params[5] or thing.required
-  thing.acl		= params[6] or thing.acl
-  thing.boss		= params[7] or thing.boss
+  thingy.help		= params[1] or thingy.help
+  thingy.default	= params[2] or thingy.default
+  local types		= params[3] or table.concat(thingy.types or {}, ',')
+  thingy.widget		= params[4] or thingy.widget
+  thingy.required	= params[5] or thingy.required
+  thingy.acl		= params[6] or thingy.acl
+  thingy.boss		= params[7] or thingy.boss
 
   -- Pull out named arguments.
   for k, v in pairs(params) do
     if 'string' == type(k) then
       if     'types' == k then types = v
       elseif 'names' == k then
-        oldNames = thing.names
-        thing.names = cvs2table(v)
-      else                  thing[k] = v
+        oldNames = thingy.names
+        thingy.names = cvs2table(v)
+      else                  thingy[k] = v
       end
     end
   end
 
-  thing.required = isBoolean(thing.required)
+  thingy.required = isBoolean(thingy.required)
 
   -- Find type, default to string, then break out the other types.
-  local typ = type(thing.default)
+  local typ = type(thingy.default)
   if 'nil' == typ then typ = 'string' end
-  thing.types = {}
   if types then types = typ .. ',' .. types else types = typ end
-  thing.types = csv2table(types)
+  thingy.types = csv2table(types)
 
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
     modThing.__stuff[v] = nil
   end
-  for i, v in ipairs(thing.names) do
-    modThing.__stuff[v] = thing
+  for i, v in ipairs(thingy.names) do
+    modThing.__stuff[v] = thingy
   end
 
-  -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thing.isValid()
-  if new then module[name] = thing.default end
+  -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thingy.isValid()
+  if new then module[name] = thingy.default end
 end
 
 
 copy = function (module, name)
   local result = {}
-  local thing = {}
+  local thingy = {}
   local modThing = getmetatable(module)
 
   for k, v in pairs(Thing) do
-    thing[k] = v
+    thingy[k] = v
   end
 
-  thing.__values = {}
+  thingy.__values = {}
   for k, v in pairs(modThing.__values) do
-    thing.__values[k] = v
+    thingy.__values[k] = v
   end
 
-  thing.__stuff = modThing.__stuff
-  thing.names = {name}
-  setmetatable(thing, {__index = Thing})
-  setmetatable(result, thing)
+  thingy.__stuff = modThing.__stuff
+  thingy.names = {name}
+  setmetatable(thingy, {__index = Thing})
+  setmetatable(result, thingy)
 
   return result
 end
@@ -617,9 +614,9 @@ end
 get = function (stuff, key, name)
   local result
   if name then
-    local thing = getmetatable(stuff)
-    if thing then
-      local this = thing.__stuff[key]
+    local thingy = getmetatable(stuff)
+    if thingy then
+      local this = thingy.__stuff[key]
       if this then result = this[name] end
     end
   else
@@ -631,9 +628,9 @@ end
 
 reset = function (stuff, key, name)
   if name then
-    local thing = getmetatable(stuff)
-    if thing then
-      local this = thing.__stuff[key]
+    local thingy = getmetatable(stuff)
+    if thingy then
+      local this = thingy.__stuff[key]
       if this then this[name] = nil end
     end
   else
@@ -643,10 +640,10 @@ end
 
 
 set = function (stuff, key, name, value)
-  if value then
-    local thing = getmetatable(stuff)
-    if thing then
-      local this = thing.__stuff[key]
+  if 'nil' ~= type(value) then
+    local thingy = getmetatable(stuff)
+    if thingy then
+      local this = thingy.__stuff[key]
       if this then this[name] = value end
     end
   else
