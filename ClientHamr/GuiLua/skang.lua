@@ -358,9 +358,9 @@ end
 Thing.remove = function (self)	-- Delete this Thing.
 end
 
-Thing.__index = function (table, key)
+Thing.__index = function (module, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  local pre = rawget(table, 'pre')
+  local pre = rawget(module, 'pre')
   if pre then pre = pre .. '_value' else pre = 'value' end
   local thing = things[key]
   -- First see if this is a Thing.
@@ -377,9 +377,9 @@ Thing.__index = function (table, key)
   return nil
 end
 
-Thing.__newindex = function (table, key, value)
+Thing.__newindex = function (module, key, value)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  local pre = rawget(table, 'pre')
+  local pre = rawget(module, 'pre')
   if pre then pre = pre .. '_value' else pre = 'value' end
   local thing = things[key]
 
@@ -405,7 +405,7 @@ Thing.__newindex = function (table, key, value)
       -- TODO - Go through it's linked things and set them to.
     end
   else
-    rawset(table, key, value)		-- Stuff it normally.
+    rawset(module, key, value)		-- Stuff it normally.
   end
 end
 
