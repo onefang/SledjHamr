@@ -113,3 +113,32 @@ test.f = 42
 test.f = nil
 print(test.fooble .. ' ' .. test.f)
 print(skang.get(test, 'f', 'default'))
+print('')
+
+
+local stuff = {}
+stuff.t = {}
+
+skang.thing{'a', module=stuff, help = 'A test stufflet'}
+skang.thing{'b', module=stuff.t, help = 'A sub stufflet'}
+skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
+print(skang.get(stuff, 'a', 'help'))
+print(skang.get(stuff.t, 'b', 'help'))
+print(skang.get(stuff.t, 'c', 'help'))
+skang.thing{'b', module=test, help = 'A test stufflet for test'}
+print(skang.get(test, 'b', 'help'))
+print(skang.get(test, 'f', 'help'))
+stuff.a = '1'
+stuff.t.b = '2'
+stuff.t.c = '3'
+test.b = '422222'
+test.f = 5
+print(skang.get(stuff, 'a'))
+print(skang.get(stuff.t, 'b'))
+print(skang.get(stuff.t, 'c'))
+print(skang.get(test, 'b'))
+print(skang.get(test, 'f'))
+print(skang.get(test, 'fooble'))
+print(stuff.a)
+print(stuff.t.b)
+print(stuff.t.c)
