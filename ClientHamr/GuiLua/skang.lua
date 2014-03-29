@@ -386,7 +386,7 @@ What about userdata?  We could hijack the type() function, and dig deeper if it'
 -- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
 -- acl		- Access Control List defining security restrains.
 -- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
-Thing.names = {'?'}
+Thing.names = {'unknown'}
 Thing.help = 'No description supplied.'
 Thing.default = ''
 Thing.types = {'string'}
