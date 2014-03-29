@@ -167,6 +167,7 @@ function printTableStart(table, space, name)
 end
 
 function printTable(table, space)
+    if nil == table then return end
     for k, v in pairs(table) do 
 	if type(v) == "table" then
 	    if v._NAME then
@@ -334,12 +335,6 @@ Other Thing things are -
 	quitter:action('quit')
 
 
-On the other hand, might be better to now think of modules as a type?
-How much of OO are we willing to go with here?  lol
-In Lua 5.1 and LuaJIT (?) metatables have no __type.
-What about userdata?  We could hijack the type() function, and dig deeper if it's a userdata, or even if it's a Thing?
-
-
   Things as a metatable field -
     In this plan test.__something is short for metatable(test).__something.
 
@@ -363,8 +358,6 @@ What about userdata?  We could hijack the type() function, and dig deeper if it'
     If module.foo is a table, it can have it's own metatable(foo).
     Such a table will use Thing as a proxy table via __index and __newindex, as it does now.
 
-    thing(test, 'foo', 'table'  ...) -> setmetatable(thing, {__index=Thing}); thing stuff goes into thing;  setmetatable(foo,  thing);  test.__stuff[foo] = thing;  test.__values[foo] = {};
-    thing(test.foo, 'bar', ...)      -> setmetatable(thing, {__index=Thing});                               setmetatable(foo,  thing);   foo.__stuff[bar] = thing;   foo.__values[bar] = thing.default
     test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo], then return an empty table instead?
     test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a)
     test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
@@ -418,13 +411,13 @@ Thing.isValid = function (self, module)	-- Check if this Thing is valid, return 
   local key = thingy.names[1];
   local value = modThing.__values[key]
 
-  local t = type(value)
+  local t = type(value) or 'nil'
   self.errors = {}
   -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
   if 'nil' == t then
     if self.required then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' is required!') end
   else
-    if self.types[1] ~= t then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
+    if self.types[1] ~= t then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
     else
       if 'number' == t then value = '' .. value end
       if ('number' == t) or ('string' == t) then
@@ -432,7 +425,18 @@ Thing.isValid = function (self, module)	-- Check if this Thing is valid, return 
       end
     end
   end
-  -- TODO - Should go through self.__stuff[*]:isValid(self) as well.
+
+  local stuff = getmetatable(value)
+  if stuff and stuff.__stuff then
+    for k, v in pairs(stuff.__stuff) do
+      if not v:isValid(value) then
+        for i, w in ipairs(v.errors) do
+          table.insert(self.errors,  w)
+        end
+      end
+    end
+  end
+
   return #(self.errors) == 0
 end
 
@@ -468,11 +472,21 @@ Thing.__newindex = function (module, key, value)
   local modThing = getmetatable(module)
 
   if modThing then
-    -- This is a proxy table, the values never exist in the real table.
+    -- This is a proxy table, the values never exist in the real table.  In theory.
     local thingy = modThing.__stuff[key]
     if thingy then
       local name = thingy.names[1]
-      modThing.__values[name] = value
+      local valueMeta
+      if 'table' == type(value) then
+        -- Coz setting it via modThing screws with the __index stuff somehow.
+        valueMeta = getmetatable(modThing.__values[name])
+        if valueMeta then
+          for k, v in pairs(value) do
+            valueMeta.__values[k] = v
+          end
+        end
+      end
+      if nil == valueMeta then modThing.__values[name] = value end
       if 'function' == type(value) then
         thingy.func = value
       else
@@ -527,7 +541,6 @@ thing = function (names, ...)
   local modThing = getmetatable(module)
   if nil == modThing then
     modThing = {}
-    modThing.names = {module._NAME}
     -- This is how the Thing is stored with the module.
     setmetatable(module, modThing)
   end
@@ -536,6 +549,7 @@ thing = function (names, ...)
   if nil == modThing.__stuff then
     -- Seems this does not deal with __index and __newindex, and also screws up __stuff somehow.
 --    setmetatable(modThing, {__index = Thing})
+    modThing.names = {module._NAME or 'NoName'}
     modThing.__stuff = {}
     modThing.__values = {}
     modThing.__index = Thing.__index
@@ -578,8 +592,13 @@ thing = function (names, ...)
   -- Find type, default to string, then break out the other types.
   local typ = type(thingy.default)
   if 'nil' == typ then typ = 'string' end
-  if types then types = typ .. ',' .. types else types = typ end
+  if 'function' == typ then types = typ .. ',' .. types end
+  if '' == types then types = typ end
   thingy.types = csv2table(types)
+
+  if 'table' == thingy.types[1] then
+    if '' == thingy.default then thingy.default = {} end
+  end
 
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do

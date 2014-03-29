@@ -105,6 +105,7 @@ test.fooble = 42
 test.fooble = true
 test.f = 42
 test.f = nil
+test.bar = 123
 print('')
 
 skang.set(test, 'f', 'required', false)
@@ -123,6 +124,10 @@ stuff.t = {}
 skang.thing{'a', module=stuff, help = 'A test stufflet'}
 skang.thing{'b', module=stuff.t, help = 'A sub stufflet'}
 skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
+skang.thing{'s', module=stuff, help = 'A Stuff', types='table'}
+skang.thing{'sa', module=stuff.s, help = 'A stufflet in a Stuff'}
+skang.thing{'sb', module=stuff.s, help = 'Another stufflet in a Stuff'}
+
 print('*********************************')
 skang.fixNames(skang, 'skang')
 skang.fixNames(test, 'test')
@@ -134,10 +139,14 @@ print('*********************************')
 print(skang.get(stuff, 'a', 'help'))
 print(skang.get(stuff.t, 'b', 'help'))
 print(skang.get(stuff.t, 'c', 'help'))
+print(skang.get(stuff, 's', 'help'))
+print(skang.get(stuff.s, 'sa,a', 'help'))
+print(skang.get(stuff.s, 'sb,b', 'help'))
 skang.thing{'baz,b', module=test, help = 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
-stuff.a = '1'
+-- Should fail isValid()
+stuff.a = 1
 stuff.t.b = '2'
 stuff.t.c = '3'
 test.b = '422222'
@@ -145,6 +154,14 @@ test.f = 5
 test_c.cbar = '666'
 -- This one doesn't actually exist.
 test_c.bar = '7'
+-- The sa should fail isValid()
+stuff.s.sa = true
+stuff.s.sb = 22
+-- TODO - This one should fail, but doesn't.  It goes through to the real stuff.s table.
+stuff.s.b = 33
+-- TODO - And the 'a' one just gets dropped.
+stuff.s = {a=8, sb='9'}
+stuff.s.sb = 44
 print('')
 
 print(skang.get(stuff, 'a'))
@@ -156,6 +173,9 @@ print(skang.get(test, 'f'))
 print(skang.get(test, 'fooble'))
 print(skang.get(test_c, 'cbar'))
 print(skang.get(test_c, 'bar'))
+print(type(skang.get(stuff, 's')))
+print(skang.get(stuff.s, 'sa'))
+print(skang.get(stuff.s, 'sb'))
 print('')
 
 print(stuff.a)
@@ -169,3 +189,6 @@ print(test_c.cbar)
 print(test_c.bar)
 print(test_c.c)
 print(test_c.cfooble)
+print(stuff.s.sa)
+print(stuff.s.sb)
+skang.printTableStart(stuff.s, '', 'stuff.s')
