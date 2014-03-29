@@ -173,7 +173,11 @@ end
 function printTable(table, space)
     for k, v in pairs(table) do 
 	if type(v) == "table" then
-	    printTableStart(v, space, k)
+	    if v._NAME then
+	      print(space .. "SKANG module " .. v._NAME .. ";")
+	    else
+	      printTableStart(v, space, k)
+	    end
 	elseif type(v) == "string" then
 	    print(space .. k .. ': "' .. v .. '";')
 	elseif type(v) == "function" then
