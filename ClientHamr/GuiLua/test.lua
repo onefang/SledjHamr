@@ -29,7 +29,7 @@ print('code')
 -- A variable that is private to this module.
 local fool
 
-skang.thing('fooble,f', 'Help text goes here', 1, 'number', '"edit", "The fooble:", 1, 1, 10, 50', true)
+skang.thing('fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50', true)
 skang.thing('bar', 'Help text', "Default")
 skang.thing('foo')
 
@@ -115,7 +115,6 @@ print(test.fooble .. ' ' .. test.f)
 print(skang.get(test, 'f', 'default'))
 print('')
 
-
 local stuff = {}
 stuff.t = {}
 
@@ -125,7 +124,7 @@ skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
 print(skang.get(stuff, 'a', 'help'))
 print(skang.get(stuff.t, 'b', 'help'))
 print(skang.get(stuff.t, 'c', 'help'))
-skang.thing{'b', module=test, help = 'A test stufflet for test'}
+skang.thing{'baz,b', module=test, help = 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
 stuff.a = '1'
@@ -133,12 +132,30 @@ stuff.t.b = '2'
 stuff.t.c = '3'
 test.b = '422222'
 test.f = 5
+test_c.cbar = '666'
+-- This one doesn't actually exist.
+test_c.bar = '7'
+print('')
+
 print(skang.get(stuff, 'a'))
 print(skang.get(stuff.t, 'b'))
 print(skang.get(stuff.t, 'c'))
 print(skang.get(test, 'b'))
+print(skang.get(test, 'baz'))
 print(skang.get(test, 'f'))
 print(skang.get(test, 'fooble'))
+print(skang.get(test_c, 'cbar'))
+print(skang.get(test_c, 'bar'))
+print('')
+
 print(stuff.a)
 print(stuff.t.b)
 print(stuff.t.c)
+print(test.b)
+print(test.baz)
+print(test.f)
+print(test.fooble)
+print(test_c.cbar)
+print(test_c.bar)
+print(test_c.c)
+print(test_c.cfooble)
