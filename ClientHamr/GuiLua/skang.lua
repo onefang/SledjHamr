@@ -335,20 +335,22 @@ end
 Thing.things = {}		-- The sub things this Thing has, for modules and Stuff.
 Thing.errors = {}		-- A list of errors returned by isValid().
 
-Thing.isValid = function (self)	-- Check if this Thing is valid, return resulting error messages in errors.
+Thing.isValid = function (self, module)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
-  local value = self.value
+  local pre = rawget(module, 'pre')
+  if pre then pre = pre .. '_value' else pre = 'value' end
+  local value = self[pre]
   local t = type(value)
   self.errors = {}
   -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
   if 'nil' == t then
-    if self.required then table.insert(self.errors, self.names[1] .. ' is required!') end
+    if self.required then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' is required!') end
   else
-    if self.types[1] ~= t then table.insert(self.errors, self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
+    if self.types[1] ~= t then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
     else
       if 'number' == t then value = '' .. value end
       if ('number' == t) or ('string' == t) then
-        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, self.names[1] .. ' does not match pattern "' .. self.pattern .. '"!') end
+        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' does not match pattern "' .. self.pattern .. '"!') end
       end
     end
   end
@@ -396,7 +398,7 @@ Thing.__newindex = function (module, key, value)
 --      print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
     else
       -- NOTE - invalid values are still stored, this is by design.
-      if not thing:isValid() then
+      if not thing:isValid(module) then
 	for i, v in ipairs(thing.errors) do
 	  print('ERROR - ' .. v)
 	end
