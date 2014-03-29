@@ -528,11 +528,13 @@ thing = function (names, ...)
   if nil == modThing then
     modThing = {}
     modThing.names = {module._NAME}
+    -- This is how the Thing is stored with the module.
     setmetatable(module, modThing)
   end
-  -- Coz at module creation time, Thing is an empty table, and setmetatable(modThing, {__index = Thing}) doesn't do the same thing.
+  -- Coz at module creation time, Thing is an empty table, and setmetatable(modThing, {__index = Thing}) doesn't do the right thing.
   -- Also, module might not be an actual module, this might be Stuff.
   if nil == modThing.__stuff then
+    -- Seems this does not deal with __index and __newindex, and also screws up __stuff somehow.
 --    setmetatable(modThing, {__index = Thing})
     modThing.__stuff = {}
     modThing.__values = {}
@@ -546,6 +548,7 @@ thing = function (names, ...)
     thingy = {}
     thingy.module = module
     thingy.names = names
+    -- To pick up isValid, pattern, and the other stuff.
     setmetatable(thingy, {__index = Thing})
   end
 
