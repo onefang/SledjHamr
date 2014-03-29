@@ -124,7 +124,7 @@ int luaopen_test_c(lua_State *L)
   lua_pushstring(L, "cfooble,c");
   lua_pushstring(L, "Help text");
   lua_pushnumber(L, 1);
-  lua_pushstring(L, "number");
+  lua_pushnil(L);
   lua_pushstring(L, "'edit', 'The cfooble:', 1, 1, 10, 50");
   lua_pushboolean(L, 1);			// Is required.
   lua_pushnil(L);				// Default ACL.
