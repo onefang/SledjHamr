@@ -48,22 +48,21 @@ end
 local skang = require 'skang'
 local test = require 'test'
 local test_c = require 'test_c'
-local copy_test = skang.new(test, 'copy')
+local copy = skang.copy(test, 'copy')
 
-print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
-print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
-print('cfunc  ->> ' .. skang.things.cfunc.help)
+print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.get(test, 'ffunc', 'help') .. ' ->> ' .. skang.get(test, 'f', 'action'))
+print('foo = ' .. test.foo .. ' ->> ' .. skang.get(test, 'foo', 'help'))
+print('cfunc  ->> ' .. skang.get(test_c, 'cfunc', 'help'))
 test.ffunc('one', 2)
 test_c.cfunc(0, 'zero')
---skang.things.ffunc('seven', 'aight')
 print('')
 
 test.f = 42
-print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
-print('copy_f is now ' .. copy_test.fooble .. ' ' .. copy_test.f)
-copy_test.f = 24
-print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
-print('copy_f is now ' .. copy_test.fooble .. ' ' .. copy_test.f)
+print('f is now ' .. test.fooble .. ' ' .. test.f)
+print('copy_f is now ' .. copy.fooble .. ' ' .. copy.f)
+copy.f = 24
+print('f is now ' .. test.fooble .. ' ' .. test.f)
+print('copy_f is now ' .. copy.fooble .. ' ' .. copy.f)
 test.f = nil
 print('f is now ' .. test.fooble .. ' ' .. test.f)
 test.fooble = 42
@@ -92,10 +91,9 @@ print(skang.isBoolean(function (a) return false end))
 print('')
 
 -- Make it required, even though it was anyway.
-skang.thing{'f', required = true}
--- First, disable the default value, so we see "is required" errors.
--- Coz using the above syntax means that default is never passed to skang.thing, since it's nil.
-skang.things.f.default = nil
+skang.set(test, 'f', 'required', true)
+-- Disable the default value, so we see "is required" errors.
+skang.reset(test, 'f', 'default')
 test.fooble = 42
 test.fooble = 'Should fail.'
 test.fooble = 42
@@ -105,3 +103,13 @@ test.fooble = 42
 test.fooble = true
 test.f = 42
 test.f = nil
+print('')
+
+skang.set(test, 'f', 'required', false)
+test.f = 42
+test.f = nil
+skang.set(test, 'f', 'default', 999)
+test.f = 42
+test.f = nil
+print(test.fooble .. ' ' .. test.f)
+print(skang.get(test, 'f', 'default'))

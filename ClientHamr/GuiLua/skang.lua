@@ -57,8 +57,7 @@ The old skang argument types are -
 do	-- Only I'm not gonna indent this.
 
 
--- There is no ThingSpace, now it's all just in this table, and meta table.  Predefined here coz moduleBegin references Thing.
-things = {}
+-- There is no ThingSpace, or Stuff, now it's all just in this meta table.  Predefined here coz moduleBegin references Thing.
 Thing = {}
 
 
@@ -124,13 +123,10 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
   -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
   _M.DEFAULT_SKANG = skin
 
-
   --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
 			-- Not such a good idea to stomp on global name space.
 			-- It's also redundant coz we get stored in package.loaded[_M._NAME] anyway.
 			-- This is why module() is broken.
-
-  setmetatable(_M, Thing)
   _M.savedEnvironment = savedEnvironment
   -- NOTE - setfenv() wont work if the environment it refers to is a C function.  Worse, getfenv() returns the global environment, so we can't tell.
   if isLua then
@@ -141,6 +137,10 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
   end
+
+  local thing = {}
+  thing.names = {name}
+  setmetatable(_M, thing)
 
   print('Loaded module ' .. _M._NAME .. ' version ' .. _M.VERSION .. ', ' .. _M.COPYRIGHT .. '.\n  ' .. _M.VERSION_DESC)
 
@@ -288,91 +288,6 @@ Other Thing things are -
 --[[ TODO
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
-Might be better to move skang.things.foo.value  ->  skang.values.module.foo
-but keep skang.things.foo.* for the Thing metadata.
-
-    test.pre
-    skang.things.test
-    skang.things.test.foo
-    skang.things.pre_test.foo -> skang.things.test.foo
-    skang.values.test.foo
-    skang.values.pre_test.foo
-
-    thing:isValid(module)
-    skang.things[module][key]:isValid(module)
-    skang.things.test.foo:isValid(test)
-    isValid(thing, module)
-      local value = values[module._NAME][self.names[1] ]
-
-    __index(module, key)
-      local thing = things[module._NAME][key]
-      local value = values[module._NAME][key]
-
-    __newindex(module, key, value)
-      local thing    = things[module._NAME][key]
-      local oldValue = values[module._NAME][key]
-      ...
-      values[module._NAME][key] = value
-      ...
-      if not thing:isValid(module) then
-
-    module(...) or module{...}
-    __call(module, ...)
-
-    new = function (module, name)
-      local result = {}
-      setmetatable(result, {__index=module})
-      result._NAME = name
-      -- Loop through the Things in module.
-      for k, v in pairs(module.things) do
-        values[name][k] = values[module._NAME][k]
-      end
-
-On the other hand, might be better to now think of modules as a type?
-How much of OO are we willing to go with here?  lol
-In Lua 5.1 and LuaJIT (?) metatables have no __type.
-What about userdata?  We could hijack the type() function, and dig deeper if it's a userdata, or even if it's a Thing?
-
-
-  Things as a metatable field -
-    In this plan test.__something is short for metatable(test).__something.
-
-    C can set metatables to non table values.  NOTE - values, not variables, so likely useless.
-
-    __index is used to look up things that don't exist in a table.
-    If table isn't actually a table, then use __index as well.
-    Actually, in that case, the environment is the "table".
-    Either way, if we get to __index, and it's a function, call the function.
-    If __index is not a function, then use __index as a table to start the lookup all over again.
-
-    __newindex is similar, it's used if table.key is nil, AND __newindex exists.
-    Otherwise, it just sets table.key.
-    Again, if __newindow is a table, then start the lookup all over again with that.
-
-    metatable(module).__thing
-    metatable(module).__stuff
-    metatable(module).__values
-
-    __thing is a table that is a Thing.  It can be just a reference to a __thing elsewhere.
-    So module is free to be full of random variables that are anything.
-    If module.foo is a table, it can have it's own metatable(foo).__thing.
-    A table with __thing will use Thing as a proxy table via __index and __newindex, as it does now.
-
-    moduleBegin(test, ...) -> thing stuff goes into test.__thing
-    thing(test, 'foo', 'string' ...) -> thing stuff gous into thing;  setmetatable(test, Thing);  test.__stuff[foo] = thing;  test.__values[foo] = default
-    thing(test, 'foo', 'table'  ...) -> thing stuff goes into thing;  setmetatable(foo,  Thing);  test.__stuff[foo] = thing;  test.__values[foo] = {};     test.foo.__thing = thing
-    thing(test.foo, 'bar', ...)      ->                               setmetatable(foo,  Thing);   foo.__stuff[bar] = thing;   foo.__values[bar] = default
-    copy(test, 'c' ->  c.__thing = test.__thing;, c.__stuff = test.__stuff;  copy test.__values to c.__values;  setmetatable(c, Thing)
-    test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo].__thing, then return an empty table instead?
-    test.foo = v  ->  test.__newindex(test, 'foo', v)  ->  test.__values[foo] = v;  test.__stuff[foo]:isValid(test)  ->  local value = test.__values[ self.names[1] ]
-	Which should call self.__stuff[*]:isValid(self)
-    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a)
-    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
-	Doesn't seem useful.
-	If test.foo is a table, with a __thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
-    get(test.foo, 'help') -> return test.foo.__thing[help]
-    skang.thing{test, 'foo', required=true} -> test.__stuff[foo].required = true
-
 
   Stuff -
       test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
@@ -417,7 +332,47 @@ What about userdata?  We could hijack the type() function, and dig deeper if it'
 	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
 	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
 	quitter:action('quit')
+
+
+On the other hand, might be better to now think of modules as a type?
+How much of OO are we willing to go with here?  lol
+In Lua 5.1 and LuaJIT (?) metatables have no __type.
+What about userdata?  We could hijack the type() function, and dig deeper if it's a userdata, or even if it's a Thing?
+
+
+  Things as a metatable field -
+    In this plan test.__something is short for metatable(test).__something.
+
+    C can set metatables to non table values.  NOTE - values, not variables, so likely useless.
+
+    __index is used to look up things that don't exist in a table.
+    If table isn't actually a table, then use __index as well.
+    Actually, in that case, the environment is the "table".
+    Either way, if we get to __index, and it's a function, call the function.
+    If __index is not a function, then use __index as a table to start the lookup all over again.
+
+    __newindex is similar, it's used if table.key is nil, AND __newindex exists.
+    Otherwise, it just sets table.key.
+    Again, if __newindow is a table, then start the lookup all over again with that.
+
+    metatable(module).__stuff
+    metatable(module).__values
+
+    The Thing is stuffed in a metatable.  It can be just a reference to an existing Thing elsewhere.
+    So module is free to be full of random variables that are anything.
+    If module.foo is a table, it can have it's own metatable(foo).
+    Such a table will use Thing as a proxy table via __index and __newindex, as it does now.
+
+    thing(test, 'foo', 'table'  ...) -> setmetatable(thing, {__index=Thing}); thing stuff goes into thing;  setmetatable(foo,  thing);  test.__stuff[foo] = thing;  test.__values[foo] = {};
+    thing(test.foo, 'bar', ...)      -> setmetatable(thing, {__index=Thing});                               setmetatable(foo,  thing);   foo.__stuff[bar] = thing;   foo.__values[bar] = thing.default
+    test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo], then return an empty table instead?
+    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a)
+    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
+	Doesn't seem useful.
+	If test.foo is a Thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
 ]]
+
+
 
 -- Default things values.
 -- help		- help text describing this Thing.
@@ -427,6 +382,7 @@ What about userdata?  We could hijack the type() function, and dig deeper if it'
 -- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
 -- acl		- Access Control List defining security restrains.
 -- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
+Thing.names = {'?'}
 Thing.help = 'No description supplied.'
 Thing.default = ''
 Thing.types = {'string'}
@@ -451,41 +407,56 @@ end
 Thing.things = {}		-- The sub things this Thing has, for modules and Stuff.
 Thing.errors = {}		-- A list of errors returned by isValid().
 
+Thing.__stuff = {}
+Thing.__values = {}
+
 Thing.isValid = function (self, module)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
-  local pre = rawget(module, 'pre')
-  if pre then pre = pre .. '_value' else pre = 'value' end
-  local value = self[pre]
+  local name = self.names[1]
+  local modThing = getmetatable(module)
+  local thing = modThing.__stuff[name]
+  local key = thing.names[1];
+  local value = modThing.__values[key]
+
   local t = type(value)
   self.errors = {}
   -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
   if 'nil' == t then
-    if self.required then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' is required!') end
+    if self.required then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' is required!') end
   else
-    if self.types[1] ~= t then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
+    if self.types[1] ~= t then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. type(value) .. '!')
     else
       if 'number' == t then value = '' .. value end
       if ('number' == t) or ('string' == t) then
-        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, module._NAME .. '.' .. self.names[1] .. ' does not match pattern "' .. self.pattern .. '"!') end
+        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' does not match pattern "' .. self.pattern .. '"!') end
       end
     end
   end
+  -- TODO - Should go through self.__stuff[*]:isValid(self) as well.
   return #(self.errors) == 0
 end
 
 Thing.remove = function (self)	-- Delete this Thing.
 end
 
+
 Thing.__index = function (module, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  local pre = rawget(module, 'pre')
-  if pre then pre = pre .. '_value' else pre = 'value' end
-  local thing = things[key]
-  -- First see if this is a Thing.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   --        Ah, it was doing isValid() on setStufflet().
   -- TODO - Call thing.func() if it exists.
-  if thing then return thing[pre] or thing.default end
+
+  -- First see if this is a Thing.
+  local modThing = getmetatable(module)
+
+  if modThing then
+    local thing = modThing.__stuff[key]
+
+    if thing then
+      local name = thing.names[1];
+      return modThing.__values[name] or thing.__stuff[name].default
+    end
+  end
 
   -- Then see if we can inherit it from Thing.
   thing = Thing[key]
@@ -497,21 +468,16 @@ end
 
 Thing.__newindex = function (module, key, value)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  local pre = rawget(module, 'pre')
-  if pre then pre = pre .. '_value' else pre = 'value' end
-  local thing = things[key]
+  local modThing = getmetatable(module)
 
-  if thing then
---    local name = thing.names[1]
+  if modThing then
     -- This is a proxy table, the values never exist in the real table.
-    thing[pre] = value
+    local thing = modThing.__stuff[key]
+    local name = thing.names[1]
+    modThing.__values[name] = value
     if 'function' == type(value) then
       thing.func = value
       local types = ''
-      for i, v in ipairs(thing.types) do
-	if 1 ~= i then types = types .. v .. ', ' end
-      end
---      print(thing.module._NAME .. '.' .. name .. '(' .. types ..  ') -> ' .. thing.help)
     else
       -- NOTE - invalid values are still stored, this is by design.
       if not thing:isValid(module) then
@@ -519,7 +485,6 @@ Thing.__newindex = function (module, key, value)
 	  print('ERROR - ' .. v)
 	end
       end
---      print(thing.types[1] .. ' ' .. thing.module._NAME .. '.' .. name .. ' = ' .. (value or 'nil') .. ' -> ' .. thing.help)
       -- TODO - Go through it's linked things and set them to.
     end
   else
@@ -555,14 +520,28 @@ thing = function (names, ...)
   local name = names[1]
   local oldNames = {}
 
-  -- No need to bitch and return if no names, this will crash for us.
-  local thing = things[name]
+  -- TODO - Double check this comment - No need to bitch and return if no names, this will crash for us.
+  local module = params.module or params[8] or getfenv(2)
+  local modThing = getmetatable(module)
+  if nil == modThing then
+    modThing = {}
+    setmetatable(module, modThing)
+  end
+  -- Coz at module creation time, Thing is an empty table, and setmetatable(modThing, {__index = Thing}) doesn't do the same thing.
+  -- Also, module might not be an actual module, this might be Stuff.
+  if nil == modThing.__stuff then
+    for k, v in pairs(Thing) do
+      modThing[k] = modThing[k] or v
+    end
+  end
+  local thing = modThing.__stuff[name]
   if not thing then	-- This is a new Thing.
     new = true
     thing = {}
     -- Grab the environment of the calling function, so this new thing automatically becomes a global in it.
-    thing.module = getfenv(2)
+    thing.module = module
     thing.names = names
+    setmetatable(thing, {__index = Thing})
   end
 
   -- Pull out positional arguments.
@@ -573,7 +552,6 @@ thing = function (names, ...)
   thing.required	= params[5] or thing.required
   thing.acl		= params[6] or thing.acl
   thing.boss		= params[7] or thing.boss
-  thing.module		= params[8] or thing.module	-- Mostly for things like C functions, where get/setfenv() wont do what we need.
 
   -- Pull out named arguments.
   for k, v in pairs(params) do
@@ -596,54 +574,69 @@ thing = function (names, ...)
   if types then types = typ .. ',' .. types else types = typ end
   thing.types = csv2table(types)
 
-  if new then setmetatable(thing, Thing) end
-
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
-    thing.module.things[v] = nil
-    things[v] = nil
+    modThing.__stuff[v] = nil
   end
   for i, v in ipairs(thing.names) do
-    thing.module.things[v] = thing
-    things[v] = thing
+    modThing.__stuff[v] = thing
   end
 
   -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thing.isValid()
-  if new then thing.module[name] = thing.default end
+  if new then module[name] = thing.default end
 end
 
 
--- skang.new() Creats a new copy of a module.
---[[
- A module isn't exactly a thing, it has Thing as it's metatable though.
+copy = function (module, name)
+  local result = {}
+  local thing = {}
+  local modThing = getmetatable(module)
 
- local test = require 'test'
-   skang.moduleBegin('test', ...)
-     setmetatable(test, Thing)
- skang.thing('foo', ...)
-   setmetatable(test.module.things.foo, Thing)
-   test.module.things.foo = skang.things.foo
- local tester = skang.new(test, 'pre')
+  for k, v in pairs(Thing) do
+    thing[k] = v
+  end
 
-    skang.things.foo.value
-    skang.things.foo.pre_value
+  thing.__values = {}
+  for k, v in pairs(modThing.__values) do
+    thing.__values[k] = v
+  end
+
+  thing.__stuff = modThing.__stuff
+  thing.names = {name}
+  setmetatable(thing, {__index = Thing})
+  setmetatable(result, thing)
+
+  return result
+end
 
 
-    ]]
-new = function (module, pre)
-      local result = {}
+get = function (stuff, key, name)
+  local result
+  local thing = getmetatable(stuff)
+  if thing then
+    local this = thing.__stuff[key]
+    if this then result = this[name] end
+  end
+  return result
+end
 
-      setmetatable(result, Thing)
-      result.pre = pre
-      -- Loop through the Things in thing
-      -- TODO - Will have to be a deeper copy if it's a Stuff?
-      for k, v in pairs(module.things) do
-        v[pre .. '_value'] = v.value
---        things[pre .. '_' .. k].module = result
-      end
 
-      return result
-    end
+reset = function (stuff, key, name)
+  local thing = getmetatable(stuff)
+  if thing then
+    local this = thing.__stuff[key]
+    if this then this[name] = nil end
+  end
+end
+
+
+set = function (stuff, key, name, value)
+  local thing = getmetatable(stuff)
+  if thing then
+    local this = thing.__stuff[key]
+    if this then this[name] = value end
+  end
+end
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.
