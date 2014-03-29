@@ -653,6 +653,10 @@ set = function (stuff, key, name, value)
   end
 end
 
+thing('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
+thing('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
+thing('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
+
 
 -- TODO - Some function stubs, for now.  Fill them up later.
 nada = function () end
@@ -669,12 +673,6 @@ end
 quit = function ()
 end
 
-
--- Create our Things here.
--- TODO - For some odd reason, these first three fuck up thing() if we create them before the above stubs.
-thing('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
-thing('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
-thing('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
 thing('nada',	'Do nothing.',					nada)
 thing('clear',	'The current skin is cleared of all widgets.',	clear)
 thing('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
