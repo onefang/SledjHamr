@@ -610,33 +610,44 @@ copy = function (module, name)
 end
 
 
--- TODO - These deal with te Thing stuff, not the values, so might need to change the names.
---        Or have them do both?
 get = function (stuff, key, name)
   local result
-  local thing = getmetatable(stuff)
-  if thing then
-    local this = thing.__stuff[key]
-    if this then result = this[name] end
+  if name then
+    local thing = getmetatable(stuff)
+    if thing then
+      local this = thing.__stuff[key]
+      if this then result = this[name] end
+    end
+  else
+    result = stuff[key]
   end
   return result
 end
 
 
 reset = function (stuff, key, name)
-  local thing = getmetatable(stuff)
-  if thing then
-    local this = thing.__stuff[key]
-    if this then this[name] = nil end
+  if name then
+    local thing = getmetatable(stuff)
+    if thing then
+      local this = thing.__stuff[key]
+      if this then this[name] = nil end
+    end
+  else
+    stuff[key] = nil
   end
 end
 
 
 set = function (stuff, key, name, value)
-  local thing = getmetatable(stuff)
-  if thing then
-    local this = thing.__stuff[key]
-    if this then this[name] = value end
+  if value then
+    local thing = getmetatable(stuff)
+    if thing then
+      local this = thing.__stuff[key]
+      if this then this[name] = value end
+    end
+  else
+    -- In this case, value isn't there, so we are reusing the third argument as the value.
+    stuff[key] = name
   end
 end
 
@@ -656,6 +667,12 @@ end
 quit = function ()
 end
 
+
+-- Create our Things here.
+-- TODO - For some odd reason, these first three fuck up thing() if we create them before the above stubs.
+thing('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
+thing('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
+thing('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
 thing('nada',	'Do nothing.',					nada)
 thing('clear',	'The current skin is cleared of all widgets.',	clear)
 thing('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
@@ -704,17 +721,17 @@ end
 		{"servlet", "doIfServlet", "action", "Only do this if we are a servlet.", "", ""},
 		{"do", "doThing", "action", "Do this action.", "", ""},
 		{"grab", "getFile", "URL", "Grab a file from a URL.", "", ""},
-		{"get", "getThing", "name", "Get the current value of an existing thing.", "", ""},
+--		{"get", "getThing", "name", "Get the current value of an existing thing.", "", ""},
 		{"gimmeskin", "gimmeSkin", "", "Returns the modules default skin.", "", ""},
 		{"help", "helpThing", "file", "Show help page.", "", ""},
-		{"nada", "nothing", "data", "Does nothing B-).", "", ""},
+--		{"nada", "nothing", "data", "Does nothing B-).", "", ""},
 		{"postshow", "postShowThings", "URL,name", "POST the values of all Things to the URL, show the returned content.", "", ""},
 		{"post", "postThings", "URL", "POST the values of all Things to the URL, return the content.", "", ""},
 		{"postparse", "postParseThings", "URL", "POST the values of all Things to the URL, parse the returned content.", "", ""},
 		{"quiet", "quiet", "", "Output errors and warnings only.", "", ""},
 		{"remove", "removeThing", "name", "Remove an existing thing.", "", ""},
 		{"sethelp", "setHelp", "name,data", "Change the help for something.", "", ""},
-		{"set", "setThing", "name,data", "Set the current value of an existing Thing.", "", ""},
+--		{"set", "setThing", "name,data", "Set the current value of an existing Thing.", "", ""},
 --		{"skang", "skangRead", "URL", "Parse the contents of a skang file or URL.", "", ""},
 --		{"quit", "startQuit", "", "Quit, exit, remove thyself.", "", ""},
 		{"stopwhinging", "stopWhinging", "", "Clear all messages.", "", ""},
