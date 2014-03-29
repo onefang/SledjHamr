@@ -29,6 +29,8 @@ print('code')
 -- A variable that is private to this module.
 local fool
 
+-- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thing{}.
+
 skang.thing('fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50', true)
 skang.thing('bar', 'Help text', "Default")
 skang.thing('foo')
