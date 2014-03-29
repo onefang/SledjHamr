@@ -123,6 +123,14 @@ stuff.t = {}
 skang.thing{'a', module=stuff, help = 'A test stufflet'}
 skang.thing{'b', module=stuff.t, help = 'A sub stufflet'}
 skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
+print('*********************************')
+skang.fixNames(skang, 'skang')
+skang.fixNames(test, 'test')
+skang.fixNames(test_c, 'test_c')
+skang.fixNames(stuff, 'stuff')
+skang.fixNames(stuff.t, 't')
+print('*********************************')
+
 print(skang.get(stuff, 'a', 'help'))
 print(skang.get(stuff.t, 'b', 'help'))
 print(skang.get(stuff.t, 'c', 'help'))

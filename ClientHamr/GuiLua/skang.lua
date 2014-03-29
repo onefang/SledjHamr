@@ -594,6 +594,19 @@ thing = function (names, ...)
 end
 
 
+fixNames = function (module, name)
+  local stuff = getmetatable(module)
+  stuff.names[1] = name
+  for k, v in pairs(stuff.__stuff) do
+    if 'table' == v.types[1] then
+      local name = v.names[1]
+      print(name .. ' -> ' .. name)
+      fixNames(stuff.__values[name], name)
+    end
+  end
+end
+
+
 copy = function (module, name)
   local result = {}
   local thingy = {}
