@@ -162,6 +162,37 @@ local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '
 print('Skang is running under Lua version ' .. _VERSION)
 
 
+
+function printTableStart(table, space, name)
+    print(space .. name .. ": ")
+    print(space .. "{")
+    printTable(table, space .. "  ")
+    print(space .. "}")
+end
+
+function printTable(table, space)
+    for k, v in pairs(table) do 
+	if type(v) == "table" then
+	    printTableStart(v, space, k)
+	elseif type(v) == "string" then
+	    print(space .. k .. ': "' .. v .. '";')
+	elseif type(v) == "function" then
+	    print(space .. "function " .. k .. "();")
+	elseif type(v) == "userdata" then
+	    print(space .. "userdata " .. k .. ";")
+	elseif type(v) == "boolean" then
+	    if (v) then
+		print(space .. "boolean " .. k .. " TRUE ;")
+	    else
+		print(space .. "boolean " .. k .. " FALSE ;")
+	    end
+	else
+	    print(space .. k .. ": " .. v .. ";")
+	end
+    end
+end
+
+
 csv2table = function (csv)
   local result = {}
   local i = 1
