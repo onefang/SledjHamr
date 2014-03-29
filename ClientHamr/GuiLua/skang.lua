@@ -389,7 +389,7 @@ What about userdata?  We could hijack the type() function, and dig deeper if it'
 Thing.names = {'unknown'}
 Thing.help = 'No description supplied.'
 Thing.default = ''
-Thing.types = {'string'}
+Thing.types = {}
 Thing.required = false
 --Thing.acl = ''
 --Thing.boss = ''
