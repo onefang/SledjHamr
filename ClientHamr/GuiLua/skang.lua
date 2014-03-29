@@ -258,37 +258,6 @@ Other Thing things are -
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
 
-  Multiple copies of modules -
-    skang.new(test, 'pre')
-      local result = {}
-      setmetatable(result, test)
-      result.pre = 'pre'
-      -- loop through the Things in test
-      -- Will have to be a deeper copy if it's a Stuff.
-        skang.things['pre' .. '_' .. 'foo'] = skang.things.foo
-        skang.things['pre' .. '_' .. 'foo'].module = result
-      return result
-    end
-
-    __index
-      local aKey = key
-      if table.pre then aKey = table.pre .. '_' .. key end
-      local thing = things[aKey]
-      ...
-      -- Then see if we can inherit it from Thing.
-      thing = Thing[key]
-
-
-    __newindex
-      local aKey = key
-      if table.pre then aKey = table.pre .. '_' .. key end
-      local thing = things[aKey]
-      ...
-
-    skang.things.foo.value
-    skang.things.pre_foo.value
-
-
   Stuff -
       test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
       test{'foo', bar='...', baz='..'}  ->  __call(test, {'foo', ...})  ->  skang.stuff{'foo', ...}
@@ -391,12 +360,14 @@ end
 
 Thing.__index = function (table, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+  local pre = rawget(table, 'pre')
+  if pre then pre = pre .. '_value' else pre = 'value' end
   local thing = things[key]
   -- First see if this is a Thing.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   --        Ah, it was doing isValid() on setStufflet().
   -- TODO - Call thing.func() if it exists.
-  if thing then return thing.value or thing.default end
+  if thing then return thing[pre] or thing.default end
 
   -- Then see if we can inherit it from Thing.
   thing = Thing[key]
@@ -408,12 +379,14 @@ end
 
 Thing.__newindex = function (table, key, value)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
+  local pre = rawget(table, 'pre')
+  if pre then pre = pre .. '_value' else pre = 'value' end
   local thing = things[key]
 
   if thing then
 --    local name = thing.names[1]
     -- This is a proxy table, the values never exist in the real table.
-    thing.value = value
+    thing[pre] = value
     if 'function' == type(value) then
       thing.func = value
       local types = ''
@@ -509,17 +482,48 @@ thing = function (names, ...)
 
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
-    thing.things[v] = nil
+    thing.module.things[v] = nil
     things[v] = nil
   end
   for i, v in ipairs(thing.names) do
-    thing.things[v] = thing
+    thing.module.things[v] = thing
     things[v] = thing
   end
 
   -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thing.isValid()
   if new then thing.module[name] = thing.default end
 end
+
+
+-- skang.new() Creats a new copy of a module.
+--[[
+ A module isn't exactly a thing, it has Thing as it's metatable though.
+
+ local test = require 'test'
+   skang.moduleBegin('test', ...)
+     setmetatable(test, Thing)
+ skang.thing('foo', ...)
+   setmetatable(test.module.things.foo, Thing)
+   test.module.things.foo = skang.things.foo
+ local tester = skang.new(test, 'pre')
+
+    skang.things.foo.value
+    skang.things.foo.pre_value
+    ]]
+new = function (module, pre)
+      local result = {}
+
+      setmetatable(result, Thing)
+      result.pre = pre
+      -- Loop through the Things in thing
+      -- TODO - Will have to be a deeper copy if it's a Stuff?
+      for k, v in pairs(module.things) do
+        v[pre .. '_value'] = v.value
+--        things[pre .. '_' .. k].module = result
+      end
+
+      return result
+    end
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.

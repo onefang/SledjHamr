@@ -48,6 +48,7 @@ end
 local skang = require 'skang'
 local test = require 'test'
 local test_c = require 'test_c'
+local copy_test = skang.new(test, 'copy')
 
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.things.ffunc.help .. ' ->> ' .. skang.things.f.action)
 print('foo = ' .. test.foo .. ' ->> ' .. skang.things.foo.help)
@@ -59,6 +60,10 @@ print('')
 
 test.f = 42
 print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
+print('copy_f is now ' .. copy_test.fooble .. ' ' .. copy_test.f)
+copy_test.f = 24
+print('f is now ' .. test.fooble .. ' ' .. test.f .. ' ' .. skang.things.f.help .. ' ' .. skang.things.fooble.help)
+print('copy_f is now ' .. copy_test.fooble .. ' ' .. copy_test.f)
 test.f = nil
 print('f is now ' .. test.fooble .. ' ' .. test.f)
 test.fooble = 42
