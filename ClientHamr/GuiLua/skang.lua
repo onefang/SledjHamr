@@ -58,7 +58,7 @@ do	-- Only I'm not gonna indent this.
 
 
 -- There is no ThingSpace, or Stuff, now it's all just in this meta table.  Predefined here coz moduleBegin references Thing.
-Thing = {}
+local Thing = {}
 
 
 -- TODO - This needs to be expanded a bit to cover things like 1.42
@@ -137,10 +137,6 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
 			-- Dunno if this causes problems with the do ... end style of joining modules.  It does.  So we need to restore in moduleEnd().
 			-- Next question, does this screw with the environment of the skang module?  No it doesn't, coz that's set up at require 'skang' time.
   end
-
-  local thing = {}
-  thing.names = {name}
-  setmetatable(_M, thing)
 
   print('Loaded module ' .. _M._NAME .. ' version ' .. _M.VERSION .. ', ' .. _M.COPYRIGHT .. '.\n  ' .. _M.VERSION_DESC)
 
@@ -523,18 +519,23 @@ thing = function (names, ...)
   local oldNames = {}
 
   -- TODO - Double check this comment - No need to bitch and return if no names, this will crash for us.
-  local module = params.module or params[8] or getfenv(2)
+
+  -- Grab the environment of the calling function if no module was passed in.
+  local module = (params.module or params[8]) or getfenv(2)
   local modThing = getmetatable(module)
   if nil == modThing then
     modThing = {}
+    modThing.names = {module._NAME}
     setmetatable(module, modThing)
   end
   -- Coz at module creation time, Thing is an empty table, and setmetatable(modThing, {__index = Thing}) doesn't do the same thing.
   -- Also, module might not be an actual module, this might be Stuff.
   if nil == modThing.__stuff then
-    for k, v in pairs(Thing) do
-      modThing[k] = modThing[k] or v
-    end
+--    setmetatable(modThing, {__index = Thing})
+    modThing.__stuff = {}
+    modThing.__values = {}
+    modThing.__index = Thing.__index
+    modThing.__newindex = Thing.__newindex
   end
 
   local thingy = modThing.__stuff[name]
