@@ -484,10 +484,12 @@ Thing.__newindex = function (module, key, value)
         end
         -- TODO - Go through it's linked things and set them to.
       end
+      -- Done, don't fall through to the rawset()
+      return
     end
-  else
-    rawset(module, key, value)		-- Stuff it normally.
   end
+
+  rawset(module, key, value)		-- Stuff it normally.
 end
 
     -- TODO - Seemed like a good idea at the time, but do we really need it?
