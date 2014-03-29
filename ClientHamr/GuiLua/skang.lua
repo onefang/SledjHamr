@@ -257,6 +257,91 @@ Other Thing things are -
 --[[ TODO
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
+Might be better to move skang.things.foo.value  ->  skang.values.module.foo
+but keep skang.things.foo.* for the Thing metadata.
+
+    test.pre
+    skang.things.test
+    skang.things.test.foo
+    skang.things.pre_test.foo -> skang.things.test.foo
+    skang.values.test.foo
+    skang.values.pre_test.foo
+
+    thing:isValid(module)
+    skang.things[module][key]:isValid(module)
+    skang.things.test.foo:isValid(test)
+    isValid(thing, module)
+      local value = values[module._NAME][self.names[1] ]
+
+    __index(module, key)
+      local thing = things[module._NAME][key]
+      local value = values[module._NAME][key]
+
+    __newindex(module, key, value)
+      local thing    = things[module._NAME][key]
+      local oldValue = values[module._NAME][key]
+      ...
+      values[module._NAME][key] = value
+      ...
+      if not thing:isValid(module) then
+
+    module(...) or module{...}
+    __call(module, ...)
+
+    new = function (module, name)
+      local result = {}
+      setmetatable(result, {__index=module})
+      result._NAME = name
+      -- Loop through the Things in module.
+      for k, v in pairs(module.things) do
+        values[name][k] = values[module._NAME][k]
+      end
+
+On the other hand, might be better to now think of modules as a type?
+How much of OO are we willing to go with here?  lol
+In Lua 5.1 and LuaJIT (?) metatables have no __type.
+What about userdata?  We could hijack the type() function, and dig deeper if it's a userdata, or even if it's a Thing?
+
+
+  Things as a metatable field -
+    In this plan test.__something is short for metatable(test).__something.
+
+    C can set metatables to non table values.  NOTE - values, not variables, so likely useless.
+
+    __index is used to look up things that don't exist in a table.
+    If table isn't actually a table, then use __index as well.
+    Actually, in that case, the environment is the "table".
+    Either way, if we get to __index, and it's a function, call the function.
+    If __index is not a function, then use __index as a table to start the lookup all over again.
+
+    __newindex is similar, it's used if table.key is nil, AND __newindex exists.
+    Otherwise, it just sets table.key.
+    Again, if __newindow is a table, then start the lookup all over again with that.
+
+    metatable(module).__thing
+    metatable(module).__stuff
+    metatable(module).__values
+
+    __thing is a table that is a Thing.  It can be just a reference to a __thing elsewhere.
+    So module is free to be full of random variables that are anything.
+    If module.foo is a table, it can have it's own metatable(foo).__thing.
+    A table with __thing will use Thing as a proxy table via __index and __newindex, as it does now.
+
+    moduleBegin(test, ...) -> thing stuff goes into test.__thing
+    thing(test, 'foo', 'string' ...) -> thing stuff gous into thing;  setmetatable(test, Thing);  test.__stuff[foo] = thing;  test.__values[foo] = default
+    thing(test, 'foo', 'table'  ...) -> thing stuff goes into thing;  setmetatable(foo,  Thing);  test.__stuff[foo] = thing;  test.__values[foo] = {};     test.foo.__thing = thing
+    thing(test.foo, 'bar', ...)      ->                               setmetatable(foo,  Thing);   foo.__stuff[bar] = thing;   foo.__values[bar] = default
+    copy(test, 'c' ->  c.__thing = test.__thing;, c.__stuff = test.__stuff;  copy test.__values to c.__values;  setmetatable(c, Thing)
+    test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo].__thing, then return an empty table instead?
+    test.foo = v  ->  test.__newindex(test, 'foo', v)  ->  test.__values[foo] = v;  test.__stuff[foo]:isValid(test)  ->  local value = test.__values[ self.names[1] ]
+	Which should call self.__stuff[*]:isValid(self)
+    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a)
+    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
+	Doesn't seem useful.
+	If test.foo is a table, with a __thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
+    get(test.foo, 'help') -> return test.foo.__thing[help]
+    skang.thing{test, 'foo', required=true} -> test.__stuff[foo].required = true
+
 
   Stuff -
       test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
@@ -511,6 +596,8 @@ end
 
     skang.things.foo.value
     skang.things.foo.pre_value
+
+
     ]]
 new = function (module, pre)
       local result = {}
