@@ -610,6 +610,8 @@ copy = function (module, name)
 end
 
 
+-- TODO - These deal with te Thing stuff, not the values, so might need to change the names.
+--        Or have them do both?
 get = function (stuff, key, name)
   local result
   local thing = getmetatable(stuff)
