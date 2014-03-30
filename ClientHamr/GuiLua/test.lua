@@ -125,8 +125,8 @@ skang.thing{'a', module=stuff, help = 'A test stufflet'}
 skang.thing{'b', module=stuff.t, help = 'A sub stufflet'}
 skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
 skang.thing{'s', module=stuff, help = 'A Stuff', types='table'}
-skang.thing{'sa', module=stuff.s, help = 'A stufflet in a Stuff'}
-skang.thing{'sb', module=stuff.s, help = 'Another stufflet in a Stuff'}
+skang.thing{'sa,a', module=stuff.s, help = 'A stufflet in a Stuff'}
+skang.thing{'sb,b', module=stuff.s, help = 'Another stufflet in a Stuff'}
 
 print('*********************************')
 skang.fixNames(skang, 'skang')
@@ -140,11 +140,12 @@ print(skang.get(stuff, 'a', 'help'))
 print(skang.get(stuff.t, 'b', 'help'))
 print(skang.get(stuff.t, 'c', 'help'))
 print(skang.get(stuff, 's', 'help'))
-print(skang.get(stuff.s, 'sa,a', 'help'))
-print(skang.get(stuff.s, 'sb,b', 'help'))
+print(skang.get(stuff.s, 'sa', 'help'))
+print(skang.get(stuff.s, 'sb', 'help'))
 skang.thing{'baz,b', module=test, help = 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
+--skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
 -- Should fail isValid()
 stuff.a = 1
 stuff.t.b = '2'
@@ -154,12 +155,10 @@ test.f = 5
 test_c.cbar = '666'
 -- This one doesn't actually exist.
 test_c.bar = '7'
--- The sa should fail isValid()
 stuff.s.sa = true
 stuff.s.sb = 22
--- TODO - This one should fail, but doesn't.  It goes through to the real stuff.s table.
 stuff.s.b = 33
--- TODO - And the 'a' one just gets dropped.
+-- NOTE - This triggers isValid twice for each table element.
 stuff.s = {a=8, sb='9'}
 stuff.s.sb = 44
 print('')

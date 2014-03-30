@@ -479,10 +479,15 @@ Thing.__newindex = function (module, key, value)
       local valueMeta
       if 'table' == type(value) then
         -- Coz setting it via modThing screws with the __index stuff somehow.
-        valueMeta = getmetatable(modThing.__values[name])
-        if valueMeta then
-          for k, v in pairs(value) do
-            valueMeta.__values[k] = v
+        local oldValue = modThing.__values[name]
+        if 'table' == type(oldValue) then
+          valueMeta = getmetatable(oldValue)
+          if valueMeta then
+            for k, v in pairs(value) do
+              local newK = valueMeta.__stuff[k]
+              if newK then newK = newK.names[1] else newK = k end
+              valueMeta.__values[newK] = v
+            end
           end
         end
       end
