@@ -233,6 +233,27 @@ isBoolean = function (aBoolean)
 end
 
 
+--[[ Stuff package
+
+In matrix-RAD Stuff took care of multi value Things, like database rows.
+
+Stuff is an abstract class that gets extended by other classes, like
+SquealStuff, which was the only thing extending it.  It dealt with the
+basic "collection of things" stuff.  Each individual thing was called a
+stufflet.  A final fooStuff would extend SquealStuff, and include an
+array of strings called "stufflets" that at least named the stufflets,
+but could also include metadata and links to other Stuffs.
+
+There was various infrastructure for reading and writing Stuff, throwing
+rows of Stuff into grids, having choices of Stuff, linking stufflets to
+individual widgets, having default Stuffs for windows, validating
+Stuffs, etc.
+
+In Lua, setting up stuff has been folded into the general Thing stuff.
+
+]]
+
+
 --[[ Thing package
 
 matrix-RAD had Thing as the base class of everything.  Lua doesn't have
@@ -290,27 +311,6 @@ Other Thing things are -
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
 
-  Stuff -
-      test{'foo', key='blah', field0='something', field1=1, ...}  ->  skang.things.foo.key='blah'  skang.things.foo.field='something' ...
-      test{'foo', bar='...', baz='..'}  ->  __call(test, {'foo', ...})  ->  skang.stuff{'foo', ...}
-    What we really want though is something like (if foo is defined as a table) -
-      ->  skang.things.foo.value = {key='blah', field0='something', field1=1, ...}
-    or even (if foo is defined as a Stuff) -
-      ->  skang.things.foo.value[blah] = {key = 'blah', field0='something', field1=1, ...}
-    Stuff is kinda rigid though, it's fields are fixed, not an everything goes Lua table.  So it needs to be defined.
-    Reusing Thing semantics, with aliases.
-    Also, let's NOT mix skang.thing{} semantics with test{} semantics, make it a different function.
-    Then we can avoid conflicts with Thing.* names, and having to sort out where to put things.
-      skang.thing{'foo', stuff={{'key', 'The Stuff key', types='string', required=true},
-                                {'field0,b' ... other Thing like stuff ... acl=''},
-                                {'field1', 'field1 is a stufflet', 42, 'number'}} }
-      skang.thing('foo', stuff=someOtherThing)
-      skang.thing('foo', stuff=skang.new(someOtherThing, 'pre'))
-      skang.things.foo.things.field0
-      skang.things.foo.things.field1
-      test.foo[blah].field1
-
-
   Widget -
     Merging widgets might work to.  B-)
     This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
@@ -363,9 +363,13 @@ Other Thing things are -
     test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
 	Doesn't seem useful.
 	If test.foo is a Thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
+
+    stuff.s = {a='foo'}   -> changes a, deletes everything else
+    stuff.s{a='foo'}      -> only changes a  ->  stuff.s.__call(stuff.s, {a='foo'}  Should allow setting non stufflets, so the below works.
+
+    stuff.s[key] = {...}  -> stuff.s.key = {...}  -> stuff.s = {key={...}}    But this semantic means only one thing, which is 'key'.
+    stuff.s{key={...}}    -> same as above                                    This does the right thing if we are using 'key' to index rows.
 ]]
-
-
 
 -- Default things values.
 -- help		- help text describing this Thing.
@@ -483,6 +487,7 @@ Thing.__newindex = function (module, key, value)
         if 'table' == type(oldValue) then
           valueMeta = getmetatable(oldValue)
           if valueMeta then
+            -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
             for k, v in pairs(value) do
               local newK = valueMeta.__stuff[k]
               if newK then newK = newK.names[1] else newK = k end
