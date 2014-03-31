@@ -206,6 +206,13 @@ csv2table = function (csv)
 end
 
 
+shiftLeft = function (tab)
+  local result = tab[1]
+  table.remove(tab, 1)
+  return result
+end
+
+
 -- My clever boolean check, this is the third language I've written this in.  B-)
 -- true   1 yes ack  ok   one  positive absolutely affirmative  'ah ha' 'shit yeah' 'why not'
 local isTrue  = 't1aopswy'
@@ -624,35 +631,22 @@ thingasm = function (names, ...)
 
   -- Check how we were called, and re arrange stuff to match.
   if 0 == #params then
-    if ('table' == type(names)) then
-      -- thingasm{...}
+    if ('table' == type(names)) then			-- thingasm{...}
       params = names
-      names = params[1]
-      table.remove(params, 1)
-      if 'table' == type(names) then
-      -- thingasm{module, 'foo', ...}
+      names = shiftLeft(params)
+      if 'table' == type(names) then			-- thingasm{module, 'foo', ...}
         module = names
-        names = params[1]
-        table.remove(params, 1)
+        names = shiftLeft(params)
       end
-    else
-      -- thingasm("foo")
-    end
+    end							-- thingasm("foo") otherwise
   else
     if 'table' == type(names) then
       module = names
-      if 'string' == type(...) then
-        -- C or __call(table, string, ..)
-        params = {...}
-      elseif 'table' == type(...) then
-      -- __call(table, table)
-        params = ...
+      if 'string' == type(...) then    params = {...}	-- C or __call(table, string, ..)
+      elseif 'table' == type(...) then params = ...	-- __call(table, table)
       end
-      names = params[1]
-      table.remove(params, 1)
-    else
-      -- thingasm('foo', ...)
-    end
+      names = shiftLeft(params)
+    end							-- thingasm('foo', ...) otherwise
   end
 
   -- Break out the names.
@@ -683,23 +677,18 @@ thingasm = function (names, ...)
   end
 
   local thingy = modThing.__stuff[name]
-  if not thingy then	-- This is a new Thing.
+  if not thingy then				-- This is a new Thing.
     new = true
     thingy = {}
     thingy.module = module
     thingy.names = names
-    -- To pick up isValid, pattern, and the other stuff.
-    setmetatable(thingy, {__index = Thing})
+    setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff.
   end
 
   -- Pull out positional arguments.
   thingy.help		= params[1] or thingy.help
   thingy.default	= params[2] or thingy.default
   local types		= params[3] or table.concat(thingy.types or {}, ',')
-  thingy.widget		= params[4] or thingy.widget
-  thingy.required	= params[5] or thingy.required
-  thingy.acl		= params[6] or thingy.acl
-  thingy.boss		= params[7] or thingy.boss
 
   -- Pull out named arguments.
   for k, v in pairs(params) do

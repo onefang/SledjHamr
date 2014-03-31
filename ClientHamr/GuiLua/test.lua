@@ -31,7 +31,7 @@ local fool
 
 -- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thing{}.
 
-skang.thingasm('fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50', true)
+skang.thingasm{'fooble,f', 'Help text goes here', 1, widget='"edit", "The fooble:", 1, 1, 10, 50', required=true}
 skang.thingasm('bar', 'Help text', "Default")
 skang.thingasm('foo')
 
@@ -54,6 +54,7 @@ local copy = skang.copy(test, 'copy')
 
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.get(test, 'ffunc', 'help') .. ' ->> ' .. skang.get(test, 'f', 'action'))
 print('foo = ' .. test.foo .. ' ->> ' .. skang.get(test, 'foo', 'help'))
+print('cfooble = ' .. test_c.cfooble .. ' ->> ' .. skang.get(test_c, 'cfooble', 'help') .. '[' .. skang.get(test_c, 'cfooble', 'widget') .. ']')
 print('cfunc  ->> ' .. skang.get(test_c, 'cfunc', 'help'))
 test.ffunc('one', 2)
 test_c.cfunc(0, 'zero')
@@ -120,10 +121,10 @@ print('')
 local stuff = {}
 stuff.t = {}
 
-skang.thingasm{stuff, 'a', help = 'A test stufflet'}
-skang.thingasm{stuff.t, 'b', help = 'A sub stufflet'}
-skang.thingasm{stuff.t, 'c', help = 'Another sub stufflet'}
-skang.thingasm{stuff, 's', help = 'A Stuff', types='table'}
+skang.thingasm{stuff, 'a', 'A test stufflet'}
+skang.thingasm{stuff.t, 'b', 'A sub stufflet'}
+skang.thingasm{stuff.t, 'c', 'Another sub stufflet'}
+skang.thingasm{stuff, 's', 'A Stuff', types='table'}
 stuff.s{'sa,a', help = 'A stufflet in a Stuff'}
 stuff.s{'sb,b', help = 'Another stufflet in a Stuff'}
 
@@ -141,7 +142,7 @@ print(skang.get(stuff.t, 'c', 'help'))
 print(skang.get(stuff, 's', 'help'))
 print(skang.get(stuff.s, 'sa', 'help'))
 print(skang.get(stuff.s, 'sb', 'help'))
-skang.thingasm{test, 'baz,b', help = 'A test stufflet for test'}
+skang.thingasm{test, 'baz,b', 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
 --skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')

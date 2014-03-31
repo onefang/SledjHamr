@@ -65,6 +65,7 @@ returned, but we want to do something different with skang.
 */
 int luaopen_test_c(lua_State *L)
 {
+  lua_Number i;
 
   // In theory, the only thing on the stack now is 'test_c' from the require() call.
 
@@ -121,16 +122,29 @@ int luaopen_test_c(lua_State *L)
 
 // skang.thing('cfooble,c', 'Help text goes here', 1, 'number', \"'edit', 'The fooble:', 1, 1, 10, 50\", true)
   lua_getfield(L, skang, "thingasm");
+  i = 1;
+  lua_newtable(L);
+  lua_pushnumber(L, i++);
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
+  lua_settable(L, -3);
+
+  lua_pushnumber(L, i++);
   lua_pushstring(L, "cfooble,c");
-  lua_pushstring(L, "Help text");
+  lua_settable(L, -3);
+
+  lua_pushnumber(L, i++);
+  lua_pushstring(L, "cfooble help text");
+  lua_settable(L, -3);
+
+  lua_pushnumber(L, i++);
   lua_pushnumber(L, 1);
-  lua_pushnil(L);
+  lua_settable(L, -3);
+
   lua_pushstring(L, "'edit', 'The cfooble:', 1, 1, 10, 50");
+  lua_setfield(L, -2, "widget");
   lua_pushboolean(L, 1);			// Is required.
-  lua_pushnil(L);				// Default ACL.
-  lua_pushnil(L);				// No boss.
-  lua_call(L, 9, 0);
+  lua_setfield(L, -2, "required");
+  lua_call(L, 1, 0);
 
 // skang.thing('cbar', 'Help text', 'Default')
   lua_getfield(L, skang, "thingasm");
@@ -138,25 +152,13 @@ int luaopen_test_c(lua_State *L)
   lua_pushstring(L, "cbar");
   lua_pushstring(L, "Help text");
   lua_pushstring(L, "Default");
-  lua_pushnil(L);				// No type.
-  lua_pushnil(L);				// No widget.
-  lua_pushnil(L);				// Not required.
-  lua_pushnil(L);				// Default ACL.
-  lua_pushnil(L);				// No boss.
-  lua_call(L, 9, 0);
+  lua_call(L, 4, 0);
 
 // skang.thing('cfoo')
   lua_getfield(L, skang, "thingasm");
-  lua_pushstring(L, "cfoo");
-  lua_pushnil(L);				// No help.
-  lua_pushnil(L);				// No default.
-  lua_pushnil(L);				// No type.
-  lua_pushnil(L);				// No widget.
-  lua_pushnil(L);				// Not required.
-  lua_pushnil(L);				// Default ACL.
-  lua_pushnil(L);				// No boss.
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_call(L, 9, 0);
+  lua_pushstring(L, "cfoo");
+  lua_call(L, 2, 0);
 
 // skang.thing('cfunc', 'Help Text', ffunc, 'number,string')
   lua_getfield(L, skang, "thingasm");
@@ -165,11 +167,7 @@ int luaopen_test_c(lua_State *L)
   lua_pushstring(L, "cfunc does nothing really");
   lua_pushcfunction(L, cfunc);
   lua_pushstring(L, "number,string");
-  lua_pushnil(L);				// No widget.
-  lua_pushnil(L);				// Not required.
-  lua_pushnil(L);				// Default ACL.
-  lua_pushnil(L);				// No boss.
-  lua_call(L, 9, 0);
+  lua_call(L, 5, 0);
 
 // skang.moduleEnd(_M)
   lua_getfield(L, skang, "moduleEnd");
