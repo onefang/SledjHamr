@@ -369,17 +369,20 @@ Other Thing things are -
 
     stuff.s = {a='foo'}   ->  changes a, deletes everything else, or should.
 
-    stuff.s[key]={...}    ->  stuff is a Thing, stuff.s is a Thing, stuff.s[key] NOT a Thing, unless set up before hand, which it is not since [key] is arbitrary.
-      When we do, we would be re using the same Thing for each [key].
-        Except currently Things have a module.
-           rawset(stuff.s, key, skang.copy(stuff.s[''], key)) -- when creating stuff.s[key]
-      So we could do - stuff.s.__stufflets = newThingForStufflets;  stuff.s is a Thing, so it goes through __newindex, and these things will get caught.
-        skang.thing{'', module=stuff.s, types='Stuff'}  -- Actually, the name is unimportant, this is for stuff with arbitrary names that don't match other Stuff.
-          stuff.s.__stufflets = newThingForStuff
-          stuff.s[''] = {}
-        skang.thing{'field0', module=stuff.s[''], ...}
-        skang.thing{'field1', module=stuff.s[''], ...}
-        So the diff is the existance of stuff.s.__stufflets, if it exists, then stuff.s[key] is checked against it, otherwise it is a non stufflet.
+    stuff.S[key]={...}    ->  stuff is a Thing, stuff.S is a Thing, stuff.S[key] NOT a Thing.
+      Unless set up before hand, which it is not since [key] is arbitrary.
+      We should be re using the same Thing for each [key], but change the Thing.module.
+      So we copy the Thing from stuff.S when putting stuff into a new [key].
+      So the difference is if it's a 'Stuff' or a 'table'.
+        skang.thing{'S', module=stuff, types='Stuff'}
+        skang.thing{'field0', module=stuff.S, ...}
+        skang.thing{'field1', module=stuff.S, ...}
+        stuff.S is a Thing, it goes through __index and __newindex, so these Things will get caught.
+        stuff.S[key] = {...}  ->  __newindex(stuff.S, key, {...})
+          if 'Stuff' == modThing.type then
+            if nil == modThing.__values[key] then rawset(modThing.__values, key, copy(module, key))
+            stuff.S[key] = {...}  -- Only do this through pairs(), and only put stuff in if it has a matching stuff.S.__stuff
+                                  -- Which we do already anyway, so the only change is to copy the Thing?
 
    What we really want is -
      squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
@@ -390,24 +393,28 @@ Other Thing things are -
      stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
        stuff = db:read('stuff', 'select * from someTable where key='someIndex')
 
-     stuff:stuff('')			  ->  getmetatable(stuff).__stuff['']
-     stuff:stuff()			  ->  getmetatable(stuff).__stuff['']
+--     stuff:stuff('')			  ->  getmetatable(stuff).__stuff['']
+--     stuff:stuff()			  ->  getmetatable(stuff).__stuff['']
 
-     stuff:stufflet('field1')		  ->  stuff:stuff().__stuff['field1']
+--     stuff:stuff('field1')		  ->  stuff:stuff().__stuff['field1']
 
      stuff:write()			  ->  Write all rows to the database table.
      stuff:write(1)			  ->  Write one row  to the database table.
-     stuff:stufflet('field1').isValid = someFunction
+     stuff:stuff('field1').isValid = someFunction	-- Should work, all stuff[key] shares the same stuff.
      stuff:isValid(db)			  ->  Validate the entire stuff against it's metadata at least.
      window.stuff = stuff		  ->  Window gets stuff as it's default stuff, any widgets with same names as the table fields get linked.
      grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
      choice.stuff = stuff		  ->  As in grid, but only using the keys.
-     widget.stuff = stuff:stufflet('field1')	  ->  This widget gets a particular stufflet.
+     widget.stuff = stuff:stuff('field1')	  ->  This widget gets a particular stufflet.
+       widget would have to look up getmetatable(window.stuff).module.  Or maybe this should work some other way?
 
      In all these cases above, stuff is a table that has a Thing metatable, so it has __stuff.
-       It also has a .__stufflets.
+       It is also a Stuff.
        Should include some way of specifyings details like key name, where string, etc.
+         getmetatable(stuff).__keyName
+         getmetatable(stuff).__where
        And a way to link this database table to others, via the key of the other, as a field in this Stuff.
+         stuff:stuff('field0').__link = {module, key, index}
        In Java we had this -
 
 public class PersonStuff extends SquealStuff
