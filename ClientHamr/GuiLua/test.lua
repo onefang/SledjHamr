@@ -125,15 +125,14 @@ skang.thingasm{stuff, 'a', 'A test stufflet'}
 skang.thingasm{stuff.t, 'b', 'A sub stufflet'}
 skang.thingasm{stuff.t, 'c', 'Another sub stufflet'}
 skang.thingasm{stuff, 's', 'A Stuff', types='table'}
-stuff.s{'sa,a', help = 'A stufflet in a Stuff'}
-stuff.s{'sb,b', help = 'Another stufflet in a Stuff'}
+stuff.s{'sa,a', 'A stufflet in a Stuff'}
+stuff.s{'sb,b', 'Another stufflet in a Stuff'}
 
 print('*********************************')
 skang.fixNames(skang, 'skang')
 skang.fixNames(test, 'test')
 skang.fixNames(test_c, 'test_c')
 skang.fixNames(stuff, 'stuff')
-skang.fixNames(stuff.t, 't')
 print('*********************************')
 
 print(skang.get(stuff, 'a', 'help'))

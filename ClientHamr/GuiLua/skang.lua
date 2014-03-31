@@ -164,6 +164,7 @@ function printTableStart(table, space, name)
     print(space .. "{")
     printTable(table, space .. "  ")
     print(space .. "}")
+    if '' == space then print('') end
 end
 
 function printTable(table, space)
