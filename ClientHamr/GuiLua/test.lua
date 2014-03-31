@@ -31,12 +31,12 @@ local fool
 
 -- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thing{}.
 
-skang.thing('fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50', true)
-skang.thing('bar', 'Help text', "Default")
-skang.thing('foo')
+skang.thingasm('fooble,f', 'Help text goes here', 1, nil, '"edit", "The fooble:", 1, 1, 10, 50', true)
+skang.thingasm('bar', 'Help text', "Default")
+skang.thingasm('foo')
 
 -- We can use inline functions if we don't need the function internally.
-skang.thing('ffunc', 'Help Text', function (arg1, arg2)
+skang.thingasm('ffunc', 'Help Text', function (arg1, arg2)
   print('Inside test.ffunc(' .. arg1 .. ', ' .. arg2 .. ')')
 end, 'number,string')
 
@@ -100,7 +100,6 @@ test.fooble = 42
 test.fooble = 'Should fail.'
 test.fooble = 42
 test.fooble = nil
-test.fooble = nil
 test.fooble = 42
 test.fooble = true
 test.f = 42
@@ -121,12 +120,12 @@ print('')
 local stuff = {}
 stuff.t = {}
 
-skang.thing{'a', module=stuff, help = 'A test stufflet'}
-skang.thing{'b', module=stuff.t, help = 'A sub stufflet'}
-skang.thing{'c', module=stuff.t, help = 'Another sub stufflet'}
-skang.thing{'s', module=stuff, help = 'A Stuff', types='table'}
-skang.thing{'sa,a', module=stuff.s, help = 'A stufflet in a Stuff'}
-skang.thing{'sb,b', module=stuff.s, help = 'Another stufflet in a Stuff'}
+skang.thingasm{stuff, 'a', help = 'A test stufflet'}
+skang.thingasm{stuff.t, 'b', help = 'A sub stufflet'}
+skang.thingasm{stuff.t, 'c', help = 'Another sub stufflet'}
+skang.thingasm{stuff, 's', help = 'A Stuff', types='table'}
+stuff.s{'sa,a', help = 'A stufflet in a Stuff'}
+stuff.s{'sb,b', help = 'Another stufflet in a Stuff'}
 
 print('*********************************')
 skang.fixNames(skang, 'skang')
@@ -142,7 +141,7 @@ print(skang.get(stuff.t, 'c', 'help'))
 print(skang.get(stuff, 's', 'help'))
 print(skang.get(stuff.s, 'sa', 'help'))
 print(skang.get(stuff.s, 'sb', 'help'))
-skang.thing{'baz,b', module=test, help = 'A test stufflet for test'}
+skang.thingasm{test, 'baz,b', help = 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
 --skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')

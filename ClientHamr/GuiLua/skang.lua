@@ -311,18 +311,6 @@ Other Thing things are -
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
 
-Maybe I can rename this to thingasm?  B-)
-  Then widget becomes skang?
-    local thingasm = require 'thingasm'
-    thingasm('foo', 'help text)			-- In this case the surrounding Lua environment becomes the module of foo.
-						--   If the first argument (or first in the table) is a string, then it's this form.
-						-- All others include the module as the first argument, which would be a table.
-    foo('bar', 'some help', types='table')	-- ___call(foo, 'bar', ...)  And now foo is the module.
-    foo.bar{'baz', types='Stuff'}		-- thingasm({foo.bar, 'baz', ...})
-    foo.bar.baz{'field0'}			-- thingasm({foo.bar.baz, 'field0'})
-    foo.bar.baz{'field1'}
-
-
   Widget -
     Merging widgets might work to.  B-)
     This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
@@ -370,16 +358,11 @@ Maybe I can rename this to thingasm?  B-)
     If module.foo is a table, it can have it's own metatable(foo).
     Such a table will use Thing as a proxy table via __index and __newindex, as it does now.
 
-    stuff:stuff('s')  ->  getmetatable(stuff).__stuff['s']
-
     test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo], then return an empty table instead?
 
-    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
-	Doesn't seem useful.
-	If test.foo is a Thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
-	  So far I have entirely failed to find a good use, since they all are catered for anyway.  lol
-
     stuff.s = {a='foo'}   ->  changes a, deletes everything else, or should.
+
+    stuff:stuff('s')  ->  getmetatable(stuff).__stuff['s']
 
     stuff.S[key]={...}    ->  stuff is a Thing, stuff.S is a Thing, stuff.S[key] NOT a Thing.
       Unless set up before hand, which it is not since [key] is arbitrary.
@@ -404,11 +387,6 @@ Maybe I can rename this to thingasm?  B-)
        stuff[1].field1                    ->  Is a Thing, with a __stuff in the stuff metatable, that was created automatically from the database meta data.
      stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
        stuff = db:read('stuff', 'select * from someTable where key='someIndex')
-
---     stuff:stuff('')			  ->  getmetatable(stuff).__stuff['']
---     stuff:stuff()			  ->  getmetatable(stuff).__stuff['']
-
---     stuff:stuff('field1')		  ->  stuff:stuff().__stuff['field1']
 
      stuff:write()			  ->  Write all rows to the database table.
      stuff:write(1)			  ->  Write one row  to the database table.
@@ -458,7 +436,6 @@ public class PersonStuff extends SquealStuff
 		FULLNAME + "||,VARCHAR,512"
 	};
 }
-
 
 ]]
 
@@ -607,27 +584,75 @@ Thing.__newindex = function (module, key, value)
   rawset(module, key, value)		-- Stuff it normally.
 end
 
-    -- TODO - Seemed like a good idea at the time, but do we really need it?
---Thing.__call = function (func, ...)
---	return func.func(...)
---    end
+thingasm = function ()
+end
+
+Thing.__call = function (func, ...)
+  return thingasm(func, ...)		-- (func, {...})
+end
 
 
--- skang.thing() Creates a new Thing, or changes an existing one.
--- It can be called with positional arguments - (names, help, default, types, widget, required, acl, boss)
--- Or it can be called with a table           - {names, help, pattern='...', acl='rwx'}
+-- skang.thingasm() Creates a new Thing, or changes an existing one.
+--[[ It can be called in many different ways -
+
+It can be called with positional arguments - (names, help, default, types, widget, required, acl, boss)
+Or it can be called with a table           - {names, help, pattern='...', acl='rwx'}
+
+The first argument can be another Thing (the parent), or a string list of names (see below).
+
+It can be called by itself, with no parent specified -
+    thingasm('foo', 'help text)
+
+In this case the surrounding Lua environment becomes the module of foo.
+   If the first argument (or first in the table) is a string, then it's this form.
+All others include the module as the first argument, which would be a table.
+
+It can be called by calling the parent as a function -
+    foo('bar', 'some help', types='table')	-- ___call(foo, 'bar', ...)  And now foo is the module.
+    foo.bar{'baz', types='Stuff'}		-- thingasm({foo.bar, 'baz', ...})
+    foo.bar.baz{'field0'}			-- thingasm({foo.bar.baz, 'field0'})
+    foo.bar.baz{'field1'}
+]]
+
 -- names	- a comma seperated list of names, aliases, and shortcuts.  The first one is the official name.
 --                If this is not a new thing, then only the first one is used to look it up.
---                So to change names, use skang.thing{'oldName', names='newName,otherNewName'}
-thing = function (names, ...)
+--                So to change names, use skang.thingasm{'oldName', names='newName,otherNewName'}
+thingasm = function (names, ...)
   local params = {...}
   local new = false
+  local module
 
-  -- Check if it was called as a table, and pull the names out of the table.
-  if 'table' == type(names) then
-    params = names
-    names = params[1]
-    table.remove(params, 1)
+  -- Check how we were called, and re arrange stuff to match.
+  if 0 == #params then
+    if ('table' == type(names)) then
+      -- thingasm{...}
+      params = names
+      names = params[1]
+      table.remove(params, 1)
+      if 'table' == type(names) then
+      -- thingasm{module, 'foo', ...}
+        module = names
+        names = params[1]
+        table.remove(params, 1)
+      end
+    else
+      -- thingasm("foo")
+    end
+  else
+    if 'table' == type(names) then
+      module = names
+      if 'string' == type(...) then
+        -- C or __call(table, string, ..)
+        params = {...}
+      elseif 'table' == type(...) then
+      -- __call(table, table)
+        params = ...
+      end
+      names = params[1]
+      table.remove(params, 1)
+    else
+      -- thingasm('foo', ...)
+    end
   end
 
   -- Break out the names.
@@ -638,7 +663,7 @@ thing = function (names, ...)
   -- TODO - Double check this comment - No need to bitch and return if no names, this will crash for us.
 
   -- Grab the environment of the calling function if no module was passed in.
-  local module = (params.module or params[8]) or getfenv(2)
+  module = module or getfenv(2)
   local modThing = getmetatable(module)
   if nil == modThing then
     modThing = {}
@@ -697,8 +722,9 @@ thing = function (names, ...)
   if '' == types then types = typ end
   thingy.types = csv2table(types)
 
-  if 'table' == thingy.types[1] then
+  if ('Stuff' == thingy.types[1]) or ('table' == thingy.types[1]) then
     if '' == thingy.default then thingy.default = {} end
+    setmetatable(thingy.default, {__call = Thing.__call})
   end
 
   -- Remove old names, then stash the Thing under all of it's new names.
@@ -792,9 +818,9 @@ set = function (stuff, key, name, value)
   end
 end
 
-thing('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
-thing('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
-thing('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
+thingasm('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
+thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
+thingasm('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.
@@ -812,12 +838,12 @@ end
 quit = function ()
 end
 
-thing('nada',	'Do nothing.',					nada)
-thing('clear',	'The current skin is cleared of all widgets.',	clear)
-thing('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
-thing('module',	'Load a module.',				module, 'file,acl')
-thing('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
-thing('quit',	'Quit, exit, remove thyself.',			quit)
+thingasm('nada',	'Do nothing.',					nada)
+thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
+thingasm('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
+thingasm('module',	'Load a module.',				module, 'file,acl')
+thingasm('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
+thingasm('quit',	'Quit, exit, remove thyself.',			quit)
 
 
 moduleEnd(_M)

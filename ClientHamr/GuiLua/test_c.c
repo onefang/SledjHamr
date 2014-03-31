@@ -120,7 +120,8 @@ int luaopen_test_c(lua_State *L)
 //          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
 
 // skang.thing('cfooble,c', 'Help text goes here', 1, 'number', \"'edit', 'The fooble:', 1, 1, 10, 50\", true)
-  lua_getfield(L, skang, "thing");
+  lua_getfield(L, skang, "thingasm");
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cfooble,c");
   lua_pushstring(L, "Help text");
   lua_pushnumber(L, 1);
@@ -129,11 +130,11 @@ int luaopen_test_c(lua_State *L)
   lua_pushboolean(L, 1);			// Is required.
   lua_pushnil(L);				// Default ACL.
   lua_pushnil(L);				// No boss.
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_call(L, 9, 0);
 
 // skang.thing('cbar', 'Help text', 'Default')
-  lua_getfield(L, skang, "thing");
+  lua_getfield(L, skang, "thingasm");
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cbar");
   lua_pushstring(L, "Help text");
   lua_pushstring(L, "Default");
@@ -142,11 +143,10 @@ int luaopen_test_c(lua_State *L)
   lua_pushnil(L);				// Not required.
   lua_pushnil(L);				// Default ACL.
   lua_pushnil(L);				// No boss.
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_call(L, 9, 0);
 
 // skang.thing('cfoo')
-  lua_getfield(L, skang, "thing");
+  lua_getfield(L, skang, "thingasm");
   lua_pushstring(L, "cfoo");
   lua_pushnil(L);				// No help.
   lua_pushnil(L);				// No default.
@@ -159,7 +159,8 @@ int luaopen_test_c(lua_State *L)
   lua_call(L, 9, 0);
 
 // skang.thing('cfunc', 'Help Text', ffunc, 'number,string')
-  lua_getfield(L, skang, "thing");
+  lua_getfield(L, skang, "thingasm");
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cfunc");
   lua_pushstring(L, "cfunc does nothing really");
   lua_pushcfunction(L, cfunc);
@@ -168,7 +169,6 @@ int luaopen_test_c(lua_State *L)
   lua_pushnil(L);				// Not required.
   lua_pushnil(L);				// Default ACL.
   lua_pushnil(L);				// No boss.
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_call(L, 9, 0);
 
 // skang.moduleEnd(_M)
