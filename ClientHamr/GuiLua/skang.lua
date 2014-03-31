@@ -411,7 +411,7 @@ Thing.isValid = function (self, module)	-- Check if this Thing is valid, return 
   -- Anything that overrides this method, should call this super method first.
   local name = self.names[1]
   local modThing = getmetatable(module)
-  local thingy = modThing.__stuff[name]
+  local thingy = modThing.__stuff[name]	-- TODO - This should be the same as self?
   local key = thingy.names[1];
   local value = modThing.__values[key]
 
