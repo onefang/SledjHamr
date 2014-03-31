@@ -591,9 +591,6 @@ Thing.__newindex = function (module, key, value)
   rawset(module, key, value)		-- Stuff it normally.
 end
 
-thingasm = function ()
-end
-
 Thing.__call = function (func, ...)
   return thingasm(func, ...)		-- (func, {...})
 end
