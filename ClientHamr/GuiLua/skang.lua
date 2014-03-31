@@ -358,17 +358,89 @@ Other Thing things are -
     If module.foo is a table, it can have it's own metatable(foo).
     Such a table will use Thing as a proxy table via __index and __newindex, as it does now.
 
+    stuff:stuff('s')  ->  getmetatable(stuff).__stuff['s']
+
     test.foo      ->  test.__index(test, 'foo')        ->  test.__values[foo];  if that's nil, and test.__stuff[foo], then return an empty table instead?
-    test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a)
+
     test.foo(a)   ->  test.__index(test, 'foo')        ->  test.__values[foo](a) (but it's not a function)  ->  test.__values[foo].__call(test.__values[foo], a)
 	Doesn't seem useful.
 	If test.foo is a Thing then that might be -> test.foo.__call(test.foo, a)  ->  could do something useful with this.
+	  So far I have entirely failed to find a good use, since they all are catered for anyway.  lol
 
-    stuff.s = {a='foo'}   -> changes a, deletes everything else
-    stuff.s{a='foo'}      -> only changes a  ->  stuff.s.__call(stuff.s, {a='foo'}  Should allow setting non stufflets, so the below works.
+    stuff.s = {a='foo'}   ->  changes a, deletes everything else, or should.
 
-    stuff.s[key] = {...}  -> stuff.s.key = {...}  -> stuff.s = {key={...}}    But this semantic means only one thing, which is 'key'.
-    stuff.s{key={...}}    -> same as above                                    This does the right thing if we are using 'key' to index rows.
+    stuff.s[key]={...}    ->  stuff is a Thing, stuff.s is a Thing, stuff.s[key] NOT a Thing, unless set up before hand, which it is not since [key] is arbitrary.
+      When we do, we would be re using the same Thing for each [key].
+        Except currently Things have a module.
+           rawset(stuff.s, key, skang.copy(stuff.s[''], key)) -- when creating stuff.s[key]
+      So we could do - stuff.s.__stufflets = newThingForStufflets;  stuff.s is a Thing, so it goes through __newindex, and these things will get caught.
+        skang.thing{'', module=stuff.s, types='Stuff'}  -- Actually, the name is unimportant, this is for stuff with arbitrary names that don't match other Stuff.
+          stuff.s.__stufflets = newThingForStuff
+          stuff.s[''] = {}
+        skang.thing{'field0', module=stuff.s[''], ...}
+        skang.thing{'field1', module=stuff.s[''], ...}
+        So the diff is the existance of stuff.s.__stufflets, if it exists, then stuff.s[key] is checked against it, otherwise it is a non stufflet.
+
+   What we really want is -
+     squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
+       local db = require 'someDbThing'	  ->  Same as above, only the database details are encodode in the someDbThing source, OR come from someDbThing.properties.
+     db:getTable('stuff', 'someTable')	  ->  Grabs the metadata, but not the rows.
+     db:read('stuff', 'select * from someTable'}  ->  Fills stuff up with several rows, including setting up the metadata for the columns.
+       stuff[1].field1                    ->  Is a Thing, with a __stuff in the stuff metatable, that was created automatically from the database meta data.
+     stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
+       stuff = db:read('stuff', 'select * from someTable where key='someIndex')
+
+     stuff:stuff('')			  ->  getmetatable(stuff).__stuff['']
+     stuff:stuff()			  ->  getmetatable(stuff).__stuff['']
+
+     stuff:stufflet('field1')		  ->  stuff:stuff().__stuff['field1']
+
+     stuff:write()			  ->  Write all rows to the database table.
+     stuff:write(1)			  ->  Write one row  to the database table.
+     stuff:stufflet('field1').isValid = someFunction
+     stuff:isValid(db)			  ->  Validate the entire stuff against it's metadata at least.
+     window.stuff = stuff		  ->  Window gets stuff as it's default stuff, any widgets with same names as the table fields get linked.
+     grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
+     choice.stuff = stuff		  ->  As in grid, but only using the keys.
+     widget.stuff = stuff:stufflet('field1')	  ->  This widget gets a particular stufflet.
+
+     In all these cases above, stuff is a table that has a Thing metatable, so it has __stuff.
+       It also has a .__stufflets.
+       Should include some way of specifyings details like key name, where string, etc.
+       And a way to link this database table to others, via the key of the other, as a field in this Stuff.
+       In Java we had this -
+
+public class PersonStuff extends SquealStuff
+{
+
+...
+
+	public final static String FULLNAME = "fullname";
+
+	public static final String keyField = "ID";       // Name of key field/s.
+	public static final String where    = keyField + "='%k'";
+	public static final String listName = "last";
+	public static final String tables   = "PEOPLE";
+	public static final String select   = null;
+	public static final String stufflets[] =
+	{
+		keyField,
+		"PASSWD_ID|net.matrix_rad.squeal.PasswdStuff|,OTHER",
+		"QUALIFICATION_IDS|net.matrix_rad.people.QualificationStuff|,OTHER",
+		"INTERESTING_IDS|net.matrix_rad.people.InterestingStuff|,OTHER",
+		"title",
+		"first",
+		"middle",
+		"last",
+		"suffix",
+
+...
+
+		FULLNAME + "||,VARCHAR,512"
+	};
+}
+
+
 ]]
 
 -- Default things values.
