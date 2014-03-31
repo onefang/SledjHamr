@@ -424,7 +424,7 @@ Maybe I can rename this to thingasm?  B-)
        It is also a Stuff.
        Should include some way of specifyings details like key name, where string, etc.
          getmetatable(stuff).__keyName
-         getmetatable(stuff).__where
+         getmetatable(stuff).__squeal.where
        And a way to link this database table to others, via the key of the other, as a field in this Stuff.
          stuff:stuff('field0').__link = {module, key, index}
        In Java we had this -
