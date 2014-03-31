@@ -311,6 +311,18 @@ Other Thing things are -
   NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
 
 
+Maybe I can rename this to thingasm?  B-)
+  Then widget becomes skang?
+    local thingasm = require 'thingasm'
+    thingasm('foo', 'help text)			-- In this case the surrounding Lua environment becomes the module of foo.
+						--   If the first argument (or first in the table) is a string, then it's this form.
+						-- All others include the module as the first argument, which would be a table.
+    foo:('bar', 'some help', types='table')	-- And now foo is the module.
+    foo.bar:{'baz', types='Stuff'}		-- thingasm({foo.bar, 'baz', ...})
+    foo.bar.baz:{'field0'}			-- thingasm({foo.bar.baz, 'field0'})
+    foo.bar.baz:{'field1'}
+
+
   Widget -
     Merging widgets might work to.  B-)
     This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
