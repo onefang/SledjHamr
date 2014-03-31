@@ -651,6 +651,7 @@ copy = function (module, name)
   end
 
   thingy.__stuff = modThing.__stuff
+  thingy.module = result
   thingy.names = {name}
   setmetatable(thingy, {__index = Thing})
   setmetatable(result, thingy)
