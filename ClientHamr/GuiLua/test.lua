@@ -127,6 +127,9 @@ skang.thingasm{stuff.t, 'c', 'Another sub stufflet'}
 skang.thingasm{stuff, 's', 'A Stuff', types='table'}
 stuff.s{'sa,a', 'A stufflet in a Stuff'}
 stuff.s{'sb,b', 'Another stufflet in a Stuff'}
+skang.thingasm{stuff, 'S', 'A database table of Stuff', types='Stuff'}
+stuff.S{'field0', 'The first field of the db table.'}
+stuff.S{'field1', 'The second field of the db table.'}
 
 print('*********************************')
 skang.fixNames(skang, 'skang')
@@ -141,10 +144,11 @@ print(skang.get(stuff.t, 'c', 'help'))
 print(skang.get(stuff, 's', 'help'))
 print(skang.get(stuff.s, 'sa', 'help'))
 print(skang.get(stuff.s, 'sb', 'help'))
+print(skang.get(stuff.S, 'field0', 'help'))
+print(skang.get(stuff.S, 'field1', 'help'))
 skang.thingasm{test, 'baz,b', 'A test stufflet for test'}
 print(skang.get(test, 'b', 'help'))
 print(skang.get(test, 'f', 'help'))
---skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
 -- Should fail isValid()
 stuff.a = 1
 stuff.t.b = '2'
@@ -160,6 +164,12 @@ stuff.s.b = 33
 -- NOTE - This triggers isValid twice for each table element.
 stuff.s = {a=8, sb='9'}
 stuff.s.sb = 44
+print('')
+--stuff.S.record0 = {}
+stuff.S.record0 = {field0=0, field1='zero'}
+--stuff.S['record1'] = {field0='1', field1='one'}
+--stuff.S['record2'] = {field0='2', field1='two'}
+
 print('')
 
 print(skang.get(stuff, 'a'))
@@ -189,4 +199,20 @@ print(test_c.c)
 print(test_c.cfooble)
 print(stuff.s.sa)
 print(stuff.s.sb)
-skang.printTableStart(stuff.s, '', 'stuff.s')
+--skang.printTableStart(stuff.s, '', 'stuff.s')
+print('')
+
+--skang.printTableStart(stuff.S, '', 'stuff.S')
+
+print(stuff.S['record0'].field1)
+--print(stuff.S['record1'].field1)
+--print(stuff.S['record2'].field0)
+
+--skang.printTableStart(stuff.S['record0'], '', 'stuff.S[record0]')
+--skang.printTableStart(stuff.S['record1'], '', 'stuff.S[record1]')
+--skang.printTableStart(stuff.S['record2'], '', 'stuff.S[record2]')
+
+--skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
+--skang.printTableStart(getmetatable(stuff), '', 'stuff metatable')
+--skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
+--skang.printTableStart(skang.stuff(stuff, 'S'), '', 'stuff.S Thing')

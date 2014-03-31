@@ -370,23 +370,6 @@ Other Thing things are -
 
     stuff.s = {a='foo'}   ->  changes a, deletes everything else, or should.
 
-    stuff:stuff('s')  ->  getmetatable(stuff).__stuff['s']
-
-    stuff.S[key]={...}    ->  stuff is a Thing, stuff.S is a Thing, stuff.S[key] NOT a Thing.
-      Unless set up before hand, which it is not since [key] is arbitrary.
-      We should be re using the same Thing for each [key], but change the Thing.module.
-      So we copy the Thing from stuff.S when putting stuff into a new [key].
-      So the difference is if it's a 'Stuff' or a 'table'.
-        skang.thing{'S', module=stuff, types='Stuff'}
-        skang.thing{'field0', module=stuff.S, ...}
-        skang.thing{'field1', module=stuff.S, ...}
-        stuff.S is a Thing, it goes through __index and __newindex, so these Things will get caught.
-        stuff.S[key] = {...}  ->  __newindex(stuff.S, key, {...})
-          if 'Stuff' == modThing.type then
-            if nil == modThing.__values[key] then rawset(modThing.__values, key, copy(module, key))
-            stuff.S[key] = {...}  -- Only do this through pairs(), and only put stuff in if it has a matching stuff.S.__stuff
-                                  -- Which we do already anyway, so the only change is to copy the Thing?
-
    What we really want is -
      squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
        local db = require 'someDbThing'	  ->  Same as above, only the database details are encodode in the someDbThing source, OR come from someDbThing.properties.
@@ -404,7 +387,7 @@ Other Thing things are -
      grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
      choice.stuff = stuff		  ->  As in grid, but only using the keys.
      widget.stuff = stuff:stuff('field1')	  ->  This widget gets a particular stufflet.
-       widget would have to look up getmetatable(window.stuff).module.  Or maybe this should work some other way?
+       widget would have to look up getmetatable(window.stuff).parent.  Or maybe this should work some other way?
 
      In all these cases above, stuff is a table that has a Thing metatable, so it has __stuff.
        It is also a Stuff.
@@ -412,7 +395,7 @@ Other Thing things are -
          getmetatable(stuff).__keyName
          getmetatable(stuff).__squeal.where
        And a way to link this database table to others, via the key of the other, as a field in this Stuff.
-         stuff:stuff('field0').__link = {module, key, index}
+         stuff:stuff('field0').__link = {parent, key, index}
        In Java we had this -
 
 public class PersonStuff extends SquealStuff
@@ -467,6 +450,7 @@ Thing.action = 'nada'		-- An optional action to perform.
 Thing.tell = ''			-- The skang command that created this Thing.
 Thing.pattern = '.*'		-- A pattern to restrict values.
 
+Thing.isStuff = false		-- Is this thing a Stuff?
 Thing.isReadOnly = false	-- Is this Thing read only?
 Thing.isServer = false		-- Is this Thing server side?
 Thing.isStub = false		-- Is this Thing a stub?
@@ -483,36 +467,31 @@ Thing.errors = {}		-- A list of errors returned by isValid().
 Thing.__stuff = {}
 Thing.__values = {}
 
-Thing.isValid = function (self, module)	-- Check if this Thing is valid, return resulting error messages in errors.
+Thing.isValid = function (self, parent)	-- Check if this Thing is valid, return resulting error messages in errors.
   -- Anything that overrides this method, should call this super method first.
   local name = self.names[1]
-  local modThing = getmetatable(module)
-  local thingy = modThing.__stuff[name]	-- TODO - This should be the same as self?
-  local key = thingy.names[1];
-  local value = modThing.__values[key]
+  local mumThing = getmetatable(parent)
+  local value = mumThing.__values[name]
 
   local t = type(value) or 'nil'
   self.errors = {}
   -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
   if 'nil' == t then
-    if self.required then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' is required!') end
+    if self.required then table.insert(self.errors, mumThing.names[1] .. '.' .. name .. ' is required!') end
   else
-    if self.types[1] ~= t then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
+    if self.types[1] ~= t then table.insert(self.errors, mumThing.names[1] .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
     else
       if 'number' == t then value = '' .. value end
       if ('number' == t) or ('string' == t) then
-        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, modThing.names[1] .. '.' .. name .. ' does not match pattern "' .. self.pattern .. '"!') end
+        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, mumThing.names[1] .. '.' .. name .. ' does not match pattern "' .. self.pattern .. '"!') end
       end
     end
   end
 
-  local stuff = getmetatable(value)
-  if stuff and stuff.__stuff then
-    for k, v in pairs(stuff.__stuff) do
-      if not v:isValid(value) then
-        for i, w in ipairs(v.errors) do
-          table.insert(self.errors,  w)
-        end
+  for k, v in pairs(self.stuff) do
+    if not v:isValid(value) then
+      for i, w in ipairs(v.errors) do
+        table.insert(self.errors,  w)
       end
     end
   end
@@ -524,21 +503,21 @@ Thing.remove = function (self)	-- Delete this Thing.
 end
 
 
-Thing.__index = function (module, key)
+Thing.__index = function (parent, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
   -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
   --        Ah, it was doing isValid() on setStufflet().
   -- TODO - Call thingy.func() if it exists.
 
   -- First see if this is a Thing.
-  local modThing = getmetatable(module)
+  local mumThing = getmetatable(parent)
   local thingy
 
-  if modThing then
-    thingy = modThing.__stuff[key]
+  if mumThing and mumThing.self then
+    thingy = mumThing.self.stuff[key]
     if thingy then
       local name = thingy.names[1];
-      return modThing.__values[name] or thingy.default
+      return mumThing.__values[name] or thingy.default
     end
   end
 
@@ -547,37 +526,59 @@ Thing.__index = function (module, key)
   return thingy
 end
 
-Thing.__newindex = function (module, key, value)
+Thing.__newindex = function (parent, key, value)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  local modThing = getmetatable(module)
+  local mumThing = getmetatable(parent)
 
-  if modThing then
+  if mumThing and mumThing.self then
     -- This is a proxy table, the values never exist in the real table.  In theory.
-    local thingy = modThing.__stuff[key]
+print('__newindex ' .. mumThing.names[1] .. ' = ' .. key)
+--printTableStart(mumThing, '', 'mumThing')
+
+    -- Find the Thing and get it done.
+    local thingy = mumThing.self.stuff[key]
+
+    if not thingy then
+      -- Deal with setting a new Stuff[key].
+      if mumThing.self.isStuff and (nil == mumThing.__values[key]) then
+print('__newindex NEW stufflet ' .. key)
+	rawset(mumThing.__values, key, copy(parent, key))
+--printTableStart(getmetatable(parent).self, '', 'parent thing')
+--printTableStart(mumThing.__values[key], '', 'stufflet')
+--printTableStart(getmetatable(mumThing.__values[key]), '', 'stufflet metatable?')
+--printTableStart(getmetatable(mumThing.__values[key]).self, '', 'stufflet thing?')
+	mumThing.self.stuff[key] = {names={key}, types={'table'}, parent=mumThing.__values[key], stuff=getmetatable(mumThing.__values[key]).self, }
+
+      end
+    end
+
     if thingy then
       local name = thingy.names[1]
       local valueMeta
+
+--printTableStart(thingy, '', 'thingy')
+
       if 'table' == type(value) then
-        -- Coz setting it via modThing screws with the __index stuff somehow.
-        local oldValue = modThing.__values[name]
+        -- Coz setting it via mumThing screws with the __index stuff somehow.
+        local oldValue = mumThing.__values[name]
         if 'table' == type(oldValue) then
           valueMeta = getmetatable(oldValue)
           if valueMeta then
             -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
             for k, v in pairs(value) do
-              local newK = valueMeta.__stuff[k]
+              local newK = valueMeta.self.stuff[k]
               if newK then newK = newK.names[1] else newK = k end
               valueMeta.__values[newK] = v
             end
           end
         end
       end
-      if nil == valueMeta then modThing.__values[name] = value end
+      if nil == valueMeta then mumThing.__values[name] = value end
       if 'function' == type(value) then
         thingy.func = value
       else
         -- NOTE - invalid values are still stored, this is by design.
-        if not thingy:isValid(module) then
+        if not thingy:isValid(parent) then
 	  for i, v in ipairs(thingy.errors) do
 	    print('ERROR - ' .. v)
 	  end
@@ -589,7 +590,7 @@ Thing.__newindex = function (module, key, value)
     end
   end
 
-  rawset(module, key, value)		-- Stuff it normally.
+  rawset(parent, key, value)		-- Stuff it normally.
 end
 
 Thing.__call = function (func, ...)
@@ -608,12 +609,12 @@ The first argument can be another Thing (the parent), or a string list of names 
 It can be called by itself, with no parent specified -
     thingasm('foo', 'help text)
 
-In this case the surrounding Lua environment becomes the module of foo.
+In this case the surrounding Lua environment becomes the parent of foo.
    If the first argument (or first in the table) is a string, then it's this form.
-All others include the module as the first argument, which would be a table.
+All others include the parent as the first argument, which would be a table.
 
 It can be called by calling the parent as a function -
-    foo('bar', 'some help', types='table')	-- ___call(foo, 'bar', ...)  And now foo is the module.
+    foo('bar', 'some help', types='table')	-- ___call(foo, 'bar', ...)  And now foo is the parent.
     foo.bar{'baz', types='Stuff'}		-- thingasm({foo.bar, 'baz', ...})
     foo.bar.baz{'field0'}			-- thingasm({foo.bar.baz, 'field0'})
     foo.bar.baz{'field1'}
@@ -625,21 +626,21 @@ It can be called by calling the parent as a function -
 thingasm = function (names, ...)
   local params = {...}
   local new = false
-  local module
+  local parent
 
   -- Check how we were called, and re arrange stuff to match.
   if 0 == #params then
     if ('table' == type(names)) then			-- thingasm{...}
       params = names
       names = shiftLeft(params)
-      if 'table' == type(names) then			-- thingasm{module, 'foo', ...}
-        module = names
+      if 'table' == type(names) then			-- thingasm{parent, 'foo', ...}
+        parent = names
         names = shiftLeft(params)
       end
     end							-- thingasm("foo") otherwise
   else
     if 'table' == type(names) then
-      module = names
+      parent = names
       if 'string' == type(...) then    params = {...}	-- C or __call(table, string, ..)
       elseif 'table' == type(...) then params = ...	-- __call(table, table)
       end
@@ -654,33 +655,33 @@ thingasm = function (names, ...)
 
   -- TODO - Double check this comment - No need to bitch and return if no names, this will crash for us.
 
-  -- Grab the environment of the calling function if no module was passed in.
-  module = module or getfenv(2)
-  local modThing = getmetatable(module)
-  if nil == modThing then
-    modThing = {}
-    -- This is how the Thing is stored with the module.
-    setmetatable(module, modThing)
+  -- Grab the environment of the calling function if no parent was passed in.
+  parent = parent or getfenv(2)
+  local mumThing = getmetatable(parent)
+  if nil == mumThing then
+    mumThing = {}
+    mumThing.self = {stuff={}}
+    setmetatable(parent, mumThing)
   end
-  -- Coz at module creation time, Thing is an empty table, and setmetatable(modThing, {__index = Thing}) doesn't do the right thing.
-  -- Also, module might not be an actual module, this might be Stuff.
-  if nil == modThing.__stuff then
+  -- Coz at module creation time, Thing is an empty table, and setmetatable(mumThing, {__index = Thing}) doesn't do the right thing.
+  if nil == mumThing.__values then
     -- Seems this does not deal with __index and __newindex, and also screws up __stuff somehow.
---    setmetatable(modThing, {__index = Thing})
-    modThing.names = {module._NAME or 'NoName'}
-    modThing.__stuff = {}
-    modThing.__values = {}
-    modThing.__index = Thing.__index
-    modThing.__newindex = Thing.__newindex
+--    setmetatable(mumThing, {__index = Thing})
+    mumThing.names = {parent._NAME or 'NoName'}
+    if parent._NAME then mumThing.types = {'Module'} end
+    mumThing.__values = {}
+    mumThing.__index = Thing.__index
+    mumThing.__newindex = Thing.__newindex
   end
 
-  local thingy = modThing.__stuff[name]
+  local thingy = mumThing.self.stuff[name]
   if not thingy then				-- This is a new Thing.
     new = true
     thingy = {}
-    thingy.module = module
     thingy.names = names
-    setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff.
+    thingy.parent = parent
+    thingy.stuff = {}
+    setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
   end
 
   -- Pull out positional arguments.
@@ -695,12 +696,12 @@ thingasm = function (names, ...)
       elseif 'names' == k then
         oldNames = thingy.names
         thingy.names = cvs2table(v)
+      elseif 'required' == k then
+        if isBoolean(v) then  thingy.required = true end
       else                  thingy[k] = v
       end
     end
   end
-
-  thingy.required = isBoolean(thingy.required)
 
   -- Find type, default to string, then break out the other types.
   local typ = type(thingy.default)
@@ -709,58 +710,78 @@ thingasm = function (names, ...)
   if '' == types then types = typ end
   thingy.types = csv2table(types)
 
-  if ('Stuff' == thingy.types[1]) or ('table' == thingy.types[1]) then
+  if 'Stuff' == thingy.types[1] then
+    thingy.types[1] = 'table'
+    thingy.isStuff = true
+  end
+  if 'table' == thingy.types[1] then
     if '' == thingy.default then thingy.default = {} end
-    setmetatable(thingy.default, {__call = Thing.__call})
+    setmetatable(thingy.default, 
+      {
+        self = thingy,
+        parent = parent,
+        names = names,
+        __values = {},
+        __index = Thing.__index,
+        __newindex = Thing.__newindex,
+        __call = Thing.__call, 
+      })
   end
 
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
-    modThing.__stuff[v] = nil
+    mumThing.self.stuff[v] = nil
   end
   for i, v in ipairs(thingy.names) do
-    modThing.__stuff[v] = thingy
+    mumThing.self.stuff[v] = thingy
   end
 
   -- This triggers the Thing.__newindex metamethod above.  If nothing else, it triggers thingy.isValid()
-  if new then module[name] = thingy.default end
+  if new and not mumThing.self.isStuff then parent[name] = thingy.default end
 end
 
 
 fixNames = function (module, name)
   local stuff = getmetatable(module)
-  stuff.names[1] = name
-  for k, v in pairs(stuff.__stuff) do
-    if 'table' == v.types[1] then
-      local name = v.names[1]
-      print(name .. ' -> ' .. name)
-      fixNames(stuff.__values[name], name)
+  if stuff then
+    stuff.names[1] = name
+    for k, v in pairs(stuff.self.stuff) do
+      if 'table' == v.types[1] then
+        local name = v.names[1]
+        print(name .. ' -> ' .. name)
+        fixNames(stuff.__values[name], name)
+      end
     end
   end
 end
 
 
-copy = function (module, name)
+copy = function (parent, name)
   local result = {}
-  local thingy = {}
-  local modThing = getmetatable(module)
+  local stuff = getmetatable(parent).self.stuff
 
-  for k, v in pairs(Thing) do
-    thingy[k] = v
+  for k, v in pairs(stuff) do
+    local temp = {}
+    for l, w in pairs(v) do
+      temp[l] = w
+    end
+    temp[1] = table.concat(temp.names, ',')
+    temp.names = nil
+    temp.types = table.concat(temp.types, ',')
+    temp.errors = nil
+    temp.parent = nil
+    thingasm(result, temp)
   end
+  getmetatable(result).names = {name}
 
-  thingy.__values = {}
-  for k, v in pairs(modThing.__values) do
-    thingy.__values[k] = v
-  end
-
-  thingy.__stuff = modThing.__stuff
-  thingy.module = result
-  thingy.names = {name}
-  setmetatable(thingy, {__index = Thing})
-  setmetatable(result, thingy)
+-- TODO - Should we copy values to?
 
   return result
+end
+
+
+stuff = function (aThingy, aStuff)
+  return getmetatable(aThingy).self.stuff[aStuff]
 end
 
 
@@ -769,7 +790,7 @@ get = function (stuff, key, name)
   if name then
     local thingy = getmetatable(stuff)
     if thingy then
-      local this = thingy.__stuff[key]
+      local this = thingy.self.stuff[key]
       if this then result = this[name] end
     end
   else
@@ -783,7 +804,7 @@ reset = function (stuff, key, name)
   if name then
     local thingy = getmetatable(stuff)
     if thingy then
-      local this = thingy.__stuff[key]
+      local this = thingy.self.stuff[key]
       if this then this[name] = nil end
     end
   else
@@ -796,7 +817,7 @@ set = function (stuff, key, name, value)
   if 'nil' ~= type(value) then
     local thingy = getmetatable(stuff)
     if thingy then
-      local this = thingy.__stuff[key]
+      local this = thingy.self.stuff[key]
       if this then this[name] = value end
     end
   else
