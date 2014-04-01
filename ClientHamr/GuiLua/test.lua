@@ -127,7 +127,7 @@ skang.thingasm{stuff.t, 'c', 'Another sub stufflet'}
 skang.thingasm{stuff, 's', 'A Stuff', types='table'}
 stuff.s{'sa,a', 'A stufflet in a Stuff'}
 stuff.s{'sb,b', 'Another stufflet in a Stuff'}
-skang.thingasm{stuff, 'S', 'A database table of Stuff', types='Stuff'}
+skang.thingasm{stuff, 'S', 'A database table of Stuff', types='Keyed'}
 stuff.S{'field0', 'The first field of the db table.'}
 stuff.S{'field1', 'The second field of the db table.'}
 
@@ -166,7 +166,7 @@ stuff.s = {a=8, sb='9'}
 stuff.s.sb = 44
 print('')
 --stuff.S.record0 = {}
-stuff.S['record0'] = {field0='0', field1='zero'}
+stuff.S['record0'] = {field0=0, field1='zero'}
 stuff.S['record1'] = {field0='1', field1='one'}
 -- TODO - adding a third makes isValid() crash.
 --stuff.S['record2'] = {field0='2', field1='two'}
@@ -216,3 +216,5 @@ print(stuff.S['record1'].field1)
 --skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
 --skang.printTableStart(getmetatable(stuff), '', 'stuff metatable')
 --skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
+
+--skang.printTableStart(getmetatable(test), '', 'test metatable')
