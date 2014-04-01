@@ -161,15 +161,16 @@ test_c.bar = '7'
 stuff.s.sa = true
 stuff.s.sb = 22
 stuff.s.b = 33
--- NOTE - This triggers isValid twice for each table element.
-stuff.s = {a=8, sb='9'}
-stuff.s.sb = 99
 print('')
---stuff.S.record0 = {}
+-- NOTE - This triggers isValid() twice for each table element.
+stuff.s = {a=8, sb='9'}
+print('')
+stuff.s.sb = 99
+-- NOTE - Yet this doesn't trigger isValid() twice.
 stuff.S['record0'] = {field0=0, field1='zero'}
 stuff.S['record1'] = {field0='1', field1='one'}
 -- TODO - adding a third makes isValid() crash.
---stuff.S['record2'] = {field0='2', field1='two'}
+stuff.S['record2'] = {field0='2', field1='two'}
 
 print('')
 
@@ -200,18 +201,19 @@ print(test_c.c)
 print(test_c.cfooble)
 print(stuff.s.sa)
 print(stuff.s.sb)
---skang.printTableStart(stuff.s, '', 'stuff.s')
 print('')
 
+skang.printTableStart(stuff.s, '', 'stuff.s')
 skang.printTableStart(stuff.S, '', 'stuff.S')
+--skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
 
 print(stuff.S['record0'].field1)
-print(stuff.S['record1'].field1)
---print(stuff.S['record2'].field0)
+print(stuff.S['record1'].field0)
+print(stuff.S['record2'].field1)
 
---skang.printTableStart(stuff.S['record0'], '', 'stuff.S[record0]')
---skang.printTableStart(stuff.S['record1'], '', 'stuff.S[record1]')
---skang.printTableStart(stuff.S['record2'], '', 'stuff.S[record2]')
+--skang.printTableStart(getmetatable(stuff.S['record0']), '', 'metatable stuff.S[record0]')
+--skang.printTableStart(getmetatable(stuff.S['record1']), '', 'metatable stuff.S[record1]')
+--skang.printTableStart(getmetatable(stuff.S['record2']), '', 'metatable stuff.S[record2]')
 
 --skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
 --skang.printTableStart(getmetatable(stuff), '', 'stuff metatable')

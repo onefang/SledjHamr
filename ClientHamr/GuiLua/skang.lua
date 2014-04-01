@@ -529,6 +529,23 @@ Thing.remove = function (self)	-- Delete this Thing.
 end
 
 
+getStuffed = function (parent, key)
+  local metaMum = getmetatable(parent)
+  local thingy
+
+  if metaMum and metaMum.__self then
+    thingy = metaMum.__self.stuff[key]
+
+    if not thingy then
+      -- Deal with getting a table entry.
+      if metaMum.__values[key] then
+	thingy = getmetatable(metaMum.__values[key]).__self
+      end
+    end
+  end
+  return metaMum, thingy
+end
+
 local Mum = 
 {
 __index = function (parent, key)
@@ -537,13 +554,10 @@ __index = function (parent, key)
   --        Ah, it was doing isValid() on setStufflet().
 
   -- First see if this is a Thing.
-  local metaMum = getmetatable(parent)
+  local metaMum, thingy = getStuffed(parent, key)
 
-  if metaMum and metaMum.__self then
-    local thingy = metaMum.__self.stuff[key]
-    if thingy then
-      return metaMum.__values[thingy.names[1] ] or thingy.default
-    end
+  if thingy then
+    return metaMum.__values[thingy.names[1] ] or thingy.default
   end
 
   -- Then see if we can inherit it from Thing.
@@ -554,56 +568,50 @@ __newindex = function (parent, key, value)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 
   -- First see if this is a Thing.
-  local metaMum = getmetatable(parent)
+  local metaMum, thingy = getStuffed(parent, key)
 
-  if metaMum and metaMum.__self then
-    local thingy = metaMum.__self.stuff[key]
-
-    if not thingy then
+  if not thingy then
+    if metaMum.__self.isKeyed then
       -- Deal with setting a new Keyed table entry.
-      if metaMum.__self.isKeyed and (nil == metaMum.__values[key]) then
-        local newThing = copy(parent, key)
-	rawset(metaMum.__values, key, newThing)
-	thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).__self.stuff, }
-        setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
-	metaMum.__self.stuff[key] = thingy
-      end
+      local newThing = copy(parent, key)
+      rawset(metaMum.__values, key, newThing)
+      thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).__self.stuff, }
+      setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
     end
+  end
 
-    if thingy then
-      local name = thingy.names[1]
-      local oldMum
+  if thingy then
+    local name = thingy.names[1]
+    local oldMum
 
-      if 'table' == type(value) then
-        -- Coz setting it via metaMum screws with the __index stuff somehow.
-        local oldValue = metaMum.__values[name]
-        if 'table' == type(oldValue) then
-          oldMum = getmetatable(oldValue)
-          if oldMum then
-	    -- TODO - This SHOULD work, but doesn't.
-            --setmetatable(value, oldMum)
-            -- Instead we do this -
-            -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
-            for k, v in pairs(value) do
-              local newK = oldMum.__self.stuff[k]
-              if newK then newK = newK.names[1] else newK = k end
-              oldMum.__values[newK] = v
-            end
-
+    if 'table' == type(value) then
+      -- Coz setting it via metaMum screws with the __index stuff somehow.
+      local oldValue = metaMum.__values[name]
+      if 'table' == type(oldValue) then
+        oldMum = getmetatable(oldValue)
+        if oldMum then
+	  -- TODO - This SHOULD work, but doesn't.
+          --setmetatable(value, oldMum)
+          -- Instead we do this -
+          -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
+          for k, v in pairs(value) do
+            local newK = oldMum.__self.stuff[k]
+            if newK then newK = newK.names[1] else newK = k end
+            oldMum.__values[newK] = v
           end
         end
       end
-      if nil == oldMum then metaMum.__values[name] = value end
-        -- NOTE - invalid values are still stored, this is by design.
-      if not thingy:isValid(parent) then
-	for i, v in ipairs(thingy.errors) do
-	  print('ERROR - ' .. v)
-	end
-      end
-      -- TODO - Go through it's linked things and set them to.
-      -- Done, don't fall through to the rawset()
-      return
     end
+    if nil == oldMum then metaMum.__values[name] = value end
+    -- NOTE - invalid values are still stored, this is by design.
+    if not thingy:isValid(parent) then
+      for i, v in ipairs(thingy.errors) do
+        print('ERROR - ' .. v)
+      end
+    end
+    -- TODO - Go through it's linked things and set them to.
+    -- Done, don't fall through to the rawset()
+    return
   end
 
   rawset(parent, key, value)		-- Stuff it normally.
