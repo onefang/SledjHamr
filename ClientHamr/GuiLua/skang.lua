@@ -452,6 +452,7 @@ TODO -
       Should be in __values I guess.
 	__values[key].value
 	__values[key].parent
+    Weak references might help in here somewhere.
 ]]
 
 
