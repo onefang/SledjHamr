@@ -166,8 +166,9 @@ stuff.s = {a=8, sb='9'}
 stuff.s.sb = 44
 print('')
 --stuff.S.record0 = {}
-stuff.S.record0 = {field0=0, field1='zero'}
---stuff.S['record1'] = {field0='1', field1='one'}
+stuff.S['record0'] = {field0='0', field1='zero'}
+stuff.S['record1'] = {field0='1', field1='one'}
+-- TODO - adding a third makes isValid() crash.
 --stuff.S['record2'] = {field0='2', field1='two'}
 
 print('')
@@ -202,10 +203,10 @@ print(stuff.s.sb)
 --skang.printTableStart(stuff.s, '', 'stuff.s')
 print('')
 
---skang.printTableStart(stuff.S, '', 'stuff.S')
+skang.printTableStart(stuff.S, '', 'stuff.S')
 
 print(stuff.S['record0'].field1)
---print(stuff.S['record1'].field1)
+print(stuff.S['record1'].field1)
 --print(stuff.S['record2'].field0)
 
 --skang.printTableStart(stuff.S['record0'], '', 'stuff.S[record0]')
@@ -215,4 +216,3 @@ print(stuff.S['record0'].field1)
 --skang.printTableStart(getmetatable(stuff.s), '', 'stuff.s metatable')
 --skang.printTableStart(getmetatable(stuff), '', 'stuff metatable')
 --skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
---skang.printTableStart(skang.stuff(stuff, 'S'), '', 'stuff.S Thing')

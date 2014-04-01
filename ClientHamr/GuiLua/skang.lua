@@ -522,8 +522,7 @@ Thing.__index = function (parent, key)
   end
 
   -- Then see if we can inherit it from Thing.
-  thingy = Thing[key]
-  return thingy
+  return Thing[key]
 end
 
 Thing.__newindex = function (parent, key, value)
@@ -532,8 +531,6 @@ Thing.__newindex = function (parent, key, value)
 
   if mumThing and mumThing.self then
     -- This is a proxy table, the values never exist in the real table.  In theory.
-print('__newindex ' .. mumThing.names[1] .. ' = ' .. key)
---printTableStart(mumThing, '', 'mumThing')
 
     -- Find the Thing and get it done.
     local thingy = mumThing.self.stuff[key]
@@ -541,22 +538,17 @@ print('__newindex ' .. mumThing.names[1] .. ' = ' .. key)
     if not thingy then
       -- Deal with setting a new Stuff[key].
       if mumThing.self.isStuff and (nil == mumThing.__values[key]) then
-print('__newindex NEW stufflet ' .. key)
-	rawset(mumThing.__values, key, copy(parent, key))
---printTableStart(getmetatable(parent).self, '', 'parent thing')
---printTableStart(mumThing.__values[key], '', 'stufflet')
---printTableStart(getmetatable(mumThing.__values[key]), '', 'stufflet metatable?')
---printTableStart(getmetatable(mumThing.__values[key]).self, '', 'stufflet thing?')
-	mumThing.self.stuff[key] = {names={key}, types={'table'}, parent=mumThing.__values[key], stuff=getmetatable(mumThing.__values[key]).self, }
-
+        local newThing = copy(parent, key)
+	rawset(mumThing.__values, key, newThing)
+	thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).self.stuff, }
+        setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
+	mumThing.self.stuff[key] = thingy
       end
     end
 
     if thingy then
       local name = thingy.names[1]
       local valueMeta
-
---printTableStart(thingy, '', 'thingy')
 
       if 'table' == type(value) then
         -- Coz setting it via mumThing screws with the __index stuff somehow.
