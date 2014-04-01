@@ -163,7 +163,7 @@ stuff.s.sb = 22
 stuff.s.b = 33
 -- NOTE - This triggers isValid twice for each table element.
 stuff.s = {a=8, sb='9'}
-stuff.s.sb = 44
+stuff.s.sb = 99
 print('')
 --stuff.S.record0 = {}
 stuff.S['record0'] = {field0=0, field1='zero'}

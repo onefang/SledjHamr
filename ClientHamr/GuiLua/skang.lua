@@ -572,24 +572,28 @@ __newindex = function (parent, key, value)
 
     if thingy then
       local name = thingy.names[1]
-      local valueMeta
+      local oldMum
 
       if 'table' == type(value) then
         -- Coz setting it via metaMum screws with the __index stuff somehow.
         local oldValue = metaMum.__values[name]
         if 'table' == type(oldValue) then
-          valueMeta = getmetatable(oldValue)
-          if valueMeta then
+          oldMum = getmetatable(oldValue)
+          if oldMum then
+	    -- TODO - This SHOULD work, but doesn't.
+            --setmetatable(value, oldMum)
+            -- Instead we do this -
             -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
             for k, v in pairs(value) do
-              local newK = valueMeta.__self.stuff[k]
+              local newK = oldMum.__self.stuff[k]
               if newK then newK = newK.names[1] else newK = k end
-              valueMeta.__values[newK] = v
+              oldMum.__values[newK] = v
             end
+
           end
         end
       end
-      if nil == valueMeta then metaMum.__values[name] = value end
+      if nil == oldMum then metaMum.__values[name] = value end
         -- NOTE - invalid values are still stored, this is by design.
       if not thingy:isValid(parent) then
 	for i, v in ipairs(thingy.errors) do
