@@ -850,11 +850,10 @@ end
 thingasm('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
 thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
 thingasm('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
+thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally left blank. ]] end)
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.
-nada = function () end
-
 clear = function ()
 end
 window = function (width, height, title)
@@ -867,7 +866,6 @@ end
 quit = function ()
 end
 
-thingasm('nada',	'Do nothing.',					nada)
 thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
 thingasm('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
 thingasm('module',	'Load a module.',				module, 'file,acl')
