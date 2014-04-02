@@ -27,7 +27,7 @@ this.func(1, 'two')
 print('code')
 
 -- A variable that is private to this module.
-local fool
+local fool = 22
 
 -- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thingasm{}.
 

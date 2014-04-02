@@ -141,7 +141,12 @@ end
 
 -- Restore the environment.
 moduleEnd = function (module)
-  -- TODO - Look for _NAME.properties, and load it into the modules Things.
+  -- See if there is a properties file, and run it in the modules environment.
+  local properties = loadfile(module._NAME .. '.properties')
+  if properties then
+    setfenv(properties, getfenv(2))
+    properties()
+  end
   -- TODO - Parse command line parameters at some point.
   --        http://stackoverflow.com/questions/3745047/help-locate-c-sample-code-to-read-lua-command-line-arguments
   if module.isLua then setfenv(2, module.savedEnvironment) end
