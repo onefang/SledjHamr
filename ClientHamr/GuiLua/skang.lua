@@ -162,10 +162,12 @@ end
 
 -- Call this now so that from now on, this is like any other module.
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
--- TODO - While it is possible to get LuaJIT version info, need to load the 'jit' module, which wont work so well if we are not in LuaJIT.
---        local jit = require 'jit';  jit.version;  jit.version_num;  jit.os;  jit.arch
-print('Skang is running under Lua version ' .. _VERSION)
-
+-- This works coz LuaJIT automatically loads the jit module.
+if type(jit) == 'table' then
+  print('Skang is being run by ' .. jit.version .. ' under ' .. jit.os .. ' on a ' .. jit.arch)
+else
+  print('Skang is being run by Lua version ' .. _VERSION)
+end
 
 
 function printTableStart(table, space, name)
