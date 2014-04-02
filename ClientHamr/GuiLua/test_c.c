@@ -15,7 +15,6 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 
 #include <lua.h>
 #include <lauxlib.h>
-//#include <lualib.h>
 
 
 static const char *ourName = "test_c";
@@ -88,7 +87,7 @@ int luaopen_test_c(lua_State *L)
   skang = lua_gettop(L);
 //  dumpStack(L, skang);
 
-// local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, true)
+// local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, false)
   lua_getfield(L, skang, "moduleBegin");
   lua_pushstring(L, ourName);
   lua_pushnil(L);				// Author comes from copyright.
@@ -117,7 +116,8 @@ int luaopen_test_c(lua_State *L)
 // TODO - This is too verbose.  I've had an idea for writing some sort of generic wrapper, though others have done the same.
 //          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
 
-// skang.thing('cfooble,c', 'Help text goes here', 1, 'number', \"'edit', 'The fooble:', 1, 1, 10, 50\", true)
+// This uses function{} style.
+// skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The fooble:', 1, 1, 10, 50\", required=true}
   lua_getfield(L, skang, "thingasm");
   i = 1;
   lua_newtable(L);
@@ -143,7 +143,7 @@ int luaopen_test_c(lua_State *L)
   lua_setfield(L, -2, "required");
   lua_call(L, 1, 0);
 
-// skang.thing('cbar', 'Help text', 'Default')
+// skang.thing(_M, 'cbar', 'Help text', 'Default')
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cbar");
@@ -151,13 +151,13 @@ int luaopen_test_c(lua_State *L)
   lua_pushstring(L, "Default");
   lua_call(L, 4, 0);
 
-// skang.thing('cfoo')
+// skang.thingasm(_M, 'cfoo')
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cfoo");
   lua_call(L, 2, 0);
 
-// skang.thing('cfunc', 'Help Text', ffunc, 'number,string')
+// skang.thingasm(_M, 'cfunc', 'cfunc does nothing really', cfunc, 'number,string')
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cfunc");
