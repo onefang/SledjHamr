@@ -3,7 +3,7 @@
 TODO - see if this still works if it's an app instead of a library.
 
 
-Seems to be several problems with linking in various OSes, heres some
+Seems to be several problems with linking in various OSes, here's some
 possibly helpful links -
 
 http://lua.2524044.n2.nabble.com/C-Lua-modules-not-compatible-with-every-Lua-interpreter-td7647522.html
@@ -54,11 +54,11 @@ static void dumpStack(lua_State *L, int i)
 /* local test_c = require 'test_c'
 
 Lua's require() function will strip any stuff from the front of the name
-separated by a hyphen, so 'GuiLua-test_c' -> 'test_c'.  Then it will
-search through a path, and eventually find this test_c.so (or test_c.dll
-or whatever), then call luaopen_test_c(), which should return a table. 
-The argument (only thing on the stack) for this function will be
-'test_c'.
+separated by a hyphen, so 'ClientHamr-GuiLua-test_c' -> 'test_c'.  Then
+it will search through a path, and eventually find this test_c.so (or
+test_c.dll or whatever), then call luaopen_test_c(), which should return
+a table.  The argument (only thing on the stack) for this function will
+be 'test_c'.
 
 Normally luaL_register() creates a table of functions, that is the table
 returned, but we want to do something different with skang.
@@ -78,11 +78,8 @@ int luaopen_test_c(lua_State *L)
 // The only locals we care about are skang and _M.
 // All modules go into package.loaded[name] as well.
 // skang is essentially a global anyway.
-// _M we pass back as the result, and our functions get added to it by skang.thing()
-//   Not entirely true, skang.things is a proxy table, skang.things.ffunc.func would be our function.
-//   skang.things.ffunc.module is our _M ('environment of our calling function', so that's the 'environment' right here, since we call skang.thing().
-// test_c.ffunc()  ->  test_c.__index(test_c, 'ffunc')  ->  skang.things[ffunc].value()  ->  test_c.c->ffunc()
-//                                                          this is a C function, not a Lua function
+// _M we pass back as the result, and our functions get added to it by skang.thingasm()
+//   Not entirely true, _M is a proxy table, getmetatable(_M).__values[cfunc] would be our function.
 
 // local skang = require 'skang'
   lua_getglobal(L, "require");

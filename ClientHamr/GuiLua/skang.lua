@@ -237,7 +237,31 @@ isBoolean = function (aBoolean)
 end
 
 
---[[ Stuff package
+--[[ Thing Java package
+
+matrix-RAD had Thing as the base class of everything.
+
+Each "users session" (matrix-RAD term that came from Java
+applets/servlets) has a ThingSpace, which is a tree that holds
+everything else.  It holds the class cache, commands, loaded modules,
+variables and their values, widgets and their states.  In matrix-RAD I
+built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees.
+
+Other Thing things are -
+    get/set	The getter and setter.
+    number	No idea how this was useful.
+    skang	The owning object, a Skang (actually got this, called module for now).
+    owner	The owning object, a String (module._NAME).
+    clas	Class of the Thing, a Class.  (pointless)
+    type	Class of the Thing, a String.  (pointless)
+    realType	Real Class of the Thing, a String.  (pointless)
+    myRoot	ThingSpace we are in, a ThingSpace.
+
+    Also various functions to wrap checking the security, like canDo, canRead, etc.
+]]
+
+
+--[[ Stuff Java package
 
 In matrix-RAD Stuff took care of multi value Things, like database rows.
 
@@ -258,148 +282,6 @@ In Lua, setting up stuff has been folded into the general Thing stuff.
 ]]
 
 
---[[ Thing package
-
-matrix-RAD had Thing as the base class of everything.  Lua doesn't have
-inheritance as such, but an inheritance structure can be built using
-Lua's meta language capabilities.  I think we still need this sort of
-thing.  Java inheritance and interfaces where used.  There's quite a few
-variations of OO support has been written for Lua, maybe some of that
-could be used?  http://lua-users.org/wiki/ObjectOrientedProgramming
-
-Other useful links -
-
-http://lua-users.org/wiki/ClassesViaModules (not in the above for some reason.
-http://lua-users.org/wiki/MetamethodsTutorial
-http://lua-users.org/wiki/MetatableEvents
-
-http://lua-users.org/wiki/MechanismNotPolicy
-http://www.inf.puc-rio.br/~roberto/pil2/chapter15.pdf
-http://lua-users.org/lists/lua-l/2011-10/msg00485.html
-http://lua-users.org/wiki/LuaModuleFunctionCritiqued
-
-On the other hand, Thing as such might just vanish and merge into
-various Lua and metatable things.  Seems that's what is going on.  We
-didn't really need much OO beyond this anyway.
-
-Each "users session" (matrix-RAD term that came from Java
-applets/servlets) has a ThingSpace, which is a tree that holds
-everything else.  It holds the class cache, commands, loaded modules,
-variables and their values, widgets and their states.  In matrix-RAD I
-built BonsiaTree and LeafLike, for the old FDO system I built dumbtrees. 
-Perhaps some combination of the two will work here?  On the other hand,
-with Lua tables, who needs trees?  lol
-
-Since skang Lua scripts should be defined as modules, we can use
-module semantics instead of get/set -
-
-local other = require('otherPackageName')
-other.foo = 'stuff'
-bar = other.foo
-
-Other Thing things are -
-    get/set	The getter and setter.
-    number	No idea how this was useful.
-    skang	The owning object, a Skang (actually got this, called module for now).
-    owner	The owning object, a String (module._NAME).
-    clas	Class of the Thing, a Class.  (pointless)
-    type	Class of the Thing, a String.  (pointless)
-    realType	Real Class of the Thing, a String.  (pointless)
-    myRoot	ThingSpace we are in, a ThingSpace.
-
-    Also various functions to wrap checking the security, like canDo, canRead, etc.
-]]
-
-
---[[ TODO
-  NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
-
-
-  Widget -
-    Merging widgets might work to.  B-)
-    This does make the entire "Things with the same name link automatically" deal work easily, since they ARE the same Thing.
-
-    Widgets get a type as well, which would be label, button, edit, grid, etc.
-    A grid could even have sub types - grid,number,string,button,date.  B-)
-    A required widget might mean that the window HAS to have one.
-    Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'.
-
-	skang.thing('foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, '', '"button", "The foo :"' 1, 1, 10, 50')
-	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
-	myButton:colour(1, 2, 3, 4)
-	-- Use generic positional / named arguments for widget to, then we can do -
-	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, look='edit.edj', colour={blue=20}, action='...'}
-	-- Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
-	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, l='edit.edj', c={b=20}, a='...'}
-	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
-	myButton = 'Not default'	-- myEditor and foo change to.  Though now foo is a command, not a parameter, so maybe don't change that.
-	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
-	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
-	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
-	quitter:action('quit')
-
-
-   Squeal -
-     squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
-       local db = require 'someDbThing'	  ->  Same as above, only the database details are encodode in the someDbThing source, OR come from someDbThing.properties.
-     db:getTable('stuff', 'someTable')	  ->  Grabs the metadata, but not the rows.
-     db:read('stuff', 'select * from someTable'}  ->  Fills stuff up with several rows, including setting up the metadata for the columns.
-       stuff[1].field1                    ->  Is a Thing, with a stuff in the stuff metatable, that was created automatically from the database meta data.
-     stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
-       stuff = db:read('stuff', 'select * from someTable where key='someIndex')
-
-     stuff:write()			  ->  Write all rows to the database table.
-     stuff:write(1)			  ->  Write one row  to the database table.
-     stuff:stuff('field1').isValid = someFunction	-- Should work, all stuff[key] shares the same stuff.
-     stuff:isValid(db)			  ->  Validate the entire stuff against it's metadata at least.
-     window.stuff = stuff		  ->  Window gets stuff as it's default stuff, any widgets with same names as the table fields get linked.
-     grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
-     choice.stuff = stuff		  ->  As in grid, but only using the keys.
-     widget.stuff = stuff:stuff('field1')	  ->  This widget gets a particular stufflet.
-       widget would have to look up getmetatable(window.stuff).parent.  Or maybe this should work some other way?
-
-     In all these cases above, stuff is a table that has a Thing metatable, so it has stuff.
-       It is also a Stuff.
-       Should include some way of specifyings details like key name, where string, etc.
-         getmetatable(stuff).__keyName
-         getmetatable(stuff).__squeal.where
-       And a way to link this database table to others, via the key of the other, as a field in this Stuff.
-         stuff:stuff('field0').__link = {parent, key, index}
-       In Java we had this -
-
-public class PersonStuff extends SquealStuff
-{
-
-...
-
-	public final static String FULLNAME = "fullname";
-
-	public static final String keyField = "ID";       // Name of key field/s.
-	public static final String where    = keyField + "='%k'";
-	public static final String listName = "last";
-	public static final String tables   = "PEOPLE";
-	public static final String select   = null;
-	public static final String stufflets[] =
-	{
-		keyField,
-		"PASSWD_ID|net.matrix_rad.squeal.PasswdStuff|,OTHER",
-		"QUALIFICATION_IDS|net.matrix_rad.people.QualificationStuff|,OTHER",
-		"INTERESTING_IDS|net.matrix_rad.people.InterestingStuff|,OTHER",
-		"title",
-		"first",
-		"middle",
-		"last",
-		"suffix",
-
-...
-
-		FULLNAME + "||,VARCHAR,512"
-	};
-}
-
-]]
-
-
 --[[  Thing structure -
 
 In the following, meta(table) is short for getmetatable(table).
@@ -415,6 +297,11 @@ meta(table).__index and __newindex only work on table entries that don't exist.
     Though if __newindex is a table, then try __newindex[key] = value.
 Using both __index and __newindex, and keeping the actual values elsewhere, is called a proxy table.
 meta(table).__call(table, ...) is called when trying to access table as a function - table(...).
+
+It's worth repeating -
+All variables in Lua are in some table somewhere, even if it's just the global environment table.
+Metatables are only associated vith values, not variables.
+Lua can only attach metatables to values that are tables, but C can attach metatables to any value.
 
 
 A Thing is a managed variable stored in a parent proxy table, which is usually empty.
@@ -847,9 +734,11 @@ set = function (stuff, key, name, value)
   end
 end
 
-thingasm('get',	'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
+thingasm('get',		'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
 thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
-thingasm('set',	'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
+thingasm('set',		'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
+
+
 thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally left blank. ]] end)
 
 
@@ -877,7 +766,6 @@ moduleEnd(_M)
 
 end
 
--- NOTE - We have swapped acl and boss around from the Java version, since boss was usually blank.
 -- Boss is the person that owns a Thing.
 
 --[[  The original Skang parameters and commands.
@@ -1034,6 +922,151 @@ GGG GUI Thing, but servlets can access them across the net.
 
 For servlet only modules from an applet, the applet only loads the skanglet class, using it for all
 access to the module.
+]]
+
+
+--[[ TODO
+  NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
+
+
+  Widget -
+    Should include functions for actually dealing with widgets, plus a way
+    of creating widgets via introspection.  Should also allow access to
+    widget internals via table access.  Lua code could look like this -
+
+    foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here :")
+    -- Method style.
+    foo:colour(255, 255, 255, 0, 0, 100, 255, 0)
+    foo:hide()
+    foo:action("skang.load(some/skang/file.skang)")
+    -- Table style.
+    foo.action = "skang.load('some/skang/file.skang')"
+    foo.colour.r = 123
+    foo.look('some/edje/file/somewhere.edj')
+    foo.help = 'This is a widget for labelling some foo.'
+
+    For widgets with "rows", which was handled by Stuff in skang, we could
+    maybe use the Lua concat operator via metatable.  I think that works by
+    having the widget (a table) on one side of the concat or the other, and
+    the metatable function gets passed left and right sides, then must
+    return the result.  Needs some experimentation, but this might look like
+    this -
+
+    this.bar = this.bar .. 'new choice'
+    this.bar = 'new first choice' .. this.bar
+
+
+    Widgets get a type as well, which would be label, button, edit, grid, etc.
+    A grid could even have sub types - grid,number,string,button,date.  B-)
+    A required widget might mean that the window HAS to have one.
+    Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'.
+
+	skang.thing('foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, '', '"button", "The foo :"' 1, 1, 10, 50')
+	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
+	myButton:colour(1, 2, 3, 4)
+	-- Use generic positional / named arguments for widget to, then we can do -
+	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, look='edit.edj', colour={blue=20}, action='...'}
+	-- Using the Thing alias stuff, maybe we can do the "first stage tokenise" step after all -
+	myEditor = skang.widget{'foo', "edit", "Edit foo :", 5, 15, 10, 100, l='edit.edj', c={b=20}, a='...'}
+	myEditor:colour(1, 2, 3, 4, 5, 6, 7, 8)
+	myButton = 'Not default'	-- myEditor and foo change to.  Though now foo is a command, not a parameter, so maybe don't change that.
+	-- Though the 'quit' Thing could have a function that does quitting, this is just an example of NOT linking to a Thing.
+	-- If we had linked to this theoretical 'quit' Thing, then pushing that Quit button would invoke it's Thing function.
+	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+	quitter:action('quit')
+
+    coordinates and sizes
+
+    Originally skang differentiated between pixels and character cells,
+    using plain integers to represent pixels, and _123 to represent
+    character cells.  The skang TODO wanted to expand that to percentages
+    and relative numbers.  We can't use _123 in Lua, so some other method
+    needs to be used.  Should include those TODO items in this new design.
+
+    Specifying character cells should be done as strings - "123"
+
+    Percentages can be done as small floating point numbers between 0 and 1,
+    which is similar to Edje.  Since Lua only has a floating point number
+    type, both 0 and 1 should still represent pixels / character cells -
+
+    0.1, 0.5, "0.2", "0.9"
+
+    Relative numbers could be done as strings, with the widget to be
+    relative to, a + or -, then the number.  This still leaves the problem
+    of telling if the number is pixels or character cells.  Also, relative
+    to what part of the other widget?  Some more thought needs to be put
+    into this.
+
+    Another idea for relative numbers could be to have a coord object with
+    various methods, so we could have something like -
+
+    widget:bottom(-10):right(5)	-- 10 pixels below the bottom of widget, 5 pixels to the right of the right edge of widget.
+    widget:width("12")		-- 12 characters longer than the width of widget.
+
+
+   Squeal -
+     Squeal was the database driver interface for SquealStuff, the database
+     version of Stuff.  Maybe we could wrap esskyuehl?  Not really in need of
+     database stuff for now, but should keep it in mind.
+     For SquealStuff, the metadata would be read from the SQL database automatically.
+
+     squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
+       local db = require 'someDbThing'	  ->  Same as above, only the database details are encodode in the someDbThing source, OR come from someDbThing.properties.
+     db:getTable('stuff', 'someTable')	  ->  Grabs the metadata, but not the rows.
+     db:read('stuff', 'select * from someTable'}  ->  Fills stuff up with several rows, including setting up the metadata for the columns.
+       stuff[1].field1                    ->  Is a Thing, with a stuff in the stuff metatable, that was created automatically from the database meta data.
+     stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
+       stuff = db:read('stuff', 'select * from someTable where key='someIndex')
+
+     stuff:write()			  ->  Write all rows to the database table.
+     stuff:write(1)			  ->  Write one row  to the database table.
+     stuff:stuff('field1').isValid = someFunction	-- Should work, all stuff[key] shares the same stuff.
+     stuff:isValid(db)			  ->  Validate the entire stuff against it's metadata at least.
+     window.stuff = stuff		  ->  Window gets stuff as it's default stuff, any widgets with same names as the table fields get linked.
+     grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
+     choice.stuff = stuff		  ->  As in grid, but only using the keys.
+     widget.stuff = stuff:stuff('field1')	  ->  This widget gets a particular stufflet.
+       widget would have to look up getmetatable(window.stuff).parent.  Or maybe this should work some other way?
+
+     In all these cases above, stuff is a table that has a Thing metatable, so it has stuff.
+       It is also a Stuff.
+       Should include some way of specifyings details like key name, where string, etc.
+         getmetatable(stuff).__keyName
+         getmetatable(stuff).__squeal.where
+       And a way to link this database table to others, via the key of the other, as a field in this Stuff.
+         stuff:stuff('field0').__link = {parent, key, index}
+       In Java we had this -
+
+public class PersonStuff extends SquealStuff
+{
+
+...
+
+	public final static String FULLNAME = "fullname";
+
+	public static final String keyField = "ID";       // Name of key field/s.
+	public static final String where    = keyField + "='%k'";
+	public static final String listName = "last";
+	public static final String tables   = "PEOPLE";
+	public static final String select   = null;
+	public static final String stufflets[] =
+	{
+		keyField,
+		"PASSWD_ID|net.matrix_rad.squeal.PasswdStuff|,OTHER",
+		"QUALIFICATION_IDS|net.matrix_rad.people.QualificationStuff|,OTHER",
+		"INTERESTING_IDS|net.matrix_rad.people.InterestingStuff|,OTHER",
+		"title",
+		"first",
+		"middle",
+		"last",
+		"suffix",
+
+...
+
+		FULLNAME + "||,VARCHAR,512"
+	};
+}
+
 ]]
 
 

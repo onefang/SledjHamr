@@ -101,73 +101,12 @@ Currently this is in skang.lua, but should bring this in here later.
 
 Currently Stuff is in skang.lua, but should bring this in here later.
 
-Squeal was the database driver interface for SquealStuff, the database
-version of Stuff.  Maybe we could wrap esskyuehl?  Not really in need of
-database stuff for now, but should keep it in mind.
-
-For SquealStuff, the metadata would be read from the SQL database
-autamatically.
-
 */
 
 
 /* widget package
 
-Should include functions for actually dealing with widgets, plus a way
-of creating widgets via introspection.  Should also allow access to
-widget internals via table access.  Lua code could look like this -
-
-foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here :")
--- Method style.
-foo:colour(255, 255, 255, 0, 0, 100, 255, 0)
-foo:hide()
-foo:action("skang.load(some/skang/file.skang)")
--- Table style.
-foo.action = "skang.load('some/skang/file.skang')"
-foo.colour.r = 123
-foo.look('some/edje/file/somewhere.edj')
-foo.help = 'This is a widget for labelling some foo.'
-
-For widgets with "rows", which was handled by Stuff in skang, we could
-maybe use the Lua concat operator via metatable.  I think that works by
-having the widget (a table) on one side of the concat or the other, and
-the metatable function gets passed left and right sides, then must
-return the result.  Needs some experimentation, but this might look like
-this -
-
-this.bar = this.bar .. 'new choice'
-this.bar = 'new first choice' .. this.bar
-
-*/
-
-
-/* coordinates and sizes
-
-Originally skang differentiated between pixels and character cells,
-using plain integers to represent pixels, and _123 to represent
-character cells.  The skang TODO wanted to expand that to percentages
-and relative numbers.  We can't use _123 in Lua, so some other method
-needs to be used.  Should include those TODO items in this new design.
-
-Specifying character cells should be done as strings - "123"
-
-Percentages can be done as small floating point numbers between 0 and 1,
-which is similar to Edje.  Since Lua only has a floating point number
-type, both 0 and 1 should still represent pixels / character cells -
-
-0.1, 0.5, "0.2", "0.9"
-
-Relative numbers could be done as strings, with the widget to be
-relative to, a + or -, then the number.  This still leaves the problem
-of telling if the number is pixels or character cells.  Also, relative
-to what part of the other widget?  Some more thought needs to be put
-into this.
-
-Another idea for relative numbers could be to have a coord object with
-various methods, so we could have something like -
-
-widget:bottom(-10):right(5)	-- 10 pixels below the bottom of widget, 5 pixels to the right of the right edge of widget.
-widget:width("12")		-- 12 characters longer than the width of widget.
+Currently widget design is in skang.lua, but should bring this in here later.
 
 */
 

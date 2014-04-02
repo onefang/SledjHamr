@@ -162,14 +162,13 @@ stuff.s.sa = true
 stuff.s.sb = 22
 stuff.s.b = 33
 print('')
--- NOTE - This triggers isValid() twice for each table element.
+-- TODO - This triggers isValid() twice for each table element.
 stuff.s = {a=8, sb='9'}
 print('')
 stuff.s.sb = 99
 -- NOTE - Yet this doesn't trigger isValid() twice.
 stuff.S['record0'] = {field0=0, field1='zero'}
 stuff.S['record1'] = {field0='1', field1='one'}
--- TODO - adding a third makes isValid() crash.
 stuff.S['record2'] = {field0='2', field1='two'}
 
 print('')
