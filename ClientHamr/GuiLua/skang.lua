@@ -438,8 +438,6 @@ local Mum =
 {
 __index = function (parent, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
-  -- TODO - Java skang called isValid() on get().  On the other hand, doesn't seem to call it on set(), but calls it on append().
-  --        Ah, it was doing isValid() on setStufflet().
 
   -- First see if this is a Thing.
   local metaMum, thingy = getStuffed(parent, key)
@@ -478,10 +476,13 @@ __newindex = function (parent, key, value)
       if 'table' == type(oldValue) then
         oldMum = getmetatable(oldValue)
         if oldMum then
-	  -- TODO - This SHOULD work, but doesn't.
+	  -- TODO - This SHOULD work, but doesn't -
           --setmetatable(value, oldMum)
           -- Instead we do this -
-          -- TODO - This wont clear out any values in the old table that are not in the new table.  Should it?
+          -- Clear out any values in the old table.
+          for k, v in pairs(oldMum.__values) do
+            oldMum.__values[k] = nil
+          end
           for k, v in pairs(value) do
             local newK = oldMum.__self.stuff[k]
             if newK then newK = newK.names[1] else newK = k end
@@ -506,7 +507,7 @@ __newindex = function (parent, key, value)
 end,
 
 __call = function (func, ...)
-  return thingasm(func, ...)		-- (func, {...})
+  return thingasm(func, ...)
 end,
 
 }
