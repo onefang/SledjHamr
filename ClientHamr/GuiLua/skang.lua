@@ -332,6 +332,12 @@ A parent is free to use it's own name space for anything it wants.
 Only the variables it specifies as managed Things are dealt with here.
 
 
+Things that are tables are treated differently, in two different ways even.
+Ordinary table Things are basically treated recursively, the table is a parent, and it gets it's own Things.
+There is also 'Keyed' type table Things, where the keys to this table are arbitrary, but we still want to store Things in it.
+In this case, when a table is assigned to this Keyed Thing, via a new key, a new table Thing is created by copying the parent Thing description.
+
+
 TODO - 
     test.foo  ->  test.__index(test, 'foo')  ->  test.__values[foo];  if that's nil, and test.stuff[foo], then return an empty table instead?
     stuff.s = {a='foo'}  ->  changes a, deletes everything else, or should.

@@ -1,11 +1,16 @@
 GuiLua is basically a redo of my ancient Java based matrix-RAD system,
-but using Lua and EFL.  The ultimate goal is for the various ClientHamr
-parts to be able to either host their own UI, or have it hosted in the
-in world 3D window.  Matrix-RAD's ability to run either server or client
-side, with no change to the code, is great for this sort of thing.  If I
-can manage the ability to "tear off" windows, in other words, pull them
-out of the 3D window to be real windows, then that's something people
-have been asking for from LL forever.
+but using Lua and EFL.  Lua is entirely different from Java, and Lua
+doesn't run in web browsers, so this version has similar concepts, and
+similar names, it's not exactly the same.  It's more accurate to say
+this is in the spirit of matrix-RAD.
+
+The ultimate goal is for the various ClientHamr parts to be able to
+either host their own UI, or have it hosted in the in world 3D window. 
+Matrix-RAD's ability to run either server or client side, with no change
+to the code, is great for this sort of thing.  If I can manage the
+ability to "tear off" windows, in other words, pull them out of the 3D
+window to be real windows, then that's something people have been asking
+for from LL forever.
 
 Stdin/out might be good to use.  Extantz starts up "client" programs,
 with a "use stdin/out" argument, the clients pass skang commands (open
@@ -37,6 +42,10 @@ Initially GuiLua can wrap elementary / evas, with the goal of wrapping
 NAWS, just like matrix-RAD was originally planned.  Then I can put off
 writing NAWS for another decade.  lol
 
+Might be nice to have a wrapper that is a web server that generates
+standard HTML forms.  No JavaScript, no HTML5, just plain old,
+compatible with everything, HTML forms.
+
 
 Design notes
 ------------
@@ -47,7 +56,9 @@ probably can deal with that though, I'm not familiar enough with them to
 know.  Eo on the other hand allegedly offers introspection, which was
 always the corner stone of matrix-RAD.  So access to elementary widgets
 via Eo might be possible.  That's kinda the entire hook I'm hoping will
-help to make matrix-RAD style stuff work as well as it did there.
+help to make matrix-RAD style stuff work as well as it did there. 
+Apparently when they promised introspection with Eo, they meant compile
+time, not run time.
 
 Edje Lua is restricted to scripts in edje files, AND sandboxed to those
 edje files as well.  We want to step outside that sandbox, and run stand
