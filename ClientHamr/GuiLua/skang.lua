@@ -147,7 +147,64 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
   return _M
 end
 
--- Restore the environment.
+
+--[[ Parse command line parameters.
+
+This is done in two parts.  Skang will do an initial scan and tokenise,
+then each module gets a chance to pull it's own stuff from the result.
+
+Make the command line parameter getting MUCH more intelligent, try to support the common 
+command line interfaces -
+
+arg value
+a value
+/arg value
+/a value
+--arg value
+--a value
+-a value
+-ab  ('a' and 'b' are both shortcuts.)
+arg=value
+a=value
+arg1=value1&arg2=value2
+arg1=value1|arg2=value2
+a=value1&a=value2
++arg/-arg  (Can't support this generically.)
+
+Ignore /,-,--,& except as arg introducers. Use = as value introducer.  Expect 
+arg or a.  If type is String, expect a value.  If type is integer, and next token is 
+not an integer, increment current value, otherwise expect integer value.  If type is
+boolean, value beginning with T, t, F, f, etc is true, otherwise value is false, unless 
+next token starts with an introducer, then value is true.
+
+TODO - Finish supporting all of the above.
+]]
+
+ARGS = {}
+lua = ''
+command = ''
+
+-- Do an initial scan and tokenise of the command line arguments.
+scanArguments = function (args)
+  if args then
+    lua = args[-1]
+    command = args[0]
+    for i, v in ipairs(args) do
+      local pre = ''
+      if '--' == string.sub(v, 1, 2) then pre = '--';  v = string.sub(v, 3, -1) end
+      if '-'  == string.sub(v, 1, 1) then pre = '-';   v = string.sub(v, 2, -1) end
+      if '+'  == string.sub(v, 1, 1) then pre = '+';   v = string.sub(v, 2, -1) end
+      if '/'  == string.sub(v, 1, 1) then pre = '/';   v = string.sub(v, 2, -1) end
+      if '='  == string.sub(v, 1, 1) then pre = '=';   v = string.sub(v, 2, -1) end
+      if '&'  == string.sub(v, 1, 1) then pre = '&';   v = string.sub(v, 2, -1) end
+      if '|'  == string.sub(v, 1, 1) then pre = '|';   v = string.sub(v, 2, -1) end
+      ARGS[i] = {pre, v}
+    end
+  end
+end
+
+
+-- Restore the environment, and grab paramateres from standard places.
 moduleEnd = function (module)
   -- See if there is a properties file, and run it in the modules environment.
   local properties = loadfile(module._NAME .. '.properties')
@@ -155,19 +212,82 @@ moduleEnd = function (module)
     setfenv(properties, getfenv(2))
     properties()
   end
-  -- TODO - Parse command line parameters at some point.
-  --        http://stackoverflow.com/questions/3745047/help-locate-c-sample-code-to-read-lua-command-line-arguments
+
+  -- Look for our command line arguments.
+  local metaMum = getmetatable(module)
+  if metaMum and metaMum.__self then
+    for i, v in ipairs(ARGS) do
+      if v[2] then
+        local thingy = metaMum.__self.stuff[v[2] ]
+        -- Did we find one of ours?
+        if thingy then
+          local value = ARGS[i + 1]
+
+          if 'string' == thingy.types[1] then
+            if value then
+              module[v[2] ] = value[2]
+              value[2] = nil	-- Mark it as used.
+            else
+              print('ERROR - Expected a string value for ' .. thingy.names[1])
+            end
+          end
+
+          if 'number' == thingy.types[1] then
+            if value then
+              -- If the introducer is '-', then this should be a negative number.
+              if '-' == value[1] then value[1] = '';  value[2] = '-' .. value[2] end
+              -- Only parse the next value as a number if it doesn't have an introducer.
+              if ('' == value[1]) or ('=' == value[1]) then
+                value[2] = tonumber(value[2])
+                if value[2] then
+                  module[v[2] ] = value[2]
+                  value[2] = nil	-- Mark it as used.
+                else
+                  print('ERROR - Expected a number value for ' .. thingy.names[1])
+                end
+              else
+                module[v[2] ] = module[v[2] ] + 1
+              end
+            else
+              print('ERROR - Expected a number value for ' .. thingy.names[1])
+            end
+          end
+
+          if 'boolean' == thingy.types[1] then
+            if value then
+              -- Only parse the next value as a boolean if it doesn't have an introducer.
+              if ('' == value[1]) or ('=' == value[1]) then
+                module[v[2] ] = isBoolean(value[2])
+                value[2] = nil	-- Mark it as used.
+              else
+                module[v[2] ] = true
+              end
+            else
+              print('ERROR - Expected a boolean value for ' .. thingy.names[1])
+            end
+          end
+
+          v[2] = nil		-- Mark it as used.
+        end
+      end
+    end
+  end
+
   if module.isLua then setfenv(2, module.savedEnvironment) end
 end
 
+
 -- Call this now so that from now on, this is like any other module.
 local _M = moduleBegin('skang', 'David Seikel', 'Copyright 2014 David Seikel', '0.1', '2014-03-27 02:57:00')
+
 -- This works coz LuaJIT automatically loads the jit module.
 if type(jit) == 'table' then
   print('Skang is being run by ' .. jit.version .. ' under ' .. jit.os .. ' on a ' .. jit.arch)
 else
   print('Skang is being run by Lua version ' .. _VERSION)
 end
+
+scanArguments(arg)
 
 
 function printTableStart(table, space, name)
