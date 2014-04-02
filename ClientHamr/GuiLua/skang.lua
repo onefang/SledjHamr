@@ -867,7 +867,7 @@ quit = function ()
 end
 
 thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
-thingasm('window',	'The size and title of the application Frame.',	window, 'x,y,name', nil, nil, 'GGG')
+thingasm{'window',	'The size and title of the application Frame.',	window, 'x,y,name', acl='GGG'}
 thingasm('module',	'Load a module.',				module, 'file,acl')
 thingasm('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
 thingasm('quit',	'Quit, exit, remove thyself.',			quit)
