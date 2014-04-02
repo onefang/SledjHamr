@@ -151,7 +151,7 @@ end
 --[[ Parse command line parameters.
 
 This is done in two parts.  Skang will do an initial scan and tokenise,
-then each module gets a chance to pull it's own stuff from the result.
+then each module gets a chance to pull it's own Things from the result.
 
 Make the command line parameter getting MUCH more intelligent, try to support the common 
 command line interfaces -
@@ -178,6 +178,16 @@ boolean, value beginning with T, t, F, f, etc is true, otherwise value is false,
 next token starts with an introducer, then value is true.
 
 TODO - Finish supporting all of the above.
+       -ab - Perhaps check for single character aliases, and if one matches, replace '-ab' with '-b'.
+             If a match is found, and there's letters left, DON'T mark it as used.
+             If it was the last one that was replaced, then check if there's a value after it.
+       These all need deeper parsing, but we dunno if they might have been inside quoted strings from the shell.
+         arg=value
+         arg = value
+         arg1=value1&arg2=value2
+         arg1=value1|arg2=value2
+       On the other hand, 
+         --arg = value  ->  --arg value
 ]]
 
 ARGS = {}
@@ -198,7 +208,7 @@ scanArguments = function (args)
       if '='  == string.sub(v, 1, 1) then pre = '=';   v = string.sub(v, 2, -1) end
       if '&'  == string.sub(v, 1, 1) then pre = '&';   v = string.sub(v, 2, -1) end
       if '|'  == string.sub(v, 1, 1) then pre = '|';   v = string.sub(v, 2, -1) end
-      ARGS[i] = {pre, v}
+      if '' ~= v then ARGS[i] = {pre, v} end
     end
   end
 end
