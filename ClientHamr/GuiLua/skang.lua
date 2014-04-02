@@ -348,79 +348,73 @@ TODO -
     Weak references might help in here somewhere.
 ]]
 
-
 -- There is no ThingSpace, or Stuff, now it's all just in this meta table.
-local Thing = {}
+local Thing =
+{
+-- Default Thing values.
+  names = {'unknown'},
+  help = 'No description supplied.',	-- help text describing this Thing.
+  default = '',			-- The default value.  This could be a funcion, making this a command.
+  types = {},			-- A list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
+  required = false,		-- Is this thing is required.  TODO - Maybe fold this into types somehow, or acl?
+  widget = '',			-- Default widget command arguments for creating this Thing as a widget.
+--  acl = '',			-- Access Control List defining security restrains.
+--  boss = '',			-- The Thing or person that owns this Thing, otherwise it is self owned.
 
--- Default things values.
--- help		- help text describing this Thing.
--- default	- the default value.  This could be a funcion, making this a command.
--- types	- a comma separated list of types.  The first is the type of the Thing itself, the rest are for multi value Things.  Or argument types for commands.
--- widget	- default widget command arguments for creating this Thing as a widget.
--- required	- "boolean" to say if this thing is required.  TODO - Maybe fold this into types somehow, or acl?
--- acl		- Access Control List defining security restrains.
--- boss		- the Thing or person that owns this Thing, otherwise it is self owned.
-Thing.names = {'unknown'}
-Thing.help = 'No description supplied.'
-Thing.default = ''
-Thing.types = {}
-Thing.required = false
---Thing.acl = ''
---Thing.boss = ''
+  action = 'nada',		-- An optional action to perform.
+  tell = '',			-- The skang command that created this Thing.
+  pattern = '.*',		-- A pattern to restrict values.
 
-Thing.action = 'nada'		-- An optional action to perform.
-Thing.tell = ''			-- The skang command that created this Thing.
-Thing.pattern = '.*'		-- A pattern to restrict values.
+  isKeyed = false,		-- Is this thing an arbitrarily Keyed table?
+  isReadOnly = false,		-- Is this Thing read only?
+  isServer = false,		-- Is this Thing server side?
+  isStub = false,		-- Is this Thing a stub?
+  isStubbed = false,		-- Is this Thing stubbed elsewhere?
 
-Thing.isKeyed = false		-- Is this thing an arbitrarily Keyed table?
-Thing.isReadOnly = false	-- Is this Thing read only?
-Thing.isServer = false		-- Is this Thing server side?
-Thing.isStub = false		-- Is this Thing a stub?
-Thing.isStubbed = false		-- Is this Thing stubbed elsewhere?
+  hasCrashed = 0,		-- How many times this Thing has crashed.
 
-Thing.hasCrashed = 0		-- How many times this Thing has crashed.
+  append = function (self,data)	-- Append to the value of this Thing.
+  end,
 
-Thing.append = function (self,data)	-- Append to the value of this Thing.
-end
+  stuff = {},			-- The sub things this Thing has, for modules, tables, and Keyed tables.
+  errors = {},			-- A list of errors returned by isValid().
 
-Thing.stuff = {}		-- The sub things this Thing has, for modules, tables, and Keyed tables.
-Thing.errors = {}		-- A list of errors returned by isValid().
+  isValid = function (self, parent)	-- Check if this Thing is valid, return resulting error messages in errors.
+    -- Anything that overrides this method, should call this super method first.
+    local name = self.names[1]
+    local metaMum = getmetatable(parent)
+    local value = metaMum.__values[name]
+    local mum = metaMum.__self.names[1]
 
-Thing.isValid = function (self, parent)	-- Check if this Thing is valid, return resulting error messages in errors.
-  -- Anything that overrides this method, should call this super method first.
-  local name = self.names[1]
-  local metaMum = getmetatable(parent)
-  local value = metaMum.__values[name]
-  local mum = metaMum.__self.names[1]
-
-  local t = type(value) or 'nil'
-  self.errors = {}
-  -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
-  if 'nil' == t then
-    if self.required then table.insert(self.errors, mum .. '.' .. name .. ' is required!') end
-  else
-    if self.types[1] ~= t then table.insert(self.errors, mum .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
+    local t = type(value) or 'nil'
+    self.errors = {}
+    -- TODO - Naturally there should be formatting functions for stuffing Thing stuff into strings, and overridable output functions.
+    if 'nil' == t then
+      if self.required then table.insert(self.errors, mum .. '.' .. name .. ' is required!') end
     else
-      if 'number' == t then value = '' .. value end
-      if ('number' == t) or ('string' == t) then
-        if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, mum .. '.' .. name .. ' does not match pattern "' .. self.pattern .. '"!') end
+      if self.types[1] ~= t then table.insert(self.errors, mum .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
+      else
+        if 'number' == t then value = '' .. value end
+        if ('number' == t) or ('string' == t) then
+          if 1 ~= string.find(value, '^' .. self.pattern .. '$') then table.insert(self.errors, mum .. '.' .. name .. ' does not match pattern "' .. self.pattern .. '"!') end
+        end
       end
     end
-  end
 
-  for k, v in pairs(self.stuff) do
-    if not v:isValid(value) then
-      for i, w in ipairs(v.errors) do
-        table.insert(self.errors,  w)
+    for k, v in pairs(self.stuff) do
+      if not v:isValid(value) then
+        for i, w in ipairs(v.errors) do
+          table.insert(self.errors,  w)
+        end
       end
     end
-  end
 
-  return #(self.errors) == 0
-end
+    return #(self.errors) == 0
+  end,
 
-Thing.remove = function (self)	-- Delete this Thing.
-end
+  remove = function (self)	-- Delete this Thing.
+  end,
+}
 
 
 getStuffed = function (parent, key)
