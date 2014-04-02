@@ -883,7 +883,7 @@ client.  Mostly it all happenes automatically through the ACLs.
 Bouncer is the Java skang security manager, it extended the Java
 SecurityManager.  Lua has no such thing, though C code running stuff in
 a sandbox does a similar job.  Fascist is the Java security supervisor,
-again should go inot the C sandbox.
+again should go into the C sandbox.
 
 Human is used for authenticating a human, Puter for authenticating a
 computer, Suits for corporate style authentication, and they all
@@ -926,7 +926,7 @@ access to the module.
 
 
 --[[ TODO
-  NOTE that skang.thing{} doesn't care what other names you pass in, they all get assigned to the thing.
+  NOTE that skang.thingasm{} doesn't care what other names you pass in, they all get assigned to the Thing.
 
 
   Widget -
@@ -934,7 +934,7 @@ access to the module.
     of creating widgets via introspection.  Should also allow access to
     widget internals via table access.  Lua code could look like this -
 
-    foo = widget.label(0, "0.1", 0.5, 0, 'Text goes here :")
+    foo = widget('label', 0, "0.1", 0.5, 0, 'Text goes here :")
     -- Method style.
     foo:colour(255, 255, 255, 0, 0, 100, 255, 0)
     foo:hide()
@@ -945,23 +945,14 @@ access to the module.
     foo.look('some/edje/file/somewhere.edj')
     foo.help = 'This is a widget for labelling some foo.'
 
-    For widgets with "rows", which was handled by Stuff in skang, we could
-    maybe use the Lua concat operator via metatable.  I think that works by
-    having the widget (a table) on one side of the concat or the other, and
-    the metatable function gets passed left and right sides, then must
-    return the result.  Needs some experimentation, but this might look like
-    this -
-
-    this.bar = this.bar .. 'new choice'
-    this.bar = 'new first choice' .. this.bar
-
-
     Widgets get a type as well, which would be label, button, edit, grid, etc.
-    A grid could even have sub types - grid,number,string,button,date.  B-)
+    A grid could even have sub types - grid,number,string,button,date.
     A required widget might mean that the window HAS to have one.
     Default for a widget could be the default creation arguments - '"Press me", 1, 1, 10, 50'.
 
-	skang.thing('foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, '', '"button", "The foo :"' 1, 1, 10, 50')
+    skang.thingasm{'myButton', types='Button', rectangle={1, 1, 10, 50}, title='Press me', ...}
+
+	skang.thingasm('foo,s,fooAlias', 'Foo is a bar, not the drinking type.', function () print('foo') end, '', '"button", "The foo :"' 1, 1, 10, 50')
 	myButton = skang.widget('foo')	-- Gets the default widget creation arguments.
 	myButton:colour(1, 2, 3, 4)
 	-- Use generic positional / named arguments for widget to, then we can do -
@@ -975,7 +966,18 @@ access to the module.
 	quitter = skang.widget(nil, 'button', 'Quit', 0.5, 0.5, 0.5, 0.5)
 	quitter:action('quit')
 
-    coordinates and sizes
+    For widgets with "rows", which was handled by Stuff in skang, we could
+    maybe use the Lua concat operator via metatable.  I think that works by
+    having the widget (a table) on one side of the concat or the other, and
+    the metatable function gets passed left and right sides, then must
+    return the result.  Needs some experimentation, but it might look like
+    this -
+
+    this.bar = this.bar .. 'new choice'
+    this.bar = 'new first choice' .. this.bar
+
+
+    coordinates and sizes -
 
     Originally skang differentiated between pixels and character cells,
     using plain integers to represent pixels, and _123 to represent
@@ -1000,8 +1002,8 @@ access to the module.
     Another idea for relative numbers could be to have a coord object with
     various methods, so we could have something like -
 
-    widget:bottom(-10):right(5)	-- 10 pixels below the bottom of widget, 5 pixels to the right of the right edge of widget.
-    widget:width("12")		-- 12 characters longer than the width of widget.
+    button:bottom(-10):right(5)	-- 10 pixels below the bottom of button, 5 pixels to the right of the right edge of button.
+    button:width("12")		-- 12 characters longer than the width of button.
 
 
    Squeal -
@@ -1010,26 +1012,25 @@ access to the module.
      database stuff for now, but should keep it in mind.
      For SquealStuff, the metadata would be read from the SQL database automatically.
 
-     squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a module.
+     squeal.database('db', 'host', 'someDb', 'user', 'password')  ->  Should return a Squeal Thing.
        local db = require 'someDbThing'	  ->  Same as above, only the database details are encodode in the someDbThing source, OR come from someDbThing.properties.
      db:getTable('stuff', 'someTable')	  ->  Grabs the metadata, but not the rows.
      db:read('stuff', 'select * from someTable'}  ->  Fills stuff up with several rows, including setting up the metadata for the columns.
-       stuff[1].field1                    ->  Is a Thing, with a stuff in the stuff metatable, that was created automatically from the database meta data.
+       stuff[1].field1                    ->  Is a Thing, with a proper metatable, that was created automatically from the database meta data.
      stuff:read('someIndex')		  ->  Grabs a single row that has the key 'someIndex', or perhaps multiple rows since this might have SQL under it.
        stuff = db:read('stuff', 'select * from someTable where key='someIndex')
 
      stuff:write()			  ->  Write all rows to the database table.
      stuff:write(1)			  ->  Write one row  to the database table.
-     stuff:stuff('field1').isValid = someFunction	-- Should work, all stuff[key] shares the same stuff.
-     stuff:isValid(db)			  ->  Validate the entire stuff against it's metadata at least.
-     window.stuff = stuff		  ->  Window gets stuff as it's default stuff, any widgets with same names as the table fields get linked.
+     stuff:stuff('field1').isValid = someFunction	-- Should work, all stuff[key] share the same Thing description.
+     stuff:isValid(db)			  ->  Validate the entire Thing against it's metadata at least.
+     window.stuff = stuff		  ->  Window gets stuff as it's default 'Keyed' table, any widgets with same names as the table fields get linked.
      grid.stuff   = stuff		  ->  Replace contents of this grid widget with data from all the rows in stuff.
      choice.stuff = stuff		  ->  As in grid, but only using the keys.
      widget.stuff = stuff:stuff('field1')	  ->  This widget gets a particular stufflet.
        widget would have to look up getmetatable(window.stuff).parent.  Or maybe this should work some other way?
 
-     In all these cases above, stuff is a table that has a Thing metatable, so it has stuff.
-       It is also a Stuff.
+     In all these cases above, stuff is a 'Keyed' table that has a Thing metatable, so it has sub Things.
        Should include some way of specifyings details like key name, where string, etc.
          getmetatable(stuff).__keyName
          getmetatable(stuff).__squeal.where
