@@ -340,7 +340,6 @@ In this case, when a table is assigned to this Keyed Thing, via a new key, a new
 
 TODO - 
     test.foo  ->  test.__index(test, 'foo')  ->  test.__values[foo];  if that's nil, and test.stuff[foo], then return an empty table instead?
-    stuff.s = {a='foo'}  ->  changes a, deletes everything else, or should.
     Do we still need a parent pointer?
       Should be in __values I guess.
 	__values[key].value
