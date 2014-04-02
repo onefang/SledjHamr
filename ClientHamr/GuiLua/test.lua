@@ -29,7 +29,7 @@ print('code')
 -- A variable that is private to this module.
 local fool
 
--- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thing{}.
+-- TODO - Could have a table of tables, and ipair through the top level, passing the inner ones to skang.thingasm{}.
 
 skang.thingasm{'fooble,f', 'Help text goes here', 1, widget='"edit", "The fooble:", 1, 1, 10, 50', required=true}
 skang.thingasm('bar', 'Help text', "Default")
