@@ -4,25 +4,13 @@ do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
-#!/usr/bin/env skang     -- Lua allows this shell hack.
+  local widget = require 'widget'
 
--- There's an implied local this = require 'test'
--- There's an implied local skang = require 'skang'
-
-local widget = require 'widget'
--- local other = require 'otherPackageName'
-
-skang.clear
-skang.window(200, 200, "G'day planet.")
-
-quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
-quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
-
---other.foo = 'stuff'
-this.bar = 'things'
-this.func(1, 'two')
+  skang.clear
+  skang.window(200, 200, "G'day planet.")
+  quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
+  quitter:action('quit')
 ]])
-
 
 print('code')
 
@@ -53,6 +41,10 @@ local test_c = require 'test_c'
 local copy = skang.copy(test, 'copy')
 
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.get(test, 'ffunc', 'help') .. ' ->> ' .. skang.get(test, 'f', 'action'))
+
+print(test.DEFAULT_SKANG)
+print('')
+
 print('foo = ' .. test.foo .. ' ->> ' .. skang.get(test, 'foo', 'help'))
 print('cfooble = ' .. test_c.cfooble .. ' ->> ' .. skang.get(test_c, 'cfooble', 'help') .. '[' .. skang.get(test_c, 'cfooble', 'widget') .. ']')
 print('cfunc  ->> ' .. skang.get(test_c, 'cfunc', 'help'))

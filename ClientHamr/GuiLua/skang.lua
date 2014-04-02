@@ -116,7 +116,15 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
   end
   _M.VERSION = version .. versionName .. timestamp
   _M.VERSION_DESC = versionDesc
-  -- TODO - If there's no skin passed in, try to find the file skin .. '.skang' and load that instead.
+  -- If there is a .skang file, read that in and override the passed in skin.
+  local f = io.open(name .. '.skang')
+  if f then
+    skin = f:read('*l')
+    if '#' == string.sub(skin, 1, 1) then skin = '' end
+    skin = skin .. f:read('*a')
+    f:close()
+  end
+  if skin then skin = "local skang = require 'skang'\nlocal this = require 'test'\n" .. skin end
   _M.DEFAULT_SKANG = skin
 
   --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
