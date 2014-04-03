@@ -512,8 +512,8 @@ TODO -
       I think this is what matrix-RAD Collisions was all about.
     Skang command line should have standardish stuff, like --version, --help, --help module.thing.
       Lua does these already, might be no need to do them ourselves -
-        -e 'some script'.
-        -i go interactive after running the -e script.
+        -e 'some code'.
+        -i go interactive after running the script.
         -v version.
         - read from stdin non interactively.
       LuaJIT has this -
