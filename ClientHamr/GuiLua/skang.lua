@@ -507,6 +507,17 @@ TODO -
 	__values[key].value
 	__values[key].parent
     Weak references might help in here somewhere.
+    Maybe try looking in the skang table for Things that are not found?
+    Maybe put Things in the skang table that are unique from modules?
+      I think this is what matrix-RAD Collisions was all about.
+    Skang command line should have standardish stuff, like --version, --help, --help module.thing.
+      Lua does these already, might be no need to do them ourselves -
+        -e 'some script'.
+        -i go interactive after running the -e script.
+        -v version.
+        - read from stdin non interactively.
+      LuaJIT has this -
+        -- stop processing options.
 ]]
 
 -- There is no ThingSpace, or Stuff, now it's all just in this meta table.
