@@ -178,16 +178,11 @@ boolean, value beginning with T, t, F, f, etc is true, otherwise value is false,
 next token starts with an introducer, then value is true.
 
 TODO - Finish supporting all of the above.
-       -ab - Perhaps check for single character aliases, and if one matches, replace '-ab' with '-b'.
-             If a match is found, and there's letters left, DON'T mark it as used.
-             If it was the last one that was replaced, then check if there's a value after it.
-       These all need deeper parsing, but we dunno if they might have been inside quoted strings from the shell.
-         arg=value
-         arg = value
-         arg1=value1&arg2=value2
-         arg1=value1|arg2=value2
-       On the other hand, 
-         --arg = value  ->  --arg value
+         These all need deeper parsing, but we dunno if they might have been inside quoted strings from the shell.
+           arg=value			Shell.
+           arg1=value1&arg2=value2	For URLs.
+           arg1=value1|arg2=value2	Can't remember why, probably the old skang multivalue syntax.
+       Test it all.
 ]]
 
 ARGS = {}
@@ -213,6 +208,51 @@ scanArguments = function (args)
   end
 end
 
+parseType = function (module, thingy, v, value)
+  if 'string' == thingy.types[1] then
+    if value then
+      module[v[2] ] = value[2]
+      value[2] = nil	-- Mark it as used.
+    else
+      print('ERROR - Expected a string value for ' .. thingy.names[1])
+    end
+  end
+
+  if 'number' == thingy.types[1] then
+    if value then
+      -- If the introducer is '-', then this should be a negative number.
+      if '-' == value[1] then value[1] = '';  value[2] = '-' .. value[2] end
+      -- Only parse the next value as a number if it doesn't have an introducer.
+      if ('' == value[1]) or ('=' == value[1]) then
+        value[2] = tonumber(value[2])
+        if value[2] then
+          module[v[2] ] = value[2]
+          value[2] = nil	-- Mark it as used.
+        else
+          print('ERROR - Expected a number value for ' .. thingy.names[1])
+        end
+      else
+        module[v[2] ] = module[v[2] ] + 1
+      end
+    else
+      print('ERROR - Expected a number value for ' .. thingy.names[1])
+    end
+  end
+
+  if 'boolean' == thingy.types[1] then
+    if value then
+      -- Only parse the next value as a boolean if it doesn't have an introducer.
+      if ('' == value[1]) or ('=' == value[1]) then
+        module[v[2] ] = isBoolean(value[2])
+        value[2] = nil	-- Mark it as used.
+      else
+        module[v[2] ] = true
+      end
+    else
+      print('ERROR - Expected a boolean value for ' .. thingy.names[1])
+    end
+  end
+end
 
 -- Restore the environment, and grab paramateres from standard places.
 moduleEnd = function (module)
@@ -231,53 +271,30 @@ moduleEnd = function (module)
         local thingy = metaMum.__self.stuff[v[2] ]
         -- Did we find one of ours?
         if thingy then
-          local value = ARGS[i + 1]
-
-          if 'string' == thingy.types[1] then
-            if value then
-              module[v[2] ] = value[2]
-              value[2] = nil	-- Mark it as used.
-            else
-              print('ERROR - Expected a string value for ' .. thingy.names[1])
-            end
-          end
-
-          if 'number' == thingy.types[1] then
-            if value then
-              -- If the introducer is '-', then this should be a negative number.
-              if '-' == value[1] then value[1] = '';  value[2] = '-' .. value[2] end
-              -- Only parse the next value as a number if it doesn't have an introducer.
-              if ('' == value[1]) or ('=' == value[1]) then
-                value[2] = tonumber(value[2])
-                if value[2] then
-                  module[v[2] ] = value[2]
-                  value[2] = nil	-- Mark it as used.
-                else
-                  print('ERROR - Expected a number value for ' .. thingy.names[1])
-                end
-              else
-                module[v[2] ] = module[v[2] ] + 1
-              end
-            else
-              print('ERROR - Expected a number value for ' .. thingy.names[1])
-            end
-          end
-
-          if 'boolean' == thingy.types[1] then
-            if value then
-              -- Only parse the next value as a boolean if it doesn't have an introducer.
-              if ('' == value[1]) or ('=' == value[1]) then
-                module[v[2] ] = isBoolean(value[2])
-                value[2] = nil	-- Mark it as used.
-              else
-                module[v[2] ] = true
-              end
-            else
-              print('ERROR - Expected a boolean value for ' .. thingy.names[1])
-            end
-          end
-
+          parseType(module, thingy, v, ARGS[i + 1])
           v[2] = nil		-- Mark it as used.
+        else
+          -- Didn't find one directly, check for single letter matches in '-abc'.
+          for k, w in pairs(metaMum.__self.stuff) do
+            if 1 == #w.names[1] then
+              for j = 1, #v[2] do
+                if string.sub(v[2], j, 1) == w.names[1] then
+                  if 1 == j then
+                    v[2] = string.sub(v[2], 2, -1)
+                    if 'boolean' == w.types[1] then module[v[2] ] = true end
+                  elseif #v[2] == j then 
+                    v[2] = string.sub(v[2], 1, j - 1)
+                    -- The one at the end is the only one that could have a following value.
+                    parseType(module, w, v, ARGS[i + 1])
+                  else
+                    v[2] = string.sub(v[2], 1, j - 1) .. string.sub(v[2], j + 1, -1)
+                    if 'boolean' == w.types[1] then module[v[2] ] = true end
+                  end
+                  if '' == v[2] then v[2] = nil end	-- Mark it as used.
+                end
+              end
+            end
+          end
         end
       end
     end
