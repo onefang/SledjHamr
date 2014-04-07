@@ -1,7 +1,7 @@
 --[[ TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
 C will let us -
-  Use Ecore's main loop.
   Actually do the widget stuff.
+  Use Ecore's main loop.
   Slap meta tables on all value types.
     Which lets us put the meta table on the variable, instead of on the table, which I think is cleaner.
   Figure out the directory separator.
@@ -95,7 +95,13 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
 			-- Should do this before any further require(), so that circular references don't blow out.
 
   -- Save the callers environment.
-  local savedEnvironment = getfenv(level)
+  local savedEnvironment
+  if isLua then
+    savedEnvironment = getfenv(level)
+  else
+    -- While the above works fine for test_c, it doesn't for GuiLua.  Odd.
+    savedEnvironment = getfenv(1)
+  end
 
   -- Clone the environment into _M, so the module can access everything as usual after the setfenv() below.
   --[[ TODO - Check if this also clones _G or _ENV.  And see if it leaks stuff in either direction.
