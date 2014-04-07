@@ -608,6 +608,13 @@ end
 
 local Mum = 
 {
+--[[ From an email by Mike Pall -
+"Important: create the metatable and its metamethods once and reuse
+the _same_ metatable for _every_ instance."
+
+This is for LuaJIT, he's the author, and concerns performance.
+]]
+
 __index = function (parent, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
 
