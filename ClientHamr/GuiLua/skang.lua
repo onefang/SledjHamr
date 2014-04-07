@@ -1102,6 +1102,298 @@ GGG GUI Thing, but servlets can access them across the net.
 
 For servlet only modules from an applet, the applet only loads the skanglet class, using it for all
 access to the module.
+
+
+Lua Security best practices -
+
+  From an email by Mike Pall -
+
+"The only reasonably safe way to run untrusted/malicious Lua scripts is
+to sandbox it at the process level. Everything else has far too many
+loopholes."
+
+http://lua-users.org/lists/lua-l/2011-02/msg01595.html
+http://lua-users.org/lists/lua-l/2011-02/msg01609.html
+http://lua-users.org/lists/lua-l/2011-02/msg01097.html
+http://lua-users.org/lists/lua-l/2011-02/msg01106.html
+
+So that's processes, not threads like LuaProc does.  B-(
+
+However, security in depth is good, so still worthwhile looking at it from other levels as well.
+
+General solution is to create a new environment, which we are doing
+anyway, then whitelist the safe stuff into it, instead of blacklisting
+unsafe stuff.  Coz you never know if new unsafe stuff might exist.
+
+Different between 5.1 (setfenv) and 5.2 (_ENV)
+
+http://lua-users.org/wiki/SandBoxes -
+
+------------------------------------------------------
+-- make environment
+local env =  -- add functions you know are safe here
+{
+  ipairs = ipairs,
+  next = next,
+  pairs = pairs,
+  pcall = pcall,
+  tonumber = tonumber,
+  tostring = tostring,
+  type = type,
+  unpack = unpack,
+  coroutine = { create = coroutine.create, resume = coroutine.resume, 
+      running = coroutine.running, status = coroutine.status, 
+      wrap = coroutine.wrap },
+  string = { byte = string.byte, char = string.char, find = string.find, 
+      format = string.format, gmatch = string.gmatch, gsub = string.gsub, 
+      len = string.len, lower = string.lower, match = string.match, 
+      rep = string.rep, reverse = string.reverse, sub = string.sub, 
+      upper = string.upper },
+  table = { insert = table.insert, maxn = table.maxn, remove = table.remove, 
+      sort = table.sort },
+  math = { abs = math.abs, acos = math.acos, asin = math.asin, 
+      atan = math.atan, atan2 = math.atan2, ceil = math.ceil, cos = math.cos, 
+      cosh = math.cosh, deg = math.deg, exp = math.exp, floor = math.floor, 
+      fmod = math.fmod, frexp = math.frexp, huge = math.huge, 
+      ldexp = math.ldexp, log = math.log, log10 = math.log10, max = math.max, 
+      min = math.min, modf = math.modf, pi = math.pi, pow = math.pow, 
+      rad = math.rad, random = math.random, sin = math.sin, sinh = math.sinh, 
+      sqrt = math.sqrt, tan = math.tan, tanh = math.tanh },
+  os = { clock = os.clock, difftime = os.difftime, time = os.time },
+}
+
+-- run code under environment [Lua 5.1]
+local function run(untrusted_code)
+  if untrusted_code:byte(1) == 27 then return nil, "binary bytecode prohibited" end
+  local untrusted_function, message = loadstring(untrusted_code)
+  if not untrusted_function then return nil, message end
+  setfenv(untrusted_function, env)
+  return pcall(untrusted_function)
+end
+
+-- run code under environment [Lua 5.2]
+local function run(untrusted_code)
+  local untrusted_function, message = load(untrusted_code, nil, 't', env)
+  if not untrusted_function then return nil, message end
+  return pcall(untrusted_function)
+end
+------------------------------------------------------
+
+Also includes a table of safe / unsafe stuff.
+
+
+While whitelisting stuff, could also wrap unsafe stuff to make them more safe.
+
+print()		-> should reroute to our output widgets.
+rawget/set()	-> don't bypass the metatables, but gets tricky and recursive.
+require		-> don't allow bypassing the sandbox to get access to restricted modules
+package.loaded	-> ditto
+
+
+Other things to do -
+
+debug.sethook() can be used to call a hook every X lines, which can help with endless loops and such.
+Have a custom memory allocater, like edje_lua2 does.
+
+------------------------------------------------------
+------------------------------------------------------
+
+The plan -
+
+  Process level -
+    Have a Lua script runner C program / library.
+    It does the LuaProc thing, and the edje_lua2 memory allocater thing.
+    Other code feeds scripts to it via a pipe.
+      Unless they are using this as a library.
+    It can be chrooted, ulimited, LXC containered, etc.
+    It has an internal watchdog thread.
+    The truly paranoid can have a watchdog timer process watch it.
+      Watches for a "new Lua state pulled off the queue" signal.
+      This could be done from the App that spawned it.
+
+    It runs a bunch of worker threads, with a queue of ready Lua states.
+    Each Lua state being run has lua_sethook() set to run each X lines, AND a watchdog timer set.
+      If either is hit, then the Lua state is put back on the queue.
+      (Currently LuaProc states go back an the queue when waiting for a "channel message", which does a lua_yeild().)
+      NOTE - apparently "compiled code" bypasses hooks, though there's an undocumented LuaJIT compile switch for that.  http://lua-users.org/lists/lua-l/2011-02/msg01106.html
+      EFL is event based.
+      LSL is event based.
+      LuaSL is event based.
+      Java skang is event based, with anything that has long running stuff overriding runBit().
+        Coz Java AWT is event based, the "events" are over ridden methods in each widget class.
+      Should all work if we keep this as event based.
+      An "event" is a bit of Lua script in a string, at Input trust level usually.
+    Configurable for this script runner is -
+      IP address & port, or pipe name.
+      Security level to run at, defaults to Network.
+      Number of worker threads, defaults to number of CPUs.
+      Memory limit per Lua state.
+      Lines & time per tick for Lua states.
+
+  Different levels of script trust -
+    System	-  the local skang and similar stuff.
+		-> No security at all.
+    App		-  Lua scripts and C from the running application.
+		-> Current module level security.
+		    Each has it's own environment, with no cross environment leakage.
+		    Runs in the Apps process, though that might be the script runner as a library.
+		    Or could be skang's main loop.
+    Local	-  Lua scripts and skang files sent from the client apps running on the same system.
+		-> As per App.
+		    Runs in a script runner, maybe?  Or just the Apps script runner.
+		    Limit OS and file stuff, the client app can do those itself.
+    Network	-  Lua scripts and skang files sent from the network.
+		-> Runs in a script runner.
+		    Option to chroot it, ulimit it, etc.
+		    Heavily Lua sandboxed via environment.
+		    It can access nails, but via network derived credentials.
+		    Can have very limited local storage, not direct file access though, but via some sort of security layer.
+		    Can have network access.
+		    Can have GUI access, but only to it's own window.
+    Config	-  Lua scripts run as configuration files.
+		-> Almost empty local environment, can really only do math and set Things.
+    Input	-  Lua scripts run as a result of hitting skang widgets on the other end of a socket.
+		-> As per Config, but can include function calls.
+		   Also would need sanitizing, as this can come from the network.
+    Microsoft	-  Not to be trusted at all.
+    Apple	-  Don't expect them to trust us.
+
+  NOTE - edje_lua2 would be roughly Local trust level.
+
+  So we need to be able to pass Lua between processes -
+    Have to be able to do it from C, from Lua, and from Lua embedded in C.
+    edje_lua2	- uses Edje messages / signals.
+    LuaSL	- uses Ecore_Con, in this case a TCP port, even though it's only local.
+		    LuaSL mainloop for it's scripts is to basically wait for these messages from LuaProc.
+		    Which yield's until we get one.
+		    Eventually gets Lua code as a string -> loadstring() -> setfenv() -> pcall()
+		    The pcall returns a string that we send back as a LuaProc message.
+    Extantz	- we want to use stdin/stdout for the pipe, but otherwise LuaSL style semantics.
+
+  Hmm, Extantz could run external skang modules in two ways -
+    Run the module as a separate app, with stdin/stdout.
+    Require the module, and run it internally.
+  Stuff like the in world editor and radar would be better as module, since they are useless outside Extantz?
+    Radar is useless outside Extantz, editor could be used to edit a local file.
+  Stuff like woMan would be better off as a separate application, so it can start and stop extantz.
+
+]]
+
+
+--[[
+The main loop.
+  A Lua skang module is basically a table, with skang managed fields.
+  Once it calls moduleEnd(), it's expected to have finished.
+    test.lua is currently an exception, it runs test stuff afterwards.
+  So their code just registers Things and local variables.
+  Some of those Things might be functions for manipulating internal module state.
+    A C module has it's variables managed outside of it by Lua.
+    So would have to go via LUA_GLOBALSINDEX to get to them.
+    Unless they are userdata, which are C things anyway.
+    Though it's functions are obviously inside the C module.
+  Normal Lua module semantics expect them to return to the require call after setting themselves up.
+    So test.lua is really an aberation.
+
+  Soooo, where does the main loop go?
+  The skang module itself could define the main loop.
+  Should not actually call it though, coz skang is itself a module.
+
+  In Java we had different entry points depending on how it was called.
+  If it was called as an applet or application, it got it's own thread with a mainloop.
+    That main loop just slept and called runBit() on all registered modules.
+  If it was loaded as a module, it bypassed that stuff.
+  I don't think Lua provides any such mechanism.
+  In theory, the first call to moduleBegin would be the one that was started as an application.
+  So we could capture that, and test against it in moduleEnd to find when THAT module finally got to the end.
+  THEN we can start the main loop (test.lua being the exception that fucks this up).
+    Though test.lua could include a runBits() that quits the main loop, then starts the main loop at the very end once more?
+  The problem with this is applications that require skang type modules.
+    The first one they require() isn't going to return.
+  Eventually skang itself will get loaded.  It looks at the "arg" global, which SHOULD be the command line.
+  Including the name of the application, which we could use to double check.
+    Extantz / script runner would set this arg global itself.
+
+  Skang applications have one main loop per app.
+  Skang modules use the main loop of what ever app called them.
+  Non skang apps have the option of calling skangs main loop.
+  Extantz starts many external skang apps, which each get their own main loop.
+  Extantz has it's own Ecore main loop.
+  LuaSL still has one main loop per script.
+  LSL scripts get their own main loop, but LSL is stupid and doesn't have any real "module" type stuff.
+
+What does skang main loop actually do?
+  In Java it just slept for a bit, then called runBit() from each module, and the only module that had one was watch.
+  Actually better off using Ecore timers for that sort of thing.
+  Skang main loop has nothing to do?  lol
+  Well, except for the "wait for LuaProc channel messages" thing.
+  Widget main loop would be Ecore's main loop.
+
+  Extantz loads a skang module.
+    Module runs in extantz script runner.
+    Module runs luaproc message main loop from skang.
+    Evas / Elm widgets send signals, call C callbacks.
+    Extantz sends Lua input scripts via luaproc messages to module.
+  Extantz runs separate skang module.
+    Module runs in it's own process.
+    Module runs it's own message loop on the end of stdin.
+    Evas / Elm widgets send signals, call C callbacks.
+    Extantz sends Lua Input scripts to module via stdout.
+  Module runs stand alone.
+    Module runs in it's own process.
+    Module has to have widget start Ecore's main loop.
+    Module runs it's own message loop, waiting for widget to send it messages.
+    Evas / Elm widgets send signals, call C callbacks.
+    Widget sends Lua Input scripts to module.
+
+Alternate plan -
+  Skang has no main loop, modules are just tables.
+    OK, so sometimes skang has to start up an Ecore main loop.
+      With either Ecore_Con, or Evas and Elm.
+  skang.message(string)
+    Call it to pass a bit of Lua to skang, which is likely Input.
+  Widget twiddles happen in Ecore's main loop, via signals and call backs.
+  Eventually these call backs hit the widgets action string.
+  Send that action string to skang.message().
+
+  Extantz loads a skang module.
+    Extantz has a skang Lua state.
+    Module is just another table in skang.
+    Widget -> callback -> action string -> skang.message()
+  Extantz runs separate skang module.
+    Skang module C code runs an Ecore main loop.
+    Module is just another table in skang.
+    Skang C uses Ecore_Con to get messages from Extantz' Ecore_Con.
+    Widget -> callback -> action string -> Ecore_Con -> skang.message()
+   OOORRRR ....
+    Skang runs a main loop reading stdin.
+    Widget -> callback -> action string -> stdout -> skang.message()
+  Module runs stand alone.
+    Skang module C code runs an Ecore main loop.
+    Module is just another table in skang.
+    Widget -> callback -> action string -> skang.message()
+  Extantz loads a skang module from the network.
+    Skang module runs on the server with it's own Ecore main loop somehow.
+    Module is just another table in skang.
+    Extantz uses Ecore_Con to get messages from Extantz' Ecore_Con, via TCP.
+    Widget -> callback -> action string -> Ecore_Con -> skang.message()
+   OOORRRR ....
+    Remember, these are untrusted, so that's what the script runner is for.
+    Skang module runs in the script runner, with some sort of luaproc interface.
+    Widget -> callback -> action string -> Ecore_Con -> luaproc -> skang.message()
+
+  Skang running as a web server.
+    Skang runs an Ecore main loop.
+    Skang has an Ecore_Con server attached to port 80.
+    Skang loads modules as usual.
+    Skang responds to specific URLs with HTML forms generated from Skang files.
+    Skang gets post data back, which kinda looks like Input.  B-)
+
+  Extantz runs a LuaSL / LSL script from the network.
+    Send this one to the LuaSL script runner.
+    Coz LSL scripts tend to have lots of copies with the same name in different objects.
+    Could get too huge to deal with via "just another table".
+    In this case, compiling the LSL might be needed to.
+
 ]]
 
 
