@@ -115,6 +115,7 @@ int luaopen_test_c(lua_State *L)
 
 // TODO - This is too verbose.  I've had an idea for writing some sort of generic wrapper, though others have done the same.
 //          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
+//          On the other hand, the generic argument pulling / pushing stuff I did for edje_lua2 gets us half way there.
 
 // This uses function{} style.
 // skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
