@@ -35,7 +35,7 @@ CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
 #LDFLAGS="-L ../../libraries/LuaJIT-2.0.2/src -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 #libs="-leo -lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
 LDFLAGS="$(pkg-config --libs-only-L luajit) -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
-libs="-leo -lecore -levas -ledje -lembryo -leet -leina $(pkg-config --libs-only-L luajit) -lpthread -lm"
+libs="-leo -lecore -levas -ledje -lembryo -leet -leina $(pkg-config --libs luajit) -lpthread -lm -ldl"
 #LDFLAGS="-L /usr/lib/lua/5.1 -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 #libs="-lecore -levas -ledje -lembryo -leet -leina -llua5.1 -lpthread -lm"
 # These need to be added to libs if linking staticaly, though some parts of EFL don't like that.
@@ -52,3 +52,4 @@ echo "clean"
 rm -f test_c.so test_c.o
 echo "C modules"
 gcc $CFLAGS -fPIC -shared -o test_c.so test_c.c
+gcc $CFLAGS -o GuiLua GuiLua.c $LDFLAGS $libs
