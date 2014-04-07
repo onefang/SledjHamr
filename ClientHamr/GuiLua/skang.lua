@@ -199,6 +199,8 @@ scanArguments = function (args)
       if '--' == string.sub(v, 1, 2) then pre = '--';  v = string.sub(v, 3, -1) end
       if '-'  == string.sub(v, 1, 1) then pre = '-';   v = string.sub(v, 2, -1) end
       if '+'  == string.sub(v, 1, 1) then pre = '+';   v = string.sub(v, 2, -1) end
+      -- TODO - Make this the opposite of the directory separator for what ever platform we are running on.
+      --        Which Lua can't figure out I think.
       if '/'  == string.sub(v, 1, 1) then pre = '/';   v = string.sub(v, 2, -1) end
       if '='  == string.sub(v, 1, 1) then pre = '=';   v = string.sub(v, 2, -1) end
       if '&'  == string.sub(v, 1, 1) then pre = '&';   v = string.sub(v, 2, -1) end
