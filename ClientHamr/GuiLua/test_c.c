@@ -117,7 +117,7 @@ int luaopen_test_c(lua_State *L)
 //          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
 
 // This uses function{} style.
-// skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The fooble:', 1, 1, 10, 50\", required=true}
+// skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
   lua_getfield(L, skang, "thingasm");
   i = 1;
   lua_newtable(L);
