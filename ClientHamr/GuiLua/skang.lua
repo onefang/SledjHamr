@@ -1,4 +1,15 @@
--- TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
+--[[ TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
+C will let us -
+  Use Ecore's main loop.
+  Actually do the widget stuff.
+  Slap meta tables on all value types.
+    Which lets us put the meta table on the variable, instead of on the table, which I think is cleaner.
+  Figure out the directory separator.
+  Network stuff.   No need to look at Lua socket stuff, we have Ecore_Con.
+  Database stuff.  No need to look at Lua SQL stuff, we have esskyuehl.  Maybe.
+
+]]
+
 
 --[[ Skang package
 
