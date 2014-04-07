@@ -30,6 +30,7 @@ static int cfunc (lua_State *L)
 }
 
 
+/*
 static void dumpStack(lua_State *L, int i)
 {
   int type = lua_type(L, i);
@@ -49,6 +50,7 @@ static void dumpStack(lua_State *L, int i)
     default			:  printf("Stack %d is unknown\n", i);  break;
   }
 }
+*/
 
 /* local test_c = require 'test_c'
 
