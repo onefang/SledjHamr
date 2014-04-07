@@ -1,7 +1,13 @@
 /* Should be a Lua skang module, roughly the same as test.lua
 
-TODO - see if this still works if it's an app instead of a library.
+TODO - See if this still works if it's an app instead of a library.
+         I think the problem will be duplicate Lua library names.
+         The C app will be linked to one copy, the lua executable that require() this is linked to another, even if it's the same one.
+         Much hilarity ensues.
+         Not to mention linker flags being different.
 
+       Plan B -
+         Widget skang module runs the window app, and sends stuff to it.
 
 Seems to be several problems with linking in various OSes, here's some
 possibly helpful links -
