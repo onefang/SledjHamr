@@ -174,111 +174,214 @@ struct _globals
   Evas		*canvas;	// The canvas for drawing directly onto.
   Evas_Object	*bg;		// Our background edje.
   lua_State	*L;		// Our Lua state.
-  int		logDom;
+  int		eina, logDom, ecore_evas, edje;
 };
 
+  globals ourGlobals;
 
 
 static const char *ourName = "widget";
 int skang, _M;
 
-static int wfunc (lua_State *L)
+/*
+static void dumpStack(lua_State *L, int i)
 {
-  double arg1 = luaL_checknumber(L, 1);
-  const char *arg2 = luaL_checkstring(L, 2);
+  int type = lua_type(L, i);
 
-  printf("Inside %s.wfunc(%f, %s)\n", ourName, arg1, arg2);
-  return 0;
+  switch (type)
+  {
+    case LUA_TNONE		:  printf("Stack %d is empty\n", i);  break;
+    case LUA_TNIL		:  printf("Stack %d is a nil\n", i);  break;
+    case LUA_TBOOLEAN		:  printf("Stack %d is a boolean\n", i);  break;
+    case LUA_TNUMBER		:  printf("Stack %d is a number\n", i);  break;
+    case LUA_TSTRING		:  printf("Stack %d is a string - %s\n", i, lua_tostring(L, i));  break;
+    case LUA_TFUNCTION		:  printf("Stack %d is a function\n", i);  break;
+    case LUA_TTHREAD		:  printf("Stack %d is a thread\n", i);  break;
+    case LUA_TTABLE		:  printf("Stack %d is a table\n", i);  break;
+    case LUA_TUSERDATA		:  printf("Stack %d is a userdata\n", i);  break;
+    case LUA_TLIGHTUSERDATA	:  printf("Stack %d is a light userdata\n", i);  break;
+    default			:  printf("Stack %d is unknown\n", i);  break;
+  }
 }
+*/
 
 
 
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
 
-
-
 #    define DATE_TIME_LEN	21
 
-char    dateTime[DATE_TIME_LEN];
+char dateTime[DATE_TIME_LEN];
 
-static
-void _ggg_log_print_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
+static void _ggg_log_print_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
 {
-    FILE *f = data;
-    char dt[DATE_TIME_LEN + 1];
-    char fileTab[256], funcTab[256];
+  FILE *f = data;
+  char dt[DATE_TIME_LEN + 1];
+  char fileTab[256], funcTab[256];
 
-    getDateTime(NULL, dt, NULL);
-    dt[19] = '\0';
-    if (12 > strlen(file))
-	snprintf(fileTab, sizeof(fileTab), "%s\t\t", file);
-    else
-	snprintf(fileTab, sizeof(fileTab), "%s\t", file);
-    snprintf(funcTab, sizeof(funcTab), "\t%s", fnc);
-    fprintf(f, "%s ", dt);
-    if (f == stderr)
-	eina_log_print_cb_stderr(d, level, fileTab, funcTab, line, fmt, data, args);
-    else if (f == stdout)
-	eina_log_print_cb_stdout(d, level, fileTab, funcTab, line, fmt, data, args);
-    fflush(f);
+  getDateTime(NULL, dt, NULL);
+  dt[19] = '\0';
+  if (12 > strlen(file))
+    snprintf(fileTab, sizeof(fileTab), "%s\t\t", file);
+  else
+    snprintf(fileTab, sizeof(fileTab), "%s\t", file);
+  snprintf(funcTab, sizeof(funcTab), "\t%s", fnc);
+  fprintf(f, "%s ", dt);
+  if (f == stderr)
+    eina_log_print_cb_stderr(d, level, fileTab, funcTab, line, fmt, data, args);
+  else if (f == stdout)
+    eina_log_print_cb_stdout(d, level, fileTab, funcTab, line, fmt, data, args);
+  fflush(f);
 }
 
 void loggingStartup(globals *ourGlobals)
 {
+  if (ourGlobals->logDom < 0)
+  {
     ourGlobals->logDom = eina_log_domain_register("GuiLua", NULL);
     if (ourGlobals->logDom < 0)
     {
-	EINA_LOG_CRIT("could not register log domain 'GuiLua'");
+      EINA_LOG_CRIT("could not register log domain 'GuiLua'");
+      return;
     }
-    // TODO - should unregister this later.
-    eina_log_level_set(EINA_LOG_LEVEL_DBG);
-    eina_log_domain_level_set("GuiLua", EINA_LOG_LEVEL_DBG);
-    eina_log_print_cb_set(_ggg_log_print_cb, stderr);
+  }
+  eina_log_level_set(EINA_LOG_LEVEL_DBG);
+  eina_log_domain_level_set("GuiLua", EINA_LOG_LEVEL_DBG);
+  eina_log_print_cb_set(_ggg_log_print_cb, stderr);
 
-    // Shut up the excess debugging shit from EFL.
-    eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_evas", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_x", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("evas_main", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
+  // Shut up the excess debugging shit from EFL.
+  eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_evas", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_x", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("evas_main", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
 }
 
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
 {
-    struct tm *newTime;
-    time_t  szClock;
-    char *date = dateTime;
+  struct tm *newTime;
+  time_t  szClock;
+  char *date = dateTime;
 
-    // Get time in seconds
-    time(&szClock);
-    // Convert time to struct tm form
-    newTime = localtime(&szClock);
+  // Get time in seconds
+  time(&szClock);
+  // Convert time to struct tm form
+  newTime = localtime(&szClock);
 
-    if (nowOut)
-	*nowOut = newTime;
-    if (dateOut)
-	date = dateOut;
-    if (timeOut)
-	*timeOut = szClock;
+  if (nowOut)
+    *nowOut = newTime;
+  if (dateOut)
+    date = dateOut;
+  if (timeOut)
+    *timeOut = szClock;
 
-    // format
-    strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
-    return (dateTime);
+  // format
+  strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
+  return (dateTime);
 }
 
 
 
-static void
-_on_delete(Ecore_Evas *ee /*__UNUSED__*/)
+static void _on_delete(Ecore_Evas *ee /*__UNUSED__*/)
 {
   ecore_main_loop_quit();
 }
 
+
+static int openWindow(lua_State *L)
+{
+  globals *ourGlobals;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  if ((ourGlobals->eina = eina_init()))
+  {
+    loggingStartup(ourGlobals);
+
+    PI("GuiLua running as an application.\n");
+
+    if ((ourGlobals->ecore_evas = ecore_evas_init()))
+    {
+      if ((ourGlobals->edje = edje_init()))
+      {
+        /* this will give you a window with an Evas canvas under the first engine available */
+        ourGlobals->ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
+        if (ourGlobals->ee)
+        {
+	  ourGlobals->canvas = ecore_evas_get(ourGlobals->ee);
+	  ecore_evas_title_set(ourGlobals->ee, "GuiLua test harness");
+	  ecore_evas_show(ourGlobals->ee);
+	  ecore_evas_callback_delete_request_set(ourGlobals->ee, _on_delete);
+        }
+        else
+	  PC("You got to have at least one evas engine built and linked up to ecore-evas for this to run properly.");
+      }
+      else
+	PC("Failed to init edje!");
+    }
+    else
+      PC("Failed to init ecore_evas!");
+  }
+  else
+    fprintf(stderr, "Failed to init eina!\n");
+
+  return 0;
+}
+
+static int loopWindow(lua_State *L)
+{
+  globals *ourGlobals;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  if (ourGlobals->canvas)
+    ecore_main_loop_begin();
+
+  return 0;
+}
+
+static int closeWindow(lua_State *L)
+{
+  globals *ourGlobals;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  if (ourGlobals->eina)
+  {
+    if (ourGlobals->ecore_evas)
+    {
+      if (ourGlobals->edje)
+      {
+        if (ourGlobals->ee)
+        {
+          ecore_evas_free(ourGlobals->ee);
+          ourGlobals->ee = NULL;
+        }
+        ourGlobals->edje = edje_shutdown();
+      }
+      ourGlobals->ecore_evas = ecore_evas_shutdown();
+    }
+    if (ourGlobals->logDom >= 0)
+    {
+      eina_log_domain_unregister(ourGlobals->logDom);
+      ourGlobals->logDom = -1;
+    }
+    ourGlobals->eina = eina_shutdown();
+  }
+
+  return 0;
+}
 
 /* local widget = require 'widget'
 
@@ -294,8 +397,6 @@ returned, but we want to do something different with skang.
 */
 int luaopen_widget(lua_State *L)
 {
-  lua_Number i;
-
   // In theory, the only thing on the stack now is 'widget' from the require() call.
 
 // pseudo-indices, special tables that can be accessed like the stack -
@@ -331,60 +432,34 @@ int luaopen_widget(lua_State *L)
   // Save this module in the C registry.
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
 
-// This uses function{} style.
-// skang.thingasm{_M, 'wfooble,c', 'wfooble help text', 1, widget=\"'edit', 'The wfooble:', 1, 1, 10, 50\", required=true}
-  lua_getfield(L, skang, "thingasm");
-  i = 1;
-  lua_newtable(L);
-  lua_pushnumber(L, i++);
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "wfooble,w");
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "wfooble help text");
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushnumber(L, 1);
-  lua_settable(L, -3);
-
-  lua_pushstring(L, "'edit', 'The wfooble:', 1, 1, 10, 50");
-  lua_setfield(L, -2, "widget");
-  lua_pushboolean(L, 1);			// Is required.
-  lua_setfield(L, -2, "required");
-  lua_call(L, 1, 0);
-
-// skang.thing(_M, 'wbar', 'Help text', 'Default')
+  // Define our functions.
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "wbar");
-  lua_pushstring(L, "Help text");
-  lua_pushstring(L, "Default");
+  lua_pushstring(L, "openWindow");
+  lua_pushstring(L, "Opens our window.");
+  lua_pushcfunction(L, openWindow);
   lua_call(L, 4, 0);
 
-// skang.thingasm(_M, 'cfoo')
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "wfoo");
-  lua_call(L, 2, 0);
+  lua_pushstring(L, "loopWindow");
+  lua_pushstring(L, "Run our windows main loop.");
+  lua_pushcfunction(L, loopWindow);
+  lua_call(L, 4, 0);
 
-// skang.thingasm(_M, 'cfunc', 'cfunc does nothing really', cfunc, 'number,string')
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "wfunc");
-  lua_pushstring(L, "wfunc does nothing really");
-  lua_pushcfunction(L, wfunc);
-  lua_pushstring(L, "number,string");
-  lua_call(L, 5, 0);
+  lua_pushstring(L, "closeWindow");
+  lua_pushstring(L, "Closes our window.");
+  lua_pushcfunction(L, closeWindow);
+  lua_call(L, 4, 0);
+
+  lua_pop(L, openWindow(L));
 
 // skang.moduleEnd(_M)
   lua_getfield(L, skang, "moduleEnd");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);
-  lua_call(L, 1, 1);
+  lua_call(L, 1, 0);
 
   return 1;
 }
@@ -392,72 +467,31 @@ int luaopen_widget(lua_State *L)
 
 int main(int argc, char **argv)
 {
-  globals ourGlobals;
   int result = EXIT_FAILURE;
 
   memset(&ourGlobals, 0, sizeof(globals));
 
-  if (eina_init())
+  ourGlobals.L = luaL_newstate();
+  if (ourGlobals.L)
   {
-    loggingStartup(&ourGlobals);
+    luaL_openlibs(ourGlobals.L);
+    // Shove ourGlobals into the registry.
+    lua_pushlightuserdata(ourGlobals.L, &ourGlobals);
+    lua_setfield(ourGlobals.L, LUA_REGISTRYINDEX, "ourGlobals");
 
-    PIm("GuiLua running as an application.\n");
+    // luaopen_widget() expects a string argument, and returns a table.
+    // Though in this case, both get ignored anyway.
+    lua_pushstring(ourGlobals.L, "widget");
+    lua_pop(ourGlobals.L, luaopen_widget(ourGlobals.L));
 
-    if (ecore_evas_init())
-    {
-      if (edje_init())
-      {
-	/* this will give you a window with an Evas canvas under the first engine available */
-	ourGlobals.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
-	if (!ourGlobals.ee)
-	{
-	  PEm("You got to have at least one evas engine built and linked up to ecore-evas for this example to run properly.");
-	  edje_shutdown();
-	  ecore_evas_shutdown();
-	  return -1;
-	}
-	ourGlobals.canvas = ecore_evas_get(ourGlobals.ee);
-	ecore_evas_title_set(ourGlobals.ee, "GuiLua test harness");
-	ecore_evas_show(ourGlobals.ee);
+    // Run the main loop via a Lua call.
+    lua_pop(ourGlobals.L, loopWindow(ourGlobals.L));
 
-	ourGlobals.bg = evas_object_rectangle_add(ourGlobals.canvas);
-	evas_object_color_set(ourGlobals.bg, 255, 255, 255, 255); /* white bg */
-	evas_object_move(ourGlobals.bg, 0, 0); /* at canvas' origin */
-	evas_object_size_hint_weight_set(ourGlobals.bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	evas_object_resize(ourGlobals.bg, WIDTH, HEIGHT); /* covers full canvas */
-	evas_object_show(ourGlobals.bg);
-	ecore_evas_object_associate(ourGlobals.ee, ourGlobals.bg, ECORE_EVAS_OBJECT_ASSOCIATE_BASE);
-	evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
-
-	// Setup our callbacks.
-	ecore_evas_callback_delete_request_set(ourGlobals.ee, _on_delete);
-
-	ourGlobals.L = luaL_newstate();
-	if (ourGlobals.L)
-	{
-	  luaL_openlibs(ourGlobals.L);
-	  luaopen_widget(ourGlobals.L);
-
-	  ecore_main_loop_begin();
-
-	  lua_close(ourGlobals.L);
-	  ecore_evas_free(ourGlobals.ee);
-	}
-	else
-	  PCm("Failed to start Lua!");
-
-	edje_shutdown();
-      }
-      else
-	PCm("Failed to init edje!");
-
-      ecore_evas_shutdown();
-    }
-    else
-      PCm("Failed to init ecore_evas!");
+    lua_pop(ourGlobals.L, closeWindow(ourGlobals.L));
+    lua_close(ourGlobals.L);
   }
   else
-    fprintf(stderr, "Failed to init eina!");
+    fprintf(stderr, "Failed to start Lua!\n");
 
   return result;
 }
