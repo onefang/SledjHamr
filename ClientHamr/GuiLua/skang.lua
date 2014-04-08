@@ -282,6 +282,8 @@ parseType = function (module, thingy, v, value)
     else
       module[v[2] ]()
     end
+  end
+
   if 'boolean' == thingy.types[1] then
     if value then
       -- Only parse the next value as a boolean if it doesn't have an introducer.
@@ -967,6 +969,7 @@ window = function (width, height, title)
 end
 
 module = function (name)
+  return require(name)
 end
 
 skang = function (name)
@@ -976,7 +979,7 @@ end
 
 thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
 thingasm{'window',	'The size and title of the application Frame.',	window, 'x,y,name', acl='GGG'}
-thingasm('module',	'Load a module.',				module, 'file,acl')
+thingasm('module,l',	'Load a module.',				module, 'file')
 thingasm('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
 thingasm('quit',	'Quit, exit, remove thyself.',			quit)
 
