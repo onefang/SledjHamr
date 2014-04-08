@@ -200,11 +200,20 @@ TODO - Finish supporting all of the above.
            arg1=value1&arg2=value2	For URLs.
            arg1=value1|arg2=value2	Can't remember why, probably the old skang multivalue syntax.
        Test it all.
+       Skang command line should have standardish stuff, like --version, --help, --help module.thing.
+         Lua does these already, might be no need to do them ourselves -
+           -e 'some code'.
+           -i go interactive after running the script.
+           -v version.
+           - read from stdin non interactively.
+         LuaJIT also has this -
+           -- stop processing options.
 ]]
 
 ARGS = {}
 lua = ''
 command = ''
+
 
 -- Do an initial scan and tokenise of the command line arguments.
 scanArguments = function (args)
@@ -258,6 +267,21 @@ parseType = function (module, thingy, v, value)
     end
   end
 
+  if 'function' == thingy.types[1] then
+    local args = {}
+    -- TODO - Should allow more than one argument, but would need to pass in ARGS and i.
+    if 2 == #thingy.types then
+      if value then
+        -- TODO - Should check the type of the arguments.
+        args[#args + 1] = value[2]
+        module[v[2] ](args[1])
+        value[2] = nil	-- Mark it as used.
+      else
+        print('ERROR - Expected an argument for ' .. thingy.names[1])
+      end
+    else
+      module[v[2] ]()
+    end
   if 'boolean' == thingy.types[1] then
     if value then
       -- Only parse the next value as a boolean if it doesn't have an introducer.
@@ -273,15 +297,7 @@ parseType = function (module, thingy, v, value)
   end
 end
 
--- Restore the environment, and grab paramateres from standard places.
-moduleEnd = function (module)
-  -- See if there is a properties file, and run it in the modules environment.
-  local properties = loadfile(module._NAME .. '.properties')
-  if properties then
-    setfenv(properties, getfenv(2))
-    properties()
-  end
-
+pullArguments = function (module)
   -- Look for our command line arguments.
   local metaMum = getmetatable(module)
   if metaMum and metaMum.__self then
@@ -318,7 +334,18 @@ moduleEnd = function (module)
       end
     end
   end
+end
 
+-- Restore the environment, and grab paramateres from standard places.
+moduleEnd = function (module)
+  -- See if there is a properties file, and run it in the modules environment.
+  local properties = loadfile(module._NAME .. '.properties')
+  if properties then
+    setfenv(properties, getfenv(2))
+    properties()
+  end
+
+  pullArguments(module)
   if module.isLua then setfenv(2, module.savedEnvironment) end
 end
 
@@ -529,14 +556,6 @@ TODO -
     Maybe try looking in the skang table for Things that are not found?
     Maybe put Things in the skang table that are unique from modules?
       I think this is what matrix-RAD Collisions was all about.
-    Skang command line should have standardish stuff, like --version, --help, --help module.thing.
-      Lua does these already, might be no need to do them ourselves -
-        -e 'some code'.
-        -i go interactive after running the script.
-        -v version.
-        - read from stdin non interactively.
-      LuaJIT has this -
-        -- stop processing options.
 ]]
 
 -- There is no ThingSpace, or Stuff, now it's all just in this meta table.
@@ -949,6 +968,7 @@ end
 
 module = function (name)
 end
+
 skang = function (name)
 end
 quit = function ()

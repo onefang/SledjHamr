@@ -416,6 +416,8 @@ int luaopen_widget(lua_State *L)
   lua_pushstring(L, "skang");
   lua_call(L, 1, 1);
   skang = lua_gettop(L);
+  lua_setfield(L, LUA_REGISTRYINDEX, "skang");
+  lua_getfield(L, LUA_REGISTRYINDEX, "skang");
 
 // local _M = skang.moduleBegin('widget', nil, 'Copyright 2014 David Seikel', '0.1', '2014-04-08 00:42:00', nil, false)
   lua_getfield(L, skang, "moduleBegin");
@@ -468,6 +470,7 @@ int luaopen_widget(lua_State *L)
 int main(int argc, char **argv)
 {
   int result = EXIT_FAILURE;
+  lua_Number i;
 
   memset(&ourGlobals, 0, sizeof(globals));
 
@@ -482,7 +485,23 @@ int main(int argc, char **argv)
     // luaopen_widget() expects a string argument, and returns a table.
     // Though in this case, both get ignored anyway.
     lua_pushstring(ourGlobals.L, "widget");
-    lua_pop(ourGlobals.L, luaopen_widget(ourGlobals.L));
+    lua_pop(ourGlobals.L, luaopen_widget(ourGlobals.L) + 1);
+
+    // Pass all our command line arguments to skang.
+    i = 1;
+    lua_getfield(ourGlobals.L, LUA_REGISTRYINDEX, "skang");
+    lua_getfield(ourGlobals.L, 1, "scanArguments");
+    lua_newtable(ourGlobals.L);
+    while (--argc > 0 && *++argv != '\0')
+    {
+      lua_pushnumber(ourGlobals.L, i++);
+      lua_pushstring(ourGlobals.L, *argv);
+      lua_settable(ourGlobals.L, -3);
+    }
+    lua_call(ourGlobals.L, 1, 0);
+    lua_getfield(ourGlobals.L, 1, "pullArguments");
+    lua_getfield(ourGlobals.L, LUA_REGISTRYINDEX, "skang");
+    lua_call(ourGlobals.L, 1, 0);
 
     // Run the main loop via a Lua call.
     lua_pop(ourGlobals.L, loopWindow(ourGlobals.L));
