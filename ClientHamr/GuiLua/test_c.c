@@ -36,7 +36,7 @@ static int cfunc (lua_State *L)
 }
 
 
-/*
+
 static void dumpStack(lua_State *L, int i)
 {
   int type = lua_type(L, i);
@@ -56,7 +56,7 @@ static void dumpStack(lua_State *L, int i)
     default			:  printf("Stack %d is unknown\n", i);  break;
   }
 }
-*/
+
 
 /* local test_c = require 'test_c'
 
@@ -110,12 +110,12 @@ int luaopen_test_c(lua_State *L)
 
   // At this point the stack should be - 'test_c', skang, _M.  Let's test that.
 /*
-  int top = 0, i;
+  int top = 0, j;
 
   top = lua_gettop(L);
   printf("MODULE test_c has %d stack items.\n", top);
-  for (i = 1; i <= top; i++)
-    dumpStack(L, i);
+  for (j = 1; j <= top; j++)
+    dumpStack(L, j);
 */
 
   // Save this module in the C registry.
@@ -178,7 +178,15 @@ int luaopen_test_c(lua_State *L)
 // skang.moduleEnd(_M)
   lua_getfield(L, skang, "moduleEnd");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);
+  // TODO - This should be (L, 1, 0), but that makes test.lua fail, claiming that none of the Things got added.  WTF?
   lua_call(L, 1, 1);
+
+  int top = 0, j;
+
+  top = lua_gettop(L);
+  printf("MODULE test_c has %d stack items.\n", top);
+  for (j = 1; j <= top; j++)
+    dumpStack(L, j);
 
   return 1;
 }
