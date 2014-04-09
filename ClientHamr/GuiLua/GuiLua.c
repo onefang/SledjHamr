@@ -34,6 +34,27 @@ scripts can have a poper GUI for a change.
 
 NOTES and TODOs -
 
+Lua scripts do -
+  require 'widget'  -> loads widget.c
+  Widget.c is a library like test_c.
+  It starts up GuiLua.c app, with stdin/stdout pipe.
+  Widget.c then acts as a proxy for all the widget stuff.
+  So Lua modules via C libraries can work with Elm code that has a special main and has to be an app.
+  Seems simplest.
+
+  Also -
+    Most of what is in here becomes a library for dynamic linking to C code.
+    Pretty much just leaving main(), though most of what is in there right now should become another function.
+    Some of this gets shared with LuaSL, since it came from there anyway.
+    Perhaps GuiLua.so will work, and I don't have to think of another name.  lol
+
+  Finally -
+    Add a --gui command line option, that runs foo.skang.
+    Than change the hash bang to use it.
+    And if there's a matching module, load the module first, call gimmeSkin() on it.
+    So that any with an internal default skin get that instead.
+    Same if theer's a module, but no skanf file.
+
 Making these packages all a sub package of skang seems like a great
 idea.  On the other hand, looks like most things are just getting folded
 into skang anyway.  See
