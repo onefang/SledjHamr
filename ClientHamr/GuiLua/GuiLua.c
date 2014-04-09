@@ -2,10 +2,8 @@
 
 Provides the skang and widget Lua packages.
 
-This should be a library in the end, but for now it's just an
-application that is a test bed for what goes into the library.  In the
-initial intended use case, several applications will be using this all at
-once, with one central app hosting all the GUIs.
+In the initial intended use case, several applications will be using
+this all at once, with one central app hosting all the GUIs.
 
 Basically this should deal with "windows" and their contents.  A
 "window" in this case is hosted in the central app as some sort of
@@ -43,10 +41,7 @@ Lua scripts do -
   Seems simplest.
 
   Also -
-    Most of what is in here becomes a library for dynamic linking to C code.
-    Pretty much just leaving main(), though most of what is in there right now should become another function.
     Some of this gets shared with LuaSL, since it came from there anyway.
-    Perhaps GuiLua.so will work, and I don't have to think of another name.  lol
 
   Finally -
     Add a --gui command line option, that runs foo.skang.
@@ -144,68 +139,15 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 
 
-#include <Eet.h>
-#include <Ecore.h>
-#include <Ecore_Evas.h>
-#include <Edje.h>
-#include <stdio.h>
-#include <ctype.h>
+#include "GuiLua.h"
 
-#include <lua.h>
-#include <luajit.h>
-#include <lualib.h>
-#include <lauxlib.h>
-
-typedef struct _globals globals;
-
-
-#define WIDTH  (300)
-#define HEIGHT (300)
-
-#define PC(...) EINA_LOG_DOM_CRIT(ourGlobals->logDom, __VA_ARGS__)
-#define PE(...) EINA_LOG_DOM_ERR(ourGlobals->logDom, __VA_ARGS__)
-#define PW(...) EINA_LOG_DOM_WARN(ourGlobals->logDom, __VA_ARGS__)
-#define PD(...) EINA_LOG_DOM_DBG(ourGlobals->logDom, __VA_ARGS__)
-#define PI(...) EINA_LOG_DOM_INFO(ourGlobals->logDom, __VA_ARGS__)
-
-#define PCm(...) EINA_LOG_DOM_CRIT(ourGlobals.logDom, __VA_ARGS__)
-#define PEm(...) EINA_LOG_DOM_ERR(ourGlobals.logDom, __VA_ARGS__)
-#define PWm(...) EINA_LOG_DOM_WARN(ourGlobals.logDom, __VA_ARGS__)
-#define PDm(...) EINA_LOG_DOM_DBG(ourGlobals.logDom, __VA_ARGS__)
-#define PIm(...) EINA_LOG_DOM_INFO(ourGlobals.logDom, __VA_ARGS__)
-
-#define D()	PD("DEBUG")
-
-// "01:03:52 01-01-1973\n\0"
-#define DATE_TIME_LEN			21
-
-
-#ifndef FALSE
-// NEVER change this
-typedef enum
-{
-  FALSE	= 0,
-  TRUE	= 1
-} boolean;
-#endif
-
-struct _globals
-{
-  Ecore_Evas	*ee;		// Our window.
-  Evas		*canvas;	// The canvas for drawing directly onto.
-  Evas_Object	*bg;		// Our background edje.
-  lua_State	*L;		// Our Lua state.
-  int		eina, logDom, ecore_evas, edje;
-};
-
-  globals ourGlobals;
-
+globals ourGlobals;
 
 static const char *ourName = "widget";
-int skang, _M;
+static int skang, _M;
 
-/*
-static void dumpStack(lua_State *L, int i)
+
+void dumpStack(lua_State *L, int i)
 {
   int type = lua_type(L, i);
 
@@ -224,15 +166,8 @@ static void dumpStack(lua_State *L, int i)
     default			:  printf("Stack %d is unknown\n", i);  break;
   }
 }
-*/
 
-
-
-char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
-
-#    define DATE_TIME_LEN	21
-
-char dateTime[DATE_TIME_LEN];
+static char dateTime[DATE_TIME_LEN];
 
 static void _ggg_log_print_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
 {
@@ -307,12 +242,10 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
 }
 
 
-
 static void _on_delete(Ecore_Evas *ee /*__UNUSED__*/)
 {
   ecore_main_loop_quit();
 }
-
 
 static int openWindow(lua_State *L)
 {
@@ -487,10 +420,8 @@ int luaopen_widget(lua_State *L)
   return 1;
 }
 
-
-int main(int argc, char **argv)
+void GuiLuaDo(int argc, char **argv)
 {
-  int result = EXIT_FAILURE;
   lua_Number i;
 
   memset(&ourGlobals, 0, sizeof(globals));
@@ -532,6 +463,4 @@ int main(int argc, char **argv)
   }
   else
     fprintf(stderr, "Failed to start Lua!\n");
-
-  return result;
 }

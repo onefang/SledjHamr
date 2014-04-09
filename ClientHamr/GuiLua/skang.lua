@@ -1,7 +1,7 @@
 --[[ TODO - This should be in C, but so far development has been quite rapid doing it in Lua.
+
 C will let us -
   Actually do the widget stuff.
-  Use Ecore's main loop.
   Slap meta tables on all value types.
     Which lets us put the meta table on the variable, instead of on the table, which I think is cleaner.
   Figure out the directory separator.
@@ -907,6 +907,9 @@ copy = function (parent, name)
   return result
 end
 
+module = function (name)
+  return require(name)
+end
 
 stuff = function (aThingy, aStuff)
   return getmetatable(aThingy).__self.stuff[aStuff]
@@ -954,10 +957,10 @@ set = function (stuff, key, name, value)
   end
 end
 
+thingasm('module,l',	'Load a module.',				module, 'file')
 thingasm('get',		'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
 thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
 thingasm('set',		'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
-
 
 thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally left blank. ]] end)
 
@@ -968,10 +971,6 @@ end
 window = function (width, height, title)
 end
 
-module = function (name)
-  return require(name)
-end
-
 skang = function (name)
 end
 quit = function ()
@@ -979,7 +978,6 @@ end
 
 thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
 thingasm{'window',	'The size and title of the application Frame.',	window, 'x,y,name', acl='GGG'}
-thingasm('module,l',	'Load a module.',				module, 'file')
 thingasm('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
 thingasm('quit',	'Quit, exit, remove thyself.',			quit)
 

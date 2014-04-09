@@ -12,7 +12,7 @@ else
     export E17DIR="/usr"
 fi
 
-CFLAGS="-g -Wall -Wunreachable-code -I include -I $LOCALDIR"
+CFLAGS="-g -Wall -I include -I $LOCALDIR"
 CFLAGS="$CFLAGS -I ../../libraries"
 #CFLAGS="$CFLAGS -I ../../libraries/LuaJIT-2.0.2/src"
 CFLAGS="$CFLAGS $(pkg-config --cflags luajit)"
@@ -34,7 +34,7 @@ CFLAGS="$CFLAGS -DPACKAGE_DATA_DIR=\"$LOCALDIR\" $CFLAGOPTS"
 
 #LDFLAGS="-L ../../libraries/LuaJIT-2.0.2/src -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 #libs="-leo -lecore -levas -ledje -lembryo -leet -leina -lluajit -lpthread -lm"
-LDFLAGS="$(pkg-config --libs-only-L luajit) -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
+LDFLAGS="-L $LOCALDIR $(pkg-config --libs-only-L luajit) -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 libs="-leo -lecore -levas -ledje -lembryo -leet -leina $(pkg-config --libs luajit) -lpthread -lm -ldl"
 #LDFLAGS="-L /usr/lib/lua/5.1 -L lib -L /usr/lib -L /lib -L $E17DIR/lib"
 #libs="-lecore -levas -ledje -lembryo -leet -leina -llua5.1 -lpthread -lm"
@@ -49,7 +49,11 @@ libs="-leo -lecore -levas -ledje -lembryo -leet -leina $(pkg-config --libs luaji
 #-lz
 
 echo "clean"
-rm -f test_c.so test_c.o
+rm -f test_c.so GuiLua.o libGuiLua.so skang
 echo "C modules"
 gcc $CFLAGS -fPIC -shared -o test_c.so test_c.c
-gcc $CFLAGS -o GuiLua GuiLua.c $LDFLAGS $libs
+gcc $CFLAGS -fPIC -c GuiLua.c
+echo "C libraries"
+gcc $CFLAGS -shared -Wl,-soname,libGuiLua.so -o libGuiLua.so GuiLua.o
+echo "C apps"
+gcc $CFLAGS -Wl,-export-dynamic -o skang skang.c $LDFLAGS -lGuiLua $libs
