@@ -67,6 +67,7 @@ The old skang argument types are -
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
 do	-- Only I'm not gonna indent this.
 
+mainSkin = {}
 
 -- TODO - This needs to be expanded a bit to cover things like 1.42
 local versions = {
@@ -141,7 +142,10 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
     skin = skin .. f:read('*a')
     f:close()
   end
-  if skin then skin = "local skang = require 'skang'\nlocal this = require 'test'\n" .. skin end
+  if skin then
+    skin = "local skang = require 'skang'\nlocal this = require 'test'\n" .. skin
+    if nil == mainSkin._NAME then mainSkin = _M end
+  end
   _M.DEFAULT_SKANG = skin
 
   --_G[_M._NAME] = _M	-- Stuff it into a global of the same name.
@@ -349,6 +353,16 @@ moduleEnd = function (module)
 
   pullArguments(module)
   if module.isLua then setfenv(2, module.savedEnvironment) end
+
+  -- Run the main skin, which is the first skin that is defined.  In theory, the skin from the main module.
+  if mainSkin == module then
+print("~~~~~~~~~~~~~~~~~RUNNING SKIN FOR " .. module._NAME .. '\n' .. module.DEFAULT_SKANG)
+    local main = loadstring(module.DEFAULT_SKANG)
+    if (main) then
+      setfenv(main, getfenv(2))
+      main()
+    end
+  end
 end
 
 
