@@ -204,18 +204,6 @@ void loggingStartup(globals *ourGlobals)
   eina_log_level_set(EINA_LOG_LEVEL_DBG);
   eina_log_domain_level_set("GuiLua", EINA_LOG_LEVEL_DBG);
   eina_log_print_cb_set(_ggg_log_print_cb, stderr);
-
-  // Shut up the excess debugging shit from EFL.
-  eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore_evas", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("ecore_x", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("evas_main", EINA_LOG_LEVEL_WARN);
-  eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
 }
 
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
@@ -242,9 +230,11 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
 }
 
 
-static void _on_delete(Ecore_Evas *ee /*__UNUSED__*/)
+static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-  ecore_main_loop_quit();
+//  globals *ourGlobals = data;
+
+  elm_exit();
 }
 
 static int openWindow(lua_State *L)
@@ -255,36 +245,16 @@ static int openWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  if ((ourGlobals->eina = eina_init()))
+  loggingStartup(ourGlobals);
+  PI("GuiLua running as an application.\n");
+
+  if ((ourGlobals->win = elm_win_util_standard_add("GuiLua", "GuiLua test harness")))
   {
-    loggingStartup(ourGlobals);
-
-    PI("GuiLua running as an application.\n");
-
-    if ((ourGlobals->ecore_evas = ecore_evas_init()))
-    {
-      if ((ourGlobals->edje = edje_init()))
-      {
-        /* this will give you a window with an Evas canvas under the first engine available */
-        ourGlobals->ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
-        if (ourGlobals->ee)
-        {
-	  ourGlobals->canvas = ecore_evas_get(ourGlobals->ee);
-	  ecore_evas_title_set(ourGlobals->ee, "GuiLua test harness");
-	  ecore_evas_show(ourGlobals->ee);
-	  ecore_evas_callback_delete_request_set(ourGlobals->ee, _on_delete);
-        }
-        else
-	  PC("You got to have at least one evas engine built and linked up to ecore-evas for this to run properly.");
-      }
-      else
-	PC("Failed to init edje!");
-    }
-    else
-      PC("Failed to init ecore_evas!");
+    evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
+    evas_object_resize(ourGlobals->win, WIDTH, HEIGHT);
+    evas_object_move(ourGlobals->win, 0, 0);
+    evas_object_show(ourGlobals->win);
   }
-  else
-    fprintf(stderr, "Failed to init eina!\n");
 
   return 0;
 }
@@ -297,8 +267,8 @@ static int loopWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  if (ourGlobals->canvas)
-    ecore_main_loop_begin();
+  if (ourGlobals->win)
+    elm_run();
 
   return 0;
 }
@@ -311,28 +281,16 @@ static int closeWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  if (ourGlobals->eina)
+  if (ourGlobals->win)
+    evas_object_del(ourGlobals->win);
+
+  if (ourGlobals->logDom >= 0)
   {
-    if (ourGlobals->ecore_evas)
-    {
-      if (ourGlobals->edje)
-      {
-        if (ourGlobals->ee)
-        {
-          ecore_evas_free(ourGlobals->ee);
-          ourGlobals->ee = NULL;
-        }
-        ourGlobals->edje = edje_shutdown();
-      }
-      ourGlobals->ecore_evas = ecore_evas_shutdown();
-    }
-    if (ourGlobals->logDom >= 0)
-    {
-      eina_log_domain_unregister(ourGlobals->logDom);
-      ourGlobals->logDom = -1;
-    }
-    ourGlobals->eina = eina_shutdown();
+    eina_log_domain_unregister(ourGlobals->logDom);
+    ourGlobals->logDom = -1;
   }
+
+  elm_shutdown();
 
   return 0;
 }

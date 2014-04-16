@@ -1,10 +1,8 @@
 
-#include <Eet.h>
-#include <Ecore.h>
-#include <Ecore_Evas.h>
-#include <Edje.h>
 #include <stdio.h>
 #include <ctype.h>
+
+#include <Elementary.h>
 
 #include <lua.h>
 #include <luajit.h>
@@ -47,11 +45,9 @@ typedef enum
 
 struct _globals
 {
-  Ecore_Evas	*ee;		// Our window.
-  Evas		*canvas;	// The canvas for drawing directly onto.
-  Evas_Object	*bg;		// Our background edje.
+  Evas_Object	*win;		// Our Elm window.
   lua_State	*L;		// Our Lua state.
-  int		eina, logDom, ecore_evas, edje;
+  int		logDom;		// Our logging domain.
 };
 
 
