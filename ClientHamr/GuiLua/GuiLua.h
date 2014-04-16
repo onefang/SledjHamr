@@ -33,6 +33,7 @@ typedef struct _globals globals;
 
 // "01:03:52 01-01-1973\n\0"
 #define DATE_TIME_LEN			21
+#    define DATE_TIME_LEN	21
 
 
 #ifndef FALSE
@@ -53,15 +54,8 @@ struct _globals
   int		eina, logDom, ecore_evas, edje;
 };
 
-//  globals ourGlobals;
-
 
 void dumpStack(lua_State *L, int i);
-
-
-#    define DATE_TIME_LEN	21
-
-//char dateTime[DATE_TIME_LEN];
 
 void loggingStartup(globals *ourGlobals);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
