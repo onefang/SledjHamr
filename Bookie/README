@@ -1,0 +1,33 @@
+Shared dynamic libraries is a bit of an issue for cross platform code. 
+LL viewers deal with it by including their own copies of the libraries
+they use.  This bypasses the idea of sharing them, and thus uses too
+much resources.  On the other hand, it seems to be the Windows way of
+doing things, lots of Windows packages I have seen include their own
+copies of libraries.  Mac Os X seems to do the same, each application is
+installed as it's own directory, filled with it's own copies of
+libraries.  Not a lot of sharing going on.  Linux and the BSDs do the
+right thing, most libraries are actually shared.  Except that LL viewers
+STILL bring their own libraries.
+
+I think the main difference is having a proper package management
+system.  Apt, RPM, and portage (I think) can track dependencies on
+libraries, install the libraries automatically, and even have different
+versions of libraries installed side by side.  Without this, the OS has
+no official way of tracking library dependencies, so every one has to
+supply their own.  Sure Mac OS X has had a few package systems ported to
+it, but none of them are the official one, so developers can't rely on
+them.
+
+SledjHamr has to deal with this, and try to do so in some sort of smart
+way.  As usual, the right way to do things is generally to do the
+opposite of what LL does.  lol
+
+Bookie should be a sub system that probes the OS, trying to see if
+there's some sort of OS store of libraries, and try to find reasonable
+versions of the libraries needed in that.  If not found, it could invoke
+an OS specific method of installing a suitable library.  If that fails,
+it can download a SledjHamr specific version into the SledjHamr
+installed directory.  So it tries to do the right thing first, and
+gradually fallsback to doing the wrong thing like LL does.
+
+That's the theory, in practice, gonna be a pain.
