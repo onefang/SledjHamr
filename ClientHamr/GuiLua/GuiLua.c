@@ -614,12 +614,11 @@ int luaopen_widget(lua_State *L)
   push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "loopWindow", "Run our windows main loop.", loopWindow, 0);
   push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "closeWindow", "Closes our window.", closeWindow, 0);
 
-// skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
+  // A test of the array building stuff.
   push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
 
   lua_pop(L, openWindow(L));
 
-// skang.moduleEnd(_M)
   push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
 
   return 1;
