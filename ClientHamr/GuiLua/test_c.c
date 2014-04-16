@@ -158,6 +158,7 @@ int luaopen_test_c(lua_State *L)
   lua_call(L, 2, 0);
 
 // skang.thingasm(_M, 'cfunc', 'cfunc does nothing really', cfunc, 'number,string')
+// push_lua(L, "@ @ $ $ & $", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfunc", "cfunc does nothing really", cfunc, "number,string");
   lua_getfield(L, skang, "thingasm");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
   lua_pushstring(L, "cfunc");

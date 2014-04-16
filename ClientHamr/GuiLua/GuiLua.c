@@ -230,6 +230,278 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
 }
 
 
+// These are what the various symbols are for each type -
+//  int		%
+//  num		#
+//  str		$
+//  bool	!
+//  C func	&
+//  table.field	@  Expects an integer and a string.
+//  nil		~
+//  table       {} Starts and stops filling up a new table.
+//              (  Just syntax sugar for call.
+//  call        )  Expects an integer, the number of results left after the call.
+// FIXME: Still to do, if we ever use them -
+//  userdata	+
+//  lightuserdata	*
+//  thread	^
+
+static char *_push_name(lua_State *L, char *q, int *idx)  // Stack usage [-0, +1, e or m]
+{
+  char *p = q;
+  char temp = '\0';
+
+  // A simplistic scan through an identifier, it's wrong, but it's quick,
+  // and we don't mind that it's wrong, coz this is only internal.
+  while (isalnum((int)*q))
+    q++;
+  temp = *q;
+  *q = '\0';
+  if (*idx > 0)
+    lua_getfield(L, *idx, p);    // Stack usage [-0, +1, e]
+  else
+  {
+    if (p != q)
+      lua_pushstring(L, p);       // Stack usage [-0, +1, m]
+    else
+    {
+      lua_pushnumber(L, (lua_Number) (0 - (*idx)));
+      (*idx)--;
+    }
+  }
+  *q = temp;
+
+  return q;
+}
+
+int pull_lua(lua_State *L, int i, char *params, ...)         // Stack usage -
+                                                             // if i is a table
+                                                             //   [-n, +n, e]
+                                                             // else
+                                                             //   [-0, +0, -]
+{
+   va_list vl;
+   char *f = strdup(params);
+   char *p = f;
+   int n = 0, j = i, count = 0;
+   Eina_Bool table = EINA_FALSE;
+
+   if (!f) return -1;
+   va_start(vl, params);
+
+   if (lua_istable(L, i))                                                // Stack usage [-0, +0, -]
+     {
+        j = -1;
+        table = EINA_TRUE;
+     }
+
+   while (*p)
+     {
+        char *q;
+        Eina_Bool get = EINA_TRUE;
+
+        while (isspace((int)*p))
+           p++;
+        q = p + 1;
+        switch (*p)
+          {
+             case '%':
+               {
+                  if (table)  q = _push_name(L, q, &i);                     // Stack usage [-0, +1, e]
+                  if (lua_isnumber(L, j))                                // Stack usage [-0, +0, -]
+                    {
+                       int *v = va_arg(vl, int *);
+                       *v = lua_tointeger(L, j);                         // Stack usage [-0, +0, -]
+                       n++;
+                    }
+                  break;
+               }
+             case '#':
+               {
+                  if (table)  q = _push_name(L, q, &i);                     // Stack usage [-0, +1, e]
+                  if (lua_isnumber(L, j))                                // Stack usage [-0, +0, -]
+                    {
+                       double *v = va_arg(vl, double *);
+                       *v = lua_tonumber(L, j);                          // Stack usage [-0, +0, -]
+                       n++;
+                    }
+                  break;
+               }
+             case '$':
+               {
+                  if (table)  q = _push_name(L, q, &i);                     // Stack usage [-0, +1, e]
+                  if (lua_isstring(L, j))                                // Stack usage [-0, +0, -]
+                    {
+                       char **v = va_arg(vl, char **);
+                       size_t len;
+                       char *temp = (char *) lua_tolstring(L, j, &len);  // Stack usage [-0, +0, m]
+
+                       len++;  // Cater for the null at the end.
+                       *v = malloc(len);
+                       if (*v)
+                         {
+                            memcpy(*v, temp, len);
+                            n++;
+                         }
+                    }
+                  break;
+               }
+             case '!':
+               {
+                  if (table)  q = _push_name(L, q, &i);                     // Stack usage [-0, +1, e]
+                  if (lua_isboolean(L, j))                               // Stack usage [-0, +0, -]
+                    {
+                       int *v = va_arg(vl, int *);
+                       *v = lua_toboolean(L, j);                         // Stack usage [-0, +0, -]
+                       n++;
+                    }
+                  break;
+               }
+             default:
+               {
+                  get = EINA_FALSE;
+                  break;
+               }
+          }
+
+        if (get)
+          {
+             if (table)
+               {
+                  // If this is a table, then we pushed a value on the stack, pop it off.
+                  lua_pop(L, 1);                                         // Stack usage [-n, +0, -]
+               }
+            else
+                j++;
+            count++;
+          }
+        p = q;
+     }
+
+   va_end(vl);
+   free(f);
+   if (count > n)
+      n = 0;
+   else if (table)
+     n = 1;
+   return n;
+}
+
+int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
+{
+  va_list vl;
+  char *f = strdup(params);
+  char *p = f;
+  int n = 0, table = 0, i = -1;
+
+  if (!f) return -1;
+
+  va_start(vl, params);
+
+  while (*p)
+  {
+    char *q;
+    Eina_Bool set = EINA_TRUE;
+
+    while (isspace((int)*p))
+      p++;
+    q = p + 1;
+    switch (*p)
+    {
+      case '%':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushinteger(L, va_arg(vl, int));    // Stack usage [-0, +1, -]
+        break;
+      }
+      case '#':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushnumber(L, va_arg(vl, double));  // Stack usage [-0, +1, -]
+        break;
+      }
+      case '$':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushstring(L, va_arg(vl, char *));  // Stack usage [-0, +1, m]
+        break;
+      }
+      case '!':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushboolean(L, va_arg(vl, int));    // Stack usage [-0, +1, -]
+        break;
+      }
+      case '@':
+      {
+        int   tabl = va_arg(vl, int);
+        char *field = va_arg(vl, char *);
+
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_getfield(L, tabl, field);           // Stack usage [-0, +1, e]
+        break;
+      }
+      case '&':
+      {
+        if (table)  q = _push_name(L, q, &i);     // Stack usage [-0, +1, m]
+        lua_pushcfunction(L, va_arg(vl, void *)); // Stack usage [-0, +1, m]
+        break;
+      }
+      case '~':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushnil(L);                         // Stack usage [-0, +1, -]
+        break;
+      }
+      case '(':		// Just syntax sugar.
+      {
+        set = EINA_FALSE;
+        break;
+      }
+      case ')':
+      {
+        lua_call(L, n - 1, va_arg(vl, int));
+        n = 0;
+        set = EINA_FALSE;
+        break;
+      }
+      case '{':
+      {
+        lua_newtable(L);
+        table++;
+        n++;
+        set = EINA_FALSE;
+        break;
+      }
+      case '}':
+      {
+        table--;
+        set = EINA_FALSE;
+        break;
+      }
+      default:
+      {
+        set = EINA_FALSE;
+        break;
+      }
+    }
+
+    if (set)
+    {
+      if (table > 0)
+        lua_settable(L, -3);                         // Stack usage [-2, +0, e]
+      else
+        n++;
+    }
+    p = q;
+  }
+
+  va_end(vl);
+  free(f);
+  return n;
+}
+
+
 static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
 //  globals *ourGlobals = data;
@@ -332,48 +604,23 @@ int luaopen_widget(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, "skang");
 
 // local _M = skang.moduleBegin('widget', nil, 'Copyright 2014 David Seikel', '0.1', '2014-04-08 00:42:00', nil, false)
-  lua_getfield(L, skang, "moduleBegin");
-  lua_pushstring(L, ourName);
-  lua_pushnil(L);				// Author comes from copyright.
-  lua_pushstring(L, "Copyright 2014 David Seikel");
-  lua_pushstring(L, "0.1");
-  lua_pushstring(L, "2014-04-08 00:42:00");
-  lua_pushnil(L);				// No skin.
-  lua_pushboolean(L, 0);			// We are not a Lua module.
-  lua_call(L, 7, 1);				// call 'skang.moduleBegin' with 7 arguments and 1 result.
-
+  push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, "moduleBegin", ourName, "Copyright 2014 David Seikel", "0.1", "2014-04-08 00:42:00", 0, 1);
   _M = lua_gettop(L);
   // Save this module in the C registry.
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
 
   // Define our functions.
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "openWindow");
-  lua_pushstring(L, "Opens our window.");
-  lua_pushcfunction(L, openWindow);
-  lua_call(L, 4, 0);
+  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "openWindow", "Opens our window.", openWindow, 0);
+  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "loopWindow", "Run our windows main loop.", loopWindow, 0);
+  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "closeWindow", "Closes our window.", closeWindow, 0);
 
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "loopWindow");
-  lua_pushstring(L, "Run our windows main loop.");
-  lua_pushcfunction(L, loopWindow);
-  lua_call(L, 4, 0);
-
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "closeWindow");
-  lua_pushstring(L, "Closes our window.");
-  lua_pushcfunction(L, closeWindow);
-  lua_call(L, 4, 0);
+// skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
+  push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
 
   lua_pop(L, openWindow(L));
 
 // skang.moduleEnd(_M)
-  lua_getfield(L, skang, "moduleEnd");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
-  lua_call(L, 1, 0);
+  push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
 
   return 1;
 }
@@ -399,8 +646,7 @@ void GuiLuaDo(int argc, char **argv)
 
     // Pass all our command line arguments to skang.
     i = 1;
-    lua_getfield(ourGlobals.L, LUA_REGISTRYINDEX, "skang");
-    lua_getfield(ourGlobals.L, 1, "scanArguments");
+    push_lua(ourGlobals.L, "@ ( @", LUA_REGISTRYINDEX, "skang", 1, "scanArguments");
     lua_newtable(ourGlobals.L);
     while (--argc > 0 && *++argv != '\0')
     {
@@ -409,9 +655,7 @@ void GuiLuaDo(int argc, char **argv)
       lua_settable(ourGlobals.L, -3);
     }
     lua_call(ourGlobals.L, 1, 0);
-    lua_getfield(ourGlobals.L, 1, "pullArguments");
-    lua_getfield(ourGlobals.L, LUA_REGISTRYINDEX, "skang");
-    lua_call(ourGlobals.L, 1, 0);
+    push_lua(ourGlobals.L, "@ ( @ )", 1, "pullArguments", LUA_REGISTRYINDEX, "skang", 0);
 
     // Run the main loop via a Lua call.
     lua_pop(ourGlobals.L, loopWindow(ourGlobals.L));

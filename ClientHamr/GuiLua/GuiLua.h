@@ -56,5 +56,8 @@ void dumpStack(lua_State *L, int i);
 void loggingStartup(globals *ourGlobals);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
 
+int pull_lua(lua_State *L, int i, char *params, ...);
+int push_lua(lua_State *L, char *params, ...);
+
 int luaopen_widget(lua_State *L);
 void GuiLuaDo(int argc, char **argv);
