@@ -155,12 +155,24 @@ void dumpStack(lua_State *L, int i)
   {
     case LUA_TNONE		:  printf("Stack %d is empty\n", i);  break;
     case LUA_TNIL		:  printf("Stack %d is a nil\n", i);  break;
-    case LUA_TBOOLEAN		:  printf("Stack %d is a boolean\n", i);  break;
-    case LUA_TNUMBER		:  printf("Stack %d is a number\n", i);  break;
+    case LUA_TBOOLEAN		:  printf("Stack %d is a boolean - %d\n", i, lua_toboolean(L, i));  break;
+    case LUA_TNUMBER		:  printf("Stack %d is a number\n - %f", i, lua_tonumber(L, i));  break;
     case LUA_TSTRING		:  printf("Stack %d is a string - %s\n", i, lua_tostring(L, i));  break;
     case LUA_TFUNCTION		:  printf("Stack %d is a function\n", i);  break;
     case LUA_TTHREAD		:  printf("Stack %d is a thread\n", i);  break;
-    case LUA_TTABLE		:  printf("Stack %d is a table\n", i);  break;
+    case LUA_TTABLE		:
+    {
+      int j;
+
+      printf("Stack %d is a table", i);
+      lua_getfield(L, i, "_NAME");
+      j = lua_gettop(L);
+      if (lua_isstring(L, j))
+        printf(" - %s", lua_tostring(L, j));
+      lua_pop(L, 1);
+      printf("\n");
+      break;
+    }
     case LUA_TUSERDATA		:  printf("Stack %d is a userdata\n", i);  break;
     case LUA_TLIGHTUSERDATA	:  printf("Stack %d is a light userdata\n", i);  break;
     default			:  printf("Stack %d is unknown\n", i);  break;
