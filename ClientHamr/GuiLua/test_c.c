@@ -10,8 +10,7 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 */
 
 
-#include <lua.h>
-#include <lauxlib.h>
+#include "GuiLua.h"
 
 
 static const char *ourName = "test_c";
@@ -25,7 +24,6 @@ static int cfunc (lua_State *L)
   printf("Inside %s.cfunc(%f, %s)\n", ourName, arg1, arg2);
   return 0;
 }
-
 
 /* local test_c = require 'test_c'
 
@@ -41,8 +39,6 @@ returned, but we want to do something different with skang.
 */
 int luaopen_test_c(lua_State *L)
 {
-  lua_Number i;
-
   // In theory, the only thing on the stack now is 'test_c' from the require() call.
 
 // pseudo-indices, special tables that can be accessed like the stack -
@@ -67,15 +63,7 @@ int luaopen_test_c(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, "skang");
 
 // local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, false)
-  lua_getfield(L, skang, "moduleBegin");
-  lua_pushstring(L, ourName);
-  lua_pushnil(L);				// Author comes from copyright.
-  lua_pushstring(L, "Copyright 2014 David Seikel");
-  lua_pushstring(L, "0.1");
-  lua_pushstring(L, "2014-03-27 03:57:00");
-  lua_pushnil(L);				// No skin.
-  lua_pushboolean(L, 0);			// We are not a Lua module.
-  lua_call(L, 7, 1);				// call 'skang.moduleBegin' with 7 arguments and 1 result.
+  push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, "moduleBegin", ourName, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00", 0, 1);
   _M = lua_gettop(L);
 
   // Save this module in the C registry.
@@ -84,59 +72,19 @@ int luaopen_test_c(lua_State *L)
 
 // This uses function{} style.
 // skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
-  lua_getfield(L, skang, "thingasm");
-  i = 1;
-  lua_newtable(L);
-  lua_pushnumber(L, i++);
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "cfooble,c");
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "cfooble help text");
-  lua_settable(L, -3);
-
-  lua_pushnumber(L, i++);
-  lua_pushnumber(L, 1);
-  lua_settable(L, -3);
-
-  lua_pushstring(L, "'edit', 'The cfooble:', 1, 1, 10, 50");
-  lua_setfield(L, -2, "widget");
-  lua_pushboolean(L, 1);			// Is required.
-  lua_setfield(L, -2, "required");
-  lua_call(L, 1, 0);
+  push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfooble,c", "cfooble help text", 1, "'edit', 'The cfooble:', 1, 1, 10, 50", 1, 0);
 
 // skang.thing(_M, 'cbar', 'Help text', 'Default')
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "cbar");
-  lua_pushstring(L, "Help text");
-  lua_pushstring(L, "Default");
-  lua_call(L, 4, 0);
+  push_lua(L, "@ ( @ $ $ $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cbar", "Help text", "Default", 0);
 
 // skang.thingasm(_M, 'cfoo')
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "cfoo");
-  lua_call(L, 2, 0);
+  push_lua(L, "@ ( @ $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfoo", 0);
 
 // skang.thingasm(_M, 'cfunc', 'cfunc does nothing really', cfunc, 'number,string')
-// push_lua(L, "@ @ $ $ & $", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfunc", "cfunc does nothing really", cfunc, "number,string");
-  lua_getfield(L, skang, "thingasm");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);	// Coz getfenv() can't find C environment.
-  lua_pushstring(L, "cfunc");
-  lua_pushstring(L, "cfunc does nothing really");
-  lua_pushcfunction(L, cfunc);
-  lua_pushstring(L, "number,string");
-  lua_call(L, 5, 0);
+ push_lua(L, "@ ( @ $ $ & $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfunc", "cfunc does nothing really", cfunc, "number,string", 0);
 
 // skang.moduleEnd(_M)
-  lua_getfield(L, skang, "moduleEnd");
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
-  lua_call(L, 1, 0);
+  push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
 
   return 1;
 }

@@ -46,7 +46,7 @@ print('')
 
 print('foo = ' .. test.foo .. ' ->> ' .. skang.get(test, 'foo', 'help'))
 print('fooble = ' .. test.fooble)
-print('cfooble = ' .. test_c.cfooble .. ' ->> ' .. skang.get(test_c, 'cfooble', 'help') .. '[' .. skang.get(test_c, 'cfooble', 'widget') .. ']')
+print('cfooble = ' .. test_c.cfooble .. ' ->> ' .. skang.get(test_c, 'cfooble', 'help') .. ' [' .. skang.get(test_c, 'cfooble', 'widget') .. ']')
 print('cfunc  ->> ' .. skang.get(test_c, 'cfunc', 'help'))
 test.ffunc('one', 2)
 test_c.cfunc(0, 'zero')
