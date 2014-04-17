@@ -521,9 +521,11 @@ static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info 
   elm_exit();
 }
 
-static int openWindow(lua_State *L)
+static int window(lua_State *L)
 {
   globals *ourGlobals;
+  char *title = NULL;
+  int w = WIDTH, h = HEIGHT;
 
   lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
   ourGlobals = lua_touserdata(L, -1);
@@ -531,11 +533,15 @@ static int openWindow(lua_State *L)
 
   loggingStartup(ourGlobals);
   PI("GuiLua running as an application.\n");
+  if (pull_lua(L, 1, "%w %h $title", &w, &h, &title) > 0)
+    PI("Setting window to %d %d %s", w, h, title);
+  else
+    title = "GuiLua test harness";
 
-  if ((ourGlobals->win = elm_win_util_standard_add("GuiLua", "GuiLua test harness")))
+  if ((ourGlobals->win = elm_win_util_standard_add("GuiLua", title)))
   {
     evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
-    evas_object_resize(ourGlobals->win, WIDTH, HEIGHT);
+    evas_object_resize(ourGlobals->win, w, h);
     evas_object_move(ourGlobals->win, 0, 0);
     evas_object_show(ourGlobals->win);
   }
@@ -622,14 +628,12 @@ int luaopen_widget(lua_State *L)
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
 
   // Define our functions.
-  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "openWindow", "Opens our window.", openWindow, 0);
+  push_lua(L, "@ ( @ $ $ & $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "window", "Opens our window.", window, "number,number,string", 0);
   push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "loopWindow", "Run our windows main loop.", loopWindow, 0);
   push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "closeWindow", "Closes our window.", closeWindow, 0);
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
-
-  lua_pop(L, openWindow(L));
 
   push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
 
