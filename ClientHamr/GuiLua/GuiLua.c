@@ -531,8 +531,6 @@ static int window(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  loggingStartup(ourGlobals);
-  PI("GuiLua running as an application.\n");
   if (pull_lua(L, 1, "%w %h $title", &w, &h, &title) > 0)
     PI("Setting window to %d %d %s", w, h, title);
   else
@@ -601,6 +599,14 @@ int luaopen_widget(lua_State *L)
 {
   // In theory, the only thing on the stack now is 'widget' from the require() call.
 
+  // In theory this function only ever gets called once.
+  memset(&ourGlobals, 0, sizeof(globals));
+  loggingStartup(&ourGlobals);
+
+  // Shove ourGlobals into the registry.
+  lua_pushlightuserdata(L, &ourGlobals);
+  lua_setfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
 //    LUA_ENVIRONINDEX - C function environment, in this case luaopen_test_c() is the C function
@@ -618,14 +624,17 @@ int luaopen_widget(lua_State *L)
   lua_pushstring(L, "skang");
   lua_call(L, 1, 1);
   skang = lua_gettop(L);
+
   lua_setfield(L, LUA_REGISTRYINDEX, "skang");
   lua_getfield(L, LUA_REGISTRYINDEX, "skang");
 
 // local _M = skang.moduleBegin('widget', nil, 'Copyright 2014 David Seikel', '0.1', '2014-04-08 00:42:00', nil, false)
   push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, "moduleBegin", ourName, "Copyright 2014 David Seikel", "0.1", "2014-04-08 00:42:00", 0, 1);
   _M = lua_gettop(L);
+
   // Save this module in the C registry.
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
 
   // Define our functions.
   push_lua(L, "@ ( @ $ $ & $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "window", "Opens our window.", window, "number,number,string", 0);
@@ -642,41 +651,41 @@ int luaopen_widget(lua_State *L)
 
 void GuiLuaDo(int argc, char **argv)
 {
+  lua_State	*L;		// Our Lua state.
   lua_Number i;
 
-  memset(&ourGlobals, 0, sizeof(globals));
 
-  ourGlobals.L = luaL_newstate();
-  if (ourGlobals.L)
+  L = luaL_newstate();
+  if (L)
   {
-    luaL_openlibs(ourGlobals.L);
-    // Shove ourGlobals into the registry.
-    lua_pushlightuserdata(ourGlobals.L, &ourGlobals);
-    lua_setfield(ourGlobals.L, LUA_REGISTRYINDEX, "ourGlobals");
+    luaL_openlibs(L);
 
-    // luaopen_widget() expects a string argument, and returns a table.
-    // Though in this case, both get ignored anyway.
-    lua_pushstring(ourGlobals.L, "widget");
-    lua_pop(ourGlobals.L, luaopen_widget(ourGlobals.L) + 1);
-
-    // Pass all our command line arguments to skang.
+    // Pass all our command line arguments to Lua.
     i = 1;
-    push_lua(ourGlobals.L, "@ ( @", LUA_REGISTRYINDEX, "skang", 1, "scanArguments");
-    lua_newtable(ourGlobals.L);
+    lua_newtable(L);
     while (--argc > 0 && *++argv != '\0')
     {
-      lua_pushnumber(ourGlobals.L, i++);
-      lua_pushstring(ourGlobals.L, *argv);
-      lua_settable(ourGlobals.L, -3);
+      lua_pushnumber(L, i++);
+      lua_pushstring(L, *argv);
+      lua_settable(L, -3);
     }
-    lua_call(ourGlobals.L, 1, 0);
-    push_lua(ourGlobals.L, "@ ( @ )", 1, "pullArguments", LUA_REGISTRYINDEX, "skang", 0);
+    lua_setfield(L, LUA_GLOBALSINDEX, "arg");
+
+
+    lua_getglobal(L, "require");
+    lua_pushstring(L, "skang");
+    // When we do this, skang will process all the arguments passed to GuiLuaDo().
+    // This likely includes a module load, which likely loads the widget module above.
+    lua_call(L, 1, 1);
+    skang = lua_gettop(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, "skang");
+
 
     // Run the main loop via a Lua call.
-    lua_pop(ourGlobals.L, loopWindow(ourGlobals.L));
-
-    lua_pop(ourGlobals.L, closeWindow(ourGlobals.L));
-    lua_close(ourGlobals.L);
+    // This does nothing if no module opened a window.
+    lua_pop(L, loopWindow(L));
+    lua_pop(L, closeWindow(L));
+    lua_close(L);
   }
   else
     fprintf(stderr, "Failed to start Lua!\n");

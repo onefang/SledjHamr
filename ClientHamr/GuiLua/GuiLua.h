@@ -46,7 +46,6 @@ typedef enum
 struct _globals
 {
   Evas_Object	*win;		// Our Elm window.
-  lua_State	*L;		// Our Lua state.
   int		logDom;		// Our logging domain.
 };
 

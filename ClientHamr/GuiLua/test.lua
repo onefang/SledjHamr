@@ -42,7 +42,6 @@ local copy = skang.copy(test, 'copy')
 
 print('End ' .. test.bar .. ' ' .. test.VERSION .. ' ' .. skang.get(test, 'ffunc', 'help') .. ' ->> ' .. skang.get(test, 'f', 'action'))
 
-print(test.DEFAULT_SKANG)
 print('')
 
 print('foo = ' .. test.foo .. ' ->> ' .. skang.get(test, 'foo', 'help'))

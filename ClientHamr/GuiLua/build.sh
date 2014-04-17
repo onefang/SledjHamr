@@ -23,5 +23,6 @@ gcc $CFLAGS -fPIC -shared -o test_c.so test_c.c
 gcc $CFLAGS -fPIC -c GuiLua.c
 echo "C libraries"
 gcc $CFLAGS -shared -Wl,-soname,libGuiLua.so -o libGuiLua.so GuiLua.o
+ln -fs libGuiLua.so widget.so
 echo "C apps"
 gcc $CFLAGS -Wl,-export-dynamic -o skang skang.c $LDFLAGS -lGuiLua $libs
