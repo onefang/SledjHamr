@@ -586,11 +586,11 @@ static int closeWindow(lua_State *L)
 /* local widget = require 'widget'
 
 Lua's require() function will strip any stuff from the front of the name
-separated by a hyphen, so 'ClientHamr-GuiLua-test_c' -> 'test_c'.  Then
-it will search through a path, and eventually find this test_c.so (or
-test_c.dll or whatever), then call luaopen_test_c(), which should return
+separated by a hyphen, so 'ClientHamr-GuiLua-widget' -> 'widget'.  Then
+it will search through a path, and eventually find this widget.so (or
+widget.dll or whatever), then call luaopen_widget(), which should return
 a table.  The argument (only thing on the stack) for this function will
-be 'test_c'.
+be 'widget'.
 
 Normally luaL_register() creates a table of functions, that is the table
 returned, but we want to do something different with skang.
@@ -609,7 +609,7 @@ int luaopen_widget(lua_State *L)
 
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
-//    LUA_ENVIRONINDEX - C function environment, in this case luaopen_test_c() is the C function
+//    LUA_ENVIRONINDEX - C function environment, in this case luaopen_widget() is the C function
 //    LUA_REGISTRYINDEX - C registry, global, for unique keys use the module name as a string, or a lightuserdata address to a C object in our module.
 //    lua_upvalueindex(n) - C function upvalues
 
@@ -651,9 +651,8 @@ int luaopen_widget(lua_State *L)
 
 void GuiLuaDo(int argc, char **argv)
 {
-  lua_State	*L;		// Our Lua state.
-  lua_Number i;
-
+  lua_State  *L;
+  lua_Number  i;
 
   L = luaL_newstate();
   if (L)
