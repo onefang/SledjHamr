@@ -610,6 +610,14 @@ int luaopen_libGuiLua(lua_State *L)
   memset(&ourGlobals, 0, sizeof(globals));
   loggingStartup(&ourGlobals);
 
+  elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
+  elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
+  elm_policy_set(ELM_POLICY_THROTTLE,	ELM_POLICY_THROTTLE_HIDDEN_ALWAYS);
+
+  // These are set via the elementary_config tool, which is hard to find.
+  elm_config_finger_size_set(0);
+  elm_config_scale_set(1.0);
+
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
 //    LUA_ENVIRONINDEX - C function environment, in this case luaopen_widget() is the C function
