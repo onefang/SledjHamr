@@ -142,10 +142,9 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 #include "GuiLua.h"
 
-globals ourGlobals;
 
-static const char *ourName = "widget";
-static int skang, _M;
+globals ourGlobals;
+static const char *globName  = "ourGlobals";
 
 
 void dumpStack(lua_State *L, int i)
@@ -255,6 +254,7 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
 //              (  Just syntax sugar for call.
 //  call        )  Expects an integer, the number of results left after the call.
 // FIXME: Still to do, if we ever use them -
+//  stack	=  Get a value from the stack, expects a stack index.
 //  userdata	+
 //  lightuserdata	*
 //  thread	^
@@ -445,6 +445,12 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
         lua_pushboolean(L, va_arg(vl, int));    // Stack usage [-0, +1, -]
         break;
       }
+      case '=':
+      {
+        if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
+        lua_pushvalue(L, va_arg(vl, int));      // Stack usage [-0, +1, -]
+        break;
+      }
       case '@':
       {
         int   tabl = va_arg(vl, int);
@@ -528,7 +534,7 @@ static int window(lua_State *L)
   char *title = NULL;
   int w = WIDTH, h = HEIGHT;
 
-  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
@@ -552,7 +558,7 @@ static int loopWindow(lua_State *L)
 {
   globals *ourGlobals;
 
-  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
@@ -566,7 +572,7 @@ static int closeWindow(lua_State *L)
 {
   globals *ourGlobals;
 
-  lua_getfield(L, LUA_REGISTRYINDEX, "ourGlobals");
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
@@ -584,29 +590,25 @@ static int closeWindow(lua_State *L)
   return 0;
 }
 
-/* local widget = require 'widget'
+/* local widget = require 'libGuiLua'
 
 Lua's require() function will strip any stuff from the front of the name
-separated by a hyphen, so 'ClientHamr-GuiLua-widget' -> 'widget'.  Then
-it will search through a path, and eventually find this widget.so (or
-widget.dll or whatever), then call luaopen_widget(), which should return
+separated by a hyphen, so 'ClientHamr-GuiLua-libGuiLua' -> 'libGuiLua'.  Then
+it will search through a path, and eventually find this libGuiLua.so (or
+libGuiLua.dll or whatever), then call luaopen_libGuiLua(), which should return
 a table.  The argument (only thing on the stack) for this function will
-be 'widget'.
+be 'libGuiLua'.
 
 Normally luaL_register() creates a table of functions, that is the table
 returned, but we want to do something different with skang.
 */
-int luaopen_widget(lua_State *L)
+int luaopen_libGuiLua(lua_State *L)
 {
-  // In theory, the only thing on the stack now is 'widget' from the require() call.
+  int skang;
 
   // In theory this function only ever gets called once.
   memset(&ourGlobals, 0, sizeof(globals));
   loggingStartup(&ourGlobals);
-
-  // Shove ourGlobals into the registry.
-  lua_pushlightuserdata(L, &ourGlobals);
-  lua_setfield(L, LUA_REGISTRYINDEX, "ourGlobals");
 
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
@@ -614,41 +616,32 @@ int luaopen_widget(lua_State *L)
 //    LUA_REGISTRYINDEX - C registry, global, for unique keys use the module name as a string, or a lightuserdata address to a C object in our module.
 //    lua_upvalueindex(n) - C function upvalues
 
-// The only locals we care about are skang and _M.
-// All modules go into package.loaded[name] as well.
-// skang is essentially a global anyway.
-// _M we pass back as the result, and our functions get added to it by skang.thingasm()
-//   Not entirely true, _M is a proxy table, getmetatable(_M).__values[cfunc] would be our function.
+  // Shove ourGlobals into the registry.
+  lua_pushlightuserdata(L, &ourGlobals);
+  lua_setfield(L, LUA_REGISTRYINDEX, globName);
 
-// local skang = require 'skang'
-  lua_getglobal(L, "require");
-  lua_pushstring(L, "skang");
-  lua_call(L, 1, 1);
+  // The skang module should have been loaded by now, so we can just grab it out of package.loaded[].
+  lua_getglobal(L, "package");
+  lua_getfield(L, lua_gettop(L), "loaded");
+  lua_remove(L, -2);					// Removes "package"
+  lua_getfield(L, lua_gettop(L), SKANG);
+  lua_remove(L, -2);					// Removes "loaded"
+  lua_setfield(L, LUA_REGISTRYINDEX, SKANG);
+  lua_getfield(L, LUA_REGISTRYINDEX, SKANG);	// Puts the skang table back on the stack.
   skang = lua_gettop(L);
 
-  lua_setfield(L, LUA_REGISTRYINDEX, "skang");
-  lua_getfield(L, LUA_REGISTRYINDEX, "skang");
-
-// local _M = skang.moduleBegin('widget', nil, 'Copyright 2014 David Seikel', '0.1', '2014-04-08 00:42:00', nil, false)
-  push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, "moduleBegin", ourName, "Copyright 2014 David Seikel", "0.1", "2014-04-08 00:42:00", 0, 1);
-  _M = lua_gettop(L);
-
-  // Save this module in the C registry.
-  lua_setfield(L, LUA_REGISTRYINDEX, ourName);
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
-
   // Define our functions.
-  push_lua(L, "@ ( @ $ $ & $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "window", "Opens our window.", window, "number,number,string", 0);
-  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "loopWindow", "Run our windows main loop.", loopWindow, 0);
-  push_lua(L, "@ ( @ $ $ & )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "closeWindow", "Closes our window.", closeWindow, 0);
+  push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, skang, "window", "Opens our window.", window, "number,number,string", 0);
+  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "loopWindow", "Run our windows main loop.", loopWindow, 0);
+  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "closeWindow", "Closes our window.", closeWindow, 0);
 
   // A test of the array building stuff.
-  push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
+  push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
 
-  push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
-
+  // Makes no difference what we return, but it's expecting something.
   return 1;
 }
+
 
 void GuiLuaDo(int argc, char **argv)
 {
@@ -672,13 +665,12 @@ void GuiLuaDo(int argc, char **argv)
     lua_setfield(L, LUA_GLOBALSINDEX, "arg");
 
 
-    lua_getglobal(L, "require");
-    lua_pushstring(L, "skang");
     // When we do this, skang will process all the arguments passed to GuiLuaDo().
-    // This likely includes a module load, which likely loads the widget module above.
+    // This likely includes a module load, which likely opens a window.
+    lua_getglobal(L, "require");
+    lua_pushstring(L, SKANG);
     lua_call(L, 1, 1);
-    skang = lua_gettop(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, "skang");
+    lua_pop(L, 1);	// Ignore the returned value.
 
 
     // Run the main loop via a Lua call.

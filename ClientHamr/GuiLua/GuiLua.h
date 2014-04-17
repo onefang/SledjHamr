@@ -29,6 +29,12 @@ typedef struct _globals globals;
 
 #define D()	PD("DEBUG")
 
+#define SKANG		"skang"
+#define MODULEBEGIN	"moduleBegin"
+#define MODULEEND	"moduleEnd"
+#define THINGASM	"thingasm"
+
+
 // "01:03:52 01-01-1973\n\0"
 #define DATE_TIME_LEN			21
 #    define DATE_TIME_LEN	21

@@ -4,11 +4,10 @@ do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
-  local widget = require 'widget'
 
   skang.clear
   skang.window(200, 200, "G'day planet.")
-  quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
+  quitter = skang.button('Quit', 0.5, 0.5, 0.5, 0.5)
   quitter:action('quit')
 ]])
 

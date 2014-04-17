@@ -55,36 +55,34 @@ int luaopen_test_c(lua_State *L)
 
 // local skang = require 'skang'
   lua_getglobal(L, "require");
-  lua_pushstring(L, "skang");
+  lua_pushstring(L, SKANG);
   lua_call(L, 1, 1);
+  lua_setfield(L, LUA_REGISTRYINDEX, SKANG);
+  lua_getfield(L, LUA_REGISTRYINDEX, SKANG);
   skang = lua_gettop(L);
 
-  lua_setfield(L, LUA_REGISTRYINDEX, "skang");
-  lua_getfield(L, LUA_REGISTRYINDEX, "skang");
-
 // local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, false)
-  push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, "moduleBegin", ourName, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00", 0, 1);
-  _M = lua_gettop(L);
-
-  // Save this module in the C registry.
+  push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, MODULEBEGIN, ourName, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00", 0, 1);
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);
+  _M = lua_gettop(L);
 
 // This uses function{} style.
 // skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
-  push_lua(L, "@ ( { @ $ $ % $widget !required } )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfooble,c", "cfooble help text", 1, "'edit', 'The cfooble:', 1, 1, 10, 50", 1, 0);
+  push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, _M, "cfooble,c", "cfooble help text", 1, "'edit', 'The cfooble:', 1, 1, 10, 50", 1, 0);
 
 // skang.thing(_M, 'cbar', 'Help text', 'Default')
-  push_lua(L, "@ ( @ $ $ $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cbar", "Help text", "Default", 0);
+  push_lua(L, "@ ( = $ $ $ )", skang, THINGASM, _M, "cbar", "Help text", "Default", 0);
 
 // skang.thingasm(_M, 'cfoo')
-  push_lua(L, "@ ( @ $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfoo", 0);
+  push_lua(L, "@ ( = $ )", skang, THINGASM, _M, "cfoo", 0);
 
 // skang.thingasm(_M, 'cfunc', 'cfunc does nothing really', cfunc, 'number,string')
- push_lua(L, "@ ( @ $ $ & $ )", skang, "thingasm", LUA_REGISTRYINDEX, ourName, "cfunc", "cfunc does nothing really", cfunc, "number,string", 0);
+ push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, _M, "cfunc", "cfunc does nothing really", cfunc, "number,string", 0);
 
 // skang.moduleEnd(_M)
-  push_lua(L, "@ ( @ )", skang, "moduleEnd", LUA_REGISTRYINDEX, ourName, 0);
+  push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 
+  // Return _M, the table itself, not the index.
   return 1;
 }

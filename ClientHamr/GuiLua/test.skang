@@ -3,13 +3,12 @@
 -- There's an implied local this = require 'test'
 -- There's an implied local skang = require 'skang'
 
-local widget = require 'widget'
 -- local other = require 'otherPackageName'
 
 skang.clear()
-widget.window(500, 500, "G'day planet.")
+skang.window(500, 500, "G'day planet.")
 
---quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
+--quitter = skang.button('Quit', 0.5, 0.5, 0.5, 0.5)
 --quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
 
 --other.foo = 'stuff'

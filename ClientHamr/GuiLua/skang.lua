@@ -977,6 +977,12 @@ set = function (stuff, key, name, value)
   end
 end
 
+
+-- Get our C functions installed into skang.
+-- This has to be after thingasm is defined.
+local GuiLua = require 'libGuiLua'
+
+
 thingasm('module,l',	'Load a module.',				module, 'file')
 thingasm('get',		'Get the current value of an existing Thing or metadata.',	get,	'thing,key,name')
 thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	reset,	'thing,key,name')
