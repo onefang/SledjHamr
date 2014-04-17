@@ -27,28 +27,6 @@ static int cfunc (lua_State *L)
 }
 
 
-
-static void dumpStack(lua_State *L, int i)
-{
-  int type = lua_type(L, i);
-
-  switch (type)
-  {
-    case LUA_TNONE		:  printf("Stack %d is empty\n", i);  break;
-    case LUA_TNIL		:  printf("Stack %d is a nil\n", i);  break;
-    case LUA_TBOOLEAN		:  printf("Stack %d is a boolean\n", i);  break;
-    case LUA_TNUMBER		:  printf("Stack %d is a number\n", i);  break;
-    case LUA_TSTRING		:  printf("Stack %d is a string - %s\n", i, lua_tostring(L, i));  break;
-    case LUA_TFUNCTION		:  printf("Stack %d is a function\n", i);  break;
-    case LUA_TTHREAD		:  printf("Stack %d is a thread\n", i);  break;
-    case LUA_TTABLE		:  printf("Stack %d is a table\n", i);  break;
-    case LUA_TUSERDATA		:  printf("Stack %d is a userdata\n", i);  break;
-    case LUA_TLIGHTUSERDATA	:  printf("Stack %d is a light userdata\n", i);  break;
-    default			:  printf("Stack %d is unknown\n", i);  break;
-  }
-}
-
-
 /* local test_c = require 'test_c'
 
 Lua's require() function will strip any stuff from the front of the name
@@ -84,7 +62,9 @@ int luaopen_test_c(lua_State *L)
   lua_pushstring(L, "skang");
   lua_call(L, 1, 1);
   skang = lua_gettop(L);
-//  dumpStack(L, skang);
+
+  lua_setfield(L, LUA_REGISTRYINDEX, "skang");
+  lua_getfield(L, LUA_REGISTRYINDEX, "skang");
 
 // local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, false)
   lua_getfield(L, skang, "moduleBegin");
@@ -97,24 +77,10 @@ int luaopen_test_c(lua_State *L)
   lua_pushboolean(L, 0);			// We are not a Lua module.
   lua_call(L, 7, 1);				// call 'skang.moduleBegin' with 7 arguments and 1 result.
   _M = lua_gettop(L);
-//  dumpStack(L, _M);
-
-  // At this point the stack should be - 'test_c', skang, _M.  Let's test that.
-/*
-  int top = 0, j;
-
-  top = lua_gettop(L);
-  printf("MODULE test_c has %d stack items.\n", top);
-  for (j = 1; j <= top; j++)
-    dumpStack(L, j);
-*/
 
   // Save this module in the C registry.
   lua_setfield(L, LUA_REGISTRYINDEX, ourName);
-
-// TODO - This is too verbose.  I've had an idea for writing some sort of generic wrapper, though others have done the same.
-//          http://www.lua.org/pil/25.3.html seems the most reasonable of the examples I've found.
-//          On the other hand, the generic argument pulling / pushing stuff I did for edje_lua2 gets us half way there.
+  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
 
 // This uses function{} style.
 // skang.thingasm{_M, 'cfooble,c', 'cfooble help text', 1, widget=\"'edit', 'The cfooble:', 1, 1, 10, 50\", required=true}
@@ -170,15 +136,7 @@ int luaopen_test_c(lua_State *L)
 // skang.moduleEnd(_M)
   lua_getfield(L, skang, "moduleEnd");
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);
-  // TODO - This should be (L, 1, 0), but that makes test.lua fail, claiming that none of the Things got added.  WTF?
-  lua_call(L, 1, 1);
-
-  int top = 0, j;
-
-  top = lua_gettop(L);
-  printf("MODULE test_c has %d stack items.\n", top);
-  for (j = 1; j <= top; j++)
-    dumpStack(L, j);
+  lua_call(L, 1, 0);
 
   return 1;
 }
