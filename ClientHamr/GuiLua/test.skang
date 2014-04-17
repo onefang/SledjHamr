@@ -6,12 +6,12 @@
 local widget = require 'widget'
 -- local other = require 'otherPackageName'
 
-skang.clear
+skang.clear()
 skang.window(200, 200, "G'day planet.")
 
-quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
-quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
+--quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
+--quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
 
 --other.foo = 'stuff'
 this.bar = 'things'
-this.func(1, 'two')
+this.ffunc(1, 'two')

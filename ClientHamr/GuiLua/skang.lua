@@ -352,17 +352,21 @@ moduleEnd = function (module)
   end
 
   pullArguments(module)
-  if module.isLua then setfenv(2, module.savedEnvironment) end
 
   -- Run the main skin, which is the first skin that is defined.  In theory, the skin from the main module.
   if mainSkin == module then
-print("~~~~~~~~~~~~~~~~~RUNNING SKIN FOR " .. module._NAME .. '\n' .. module.DEFAULT_SKANG)
-    local main = loadstring(module.DEFAULT_SKANG)
-    if (main) then
-      setfenv(main, getfenv(2))
-      main()
+    print("~~~~~~~~~~~~~~~~~RUNNING SKIN FOR " .. module._NAME)
+print(module.DEFAULT_SKANG .. '\n~~~~~~~~~~~~~~~~~')
+    local skin, err = loadstring(module.DEFAULT_SKANG)
+    if skin then
+      setfenv(skin, getfenv(2))
+      skin()
+    else
+      print("ERROR - " .. err)
     end
   end
+
+  if module.isLua then setfenv(2, module.savedEnvironment) end
 end
 
 
