@@ -349,7 +349,7 @@ moduleEnd = function (module)
   if properties then
     setfenv(properties, getfenv(2))
     properties()
-  elseif 'cannot open ' ~= string.sub(err, 1, 12)  then
+  elseif 'cannot open ' ~= string.sub(err, 1, 12) then
     print("ERROR - " .. err)
   end
 
