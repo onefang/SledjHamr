@@ -988,8 +988,6 @@ thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally lef
 -- TODO - Some function stubs, for now.  Fill them up later.
 clear = function ()
 end
---window = function (width, height, title)
---end
 
 skang = function (name)
 end
@@ -997,9 +995,11 @@ quit = function ()
 end
 
 thingasm('clear',	'The current skin is cleared of all widgets.',	clear)
---thingasm{'window',	'The size and title of the application Frame.',	window, 'x,y,name', acl='GGG'}
 thingasm('skang',	'Parse the contents of a skang file or URL.',	skang,	'URL')
 thingasm('quit',	'Quit, exit, remove thyself.',			quit)
+
+-- This moved to the widget module, but it's not all there yet.
+--thingasm{'window',	'The size and title of the application Frame.',	window, 'x,y,name', acl='GGG'}
 
 
 moduleEnd(_M)
