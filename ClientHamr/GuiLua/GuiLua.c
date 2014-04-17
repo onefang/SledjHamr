@@ -48,7 +48,7 @@ Lua scripts do -
     Than change the hash bang to use it.
     And if there's a matching module, load the module first, call gimmeSkin() on it.
     So that any with an internal default skin get that instead.
-    Same if theer's a module, but no skanf file.
+    Same if there's a module, but no skang file.
 
 Making these packages all a sub package of skang seems like a great
 idea.  On the other hand, looks like most things are just getting folded
@@ -59,7 +59,8 @@ package details.
 See if I can use LuaJIT FFI here.  Since this will be a library, and
 skang apps could be written in C or Lua, perhaps writing this library to
 be FFI friendly instead of the usual Lua C binding might be the way to
-go?
+go?  LuaJIT is not ready yet, since it needs include files copied into
+Lua files, and does not support macros.
 
 For the "GUI hosted in another app" case, we will need some sort of
 internal window manager running in that other app.
