@@ -345,10 +345,12 @@ end
 -- Restore the environment, and grab paramateres from standard places.
 moduleEnd = function (module)
   -- See if there is a properties file, and run it in the modules environment.
-  local properties = loadfile(module._NAME .. '.properties')
+  local properties, err = loadfile(module._NAME .. '.properties')
   if properties then
     setfenv(properties, getfenv(2))
     properties()
+  elseif 'cannot open ' ~= string.sub(err, 1, 12)  then
+    print("ERROR - " .. err)
   end
 
   pullArguments(module)
