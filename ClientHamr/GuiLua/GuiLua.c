@@ -521,10 +521,14 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
 }
 
 
+// TODO - These functions should be able to deal with multiple windows.
+// TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
 //  globals *ourGlobals = data;
 
+// TODO - skang.quit() should do this to.
+  // Tell the main loop to stop, which it will, eventually.
   elm_exit();
 }
 
@@ -585,6 +589,7 @@ static int closeWindow(lua_State *L)
     ourGlobals->logDom = -1;
   }
 
+  // This shuts down Elementary, but keeps the main loop running until all ecore_evas are freed.
   elm_shutdown();
 
   return 0;
