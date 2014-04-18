@@ -216,6 +216,9 @@ void loggingStartup(globals *ourGlobals)
   eina_log_level_set(EINA_LOG_LEVEL_DBG);
   eina_log_domain_level_set("GuiLua", EINA_LOG_LEVEL_DBG);
   eina_log_print_cb_set(_ggg_log_print_cb, stderr);
+
+  // Shut up the excess debugging shit from EFL.
+  eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
 }
 
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
@@ -527,32 +530,94 @@ static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info 
 {
 //  globals *ourGlobals = data;
 
-// TODO - skang.quit() should do this to.
   // Tell the main loop to stop, which it will, eventually.
   elm_exit();
 }
 
+
+struct widget
+{
+  Evas_Object	*widget;
+  char		*label, *look, *action, *help;
+  // foreground / background colour
+  // thing
+  // types {}
+  // skangCoord x, y, w, h
+};
+
+/* Sooo, how to do this -
+
+widget has to be a light userdata
+The rest can be Lua sub things?  Each with a C function to update the widget.
+
+win.quitter.look
+
+win.quitter:colour(1,2,3,4)  -> win.quitter.colour(win.quitter, 1,2,3,4)  ->  __call(win.quitter.colour, win.quitter, 1,2,3,4)  ->  skang.colour(win.quitter.colour, win.quitter, 1,2,3,4)
+win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Thing and Mum.  We eventually want to call skang.colour() though.
+
+*/
+
+static int widget(lua_State *L)
+{
+  globals *ourGlobals;
+  Evas_Object *bt;
+  char *type = "label";
+  char *title = ":";
+  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  pull_lua(L, 1, "$type $title %x %y %w %h", &type, &title, &x, &y, &w, &h);
+
+  // Poor mans introspection, until I write real introspection into EFL.
+  if (strcmp(type, "button") == 0)
+  {
+    bt = elm_button_add(ourGlobals->win);
+    elm_object_text_set(bt, title);
+    evas_object_smart_callback_add(bt, "clicked", _on_done, ourGlobals);
+    evas_object_resize(bt, w, h);
+    evas_object_move(bt, x, y);
+    evas_object_show(bt);
+    lua_pushlightuserdata(L, &bt);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int colour(lua_State *L)
+{
+// TODO - This is just a stub for now.
+
+  return 0;
+}
+
+
 static int window(lua_State *L)
 {
   globals *ourGlobals;
-  char *title = NULL;
+  char *name = "GuiLua";
+  char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
 
   lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  if (pull_lua(L, 1, "%w %h $title", &w, &h, &title) > 0)
-    PI("Setting window to %d %d %s", w, h, title);
-  else
-    title = "GuiLua test harness";
+  pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
+  PI("Setting window to %d %d %s", w, h, title);
 
-  if ((ourGlobals->win = elm_win_util_standard_add("GuiLua", title)))
+  if ((ourGlobals->win = elm_win_util_standard_add(name, title)))
   {
     evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
     evas_object_resize(ourGlobals->win, w, h);
     evas_object_move(ourGlobals->win, 0, 0);
     evas_object_show(ourGlobals->win);
+
+    lua_pushlightuserdata(L, &ourGlobals->win);
+    return 1;
   }
 
   return 0;
@@ -599,6 +664,10 @@ static int closeWindow(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
+
+  // This causes EO to spill lots of meaningless error messages.
+//  if (bt)
+//    evas_object_del(bt);
 
   if (ourGlobals->win)
     evas_object_del(ourGlobals->win);
@@ -665,8 +734,10 @@ int luaopen_libGuiLua(lua_State *L)
 
   // Define our functions.
 //thingasm{'window', 'The size and title of the application Frame.', window, 'x,y,name', acl='GGG'}
-  push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "window",	"Opens our window.",				window, "number,number,string", "GGG", 0);
-  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets",	clear, 0);
+  push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "number,number,string", "GGG", 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "closeWindow",	"Closes our window.",				closeWindow, 0);

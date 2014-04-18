@@ -625,7 +625,9 @@ local Thing =
     if 'nil' == t then
       if self.required then table.insert(self.errors, mum .. '.' .. name .. ' is required!') end
     else
-      if self.types[1] ~= t then table.insert(self.errors, mum .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
+      if 'widget' == self.types[1] then
+      -- TODO - Should validate any attached Thing.
+      elseif self.types[1] ~= t then table.insert(self.errors, mum .. '.' .. name .. ' should be a ' .. self.types[1] .. ', but it is a ' .. t .. '!')
       else
         if 'number' == t then value = '' .. value end
         if ('number' == t) or ('string' == t) then
@@ -669,7 +671,6 @@ end
 
 local Mum = 
 {
---[[ From an email by Mike Pall -
 
 __index = function (parent, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
@@ -882,6 +883,16 @@ thingasm = function (names, ...)
     setmetatable(thingy.default, thisMum)
   end
 
+  if 'widget' == thingy.types[1] then
+    local args, err = loadstring('return ' .. thingy.widget)
+    if args then
+      setfenv(args, parent)
+      parent.W[name] = {widget = widget(args())}
+    else
+      print("ERROR - " .. err)
+    end
+  end
+
   -- Remove old names, then stash the Thing under all of it's new names.
   for i, v in ipairs(oldNames) do
     metaMum.__self.stuff[v] = nil
@@ -891,7 +902,7 @@ thingasm = function (names, ...)
   end
 
   -- This triggers the Mum.__newindex metamethod above.  If nothing else, it triggers thingy.isValid()
-  if new and not metaMum.__self.isKeyed then parent[name] = thingy.default end
+  if new and not metaMum.__self.isKeyed and ('widget' ~= thingy.types[1]) then parent[name] = thingy.default end
 end
 
 
@@ -994,6 +1005,34 @@ thingasm('reset',	'Reset the current value of an existing Thing or metadata.',	r
 thingasm('set',		'Set the current value of an existing Thing or metadata.',	set,	'thing,key,name,data')
 
 thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally left blank. ]] end)
+
+
+
+-- Widget wrappers.
+-- TODO - Fix this up so we don't need .W
+local widgets = {}
+--thingasm{widgets, 'window', 'The window.', types='userdata'}
+thingasm{widgets, 'W', 'Holds all the widgets', types='Keyed'}
+widgets.W{'look,l', 'The look of the widget.', types='string'}
+widgets.W{'colour,color,c', 'The  colours of the widget.', types='table'}
+widgets.W.c{'red,r',   'The red   colour  of the widget.', 255, types='number'}
+widgets.W.c{'green,g', 'The green colour  of the widget.', 255, types='number'}
+widgets.W.c{'blue,b',  'The blue  colour  of the widget.', 255, types='number'}
+widgets.W.c{'alpha,a', 'The alpha colour  of the widget.', 255, types='number'}
+-- At this point we want to change widgets.W.c() to go to a different __call, coz right now it's going to the Mum.__call, which wraps thingasm.
+-- TODO - Keep an eye on this if we change to a single Mum, instead of the shallow copy we use now.
+local wMum = getmetatable(widgets.W.c)
+wMum.__call = function (func, ...)
+  return Colour(func, ...)
+end
+
+window = function(w, h, title, name)
+  name = name or 'myWindow'
+  local win = {}
+  win.W = copy(widgets.W, name)
+  win.window = Cwindow(w, h, title, name)
+  return win
+end
 
 
 -- TODO - Some function stubs, for now.  Fill them up later.

@@ -6,9 +6,10 @@
 -- local other = require 'otherPackageName'
 
 skang.clear()
-skang.window(500, 500, "G'day planet.")
+local win = skang.window(500, 500, "G'day planet.", 'testWindow')
 
---quitter = skang.widget('button', 'Quit', 0.5, 0.5, 0.5, 0.5)
+
+skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 50', required=true}
 --quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
 
 --other.foo = 'stuff'
