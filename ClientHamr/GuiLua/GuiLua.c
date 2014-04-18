@@ -558,6 +558,13 @@ static int window(lua_State *L)
   return 0;
 }
 
+static int clear(lua_State *L)
+{
+// TODO - This is just a stub for now.
+
+  return 0;
+}
+
 static int loopWindow(lua_State *L)
 {
   globals *ourGlobals;
@@ -568,6 +575,19 @@ static int loopWindow(lua_State *L)
 
   if (ourGlobals->win)
     elm_run();
+
+  return 0;
+}
+
+static int quit(lua_State *L)
+{
+  globals *ourGlobals;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  _on_done(ourGlobals, NULL, NULL);
 
   return 0;
 }
@@ -644,9 +664,12 @@ int luaopen_libGuiLua(lua_State *L)
   skang = lua_gettop(L);
 
   // Define our functions.
-  push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, skang, "window", "Opens our window.", window, "number,number,string", 0);
-  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "loopWindow", "Run our windows main loop.", loopWindow, 0);
-  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "closeWindow", "Closes our window.", closeWindow, 0);
+//thingasm{'window', 'The size and title of the application Frame.', window, 'x,y,name', acl='GGG'}
+  push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "window",	"Opens our window.",				window, "number,number,string", "GGG", 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets",	clear, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "closeWindow",	"Closes our window.",				closeWindow, 0);
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
