@@ -1,4 +1,4 @@
-#!/usr/bin/env skang     -- Lua allows this shell hack.
+#!/usr/bin/env skang -l test     -- Lua allows this shell hack.
 
 -- There's an implied local this = require 'test'
 -- There's an implied local skang = require 'skang'
@@ -8,7 +8,7 @@
 skang.clear()
 skang.window(500, 500, "G'day planet.")
 
---quitter = skang.button('Quit', 0.5, 0.5, 0.5, 0.5)
+--quitter = skang.widget('button', 'Quit', 0.5, 0.5, 0.5, 0.5)
 --quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
 
 --other.foo = 'stuff'
