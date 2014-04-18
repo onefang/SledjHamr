@@ -696,7 +696,8 @@ __newindex = function (parent, key, value)
       -- Deal with setting a new Keyed table entry.
       local newThing = copy(parent, key)
       rawset(metaMum.__values, key, newThing)
-      thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).__self.stuff, }
+--      thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).__self.stuff, }
+      thingy = {names={key}, types={'table'}, stuff=getmetatable(newThing).__self.stuff, }
       setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
     end
   end
