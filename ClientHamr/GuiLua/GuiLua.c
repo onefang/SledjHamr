@@ -587,13 +587,30 @@ static int widget(lua_State *L)
   return 0;
 }
 
+static void _on_click(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+  // TODO, pull the action out of the widget, then somehow magically send it to Lua.
+}
+
+static int action(lua_State *L)
+{
+  Evas_Object *obj= lua_touserdata(L, 1);
+  char *action = "nada";
+
+  pull_lua(L, 2, "$", &action);
+printf("Setting action %s\n", action);
+  // TODO - stuff the action into the widget somewhere.
+  evas_object_smart_callback_add(obj, "clicked", _on_click, L);
+
+  return 0;
+}
+
 static int colour(lua_State *L)
 {
 // TODO - This is just a stub for now.
 
   return 0;
 }
-
 
 static int window(lua_State *L)
 {
@@ -737,6 +754,7 @@ int luaopen_libGuiLua(lua_State *L)
   push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "number,number,string", "GGG", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);

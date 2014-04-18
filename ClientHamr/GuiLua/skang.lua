@@ -696,9 +696,14 @@ __newindex = function (parent, key, value)
     if metaMum.__self.isKeyed then
       -- Deal with setting a new Keyed table entry.
       local newThing = copy(parent, key)
+      local newSelf = getmetatable(newThing).__self
       rawset(metaMum.__values, key, newThing)
---      thingy = {names={key}, types={'table'}, parent=newThing, stuff=getmetatable(newThing).__self.stuff, }
-      thingy = {names={key}, types={'table'}, stuff=getmetatable(newThing).__self.stuff, }
+      thingy = {}
+      for k, v in pairs(newSelf) do
+        thingy[k] = v
+      end
+      thingy.names={key}
+      thingy.types={'table'}
       setmetatable(thingy, {__index = Thing})	-- To pick up isValid, pattern, and the other stuff by default.
     end
   end
@@ -796,6 +801,7 @@ thingasm = function (names, ...)
   local params = {...}
   local new = false
   local parent
+  local set = true
 
   -- Check how we were called, and re arrange stuff to match.
   if 0 == #params then
@@ -870,8 +876,20 @@ thingasm = function (names, ...)
   if '' == types then types = typ end
   thingy.types = csv2table(types)
 
+  if 'widget' == thingy.types[1] then
+    set = false
+    local args, err = loadstring('return ' .. thingy.widget)
+    if args then
+      setfenv(args, parent)
+      parent.W[name] = {widget = widget(args())}
+    else
+      print("ERROR - " .. err)
+    end
+  end
+
   -- Deal with Keyed and tables.
   if 'Keyed' == thingy.types[1] then
+    set = false
     thingy.types[1] = 'table'
     thingy.isKeyed = true
   end
@@ -883,14 +901,8 @@ thingasm = function (names, ...)
     setmetatable(thingy.default, thisMum)
   end
 
-  if 'widget' == thingy.types[1] then
-    local args, err = loadstring('return ' .. thingy.widget)
-    if args then
-      setfenv(args, parent)
-      parent.W[name] = {widget = widget(args())}
-    else
-      print("ERROR - " .. err)
-    end
+  if 'userdata' == thingy.types[1] then
+    set = false
   end
 
   -- Remove old names, then stash the Thing under all of it's new names.
@@ -902,7 +914,7 @@ thingasm = function (names, ...)
   end
 
   -- This triggers the Mum.__newindex metamethod above.  If nothing else, it triggers thingy.isValid()
-  if new and not metaMum.__self.isKeyed and ('widget' ~= thingy.types[1]) then parent[name] = thingy.default end
+  if new and set then parent[name] = thingy.default end
 end
 
 
@@ -1013,6 +1025,20 @@ thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally lef
 local widgets = {}
 --thingasm{widgets, 'window', 'The window.', types='userdata'}
 thingasm{widgets, 'W', 'Holds all the widgets', types='Keyed'}
+widgets.W{'widget', 'The widget.', types='userdata'}
+widgets.W{'action,a', 'The action for the widget.', 'nada', types='string'}
+local aIsValid = function (self, parent)
+  local result = Thing.isValid(self, parent)
+
+  if result then
+    local value = parent[self.names[1] ]
+print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value)
+--printTableStart(parent, '', 'parent')
+    action(parent.widget, value)
+  end
+  return result
+end
+
 widgets.W{'look,l', 'The look of the widget.', types='string'}
 widgets.W{'colour,color,c', 'The  colours of the widget.', types='table'}
 widgets.W.c{'red,r',   'The red   colour  of the widget.', 255, types='number'}
@@ -1030,6 +1056,8 @@ window = function(w, h, title, name)
   name = name or 'myWindow'
   local win = {}
   win.W = copy(widgets.W, name)
+  local wMum, wThingy = getStuffed(win.W, 'a')
+  wThingy.isValid = aIsValid
   win.window = Cwindow(w, h, title, name)
   return win
 end
