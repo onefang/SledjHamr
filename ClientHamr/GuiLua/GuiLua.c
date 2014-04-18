@@ -60,7 +60,7 @@ See if I can use LuaJIT FFI here.  Since this will be a library, and
 skang apps could be written in C or Lua, perhaps writing this library to
 be FFI friendly instead of the usual Lua C binding might be the way to
 go?  LuaJIT is not ready yet, since it needs include files copied into
-Lua files, and does not support macros.
+Lua files, and does not support macros, which EFL uses a lot of.
 
 For the "GUI hosted in another app" case, we will need some sort of
 internal window manager running in that other app.

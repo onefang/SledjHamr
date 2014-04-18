@@ -8,6 +8,7 @@ C will let us -
   Network stuff.   No need to look at Lua socket stuff, we have Ecore_Con.
   Database stuff.  No need to look at Lua SQL stuff, we have esskyuehl.  Maybe.
 
+  Actually, we could have the best of both worlds, since it is currently a C / Lua hybrid.  B-)
 ]]
 
 
@@ -669,11 +670,6 @@ end
 local Mum = 
 {
 --[[ From an email by Mike Pall -
-"Important: create the metatable and its metamethods once and reuse
-the _same_ metatable for _every_ instance."
-
-This is for LuaJIT, he's the author, and concerns performance.
-]]
 
 __index = function (parent, key)
   -- This only works for keys that don't exist.  By definition a value of nil means it doesn't exist.
@@ -753,6 +749,14 @@ end,
 
 newMum = function ()
   local result = {}
+--[[ From an email by Mike Pall -
+"Important: create the metatable and its metamethods once and reuse
+the _same_ metatable for _every_ instance."
+
+This is for LuaJIT, he's the author, and concerns performance.
+
+TODO - Which is the exact opposite of what we are doing.  Perhaps we can fix that?
+]]
   for k, v in pairs(Mum) do
     result[k] = v
   end
@@ -1532,6 +1536,9 @@ Alternate plan -
 
     button:bottom(-10):right(5)	-- 10 pixels below the bottom of button, 5 pixels to the right of the right edge of button.
     button:width("12")		-- 12 characters longer than the width of button.
+
+    But then how do we store that so that things move when the thing they are
+    relative to moves?
 
 
    Squeal -
