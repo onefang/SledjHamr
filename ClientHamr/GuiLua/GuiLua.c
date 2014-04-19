@@ -535,33 +535,23 @@ static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info 
 }
 
 
-struct widget
-{
-  Evas_Object	*widget;
-  char		*label, *look, *action, *help;
-  // foreground / background colour
-  // thing
-  // types {}
-  // skangCoord x, y, w, h
-};
-
 /* Sooo, how to do this -
-
 widget has to be a light userdata
 The rest can be Lua sub things?  Each with a C function to update the widget.
 
-win.quitter.look
-
 win.quitter:colour(1,2,3,4)  -> win.quitter.colour(win.quitter, 1,2,3,4)  ->  __call(win.quitter.colour, win.quitter, 1,2,3,4)  ->  skang.colour(win.quitter.colour, win.quitter, 1,2,3,4)
 win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Thing and Mum.  We eventually want to call skang.colour() though.
-
 */
 
 struct _Widget
 {
   char magic[8];
-  char *action;
   Evas_Object *obj;
+  char *label, *look, *action, *help;
+  // foreground / background colour
+  // thing
+  // types {}
+  // skangCoord x, y, w, h
 };
 
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
@@ -603,6 +593,7 @@ static int widget(lua_State *L)
 
     wid = calloc(1, sizeof(struct _Widget));
     strcpy(wid->magic, "Widget");
+    wid->label = strdup(title);
     wid->obj = elm_button_add(ourGlobals->win);
     elm_object_text_set(wid->obj, title);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, L);
@@ -717,10 +708,7 @@ static int closeWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  // This causes EO to spill lots of meaningless error messages.
-//  if (bt)
-//    evas_object_del(bt);
-
+  // Elm will delete our buttons to, and EO will bitch four times for each.
   if (ourGlobals->win)
     evas_object_del(ourGlobals->win);
 
