@@ -4,11 +4,9 @@ do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
-
-  skang.clear
-  skang.window(200, 200, "G'day planet.")
-  quitter = skang.button('Quit', 0.5, 0.5, 0.5, 0.5)
-  quitter:action('quit')
+  local win = skang.window(500, 500, "G'day planet.", 'testWindow')
+  skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 30'}
+  win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translat 'quit' into the Lua 'skang.quit()'?
 ]])
 
 print('code')

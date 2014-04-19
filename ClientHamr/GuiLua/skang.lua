@@ -144,7 +144,7 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
     f:close()
   end
   if skin then
-    skin = "local skang = require 'skang'\nlocal this = require 'test'\n" .. skin
+    skin = "local skang = require 'skang'\nlocal " .. name .. " = require '" .. name .. "'\n" .. skin
     if nil == mainSkin._NAME then mainSkin = _M end
   end
   _M.DEFAULT_SKANG = skin
@@ -358,8 +358,7 @@ moduleEnd = function (module)
 
   -- Run the main skin, which is the first skin that is defined.  In theory, the skin from the main module.
   if mainSkin == module then
-    print("~~~~~~~~~~~~~~~~~RUNNING SKIN FOR " .. module._NAME)
-print(module.DEFAULT_SKANG .. '\n~~~~~~~~~~~~~~~~~')
+    print("RUNNING SKIN FOR " .. module._NAME)
     local skin, err = loadstring(module.DEFAULT_SKANG)
     if skin then
       setfenv(skin, getfenv(2))

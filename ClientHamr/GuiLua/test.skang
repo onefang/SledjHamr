@@ -1,9 +1,7 @@
 #!/usr/bin/env skang -l test     -- Lua allows this shell hack.
 
--- There's an implied local this = require 'test'
 -- There's an implied local skang = require 'skang'
-
--- local other = require 'otherPackageName'
+-- There's an implied local test = require 'test'
 
 -- This is a bit more verbose than I wanted.  lol
 local win = skang.window(500, 500, "G'day planet.", 'testWindow')
@@ -12,6 +10,5 @@ win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.c
 
 skang.thingasm{win, 'ffuncer', 'Calls ffunc', types = 'widget', widget='"button", "ffunc()", 10, 40, 100, 30', action='test.ffunc(3, 4)'}
 
---other.foo = 'stuff'
-this.bar = 'things'
-this.ffunc(1, 'two')
+test.bar = 'things'
+test.ffunc(1, 'two')
