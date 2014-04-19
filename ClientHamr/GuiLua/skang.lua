@@ -1065,6 +1065,8 @@ window = function(w, h, title, name)
   return win
 end
 
+thingasm{'window',	'Specifies the size and title of the application Frame.', window, 'number,number,string', acl="GGG"}
+
 
 -- TODO - Some function stubs, for now.  Fill them up later.
 skang = function (name)
