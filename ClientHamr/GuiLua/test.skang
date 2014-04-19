@@ -7,8 +7,11 @@
 
 -- This is a bit more verbose than I wanted.  lol
 local win = skang.window(500, 500, "G'day planet.", 'testWindow')
-skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 50'}
+skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 30'}
 win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translat 'quit' into the Lua 'skang.quit()'?
+
+skang.thingasm{win, 'ffuncer', 'Calls ffunc', types = 'widget', widget='"button", "ffunc()", 10, 40, 100, 30', action='test.ffunc(3, 4)'}
+win.W.ffuncer.action = 'test.ffunc(3, 4)'
 
 --other.foo = 'stuff'
 this.bar = 'things'
