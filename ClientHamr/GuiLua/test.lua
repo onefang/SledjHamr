@@ -193,14 +193,15 @@ print(stuff.s.sa)
 print(stuff.s.sb)
 print('')
 
-skang.printTableStart(stuff.s, '', 'stuff.s')
-skang.printTableStart(stuff.S, '', 'stuff.S')
+--skang.printTableStart(stuff.s, '', 'stuff.s')
+--skang.printTableStart(stuff.S, '', 'stuff.S')
 --skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
 
 print(stuff.S['record0'].field1)
 print(stuff.S['record1'].field0)
 print(stuff.S['record2'].field1)
 
+--skang.printTableStart(stuff.S['record0'], '', 'stuff.S[record0]')
 --skang.printTableStart(getmetatable(stuff.S['record0']), '', 'metatable stuff.S[record0]')
 --skang.printTableStart(getmetatable(stuff.S['record1']), '', 'metatable stuff.S[record1]')
 --skang.printTableStart(getmetatable(stuff.S['record2']), '', 'metatable stuff.S[record2]')

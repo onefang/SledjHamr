@@ -557,10 +557,35 @@ win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Th
 
 */
 
+struct _Widget
+{
+  char magic[8];
+  char *action;
+  Evas_Object *obj;
+};
+
+static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+  globals *ourGlobals;
+  lua_State *L = data;
+  struct _Widget *wid;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+  wid = evas_object_data_get(obj, "Widget");
+  if (wid)
+  {
+    PD("Doing action %s", wid->action);
+    if (0 != luaL_dostring(L, wid->action))
+      PE("Error running - %s", wid->action);
+  }
+}
+
 static int widget(lua_State *L)
 {
   globals *ourGlobals;
-  Evas_Object *bt;
   char *type = "label";
   char *title = ":";
   int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
@@ -574,34 +599,44 @@ static int widget(lua_State *L)
   // Poor mans introspection, until I write real introspection into EFL.
   if (strcmp(type, "button") == 0)
   {
-    bt = elm_button_add(ourGlobals->win);
-    elm_object_text_set(bt, title);
-    evas_object_smart_callback_add(bt, "clicked", _on_done, ourGlobals);
-    evas_object_resize(bt, w, h);
-    evas_object_move(bt, x, y);
-    evas_object_show(bt);
-    lua_pushlightuserdata(L, &bt);
+    struct _Widget *wid;
+
+    wid = calloc(1, sizeof(struct _Widget));
+    strcpy(wid->magic, "Widget");
+    wid->obj = elm_button_add(ourGlobals->win);
+    elm_object_text_set(wid->obj, title);
+    evas_object_smart_callback_add(wid->obj, "clicked", _on_click, L);
+    evas_object_resize(wid->obj, w, h);
+    evas_object_move(wid->obj, x, y);
+    evas_object_show(wid->obj);
+    evas_object_data_set(wid->obj, "Widget", wid);
+    /* Evas_Object *bt isn't a real pointer it seems.  At least Lua bitches about it -
+         PANIC: unprotected error in call to Lua API (bad light userdata pointer)
+       So we wrap it.
+    */
+    lua_pushlightuserdata(L, (void *) wid);
     return 1;
   }
 
   return 0;
 }
 
-static void _on_click(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-  // TODO, pull the action out of the widget, then somehow magically send it to Lua.
-}
-
 static int action(lua_State *L)
 {
-  Evas_Object *obj= lua_touserdata(L, 1);
+  globals *ourGlobals;
+  struct _Widget *wid = lua_touserdata(L, 1);
   char *action = "nada";
 
-  pull_lua(L, 2, "$", &action);
-printf("Setting action %s\n", action);
-  // TODO - stuff the action into the widget somewhere.
-  evas_object_smart_callback_add(obj, "clicked", _on_click, L);
+  lua_getfield(L, LUA_REGISTRYINDEX, globName);
+  ourGlobals = lua_touserdata(L, -1);
+  lua_pop(L, 1);
 
+  pull_lua(L, 2, "$", &action);
+  if (wid && strcmp(wid->magic, "Widget") == 0)
+  {
+    PD("Setting action %s", action);
+    wid->action = strdup(action);
+  }
   return 0;
 }
 
@@ -795,12 +830,13 @@ void GuiLuaDo(int argc, char **argv)
     lua_getglobal(L, "require");
     lua_pushstring(L, SKANG);
     lua_call(L, 1, 1);
-    lua_pop(L, 1);	// Ignore the returned value.
+    lua_setfield(L, LUA_GLOBALSINDEX, SKANG);
 
 
     // Run the main loop via a Lua call.
     // This does nothing if no module opened a window.
-    lua_pop(L, loopWindow(L));
+    if (0 != luaL_dostring(L, "skang.loopWindow()"))
+      PEm("Error running - skang.loopWindow()");
     lua_pop(L, closeWindow(L));
     lua_close(L);
   }

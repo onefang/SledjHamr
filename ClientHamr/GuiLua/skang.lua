@@ -881,7 +881,9 @@ thingasm = function (names, ...)
     local args, err = loadstring('return ' .. thingy.widget)
     if args then
       setfenv(args, parent)
-      parent.W[name] = {widget = widget(args())}
+      local result = widget(args())
+print('NO IDEA WHY this does isValid() three times on the action, and the first one being a string.')
+      parent.W[name] = {Cwidget = result}
     else
       print("ERROR - " .. err)
     end
@@ -1025,21 +1027,21 @@ thingasm('nada',	'Do nothing.',	function () --[[ This function intentionally lef
 local widgets = {}
 --thingasm{widgets, 'window', 'The window.', types='userdata'}
 thingasm{widgets, 'W', 'Holds all the widgets', types='Keyed'}
-widgets.W{'widget', 'The widget.', types='userdata'}
+widgets.W{'Cwidget', 'The widget.', types='userdata'}
 widgets.W{'action,a', 'The action for the widget.', 'nada', types='string'}
 local aIsValid = function (self, parent)
   local result = Thing.isValid(self, parent)
 
   if result then
     local value = parent[self.names[1] ]
-print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value)
---printTableStart(parent, '', 'parent')
-    action(parent.widget, value)
+print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value .. '   ' .. type(parent.Cwidget))
+    action(parent.Cwidget, value)
   end
   return result
 end
 
 widgets.W{'look,l', 'The look of the widget.', types='string'}
+--[[
 widgets.W{'colour,color,c', 'The  colours of the widget.', types='table'}
 widgets.W.c{'red,r',   'The red   colour  of the widget.', 255, types='number'}
 widgets.W.c{'green,g', 'The green colour  of the widget.', 255, types='number'}
@@ -1051,11 +1053,12 @@ local wMum = getmetatable(widgets.W.c)
 wMum.__call = function (func, ...)
   return Colour(func, ...)
 end
+]]
 
 window = function(w, h, title, name)
   name = name or 'myWindow'
   local win = {}
-  win.W = copy(widgets.W, name)
+  win = copy(widgets, name)
   local wMum, wThingy = getStuffed(win.W, 'a')
   wThingy.isValid = aIsValid
   win.window = Cwindow(w, h, title, name)
