@@ -958,7 +958,8 @@ copy = function (parent, name)
 end
 
 module = function (name)
-  return require(name)
+  _G[name] = require(name)
+  return _G[name]
 end
 
 stuff = function (aThingy, aStuff)
