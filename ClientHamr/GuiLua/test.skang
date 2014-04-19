@@ -11,7 +11,6 @@ skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widge
 win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translat 'quit' into the Lua 'skang.quit()'?
 
 skang.thingasm{win, 'ffuncer', 'Calls ffunc', types = 'widget', widget='"button", "ffunc()", 10, 40, 100, 30', action='test.ffunc(3, 4)'}
-win.W.ffuncer.action = 'test.ffunc(3, 4)'
 
 --other.foo = 'stuff'
 this.bar = 'things'
