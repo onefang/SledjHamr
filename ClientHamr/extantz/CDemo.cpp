@@ -32,8 +32,8 @@ void CDemo::setup(GLData *gld)
 {
 	device = gld->device;
 	IrrlichtDevice	*device = gld->device;
-	IVideoDriver	*driver = gld->driver;
-	ISceneManager	*smgr   = gld->smgr;
+//	IVideoDriver	*driver = gld->driver;
+//	ISceneManager	*smgr   = gld->smgr;
 
 	if (device->getFileSystem()->existFile("irrlicht.dat"))
 		device->getFileSystem()->addFileArchive("irrlicht.dat");

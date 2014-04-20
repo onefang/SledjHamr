@@ -37,14 +37,15 @@ static Elm_Genlist_Item_Class *grid_gic = NULL;
 static Elm_Genlist_Item_Class *account_gic = NULL;
 static Elm_Genlist_Item_Class *viewer_gic = NULL;
 
-static const char *img1 = PACKAGE_DATA_DIR "/images/plant_01.jpg";
-static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
+//static const char *img1 = PACKAGE_DATA_DIR "/images/plant_01.jpg";
+//static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
 static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
 
 
 #define EPHYSICS_TEST_THEME "extantz"
 
 
+#if DO_GEARS
 //--------------------------------//
 // Gear Stuff.
 
@@ -237,6 +238,8 @@ static void draw_gear(GLData *gld, Gear *gear, GLfloat *m, GLfloat x, GLfloat y,
    gl->glEnableVertexAttribArray(1);
    gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, gear->count);
 }
+#endif
+
 
 static void gldata_init(GLData *gld)
 {
@@ -255,6 +258,8 @@ static void gldata_init(GLData *gld)
 
 //-------------------------//
 
+
+#if DO_GEARS
 static const char vertex_shader[] =
    "uniform mat4 proj;\n"
    "attribute vec4 position;\n"
@@ -327,7 +332,7 @@ static void gears_init(GLData *gld)
     Evas_GL_API *gl = gld->glApi;
     GLint linked = 0;
 
-    char msg[512];
+//    char msg[512];
 
     gl->glEnable(GL_CULL_FACE);
     gl->glEnable(GL_DEPTH_TEST);
@@ -383,6 +388,7 @@ static void gears_init(GLData *gld)
 
     gld->gearsInited = EINA_TRUE;
 }
+#endif
 
 static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
@@ -559,7 +565,7 @@ static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Ev
 // Evas style event callback.
 static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-    GLData *gld = data;
+//    GLData *gld = data;
     Evas_Event_Mouse_Down *ev = event_info;
 
     if (1 == ev->button)
@@ -708,7 +714,7 @@ static void on_pixels(void *data, Evas_Object *obj)
 
 static void _draw_gl(Evas_Object *obj)
 {
-   Evas_GL_API *gl = elm_glview_gl_api_get(obj);
+//   Evas_GL_API *gl = elm_glview_gl_api_get(obj);
    GLData *gld = evas_object_data_get(obj, "gld");
    if (!gld) return;
 
@@ -1100,7 +1106,8 @@ static void create_handles(Evas_Object *obj)
 static Evas_Object *_toolbar_menu_add(Evas_Object *win, Evas_Object *tb, char *label)
 {
     Evas_Object *menu= NULL;
-    Elm_Object_Item *tb_it, *menu_it;
+    Elm_Object_Item *tb_it;
+//, *menu_it;
 
     tb_it = elm_toolbar_item_append(tb, NULL, label, NULL, NULL);
     elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
@@ -1150,8 +1157,9 @@ static void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w
 
 static void overlay_add(GLData *gld)
 {
-    Evas_Object *bg, *bx, *tb, *menu;
-    Elm_Object_Item *tb_it, *menu_it;
+    Evas_Object *bg;
+//, *bx, *tb, *menu;
+//    Elm_Object_Item *tb_it, *menu_it;
 
     // There many are reasons for this window.
     // The first is to cover the GL and provide something to click on to change focus.
@@ -1229,9 +1237,10 @@ static void chat_add(GLData *gld)
 
 static void woMan_add(GLData *gld)
 {
-    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
+//    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
+    Evas_Object *win, *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
-    char buf[PATH_MAX];
+//    char buf[PATH_MAX];
     int i;
 
     win = fang_win_add(gld);
@@ -1374,15 +1383,17 @@ static void woMan_add(GLData *gld)
 
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *bg, *menu, *bt, *tb;
-    Elm_Object_Item *tb_it, *menu_it;
+//    Evas_Object *bg, *menu, *bt, *tb;
+    Evas_Object *menu, *tb;
+    Elm_Object_Item *tb_it;
+//, *menu_it;
     EPhysics_Body *boundary;
     EPhysics_World *world;
     EPhysics_Body *box_body1, *box_body2;
     Evas_Object *box1, *box2;
     GLData *gld = NULL;
-    char buf[PATH_MAX];
-    int i;
+//    char buf[PATH_MAX];
+//    int i;
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
     _log_domain = eina_log_domain_register("extantz", NULL);
@@ -1403,7 +1414,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_config_scale_set(1.0);
 
     // alloc a data struct to hold our relevant gl info in
-    if (!(gld = calloc(1, sizeof(GLData)))) return;
+    if (!(gld = calloc(1, sizeof(GLData)))) return 1;
     gldata_init(gld);
 
     // Set the engine to opengl_x11, then open our window.
@@ -1462,25 +1473,25 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     // Menus.
     menu = _toolbar_menu_add(gld->win, tb, "file");
-    elm_menu_item_add(menu, menu_it, NULL, "quit", _on_done, gld);
+    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
     menu = _toolbar_menu_add(gld->win, tb, "edit");
-    elm_menu_item_add(menu, menu_it, NULL, "preferences", NULL, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
 
     menu = _toolbar_menu_add(gld->win, tb, "view");
     menu = _toolbar_menu_add(gld->win, tb, "world");
     menu = _toolbar_menu_add(gld->win, tb, "tools");
 
     menu = _toolbar_menu_add(gld->win, tb, "help");
-    elm_menu_item_add(menu, menu_it, NULL, "grid help", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz blogs", NULL, NULL);
-    elm_menu_item_add(menu, menu_it, NULL, "extantz forum", NULL, NULL);
-    elm_menu_item_separator_add(menu, menu_it);
-    elm_menu_item_add(menu, menu_it, NULL, "about extantz", NULL, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "grid help", NULL, NULL);
+    elm_menu_item_separator_add(menu, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "extantz blogs", NULL, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "extantz forum", NULL, NULL);
+    elm_menu_item_separator_add(menu, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "about extantz", NULL, NULL);
 
     menu = _toolbar_menu_add(gld->win, tb, "advanced");
-    elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
+    elm_menu_item_add(menu, NULL, NULL, "debug settings", NULL, NULL);
 
     menu = _toolbar_menu_add(gld->win, tb, "god");
 

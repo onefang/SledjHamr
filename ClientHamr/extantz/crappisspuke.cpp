@@ -33,7 +33,7 @@ EAPI int startIrr(GLData *gld)
 	void *display = NULL;
 	unsigned long sfc = 0;
 	void *ctx = NULL;
-	Evas_GL_API *gl = gld->glApi;
+//	Evas_GL_API *gl = gld->glApi;
 
 #if USE_DEMO
 	myDemo = new CDemo(gld, additive);
@@ -238,7 +238,7 @@ EAPI void drawIrr_start(GLData *gld)
 
 	// Work out a frame delta time.
 	const u32 now = device->getTimer()->getTime();
-	const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
+//	const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 	then = now;
 
 
