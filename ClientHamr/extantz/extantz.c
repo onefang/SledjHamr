@@ -1351,9 +1351,10 @@ static void woMan_add(GLData *gld)
     evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(nf);
-    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
-    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_visible_set(tab_it, EINA_FALSE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
+    
+    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_box_pack_end(bx, nf);
 
 #if USE_EO
