@@ -41,6 +41,17 @@ void loggingStartup(gameGlobals *game)
     eina_log_level_set(EINA_LOG_LEVEL_DBG);
     eina_log_domain_level_set("LuaSL", EINA_LOG_LEVEL_DBG);
     eina_log_print_cb_set(_ggg_log_print_cb, stderr);
+
+    // Shut up the excess debugging shit from EFL.
+    eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore_con", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
+    eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
 }
 
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
