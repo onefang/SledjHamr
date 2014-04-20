@@ -1,0 +1,82 @@
+/*  LumbrJack - a logging library that wraps Eina logging.
+
+*/
+
+
+#include "LumbrJack.h"
+
+
+static char dateTime[DATE_TIME_LEN];
+
+static void _ggg_log_print_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
+{
+  FILE *f = data;
+  char dt[DATE_TIME_LEN + 1];
+  char fileTab[256], funcTab[256];
+
+  getDateTime(NULL, dt, NULL);
+  dt[19] = '\0';
+  if (12 > strlen(file))
+    snprintf(fileTab, sizeof(fileTab), "%s\t\t", file);
+  else
+    snprintf(fileTab, sizeof(fileTab), "%s\t", file);
+  snprintf(funcTab, sizeof(funcTab), "\t%s", fnc);
+  fprintf(f, "%s ", dt);
+  if (f == stderr)
+    eina_log_print_cb_stderr(d, level, fileTab, funcTab, line, fmt, data, args);
+  else if (f == stdout)
+    eina_log_print_cb_stdout(d, level, fileTab, funcTab, line, fmt, data, args);
+  fflush(f);
+}
+
+int loggingStartup(char *name, int logDom)
+{
+  if (logDom < 0)
+  {
+    logDom = eina_log_domain_register(name, NULL);
+    if (logDom < 0)
+    {
+      EINA_LOG_CRIT("could not register log domain '%s'", name);
+      return logDom;
+    }
+  }
+  eina_log_level_set(EINA_LOG_LEVEL_DBG);
+  eina_log_domain_level_set(name, EINA_LOG_LEVEL_DBG);
+  eina_log_print_cb_set(_ggg_log_print_cb, stderr);
+
+  // Shut up the excess debugging shit from EFL.
+  eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_con", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
+
+  return logDom;
+}
+
+char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
+{
+  struct tm *newTime;
+  time_t  szClock;
+  char *date = dateTime;
+
+  // Get time in seconds
+  time(&szClock);
+  // Convert time to struct tm form
+  newTime = localtime(&szClock);
+
+  if (nowOut)
+    *nowOut = newTime;
+  if (dateOut)
+    date = dateOut;
+  if (timeOut)
+    *timeOut = szClock;
+
+  // format
+  strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
+  return (dateTime);
+}
