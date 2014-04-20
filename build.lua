@@ -75,10 +75,12 @@ EDJE_FLAGS = '-id images -fd fonts'
 
 
 if 'nil' == type(args) then
+  -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
   print('_______________ BUILDING lemon _______________')
   removeFiles(LOCALDIR .. '/libraries/lemon', {'*.o', 'lemon'})
   compileFiles('lemon', LOCALDIR .. '/libraries/lemon', {'lemon'})
   print('_______________ BUILDING Irrlicht _______________')
+  -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
   runCommand('Irrlicht', 'libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
   buildSub('LuaSL',	'LuaSL')
   buildSub('GuiLua',	'ClientHamr/GuiLua')
