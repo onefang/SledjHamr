@@ -8,7 +8,12 @@ wd=$(pwd)
 
 echo "_______________ TESTING extantz _______________"
 cd $wd/ClientHamr/extantz
-./extantz &
+./test.sh &
+sleep 1
+
+echo "_______________ TESTING GuiLua _______________"
+cd $wd/ClientHamr/GuiLua
+./test.sh &
 sleep 1
 
 echo "_______________ TESTING LuaSL _______________"

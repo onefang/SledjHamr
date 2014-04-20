@@ -1,1 +1,3 @@
-./build.sh && ./extantz
+#! /bin/bash
+
+./extantz

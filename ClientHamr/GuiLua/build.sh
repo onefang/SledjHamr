@@ -4,7 +4,6 @@ export LOCALDIR=`pwd`
 
 # No need for a make file, or dependencies, the entire thing takes only a few seconds to build.
 
-
 CFLAGS="-g -Wall -I include -I $LOCALDIR"
 CFLAGS="$CFLAGS -I ../../libraries"
 CFLAGS="$CFLAGS $(pkg-config --cflags luajit)"
