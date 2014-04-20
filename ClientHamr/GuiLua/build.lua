@@ -10,7 +10,7 @@ if 'nil' == type(dir) then
   else
     print("ERROR - " .. err)
   end
-  dir = readCommand('pwd')
+  dir = workingDir
 end
 
 LDFLAGS = '-L ' .. dir .. ' ' .. LDFLAGS

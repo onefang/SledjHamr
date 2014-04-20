@@ -10,7 +10,7 @@ if 'nil' == type(dir) then
   else
     print("ERROR - " .. err)
   end
-  dir = readCommand('pwd')
+  dir = workingDir
 end
 
 CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include'

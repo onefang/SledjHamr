@@ -40,10 +40,10 @@ end
 
 local buildSub = function (name, dir)
   print('_______________ BUILDING ' .. name .. ' _______________')
-  local build, err = loadfile(LOCALDIR .. '/' .. dir .. '/build.lua')
+  local build, err = loadfile(dir .. '/build.lua')
   if build then
     setfenv(build, getfenv(2))
-    build(LOCALDIR .. '/' .. dir)
+    build(workingDir .. '/' .. dir)
   else
     print("ERROR - " .. err)
   end
@@ -53,8 +53,9 @@ end
 -- On the other hand, there's a more direct way to get to environment variables, it would fail to.
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
-LOCALDIR = readCommand('pwd')readCommand('pwd')
-CFLAGS = '-g -Wall -I include -I ' .. LOCALDIR .. ' -I ../../libraries'
+workingDir = readCommand('pwd')
+-- TODO - -I ../../libraries will be wrong for somethings, but right now those things don't care.
+CFLAGS = '-g -Wall -I include -I ../../libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eo')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eet')
@@ -63,12 +64,15 @@ CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-evas')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-file')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'edje')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
-CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. LOCALDIR .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. LOCALDIR .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. LOCALDIR .. '\\"'
+-- TODO - The workingDir part of these strings gets set differently depending on who starts the build.
+--        Which is a problem for the PACKAGE_*_DIR defines.
+--        On the other hand, that part needs to be rethought anyway, coz otherwise they are locked to the build place.
+CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. workingDir .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. workingDir .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. workingDir .. '\\"'
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
-LDFLAGS = '-L ' .. LOCALDIR .. ' ' ..  pkgConfig('libs-only-L', 'luajit') .. ' -L lib -L /usr/lib -L /lib'
+LDFLAGS = pkgConfig('libs-only-L', 'luajit') .. ' -L lib -L /usr/lib -L /lib'
 libs = pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm'
 LFLAGS = '-d'
 EDJE_FLAGS = '-id images -fd fonts'
@@ -77,8 +81,8 @@ EDJE_FLAGS = '-id images -fd fonts'
 if 'nil' == type(args) then
   -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
   print('_______________ BUILDING lemon _______________')
-  removeFiles(LOCALDIR .. '/libraries/lemon', {'*.o', 'lemon'})
-  compileFiles('lemon', LOCALDIR .. '/libraries/lemon', {'lemon'})
+  removeFiles('libraries/lemon', {'*.o', 'lemon'})
+  compileFiles('lemon', 'libraries/lemon', {'lemon'})
   print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
   runCommand('Irrlicht', 'libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
