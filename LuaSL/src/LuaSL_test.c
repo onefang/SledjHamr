@@ -292,7 +292,8 @@ static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Server_De
     {
 	ourGlobals->server = NULL;
 	ecore_con_server_del(ev->server);
-	ecore_main_loop_quit();
+	if (!ourGlobals->ui)
+	    ecore_main_loop_quit();
     }
 
     return ECORE_CALLBACK_RENEW;
