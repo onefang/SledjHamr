@@ -1,3 +1,3 @@
 #! /bin/bash
 
-export LD_LIBRARY_PATH="."; ./skang -l test -foo "argy bargy"
+export LD_LIBRARY_PATH=".:../../libraries"; ./skang -l test -foo "argy bargy"
