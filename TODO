@@ -1,8 +1,8 @@
 FIXES -
 
-Irrlicht is flickering like crazy.  Hmm, might be Irlicht's fault,
+Irrlicht is flickering like crazy.  Hmm, might be Irrlicht's fault,
 mostly it flickers to black, but I've seen it flicker to the first frame
-of the GL demo.  On the other hand, it shows the Alm background usually.
+of the GL demo.  On the other hand, it shows the Elm background usually.
 
 LuaSL grew a couple of bugs when I upgraded to LuaJIT 2.0.1 package.
 
