@@ -49,13 +49,20 @@ local buildSub = function (name, dir)
   end
 end
 
+
+workingDir = readCommand('pwd')
+baseDir = workingDir
+if 'number' == type(args) then
+  for i = 1, args do
+    baseDir = string.gsub(baseDir, '(.*)/.-$', '%1')
+  end
+end
+
 -- Likely this will fail, coz Lua likes to strip out environmont variables.
 -- On the other hand, there's a more direct way to get to environment variables, it would fail to.
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
-workingDir = readCommand('pwd')
--- TODO - -I ../../libraries will be wrong for somethings, but right now those things don't care.
-CFLAGS = '-g -Wall -I include -I ../../libraries'
+CFLAGS = '-g -Wall -I include -I ' .. baseDir .. '/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eo')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eet')
@@ -72,8 +79,8 @@ CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. workingDir .. '\\"'
 CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. workingDir .. '\\"'
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
-LDFLAGS = pkgConfig('libs-only-L', 'luajit') .. ' -L lib -L /usr/lib -L /lib'
-libs = pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm'
+LDFLAGS = '-L ' .. baseDir .. '/libraries ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
+libs = '-lLumbrJack -lRunnr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm'
 LFLAGS = '-d'
 EDJE_FLAGS = '-id images -fd fonts'
 
@@ -85,9 +92,8 @@ if 'nil' == type(args) then
   compileFiles('lemon', 'libraries/lemon', {'lemon'})
   print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
-  runCommand('Irrlicht', 'libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
-  buildSub('LumbrJack',	'LumbrJack')
-  buildSub('Runnr',	'Runnr')
+  runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
+  buildSub('libraries',	'libraries')
   buildSub('LuaSL',	'LuaSL')
   buildSub('GuiLua',	'ClientHamr/GuiLua')
   buildSub('extantz',	'ClientHamr/extantz')

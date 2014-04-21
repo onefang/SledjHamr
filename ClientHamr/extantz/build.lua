@@ -6,7 +6,7 @@ if 'nil' == type(dir) then
   local build, err = loadfile('../../build.lua')
   if build then
     setfenv(build, getfenv(2))
-    build('')
+    build(2)
   else
     print("ERROR - " .. err)
   end

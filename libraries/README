@@ -21,3 +21,11 @@ that anymore.
 
 luaproc has been hacked up a bit, and will continue to be hacked up. 
 Merged it into LuaSL, so it's no longer here.
+
+--------------------------------------------------------------------
+
+These are the libraries written for the SledjHamr project.
+
+LumbrJack is a library of logging stuff, coz every one wants to log.
+
+Runnr is for running Lua scripts.  Named (sorta) after a friend of mine.

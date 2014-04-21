@@ -15,7 +15,10 @@ end
 
 LDFLAGS = '-L ' .. dir .. ' ' .. LDFLAGS
 
-removeFiles(dir, {'LumbrJack.o', 'libLumbrJack.so'})
+removeFiles(dir, {'LumbrJack.o', 'libLumbrJack.so', 'Runnr.o', 'libRunnr.so'})
 
 runCommand('C libraries',	dir, 'gcc ' .. CFLAGS .. ' -fPIC -c LumbrJack.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libLumbrJack.so -o libLumbrJack.so LumbrJack.o')
+
+runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -fPIC -c Runnr.c')
+runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libRunnr.so -o libRunnr.so Runnr.o')
