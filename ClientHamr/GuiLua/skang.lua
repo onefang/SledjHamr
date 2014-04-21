@@ -1010,7 +1010,8 @@ end
 
 -- Get our C functions installed into skang.
 -- This has to be after thingasm is defined.
-local GuiLua = require 'libGuiLua'
+package.cpath = package.cpath .. ';../../libraries/lib?.so'
+local GuiLua = require 'GuiLua'
 
 
 thingasm('module,l',	'Load a module.',				module, 'file')

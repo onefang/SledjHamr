@@ -359,7 +359,7 @@ be 'libGuiLua'.
 Normally luaL_register() creates a table of functions, that is the table
 returned, but we want to do something different with skang.
 */
-int luaopen_libGuiLua(lua_State *L)
+int luaopen_GuiLua(lua_State *L)
 {
   int skang;
 
