@@ -222,14 +222,14 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %parse_accept
 {
-//    gameGlobals *game = compiler->game;
+//    gameGlobals *ourGlobals = compiler->game;
 
 //    PI("Parsing complete.");
 }
 
 %parse_failure
 {
-    gameGlobals *game = compiler->game;
+    gameGlobals *ourGlobals = compiler->game;
 
     compiler->script.bugCount++;
     PE("Giving up.  Parser is hopelessly lost!");
@@ -237,7 +237,7 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %stack_overflow
 {
-    gameGlobals *game = compiler->game;
+    gameGlobals *ourGlobals = compiler->game;
 
     compiler->script.bugCount++;
     PE("Giving up.  Parser stack overflow @ line %d, column %d!", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
@@ -245,7 +245,7 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %syntax_error
 {
-    gameGlobals *game = compiler->game;
+    gameGlobals *ourGlobals = compiler->game;
 
     compiler->script.bugCount++;
     PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);

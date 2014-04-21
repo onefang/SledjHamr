@@ -46,7 +46,7 @@ THE SOFTWARE.
 void luaprocInit(void);
 int sched_create_worker(void);
 void newProc(const char *code, int file, script *lp);
-const char *sendToChannel(gameGlobals *game, const char *SID, const char *message);
+const char *sendToChannel(gameGlobals *ourGlobals, const char *SID, const char *message);
 
 /* join all worker threads and exit */
 void sched_join_workerthreads(void);

@@ -1,83 +1,7 @@
 #include "LuaSL.h"
 
 
-// "01:03:52 01-01-1973\n\0"
-#    define DATE_TIME_LEN	21
-
-
-char    dateTime[DATE_TIME_LEN];
-
-
-static
-void _ggg_log_print_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
-{
-    FILE *f = data;
-    char dt[DATE_TIME_LEN + 1];
-    char fileTab[256], funcTab[256];
-
-    getDateTime(NULL, dt, NULL);
-    dt[19] = '\0';
-    if (12 > strlen(file))
-	snprintf(fileTab, sizeof(fileTab), "%s\t\t", file);
-    else
-	snprintf(fileTab, sizeof(fileTab), "%s\t", file);
-    snprintf(funcTab, sizeof(funcTab), "\t%s", fnc);
-    fprintf(f, "%s ", dt);
-    if (f == stderr)
-	eina_log_print_cb_stderr(d, level, fileTab, funcTab, line, fmt, data, args);
-    else if (f == stdout)
-	eina_log_print_cb_stdout(d, level, fileTab, funcTab, line, fmt, data, args);
-    fflush(f);
-}
-
-void loggingStartup(gameGlobals *game)
-{
-    game->logDom = eina_log_domain_register("LuaSL", NULL);
-    if (game->logDom < 0)
-    {
-	EINA_LOG_CRIT("could not register log domain 'LuaSL'");
-    }
-    // TODO - should unregister this later.
-    eina_log_level_set(EINA_LOG_LEVEL_DBG);
-    eina_log_domain_level_set("LuaSL", EINA_LOG_LEVEL_DBG);
-    eina_log_print_cb_set(_ggg_log_print_cb, stderr);
-
-    // Shut up the excess debugging shit from EFL.
-    eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_con", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
-    eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
-}
-
-char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
-{
-    struct tm *newTime;
-    time_t  szClock;
-    char *date = dateTime;
-
-    // Get time in seconds
-    time(&szClock);
-    // Convert time to struct tm form
-    newTime = localtime(&szClock);
-
-    if (nowOut)
-	*nowOut = newTime;
-    if (dateOut)
-	date = dateOut;
-    if (timeOut)
-	*timeOut = szClock;
-
-    // format
-    strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
-    return (dateTime);
-}
-
-void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message, ...)
+void sendBack(gameGlobals *ourGlobals, Ecore_Con_Client *client, const char *SID, const char *message, ...)
 {
     va_list args;
     char buf[PATH_MAX];
@@ -94,7 +18,7 @@ void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, cons
     ecore_con_client_flush(client);
 }
 
-void sendForth(gameGlobals *game, const char *SID, const char *message, ...)
+void sendForth(gameGlobals *ourGlobals, const char *SID, const char *message, ...)
 {
     va_list args;
     char buf[PATH_MAX];
@@ -107,8 +31,8 @@ void sendForth(gameGlobals *game, const char *SID, const char *message, ...)
     va_end(args);
     buf[length++] = '\n';
     buf[length++] = '\0';
-    ecore_con_server_send(game->server, buf, strlen(buf));
-    ecore_con_server_flush(game->server);
+    ecore_con_server_send(ourGlobals->server, buf, strlen(buf));
+    ecore_con_server_flush(ourGlobals->server);
 }
 
 float timeDiff(struct timeval *now, struct timeval *then)

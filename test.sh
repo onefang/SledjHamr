@@ -4,7 +4,7 @@ reset
 
 wd=$(pwd)
 
-./build.sh || exit
+./build.lua || exit
 
 echo "_______________ TESTING extantz _______________"
 cd $wd/ClientHamr/extantz
@@ -21,9 +21,7 @@ echo "_______________ TESTING LuaSL _______________"
 killall -KILL LuaSL
 cd $wd/LuaSL/testLua
 export LUA_PATH="$wd/LuaSL/src/?.lua"
-export LUA_SOPATH='../../libraries/luaproc/'
-export LD_LIBRARY_PATH="../../libraries/luajit-2.0/src:$LD_LIBRARY_PATH"
-export EINA_LOG_LEVELS="eo:2,ecore:2,ecore_con:2"
+export LD_LIBRARY_PATH="../../libraries:$LD_LIBRARY_PATH"
 
 case $@ in
 

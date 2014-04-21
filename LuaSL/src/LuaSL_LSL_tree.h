@@ -406,8 +406,8 @@ typedef struct
 
 
 
-boolean compilerSetup(gameGlobals *game);
-boolean compileLSL(gameGlobals *game, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants);
+boolean compilerSetup(gameGlobals *ourGlobals);
+boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants);
 void burnLeaf(void *data);
 
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);

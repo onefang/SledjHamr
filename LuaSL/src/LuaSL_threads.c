@@ -392,7 +392,7 @@ const char *sendToChannelErrors[] =
 };
 
 /* send a message to a lua process */
-const char *sendToChannel(gameGlobals *game, const char *SID, const char *message)
+const char *sendToChannel(gameGlobals *ourGlobals, const char *SID, const char *message)
 {
     const char *result = NULL;
     script *dstlp;
@@ -401,7 +401,7 @@ const char *sendToChannel(gameGlobals *game, const char *SID, const char *messag
     pthread_mutex_lock(&mutex_channel);
 
     // Add the message to the queue.
-    if ((dstlp = eina_hash_find(game->scripts, SID)))
+    if ((dstlp = eina_hash_find(ourGlobals->scripts, SID)))
     {
 	scriptMessage *sm = NULL;
 

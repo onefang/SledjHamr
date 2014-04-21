@@ -23,39 +23,16 @@ typedef struct _script script;			// Define this here, so LuaSL_threads.h can use
 typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h can use it.
 
 #include "LuaSL_threads.h"
+#include "LumbrJack.h"
 
 
 #define WIDTH  (1024)
 #define HEIGHT (768)
 
-#define PC(...) EINA_LOG_DOM_CRIT(game->logDom, __VA_ARGS__)
-#define PE(...) EINA_LOG_DOM_ERR(game->logDom, __VA_ARGS__)
-#define PW(...) EINA_LOG_DOM_WARN(game->logDom, __VA_ARGS__)
-#define PD(...) EINA_LOG_DOM_DBG(game->logDom, __VA_ARGS__)
-#define PI(...) EINA_LOG_DOM_INFO(game->logDom, __VA_ARGS__)
-
-#define PCm(...) EINA_LOG_DOM_CRIT(game.logDom, __VA_ARGS__)
-#define PEm(...) EINA_LOG_DOM_ERR(game.logDom, __VA_ARGS__)
-#define PWm(...) EINA_LOG_DOM_WARN(game.logDom, __VA_ARGS__)
-#define PDm(...) EINA_LOG_DOM_DBG(game.logDom, __VA_ARGS__)
-#define PIm(...) EINA_LOG_DOM_INFO(game.logDom, __VA_ARGS__)
-
-#define D()	PD("DEBUG")
-
-// "01:03:52 01-01-1973\n\0"
-#define DATE_TIME_LEN			21
 
 #define TABLE_WIDTH	7
 #define TABLE_HEIGHT	42
 
-#ifndef FALSE
-// NEVER change this
-typedef enum
-{
-    FALSE	= 0,
-    TRUE	= 1
-} boolean;
-#endif
 
 struct _gameGlobals
 {
@@ -97,11 +74,9 @@ typedef struct
 } scriptMessage;
 
 
-void loggingStartup(gameGlobals *game);
-char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
 void scriptSendBack(void * data);
-void sendBack(gameGlobals *game, Ecore_Con_Client *client, const char *SID, const char *message, ...);
-void sendForth(gameGlobals *game, const char *SID, const char *message, ...);
+void sendBack(gameGlobals *ourGlobals, Ecore_Con_Client *client, const char *SID, const char *message, ...);
+void sendForth(gameGlobals *ourGlobals, const char *SID, const char *message, ...);
 float timeDiff(struct timeval *now, struct timeval *then);
 
 #include "LuaSL_LSL_tree.h"

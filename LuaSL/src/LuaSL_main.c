@@ -9,24 +9,24 @@ static Eina_Strbuf *clientStream;
 static Eina_Bool _sleep_timer_cb(void *data)
 {
     script *script = data;
-    gameGlobals *game = script->game;
+    gameGlobals *ourGlobals = script->game;
 
     PD("Waking up %s", script->SID);
-    sendToChannel(game, script->SID, "return 0.0");
+    sendToChannel(ourGlobals, script->SID, "return 0.0");
     return ECORE_CALLBACK_CANCEL;
 }
 
 static Eina_Bool _timer_timer_cb(void *data)
 {
     script *script = data;
-    gameGlobals *game = script->game;
+    gameGlobals *ourGlobals = script->game;
 
     PD("Timer for %s", script->SID);
-    sendToChannel(game, script->SID, "events.timer()");
+    sendToChannel(ourGlobals, script->SID, "events.timer()");
     return ECORE_CALLBACK_RENEW;
 }
 
-static script *findThem(gameGlobals *game, const char *base, const char *text)
+static script *findThem(gameGlobals *ourGlobals, const char *base, const char *text)
 {
     char name[PATH_MAX];
     char *temp;
@@ -38,12 +38,12 @@ static script *findThem(gameGlobals *game, const char *base, const char *text)
     if ((temp = rindex(name, '"')))
 	temp[0] = '\0';
     strcat(name, ".lsl");
-    return eina_hash_find(game->names, name);
+    return eina_hash_find(ourGlobals->names, name);
 }
 
 static void resetScript(script *victim)
 {
-    gameGlobals *game = victim->game;
+    gameGlobals *ourGlobals = victim->game;
 
     PD("Resetting %s", victim->fileName);
     // TODO - now what?
@@ -52,7 +52,7 @@ static void resetScript(script *victim)
 void scriptSendBack(void * data)
 {
     scriptMessage *message = data;
-    gameGlobals *game = message->script->game;
+    gameGlobals *ourGlobals = message->script->game;
 
     if (0 == strncmp(message->message, "llSleep(", 8))
 	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);
@@ -72,7 +72,7 @@ void scriptSendBack(void * data)
     {
 	script *them;
 
-	if ((them = findThem(game, message->script->fileName, &(message->message[18]))))
+	if ((them = findThem(ourGlobals, message->script->fileName, &(message->message[18]))))
 	{
 	    char *temp = rindex(&(message->message[18]), ',');
 
@@ -82,9 +82,9 @@ void scriptSendBack(void * data)
 		while (isspace(*temp))
 		    temp++;
 		if ('1' == *temp)
-		    sendToChannel(game, them->SID, "start()");
+		    sendToChannel(ourGlobals, them->SID, "start()");
 		else
-		    sendToChannel(game, them->SID, "stop()");
+		    sendToChannel(ourGlobals, them->SID, "stop()");
 		PD("Stopped %s", them->fileName);
 	    }
 	    else
@@ -103,13 +103,13 @@ void scriptSendBack(void * data)
     {
 	script *them;
 
-	if ((them = findThem(game, message->script->fileName, &(message->message[20]))))
+	if ((them = findThem(ourGlobals, message->script->fileName, &(message->message[20]))))
 	    resetScript(them);
     }
     else if (0 == strncmp(message->message, "llResetScript(", 14))
 	resetScript(message->script);
     else
-	sendBack(game, message->script->client, message->script->SID, message->message);
+	sendBack(ourGlobals, message->script->client, message->script->SID, message->message);
     free(message);
 }
 
@@ -121,7 +121,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Ad
 
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
 {
-    gameGlobals *game = data;
+    gameGlobals *ourGlobals = data;
     char buf[PATH_MAX];
     char SID[PATH_MAX];
     const char *command;
@@ -154,28 +154,28 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		temp[0] = '\0';
 
 		PD("Compiling %s, %s.", SID, file);
-		if (compileLSL(game, ev->client, SID, file, FALSE))
+		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
 		{
 		    script *me = calloc(1, sizeof(script));
 
 		    gettimeofday(&me->startTime, NULL);
 		    strncpy(me->SID, SID, sizeof(me->SID));
 		    strncpy(me->fileName, file, sizeof(me->fileName));
-		    me->game = game;
+		    me->game = ourGlobals;
 		    me->client = ev->client;
-		    eina_hash_add(game->scripts, me->SID, me);
-		    eina_hash_add(game->names, me->fileName, me);
-		    sendBack(game, ev->client, SID, "compiled(true)");
+		    eina_hash_add(ourGlobals->scripts, me->SID, me);
+		    eina_hash_add(ourGlobals->names, me->fileName, me);
+		    sendBack(ourGlobals, ev->client, SID, "compiled(true)");
 		}
 		else
-		    sendBack(game, ev->client, SID, "compiled(false)");
+		    sendBack(ourGlobals, ev->client, SID, "compiled(false)");
 	    }
 	    else if (0 == strcmp(command, "run()"))
 	    {
 		script *me;
 		char buf[PATH_MAX];
 
-		me = eina_hash_find(game->scripts, SID);
+		me = eina_hash_find(ourGlobals->scripts, SID);
 		if (me)
 		{
 		    sprintf(buf, "%s.lua.out", me->fileName);
@@ -191,7 +191,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    {
 		const char *status = NULL;
 
-		status = sendToChannel(game, SID, command);
+		status = sendToChannel(ourGlobals, SID, command);
 		if (status)
 		    PE("Error sending command %s to script %s : %s", command, SID, status);
 	    }
@@ -206,7 +206,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 
 static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Del *ev)
 {
-    gameGlobals *game = data;
+    gameGlobals *ourGlobals = data;
 
     if (ev->client)
     {
@@ -219,31 +219,31 @@ static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_De
 
 int main(int argc, char **argv)
 {
-    gameGlobals game;
+    gameGlobals ourGlobals;
     int result = EXIT_FAILURE;
 
-    memset(&game, 0, sizeof(gameGlobals));
-    game.address = "127.0.0.1";
-    game.port = 8211;
+    memset(&ourGlobals, 0, sizeof(gameGlobals));
+    ourGlobals.address = "127.0.0.1";
+    ourGlobals.port = 8211;
 
     if (eina_init())
     {
-	loggingStartup(&game);
-	game.scripts = eina_hash_string_superfast_new(NULL);
-	game.names = eina_hash_string_superfast_new(NULL);
+	ourGlobals.logDom = loggingStartup("LuaSL", ourGlobals.logDom);
+	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
+	ourGlobals.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_con_init())
 	{
 	    if (ecore_con_init())
 	    {
-		if ((game.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, game.address, game.port, &game)))
+		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 		{
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &game);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &game);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &game);
-		    ecore_con_server_timeout_set(game.server, 0);
-		    ecore_con_server_client_limit_set(game.server, -1, 0);
-		    ecore_con_server_timeout_set(game.server, 10);
-		    ecore_con_server_client_limit_set(game.server, 3, 0);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
+		    ecore_con_server_timeout_set(ourGlobals.server, 0);
+		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
+		    ecore_con_server_timeout_set(ourGlobals.server, 10);
+		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
 		    clientStream = eina_strbuf_new();
 
 		    if (edje_init())
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 			int i;
 
 			result = 0;
-			compilerSetup(&game);
+			compilerSetup(&ourGlobals);
 			luaprocInit();
 			for (i = 0; i < CPUs; i++)
 			{
@@ -402,7 +402,7 @@ static int errFunc(lua_State *L)
     return 0;
 }
 
-void runLuaFile(gameGlobals *game, const char *filename)
+void runLuaFile(gameGlobals *ourGlobals, const char *filename)
 {
     PD("Starting %s", filename);
     newProc(filename, TRUE);
