@@ -26,8 +26,8 @@ typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h
 #include "LumbrJack.h"
 
 
-#define WIDTH  (1024)
-#define HEIGHT (768)
+#define WIDTH  (512)
+#define HEIGHT (384)
 
 
 #define TABLE_WIDTH	7
