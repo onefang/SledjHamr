@@ -1,4 +1,4 @@
 Viewer integration with libpurple, using it for generic IM services.
 
-Libpurple is  amodular IM system, we could just add a libpurple based IM
+Libpurple is a modular IM system, we could just add a libpurple based IM
 system to the viewer, and use that for the XMPP integration.
