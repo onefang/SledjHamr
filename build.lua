@@ -71,18 +71,15 @@ CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-evas')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-file')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'edje')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
--- TODO - The workingDir part of these strings gets set differently depending on who starts the build.
---        Which is a problem for the PACKAGE_*_DIR defines.
---        On the other hand, that part needs to be rethought anyway, coz otherwise they are locked to the build place.
-CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. workingDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. workingDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. workingDir .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. baseDir .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. baseDir .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. baseDir .. '\\"'
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
 LDFLAGS = '-L ' .. baseDir .. '/libraries ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
 libs = '-lLumbrJack -lRunnr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm'
 LFLAGS = '-d'
-EDJE_FLAGS = '-id images -fd fonts'
+EDJE_FLAGS = '-id ' .. baseDir .. '/images -fd ' .. baseDir .. '/fonts'
 
 
 if 'nil' == type(args) then

@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #else
-#define PACKAGE_EXAMPLES_DIR "."
+//#define PACKAGE_EXAMPLES_DIR "."
 #define __UNUSED__
 #endif
 

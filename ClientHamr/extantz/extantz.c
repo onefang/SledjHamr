@@ -1538,7 +1538,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_friction_set(boundary, 0);
 
     box1 = elm_image_add(gld->win);
-    elm_image_file_set(box1, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
+    elm_image_file_set(box1, PACKAGE_DATA_DIR "/images/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
     evas_object_move(box1, gld->win_w / 2 - 80, gld->win_h - 200);
     evas_object_resize(box1, 70, 70);
     evas_object_show(box1);
@@ -1552,7 +1552,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
 
     box2 = elm_image_add(gld->win);
-    elm_image_file_set(box2, PACKAGE_DATA_DIR "/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
+    elm_image_file_set(box2, PACKAGE_DATA_DIR "/images/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
     evas_object_move(box2, gld->win_w / 2 + 10, gld->win_h - 200);
     evas_object_resize(box2, 70, 70);
     evas_object_show(box2);

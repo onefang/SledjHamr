@@ -147,7 +147,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
 
     ourGlobals->server = ev->server;
     gettimeofday(&startTime, NULL);
-    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+    snprintf(buf, sizeof(buf), "%s/LuaSL/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
     // Wait awhile, then start sending events for testing.
     ecore_timer_add(0.5, _timer_cb, ourGlobals);
@@ -391,7 +391,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+				snprintf(buf, sizeof(buf), "%s/LuaSL/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
