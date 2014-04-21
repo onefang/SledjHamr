@@ -17,28 +17,5 @@ cd $wd/ClientHamr/GuiLua
 sleep 1
 
 echo "_______________ TESTING LuaSL _______________"
-# Kill any left overs.
-killall -KILL LuaSL
-cd $wd/LuaSL/testLua
-export LUA_PATH="$wd/LuaSL/src/?.lua"
-export LD_LIBRARY_PATH="../../libraries:$LD_LIBRARY_PATH"
-
-case $@ in
-
-    ddd)
-	ddd ../LuaSL
-	;;
-
-    gdb)
-	gdb ../LuaSL
-	;;
-
-    *)
-	echo "_______________ STARTING LuaSL _______________"
-	../LuaSL &
-	sleep 1
-	echo "_______________ STARTING LuaSL_test _______________"
-	../LuaSL_test
-	;;
-
-esac
+cd $wd/LuaSL
+./test.sh $0
