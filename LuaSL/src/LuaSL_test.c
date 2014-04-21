@@ -392,7 +392,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/LuaSL/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+				snprintf(buf, sizeof(buf), "%s/images/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
