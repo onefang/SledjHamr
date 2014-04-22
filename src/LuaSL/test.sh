@@ -4,21 +4,21 @@ wd=$(pwd)
 
 # Kill any left overs.
 killall -KILL LuaSL
-export LUA_PATH="$wd/?.lua"
+export LUA_PATH="$wd/../../libraries/?.lua"
 
 case $@ in
 
     ddd)
-	ddd ./LuaSL
+	ddd ../../LuaSL
 	;;
 
     gdb)
-	gdb ./LuaSL
+	gdb ../../LuaSL
 	;;
 
     *)
 	echo "_______________ STARTING LuaSL _______________"
-	./LuaSL &
+	../../LuaSL &
 	sleep 1
 	echo "_______________ STARTING LuaSL_test _______________"
 	./LuaSL_test

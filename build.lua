@@ -91,7 +91,7 @@ if 'nil' == type(args) then
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
   runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
   buildSub('libraries',	'libraries')
-  buildSub('LuaSL',	'LuaSL')
-  buildSub('GuiLua',	'ClientHamr/GuiLua')
-  buildSub('extantz',	'ClientHamr/extantz')
+  buildSub('LuaSL',	'src/LuaSL')
+  buildSub('GuiLua',	'src/GuiLua')
+  buildSub('extantz',	'src/extantz')
 end

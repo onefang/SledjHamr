@@ -1,6 +1,7 @@
 /docs/XMRE.txt
 extantz
-/ClientHamr/GuiLua/skang
+LuaSL
+/src/GuiLua/skang
 /libraries/irrlicht-1.8.1/bin/Linux/01.HelloWorld
 /libraries/irrlicht-1.8.1/lib/Linux/libIrrlicht.a
 /libraries/irrlicht-1.8.1/source/Irrlicht/C3DSMeshFileLoader.d
@@ -318,16 +319,14 @@ extantz
 *.lsl.lua
 *.lsl2
 libraries/lemon/lemon
-LuaSL/LuaSL
-LuaSL/LuaSL_test
-LuaSL/LuaSL_parser
-LuaSL/constants.lsl
-LuaSL/LuaSL_lemon_yaccer.c
-LuaSL/LuaSL_lemon_yaccer.h
-LuaSL/LuaSL_lemon_yaccer.out
-LuaSL/lex.backup
-LuaSL/LuaSL_lexer.c
-LuaSL/LuaSL_lexer.h
-LuaSL/LuaSL_LSL_lexer.c
-LuaSL/LuaSL_LSL_lexer.h
+libraries/constants.lsl
+src/LuaSL/LuaSL_test
+src/LuaSL/LuaSL_lemon_yaccer.c
+src/LuaSL/LuaSL_lemon_yaccer.h
+src/LuaSL/LuaSL_lemon_yaccer.out
+src/LuaSL/lex.backup
+src/LuaSL/LuaSL_lexer.c
+src/LuaSL/LuaSL_lexer.h
+src/LuaSL/LuaSL_LSL_lexer.c
+src/LuaSL/LuaSL_LSL_lexer.h
 
