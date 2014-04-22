@@ -11,10 +11,10 @@ echo "_______________ TESTING extantz _______________"
 sleep 1
 
 echo "_______________ TESTING GuiLua _______________"
-cd $wd/ClientHamr/GuiLua
+cd $wd/src/GuiLua
 ./test.sh &
 sleep 1
 
 echo "_______________ TESTING LuaSL _______________"
-cd $wd/LuaSL
+cd $wd/src/LuaSL
 ./test.sh $0
