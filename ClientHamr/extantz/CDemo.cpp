@@ -38,11 +38,11 @@ void CDemo::setup(GLData *gld)
 	if (device->getFileSystem()->existFile("irrlicht.dat"))
 		device->getFileSystem()->addFileArchive("irrlicht.dat");
 	else
-		device->getFileSystem()->addFileArchive("media/irrlicht.dat");
+		device->getFileSystem()->addFileArchive("media/Irrlicht/irrlicht.dat");
 	if (device->getFileSystem()->existFile("map-20kdm2.pk3"))
 		device->getFileSystem()->addFileArchive("map-20kdm2.pk3");
 	else
-		device->getFileSystem()->addFileArchive("media/map-20kdm2.pk3");
+		device->getFileSystem()->addFileArchive("media/Irrlicht/map-20kdm2.pk3");
 
 	sceneStartTime = device->getTimer()->getTime();
 	timeForThisScene = 0;
@@ -275,13 +275,13 @@ void CDemo::loadSceneData()
 	// load sydney model and create 2 instances
 
 	scene::IAnimatedMesh *mesh = 0;
-	mesh = sm->getMesh("media/sydney.md2");
+	mesh = sm->getMesh("media/Irrlicht/sydney.md2");
 	if (mesh)
 	{
 		model1 = sm->addAnimatedMeshSceneNode(mesh);
 		if (model1)
 		{
-			model1->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			model1->setMaterialTexture(0, driver->getTexture("media/Irrlicht/sydney.bmp"));
 			model1->setPosition(core::vector3df(100, 40, -80));
 			model1->setScale(core::vector3df(2, 2, 2));
 			model1->setMD2Animation(scene::EMAT_STAND);
@@ -293,7 +293,7 @@ void CDemo::loadSceneData()
 		model2 = sm->addAnimatedMeshSceneNode(mesh);
 		if (model2)
 		{
-			model2->setMaterialTexture(0, driver->getTexture("media/spheremap.jpg"));
+			model2->setMaterialTexture(0, driver->getTexture("media/Irrlicht/spheremap.jpg"));
 			model2->setPosition(core::vector3df(180, 15, -60));
 			model2->setScale(core::vector3df(2, 2, 2));
 			model2->setMD2Animation(scene::EMAT_RUN);
@@ -309,12 +309,12 @@ void CDemo::loadSceneData()
 	// create sky box
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
 	skyboxNode = sm->addSkyBoxSceneNode(
-		driver->getTexture("media/irrlicht2_up.jpg"),
-		driver->getTexture("media/irrlicht2_dn.jpg"),
-		driver->getTexture("media/irrlicht2_lf.jpg"),
-		driver->getTexture("media/irrlicht2_rt.jpg"),
-		driver->getTexture("media/irrlicht2_ft.jpg"),
-		driver->getTexture("media/irrlicht2_bk.jpg"));
+		driver->getTexture("media/Irrlicht/irrlicht2_up.jpg"),
+		driver->getTexture("media/Irrlicht/irrlicht2_dn.jpg"),
+		driver->getTexture("media/Irrlicht/irrlicht2_lf.jpg"),
+		driver->getTexture("media/Irrlicht/irrlicht2_rt.jpg"),
+		driver->getTexture("media/Irrlicht/irrlicht2_ft.jpg"),
+		driver->getTexture("media/Irrlicht/irrlicht2_bk.jpg"));
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	// create walk-between-portals animation
@@ -333,7 +333,7 @@ void CDemo::loadSceneData()
 	core::array<video::ITexture*> textures;
 	for (s32 g=1; g<8; ++g)
 	{
-		core::stringc tmp("media/portal");
+		core::stringc tmp("media/Irrlicht/portal");
 		tmp += g;
 		tmp += ".bmp";
 		video::ITexture* t = driver->getTexture(tmp);
@@ -348,7 +348,7 @@ void CDemo::loadSceneData()
 	{
 		bill = sm->addBillboardSceneNode(0, core::dimension2d<f32>(100, 100), waypoint[r]+ core::vector3df(0, 20, 0));
 		bill->setMaterialFlag(video::EMF_LIGHTING, false);
-		bill->setMaterialTexture(0, driver->getTexture("media/portal1.bmp"));
+		bill->setMaterialTexture(0, driver->getTexture("media/Irrlicht/portal1.bmp"));
 		bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 		bill->addAnimator(anim);
 	}
@@ -366,7 +366,7 @@ void CDemo::loadSceneData()
 
 	bill = device->getSceneManager()->addBillboardSceneNode(light, core::dimension2d<f32>(40, 40));
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
-	bill->setMaterialTexture(0, driver->getTexture("media/particlewhite.bmp"));
+	bill->setMaterialTexture(0, driver->getTexture("media/Irrlicht/particlewhite.bmp"));
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
 	// create meta triangle selector with all triangles selectors in it.
@@ -390,7 +390,7 @@ void CDemo::loadSceneData()
 
 	campFire->setMaterialFlag(video::EMF_LIGHTING, false);
 	campFire->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
-	campFire->setMaterialTexture(0, driver->getTexture("media/fireball.bmp"));
+	campFire->setMaterialTexture(0, driver->getTexture("media/Irrlicht/fireball.bmp"));
 	campFire->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 }
 
@@ -444,7 +444,7 @@ void CDemo::shoot()
 	node = sm->addBillboardSceneNode(0, core::dimension2d<f32>(25, 25), start);
 
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	node->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/fireball.bmp"));
+	node->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/Irrlicht/fireball.bmp"));
 	node->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
 	f32 length = (f32)(end - start).getLength();
@@ -496,7 +496,7 @@ void CDemo::createParticleImpacts()
 
 			pas->setMaterialFlag(video::EMF_LIGHTING, false);
 			pas->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
-			pas->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/smoke.bmp"));
+			pas->setMaterialTexture(0, device->getVideoDriver()->getTexture("media/Irrlicht/smoke.bmp"));
 			pas->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
 			scene::ISceneNodeAnimator *anim = sm->createDeleteAnimator(2000);
