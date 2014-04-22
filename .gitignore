@@ -322,12 +322,12 @@ LuaSL/LuaSL
 LuaSL/LuaSL_test
 LuaSL/LuaSL_parser
 LuaSL/constants.lsl
-LuaSL/src/LuaSL_lemon_yaccer.c
-LuaSL/src/LuaSL_lemon_yaccer.h
-LuaSL/src/LuaSL_lemon_yaccer.out
-LuaSL/src/lex.backup
-LuaSL/src/LuaSL_lexer.c
-LuaSL/src/LuaSL_lexer.h
-LuaSL/src/LuaSL_LSL_lexer.c
-LuaSL/src/LuaSL_LSL_lexer.h
+LuaSL/LuaSL_lemon_yaccer.c
+LuaSL/LuaSL_lemon_yaccer.h
+LuaSL/LuaSL_lemon_yaccer.out
+LuaSL/lex.backup
+LuaSL/LuaSL_lexer.c
+LuaSL/LuaSL_lexer.h
+LuaSL/LuaSL_LSL_lexer.c
+LuaSL/LuaSL_LSL_lexer.h
 

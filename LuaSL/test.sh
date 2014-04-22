@@ -4,7 +4,7 @@ wd=$(pwd)
 
 # Kill any left overs.
 killall -KILL LuaSL
-export LUA_PATH="$wd/src/?.lua"
+export LUA_PATH="$wd/?.lua"
 
 case $@ in
 
