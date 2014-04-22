@@ -147,7 +147,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
 
     ourGlobals->server = ev->server;
     gettimeofday(&startTime, NULL);
-    snprintf(buf, sizeof(buf), "%s/LuaSL/Test sim/objects", PACKAGE_DATA_DIR);
+    snprintf(buf, sizeof(buf), "%s/media/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
     // Wait awhile, then start sending events for testing.
     ecore_timer_add(0.5, _timer_cb, ourGlobals);
