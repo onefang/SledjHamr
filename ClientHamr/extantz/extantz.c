@@ -37,9 +37,9 @@ static Elm_Genlist_Item_Class *grid_gic = NULL;
 static Elm_Genlist_Item_Class *account_gic = NULL;
 static Elm_Genlist_Item_Class *viewer_gic = NULL;
 
-//static const char *img1 = PACKAGE_DATA_DIR "/images/plant_01.jpg";
-//static const char *img2 = PACKAGE_DATA_DIR "/images/sky_01.jpg";
-static const char *img3 = PACKAGE_DATA_DIR "/images/rock_01.jpg";
+//static const char *img1 = PACKAGE_DATA_DIR "/media/plant_01.jpg";
+//static const char *img2 = PACKAGE_DATA_DIR "/media/sky_01.jpg";
+static const char *img3 = PACKAGE_DATA_DIR "/media/rock_01.jpg";
 
 
 #define EPHYSICS_TEST_THEME "extantz"
@@ -1090,7 +1090,7 @@ static void create_handles(Evas_Object *obj)
 
         hand = evas_object_image_filled_add(evas_object_evas_get(obj));
         evas_object_resize(hand, 31, 31);
-        snprintf(buf, sizeof(buf), "%s/images/pt.png", elm_app_data_dir_get());
+        snprintf(buf, sizeof(buf), "%s/media/pt.png", elm_app_data_dir_get());
         evas_object_image_file_set(hand, buf, NULL);
         if (i == 0)      evas_object_move(hand, x     - 15, y     - 15);
         else if (i == 1) evas_object_move(hand, x + w - 15, y     - 15);
@@ -1404,7 +1404,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     // If you want efl to handle finding your bin/lib/data dirs, you must do this below.
     elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
     elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
-    elm_app_info_set(elm_main, "datadir", "images/sky_03.jpg");
+    elm_app_info_set(elm_main, "datadir", "media/sky_03.jpg");
     fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
     fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
     fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
@@ -1444,7 +1444,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     bg = elm_bg_add(gld->win);
     elm_bg_load_size_set(bg, gld->win_w, gld->win_h);
     elm_bg_option_set(bg, ELM_BG_OPTION_CENTER);
-    snprintf(buf, sizeof(buf), "%s/images/sky_03.jpg", elm_app_data_dir_get());
+    snprintf(buf, sizeof(buf), "%s/media/sky_03.jpg", elm_app_data_dir_get());
     elm_bg_file_set(bg, buf, NULL);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(gld->win, bg);
@@ -1538,7 +1538,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_friction_set(boundary, 0);
 
     box1 = elm_image_add(gld->win);
-    elm_image_file_set(box1, PACKAGE_DATA_DIR "/images/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
+    elm_image_file_set(box1, PACKAGE_DATA_DIR "/media/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
     evas_object_move(box1, gld->win_w / 2 - 80, gld->win_h - 200);
     evas_object_resize(box1, 70, 70);
     evas_object_show(box1);
@@ -1552,7 +1552,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
 
     box2 = elm_image_add(gld->win);
-    elm_image_file_set(box2, PACKAGE_DATA_DIR "/images/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
+    elm_image_file_set(box2, PACKAGE_DATA_DIR "/media/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
     evas_object_move(box2, gld->win_w / 2 + 10, gld->win_h - 200);
     evas_object_resize(box2, 70, 70);
     evas_object_show(box2);

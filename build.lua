@@ -79,7 +79,7 @@ CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 LDFLAGS = '-L ' .. baseDir .. '/libraries ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
 libs = '-lLumbrJack -lRunnr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm -Wl,-rpath,' .. baseDir .. '/libraries'
 LFLAGS = '-d'
-EDJE_FLAGS = '-id ' .. baseDir .. '/images -fd ' .. baseDir .. '/fonts'
+EDJE_FLAGS = '-id ' .. baseDir .. '/media -fd ' .. baseDir .. '/media'
 
 
 if 'nil' == type(args) then

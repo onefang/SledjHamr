@@ -392,7 +392,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/images/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+				snprintf(buf, sizeof(buf), "%s/media/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
@@ -409,7 +409,7 @@ int main(int argc, char **argv)
 				evas_object_resize(ourGlobals.edje, WIDTH, HEIGHT);
 				evas_object_show(ourGlobals.edje);
 
-				snprintf(buf, sizeof(buf), "%s/images/bubble_sh.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/media/bubble_sh.png", PACKAGE_DATA_DIR);
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    sh = evas_object_image_filled_add(ourGlobals.canvas);
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 				    evas_object_data_set(ourGlobals.bg, names[(i * 2) + 1], sh);
 				}
 
-				snprintf(buf, sizeof(buf), "%s/images/bubble.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/media/bubble.png", PACKAGE_DATA_DIR);
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    bub = evas_object_image_filled_add(ourGlobals.canvas);
