@@ -465,6 +465,18 @@ struct _Widget
 
 // TODO - These functions should be able to deal with multiple windows.
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
+static void _on_canvas_resize(Ecore_Evas *ee)
+{
+   int w, h;
+
+   ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
+
+printf("RESIZED!!!\n");
+   evas_object_resize(ourGlobals.background, w, h);
+   evas_object_resize(ourGlobals.image, w, h);
+   evas_object_move(ourGlobals.image, 0, 0);
+}
+
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
   globals *ourGlobals;
@@ -571,7 +583,6 @@ static int window(lua_State *L)
   globals *ourGlobals;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
-  Evas_Object *background;
   struct _Widget *wid;
   int w = WIDTH, h = HEIGHT;
 
@@ -592,21 +603,29 @@ static int window(lua_State *L)
 
     // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
     ourGlobals->evas = evas_object_evas_get(ourGlobals->win);
+    // An Ecore_Evas holds an Evas.
+    // Get the Ecore_Evas that wraps an Evas.
+    ourGlobals->ee = ecore_evas_ecore_evas_get(ourGlobals->evas);	// Only use this on Evas that was created with Ecore_Evas.
+    ecore_evas_callback_resize_set(ourGlobals->ee, _on_canvas_resize);
+
     _scene_setup(ourGlobals, &ourScene);
 
     /* Add a background rectangle objects. */
-    background = evas_object_rectangle_add(ourGlobals->evas);
-    evas_object_color_set(background, 0, 0, 0, 255);
-    evas_object_move(background, 0, 0);
-    evas_object_resize(background, w, h);
-    evas_object_show(background);
+    ourGlobals->background = evas_object_rectangle_add(ourGlobals->evas);
+    evas_object_color_set(ourGlobals->background, 255, 0, 255, 255);
+    evas_object_move(ourGlobals->background, 0, 0);
+    evas_object_resize(ourGlobals->background, w, h);
+    evas_object_show(ourGlobals->background);
 
     // Add an image object for 3D scene rendering.
     wid = calloc(1, sizeof(struct _Widget));
     strcpy(wid->magic, "Widget");
     eina_clist_add_head(&ourGlobals->widgets, &wid->node);
 
+// TODO - Doesn't matter how you do it, calling evas_obj_image_scene_set() AND evas_obj_size_set() will segfault.
+//        Not calling them both means the image is not big enough to see.  FUCK!!
     wid->obj = eo_add(EVAS_OBJ_IMAGE_CLASS, ourGlobals->win);
+    ourGlobals->image = (wid->obj);
     eo_do(wid->obj,
 	evas_obj_image_filled_set(EINA_TRUE),
 //	evas_obj_image_size_set(w, h),

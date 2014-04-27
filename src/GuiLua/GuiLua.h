@@ -21,9 +21,9 @@ struct _globals
   Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
 
-//Ecore_Evas       *ecore_evas;
+Ecore_Evas       *ee;
 Evas             *evas;
-//Evas_Object      *background;
+Evas_Object      *background;
 Evas_Object      *image;
 };
 
