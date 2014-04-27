@@ -1,8 +1,18 @@
 
+#define EFL_API_OVERRIDE 1
+/* Enable access to unstable EFL API that are still in beta */
+#define EFL_BETA_API_SUPPORT 1
+/* Enable access to unstable EFL EO API. */
+#define EFL_EO_API_SUPPORT 1
+
 #include <stdio.h>
 #include <ctype.h>
 
 #include <Elementary.h>
+
+// This got left out.
+//EAPI Evas_3D_Scene *evas_3d_scene_add(Evas *e);
+
 
 #include <lua.h>
 #include <luajit.h>
@@ -28,6 +38,11 @@ struct _globals
 {
   Evas_Object	*win;		// Our Elm window.
   int		logDom;		// Our logging domain.
+
+//Ecore_Evas       *ecore_evas;
+Evas             *evas;
+//Evas_Object      *background;
+Evas_Object      *image;
 };
 
 
