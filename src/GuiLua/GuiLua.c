@@ -442,19 +442,6 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
 	);
 }
 
-
-
-// TODO - These functions should be able to deal with multiple windows.
-// TODO - Should be able to open external and internal windows, and even switch between them on the fly.
-static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-//  globals *ourGlobals = data;
-
-  // Tell the main loop to stop, which it will, eventually.
-  elm_exit();
-}
-
-
 /* Sooo, how to do this -
 widget has to be a light userdata
 The rest can be Lua sub things?  Each with a C function to update the widget.
@@ -475,6 +462,9 @@ struct _Widget
   // skangCoord x, y, w, h
 };
 
+
+// TODO - These functions should be able to deal with multiple windows.
+// TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
   globals *ourGlobals;
@@ -492,6 +482,14 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
     if (0 != luaL_dostring(L, wid->action))
       PE("Error running - %s", wid->action);
   }
+}
+
+static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+//  globals *ourGlobals = data;
+
+  // Tell the main loop to stop, which it will, eventually.
+  elm_exit();
 }
 
 static int widget(lua_State *L)
@@ -611,11 +609,12 @@ static int window(lua_State *L)
     wid->obj = eo_add(EVAS_OBJ_IMAGE_CLASS, ourGlobals->win);
     eo_do(wid->obj,
 	evas_obj_image_filled_set(EINA_TRUE),
-	evas_obj_image_size_set(w, h),
-//	evas_obj_size_set(w, h),
+//	evas_obj_image_size_set(w, h),
+	evas_obj_image_file_set("../../media/sky_01.jpg", NULL),
 	evas_obj_position_set(0, 0),
-	evas_obj_visibility_set(EINA_TRUE),
-	evas_obj_image_scene_set(data.scene)
+	evas_obj_size_set(w, h),
+	evas_obj_visibility_set(EINA_TRUE)
+//	evas_obj_image_scene_set(ourScene.scene)
 	);
 //    evas_object_resize(wid->obj, w, h);
 //    evas_object_move(wid->obj, 0, 0);
