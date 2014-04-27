@@ -147,7 +147,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
 
     ourGlobals->server = ev->server;
     gettimeofday(&startTime, NULL);
-    snprintf(buf, sizeof(buf), "%s/media/Test sim/objects", PACKAGE_DATA_DIR);
+    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
     eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
     // Wait awhile, then start sending events for testing.
     ecore_timer_add(0.5, _timer_cb, ourGlobals);
@@ -392,7 +392,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/media/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+				snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
@@ -409,7 +409,7 @@ int main(int argc, char **argv)
 				evas_object_resize(ourGlobals.edje, WIDTH, HEIGHT);
 				evas_object_show(ourGlobals.edje);
 
-				snprintf(buf, sizeof(buf), "%s/media/bubble_sh.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/bubble_sh.png", PACKAGE_DATA_DIR);
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    sh = evas_object_image_filled_add(ourGlobals.canvas);
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 				    evas_object_data_set(ourGlobals.bg, names[(i * 2) + 1], sh);
 				}
 
-				snprintf(buf, sizeof(buf), "%s/media/bubble.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/bubble.png", PACKAGE_DATA_DIR);
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    bub = evas_object_image_filled_add(ourGlobals.canvas);

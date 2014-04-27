@@ -319,7 +319,7 @@ skang
 *.lsl.lua
 *.lsl2
 libraries/lemon/lemon
-libraries/constants.lsl
+lib/constants.lsl
 src/LuaSL/LuaSL_test
 src/LuaSL/LuaSL_lemon_yaccer.c
 src/LuaSL/LuaSL_lemon_yaccer.h

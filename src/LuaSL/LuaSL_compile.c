@@ -2119,9 +2119,9 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	}
 
 	// Compile the constants.
-	snprintf(buf, sizeof(buf), "lua -e 'require(\"LSL\").gimmeLSL()' > %s/libraries/constants.lsl", PACKAGE_DATA_DIR);
+	snprintf(buf, sizeof(buf), "lua -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", PACKAGE_LIB_DIR);
 	system(buf);
-	snprintf(buf, sizeof(buf), "%s/libraries/constants.lsl", PACKAGE_DATA_DIR);
+	snprintf(buf, sizeof(buf), "%s/constants.lsl", PACKAGE_LIB_DIR);
 	compileLSL(ourGlobals, NULL, "FAKE_SID", buf, TRUE);
 
 	return TRUE;

@@ -26,6 +26,8 @@ Merged it into LuaSL, so it's no longer here.
 
 These are the libraries written for the SledjHamr project.
 
-LumbrJack is a library of logging stuff, coz every one wants to log.
+libLumbrJack is a library of logging stuff, coz every one wants to log.
 
-Runnr is for running Lua scripts.  Named (sorta) after a friend of mine.
+libRunnr is for running Lua scripts.  Named (sorta) after a friend of mine.
+
+libSledjHamr is a motley collection of stuff that is needed.

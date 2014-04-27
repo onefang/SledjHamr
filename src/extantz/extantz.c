@@ -39,7 +39,7 @@ static Elm_Genlist_Item_Class *viewer_gic = NULL;
 
 //static const char *img1 = PACKAGE_DATA_DIR "/media/plant_01.jpg";
 //static const char *img2 = PACKAGE_DATA_DIR "/media/sky_01.jpg";
-static const char *img3 = PACKAGE_DATA_DIR "/media/rock_01.jpg";
+static const char *img3 = "rock_01.jpg";
 
 
 #define EPHYSICS_TEST_THEME "extantz"
@@ -1240,7 +1240,7 @@ static void woMan_add(GLData *gld)
 //    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Evas_Object *win, *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
-//    char buf[PATH_MAX];
+    char buf[PATH_MAX];
     int i;
 
     win = fang_win_add(gld);
@@ -1351,9 +1351,10 @@ static void woMan_add(GLData *gld)
     evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(nf);
-    
+
+    sprintf(buf, "%s/%s", elm_app_data_dir_get(), img3);
     tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(win, img3);	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = _content_image_new(win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_box_pack_end(bx, nf);
 
@@ -1393,7 +1394,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     EPhysics_Body *box_body1, *box_body2;
     Evas_Object *box1, *box2;
     GLData *gld = NULL;
-//    char buf[PATH_MAX];
+    char buf[PATH_MAX];
 //    int i;
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
@@ -1401,10 +1402,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     // Don't do this, we need to clean up other stuff to, so set a clean up function below.
     //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
 
-    // If you want efl to handle finding your bin/lib/data dirs, you must do this below.
-    elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
-    elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
-    elm_app_info_set(elm_main, "datadir", "media/sky_03.jpg");
+    HamrTime(elm_main, "extantz");
     fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
     fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
     fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
@@ -1538,7 +1536,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_friction_set(boundary, 0);
 
     box1 = elm_image_add(gld->win);
-    elm_image_file_set(box1, PACKAGE_DATA_DIR "/media/" EPHYSICS_TEST_THEME ".edj", "blue-cube");
+    sprintf(buf, "%s/%s.edj", elm_app_data_dir_get(), EPHYSICS_TEST_THEME);
+    elm_image_file_set(box1, strdup(buf), "blue-cube");
     evas_object_move(box1, gld->win_w / 2 - 80, gld->win_h - 200);
     evas_object_resize(box1, 70, 70);
     evas_object_show(box1);
@@ -1552,7 +1551,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
 
     box2 = elm_image_add(gld->win);
-    elm_image_file_set(box2, PACKAGE_DATA_DIR "/media/" EPHYSICS_TEST_THEME ".edj", "purple-cube");
+    elm_image_file_set(box2, strdup(buf), "purple-cube");
     evas_object_move(box2, gld->win_w / 2 + 10, gld->win_h - 200);
     evas_object_resize(box2, 70, 70);
     evas_object_show(box2);

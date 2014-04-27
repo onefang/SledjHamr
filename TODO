@@ -3,45 +3,19 @@ FIXES -
     Project paths
     -------------
 
-CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. baseDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. baseDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. baseDir .. '\\"'
-
-  // There is also a locale variety, but we are not dealing with locale stuff yet.
-  // There is a prefix variety, but you can't set it, only read it later.
-  // These set the fallbacks used by elm_app_info_set(), that are defined at compile time.
-  elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
-  elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
-  elm_app_compile_lib_dir_set(PACKAGE_LIB_DIR);
-  // Do this after the above calls, but before changing the working directory, or screwing with argv[0].
-  // It tries to set up the package paths depending on where the executable is, so things are relocatable.
-  // First argument is the elm_main() function that Elementary starts us from.
-  // Second argument should be a lower case string used as the "domain", which is different from the log domain.
-  //   It's used lower case as part of the data directory path.
-  //     So, if prefix is /usr/local, then the system data dir is /usr/local/share,
-  //     and this apps data dir is /usr/local/share/"domain".
-  //   It's used upper case as part of environment variables to override directory paths at run time.
-  //     So "DOMAIN"_PREFIX, "DOMAIN"_BIN_DIR, "DOMAIN"_LIB_DIR, "DOMAIN"_DATA_DIR, and "DOMAIN"_LOCALE_DIR
-  // Third argument is the name of a file it can check for to make sure it found the correct path.
-  //  This file is looked for in the data dir.
-  elm_app_info_set(elm_main, "GuiLua", "skang.lua");
-  // Once this is all setup, the code can do -
-  elm_app_prefix_dir_get();	// or bin, lib, data, locale.
-
 The executables currently live in ...../SledjHamr.
   Test executables stay in the src directory.
 Media and other data in SledjHamr/media (includes the test sim and Irrlicht examples).
-Libraries are in SledjHamr/libraries (including Irrlicht, lemon, and some sources).
-  Should move LumbrJack and Runnr sources to src, and probably lemon to.
+External libraries are in SledjHamr/libraries (Irrlicht and lemon).
   Irrlicht is statically linked, so except for it's media, we don't need it at run time.
     We could probably move the Irrlicht examples we actually use (all test data anyway) to Test sim.
+  Lemon is only used at build time.
 
 Builders should be able to -
   put binaries in /usr/local/bin
   put libraries - /usr/local/lib/SledjHamr
   put media in /usr/local/share/SledjHamr
 If they don't, those things should be in the build directory, where they are now.
-  And looked up locally to allow moving it as one thing.
 
 User should be able to -
   Run sims from where ever they like.
@@ -53,12 +27,6 @@ User should be able to -
   Write their own skins, using their own media.
 
 SOOOO ...
-  build.lua should set -
-    PACKAGE_BIN_DIR	= SledjHamr
-    PACKAGE_LIB_DIR	= SledjHamr/libraries	(should rename this to lib)
-    PACKAGE_DATA_DIR	= SledjHamr/media
-    PACKAGE_LOCALE_DIR	= SledjHamr/locale	(doesn't exist yet)
-
   install.lua should - 			(doesn't exist yet)
     SledjHamr binaries	-> prefix .. '/bin'
     SledjHamr/libraries	-> prefix .. '/lib/SledjHamr'
@@ -68,14 +36,6 @@ SOOOO ...
         Nails will eventually make changes to the test sim during testing.
         For now, we don't care, there's no actual installing going on.
     SledjHamr/locale	-> prefix .. '/share/SledjHamr/locale'
-
-  Some library function should call all the elm_app_compile_*_dir_set() functions.
-  They should be set as -D options only for that library.
-  elm_app_info_set() has to be called for each different elm_main(), so that might be tricky.
-  elm_app_*_dir_get() can then be called from anywhere, and will get the same results.
-  NOTE - this is Elm specific, so non GUI stuff like LuaSL can't use it.
-  Seems that non Elm examples all just use the PACKAGE_*_DIR type macros directly in strings.
-
 
 
 Irrlicht is flickering like crazy.  Hmm, might be Irrlicht's fault,
@@ -118,7 +78,7 @@ Write my own, use ePhysics.  Hopefully ePhysics has some sort of
 magnetism / attraction thingy.  See the forces demo, should be doable. 
 Collision restraints and impulses?
 
-See if Evas allows detaching stuff from one canvas and adding it to
+See if Evas allows detaching stuff from one canvas and adding it to 
 another canvas.  This allows things like tearing off tabs from windows,
 tearing off sub menus, and switching windows between internal and
 external windows, without having to entirely recreate the UI stack

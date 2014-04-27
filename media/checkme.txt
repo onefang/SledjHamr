@@ -1,0 +1,2 @@
+A file for elm_app_info_set() to find, to make sure it found the correct
+data directory.

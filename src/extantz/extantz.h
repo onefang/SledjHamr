@@ -6,14 +6,8 @@
 #define USE_DEMO    1
 #define DO_GEARS    0
 
-#if USE_EO
-    /* Enable access to unstable EFL API that are still in beta */
-    #define EFL_BETA_API_SUPPORT 1
-    /* Enable access to unstable EFL EO API. */
-    #define EFL_EO_API_SUPPORT 1
-#endif
 
-#include <Elementary.h>
+#include "SledjHamr.h"
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
 #include <EPhysics.h>

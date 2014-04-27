@@ -58,11 +58,16 @@ if 'number' == type(args) then
   end
 end
 
+bin_d    = baseDir
+lib_d    = baseDir .. '/lib'
+data_d   = baseDir .. '/media'
+locale_d = baseDir .. '/locale'
+
 -- Likely this will fail, coz Lua likes to strip out environmont variables.
 -- On the other hand, there's a more direct way to get to environment variables, it would fail to.
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
-CFLAGS = '-g -Wall -I include -I ' .. baseDir .. '/libraries'
+CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eo')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eet')
@@ -71,13 +76,10 @@ CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-evas')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-file')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'edje')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
-CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'  .. baseDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'  .. baseDir .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"' .. baseDir .. '\\"'
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
-LDFLAGS = '-L ' .. baseDir .. '/libraries ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
-libs = '-lLumbrJack -lRunnr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm -Wl,-rpath,' .. baseDir .. '/libraries'
+LDFLAGS = '-L ' .. baseDir .. '/lib ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
+libs = '-lLumbrJack -lRunnr -lSledjHamr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm -Wl,-rpath,' .. baseDir .. '/lib'
 LFLAGS = '-d'
 EDJE_FLAGS = '-id ' .. baseDir .. '/media -fd ' .. baseDir .. '/media'
 
@@ -90,7 +92,7 @@ if 'nil' == type(args) then
   print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
   runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
-  buildSub('libraries',	'libraries')
+  buildSub('libraries',	'src/libraries')
   buildSub('LuaSL',	'src/LuaSL')
   buildSub('GuiLua',	'src/GuiLua')
   buildSub('extantz',	'src/extantz')

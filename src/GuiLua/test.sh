@@ -2,5 +2,5 @@
 
 wd=$(pwd)
 
-export LUA_PATH="$wd/../../libraries/?.lua;./?.lua"
+export LUA_PATH="$wd/../../lib/?.lua;./?.lua"
 ../../skang -l test -foo "argy bargy"
