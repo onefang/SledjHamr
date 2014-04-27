@@ -1,0 +1,15 @@
+Wild idea while not getting to sleep -
+
+Implement an Android "phone" in world.
+
+If it's actually Android, then there's a big load of software available
+for it already.  B-)
+
+It can run Jabber/XMPP clients that connect to the worlds XMPP server. 
+So most of the time it's just the chat/IM window.
+
+It would usually be connected to the HUD, so private, but might be able
+to pull it off the HUD and show it to others.  This part inspired by
+Evas_3D claiming it can have Evas and Elm widgets as it's 3D textures.
+
+The GPS system can track your avatars in world position.
