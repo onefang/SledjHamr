@@ -247,7 +247,7 @@ _animate_scene(void *data)
 	);
 
     eo_do(scene->mesh2_node,
-	evas_3d_node_mesh_frame_set(scene->mesh2, frame);
+	evas_3d_node_mesh_frame_set(scene->mesh2, frame)
 	);
 
    /* Rotate */
@@ -411,7 +411,6 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
 
     eo_do(scene->mesh2,
 	evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
-	evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG);
 	);
 }
 
