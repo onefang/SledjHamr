@@ -368,6 +368,8 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
 	evas_3d_node_mesh_add(scene->mesh)
 	);
 
+#if DO_CUBE
+#else
     // Setup an MD2 mesh.
     scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
     eo_do(scene->mesh2,
@@ -412,6 +414,7 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
     eo_do(scene->mesh2,
 	evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
 	);
+#endif
 }
 
 
