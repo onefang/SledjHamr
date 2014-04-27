@@ -367,9 +367,10 @@ win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Th
 
 struct _Widget
 {
-  char magic[8];
-  Evas_Object *obj;
-  char *label, *look, *action, *help;
+  char		magic[8];
+  Evas_Object	*obj;
+  Eina_Clist	node;
+  char		*label, *look, *action, *help;
   // foreground / background colour
   // thing
   // types {}
@@ -409,23 +410,32 @@ static int widget(lua_State *L)
   pull_lua(L, 1, "$type $title %x %y %w %h", &type, &title, &x, &y, &w, &h);
 
   // Poor mans introspection, until I write real introspection into EFL.
+  // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?
   if (strcmp(type, "button") == 0)
   {
     struct _Widget *wid;
 
     wid = calloc(1, sizeof(struct _Widget));
     strcpy(wid->magic, "Widget");
+    eina_clist_add_head(&ourGlobals->widgets, &wid->node);
     wid->label = strdup(title);
-    wid->obj = elm_button_add(ourGlobals->win);
-    elm_object_text_set(wid->obj, title);
+
+    // These two lines are likely the only ones that will be different for the different sorts of widgets.
+    wid->obj = eo_add(ELM_OBJ_BUTTON_CLASS, ourGlobals->win);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, L);
-    evas_object_resize(wid->obj, w, h);
-    evas_object_move(wid->obj, x, y);
-    evas_object_show(wid->obj);
-    evas_object_data_set(wid->obj, "Widget", wid);
+
+    elm_object_part_text_set(wid->obj, NULL, wid->label);
+    eo_do(wid->obj,
+	evas_obj_size_set(w, h),
+	evas_obj_position_set(x, y),
+	evas_obj_visibility_set(EINA_TRUE),
+	eo_key_data_set("Widget", wid, NULL)
+	);
+
     /* Evas_Object *bt isn't a real pointer it seems.  At least Lua bitches about it -
          PANIC: unprotected error in call to Lua API (bad light userdata pointer)
-       So we wrap it.
+       So we wrap the _Widget instead of the Evas_Object.
+       TODO - Might as well make _Widget a full userdata.
     */
     lua_pushlightuserdata(L, (void *) wid);
     return 1;
@@ -476,6 +486,7 @@ static int window(lua_State *L)
 
   if ((ourGlobals->win = elm_win_util_standard_add(name, title)))
   {
+    eina_clist_init(&ourGlobals->widgets);
     evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
     evas_object_resize(ourGlobals->win, w, h);
     evas_object_move(ourGlobals->win, 0, 0);
@@ -559,9 +570,17 @@ static int closeWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  // Elm will delete our buttons to, and EO will bitch four times for each.
   if (ourGlobals->win)
+  {
+    struct _Widget *wid;
+
+    // Elm will delete our widgets , but if we are using eo, we need to unref them.
+    EINA_CLIST_FOR_EACH_ENTRY(wid, &ourGlobals->widgets, struct _Widget, node)
+    {
+      eo_unref(wid->obj);
+    }
     evas_object_del(ourGlobals->win);
+  }
 
   if (ourGlobals->logDom >= 0)
   {

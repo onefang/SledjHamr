@@ -18,6 +18,7 @@ typedef struct _globals globals;
 struct _globals
 {
   Evas_Object	*win;		// Our Elm window.
+  Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
 
 //Ecore_Evas       *ecore_evas;
