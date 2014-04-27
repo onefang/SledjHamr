@@ -342,7 +342,7 @@ _scene_setup(globals *ourGlobals, Scene_Data *data)
     data->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas);
     eo_do(data->scene,
 	evas_3d_scene_size_set(WIDTH, HEIGHT),
-	evas_3d_scene_background_color_set(1.0, 0.0, 1.0, 0.5)
+	evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
 	);
 
   // TODO - I have no idea how this should work.
@@ -514,7 +514,7 @@ static int window(lua_State *L)
 
     /* Add a background rectangle objects. */
     background = evas_object_rectangle_add(ourGlobals->evas);
-    evas_object_color_set(background, 255, 0, 255, 255);
+    evas_object_color_set(background, 0, 0, 0, 255);
     evas_object_move(background, 0, 0);
     evas_object_resize(background, w, h);
     evas_object_show(background);
