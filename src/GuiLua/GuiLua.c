@@ -154,11 +154,15 @@ typedef struct _Scene_Data
    Evas_3D_Node     *camera_node;
    Evas_3D_Node     *light_node;
    Evas_3D_Node     *mesh_node;
+   Evas_3D_Node     *mesh2_node;
 
    Evas_3D_Camera   *camera;
    Evas_3D_Light    *light;
    Evas_3D_Mesh     *mesh;
    Evas_3D_Material *material;
+   Evas_3D_Mesh     *mesh2;
+   Evas_3D_Material *material2;
+    Evas_3D_Texture *texture2;
 } Scene_Data;
 
 static const float cube_vertices[] =
@@ -232,6 +236,7 @@ static Eina_Bool
 _animate_scene(void *data)
 {
    static float angle = 0.0f;
+   static int frame = 0;
 
    Scene_Data *scene = (Scene_Data *)data;
 
@@ -241,18 +246,33 @@ _animate_scene(void *data)
 	evas_3d_node_orientation_angle_axis_set(angle, 1.0, 1.0, 1.0)
 	);
 
+    eo_do(scene->mesh2_node,
+	evas_3d_node_mesh_frame_set(scene->mesh2, frame);
+	);
+
    /* Rotate */
    if (angle > 360.0)
      angle -= 360.0f;
+
+   frame += 32;
+   if (frame > 256 * 50)
+       frame = 0;
+
    return EINA_TRUE;
 }
+
+#define DO_CUBE 1
 
 static void
 _camera_setup(globals *ourGlobals, Scene_Data *data)
 {
     data->camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas);
     eo_do(data->camera,
+#if DO_CUBE
 	evas_3d_camera_projection_perspective_set(60.0, 1.0, 2.0, 50.0)
+#else
+	evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
+#endif
 	);
 
     data->camera_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_CAMERA);
@@ -263,8 +283,13 @@ _camera_setup(globals *ourGlobals, Scene_Data *data)
 	evas_3d_node_member_add(data->camera_node)
 	);
     eo_do(data->camera_node,
+#if DO_CUBE
 	evas_3d_node_position_set(0.0, 0.0, 10.0),
 	evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
+#else
+	evas_3d_node_position_set(100.0, 0.0, 20.0),
+	evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
+#endif
 	);
 }
 
@@ -273,9 +298,14 @@ _light_setup(globals *ourGlobals, Scene_Data *data)
 {
     data->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas);
     eo_do(data->light,
+#if DO_CUBE
 	evas_3d_light_ambient_set(0.2, 0.2, 0.2, 1.0),
+#else
+	evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
+#endif
 	evas_3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
-	evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0)
+	evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
+	evas_3d_light_directional_set(EINA_TRUE)
 	);
 
     data->light_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_LIGHT);
@@ -286,8 +316,12 @@ _light_setup(globals *ourGlobals, Scene_Data *data)
 	evas_3d_node_member_add(data->light_node)
 	);
     eo_do(data->light_node,
-	evas_3d_node_position_set(0.0, 0.0, 10.0);
-	evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0);
+#if DO_CUBE
+	evas_3d_node_position_set(0.0, 0.0, 10.0),
+#else
+	evas_3d_node_position_set(1000.0, 0.0, 1000.0),
+#endif
+	evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
 	);
 }
 
@@ -319,7 +353,7 @@ _mesh_setup(globals *ourGlobals, Scene_Data *data)
 	evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TEXCOORD, 12 * sizeof(float), &cube_vertices[10]),
 
 	evas_3d_mesh_index_data_set(EVAS_3D_INDEX_FORMAT_UNSIGNED_SHORT, 36, &cube_indices[0]),
-	evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES);
+	evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES),
 
 	evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG),
 
@@ -333,6 +367,52 @@ _mesh_setup(globals *ourGlobals, Scene_Data *data)
     eo_do(data->mesh_node,
 	evas_3d_node_mesh_add(data->mesh)
 	);
+
+    // Setup an MD2 mesh.
+    data->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
+    eo_do(data->mesh2,
+	evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, "../../media/sonic.md2", NULL)
+	);
+
+    data->material2 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
+    eo_do(data->mesh2,
+	evas_3d_mesh_frame_material_set(0, data->material2)
+	);
+
+    data->texture2 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
+    eo_do(data->texture2,
+//	evas_3d_texture_file_set("../../media/sonic.png", NULL)
+//	evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),
+//	evas_3d_texture_wrap_set(EVAS_3D_WRAP_MODE_REPEAT, EVAS_3D_WRAP_MODE_REPEAT)
+	);
+
+    eo_do(data->material2,
+//	evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, data->texture2),
+
+	evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
+	evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
+	evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
+	evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
+
+	evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.01, 0.01, 0.01, 1.0),
+	evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 1.0, 1.0, 1.0, 1.0),
+	evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+	evas_3d_material_shininess_set(50.0)
+	);
+
+
+    data->mesh2_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
+    eo_do(data->root_node,
+	evas_3d_node_member_add(data->mesh2_node)
+	);
+    eo_do(data->mesh2_node,
+	evas_3d_node_mesh_add(data->mesh2)
+	);
+
+    eo_do(data->mesh2,
+	evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG);
+	);
+
 }
 
 
@@ -354,8 +434,9 @@ _scene_setup(globals *ourGlobals, Scene_Data *data)
     _mesh_setup(ourGlobals, data);
 
     eo_do(data->scene,
-	evas_3d_scene_root_node_set(data->root_node);
-	evas_3d_scene_camera_node_set(data->camera_node);
+	evas_3d_scene_root_node_set(data->root_node),
+	evas_3d_scene_camera_node_set(data->camera_node),
+	evas_3d_scene_size_set(1024, 1024)
 	);
 }
 
@@ -503,6 +584,7 @@ static int window(lua_State *L)
   if ((ourGlobals->win = elm_win_util_standard_add(name, title)))
   {
     eina_clist_init(&ourGlobals->widgets);
+
     evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
     evas_object_resize(ourGlobals->win, w, h);
     evas_object_move(ourGlobals->win, 0, 0);
@@ -528,10 +610,13 @@ static int window(lua_State *L)
     eo_do(wid->obj,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_size_set(w, h),
+//	evas_obj_size_set(w, h),
 	evas_obj_position_set(0, 0),
 	evas_obj_visibility_set(EINA_TRUE),
 	evas_obj_image_scene_set(data.scene)
 	);
+//    evas_object_resize(wid->obj, w, h);
+//    evas_object_move(wid->obj, 0, 0);
 
     // Add animation timer callback.
     ecore_timer_add(0.016, _animate_scene, &data);
