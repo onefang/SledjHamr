@@ -763,15 +763,6 @@ struct _Widget
 
 // TODO - These functions should be able to deal with multiple windows.
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
-static void _on_canvas_resize(Ecore_Evas *ee)
-{
-    int w, h;
-
-    ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
-    eo_do(ourGlobals.background,	evas_obj_size_set(w, h));
-    eo_do(ourGlobals.image,		evas_obj_size_set(w, h));
-}
-
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
   globals *ourGlobals;
@@ -922,8 +913,7 @@ static int window(lua_State *L)
   globals *ourGlobals;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
-  struct _Widget *wid;
-  Evas_Object *temp;
+  Evas_Object *obj, *temp;
   int result = 0;
   int w = WIDTH, h = HEIGHT;
 
@@ -946,39 +936,27 @@ static int window(lua_State *L)
 
     // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
     ourGlobals->evas = evas_object_evas_get(ourGlobals->win);
-    // An Ecore_Evas holds an Evas.
-    // Get the Ecore_Evas that wraps an Evas.
-    ourGlobals->ee = ecore_evas_ecore_evas_get(ourGlobals->evas);	// Only use this on Evas that was created with Ecore_Evas.
-    ecore_evas_callback_resize_set(ourGlobals->ee, _on_canvas_resize);
 
     _scene_setup(ourGlobals, &ourScene);
 
     // Add a background image object.
-    wid = calloc(1, sizeof(struct _Widget));
-    strcpy(wid->magic, "Widget");
-    eina_clist_add_head(&ourGlobals->widgets, &wid->node);
-
-    wid->obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
-    ourGlobals->background = (wid->obj);
-    eo_do(wid->obj,
+    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
+    eo_do(obj,
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
 	elm_obj_image_file_set("../../media/sky_01.jpg", NULL),
 	evas_obj_position_set(0, 0),
-	evas_obj_size_set(w, h),
 	evas_obj_visibility_set(EINA_TRUE)
 	);
+    elm_win_resize_object_add(ourGlobals->win, obj);
+    eo_unref(obj);
 
     // Add an image object for 3D scene rendering.
-    wid = calloc(1, sizeof(struct _Widget));
-    strcpy(wid->magic, "Widget");
-    eina_clist_add_head(&ourGlobals->widgets, &wid->node);
-
-    wid->obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
-    ourGlobals->image = (wid->obj);
-    eo_do(wid->obj,
+    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
+    eo_do(obj,
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
 	evas_obj_position_set(0, 0),
-	evas_obj_size_set(w, h),
 	evas_obj_visibility_set(EINA_TRUE),
 	temp = elm_obj_image_object_get()
 	);
@@ -986,6 +964,8 @@ static int window(lua_State *L)
 	evas_obj_image_scene_set(ourScene.scene)
 	);
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourGlobals);
+    elm_win_resize_object_add(ourGlobals->win, obj);
+    eo_unref(obj);
 
     // Add animation timer callback.
     ecore_timer_add(0.016, _animate_scene, &ourScene);

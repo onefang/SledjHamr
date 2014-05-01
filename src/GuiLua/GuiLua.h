@@ -17,14 +17,10 @@ typedef struct _globals globals;
 
 struct _globals
 {
+  Evas		*evas;
   Evas_Object	*win;		// Our Elm window.
   Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
-
-Ecore_Evas       *ee;
-Evas             *evas;
-Evas_Object      *background;
-Evas_Object      *image;
 };
 
 
