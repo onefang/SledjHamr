@@ -1,9 +1,9 @@
 #define USE_EO      0
-#define USE_PHYSICS 1
+#define USE_PHYSICS 0
 #define USE_EGL     1	// If using Evas_GL, though it might be via Elm.
 #define USE_ELM_GL  1
-#define USE_IRR     1
-#define USE_DEMO    1
+#define USE_IRR     0
+#define USE_DEMO    0
 #define DO_GEARS    0
 
 
@@ -205,6 +205,7 @@ EAPI int startIrr(GLData *gld);
 EAPI void drawIrr_start(GLData *gld);
 EAPI void drawIrr_end(GLData *gld);
 EAPI void finishIrr(GLData *gld);
+EAPI void Evas_3D_Demo_add(globals *ourGlobals);
 
 #ifdef __cplusplus
 }

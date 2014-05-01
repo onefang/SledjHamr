@@ -902,7 +902,7 @@ static void init_evas_gl(GLData *gld)
     evas_object_show(gld->r1);
     elm_box_pack_end(gld->bx, gld->r1);
 
-    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
+//    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_GL, gld);
 //    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, gld);
 //    evas_object_event_callback_add(gld->r1, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up, gld);
 #endif
@@ -1423,6 +1423,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	elm_config_preferred_engine_set("opengl_x11");
     gld->win = elm_win_add(NULL, "extantz", ELM_WIN_BASIC);
     gld->win = elm_win_util_standard_add("extantz", "extantz virtual world viewer");
+    ourGlobals.win = gld->win;
 
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
@@ -1456,17 +1457,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(gld->win, obj);
     eo_unref(obj);
 
-    // Note, we don't need an Elm_bg, the entire thing gets covered with the GL rendering surface anyway.
-#if 0
-    bg = elm_bg_add(gld->win);
-    elm_bg_load_size_set(bg, gld->win_w, gld->win_h);
-    elm_bg_option_set(bg, ELM_BG_OPTION_CENTER);
-    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
-    elm_bg_file_set(bg, buf, NULL);
-    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(gld->win, bg);
-    evas_object_show(bg);
-#endif
+    Evas_3D_Demo_add(&ourGlobals);
 
     gld->bx = elm_box_add(gld->win);
     evas_object_size_hint_weight_set(gld->bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);

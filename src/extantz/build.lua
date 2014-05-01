@@ -23,4 +23,5 @@ runCommand('edje_cc',		dir, 'edje_cc ' .. EDJE_FLAGS .. ' extantz.edc ../../medi
 runCommand('Irrlicht files',	dir, 'g++ ' .. CFLAGS .. ' -O3 -ffast-math -c crappisspuke.cpp -o crappisspuke.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -O3 -ffast-math -c CDemo.cpp -o CDemo.o ' .. LDFLAGS)
 runCommand('extantz',		dir, 'g++ ' .. CFLAGS .. ' -O3 -ffast-math -c extantzCamera.cpp -o extantzCamera.o ' .. LDFLAGS)
-runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' extantz.c crappisspuke.o CDemo.o extantzCamera.o -o ../../extantz ' .. LDFLAGS .. ' ' .. libs)
+runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -c Evas_3D_demo.c -o Evas_3D_demo.o ' .. LDFLAGS)
+runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' extantz.c crappisspuke.o CDemo.o extantzCamera.o Evas_3D_demo.o -o ../../extantz ' .. LDFLAGS .. ' ' .. libs)
