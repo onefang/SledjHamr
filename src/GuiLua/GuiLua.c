@@ -149,7 +149,6 @@ static const char *globName  = "ourGlobals";
 
 
 
-
 typedef struct _Scene_Data
 {
   Evas_Object      *image;		// Our Elm image.
@@ -466,12 +465,11 @@ _animate_scene(void *data)
 
   Scene_Data *scene = (Scene_Data *)data;
 
-  // Rotate cube
+  // Animate cube.
   angle += 0.5;
   if (angle > 360.0)		angle -= 360.0f;
 
   frame += inc;
-
   if (frame >= 20) inc = -1;
   else if (frame <= 0) inc = 1;
 
@@ -541,8 +539,7 @@ _light_setup(globals *ourGlobals, Scene_Data *scene)
     );
 }
 
-static void
-_mesh_setup(globals *ourGlobals, Scene_Data *scene)
+static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
 {
   // Setup cube materials.
   scene->material0 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
@@ -616,8 +613,10 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_node_position_set(40.0, 3.5, 23.0),
     evas_3d_node_mesh_add(scene->mesh)
     );
+}
 
-
+static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
+{
   // Setup an MD2 mesh.
   scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
   eo_do(scene->mesh2,
@@ -662,8 +661,10 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
   eo_do(scene->mesh2,
     evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
     );
+}
 
-
+static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
+{
   // Setup earth material.
    scene->material3 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
 
@@ -733,7 +734,9 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
 
   _camera_setup(ourGlobals, scene);
   _light_setup(ourGlobals, scene);
-  _mesh_setup(ourGlobals, scene);
+  _cube_setup(ourGlobals, scene);
+  _sonic_setup(ourGlobals, scene);
+  _earth_setup(ourGlobals, scene);
 
   eo_do(scene->scene,
     evas_3d_scene_root_node_set(scene->root_node),
@@ -985,7 +988,6 @@ static int window(lua_State *L)
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
 	elm_obj_image_file_set("../../media/sky_01.jpg", NULL),
-	evas_obj_position_set(0, 0),
 	evas_obj_visibility_set(EINA_TRUE)
 	);
     elm_win_resize_object_add(ourGlobals->win, obj);
@@ -997,7 +999,6 @@ static int window(lua_State *L)
     eo_do(obj,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
-	evas_obj_position_set(0, 0),
 	evas_obj_visibility_set(EINA_TRUE),
 	temp = elm_obj_image_object_get()
 	);
@@ -1010,7 +1011,6 @@ static int window(lua_State *L)
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
     elm_win_resize_object_add(ourGlobals->win, obj);
-    eo_unref(obj);
 
     // Add animation timer callback.
     ecore_timer_add(0.016, _animate_scene, &ourScene);
@@ -1076,6 +1076,7 @@ static int closeWindow(lua_State *L)
     {
       eo_unref(wid->obj);
     }
+    eo_unref(ourScene.image);
     evas_object_del(ourGlobals->win);
     _sphere_fini();
   }
