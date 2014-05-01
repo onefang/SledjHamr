@@ -455,7 +455,7 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
 {
   scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas);
   eo_do(scene->scene,
-    evas_3d_scene_size_set(1024, 1024),
+    evas_3d_scene_size_set(512, 512),
     evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
     );
 

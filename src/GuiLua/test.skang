@@ -4,7 +4,7 @@
 -- There's an implied local test = require 'test'
 
 -- This is a bit more verbose than I wanted.  lol
-local win = skang.window(1024, 1024, "G'day planet.", 'testWindow')
+local win = skang.window(512, 512, "G'day planet.", 'testWindow')
 skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 30'}
 win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translate 'quit' into the Lua 'skang.quit()'?
 
