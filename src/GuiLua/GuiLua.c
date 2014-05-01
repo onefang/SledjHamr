@@ -143,8 +143,6 @@ and ordinary elementary widgets.  Proper introspection can come later.
 #include "GuiLua.h"
 
 
-// TODO - This is missing, remove it when it's all sorted out.
-EAPI Evas_3D_Node *evas_3d_node_add(Evas *e, Evas_3D_Node_Type type);
 
 
 typedef struct _Scene_Data
