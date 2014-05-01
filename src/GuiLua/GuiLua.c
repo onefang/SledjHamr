@@ -741,7 +741,7 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
   eo_do(scene->scene,
     evas_3d_scene_root_node_set(scene->root_node),
     evas_3d_scene_camera_node_set(scene->camera_node)
-);
+    );
 }
 
 /* Sooo, how to do this -
