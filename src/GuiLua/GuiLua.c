@@ -152,6 +152,7 @@ static const char *globName  = "ourGlobals";
 
 typedef struct _Scene_Data
 {
+  Evas_Object      *image;		// Our Elm image.
   Evas_3D_Scene    *scene;
   Evas_3D_Node     *root_node;
   Evas_3D_Node     *camera_node;
@@ -782,9 +783,48 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   }
 }
 
+static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
+{
+   Scene_Data *scene = data;
+   Evas_Event_Mouse_Move *ev = einfo;
+   Evas_Coord x, y, w, h;
+   Evas_Coord obj_x, obj_y;
+   int scene_w, scene_h;
+   Evas_Real scene_x, scene_y;
+   Evas_Real s, t;
+   Evas_3D_Node *n;
+   Evas_3D_Mesh *m;
+   Eina_Bool pick;
+   char *name = NULL;
+
+   evas_object_geometry_get(o, &x, &y, &w, &h);
+
+   obj_x = ev->cur.canvas.x - x;
+   obj_y = ev->cur.canvas.y - y;
+
+   eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
+
+   scene_x = obj_x * scene_w / (Evas_Real)w;
+   scene_y = obj_y * scene_h / (Evas_Real)h;
+
+   eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
+   if (pick)
+     name = evas_object_data_get(n, "Name");
+   // This is a raw Evas callback, on the Elm image internal Evas_Object.
+   // So we need to get the Elm Image back from the raw Evas_Object.
+   // Which is why we stuffed it in the scene structure.
+   if (name)
+   {
+      elm_object_tooltip_text_set(scene->image, name);
+      elm_object_tooltip_show(scene->image);
+   }
+   else
+      elm_object_tooltip_hide(scene->image);
+}
+
 static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {
-//   globals *ourGlobals = data;
+   Scene_Data *scene = data;
    Evas_Event_Mouse_Down *ev = einfo;
    Evas_Coord x, y, w, h;
    Evas_Coord obj_x, obj_y;
@@ -801,12 +841,12 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
    obj_x = ev->canvas.x - x;
    obj_y = ev->canvas.y - y;
 
-   eo_do(ourScene.scene, evas_3d_scene_size_get(&scene_w, &scene_h));
+   eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
 
    scene_x = obj_x * scene_w / (Evas_Real)w;
    scene_y = obj_y * scene_h / (Evas_Real)h;
 
-   eo_do(ourScene.scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
+   eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
    if (pick)
    {
      name = evas_object_data_get(n, "Name");
@@ -953,6 +993,7 @@ static int window(lua_State *L)
 
     // Add an image object for 3D scene rendering.
     obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
+    ourScene.image = obj;
     eo_do(obj,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
@@ -963,7 +1004,11 @@ static int window(lua_State *L)
     eo_do(temp,
 	evas_obj_image_scene_set(ourScene.scene)
 	);
-    evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourGlobals);
+    elm_object_tooltip_text_set(obj, "");
+    elm_object_tooltip_hide(obj);
+    // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
+    evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
+    evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
     elm_win_resize_object_add(ourGlobals->win, obj);
     eo_unref(obj);
 
