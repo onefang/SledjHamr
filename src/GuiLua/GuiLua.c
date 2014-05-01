@@ -501,13 +501,8 @@ static void _on_canvas_resize(Ecore_Evas *ee)
     int w, h;
 
     ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
-
-printf("RESIZED!!!\n");
-    eo_do(ourGlobals.background, evas_obj_size_set(w, h));
-    eo_do(ourGlobals.image,
-	evas_obj_size_set(w, h)
-//	evas_obj_position_set(0, 0)
-	);
+    eo_do(ourGlobals.background,	evas_obj_size_set(w, h));
+    eo_do(ourGlobals.image,		evas_obj_size_set(w, h));
 }
 
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
