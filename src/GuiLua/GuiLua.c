@@ -612,6 +612,7 @@ static int window(lua_State *L)
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   struct _Widget *wid;
+  Evas_Object *temp;
   int result = 0;
   int w = WIDTH, h = HEIGHT;
 
@@ -641,11 +642,18 @@ static int window(lua_State *L)
 
     _scene_setup(ourGlobals, &ourScene);
 
-    /* Add a background rectangle objects. */
-    ourGlobals->background = eo_add(EVAS_OBJ_RECTANGLE_CLASS, ourGlobals->evas);
-    eo_do(ourGlobals->background,
-	evas_obj_color_set(0, 0, 0, 255),
-	evas_obj_size_set(w, w),
+    // Add a background image object.
+    wid = calloc(1, sizeof(struct _Widget));
+    strcpy(wid->magic, "Widget");
+    eina_clist_add_head(&ourGlobals->widgets, &wid->node);
+
+    wid->obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
+    ourGlobals->background = (wid->obj);
+    eo_do(wid->obj,
+	elm_obj_image_fill_outside_set(EINA_TRUE),
+	elm_obj_image_file_set("../../media/sky_01.jpg", NULL),
+	evas_obj_position_set(0, 0),
+	evas_obj_size_set(w, h),
 	evas_obj_visibility_set(EINA_TRUE)
 	);
 
@@ -654,17 +662,19 @@ static int window(lua_State *L)
     strcpy(wid->magic, "Widget");
     eina_clist_add_head(&ourGlobals->widgets, &wid->node);
 
-    wid->obj = eo_add(EVAS_OBJ_IMAGE_CLASS, ourGlobals->win);
+    wid->obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
     ourGlobals->image = (wid->obj);
     eo_do(wid->obj,
-	evas_obj_image_filled_set(EINA_TRUE),
-	evas_obj_image_size_set(w, h),
-	evas_obj_image_file_set("../../media/sky_01.jpg", NULL),
+	elm_obj_image_fill_outside_set(EINA_TRUE),
 	evas_obj_position_set(0, 0),
 	evas_obj_size_set(w, h),
 	evas_obj_visibility_set(EINA_TRUE),
+	temp = elm_obj_image_object_get()
+	);
+    eo_do(temp,
 	evas_obj_image_scene_set(ourScene.scene)
 	);
+
     // Add animation timer callback.
     ecore_timer_add(0.016, _animate_scene, &ourScene);
 
@@ -729,7 +739,6 @@ static int closeWindow(lua_State *L)
     {
       eo_unref(wid->obj);
     }
-    eo_unref(ourGlobals->background);
     evas_object_del(ourGlobals->win);
   }
 
