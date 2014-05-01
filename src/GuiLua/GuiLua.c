@@ -1110,7 +1110,6 @@ int luaopen_GuiLua(lua_State *L)
   int skang;
 
   // In theory this function only ever gets called once.
-  memset(&ourGlobals, 0, sizeof(globals));
   ourGlobals.logDom = loggingStartup("GuiLua", ourGlobals.logDom);
 
   elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
