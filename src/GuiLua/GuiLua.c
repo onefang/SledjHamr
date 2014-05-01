@@ -584,6 +584,7 @@ static int window(lua_State *L)
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   struct _Widget *wid;
+  int result = 0;
   int w = WIDTH, h = HEIGHT;
 
   lua_getfield(L, LUA_REGISTRYINDEX, globName);
@@ -592,6 +593,8 @@ static int window(lua_State *L)
 
   pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
 
+  // Set the engine to opengl_x11, then open the window.
+  elm_config_preferred_engine_set("opengl_x11");
   if ((ourGlobals->win = elm_win_util_standard_add(name, title)))
   {
     eina_clist_init(&ourGlobals->widgets);
@@ -623,29 +626,28 @@ static int window(lua_State *L)
     strcpy(wid->magic, "Widget");
     eina_clist_add_head(&ourGlobals->widgets, &wid->node);
 
-// TODO - Doesn't matter how you do it, calling evas_obj_image_scene_set() AND evas_obj_size_set() will segfault.
-//        Not calling them both means the image is not big enough to see.  FUCK!!
     wid->obj = eo_add(EVAS_OBJ_IMAGE_CLASS, ourGlobals->win);
     ourGlobals->image = (wid->obj);
     eo_do(wid->obj,
 	evas_obj_image_filled_set(EINA_TRUE),
-//	evas_obj_image_size_set(w, h),
+	evas_obj_image_size_set(w, h),
 	evas_obj_image_file_set("../../media/sky_01.jpg", NULL),
 	evas_obj_position_set(0, 0),
 	evas_obj_size_set(w, h),
-	evas_obj_visibility_set(EINA_TRUE)
-//	evas_obj_image_scene_set(ourScene.scene)
+	evas_obj_visibility_set(EINA_TRUE),
+	evas_obj_image_scene_set(ourScene.scene)
 	);
-//    evas_object_resize(wid->obj, w, h);
-//    evas_object_move(wid->obj, 0, 0);
     // Add animation timer callback.
     ecore_timer_add(0.016, _animate_scene, &ourScene);
 
     lua_pushlightuserdata(L, &ourGlobals->win);
-    return 1;
+    result = 1;
   }
 
-  return 0;
+  // Set preferred engine back to default from config
+  elm_config_preferred_engine_set(NULL);
+
+  return result;
 }
 
 static int clear(lua_State *L)
