@@ -400,7 +400,10 @@ _mesh_setup(globals *ourGlobals, Scene_Data *scene)
     );
   scene->mesh_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
   eo_do(scene->root_node, evas_3d_node_member_add(scene->mesh_node));
-  eo_do(scene->mesh_node, evas_3d_node_mesh_add(scene->mesh));
+  eo_do(scene->mesh_node,
+    evas_3d_node_position_set(40.0, 3.5, 23.0),
+    evas_3d_node_mesh_add(scene->mesh)
+    );
 
 
   // Setup an MD2 mesh.
