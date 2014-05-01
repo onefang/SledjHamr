@@ -1046,7 +1046,7 @@ static int closeWindow(lua_State *L)
   {
     struct _Widget *wid;
 
-    // Elm will delete our widgets , but if we are using eo, we need to unref them.
+    // Elm will delete our widgets, but if we are using eo, we need to unref them.
     EINA_CLIST_FOR_EACH_ENTRY(wid, &ourGlobals->widgets, struct _Widget, node)
     {
       eo_unref(wid->obj);
