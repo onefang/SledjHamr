@@ -48,6 +48,7 @@ int loggingStartup(char *name, int logDom)
   eina_log_domain_level_set("eo", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("eldbus", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("eet", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("efreet_icon", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("ecore", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("ecore_audio", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("ecore_con", EINA_LOG_LEVEL_WARN);
@@ -56,6 +57,7 @@ int loggingStartup(char *name, int logDom)
   eina_log_domain_level_set("ecore_input_evas", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("ecore_system_upower", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("eio", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("ephysics", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("evas_main", EINA_LOG_LEVEL_WARN);
 
   return logDom;
