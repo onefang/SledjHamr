@@ -251,12 +251,10 @@ _animate_scene(void *data)
 	);
 
    /* Rotate */
-   if (angle > 360.0)
-     angle -= 360.0f;
+   if (angle > 360.0)		angle -= 360.0f;
 
    frame += 32;
-   if (frame > 256 * 50)
-       frame = 0;
+   if (frame > 256 * 50)	frame = 0;
 
    return EINA_TRUE;
 }
@@ -423,7 +421,7 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
 {
     scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas);
     eo_do(scene->scene,
-	evas_3d_scene_size_set(WIDTH, HEIGHT),
+//	evas_3d_scene_size_set(1024, 1024),
 	evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
 	);
 
@@ -467,14 +465,16 @@ struct _Widget
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_canvas_resize(Ecore_Evas *ee)
 {
-   int w, h;
+    int w, h;
 
-   ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
+    ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
 
 printf("RESIZED!!!\n");
-   evas_object_resize(ourGlobals.background, w, h);
-   evas_object_resize(ourGlobals.image, w, h);
-   evas_object_move(ourGlobals.image, 0, 0);
+    eo_do(ourGlobals.background, evas_obj_size_set(w, h));
+    eo_do(ourGlobals.image,
+	evas_obj_size_set(w, h)
+//	evas_obj_position_set(0, 0)
+	);
 }
 
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
@@ -611,11 +611,12 @@ static int window(lua_State *L)
     _scene_setup(ourGlobals, &ourScene);
 
     /* Add a background rectangle objects. */
-    ourGlobals->background = evas_object_rectangle_add(ourGlobals->evas);
-    evas_object_color_set(ourGlobals->background, 255, 0, 255, 255);
-    evas_object_move(ourGlobals->background, 0, 0);
-    evas_object_resize(ourGlobals->background, w, h);
-    evas_object_show(ourGlobals->background);
+    ourGlobals->background = eo_add(EVAS_OBJ_RECTANGLE_CLASS, ourGlobals->evas);
+    eo_do(ourGlobals->background,
+	evas_obj_color_set(0, 0, 0, 255),
+	evas_obj_size_set(w, w),
+	evas_obj_visibility_set(EINA_TRUE)
+	);
 
     // Add an image object for 3D scene rendering.
     wid = calloc(1, sizeof(struct _Widget));
@@ -698,6 +699,7 @@ static int closeWindow(lua_State *L)
     {
       eo_unref(wid->obj);
     }
+    eo_unref(ourGlobals->background);
     evas_object_del(ourGlobals->win);
   }
 
