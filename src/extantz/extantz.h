@@ -8,6 +8,7 @@
 
 
 #include "SledjHamr.h"
+#include "LumbrJack.h"
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
 #include <EPhysics.h>
@@ -59,13 +60,15 @@ typedef struct ICameraSceneNode ICameraSceneNode;
 #endif
 
 
-#define CRI(...)      EINA_LOG_DOM_CRIT(_log_domain, _VA_ARGS__)
-#define ERR(...)      EINA_LOG_DOM_ERR(_log_domain, __VA_ARGS__)
-#define WRN(...)      EINA_LOG_DOM_WARN(_log_domain, __VA_ARGS__)
-#define INF(...)      EINA_LOG_DOM_INFO(_log_domain, __VA_ARGS__)
-#define DBG(...)      EINA_LOG_DOM_DBG(_log_domain, __VA_ARGS__)
+typedef struct _globals
+{
+  Evas		*evas;
+  Evas_Object	*win;		// Our Elm window.
+  Eina_Clist	widgets;	// Our windows widgets.
+  int		logDom;		// Our logging domain.
+} globals;
 
-extern int _log_domain;
+extern globals ourGlobals;
 
 
 typedef struct _Gear Gear;

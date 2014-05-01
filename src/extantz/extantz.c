@@ -1,7 +1,7 @@
 #include "extantz.h"
 
 
-int _log_domain = -1;
+globals ourGlobals;
 
 Eina_Hash *grids;
 Eina_Hash *viewers;
@@ -786,10 +786,8 @@ static void _del_gl(Evas_Object *obj)
 // Callback for when the app quits.
 static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-    GLData *gld = data;
+//    GLData *gld = data;
 
-    evas_object_del(gld->win);
-    free(gld);
     elm_exit();
 }
 
@@ -1386,7 +1384,7 @@ static void woMan_add(GLData *gld)
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
 //    Evas_Object *bg, *menu, *bt, *tb;
-    Evas_Object *menu, *tb;
+    Evas_Object *obj, *menu, *tb;
     Elm_Object_Item *tb_it;
 //, *menu_it;
     EPhysics_Body *boundary;
@@ -1398,15 +1396,19 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //    int i;
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
-    _log_domain = eina_log_domain_register("extantz", NULL);
-    // Don't do this, we need to clean up other stuff to, so set a clean up function below.
-    //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
-
     HamrTime(elm_main, "extantz");
     fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
     fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
     fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
     fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
+
+    ourGlobals.logDom = loggingStartup("extantz", ourGlobals.logDom);
+
+    // Don't do this, we need to clean up other stuff to, so set a clean up function below.
+    //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
+    elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
+    elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
+    elm_policy_set(ELM_POLICY_THROTTLE,	ELM_POLICY_THROTTLE_HIDDEN_ALWAYS);
 
     // These are set via the elementary_config tool, which is hard to find.
     elm_config_finger_size_set(0);
@@ -1420,6 +1422,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     if (gld->useEGL)
 	elm_config_preferred_engine_set("opengl_x11");
     gld->win = elm_win_add(NULL, "extantz", ELM_WIN_BASIC);
+    gld->win = elm_win_util_standard_add("extantz", "extantz virtual world viewer");
+
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
@@ -1428,7 +1432,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	return 1;
 #endif
 
-    elm_win_title_set(gld->win, "extantz virtual world manager");
+//    elm_win_title_set(gld->win, "extantz virtual world manager");
     evas_object_smart_callback_add(gld->win, "delete,request", _on_done, gld);
 
     // Get the screen size.
@@ -1437,12 +1441,27 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     gld->win_w = gld->scr_w / 2;
     gld->win_h = gld->scr_h - 30;
 
+    // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
+    ourGlobals.evas = evas_object_evas_get(gld->win);
+
+    // Add a background image object.
+    obj = eo_add(ELM_OBJ_IMAGE_CLASS, gld->win);
+    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
+    eo_do(obj,
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	elm_obj_image_fill_outside_set(EINA_TRUE),
+	elm_obj_image_file_set(buf, NULL),
+	evas_obj_visibility_set(EINA_TRUE)
+	);
+    elm_win_resize_object_add(gld->win, obj);
+    eo_unref(obj);
+
     // Note, we don't need an Elm_bg, the entire thing gets covered with the GL rendering surface anyway.
 #if 0
     bg = elm_bg_add(gld->win);
     elm_bg_load_size_set(bg, gld->win_w, gld->win_h);
     elm_bg_option_set(bg, ELM_BG_OPTION_CENTER);
-    snprintf(buf, sizeof(buf), "%s/media/sky_03.jpg", elm_app_data_dir_get());
+    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
     elm_bg_file_set(bg, buf, NULL);
     evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     elm_win_resize_object_add(gld->win, bg);
@@ -1579,6 +1598,18 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ephysics_world_del(world);
     ephysics_shutdown();
 #endif
+
+    if (gld->win)
+    {
+	evas_object_del(gld->win);
+    }
+    free(gld);
+
+    if (ourGlobals.logDom >= 0)
+    {
+	eina_log_domain_unregister(ourGlobals.logDom);
+	ourGlobals.logDom = -1;
+    }
 
     elm_shutdown();
 
