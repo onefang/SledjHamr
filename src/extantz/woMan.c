@@ -274,9 +274,6 @@ void woMan_add(GLData *gld)
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_box_pack_end(bx, nf);
 
-#if USE_EO
-    // Not ready for prime time yet, or I'm missing a step.  Causes it to hang after closing the window.
-    // Slightly better now, it bitches instead of hanging.
     bt = eo_add(ELM_OBJ_BUTTON_CLASS, win);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
     eo_do(bt, 
@@ -285,15 +282,9 @@ void woMan_add(GLData *gld)
 		evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 		evas_obj_visibility_set(EINA_TRUE)
 	);
-#else
-    bt = elm_button_add(win);
-    elm_object_text_set(bt, "Login");
-    evas_object_size_hint_align_set(bt, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.0);
-    evas_object_show(bt);
-#endif
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
     elm_box_pack_end(bx, bt);
+    eo_unref(bt);
     evas_object_show(bx);
 
     fang_win_complete(gld, win, 30, 30, gld->win_w / 3, gld->win_h / 3);

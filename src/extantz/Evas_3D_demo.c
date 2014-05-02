@@ -1,37 +1,6 @@
 #include "extantz.h"
 
 
-typedef struct _Scene_Data
-{
-  Evas_Object      *image;		// Our Elm image.
-  Evas_3D_Scene    *scene;
-  Evas_3D_Node     *root_node;
-  Evas_3D_Node     *camera_node;
-  Evas_3D_Node     *light_node;
-
-  Evas_3D_Camera   *camera;
-  Evas_3D_Light    *light;
-
-  Evas_3D_Mesh     *mesh;
-  Evas_3D_Node     *mesh_node;
-  Evas_3D_Material *material0;
-  Evas_3D_Material *material1;
-  Evas_3D_Texture  *texture0;
-  Evas_3D_Texture  *texture1;
-  Evas_3D_Texture  *texture_normal;
-
-  Evas_3D_Mesh     *mesh2;
-  Evas_3D_Node     *mesh2_node;
-  Evas_3D_Material *material2;
-  Evas_3D_Texture  *texture2;
-
-  Evas_3D_Mesh     *mesh3;
-  Evas_3D_Node     *mesh3_node;
-  Evas_3D_Material *material3;
-  Evas_3D_Texture  *texture_diffuse;
-
-} Scene_Data;
-
 static Scene_Data ourScene;
 
 
@@ -161,15 +130,6 @@ _normalize(const vec3 *v)
     return vec;
 }
 
-static void
-_sphere_fini()
-{
-    if (sphere_vertices)
-	free(sphere_vertices);
-
-    if (sphere_indices)
-	free(sphere_indices);
-}
 
 static void
 _sphere_init(int precision)
@@ -306,8 +266,7 @@ _sphere_init(int precision)
 }
 
 
-static Eina_Bool
-_animate_scene(void *data)
+Eina_Bool _animate_scene(void *data)
 {
   static float angle = 0.0f;
   static float earthAngle = 0.0f;
@@ -393,6 +352,8 @@ _light_setup(globals *ourGlobals, Scene_Data *scene)
 
 static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
 {
+  char buf[PATH_MAX];
+
   // Setup cube materials.
   scene->material0 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
   scene->material1 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
@@ -431,7 +392,8 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
   eo_do(scene->texture1,
     evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels1[0])
     );
-  eo_do(scene->texture_normal, evas_3d_texture_file_set("media/normal_lego.png", NULL));
+  snprintf(buf, sizeof(buf), "%s/normal_lego.png", elm_app_data_dir_get());
+  eo_do(scene->texture_normal, evas_3d_texture_file_set(buf, NULL));
 
   eo_do(scene->material0, evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture0));
   eo_do(scene->material1, evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture1));
@@ -469,10 +431,13 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
 
 static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
 {
+  char buf[PATH_MAX];
+
   // Setup an MD2 mesh.
   scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
+  snprintf(buf, sizeof(buf), "%s/sonic.md2", elm_app_data_dir_get());
   eo_do(scene->mesh2,
-    evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, "media/sonic.md2", NULL)
+    evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL)
     );
 
   scene->material2 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
@@ -481,8 +446,9 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
     );
 
   scene->texture2 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
+  snprintf(buf, sizeof(buf), "%s/sonic.png", elm_app_data_dir_get());
   eo_do(scene->texture2,
-    evas_3d_texture_file_set("media/sonic.png", NULL),
+    evas_3d_texture_file_set(buf, NULL),
     evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),
     evas_3d_texture_wrap_set(EVAS_3D_WRAP_MODE_REPEAT, EVAS_3D_WRAP_MODE_REPEAT)
     );
@@ -517,12 +483,15 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
 
 static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
 {
+  char buf[PATH_MAX];
+
   // Setup earth material.
    scene->material3 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
 
    scene->texture_diffuse = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
+  snprintf(buf, sizeof(buf), "%s/EarthDiffuse.png", elm_app_data_dir_get());
    eo_do(scene->texture_diffuse,
-         evas_3d_texture_file_set("media/EarthDiffuse.png", NULL),
+         evas_3d_texture_file_set(buf, NULL),
          evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR));
    eo_do(scene->material3,
          evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture_diffuse),
@@ -597,7 +566,6 @@ _scene_setup(globals *ourGlobals, Scene_Data *scene)
 }
 
 
-
 static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {
    Scene_Data *scene = data;
@@ -649,7 +617,7 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
    Evas_3D_Node *n;
    Evas_3D_Mesh *m;
    Eina_Bool pick;
-   char *name;
+   char *name = NULL;
 
    evas_object_geometry_get(o, &x, &y, &w, &h);
 
@@ -685,18 +653,8 @@ void Evas_3D_Demo_add(globals *ourGlobals)
 {
   Evas_Object *obj, *temp;
 
-    _scene_setup(ourGlobals, &ourScene);
-
-    // Add a background image object.
-    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
-    eo_do(obj,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	elm_obj_image_fill_outside_set(EINA_TRUE),
-	elm_obj_image_file_set("media/sky_01.jpg", NULL),
-	evas_obj_visibility_set(EINA_TRUE)
-	);
-    elm_win_resize_object_add(ourGlobals->win, obj);
-    eo_unref(obj);
+  ourGlobals->scene = &ourScene;
+  _scene_setup(ourGlobals, &ourScene);
 
     // Add an image object for 3D scene rendering.
     obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
@@ -716,7 +674,14 @@ void Evas_3D_Demo_add(globals *ourGlobals)
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
     elm_win_resize_object_add(ourGlobals->win, obj);
+//    elm_box_pack_end(ourGlobals->gld.bx, obj);
 
     // Add animation timer callback.
-    ecore_timer_add(0.016, _animate_scene, &ourScene);
+//    ecore_timer_add(0.016, _animate_scene, &ourScene);
+}
+
+void Evas_3D_Demo_fini()
+{
+    free(sphere_vertices);
+    free(sphere_indices);
 }

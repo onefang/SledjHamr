@@ -49,7 +49,7 @@ ICameraSceneNode *addExtantzCamera(ISceneManager* sm, ISceneNode* parent, s32 id
 //extantzCamera::extantzCamera(gui::ICursorControl* cursorControl)
 //    : CursorControl(cursorControl), MaxVerticalAngle(88.0f), MoveSpeed(0.4f), RotateSpeed(100.0f), JumpSpeed(3.0f),
 extantzCamera::extantzCamera()
-    : MaxVerticalAngle(88.0f), MouseYDirection(1.0f), LastAnimationTime(0), NoVerticalMovement(false)
+    : NoVerticalMovement(false), MouseYDirection(1.0f), MaxVerticalAngle(88.0f), LastAnimationTime(0)
 {
 	#ifdef _DEBUG
 	setDebugName("extantzCamera");

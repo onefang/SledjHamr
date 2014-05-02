@@ -25,7 +25,9 @@ EAPI int startIrr(GLData *gld)
 	IrrlichtDevice	*device;
 	IVideoDriver	*driver;
 	ISceneManager	*smgr;
+    #if USE_DEMO
 	bool additive = true;
+    #endif
 #endif
 
 	if (!gld->useIrr)
