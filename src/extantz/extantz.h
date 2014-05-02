@@ -1,5 +1,5 @@
 #define USE_PHYSICS 1
-#define USE_IRR     1
+#define USE_IRR     0
 #define USE_DEMO    1
 #define DO_GEARS    0
 
@@ -128,6 +128,8 @@ struct _Gear
    int count;
 };
 
+
+
 typedef struct _Scene_Data
 {
   Evas_Object      *image;		// Our Elm image.
@@ -216,6 +218,7 @@ typedef struct _globals
 {
   Evas		*evas;
   Evas_Object	*win;		// Our Elm window.
+  Evas_Object	*tb;		// Our Elm toolbar.
   Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
 
@@ -239,7 +242,9 @@ EAPI void finishIrr(GLData *gld);
 
 EAPI void Evas_3D_Demo_add(globals *ourGlobals);
 Eina_Bool _animate_scene(void *data);
-void Evas_3D_Demo_fini(void);
+void Evas_3D_Demo_fini(globals *ourGlobals);
+
+void cameraAdd(Evas_Object *win, GLData *gld);
 
 Evas_Object *fang_win_add(GLData *gld);
 void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h);

@@ -268,13 +268,16 @@ _sphere_init(int precision)
 
 Eina_Bool _animate_scene(void *data)
 {
+  globals *ourGlobals = data;
+
   static float angle = 0.0f;
   static float earthAngle = 0.0f;
   static int   frame = 0;
   static int   inc   = 1;
   static int   sonicFrame = 0;
+  Evas_Real x, y, z;
 
-  Scene_Data *scene = (Scene_Data *)data;
+  Scene_Data *scene = ourGlobals->scene;
 
   // Animate cube.
   angle += 0.5;
@@ -302,6 +305,13 @@ Eina_Bool _animate_scene(void *data)
   eo_do(scene->mesh3_node,
     evas_3d_node_orientation_angle_axis_set(angle, 0.0, 1.0, 0.0)
     );
+
+  // Camera movement.
+  eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
+  x += ourGlobals->gld.move->x;
+  y += ourGlobals->gld.move->y;
+  z += ourGlobals->gld.move->z;
+  eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
 
   return EINA_TRUE;
 }
@@ -602,7 +612,10 @@ static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
       elm_object_tooltip_show(scene->image);
    }
    else
+   {
+      elm_object_tooltip_text_set(scene->image, "");
       elm_object_tooltip_hide(scene->image);
+   }
 }
 
 static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
@@ -618,6 +631,9 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
    Evas_3D_Mesh *m;
    Eina_Bool pick;
    char *name = NULL;
+
+   // Set the focus onto us.
+   elm_object_focus_set(o, EINA_TRUE);
 
    evas_object_geometry_get(o, &x, &y, &w, &h);
 
@@ -673,15 +689,18 @@ void Evas_3D_Demo_add(globals *ourGlobals)
     // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
+    cameraAdd(obj, &ourGlobals->gld);
     elm_win_resize_object_add(ourGlobals->win, obj);
 //    elm_box_pack_end(ourGlobals->gld.bx, obj);
 
     // Add animation timer callback.
 //    ecore_timer_add(0.016, _animate_scene, &ourScene);
+    ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
 }
 
-void Evas_3D_Demo_fini()
+void Evas_3D_Demo_fini(globals *ourGlobals)
 {
-    free(sphere_vertices);
-    free(sphere_indices);
+  eo_unref(ourGlobals->scene->image);
+  free(sphere_vertices);
+  free(sphere_indices);
 }

@@ -34,7 +34,8 @@ static void _resize(GLData *gld)
 {
    Evas_GL_API *gl = gld->glApi;
 
-    _resize_winwin(gld);
+   if (gld->elmGl)
+      _resize_winwin(gld);
 
 #if DO_GEARS
    GLfloat ar, m[16] = {
@@ -56,7 +57,8 @@ static void _resize(GLData *gld)
    memcpy(gld->proj, m, sizeof gld->proj);
 #endif
 
-   gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
+   if (gl)
+      gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
 }
 
 static void _resize_gl(Evas_Object *obj)
@@ -69,6 +71,16 @@ static void _resize_gl(Evas_Object *obj)
    gld->img_w = w;
    gld->img_h = h;
    _resize(gld);
+}
+
+static void _on_resize(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  globals *ourGlobals = data;
+  GLData *gld = &ourGlobals->gld;
+
+  eo_do(gld->win, evas_obj_size_get(&gld->win_w, &gld->win_h));
+  eo_do(ourGlobals->tb, evas_obj_size_set(gld->win_w, 25));
+  _resize(gld);
 }
 
 // Callback from Evas, also used as the general callback for deleting the GL stuff.
@@ -128,6 +140,7 @@ static void _draw_gl(Evas_Object *obj)
 {
   globals *ourGlobals = evas_object_data_get(obj, "glob");
   GLData *gld = &ourGlobals->gld;
+  if (!ourGlobals)  return;
 
   if (!gld->doneIrr)		gld->doneIrr = startIrr(gld);	// Needs to be after gld->win is shown, and needs to be done in the render thread.
 #if DO_GEARS
@@ -142,7 +155,7 @@ static void _draw_gl(Evas_Object *obj)
   drawGears(gld);
 #endif
 
-  _animate_scene(ourGlobals->scene);
+  _animate_scene(ourGlobals);
 
   drawIrr_end(gld);
 
@@ -254,17 +267,19 @@ static Evas_Object *_toolbar_menu_add(Evas_Object *win, Evas_Object *tb, char *l
     return menu;
 }
 
-static void makeMainMenu(GLData *gld)
+static void makeMainMenu(globals *ourGlobals)
 {
+    GLData *gld = &ourGlobals->gld;
     Evas_Object *menu, *tb;
     Elm_Object_Item *tb_it;
 
     // A toolbar thingy.
     tb = eo_add(ELM_OBJ_TOOLBAR_CLASS, gld->win);
+    ourGlobals->tb = tb;
     eo_do(tb,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_SCROLL),
+	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
 	evas_obj_size_set(gld->win_w, 25),
 	evas_obj_position_set(0, 0),
 	elm_obj_toolbar_align_set(0.0)
@@ -306,7 +321,6 @@ static void makeMainMenu(GLData *gld)
     tb_it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
 
     evas_object_show(tb);
-    eo_unref(tb);
 }
 
 EAPI_MAIN int elm_main(int argc, char **argv)
@@ -354,6 +368,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 #endif
 
     evas_object_smart_callback_add(gld->win, "delete,request", _on_done, gld);
+    evas_object_event_callback_add(gld->win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
 
     // Get the screen size.
     elm_win_screen_size_get(gld->win, &gld->win_x, &gld->win_y, &gld->scr_w, &gld->scr_h);
@@ -373,7 +388,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(gld->win, obj);
     eo_unref(obj);
 
-
     gld->bx = eo_add(ELM_OBJ_BOX_CLASS, gld->win);
     eo_do(gld->bx,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
@@ -384,13 +398,12 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
 //    overlay_add(gld);
     woMan_add(gld);
-    // TODO - This is what causes it to hang after quitting.  Fix it.
-//    chat_add(gld);
+    chat_add(gld);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
     // Also, GL focus gets lost when any menu is used.  sigh
-    makeMainMenu(gld);
+    makeMainMenu(&ourGlobals);
 
     // This does elm_box_pack_end(), so needs to be after the others.
     init_evas_gl(&ourGlobals);
@@ -418,8 +431,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     if (gld->win)
     {
+	Evas_3D_Demo_fini(&ourGlobals);
+	eo_unref(ourGlobals.tb);
 	eo_unref(gld->bx);
-	Evas_3D_Demo_fini();
 	evas_object_del(gld->win);
     }
 

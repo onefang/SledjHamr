@@ -7,30 +7,41 @@ void chat_add(GLData *gld)
 
     win = fang_win_add(gld);
 
-    bx = elm_box_add(win);
+    bx = eo_add(ELM_OBJ_BOX_CLASS, win);
+    eo_do(bx,
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
+	);
     elm_win_resize_object_add(win, bx);
-    evas_object_size_hint_weight_set(bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
-    en = elm_entry_add(win);
-    elm_entry_scrollable_set(en, EINA_TRUE);
-    evas_object_size_hint_weight_set(en, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(en, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    en = eo_add(ELM_OBJ_ENTRY_CLASS, win);
     elm_object_text_set(en, "History is shown here");
-    elm_entry_editable_set(en, EINA_FALSE);
-    evas_object_show(en);
+    eo_do(en,
+	elm_obj_entry_scrollable_set(EINA_TRUE),
+	elm_obj_entry_editable_set(EINA_FALSE),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_visibility_set(EINA_TRUE)
+	);
     elm_box_pack_end(bx, en);
+    eo_unref(en);
 
-    en = elm_entry_add(win);
-    elm_entry_scrollable_set(en, EINA_TRUE);
-    evas_object_size_hint_weight_set(en, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(en, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    en = eo_add(ELM_OBJ_ENTRY_CLASS, win);
     elm_object_text_set(en, "");
-    elm_entry_editable_set(en, EINA_TRUE);
-    evas_object_show(en);
+    eo_do(en,
+	elm_obj_entry_scrollable_set(EINA_TRUE),
+// TODO - Setting editable to TRUE is what hangs up extantz on exit.
+//	elm_obj_entry_editable_set(EINA_TRUE),
+	elm_obj_entry_editable_set(EINA_FALSE),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_visibility_set(EINA_TRUE)
+	);
     elm_box_pack_end(bx, en);
+    eo_unref(en);
 
     evas_object_show(bx);
+    eo_unref(bx);
 
     fang_win_complete(gld, win, 30, 500, gld->win_w / 3, gld->win_h / 3);
 }
