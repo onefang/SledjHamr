@@ -21,10 +21,12 @@ extern "C" {
 EAPI int startIrr(GLData *gld)
 {
 	SIrrlichtCreationParameters params;
+#if USE_IRR
 	IrrlichtDevice	*device;
 	IVideoDriver	*driver;
 	ISceneManager	*smgr;
 	bool additive = true;
+#endif
 
 	if (!gld->useIrr)
 	    return 1;		// Return 1 so that the caller stops asking on each frame.

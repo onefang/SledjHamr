@@ -28,5 +28,5 @@ CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'    .. lib_d    .. '\\"'
 CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"'   .. data_d   .. '\\"'
 CFLAGS = CFLAGS .. ' -DPACKAGE_LOCALE_DIR=\\"' .. locale_d .. '\\"'
 
-compileFiles('../../LuaSL', dir, {'LuaSL_main', 'LuaSL_compile', 'LuaSL_threads', 'LuaSL_utilities', 'LuaSL_lexer', 'LuaSL_lemon_yaccer'})
-compileFiles('LuaSL_test', dir, {'LuaSL_test', 'LuaSL_utilities'})
+compileFiles('../../LuaSL', dir, {'LuaSL_main', 'LuaSL_compile', 'LuaSL_threads', 'LuaSL_utilities', 'LuaSL_lexer', 'LuaSL_lemon_yaccer'}, '')
+compileFiles('LuaSL_test', dir, {'LuaSL_test', 'LuaSL_utilities'}, '')

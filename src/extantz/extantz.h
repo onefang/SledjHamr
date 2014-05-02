@@ -1,5 +1,5 @@
 #define USE_EO      0
-#define USE_PHYSICS 0
+#define USE_PHYSICS 1
 #define USE_EGL     1	// If using Evas_GL, though it might be via Elm.
 #define USE_ELM_GL  1
 #define USE_IRR     0
@@ -201,11 +201,26 @@ struct _GLData
 };
 
 
+void gears_init(GLData *gld);
+void drawGears(GLData *gld);
+void free_gear(Gear *gear);
+
+EPhysics_World *ephysicsAdd(GLData *gld);
+
 EAPI int startIrr(GLData *gld);
 EAPI void drawIrr_start(GLData *gld);
 EAPI void drawIrr_end(GLData *gld);
 EAPI void finishIrr(GLData *gld);
+
 EAPI void Evas_3D_Demo_add(globals *ourGlobals);
+
+Evas_Object *fang_win_add(GLData *gld);
+void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h);
+void overlay_add(GLData *gld);
+
+void chat_add(GLData *gld);
+void woMan_add(GLData *gld);
+
 
 #ifdef __cplusplus
 }

@@ -27,7 +27,7 @@ runCommand = function (name, dir, command)
   os.execute('cd ' .. dir .. '; ' .. command)
 end
 
-compileFiles = function (name, dir, files)
+compileFiles = function (name, dir, files, extras)
   local objects = ''
   print('\n' .. name)
   for i, v in ipairs(files) do
@@ -35,7 +35,7 @@ compileFiles = function (name, dir, files)
     os.execute('cd ' .. dir .. '; gcc ' .. CFLAGS .. ' -c -o ' .. v .. '.o ' .. v .. '.c')
     objects = objects .. ' ' .. v .. '.o'
   end
-  os.execute('cd ' .. dir .. '; gcc ' .. CFLAGS .. ' -o ' .. name .. ' ' .. objects .. ' ' .. LDFLAGS .. ' ' .. libs)
+  os.execute('cd ' .. dir .. '; gcc ' .. CFLAGS .. ' -o ' .. name .. ' ' .. objects .. ' ' .. extras .. ' ' .. LDFLAGS .. ' ' .. libs)
 end
 
 local buildSub = function (name, dir)
@@ -88,7 +88,7 @@ if 'nil' == type(args) then
   -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
   print('_______________ BUILDING lemon _______________')
   removeFiles('libraries/lemon', {'*.o', 'lemon'})
-  compileFiles('lemon', 'libraries/lemon', {'lemon'})
+  compileFiles('lemon', 'libraries/lemon', {'lemon'}, '')
   print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
   runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
