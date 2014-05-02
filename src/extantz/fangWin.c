@@ -287,12 +287,10 @@ void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h
 void overlay_add(GLData *gld)
 {
     Evas_Object *bg;
-//, *bx, *tb, *menu;
-//    Elm_Object_Item *tb_it, *menu_it;
 
-    // There many are reasons for this window.
+    // There are many reasons for this window.
     // The first is to cover the GL and provide something to click on to change focus.
-    // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through,we catch the clicks here.
+    // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through, we catch the clicks here.
     //   So we can probably avoid the following issue -
     //     How to do click through?  evas_object_pass_events_set(rectangle, EINA_TRUE), and maybe need to do that to the underlaying window to?
     //     Though if the rectangle is entirely transparent, or even hidden, events might pass through anyway.
