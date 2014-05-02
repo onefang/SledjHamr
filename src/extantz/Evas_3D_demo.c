@@ -269,13 +269,15 @@ _sphere_init(int precision)
 Eina_Bool _animate_scene(void *data)
 {
   globals *ourGlobals = data;
-
   static float angle = 0.0f;
   static float earthAngle = 0.0f;
   static int   frame = 0;
   static int   inc   = 1;
   static int   sonicFrame = 0;
-  Evas_Real x, y, z;
+  Evas_Real x, y, z, w;
+  EPhysics_Quaternion *quat   = ephysics_quaternion_new();
+  EPhysics_Quaternion *quat1  = ephysics_quaternion_new();
+  EPhysics_Quaternion *result = ephysics_quaternion_new();
 
   Scene_Data *scene = ourGlobals->scene;
 
@@ -307,11 +309,23 @@ Eina_Bool _animate_scene(void *data)
     );
 
   // Camera movement.
+  ephysics_quaternion_euler_set(quat1, ourGlobals->gld.move->r, ourGlobals->gld.move->s, ourGlobals->gld.move->t);
+  eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &x, &y, &z, &w));
+  ephysics_quaternion_set(quat, x, y, z, w);
+  ephysics_quaternion_multiply(quat, quat1, result);
+  ephysics_quaternion_normalize(result);
+  ephysics_quaternion_get(result, &x, &y, &z, &w);
+  eo_do(scene->camera_node, evas_3d_node_orientation_set(x, y, z, w));
+
   eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
-  x += ourGlobals->gld.move->x;
-  y += ourGlobals->gld.move->y;
-  z += ourGlobals->gld.move->z;
+  x -= ourGlobals->gld.move->x;
+  y -= ourGlobals->gld.move->y;
+  z -= ourGlobals->gld.move->z;
   eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
+
+  free(result);
+  free(quat1);
+  free(quat);
 
   return EINA_TRUE;
 }

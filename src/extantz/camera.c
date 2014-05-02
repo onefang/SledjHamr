@@ -16,9 +16,9 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
 	{
 	}
 	else if  (0 == strcmp(ev->key, "Left"))
-	    gld->move->y = 2.0;
+	    gld->move->r = 2.0;
 	else if  (0 == strcmp(ev->key, "Right"))
-	    gld->move->y = -2.0;
+	    gld->move->r = -2.0;
 	else if  (0 == strcmp(ev->key, "Up"))
 	    gld->move->x = 2.0;
 	else if  (0 == strcmp(ev->key, "Down"))
@@ -27,10 +27,10 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
 	    gld->move->z = -2.0;
 	else if  (0 == strcmp(ev->key, "Next"))
 	    gld->move->z = 2.0;
-//	else if  (0 == strcmp(ev->key, "Home"))
-//	    ;
-//	else if  (0 == strcmp(ev->key, "End"))
-//	    ;
+	else if  (0 == strcmp(ev->key, "Home"))
+	    gld->move->y = 2.0;
+	else if  (0 == strcmp(ev->key, "End"))
+	    gld->move->y = -2.0;
 	else if  (0 == strcmp(ev->key, "space"))
 	    gld->move->jump = 1.0;
 	else
@@ -119,9 +119,9 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
 	{
 	}
 	else if  (0 == strcmp(ev->key, "Left"))
-	    gld->move->y = 0.0;
+	    gld->move->r = 0.0;
 	else if  (0 == strcmp(ev->key, "Right"))
-	    gld->move->y = 0.0;
+	    gld->move->r = 0.0;
 	else if  (0 == strcmp(ev->key, "Up"))
 	    gld->move->x = 0.0;
 	else if  (0 == strcmp(ev->key, "Down"))
@@ -130,10 +130,10 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
 	    gld->move->z = 0.0;
 	else if  (0 == strcmp(ev->key, "Next"))
 	    gld->move->z = 0.0;
-//	else if  (0 == strcmp(ev->key, "Home"))
-//	    ;
-//	else if  (0 == strcmp(ev->key, "End"))
-//	    ;
+	else if  (0 == strcmp(ev->key, "Home"))
+	    gld->move->y = 0.0;
+	else if  (0 == strcmp(ev->key, "End"))
+	    gld->move->y = 0.0;
 	else if  (0 == strcmp(ev->key, "space"))
 	    gld->move->jump = 0.0;
 	else
