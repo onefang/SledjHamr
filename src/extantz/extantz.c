@@ -4,7 +4,6 @@
 globals ourGlobals;
 
 
-
 static void gldata_init(GLData *gld)
 {
     gld->useEGL = USE_EGL;
@@ -19,8 +18,6 @@ static void gldata_init(GLData *gld)
     gld->light[1] = 1.0;
     gld->light[2] = -5.0;
 }
-
-//-------------------------//
 
 
 
