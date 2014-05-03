@@ -161,32 +161,19 @@ typedef struct _Scene_Data
 
 } Scene_Data;
 
-// GL related data here.
+// Elm GL view related data here.
 struct _GLData
 {
-    Evas_Object	*win, *winwin;
+    Evas_Object	*winwin;
+    Evas_Object	*elmGl;
+    Evas_GL_API	*glApi;
 
-    Ecore_Evas	*ee;
-    Evas	*canvas;
-
-    Evas_Object		*elmGl;
-    Evas_GL_API		*glApi;
-
-    GLuint	program;
-    GLuint	vtx_shader;
-    GLuint	fgmt_shader;
-    int		scr_w, scr_h;	// The size of the screen.
-    int		win_w, win_h;	// The size of the window.
-    int		win_x, win_y;	// The position of the window.
     int		sfc_w, sfc_h;	// This is what Irrlicht is using, size of the GL image surface / glview.
     int		img_w, img_h;	// Size of the viewport.  DON'T reuse sfc_* here.  Despite the fact that sfc_* is only used in the init when Irricht is disabled?  WTF?
     int		useIrr : 1;
     int		doneIrr : 1;
     int		gearsInited : 1;
     int		resized : 1;
-
-    Evas_Object	*bx;//, *r1;
-    Ecore_Animator  *animator;
 
     IrrlichtDevice	*device;
     IVideoDriver	*driver;
@@ -195,7 +182,11 @@ struct _GLData
 
     cameraMove		*move;
 
-   // Gear Stuff
+#if DO_GEARS
+    GLuint	program;
+    GLuint	vtx_shader;
+    GLuint	fgmt_shader;
+
    GLfloat      view_rotx;
    GLfloat      view_roty;
    GLfloat      view_rotz;
@@ -212,15 +203,24 @@ struct _GLData
 
    GLfloat      proj[16];
    GLfloat      light[3];
+#endif
 };
 
 typedef struct _globals
 {
-  Evas		*evas;
+//  Ecore_Evas	*ee;
+  Evas	*evas;
   Evas_Object	*win;		// Our Elm window.
   Evas_Object	*tb;		// Our Elm toolbar.
+  Evas_Object	*bx;		// Our box.
   Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
+
+  int		scr_w, scr_h;	// The size of the screen.
+  int		win_w, win_h;	// The size of the window.
+  int		win_x, win_y;	// The position of the window.
+
+  Ecore_Animator  *animator;
 
   struct _GLData gld;
   Scene_Data	*scene;
@@ -233,7 +233,7 @@ void gears_init(GLData *gld);
 void drawGears(GLData *gld);
 void free_gear(Gear *gear);
 
-EPhysics_World *ephysicsAdd(GLData *gld);
+EPhysics_World *ephysicsAdd(globals *ourGlobals);
 
 EAPI int startIrr(GLData *gld);
 EAPI void drawIrr_start(GLData *gld);
@@ -246,12 +246,12 @@ void Evas_3D_Demo_fini(globals *ourGlobals);
 
 void cameraAdd(Evas_Object *win, GLData *gld);
 
-Evas_Object *fang_win_add(GLData *gld);
-void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h);
-void overlay_add(GLData *gld);
+Evas_Object *fang_win_add(globals *ourGlobals);
+void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int w, int h);
+void overlay_add(globals *ourGlobals);
 
-void chat_add(GLData *gld);
-void woMan_add(GLData *gld);
+void chat_add(globals *ourGlobals);
+void woMan_add(globals *ourGlobals);
 
 
 #ifdef __cplusplus

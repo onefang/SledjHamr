@@ -78,79 +78,81 @@ static void create_handles(Evas_Object *obj)
      }
 }
 
-Evas_Object *fang_win_add(GLData *gld)
+Evas_Object *fang_win_add(globals *ourGlobals)
 {
-    Evas_Object *win, *bg;
+  GLData *gld = &ourGlobals->gld;
+  Evas_Object *win, *bg;
 
-    // In theory this should create an EWS window, in practice, I'm not seeing any difference.
-    // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
-//    elm_config_engine_set("ews");
-    win = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
-    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
-    // According to the Elm inlined image window example, this is what's needed to.
-    evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
-    elm_win_alpha_set(win, EINA_TRUE);
+  // In theory this should create an EWS window, in practice, I'm not seeing any difference.
+  // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
+//  elm_config_engine_set("ews");
+  win = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
+  // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
+  // According to the Elm inlined image window example, this is what's needed to.
+  evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+  elm_win_alpha_set(win, EINA_TRUE);
 
-    // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
-    // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-    bg = evas_object_rectangle_add(evas_object_evas_get(win));
-    evas_object_color_set(bg, 50, 0, 100, 100);
-    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(win, bg);
-    evas_object_show(bg);
+  // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
+  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
+  bg = evas_object_rectangle_add(evas_object_evas_get(win));
+  evas_object_color_set(bg, 50, 0, 100, 100);
+  evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+  elm_win_resize_object_add(win, bg);
+  evas_object_show(bg);
 
-    return win;
+  return win;
 }
 
-void fang_win_complete(GLData *gld, Evas_Object *win, int x, int y, int w, int h)
+void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int w, int h)
 {
-    // image object for win is unlinked to its pos/size - so manual control
-    // this allows also for using map and other things with it.
-    evas_object_move(elm_win_inlined_image_object_get(win), x, y);
-    // Odd, it needs to be resized twice.  WTF?
-    evas_object_resize(win, w, h);
-    evas_object_resize(elm_win_inlined_image_object_get(win), w, h);
-    evas_object_show(win);
-    create_handles(elm_win_inlined_image_object_get(win));
+  // image object for win is unlinked to its pos/size - so manual control
+  // this allows also for using map and other things with it.
+  evas_object_move(elm_win_inlined_image_object_get(win), x, y);
+  // Odd, it needs to be resized twice.  WTF?
+  evas_object_resize(win, w, h);
+  evas_object_resize(elm_win_inlined_image_object_get(win), w, h);
+  evas_object_show(win);
+  create_handles(elm_win_inlined_image_object_get(win));
 }
 
-void overlay_add(GLData *gld)
+void overlay_add(globals *ourGlobals)
 {
-    Evas_Object *bg;
+  GLData *gld = &ourGlobals->gld;
+  Evas_Object *bg;
 
-    // There are many reasons for this window.
-    // The first is to cover the GL and provide something to click on to change focus.
-    // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through, we catch the clicks here.
-    //   So we can probably avoid the following issue -
-    //     How to do click through?  evas_object_pass_events_set(rectangle, EINA_TRUE), and maybe need to do that to the underlaying window to?
-    //     Though if the rectangle is entirely transparent, or even hidden, events might pass through anyway.
-    //   Gotta have click through on the parts where there's no other window.
-    // The third is to have the other windows live here.
-    //   This idea doesn't work, as it breaks the damn focus again.
-    //   Don't think it's needed anyway.
-    // While on the subject of layers, need a HUD layer of some sort, but Irrlicht might support that itself.
+  // There are many reasons for this window.
+  // The first is to cover the GL and provide something to click on to change focus.
+  // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through, we catch the clicks here.
+  //   So we can probably avoid the following issue -
+  //     How to do click through?  evas_object_pass_events_set(rectangle, EINA_TRUE), and maybe need to do that to the underlaying window to?
+  //     Though if the rectangle is entirely transparent, or even hidden, events might pass through anyway.
+  //   Gotta have click through on the parts where there's no other window.
+  // The third is to have the other windows live here.
+  //   This idea doesn't work, as it breaks the damn focus again.
+  //   Don't think it's needed anyway.
+  // While on the subject of layers, need a HUD layer of some sort, but Irrlicht might support that itself.
 
-    gld->winwin = elm_win_add(gld->win, "inlined", ELM_WIN_INLINED_IMAGE);
-    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
-    // According to the Elm inlined image window example, this is what's needed to.
-    evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
-    // In this code, we are making our own camera, so grab it's input when we are focused.
-    cameraAdd(gld->winwin, gld);
+  gld->winwin = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
+  // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
+  // According to the Elm inlined image window example, this is what's needed to.
+  evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+  // In this code, we are making our own camera, so grab it's input when we are focused.
+  cameraAdd(gld->winwin, gld);
 
-    elm_win_alpha_set(gld->winwin, EINA_TRUE);
-    // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
-    // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-    bg = evas_object_rectangle_add(evas_object_evas_get(gld->winwin));
-    evas_object_color_set(bg, 0, 0, 0, 0);
-    evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(gld->winwin, bg);
-    evas_object_show(bg);
+  elm_win_alpha_set(gld->winwin, EINA_TRUE);
+  // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
+  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
+  bg = evas_object_rectangle_add(evas_object_evas_get(gld->winwin));
+  evas_object_color_set(bg, 0, 0, 0, 0);
+  evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+  elm_win_resize_object_add(gld->winwin, bg);
+  evas_object_show(bg);
 
-    // image object for win is unlinked to its pos/size - so manual control
-    // this allows also for using map and other things with it.
-    evas_object_move(elm_win_inlined_image_object_get(gld->winwin), 0, 0);
-    // Odd, it needs to be resized twice.  WTF?
-    evas_object_resize(gld->winwin, gld->win_w, gld->win_h);
-    evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), gld->win_w, gld->win_h);
-    evas_object_show(gld->winwin);
+  // image object for win is unlinked to its pos/size - so manual control
+  // this allows also for using map and other things with it.
+  evas_object_move(elm_win_inlined_image_object_get(gld->winwin), 0, 0);
+  // Odd, it needs to be resized twice.  WTF?
+  evas_object_resize(gld->winwin, ourGlobals->win_w, ourGlobals->win_h);
+  evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), ourGlobals->win_w, ourGlobals->win_h);
+  evas_object_show(gld->winwin);
 }
