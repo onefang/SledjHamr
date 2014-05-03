@@ -7,8 +7,6 @@
 
 EPhysics_World *ephysicsAdd(globals *ourGlobals)
 {
-//  GLData *gld = &ourGlobals->gld;
-
   EPhysics_Body *boundary;
   EPhysics_World *world;
   EPhysics_Body *box_body1, *box_body2;

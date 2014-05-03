@@ -214,7 +214,6 @@ void woMan_add(globals *ourGlobals)
 	    thisGrid->loginURI		= gridTest[i][1];
 	    thisGrid->splashPage 	= gridTest[i][2];
 	    thisGrid->icon		= "folder";
-//	    thisGrid->gld		= gld;
 	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
 	    eina_hash_add(grids, thisGrid->name, thisGrid);
 	}
