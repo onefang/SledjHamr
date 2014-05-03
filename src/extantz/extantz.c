@@ -452,3 +452,57 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     return 0;
 }
 ELM_MAIN()
+
+
+
+/*  CALLBACK types
+
+void edje_object_signal_callback_add(Evas_Object *obj, const char *emission, const char *source, Edje_Signal_Cb func, void *data)
+    typedef void(* Edje_Signal_Cb)(void *data, Evas_Object *obj, const char *emission, const char *source)
+    called for signals sent from edje that match emission and source
+
+void evas_object_event_callback_add(Evas_Object *obj, Evas_Callback_Type type, Evas_Object_Event_Cb func, const void *data)
+    typedef void(* 	Evas_Object_Event_Cb )(void *data, Evas *e, Evas_Object *obj, void *event_info)
+    no propogation
+
+void evas_object_smart_callback_add(Evas_Object *obj, const char *event, Evas_Smart_Cb func, const void *data)
+    typedef void(* 	Evas_Smart_Cb )(void *data, Evas_Object *obj, void *event_info)
+    smart events on smart objects
+
+void elm_object_signal_callback_add(Evas_Object *obj, const char *emission, const char *source, Edje_Signal_Cb func, void *data)
+    typedef void(* Edje_Signal_Cb)(void *data, Evas_Object *obj, const char *emission, const char *source)
+    called for signals sent from obj that match emission and source
+
+void elm_object_event_callback_add(Evos_Object *, Elm_Event_Cb, void *)
+  typedef Eina_Bool(* Elm_Event_Cb)(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
+  called for all input events
+  Key up / down / mouse wheel events on a Elm widget
+  propogate up through parents
+    any focusable widget with this callback can deal with it
+    and tell Elm to stop propagating the event.
+
+BUUUTT....
+
+There's also specific callbacks that don't follow the above.
+
+static void _resize_gl(Evas_Object *obj)
+static void _draw_gl(Evas_Object *obj)
+
+    elm_glview_resize_func_set(gld->elmGl, _resize_gl);
+    elm_glview_render_func_set(gld->elmGl, (Elm_GLView_Func_Cb) _draw_gl);
+
+And others no doubt.
+
+ALSOOOO....
+
+Ecore events.  lol
+
+
+BTW.....
+
+Elm has C&P / DND, but it's very limited.  So far only does Unix X text (plain, markup, html), images, and vcards.
+Might as well imlpement it myself.
+On the other hand, image is all I really need to fake it.
+elm_cnp.h seems to be the only docs, not actually linked to the rest of Elm docs.
+
+*/
