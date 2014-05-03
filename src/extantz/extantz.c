@@ -330,6 +330,15 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     char buf[PATH_MAX];
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
+    /* Set the locale according to the system pref.
+     * If you don't do so the file selector will order the files list in
+     * a case sensitive manner
+     */
+    setlocale(LC_ALL, "");
+
+    elm_need_ethumb();
+    elm_need_efreet();
+
     HamrTime(elm_main, "extantz");
     fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
     fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
@@ -403,6 +412,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //    overlay_add(&ourGlobals);
     woMan_add(&ourGlobals);
     chat_add(&ourGlobals);
+    files_add(&ourGlobals);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?

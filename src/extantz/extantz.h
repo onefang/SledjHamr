@@ -251,6 +251,7 @@ void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int 
 void overlay_add(globals *ourGlobals);
 
 void chat_add(globals *ourGlobals);
+void files_add(globals *ourGlobals);
 void woMan_add(globals *ourGlobals);
 
 
