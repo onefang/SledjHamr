@@ -139,13 +139,13 @@ static Evas_Object *_viewer_content_get(void *data, Evas_Object *obj, const char
 
 static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 {
-//    ezGrid *thisGrid = data;
-//    GLData *gld = thisGrid->gld;
-//    char buf[PATH_MAX];
+  globals *ourGlobals = evas_object_data_get(obj, "glob");
+  ezGrid *thisGrid = data;
+  char buf[PATH_MAX];
 
-//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s &", gld->win_w - (gld->win_w / 5), gld->win_h - 30, gld->win_w / 5, gld->win_y, thisGrid->splashPage);
-//    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", gld->win_w - (gld->win_w / 5), gld->win_h - 30, gld->win_w / 5, gld->win_y, thisGrid->splashPage);
-//    printf("%s   ### genlist obj [%p], item pointer [%p]\n", buf, obj, event_info);
+//    sprintf(buf, "dillo -f -g '%dx%d+%d+%d' %s &", gld->win_w - (ourGlobals->win_w / 5), ourGlobals->win_h - 30, ourGlobals->win_w / 5, ourGlobals->win_y, thisGrid->splashPage);
+    sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", ourGlobals->win_w - (ourGlobals->win_w / 5), ourGlobals->win_h - 30, ourGlobals->win_w / 5, ourGlobals->win_y, thisGrid->splashPage);
+    printf("%s   ### genlist obj [%p], item pointer [%p]\n", buf, obj, event_info);
 // comment this out for now, busy dealing with input stuff, don't want to trigger this multiple times.
 //    system(buf);
 }
@@ -153,7 +153,6 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 
 void woMan_add(globals *ourGlobals)
 {
-  GLData *gld = &ourGlobals->gld;
 //    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Evas_Object *win, *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
@@ -195,6 +194,7 @@ void woMan_add(globals *ourGlobals)
 
     gridList = elm_genlist_add(win);
     grids = eina_hash_stringshared_new(free);
+    evas_object_data_set(gridList, "glob", ourGlobals);
 
     grid_gic = elm_genlist_item_class_new();
     grid_gic->item_style = "double_label";
@@ -214,7 +214,7 @@ void woMan_add(globals *ourGlobals)
 	    thisGrid->loginURI		= gridTest[i][1];
 	    thisGrid->splashPage 	= gridTest[i][2];
 	    thisGrid->icon		= "folder";
-	    thisGrid->gld		= gld;
+//	    thisGrid->gld		= gld;
 	    thisGrid->item = elm_genlist_item_append(gridList, grid_gic, thisGrid, NULL, ELM_GENLIST_ITEM_TREE, _grid_sel_cb, thisGrid);
 	    eina_hash_add(grids, thisGrid->name, thisGrid);
 	}

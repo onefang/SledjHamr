@@ -6,7 +6,6 @@
 // Evas style event callback.
 static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-//    GLData *gld = data;
     Evas_Event_Mouse_Down *ev = event_info;
 
     if (1 == ev->button)
@@ -80,7 +79,6 @@ static void create_handles(Evas_Object *obj)
 
 Evas_Object *fang_win_add(globals *ourGlobals)
 {
-  GLData *gld = &ourGlobals->gld;
   Evas_Object *win, *bg;
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
@@ -89,7 +87,7 @@ Evas_Object *fang_win_add(globals *ourGlobals)
   win = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
   // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
   // According to the Elm inlined image window example, this is what's needed to.
-  evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+  evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
   elm_win_alpha_set(win, EINA_TRUE);
 
   // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
@@ -135,9 +133,9 @@ void overlay_add(globals *ourGlobals)
   gld->winwin = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
   // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
   // According to the Elm inlined image window example, this is what's needed to.
-  evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, gld);
+  evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
   // In this code, we are making our own camera, so grab it's input when we are focused.
-  cameraAdd(gld->winwin, gld);
+  cameraAdd(ourGlobals, gld->winwin);
 
   elm_win_alpha_set(gld->winwin, EINA_TRUE);
   // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.

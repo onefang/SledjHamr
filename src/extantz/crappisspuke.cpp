@@ -18,8 +18,9 @@ u32 then;
 extern "C" {
 #endif
 
-EAPI int startIrr(GLData *gld)
+EAPI int startIrr(globals *ourGlobals)
 {
+	GLData *gld = &ourGlobals->gld;
 	SIrrlichtCreationParameters params;
 #if USE_IRR
 	IrrlichtDevice	*device;
@@ -92,7 +93,7 @@ etc. of course.
 */
 
 
-	sfc     = ecore_evas_window_get(gld->ee);
+	sfc     = ecore_evas_window_get(ourGlobals->ee);
 	// This is the way Raster wants me to do things, but these functions are not actually available.  Pffft
 //	ctx     = gl->glGetCurrentContext();
 //	display = gl->glGetCurrentDisplay();
@@ -229,8 +230,9 @@ etc. of course.
     return 1;
 }
 
-EAPI void drawIrr_start(GLData *gld)
+EAPI void drawIrr_start(globals *ourGlobals)
 {
+    GLData *gld = &ourGlobals->gld;
     if (gld->useIrr)
     {
 	IrrlichtDevice	*device = gld->device;
@@ -267,16 +269,18 @@ EAPI void drawIrr_start(GLData *gld)
     }
 }
 
-EAPI void drawIrr_end(GLData *gld)
+EAPI void drawIrr_end(globals *ourGlobals)
 {
+    GLData *gld = &ourGlobals->gld;
     IVideoDriver	*driver = gld->driver;
 
     if (gld->useIrr)
 	driver->endScene();
 }
 
-EAPI void finishIrr(GLData *gld)
+EAPI void finishIrr(globals *ourGlobals)
 {
+    GLData *gld = &ourGlobals->gld;
     IrrlichtDevice	*device = gld->device;
 
     /*

@@ -1,6 +1,6 @@
 #define USE_PHYSICS 1
 #define USE_IRR     0
-#define USE_DEMO    1
+#define USE_DEMO    0
 #define DO_GEARS    0
 
 
@@ -57,9 +57,14 @@ typedef struct ICameraSceneNode ICameraSceneNode;
 #endif
 
 
-
-typedef struct _Gear Gear;
-typedef struct _GLData GLData;
+#if DO_GEARS
+typedef struct _Gear
+{
+   GLfloat *vertices;
+   GLuint vbo;
+   int count;
+} Gear;
+#endif
 
 typedef enum
 {
@@ -98,7 +103,6 @@ typedef struct
     ezPlatform	platform;
     ezViewer	*viewer;
     Elm_Object_Item *item;
-GLData	*gld;		// Just a temporary evil hack to pass gld to _grid_sel_cb().
 } ezGrid;
 
 typedef struct
@@ -118,16 +122,6 @@ typedef struct
     char	*screenshot;
     short	x, y, z;
 } ezLandmark;
-
-
-
-struct _Gear
-{
-   GLfloat *vertices;
-   GLuint vbo;
-   int count;
-};
-
 
 
 typedef struct _Scene_Data
@@ -162,7 +156,7 @@ typedef struct _Scene_Data
 } Scene_Data;
 
 // Elm GL view related data here.
-struct _GLData
+typedef struct _GLData
 {
     Evas_Object	*winwin;
     Evas_Object	*elmGl;
@@ -204,11 +198,13 @@ struct _GLData
    GLfloat      proj[16];
    GLfloat      light[3];
 #endif
-};
+} GLData;
 
 typedef struct _globals
 {
-//  Ecore_Evas	*ee;
+#if USE_IRR
+  Ecore_Evas	*ee;
+#endif
   Evas	*evas;
   Evas_Object	*win;		// Our Elm window.
   Evas_Object	*tb;		// Our Elm toolbar.
@@ -222,29 +218,33 @@ typedef struct _globals
 
   Ecore_Animator  *animator;
 
-  struct _GLData gld;
+  GLData gld;
   Scene_Data	*scene;
 } globals;
 
 extern globals ourGlobals;
 
 
+#if DO_GEARS
 void gears_init(GLData *gld);
 void drawGears(GLData *gld);
 void free_gear(Gear *gear);
+#endif
 
 EPhysics_World *ephysicsAdd(globals *ourGlobals);
 
-EAPI int startIrr(GLData *gld);
-EAPI void drawIrr_start(GLData *gld);
-EAPI void drawIrr_end(GLData *gld);
-EAPI void finishIrr(GLData *gld);
+#if USE_IRR
+EAPI int startIrr(globals *ourGlobals);
+EAPI void drawIrr_start(globals *ourGlobals);
+EAPI void drawIrr_end(globals *ourGlobals);
+EAPI void finishIrr(globals *ourGlobals);
+#endif
 
 EAPI void Evas_3D_Demo_add(globals *ourGlobals);
-Eina_Bool _animate_scene(void *data);
+Eina_Bool _animate_scene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
-void cameraAdd(Evas_Object *win, GLData *gld);
+void cameraAdd(globals *ourGlobals, Evas_Object *win);
 
 Evas_Object *fang_win_add(globals *ourGlobals);
 void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int w, int h);
@@ -257,4 +257,3 @@ void woMan_add(globals *ourGlobals);
 #ifdef __cplusplus
 }
 #endif
-

@@ -266,9 +266,8 @@ _sphere_init(int precision)
 }
 
 
-Eina_Bool _animate_scene(void *data)
+Eina_Bool _animate_scene(globals *ourGlobals)
 {
-  globals *ourGlobals = data;
   static float angle = 0.0f;
   static float earthAngle = 0.0f;
   static int   frame = 0;
@@ -703,12 +702,10 @@ void Evas_3D_Demo_add(globals *ourGlobals)
     // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
     evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
-    cameraAdd(obj, &ourGlobals->gld);
+    cameraAdd(ourGlobals, obj);
     elm_win_resize_object_add(ourGlobals->win, obj);
 //    elm_box_pack_end(ourGlobals->gld.bx, obj);
 
-    // Add animation timer callback.
-//    ecore_timer_add(0.016, _animate_scene, &ourScene);
     ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
 }
 

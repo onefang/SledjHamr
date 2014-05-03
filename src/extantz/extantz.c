@@ -89,7 +89,6 @@ static void _on_resize(void *data, Evas *evas, Evas_Object *obj, void *event_inf
 static void _clean_gl(void *data, Evas *e EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
   globals *ourGlobals = data;
-  GLData *gld = &ourGlobals->gld;
 
   ecore_animator_del(ourGlobals->animator);
 
@@ -97,7 +96,9 @@ static void _clean_gl(void *data, Evas *e EINA_UNUSED, Evas_Object *obj EINA_UNU
 //    evas_gl_make_current(NULL, NULL, NULL);
 
   // TODO - Since this is created on the render thread, better hope this is being deleted on the render thread.
-  finishIrr(gld);
+#if USE_IRR
+  finishIrr(ourGlobals);
+#endif
 
 #if DO_GEARS
   Evas_GL_API *gl = gld->glApi;
@@ -141,14 +142,19 @@ static void _draw_gl(Evas_Object *obj)
   GLData *gld = &ourGlobals->gld;
   if (!ourGlobals)  return;
 
-  if (!gld->doneIrr)		gld->doneIrr = startIrr(gld);	// Needs to be after gld->win is shown, and needs to be done in the render thread.
+#if USE_IRR
+  if (!gld->doneIrr)		gld->doneIrr = startIrr(ourGlobals);	// Needs to be after gld->win is shown, and needs to be done in the render thread.
+#endif
+
 #if DO_GEARS
   if (!gld->gearsInited)	gears_init(gld);
 #endif
 
 //  if (gld->resized)		_resize(gld);
 
-  drawIrr_start(gld);
+#if USE_IRR
+  drawIrr_start(ourGlobals);
+#endif
 
 #if DO_GEARS
   drawGears(gld);
@@ -156,7 +162,9 @@ static void _draw_gl(Evas_Object *obj)
 
   _animate_scene(ourGlobals);
 
-  drawIrr_end(gld);
+#if USE_IRR
+  drawIrr_end(ourGlobals);
+#endif
 
 #if USE_IRR
 #else
@@ -349,12 +357,14 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
-  // TODO, or not TODO - I keep getting rid of these, but keep bringing them back.  Leave ee commented for now.
+  // TODO, or not TODO - I keep getting rid of these, but keep bringing them back.
   // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
   ourGlobals.evas = evas_object_evas_get(ourGlobals.win);
   // An Ecore_Evas holds an Evas.
   // Get the Ecore_Evas that wraps an Evas.
-  //ourGlobals.ee = ecore_evas_ecore_evas_get(ourGlobals.evas);	// Only use this on Evas that was created with Ecore_Evas.
+#if USE_IRR
+  ourGlobals.ee = ecore_evas_ecore_evas_get(ourGlobals.evas);	// Only use this on Evas that was created with Ecore_Evas.
+#endif
 
 #if USE_PHYSICS
     if (!ephysics_init())

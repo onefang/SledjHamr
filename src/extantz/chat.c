@@ -1,6 +1,5 @@
 #include "extantz.h"
 
-
 void chat_add(globals *ourGlobals)
 {
   Evas_Object *win, *bx, *en;
@@ -8,10 +7,10 @@ void chat_add(globals *ourGlobals)
   win = fang_win_add(ourGlobals);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, win);
-  eo_do(bx,
+    eo_do(bx,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
-    );
+       );
   elm_win_resize_object_add(win, bx);
 
   en = eo_add(ELM_OBJ_ENTRY_CLASS, win);
@@ -22,7 +21,7 @@ void chat_add(globals *ourGlobals)
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     evas_obj_visibility_set(EINA_TRUE)
-    );
+       );
   elm_box_pack_end(bx, en);
   eo_unref(en);
 
@@ -31,12 +30,12 @@ void chat_add(globals *ourGlobals)
   eo_do(en,
     elm_obj_entry_scrollable_set(EINA_TRUE),
 // TODO - Setting editable to TRUE is what hangs up extantz on exit.
-//	elm_obj_entry_editable_set(EINA_TRUE),
+// elm_obj_entry_editable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_FALSE),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     evas_obj_visibility_set(EINA_TRUE)
-    );
+       );
   elm_box_pack_end(bx, en);
   eo_unref(en);
 
