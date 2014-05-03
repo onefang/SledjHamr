@@ -228,6 +228,7 @@ static int widget(lua_State *L)
 
     elm_object_part_text_set(wid->obj, NULL, wid->label);
     eo_do(wid->obj,
+//	elm_obj_widget_part_text_set(NULL, wid->label),
 	evas_obj_size_set(w, h),
 	evas_obj_position_set(x, y),
 	evas_obj_visibility_set(EINA_TRUE),
