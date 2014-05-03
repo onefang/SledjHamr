@@ -5,7 +5,7 @@
 #define __C_DEMO_H_INCLUDED__
 
 #ifdef _IRR_WINDOWS_
-#include <windows.h>
+  #include <windows.h>
 #endif
 
 const int CAMERA_COUNT = 7;
@@ -14,50 +14,49 @@ class CDemo : public IEventReceiver
 {
 public:
 
-	CDemo(GLData *gld, bool additive);
+  CDemo(GLData *gld, bool additive);
 
-	~CDemo();
+  ~CDemo();
 
-	void setup(GLData *gld);
-	void preDraw(GLData *gld, u32 now);
+  void setup(GLData *gld);
+  void preDraw(GLData *gld, u32 now);
 
-	virtual bool OnEvent(const SEvent& event);
+  virtual bool OnEvent(const SEvent& event);
 
 private:
 
-	void createLoadingScreen();
-	void loadSceneData();
-	void switchToNextScene(GLData *gld);
-	void shoot();
-	void createParticleImpacts();
+  void createLoadingScreen();
+  void loadSceneData();
+  void switchToNextScene(GLData *gld);
+  void shoot();
+  void createParticleImpacts();
 
-	bool additive;
-	IrrlichtDevice *device;
+  bool		 additive;
+  IrrlichtDevice *device;
 
-	struct SParticleImpact
-	{
-		u32 when;
-		core::vector3df pos;
-		core::vector3df outVector;
-	};
+  struct SParticleImpact
+  {
+    u32		    when;
+    core::vector3df pos;
+    core::vector3df outVector;
+  };
 
-	int currentScene;
+  int currentScene;
 
-	scene::IQ3LevelMesh* quakeLevelMesh;
-	scene::ISceneNode* quakeLevelNode;
-	scene::ISceneNode* skyboxNode;
-	scene::IAnimatedMeshSceneNode* model1;
-	scene::IAnimatedMeshSceneNode* model2;
-	scene::IParticleSystemSceneNode* campFire;
+  scene::IQ3LevelMesh		  *quakeLevelMesh;
+  scene::ISceneNode		  *quakeLevelNode;
+  scene::ISceneNode		  *skyboxNode;
+  scene::IAnimatedMeshSceneNode	  *model1;
+  scene::IAnimatedMeshSceneNode	  *model2;
+  scene::IParticleSystemSceneNode *campFire;
 
-	scene::IMetaTriangleSelector* metaSelector;
-	scene::ITriangleSelector* mapSelector;
+  scene::IMetaTriangleSelector *metaSelector;
+  scene::ITriangleSelector     *mapSelector;
 
-	s32 sceneStartTime;
-	s32 timeForThisScene;
+  s32 sceneStartTime;
+  s32 timeForThisScene;
 
-	core::array<SParticleImpact> Impacts;
+  core::array<SParticleImpact> Impacts;
 };
 
-#endif
-
+#endif // ifndef __C_DEMO_H_INCLUDED__
