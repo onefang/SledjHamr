@@ -20,4 +20,4 @@ typedef struct _globals
 } globals;
 
 
-void GuiLuaDo(int argc, char **argv);
+void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop);

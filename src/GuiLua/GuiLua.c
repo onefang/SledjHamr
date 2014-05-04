@@ -178,6 +178,7 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   }
 }
 
+// TODO - skang.thingasm() should pass us the winFang pointer it has as the parent module.
 static int widget(lua_State *L)
 {
   globals *ourGlobals;
@@ -223,18 +224,13 @@ static int widget(lua_State *L)
 
 static int action(lua_State *L)
 {
-  globals *ourGlobals;
   Widget *wid = lua_touserdata(L, 1);
   char *action = "nada";
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
 
   pull_lua(L, 2, "$", &action);
   if (wid && strcmp(wid->magic, "Widget") == 0)
   {
-    PD("Setting action %s", action);
+printf(">>>>>>>>>> Setting action : %s\n", action);
     wid->action = strdup(action);
   }
   return 0;
@@ -303,10 +299,7 @@ static int closeWindow(lua_State *L)
   ourGlobals = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-  if (ourGlobals->win)
-  {
-    winFangDel(ourGlobals->win);
-  }
+  winFangDel(ourGlobals->win);
 
   if (ourGlobals->logDom >= 0)
   {
@@ -386,7 +379,7 @@ int luaopen_GuiLua(lua_State *L)
 }
 
 
-void GuiLuaDo(int argc, char **argv)
+void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
 {
   lua_State  *L;
   lua_Number  i;
@@ -416,12 +409,15 @@ void GuiLuaDo(int argc, char **argv)
     lua_setfield(L, LUA_GLOBALSINDEX, SKANG);
 
 
-    // Run the main loop via a Lua call.
-    // This does nothing if no module opened a window.
-    if (0 != luaL_dostring(L, "skang.loopWindow()"))
-      PEm("Error running - skang.loopWindow()");
-    lua_pop(L, closeWindow(L));
-    lua_close(L);
+    if (mainloop)
+    {
+      // Run the main loop via a Lua call.
+      // This does nothing if no module opened a window.
+      if (0 != luaL_dostring(L, "skang.loopWindow()"))
+        PEm("Error running - skang.loopWindow()");
+      lua_pop(L, closeWindow(L));
+      lua_close(L);
+    }
   }
   else
     fprintf(stderr, "Failed to start Lua!\n");
