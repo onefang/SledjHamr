@@ -670,13 +670,13 @@ void Evas_3D_Demo_add(globals *ourGlobals)
     evas_obj_visibility_set(EINA_TRUE),
     temp = elm_obj_image_object_get()
   );
+  elm_object_tooltip_text_set(obj, "");
+  elm_object_tooltip_hide(obj);
   ourScene.image = obj;
 
   eo_do(temp,
     evas_obj_image_scene_set(ourScene.scene)
   );
-  elm_object_tooltip_text_set(obj, "");
-  elm_object_tooltip_hide(obj);
   // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
