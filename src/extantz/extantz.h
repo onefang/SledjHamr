@@ -123,6 +123,27 @@ typedef struct
     short	x, y, z;
 } ezLandmark;
 
+typedef struct _fangWin
+{
+  Evas_Object	*win;
+  Eina_Clist	widgets;
+  void		*data;
+  Evas_Smart_Cb on_del;
+} fangWin;
+
+typedef struct _Widget
+{
+  char		magic[8];
+  Evas_Object	*obj;
+  Eina_Clist	node;
+  char		*label, *look, *action, *help;
+  // foreground / background colour
+  // thing
+  // types {}
+  // skangCoord x, y, w, h
+  void		*data;
+  Evas_Smart_Cb on_del;
+} Widget;
 
 typedef struct _Scene_Data
 {
@@ -246,13 +267,15 @@ void Evas_3D_Demo_fini(globals *ourGlobals);
 
 void cameraAdd(globals *ourGlobals, Evas_Object *win);
 
-Evas_Object *fang_win_add(globals *ourGlobals);
-void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int w, int h);
+fangWin *fang_win_add(globals *ourGlobals);
+void fang_win_complete(globals *ourGlobals, fangWin *win, int x, int y, int w, int h);
+void fang_win_del(globals *ourGlobals, fangWin *win);
 void overlay_add(globals *ourGlobals);
+Widget *widgetAdd(fangWin *win);
 
-void chat_add(globals *ourGlobals);
-void files_add(globals *ourGlobals);
-void woMan_add(globals *ourGlobals);
+fangWin *chat_add(globals *ourGlobals);
+fangWin *files_add(globals *ourGlobals);
+fangWin *woMan_add(globals *ourGlobals);
 
 
 #ifdef __cplusplus

@@ -151,23 +151,23 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 
-void woMan_add(globals *ourGlobals)
+fangWin *woMan_add(globals *ourGlobals)
 {
-//    Evas_Object *win, *bg, *bx, *ic, *bb, *av, *en, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
-    Evas_Object *win, *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
+    fangWin *me;
+    Evas_Object *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
     char buf[PATH_MAX];
     int i;
 
-    win = fang_win_add(ourGlobals);
+    me = fang_win_add(ourGlobals);
 
-    bx = elm_box_add(win);
-    elm_win_resize_object_add(win, bx);
+    bx = elm_box_add(me->win);
+    elm_win_resize_object_add(me->win, bx);
     evas_object_size_hint_weight_set(bx, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
     // A tab thingy.
-    tb = elm_toolbar_add(win);
+    tb = elm_toolbar_add(me->win);
     evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
     elm_toolbar_shrink_mode_set(tb, ELM_TOOLBAR_SHRINK_SCROLL);
@@ -177,7 +177,7 @@ void woMan_add(globals *ourGlobals)
     elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
     // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
     elm_toolbar_item_priority_set(tb_it, 9999);
-    elm_toolbar_menu_parent_set(tb, win);
+    elm_toolbar_menu_parent_set(tb, me->win);
     menu = elm_toolbar_item_menu_get(tb_it);
 
     menu_it = elm_menu_item_add(menu, NULL, NULL, "edit", NULL, NULL);
@@ -192,7 +192,7 @@ void woMan_add(globals *ourGlobals)
     elm_box_pack_end(bx, tb);
     evas_object_show(tb);
 
-    gridList = elm_genlist_add(win);
+    gridList = elm_genlist_add(me->win);
     grids = eina_hash_stringshared_new(free);
     evas_object_data_set(gridList, "glob", ourGlobals);
 
@@ -241,7 +241,7 @@ void woMan_add(globals *ourGlobals)
     }
 
     // Viewers stuff
-    viewerList = elm_genlist_add(win);
+    viewerList = elm_genlist_add(me->win);
     viewer_gic = elm_genlist_item_class_new();
     viewer_gic->item_style = "double_label";
     viewer_gic->func.text_get = _viewer_label_get;
@@ -263,18 +263,18 @@ void woMan_add(globals *ourGlobals)
     }
 
     // Toolbar pages
-    nf = elm_naviframe_add(win);
+    nf = elm_naviframe_add(me->win);
     evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
     evas_object_show(nf);
 
     sprintf(buf, "%s/%s", elm_app_data_dir_get(), img3);
     tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
-    tab = _content_image_new(win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
+    tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_box_pack_end(bx, nf);
 
-    bt = eo_add(ELM_OBJ_BUTTON_CLASS, win);
+    bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
     eo_do(bt, 
 //		evas_obj_text_set("Login"),
@@ -287,5 +287,6 @@ void woMan_add(globals *ourGlobals)
     eo_unref(bt);
     evas_object_show(bx);
 
-    fang_win_complete(ourGlobals, win, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
+    fang_win_complete(ourGlobals, me, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
+    return me;
 }

@@ -153,19 +153,20 @@ static Eina_Bool _edje_filter(const char *path, Eina_Bool dir, void *data EINA_U
    return EINA_FALSE;
 }
 
-void files_add(globals *ourGlobals)
+fangWin *files_add(globals *ourGlobals)
 {
-  Evas_Object *win, *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
+  fangWin *me;
+  Evas_Object *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
-  win = fang_win_add(ourGlobals);
+  me = fang_win_add(ourGlobals);
 
-  bx = eo_add(ELM_OBJ_BOX_CLASS, win);
+  bx = eo_add(ELM_OBJ_BOX_CLASS, me->win);
   eo_do(bx,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
-  elm_win_resize_object_add(win, bx);
+  elm_win_resize_object_add(me->win, bx);
 
   fs = eo_add(ELM_OBJ_FILESELECTOR_CLASS, bx);
   eo_do(fs,
@@ -198,7 +199,7 @@ void files_add(globals *ourGlobals)
 
   eo_unref(fs);
 
-  vbox = eo_add(ELM_OBJ_BOX_CLASS, win);
+  vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win);
   eo_do(vbox,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     elm_obj_box_horizontal_set(EINA_TRUE),
@@ -236,7 +237,7 @@ void files_add(globals *ourGlobals)
 
 
    hoversel = elm_hoversel_add(vbox);
-   elm_hoversel_hover_parent_set(hoversel, win);
+   elm_hoversel_hover_parent_set(hoversel, me->win);
    evas_object_data_set(hoversel, "fileselector", fs);
    elm_object_text_set(hoversel, "sorting");
 
@@ -253,7 +254,7 @@ void files_add(globals *ourGlobals)
    evas_object_show(hoversel);
 
    hoversel = elm_hoversel_add(vbox);
-   elm_hoversel_hover_parent_set(hoversel, win);
+   elm_hoversel_hover_parent_set(hoversel, me->win);
    evas_object_data_set(hoversel, "fileselector", fs);
    elm_object_text_set(hoversel, "size");
 
@@ -270,5 +271,6 @@ void files_add(globals *ourGlobals)
   evas_object_show(bx);
   eo_unref(bx);
 
-  fang_win_complete(ourGlobals, win, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
+  fang_win_complete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
+  return me;
 }

@@ -327,6 +327,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     Evas_Object *obj;
     EPhysics_World *world;
     GLData *gld = NULL;
+    fangWin *chat = NULL, *files = NULL, *woMan = NULL;
     char buf[PATH_MAX];
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
@@ -410,9 +411,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(ourGlobals.win, ourGlobals.bx);
 
 //    overlay_add(&ourGlobals);
-    woMan_add(&ourGlobals);
-    chat_add(&ourGlobals);
-    files_add(&ourGlobals);
+    woMan = woMan_add(&ourGlobals);
+    chat = chat_add(&ourGlobals);
+//    files = files_add(&ourGlobals);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
@@ -447,6 +448,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     {
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
+	fang_win_del(&ourGlobals, woMan);
+	fang_win_del(&ourGlobals, chat);
+	fang_win_del(&ourGlobals, files);
 	eo_unref(ourGlobals.bx);
 	evas_object_del(ourGlobals.win);
     }

@@ -1,7 +1,6 @@
 #include "extantz.h"
 
 
-
 // Elm inlined image windows needs this to change focus on mouse click.
 // Evas style event callback.
 static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -77,40 +76,60 @@ static void create_handles(Evas_Object *obj)
      }
 }
 
-Evas_Object *fang_win_add(globals *ourGlobals)
+fangWin *fang_win_add(globals *ourGlobals)
 {
-  Evas_Object *win, *bg;
+  fangWin *result;
+  Evas_Object *bg;
+
+  result = calloc(1, sizeof(fangWin));
+  eina_clist_init(&result->widgets);
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
   // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
 //  elm_config_engine_set("ews");
-  win = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
+  result->win = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
   // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
   // According to the Elm inlined image window example, this is what's needed to.
-  evas_object_event_callback_add(elm_win_inlined_image_object_get(win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
-  elm_win_alpha_set(win, EINA_TRUE);
+  evas_object_event_callback_add(elm_win_inlined_image_object_get(result->win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
+  elm_win_alpha_set(result->win, EINA_TRUE);
 
   // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
   // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-  bg = evas_object_rectangle_add(evas_object_evas_get(win));
+  bg = evas_object_rectangle_add(evas_object_evas_get(result->win));
   evas_object_color_set(bg, 50, 0, 100, 100);
   evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-  elm_win_resize_object_add(win, bg);
+  elm_win_resize_object_add(result->win, bg);
   evas_object_show(bg);
 
-  return win;
+  return result;
 }
 
-void fang_win_complete(globals *ourGlobals, Evas_Object *win, int x, int y, int w, int h)
+void fang_win_complete(globals *ourGlobals, fangWin *win, int x, int y, int w, int h)
 {
   // image object for win is unlinked to its pos/size - so manual control
   // this allows also for using map and other things with it.
-  evas_object_move(elm_win_inlined_image_object_get(win), x, y);
+  evas_object_move(elm_win_inlined_image_object_get(win->win), x, y);
   // Odd, it needs to be resized twice.  WTF?
-  evas_object_resize(win, w, h);
-  evas_object_resize(elm_win_inlined_image_object_get(win), w, h);
-  evas_object_show(win);
-  create_handles(elm_win_inlined_image_object_get(win));
+  evas_object_resize(win->win, w, h);
+  evas_object_resize(elm_win_inlined_image_object_get(win->win), w, h);
+  evas_object_show(win->win);
+  create_handles(elm_win_inlined_image_object_get(win->win));
+}
+
+void fang_win_del(globals *ourGlobals, fangWin *win)
+{
+  Widget *wid;
+
+  if (!win)  return;
+
+  // Elm will delete our widgets, but if we are using eo, we need to unref them.
+  EINA_CLIST_FOR_EACH_ENTRY(wid, &win->widgets, Widget, node)
+  {
+    if (wid->on_del)  wid->on_del(wid, wid->obj, NULL);
+    eo_unref(wid->obj);
+  }
+  if (win->on_del)  win->on_del(win, win->win, NULL);
+  evas_object_del(win->win);
 }
 
 void overlay_add(globals *ourGlobals)
@@ -153,4 +172,15 @@ void overlay_add(globals *ourGlobals)
   evas_object_resize(gld->winwin, ourGlobals->win_w, ourGlobals->win_h);
   evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), ourGlobals->win_w, ourGlobals->win_h);
   evas_object_show(gld->winwin);
+}
+
+Widget *widgetAdd(fangWin *win)
+{
+  Widget *result;
+
+  result = calloc(1, sizeof(Widget));
+  strcpy(result->magic, "Widget");
+  eina_clist_add_head(&win->widgets, &result->node);
+
+  return result;
 }
