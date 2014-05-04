@@ -16,7 +16,7 @@ winFang *chat_add(globals *ourGlobals)
   Widget  *wid;
   Evas_Object *bx, *en;
 
-  me = winFangAdd(ourGlobals->win);
+  me = winFangAdd(ourGlobals->win, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
   eina_clist_add_head(&ourGlobals->winFangs, &me->node);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
@@ -47,6 +47,5 @@ winFang *chat_add(globals *ourGlobals)
   evas_object_show(bx);
   eo_unref(bx);
 
-  winFangComplete(me, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
   return me;
 }

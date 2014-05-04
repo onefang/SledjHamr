@@ -159,7 +159,7 @@ winFang *woMan_add(globals *ourGlobals)
     char buf[PATH_MAX];
     int i;
 
-    me = winFangAdd(ourGlobals->win);
+    me = winFangAdd(ourGlobals->win, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
     eina_clist_add_head(&ourGlobals->winFangs, &me->node);
 
     bx = elm_box_add(me->win);
@@ -287,6 +287,5 @@ winFang *woMan_add(globals *ourGlobals)
     eo_unref(bt);
     evas_object_show(bx);
 
-    winFangComplete(me, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
     return me;
 }

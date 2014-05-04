@@ -146,7 +146,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   Widget  *wid;
   Evas_Object *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
-  me = winFangAdd(ourGlobals->win);
+  me = winFangAdd(ourGlobals->win, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
   eina_clist_add_head(&ourGlobals->winFangs, &me->node);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
@@ -278,7 +278,6 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   eo_unref(vbox);
   eo_unref(bx);
 
-  winFangComplete(me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
   winFangHide(me);
   return me;
 }

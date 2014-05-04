@@ -67,13 +67,20 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
-winFang *winFangAdd(Evas_Object *parent)
+winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h)
 {
   winFang *result;
-  Evas_Object *bg;
+  Evas_Object *obj, *obj2, *bg;
+  char buf[PATH_MAX];
+  int i;
 
   result = calloc(1, sizeof(winFang));
   eina_clist_init(&result->widgets);
+
+  result->x = x;
+  result->y = y;
+  result->w = w;
+  result->h = h;
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
   // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
@@ -92,61 +99,51 @@ winFang *winFangAdd(Evas_Object *parent)
   elm_win_resize_object_add(result->win, bg);
   evas_object_show(bg);
 
-  return result;
-}
-
-void winFangComplete(winFang *win, int x, int y, int w, int h)
-{
-  Evas_Object *obj  = elm_win_inlined_image_object_get(win->win);
-  Evas_Object *obj2 = evas_object_evas_get(obj);
-  char buf[PATH_MAX];
-  int i;
-
-  win->x = x;
-  win->y = y;
-  win->w = w;
-  win->h = h;
+  obj  = elm_win_inlined_image_object_get(result->win);
+  obj2 = evas_object_evas_get(obj);
   // image object for win is unlinked to its pos/size - so manual control
   // this allows also for using map and other things with it.
-  evas_object_move(obj, x, y);
+  evas_object_move(obj, result->x, result->y);
   // Odd, it needs to be resized twice.  WTF?
-  evas_object_resize(win->win, w, h);
-  evas_object_resize(obj, w, h);
-  evas_object_show(win->win);
+  evas_object_resize(result->win, result->w, result->h);
+  evas_object_resize(obj, result->w, result->h);
+  evas_object_show(result->win);
 
   // Create corner handles.
   snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
   for (i = 0; i < 4; i++)
   {
     char key[32];
-    int cx = x, cy = y;
+    int cx = result->x, cy = result->y;
 
-         if (i == 1)   cx += w;
-    else if (i == 2)  {cx += w;  cy += h;}
-    else if (i == 3)   cy += h;
+         if (i == 1)   cx += result->w;
+    else if (i == 2)  {cx += result->w;  cy += result->h;}
+    else if (i == 3)   cy += result->h;
     snprintf(key, sizeof(key), "h-%i\n", i);
 #if 1
-        win->hand[i] = evas_object_image_filled_add(obj2);
-        evas_object_image_file_set(win->hand[i], buf, NULL);
-        evas_object_resize(win->hand[i], 31, 31);
-        evas_object_move(win->hand[i], cx - 15, cy - 15);
-        evas_object_data_set(obj, key, win->hand[i]);
-        evas_object_show(win->hand[i]);
-        evas_object_event_callback_add(win->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+        result->hand[i] = evas_object_image_filled_add(obj2);
+        evas_object_image_file_set(result->hand[i], buf, NULL);
+        evas_object_resize(result->hand[i], 31, 31);
+        evas_object_move(result->hand[i], cx - 15, cy - 15);
+        evas_object_data_set(obj, key, result->hand[i]);
+        evas_object_show(result->hand[i]);
+        evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
 #else
 // TODO - No idea why, but using this version makes the window vanish when you click on a handle.
-    win->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
+    result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_file_set(buf, NULL),
 	evas_obj_size_set(31, 31),
 	evas_obj_position_set(cx - 15, cy - 15),
-	eo_key_data_set(key, win->hand[i], NULL),
+	eo_key_data_set(key, result->hand[i], NULL),
 	evas_obj_visibility_set(EINA_TRUE)
 	);
-    evas_object_event_callback_add(win->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
-    eo_unref(win->hand[i]);
+    evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+    eo_unref(result->hand[i]);
 #endif
   }
+
+  return result;
 }
 
 void winFangDel(winFang *win)

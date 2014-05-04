@@ -30,8 +30,7 @@ typedef struct _Widget
   Evas_Smart_Cb on_del;
 } Widget;
 
-winFang *winFangAdd(Evas_Object *parent);
-void winFangComplete(winFang *win, int x, int y, int w, int h);
+winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h);
 void winFangHide(winFang *win);
 void winFangShow(winFang *win);
 void winFangDel(winFang *win);
