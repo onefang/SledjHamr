@@ -49,6 +49,11 @@ static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_
    evas_map_free(p);
 }
 
+static void _on_done(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+  elm_exit();
+}
+
 void winFangHide(winFang *win)
 {
   int i;
@@ -67,7 +72,7 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
-winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h)
+winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title, char *name)
 {
   winFang *result;
   Evas_Object *obj, *obj2, *bg;
@@ -77,6 +82,8 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h)
   result = calloc(1, sizeof(winFang));
   eina_clist_init(&result->widgets);
 
+  if (parent)	result->internal = EINA_TRUE;
+
   result->x = x;
   result->y = y;
   result->w = w;
@@ -85,63 +92,77 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h)
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
   // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
 //  elm_config_engine_set("ews");
-  result->win = elm_win_add(parent, "inlined", ELM_WIN_INLINED_IMAGE);
-  // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
-  // According to the Elm inlined image window example, this is what's needed to.
-  evas_object_event_callback_add(elm_win_inlined_image_object_get(result->win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
-  elm_win_alpha_set(result->win, EINA_TRUE);
-
-  // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
-  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-  bg = evas_object_rectangle_add(evas_object_evas_get(result->win));
-  evas_object_color_set(bg, 50, 0, 100, 100);
-  evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-  elm_win_resize_object_add(result->win, bg);
-  evas_object_show(bg);
-
-  obj  = elm_win_inlined_image_object_get(result->win);
-  obj2 = evas_object_evas_get(obj);
-  // image object for win is unlinked to its pos/size - so manual control
-  // this allows also for using map and other things with it.
-  evas_object_move(obj, result->x, result->y);
-  // Odd, it needs to be resized twice.  WTF?
-  evas_object_resize(result->win, result->w, result->h);
-  evas_object_resize(obj, result->w, result->h);
-  evas_object_show(result->win);
-
-  // Create corner handles.
-  snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
-  for (i = 0; i < 4; i++)
+  if (result->internal)
   {
-    char key[32];
-    int cx = result->x, cy = result->y;
+    result->win = elm_win_add(parent, name, ELM_WIN_INLINED_IMAGE);
+    obj  = elm_win_inlined_image_object_get(result->win);
+    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
+    // According to the Elm inlined image window example, this is what's needed to.
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
+    elm_win_alpha_set(result->win, EINA_TRUE);
 
-         if (i == 1)   cx += result->w;
-    else if (i == 2)  {cx += result->w;  cy += result->h;}
-    else if (i == 3)   cy += result->h;
-    snprintf(key, sizeof(key), "h-%i\n", i);
+    // image object for win is unlinked to its pos/size - so manual control
+    // this allows also for using map and other things with it.
+    evas_object_move(obj, result->x, result->y);
+    // Odd, it needs to be resized twice.  WTF?
+    evas_object_resize(obj, result->w, result->h);
+
+    obj2 = evas_object_evas_get(obj);
+    // Create corner handles.
+    snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
+    for (i = 0; i < 4; i++)
+    {
+      char key[32];
+      int cx = result->x, cy = result->y;
+
+           if (i == 1)   cx += result->w;
+      else if (i == 2)  {cx += result->w;  cy += result->h;}
+      else if (i == 3)   cy += result->h;
+      snprintf(key, sizeof(key), "h-%i\n", i);
 #if 1
-        result->hand[i] = evas_object_image_filled_add(obj2);
-        evas_object_image_file_set(result->hand[i], buf, NULL);
-        evas_object_resize(result->hand[i], 31, 31);
-        evas_object_move(result->hand[i], cx - 15, cy - 15);
-        evas_object_data_set(obj, key, result->hand[i]);
-        evas_object_show(result->hand[i]);
-        evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+      result->hand[i] = evas_object_image_filled_add(obj2);
+      evas_object_image_file_set(result->hand[i], buf, NULL);
+      evas_object_resize(result->hand[i], 31, 31);
+      evas_object_move(result->hand[i], cx - 15, cy - 15);
+      evas_object_data_set(obj, key, result->hand[i]);
+      evas_object_show(result->hand[i]);
+      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
 #else
 // TODO - No idea why, but using this version makes the window vanish when you click on a handle.
-    result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
+      result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_file_set(buf, NULL),
 	evas_obj_size_set(31, 31),
 	evas_obj_position_set(cx - 15, cy - 15),
 	eo_key_data_set(key, result->hand[i], NULL),
 	evas_obj_visibility_set(EINA_TRUE)
-	);
-    evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
-    eo_unref(result->hand[i]);
+      );
+      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+      eo_unref(result->hand[i]);
 #endif
+    }
   }
+  else
+  {
+    elm_config_preferred_engine_set("opengl_x11");
+    result->win = elm_win_add(parent, name, ELM_WIN_BASIC);
+    evas_object_move(result->win, result->x, result->y);
+    evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
+  }
+
+  elm_win_title_set(result->win, title);
+  // Apparently transparent is not good enough for ELM backgrounds, so make it an Evas rectangle.
+  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
+  bg = eo_add(EVAS_OBJ_RECTANGLE_CLASS, evas_object_evas_get(result->win),
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    evas_obj_color_set(50, 0, 100, 100),
+    evas_obj_visibility_set(EINA_TRUE)
+  );
+  elm_win_resize_object_add(result->win, bg);
+  eo_unref(bg);
+
+  evas_object_resize(result->win, result->w, result->h);
+  evas_object_show(result->win);
 
   return result;
 }

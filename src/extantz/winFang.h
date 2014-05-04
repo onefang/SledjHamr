@@ -6,6 +6,7 @@ typedef struct _winFang
   Evas_Object	*win;
   Eina_Clist	widgets;
   int		x, y, w, h;
+  Eina_Bool	internal;
 
   Evas_Object *hand[4];
 
@@ -30,7 +31,7 @@ typedef struct _Widget
   Evas_Smart_Cb on_del;
 } Widget;
 
-winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h);
+winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title, char *name);
 void winFangHide(winFang *win);
 void winFangShow(winFang *win);
 void winFangDel(winFang *win);

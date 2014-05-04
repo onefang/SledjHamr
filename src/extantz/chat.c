@@ -16,7 +16,7 @@ winFang *chat_add(globals *ourGlobals)
   Widget  *wid;
   Evas_Object *bx, *en;
 
-  me = winFangAdd(ourGlobals->win, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
+  me = winFangAdd(ourGlobals->win, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "chatter box", "chat");
   eina_clist_add_head(&ourGlobals->winFangs, &me->node);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
