@@ -1,4 +1,4 @@
-#include "extantz.h"
+#include "winFang.h"
 
 
 // Elm inlined image windows needs this to change focus on mouse click.
@@ -144,7 +144,6 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title
   }
   else
   {
-    elm_config_preferred_engine_set("opengl_x11");
     result->win = elm_win_add(parent, name, ELM_WIN_BASIC);
     evas_object_move(result->win, result->x, result->y);
     evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
@@ -198,7 +197,11 @@ Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char
       evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
       evas_obj_visibility_set(EINA_TRUE)
     );
-    if (title)  elm_object_text_set(result->obj, title);
+    if (title)
+    {
+      result->label = strdup(title);
+      elm_object_text_set(result->obj, result->label);
+    }
   }
 
   return result;

@@ -18,12 +18,10 @@ LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
 libs    = libs    .. ' -lIrrlicht -lGL -lbz2'
 
 removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', 'gears.o', 'ephysics_demo.o', 'Evas_3D_demo.o', '../../media/extantz.edj'})
-removeFiles(dir, {'../../extantz', 'camera.o', 'winFang.o', lib_d .. '/libwinFang.so', 'chat.o', 'files.o', 'woMan.o'})
+removeFiles(dir, {'../../extantz', 'camera.o', 'chat.o', 'files.o', 'woMan.o'})
 
 runCommand('edje_cc',		dir, 'edje_cc ' .. EDJE_FLAGS .. ' extantz.edc ../../media/extantz.edj')
 runCommand('Irrlicht files',	dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c crappisspuke.cpp -o crappisspuke.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c CDemo.cpp -o CDemo.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c extantzCamera.cpp -o extantzCamera.o ' .. LDFLAGS)
-runCommand('C libraries',	dir, 'gcc ' .. CFLAGS .. ' -fPIC -c winFang.c')
-runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libwinFang.so -o ' .. lib_d .. '/libwinFang.so winFang.o')
 compileFiles('../../extantz',	dir, {'gears', 'ephysics_demo', 'camera', 'Evas_3D_demo', 'chat', 'files', 'woMan', 'extantz'}, 'crappisspuke.o CDemo.o extantzCamera.o -lwinFang')

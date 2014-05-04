@@ -156,18 +156,6 @@ win.quitter:colour(1,2,3,4)  -> win.quitter.colour(win.quitter, 1,2,3,4)  ->  __
 win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Thing and Mum.  We eventually want to call skang.colour() though.
 */
 
-struct _Widget
-{
-  char		magic[8];
-  Evas_Object	*obj;
-  Eina_Clist	node;
-  char		*label, *look, *action, *help;
-  // foreground / background colour
-  // thing
-  // types {}
-  // skangCoord x, y, w, h
-};
-
 
 // TODO - These functions should be able to deal with multiple windows.
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
@@ -175,7 +163,7 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
 {
   globals *ourGlobals;
   lua_State *L = data;
-  struct _Widget *wid;
+  Widget *wid;
 
   lua_getfield(L, LUA_REGISTRYINDEX, globName);
   ourGlobals = lua_touserdata(L, -1);
@@ -215,18 +203,12 @@ static int widget(lua_State *L)
   // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?
   if (strcmp(type, "button") == 0)
   {
-    struct _Widget *wid;
-
-    wid = calloc(1, sizeof(struct _Widget));
-    strcpy(wid->magic, "Widget");
-    eina_clist_add_head(&ourGlobals->widgets, &wid->node);
-    wid->label = strdup(title);
+    Widget *wid;
 
     // These two lines are likely the only ones that will be different for the different sorts of widgets.
-    wid->obj = eo_add(ELM_OBJ_BUTTON_CLASS, ourGlobals->win);
+    wid = widgetAdd(ourGlobals->win, ELM_OBJ_BUTTON_CLASS, ourGlobals->win->win, title);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, L);
 
-    elm_object_part_text_set(wid->obj, NULL, wid->label);
     eo_do(wid->obj,
 //	elm_obj_widget_part_text_set(NULL, wid->label),
 	evas_obj_size_set(w, h),
@@ -250,7 +232,7 @@ static int widget(lua_State *L)
 static int action(lua_State *L)
 {
   globals *ourGlobals;
-  struct _Widget *wid = lua_touserdata(L, 1);
+  Widget *wid = lua_touserdata(L, 1);
   char *action = "nada";
 
   lua_getfield(L, LUA_REGISTRYINDEX, globName);
@@ -278,7 +260,6 @@ static int window(lua_State *L)
   globals *ourGlobals;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
-  Evas_Object *obj;
   int result = 0;
   int w = WIDTH, h = HEIGHT;
 
@@ -287,38 +268,9 @@ static int window(lua_State *L)
   lua_pop(L, 1);
 
   pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
-
-  // Set the engine to opengl_x11, then open the window.
-  elm_config_preferred_engine_set("opengl_x11");
-  if ((ourGlobals->win = elm_win_util_standard_add(name, title)))
-  {
-    eina_clist_init(&ourGlobals->widgets);
-
-    evas_object_smart_callback_add(ourGlobals->win, "delete,request", _on_done, ourGlobals);
-    evas_object_resize(ourGlobals->win, w, h);
-    evas_object_move(ourGlobals->win, 0, 0);
-    evas_object_show(ourGlobals->win);
-
-    // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
-    ourGlobals->evas = evas_object_evas_get(ourGlobals->win);
-
-    // Add a background image object.
-    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
-    eo_do(obj,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	elm_obj_image_fill_outside_set(EINA_TRUE),
-	elm_obj_image_file_set("../../media/sky_01.jpg", NULL),
-	evas_obj_visibility_set(EINA_TRUE)
-	);
-    elm_win_resize_object_add(ourGlobals->win, obj);
-    eo_unref(obj);
-
-    lua_pushlightuserdata(L, &ourGlobals->win);
-    result = 1;
-  }
-
-  // Set preferred engine back to default from config
-  elm_config_preferred_engine_set(NULL);
+  ourGlobals->win = winFangAdd(NULL, 0, 0, w, h, title, name);
+  lua_pushlightuserdata(L, &ourGlobals->win);
+  result = 1;
 
   return result;
 }
@@ -367,14 +319,7 @@ static int closeWindow(lua_State *L)
 
   if (ourGlobals->win)
   {
-    struct _Widget *wid;
-
-    // Elm will delete our widgets, but if we are using eo, we need to unref them.
-    EINA_CLIST_FOR_EACH_ENTRY(wid, &ourGlobals->widgets, struct _Widget, node)
-    {
-      eo_unref(wid->obj);
-    }
-    evas_object_del(ourGlobals->win);
+    winFangDel(ourGlobals->win);
   }
 
   if (ourGlobals->logDom >= 0)

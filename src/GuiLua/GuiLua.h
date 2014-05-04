@@ -1,6 +1,7 @@
 #include "SledjHamr.h"
 #include "LumbrJack.h"
 #include "Runnr.h"
+#include "winFang.h"
 
 
 #define WIDTH  (300)
@@ -14,9 +15,7 @@
 
 typedef struct _globals
 {
-  Evas		*evas;
-  Evas_Object	*win;		// Our Elm window.
-  Eina_Clist	widgets;	// Our windows widgets.
+  winFang	*win;
   int		logDom;		// Our logging domain.
 } globals;
 
