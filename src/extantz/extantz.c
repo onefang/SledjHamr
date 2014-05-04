@@ -386,7 +386,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     Evas_Object *obj;
     EPhysics_World *world;
     GLData *gld = NULL;
-    winFang *chat = NULL, *woMan = NULL;
     char buf[PATH_MAX];
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
@@ -417,6 +416,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_config_finger_size_set(0);
     elm_config_scale_set(1.0);
 
+    eina_clist_init(&ourGlobals.winFangs);
     gld = &ourGlobals.gld;
     gldata_init(gld);
 
@@ -468,8 +468,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(ourGlobals.win, ourGlobals.bx);
 
 //    overlay_add(&ourGlobals);
-    woMan = woMan_add(&ourGlobals);
-    chat = chat_add(&ourGlobals);
+    woMan_add(&ourGlobals);
+    chat_add(&ourGlobals);
     ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
@@ -503,11 +503,15 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     if (ourGlobals.	win)
     {
+	winFang *win;
+
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
-	winFangDel(&ourGlobals, ourGlobals.files);
-	winFangDel(&ourGlobals, chat);
-	winFangDel(&ourGlobals, woMan);
+
+	EINA_CLIST_FOR_EACH_ENTRY(win, &ourGlobals.winFangs, winFang, node)
+	{
+	  winFangDel(&ourGlobals, win);
+	}
 	eo_unref(ourGlobals.bx);
 	evas_object_del(ourGlobals.win);
     }

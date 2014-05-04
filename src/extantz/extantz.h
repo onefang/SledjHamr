@@ -211,7 +211,6 @@ typedef struct _globals
   Evas_Object	*win;		// Our Elm window.
   Evas_Object	*tb;		// Our Elm toolbar.
   Evas_Object	*bx;		// Our box.
-  Eina_Clist	widgets;	// Our windows widgets.
   int		logDom;		// Our logging domain.
 
   int		scr_w, scr_h;	// The size of the screen.
@@ -223,7 +222,7 @@ typedef struct _globals
   GLData gld;
   Scene_Data	*scene;
 
-  Eina_Clist	windows;
+  Eina_Clist	winFangs;
 
   winFang	*files;
 } globals;

@@ -82,6 +82,7 @@ winFang *winFangAdd(globals *ourGlobals)
   Evas_Object *bg;
 
   result = calloc(1, sizeof(winFang));
+  eina_clist_add_head(&ourGlobals->winFangs, &result->node);
   eina_clist_init(&result->widgets);
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.

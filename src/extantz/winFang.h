@@ -8,6 +8,7 @@ typedef struct _winFang
 {
   Evas_Object	*win;
   Eina_Clist	widgets;
+  Eina_Clist	node;
   void		*data;
   Evas_Smart_Cb on_del;
 } winFang;
@@ -16,12 +17,14 @@ typedef struct _Widget
 {
   char		magic[8];
   Evas_Object	*obj;
-  Eina_Clist	node;
+
   char		*label, *look, *action, *help;
   // foreground / background colour
   // thing
   // types {}
   // skangCoord x, y, w, h
+
+  Eina_Clist	node;
   void		*data;
   Evas_Smart_Cb on_del;
 } Widget;
