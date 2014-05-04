@@ -21,5 +21,4 @@ typedef struct _globals
 } globals;
 
 
-int luaopen_widget(lua_State *L);
 void GuiLuaDo(int argc, char **argv);

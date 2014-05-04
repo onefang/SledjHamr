@@ -418,7 +418,7 @@ int luaopen_GuiLua(lua_State *L)
 
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
-//    LUA_ENVIRONINDEX - C function environment, in this case luaopen_widget() is the C function
+//    LUA_ENVIRONINDEX - C function environment, in this case luaopen_GuiLUa() is the C function
 //    LUA_REGISTRYINDEX - C registry, global, for unique keys use the module name as a string, or a lightuserdata address to a C object in our module.
 //    lua_upvalueindex(n) - C function upvalues
 
