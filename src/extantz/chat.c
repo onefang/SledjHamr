@@ -5,18 +5,18 @@
 //   The bug is that editable entry widgets cause the app to hang on exit.
 void _on_entry_del(void *data, Evas_Object *obj, void *event_info)
 {
-//  fangWin *me = data;
+//  winFang *me = data;
 
   elm_entry_editable_set(obj, EINA_FALSE);
 }
 
-fangWin *chat_add(globals *ourGlobals)
+winFang *chat_add(globals *ourGlobals)
 {
-  fangWin *me;
+  winFang *me;
   Widget  *wid;
   Evas_Object *bx, *en;
 
-  me = fang_win_add(ourGlobals);
+  me = winFangAdd(ourGlobals);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
@@ -46,6 +46,6 @@ fangWin *chat_add(globals *ourGlobals)
   evas_object_show(bx);
   eo_unref(bx);
 
-  fang_win_complete(ourGlobals, me, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
+  winFangComplete(ourGlobals, me, 30, 500, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
   return me;
 }

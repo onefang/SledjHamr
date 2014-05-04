@@ -76,12 +76,12 @@ static void create_handles(Evas_Object *obj)
      }
 }
 
-fangWin *fang_win_add(globals *ourGlobals)
+winFang *winFangAdd(globals *ourGlobals)
 {
-  fangWin *result;
+  winFang *result;
   Evas_Object *bg;
 
-  result = calloc(1, sizeof(fangWin));
+  result = calloc(1, sizeof(winFang));
   eina_clist_init(&result->widgets);
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
@@ -104,7 +104,7 @@ fangWin *fang_win_add(globals *ourGlobals)
   return result;
 }
 
-void fang_win_complete(globals *ourGlobals, fangWin *win, int x, int y, int w, int h)
+void winFangComplete(globals *ourGlobals, winFang *win, int x, int y, int w, int h)
 {
   // image object for win is unlinked to its pos/size - so manual control
   // this allows also for using map and other things with it.
@@ -116,7 +116,7 @@ void fang_win_complete(globals *ourGlobals, fangWin *win, int x, int y, int w, i
   create_handles(elm_win_inlined_image_object_get(win->win));
 }
 
-void fang_win_del(globals *ourGlobals, fangWin *win)
+void winFangDel(globals *ourGlobals, winFang *win)
 {
   Widget *wid;
 
@@ -132,49 +132,7 @@ void fang_win_del(globals *ourGlobals, fangWin *win)
   evas_object_del(win->win);
 }
 
-void overlay_add(globals *ourGlobals)
-{
-  GLData *gld = &ourGlobals->gld;
-  Evas_Object *bg;
-
-  // There are many reasons for this window.
-  // The first is to cover the GL and provide something to click on to change focus.
-  // The second is to provide something to click on for all the GL type clicking stuff that needs to be done.  In other words, no click through, we catch the clicks here.
-  //   So we can probably avoid the following issue -
-  //     How to do click through?  evas_object_pass_events_set(rectangle, EINA_TRUE), and maybe need to do that to the underlaying window to?
-  //     Though if the rectangle is entirely transparent, or even hidden, events might pass through anyway.
-  //   Gotta have click through on the parts where there's no other window.
-  // The third is to have the other windows live here.
-  //   This idea doesn't work, as it breaks the damn focus again.
-  //   Don't think it's needed anyway.
-  // While on the subject of layers, need a HUD layer of some sort, but Irrlicht might support that itself.
-
-  gld->winwin = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
-  // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
-  // According to the Elm inlined image window example, this is what's needed to.
-  evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
-  // In this code, we are making our own camera, so grab it's input when we are focused.
-  cameraAdd(ourGlobals, gld->winwin);
-
-  elm_win_alpha_set(gld->winwin, EINA_TRUE);
-  // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.
-  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-  bg = evas_object_rectangle_add(evas_object_evas_get(gld->winwin));
-  evas_object_color_set(bg, 0, 0, 0, 0);
-  evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-  elm_win_resize_object_add(gld->winwin, bg);
-  evas_object_show(bg);
-
-  // image object for win is unlinked to its pos/size - so manual control
-  // this allows also for using map and other things with it.
-  evas_object_move(elm_win_inlined_image_object_get(gld->winwin), 0, 0);
-  // Odd, it needs to be resized twice.  WTF?
-  evas_object_resize(gld->winwin, ourGlobals->win_w, ourGlobals->win_h);
-  evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), ourGlobals->win_w, ourGlobals->win_h);
-  evas_object_show(gld->winwin);
-}
-
-Widget *widgetAdd(fangWin *win, const Eo_Class *klass, Evas_Object *parent, char *title)
+Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title)
 {
   Widget *result;
 

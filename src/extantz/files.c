@@ -60,7 +60,7 @@ static void _big_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *ev
 
 static void my_fileselector_activated(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-  fangWin *me = data;
+  winFang *me = data;
   Evas_Object *fs = me->data;
 
    if (elm_fileselector_multi_select_get(fs))
@@ -85,7 +85,7 @@ static void my_fileselector_activated(void *data, Evas_Object *obj EINA_UNUSED, 
 
 static void _CANCEL_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-  fangWin *me = data;
+  winFang *me = data;
 
   evas_object_hide(me->win);
 }
@@ -140,13 +140,13 @@ void _on_fs_del(void *data, Evas_Object *obj, void *event_info)
   elm_entry_editable_set(obj, EINA_FALSE);
 }
 
-fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save)
+winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save)
 {
-  fangWin *me;
+  winFang *me;
   Widget  *wid;
   Evas_Object *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
-  me = fang_win_add(ourGlobals);
+  me = winFangAdd(ourGlobals);
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
@@ -277,12 +277,12 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   eo_unref(vbox);
   eo_unref(bx);
 
-  fang_win_complete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
+  winFangComplete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
   evas_object_hide(me->win);
   return me;
 }
 
-void filesShow(fangWin *me, Evas_Smart_Cb func, void *data)
+void filesShow(winFang *me, Evas_Smart_Cb func, void *data)
 {
   Evas_Object *fs = me->data;
 

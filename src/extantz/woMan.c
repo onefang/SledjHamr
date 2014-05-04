@@ -151,15 +151,15 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 
-fangWin *woMan_add(globals *ourGlobals)
+winFang *woMan_add(globals *ourGlobals)
 {
-    fangWin *me;
+    winFang *me;
     Evas_Object *bx, *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
     Elm_Object_Item *tb_it, *menu_it, *tab_it;
     char buf[PATH_MAX];
     int i;
 
-    me = fang_win_add(ourGlobals);
+    me = winFangAdd(ourGlobals);
 
     bx = elm_box_add(me->win);
     elm_win_resize_object_add(me->win, bx);
@@ -286,6 +286,6 @@ fangWin *woMan_add(globals *ourGlobals)
     eo_unref(bt);
     evas_object_show(bx);
 
-    fang_win_complete(ourGlobals, me, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
+    winFangComplete(ourGlobals, me, 30, 30, ourGlobals->win_w / 3, ourGlobals->win_h / 3);
     return me;
 }
