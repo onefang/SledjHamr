@@ -178,14 +178,6 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   }
 }
 
-static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-//  globals *ourGlobals = data;
-
-  // Tell the main loop to stop, which it will, eventually.
-  elm_exit();
-}
-
 static int widget(lua_State *L)
 {
   globals *ourGlobals;
@@ -298,13 +290,7 @@ static int loopWindow(lua_State *L)
 
 static int quit(lua_State *L)
 {
-  globals *ourGlobals;
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-
-  _on_done(ourGlobals, NULL, NULL);
+  elm_exit();
 
   return 0;
 }
