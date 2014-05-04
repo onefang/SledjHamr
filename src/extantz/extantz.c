@@ -448,9 +448,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     {
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
-	fang_win_del(&ourGlobals, woMan);
-	fang_win_del(&ourGlobals, chat);
 	fang_win_del(&ourGlobals, files);
+	fang_win_del(&ourGlobals, chat);
+	fang_win_del(&ourGlobals, woMan);
 	eo_unref(ourGlobals.bx);
 	evas_object_del(ourGlobals.win);
     }
