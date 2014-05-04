@@ -80,14 +80,14 @@ static void my_fileselector_activated(void *data, Evas_Object *obj EINA_UNUSED, 
 
      printf("SELECTED file : %s\n", file);
    }
-  evas_object_hide(me->win);
+  winFangHide(me);
 }
 
 static void _CANCEL_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
   winFang *me = data;
 
-  evas_object_hide(me->win);
+  winFangHide(me);
 }
 
 static void _OK_clicked(void *data, Evas_Object *obj, void *event_info)
@@ -278,7 +278,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   eo_unref(bx);
 
   winFangComplete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
-  evas_object_hide(me->win);
+  winFangHide(me);
   return me;
 }
 
@@ -292,5 +292,5 @@ void filesShow(winFang *me, Evas_Smart_Cb func, void *data)
     evas_object_smart_callback_add(fs, "activated", func, data);
   else
     evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
-  evas_object_show(me->win);
+  winFangShow(me);
 }

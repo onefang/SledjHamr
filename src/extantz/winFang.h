@@ -8,6 +8,10 @@ typedef struct _winFang
 {
   Evas_Object	*win;
   Eina_Clist	widgets;
+  int		x, y, w, h;
+
+  Evas_Object *hand[4];
+
   Eina_Clist	node;
   void		*data;
   Evas_Smart_Cb on_del;
@@ -31,5 +35,8 @@ typedef struct _Widget
 
 winFang *winFangAdd(globals *ourGlobals);
 void winFangComplete(globals *ourGlobals, winFang *win, int x, int y, int w, int h);
+void winFangHide(winFang *win);
+void winFangShow(winFang *win);
 void winFangDel(globals *ourGlobals, winFang *win);
+
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
