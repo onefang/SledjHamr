@@ -241,6 +241,8 @@ typedef struct _globals
 
   GLData gld;
   Scene_Data	*scene;
+
+  fangWin	*files;
 } globals;
 
 extern globals ourGlobals;
@@ -274,7 +276,8 @@ void overlay_add(globals *ourGlobals);
 Widget *widgetAdd(fangWin *win);
 
 fangWin *chat_add(globals *ourGlobals);
-fangWin *files_add(globals *ourGlobals);
+fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);
+void     filesShow(fangWin *me, Evas_Smart_Cb func, void *data);
 fangWin *woMan_add(globals *ourGlobals);
 
 

@@ -58,9 +58,10 @@ static void _big_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *ev
    elm_fileselector_thumbnail_size_set(fs, 128, 128);
 }
 
-static void _OK_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+static void my_fileselector_activated(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-   Evas_Object *fs = data;
+  fangWin *me = data;
+  Evas_Object *fs = me->data;
 
    if (elm_fileselector_multi_select_get(fs))
    {
@@ -79,16 +80,19 @@ static void _OK_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_in
 
      printf("SELECTED file : %s\n", file);
    }
+  evas_object_hide(me->win);
 }
 
 static void _CANCEL_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-//   Evas_Object *fs = data;
+  fangWin *me = data;
+
+  evas_object_hide(me->win);
 }
 
-static void my_fileselector_activated(void *data, Evas_Object *obj, void *event_info)
+static void _OK_clicked(void *data, Evas_Object *obj, void *event_info)
 {
-   _OK_clicked(data, obj, event_info);
+   my_fileselector_activated(data, obj, event_info);
 }
 
 #if 0
@@ -136,7 +140,7 @@ void _on_fs_del(void *data, Evas_Object *obj, void *event_info)
   elm_entry_editable_set(obj, EINA_FALSE);
 }
 
-fangWin *files_add(globals *ourGlobals)
+fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save)
 {
   fangWin *me;
   Widget  *wid;
@@ -153,8 +157,10 @@ fangWin *files_add(globals *ourGlobals)
   elm_win_resize_object_add(me->win, bx);
 
   fs = eo_add(ELM_OBJ_FILESELECTOR_CLASS, bx);
+  me->data = fs;
   wid = widgetAdd(me);
   wid->obj = fs;
+  wid->data = ourGlobals;
   wid->on_del = _on_fs_del;
   eo_do(fs,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
@@ -166,10 +172,9 @@ fangWin *files_add(globals *ourGlobals)
        );
   elm_box_pack_end(bx, fs);
 
-  // TODO - Should allow these to be set from the caller.
-  elm_fileselector_path_set(fs, elm_app_data_dir_get());
-  elm_fileselector_is_save_set(fs, EINA_FALSE);
-  elm_fileselector_multi_select_set(fs, EINA_TRUE);
+  elm_fileselector_path_set(fs, path);
+  elm_fileselector_is_save_set(fs, save);
+  elm_fileselector_multi_select_set(fs, multi);
 
   // TODO - Should allow these to be set from the caller.
   // TODO - Don't do these, it adds a horribly out of place button.
@@ -182,7 +187,7 @@ fangWin *files_add(globals *ourGlobals)
 //  elm_fileselector_mime_types_filter_append(fs, "text/*", "text files");
 
   // Call back for double click or Enter pressed on file.
-  evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, fs);
+  evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
 
   vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win);
   eo_do(vbox,
@@ -264,14 +269,14 @@ fangWin *files_add(globals *ourGlobals)
   bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
   elm_object_text_set(bt, "OK");
   eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
-  evas_object_smart_callback_add(bt, "clicked", _OK_clicked, fs);
+  evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
   bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
   elm_object_text_set(bt, "CANCEL");
   eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
-  evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, fs);
+  evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
@@ -282,5 +287,19 @@ fangWin *files_add(globals *ourGlobals)
   eo_unref(bx);
 
   fang_win_complete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);
+  evas_object_hide(me->win);
   return me;
+}
+
+void filesShow(fangWin *me, Evas_Smart_Cb func, void *data)
+{
+  Evas_Object *fs = me->data;
+
+  if (!data)  data = me;
+
+  if (func)
+    evas_object_smart_callback_add(fs, "activated", func, data);
+  else
+    evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
+  evas_object_show(me->win);
 }

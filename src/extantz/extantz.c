@@ -128,7 +128,13 @@ static void _del_gl(Evas_Object *obj)
   _clean_gl(ourGlobals, NULL, NULL, NULL);
 }
 
-// Callback for when the app quits.
+static void _on_open(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+  globals *ourGlobals = data;
+
+  filesShow(ourGlobals->files, NULL, NULL);
+}
+
 static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
 //    GLData *gld = data;
@@ -286,6 +292,7 @@ static void makeMainMenu(globals *ourGlobals)
 
     // Menus.
     menu = _toolbar_menu_add(ourGlobals->win, tb, "file");
+    elm_menu_item_add(menu, NULL, NULL, "open", _on_open, ourGlobals);
     elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
     menu = _toolbar_menu_add(ourGlobals->win, tb, "edit");
@@ -327,7 +334,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     Evas_Object *obj;
     EPhysics_World *world;
     GLData *gld = NULL;
-    fangWin *chat = NULL, *files = NULL, *woMan = NULL;
+    fangWin *chat = NULL, *woMan = NULL;
     char buf[PATH_MAX];
 //    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
@@ -413,7 +420,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //    overlay_add(&ourGlobals);
     woMan = woMan_add(&ourGlobals);
     chat = chat_add(&ourGlobals);
-    files = files_add(&ourGlobals);
+    ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
@@ -448,7 +455,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     {
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
-	fang_win_del(&ourGlobals, files);
+	fang_win_del(&ourGlobals, ourGlobals.files);
 	fang_win_del(&ourGlobals, chat);
 	fang_win_del(&ourGlobals, woMan);
 	eo_unref(ourGlobals.bx);
