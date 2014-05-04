@@ -18,22 +18,20 @@ fangWin *chat_add(globals *ourGlobals)
 
   me = fang_win_add(ourGlobals);
 
-  bx = eo_add(ELM_OBJ_BOX_CLASS, me->win);
-    eo_do(bx,
+  bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
        );
   elm_win_resize_object_add(me->win, bx);
 
-  en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win);
-  elm_object_text_set(en, "History is shown here");
-  eo_do(en,
+  en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win,
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_FALSE),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     evas_obj_visibility_set(EINA_TRUE)
        );
+  elm_object_text_set(en, "History is shown here");
   elm_box_pack_end(bx, en);
   eo_unref(en);
 

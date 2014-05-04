@@ -333,27 +333,24 @@ Eina_Bool _animate_scene(globals *ourGlobals)
 static void
 _camera_setup(globals *ourGlobals, Scene_Data *scene)
 {
-  scene->camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas);
-  eo_do(scene->camera,
+  scene->camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas,
     evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
     );
 
   scene->camera_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_CAMERA);
   eo_do(scene->camera_node,
-    evas_3d_node_camera_set(scene->camera)
-    );
-  eo_do(scene->root_node, evas_3d_node_member_add(scene->camera_node));
-  eo_do(scene->camera_node,
+    evas_3d_node_camera_set(scene->camera),
     evas_3d_node_position_set(50.0, 0.0, 20.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
     );
+
+  eo_do(scene->root_node, evas_3d_node_member_add(scene->camera_node));
 }
 
 static void
 _light_setup(globals *ourGlobals, Scene_Data *scene)
 {
-  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas);
-  eo_do(scene->light,
+  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas,
     evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
@@ -362,15 +359,13 @@ _light_setup(globals *ourGlobals, Scene_Data *scene)
 
   scene->light_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_LIGHT);
   eo_do(scene->light_node,
-    evas_3d_node_light_set(scene->light)
-    );
-  eo_do(scene->root_node,
-    evas_3d_node_member_add(scene->light_node)
-    );
-  eo_do(scene->light_node,
+    evas_3d_node_light_set(scene->light),
     evas_3d_node_position_set(1000.0, 0.0, 1000.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
     );
+
+  eo_do(scene->root_node, evas_3d_node_member_add(scene->light_node));
+
 }
 
 static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
@@ -378,53 +373,49 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
   char buf[PATH_MAX];
 
   // Setup cube materials.
-  scene->material0 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
-  scene->material1 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
-
-  eo_do(scene->material0,
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
-
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-    evas_3d_material_shininess_set(100.0)
-    );
-
-  eo_do(scene->material1,
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
-    evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
-
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
-    evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-    evas_3d_material_shininess_set(100.0)
-    );
-
-  scene->texture0 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
-  scene->texture1 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
-  scene->texture_normal = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
-
-  eo_do(scene->texture0,
+  scene->texture0 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels0[0])
     );
-  eo_do(scene->texture1,
+
+  scene->texture1 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels1[0])
     );
-  snprintf(buf, sizeof(buf), "%s/normal_lego.png", elm_app_data_dir_get());
-  eo_do(scene->texture_normal, evas_3d_texture_file_set(buf, NULL));
 
-  eo_do(scene->material0, evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture0));
-  eo_do(scene->material1, evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture1));
-  eo_do(scene->material1, evas_3d_material_texture_set(EVAS_3D_MATERIAL_NORMAL, scene->texture_normal));
+  snprintf(buf, sizeof(buf), "%s/normal_lego.png", elm_app_data_dir_get());
+  scene->texture_normal = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
+    evas_3d_texture_file_set(buf, NULL)
+    );
+
+  scene->material0 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
+
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+    evas_3d_material_shininess_set(100.0),
+    evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture0)
+  );
+
+  scene->material1 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
+
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+    evas_3d_material_shininess_set(100.0),
+
+    evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture1),
+    evas_3d_material_texture_set(EVAS_3D_MATERIAL_NORMAL, scene->texture_normal)
+    );
 
   // Setup CUBE mesh.
-  scene->mesh = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
-  eo_do(scene->mesh,
+  scene->mesh = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
     evas_3d_mesh_vertex_count_set(24),
     evas_3d_mesh_frame_add(0),
 
@@ -443,13 +434,15 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_mesh_frame_add(20),
     evas_3d_mesh_frame_material_set(20, scene->material1)
     );
+
   scene->mesh_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->root_node, evas_3d_node_member_add(scene->mesh_node));
   eo_do(scene->mesh_node,
     eo_key_data_set("Name", "cube", NULL),
     evas_3d_node_position_set(40.0, 3.5, 23.0),
     evas_3d_node_mesh_add(scene->mesh)
     );
+
+  eo_do(scene->root_node, evas_3d_node_member_add(scene->mesh_node));
 }
 
 static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
@@ -457,26 +450,14 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
   char buf[PATH_MAX];
 
   // Setup an MD2 mesh.
-  scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
-  snprintf(buf, sizeof(buf), "%s/sonic.md2", elm_app_data_dir_get());
-  eo_do(scene->mesh2,
-    evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL)
-    );
-
-  scene->material2 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
-  eo_do(scene->mesh2,
-    evas_3d_mesh_frame_material_set(0, scene->material2)
-    );
-
-  scene->texture2 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
   snprintf(buf, sizeof(buf), "%s/sonic.png", elm_app_data_dir_get());
-  eo_do(scene->texture2,
+  scene->texture2 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_file_set(buf, NULL),
     evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),
     evas_3d_texture_wrap_set(EVAS_3D_WRAP_MODE_REPEAT, EVAS_3D_WRAP_MODE_REPEAT)
     );
 
-  eo_do(scene->material2,
+  scene->material2 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
     evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture2),
 
     evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
@@ -490,18 +471,20 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_material_shininess_set(50.0)
   );
 
-  scene->mesh2_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->root_node,
-    evas_3d_node_member_add(scene->mesh2_node)
+  snprintf(buf, sizeof(buf), "%s/sonic.md2", elm_app_data_dir_get());
+  scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
+    evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL),
+    evas_3d_mesh_frame_material_set(0, scene->material2),
+    evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
     );
+
+  scene->mesh2_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
   eo_do(scene->mesh2_node,
     eo_key_data_set("Name", "sonic", NULL),
     evas_3d_node_mesh_add(scene->mesh2)
     );
 
-  eo_do(scene->mesh2,
-    evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
-    );
+  eo_do(scene->root_node, evas_3d_node_member_add(scene->mesh2_node));
 }
 
 static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
@@ -509,81 +492,76 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
   char buf[PATH_MAX];
 
   // Setup earth material.
-   scene->material3 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas);
-
-   scene->texture_diffuse = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas);
   snprintf(buf, sizeof(buf), "%s/EarthDiffuse.png", elm_app_data_dir_get());
-   eo_do(scene->texture_diffuse,
-         evas_3d_texture_file_set(buf, NULL),
-         evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR));
-   eo_do(scene->material3,
-         evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture_diffuse),
+  scene->texture_diffuse = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
+    evas_3d_texture_file_set(buf, NULL),
+    evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR)
+  );
 
-         evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-         evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-         evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
+  scene->material3 = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, scene->texture_diffuse),
 
-         evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.01, 0.01, 0.01, 1.0),
-         evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 1.0, 1.0, 1.0, 1.0),
-         evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-         evas_3d_material_shininess_set(50.0));
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
+    evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
+
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.01, 0.01, 0.01, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 1.0, 1.0, 1.0, 1.0),
+    evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+    evas_3d_material_shininess_set(50.0)
+  );
 
   // Setup earth mesh.
    _sphere_init(100);
 
-   scene->mesh3 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas);
-   eo_do(scene->mesh3,
-         evas_3d_mesh_vertex_count_set(vertex_count),
-         evas_3d_mesh_frame_add(0),
-         evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_POSITION, sizeof(vertex), &sphere_vertices[0].position),
-         evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_NORMAL,   sizeof(vertex), &sphere_vertices[0].normal),
-         evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TANGENT,  sizeof(vertex), &sphere_vertices[0].tangent),
-         evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_COLOR,    sizeof(vertex), &sphere_vertices[0].color),
-         evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TEXCOORD, sizeof(vertex), &sphere_vertices[0].texcoord),
+  scene->mesh3 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
+    evas_3d_mesh_vertex_count_set(vertex_count),
+    evas_3d_mesh_frame_add(0),
+    evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_POSITION, sizeof(vertex), &sphere_vertices[0].position),
+    evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_NORMAL,   sizeof(vertex), &sphere_vertices[0].normal),
+    evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TANGENT,  sizeof(vertex), &sphere_vertices[0].tangent),
+    evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_COLOR,    sizeof(vertex), &sphere_vertices[0].color),
+    evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TEXCOORD, sizeof(vertex), &sphere_vertices[0].texcoord),
 
-         evas_3d_mesh_index_data_set(EVAS_3D_INDEX_FORMAT_UNSIGNED_SHORT, index_count, &sphere_indices[0]),
-         evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES),
-         evas_3d_mesh_frame_material_set(0, scene->material3)
-         );
+    evas_3d_mesh_index_data_set(EVAS_3D_INDEX_FORMAT_UNSIGNED_SHORT, index_count, &sphere_indices[0]),
+    evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES),
+    evas_3d_mesh_frame_material_set(0, scene->material3),
+
+    evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_DIFFUSE)
+  );
 
   scene->mesh3_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->root_node,
-    evas_3d_node_member_add(scene->mesh3_node)
-    );
   eo_do(scene->mesh3_node,
     eo_key_data_set("Name", "earth", NULL),
     evas_3d_node_position_set(40.0, -3.5, 23.0),
     evas_3d_node_mesh_add(scene->mesh3)
-    );
+  );
 
-  eo_do(scene->mesh3,
-    evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_DIFFUSE)
-    );
+  eo_do(scene->root_node, evas_3d_node_member_add(scene->mesh3_node));
 }
 
 
 static void
 _scene_setup(globals *ourGlobals, Scene_Data *scene)
 {
-  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas);
-  eo_do(scene->scene,
-    evas_3d_scene_size_set(512, 512),
-    evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
-    );
-
   // TODO - I have no idea how this should work.
   // It seems the people that wrote the examples don't know either.  lol
 //  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
   scene->root_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
 
+  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas,
+    evas_3d_scene_root_node_set(scene->root_node),
+    evas_3d_scene_size_set(512, 512),
+    evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
+  );
+
   _camera_setup(ourGlobals, scene);
-  _light_setup(ourGlobals, scene);
-  _cube_setup(ourGlobals, scene);
-  _sonic_setup(ourGlobals, scene);
-  _earth_setup(ourGlobals, scene);
+  _light_setup(ourGlobals,  scene);
+  _cube_setup(ourGlobals,   scene);
+  _sonic_setup(ourGlobals,  scene);
+  _earth_setup(ourGlobals,  scene);
 
   eo_do(scene->scene,
-    evas_3d_scene_root_node_set(scene->root_node),
     evas_3d_scene_camera_node_set(scene->camera_node)
     );
 }
@@ -685,28 +663,29 @@ void Evas_3D_Demo_add(globals *ourGlobals)
   ourGlobals->scene = &ourScene;
   _scene_setup(ourGlobals, &ourScene);
 
-    // Add an image object for 3D scene rendering.
-    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win);
-    ourScene.image = obj;
-    eo_do(obj,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	elm_obj_image_fill_outside_set(EINA_TRUE),
-	evas_obj_visibility_set(EINA_TRUE),
-	temp = elm_obj_image_object_get()
-	);
-    eo_do(temp,
-	evas_obj_image_scene_set(ourScene.scene)
-	);
-    elm_object_tooltip_text_set(obj, "");
-    elm_object_tooltip_hide(obj);
-    // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
-    evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
-    evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
-    cameraAdd(ourGlobals, obj);
-    elm_win_resize_object_add(ourGlobals->win, obj);
-//    elm_box_pack_end(ourGlobals->gld.bx, obj);
+  // Add an image object for 3D scene rendering.
+  obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    elm_obj_image_fill_outside_set(EINA_TRUE),
+    evas_obj_visibility_set(EINA_TRUE),
+    temp = elm_obj_image_object_get()
+  );
+  ourScene.image = obj;
 
-    ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
+  eo_do(temp,
+    evas_obj_image_scene_set(ourScene.scene)
+  );
+  elm_object_tooltip_text_set(obj, "");
+  elm_object_tooltip_hide(obj);
+  // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
+  evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
+  evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
+
+  cameraAdd(ourGlobals, obj);
+  elm_win_resize_object_add(ourGlobals->win, obj);
+//  elm_box_pack_end(ourGlobals->gld.bx, obj);
+
+  ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
 }
 
 void Evas_3D_Demo_fini(globals *ourGlobals)

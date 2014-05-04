@@ -274,14 +274,13 @@ fangWin *woMan_add(globals *ourGlobals)
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_box_pack_end(bx, nf);
 
-    bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
-    elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
-    eo_do(bt, 
+    bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
 //		evas_obj_text_set("Login"),
 		evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 		evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 		evas_obj_visibility_set(EINA_TRUE)
 	);
+    elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
     elm_box_pack_end(bx, bt);
     eo_unref(bt);

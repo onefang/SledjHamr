@@ -148,8 +148,7 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   me = fang_win_add(ourGlobals);
 
-  bx = eo_add(ELM_OBJ_BOX_CLASS, me->win);
-  eo_do(bx,
+  bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
@@ -189,16 +188,13 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   // Call back for double click or Enter pressed on file.
   evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
 
-  vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win);
-  eo_do(vbox,
+  vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     elm_obj_box_horizontal_set(EINA_TRUE),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
 
-  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox);
-  elm_object_text_set(hoversel, "sorting");
-  eo_do(hoversel, 
+  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs, NULL),
     elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
@@ -211,12 +207,11 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_obj_hoversel_item_add("time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC),
     evas_obj_visibility_set(EINA_TRUE)
     );
+  elm_object_text_set(hoversel, "sorting");
   elm_box_pack_end(vbox, hoversel);
   eo_unref(hoversel);
 
-  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox);
-  elm_object_text_set(hoversel, "size");
-  eo_do(hoversel, 
+  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs, NULL),
     elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
@@ -225,57 +220,57 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_obj_hoversel_item_add("big",    NULL, ELM_ICON_NONE, _big_icon_clicked,    fs),
     evas_obj_visibility_set(EINA_TRUE)
     );
+  elm_object_text_set(hoversel, "size");
   elm_box_pack_end(vbox, hoversel);
   // Make sure it starts off as small, works around "hitting grid mode before hitting size not showing anything" bug.
   _small_icon_clicked(fs, hoversel, NULL);
   eo_unref(hoversel);
 
 
-  bt = eo_add(ELM_OBJ_CHECK_CLASS, vbox);
-  elm_object_text_set(bt, "hidden");
-  eo_do(bt,
-   elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
+  bt = eo_add(ELM_OBJ_CHECK_CLASS, vbox,
+    elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
     evas_obj_visibility_set(EINA_TRUE)
     );
+  elm_object_text_set(bt, "hidden");
   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  rdg = rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox);
-  elm_object_text_set(rd, "grid");
-  eo_do(rd,
+  rdg = rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
     evas_obj_visibility_set(EINA_TRUE)
     );
+  elm_object_text_set(rd, "grid");
   elm_box_pack_end(vbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
   // Make it start in grid mode.  It defaults to list mode, so this swaps it over.
   _mode_changed_cb(fs, rd, NULL);
   eo_unref(rd);
 
-  rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox);
-  elm_radio_group_add(rd, rdg);
-  elm_object_text_set(rd, "list");
-  eo_do(rd,
+  rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
     evas_obj_visibility_set(EINA_TRUE)
     );
+  elm_radio_group_add(rd, rdg);
+  elm_object_text_set(rd, "list");
   elm_box_pack_end(vbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
   eo_unref(rd);
   // No need to unref this, it's taken care of already.
   //eo_unref(rdg);
 
-  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
+  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
+    evas_obj_visibility_set(EINA_TRUE)
+  );
   elm_object_text_set(bt, "OK");
-  eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
   evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
+  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
+    evas_obj_visibility_set(EINA_TRUE)
+  );
   elm_object_text_set(bt, "CANCEL");
-  eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
   evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);

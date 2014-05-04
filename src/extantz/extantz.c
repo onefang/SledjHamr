@@ -279,9 +279,7 @@ static void makeMainMenu(globals *ourGlobals)
     Elm_Object_Item *tb_it;
 
     // A toolbar thingy.
-    tb = eo_add(ELM_OBJ_TOOLBAR_CLASS, ourGlobals->win);
-    ourGlobals->tb = tb;
-    eo_do(tb,
+    tb = eo_add(ELM_OBJ_TOOLBAR_CLASS, ourGlobals->win,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
@@ -289,6 +287,7 @@ static void makeMainMenu(globals *ourGlobals)
 	evas_obj_position_set(0, 0),
 	elm_obj_toolbar_align_set(0.0)
 	);
+    ourGlobals->tb = tb;
 
     // Menus.
     menu = _toolbar_menu_add(ourGlobals->win, tb, "file");
@@ -398,9 +397,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ourGlobals.win_h = ourGlobals.scr_h - 30;
 
     // Add a background image object.
-    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals.win);
     snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
-    eo_do(obj,
+    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals.win,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	elm_obj_image_fill_outside_set(EINA_TRUE),
 	elm_obj_image_file_set(buf, NULL),
@@ -409,8 +407,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_win_resize_object_add(ourGlobals.win, obj);
     eo_unref(obj);
 
-    ourGlobals.bx = eo_add(ELM_OBJ_BOX_CLASS, ourGlobals.win);
-    eo_do(ourGlobals.bx,
+    ourGlobals.bx = eo_add(ELM_OBJ_BOX_CLASS, ourGlobals.win,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_visibility_set(EINA_TRUE)
