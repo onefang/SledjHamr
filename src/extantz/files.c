@@ -1,78 +1,6 @@
 #include "extantz.h"
+#include <elm_interface_fileselector.h>
 
-
-static void my_fileselector_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info)
-{
-   /* event_info conatin the full path of the selected file
-    * or NULL if none is selected or cancel is pressed */
-    const char *selected = event_info;
-
-    if (selected)
-      printf("Selected file: %s\n", selected);
-    else
-      evas_object_del(data);  /* delete the test window */
-}
-
-static void my_fileselector_selected(void *data EINA_UNUSED, Evas_Object *obj, void *event_info)
-{
-   /* event_info conatin the full path of the selected file */
-   const char *selected = event_info;
-   printf("Selected file: %s\n", selected);
-
-   /* or you can query the selection */
-   if (elm_fileselector_multi_select_get(obj))
-     {
-        const Eina_List *li;
-        const Eina_List *paths = elm_fileselector_selected_paths_get(obj);
-        char *path;
-        printf("All selected files are:\n");
-        EINA_LIST_FOREACH(paths, li, path)
-          printf(" %s\n", path);
-     }
-   else
-     printf("or: %s\n", elm_fileselector_selected_get(obj));
-}
-
-static void _popup_close_cb(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-   evas_object_del(data);
-}
-
-static void my_fileselector_invalid(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info)
-{
-   Evas_Object *popup;
-   Evas_Object *btn;
-   char error_msg[256];
-
-   snprintf(error_msg, 256, "No such file or directory: %s", (char *)event_info);
-
-   popup = elm_popup_add(data);
-   elm_popup_content_text_wrap_type_set(popup, ELM_WRAP_CHAR);
-   elm_object_part_text_set(popup, "title,text", "Error");
-   elm_object_text_set(popup, error_msg);
-
-   btn = elm_button_add(popup);
-   elm_object_text_set(btn, "OK");
-   elm_object_part_content_set(popup, "button1", btn);
-   evas_object_smart_callback_add(btn, "clicked", _popup_close_cb, popup);
-
-   evas_object_show(popup);
-}
-
-static void my_fileselector_activated(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info)
-{
-   printf("Activated file: %s\n", (char *)event_info);
-}
-
-static void _expandable_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
-{
-   Evas_Object *fs = data;
-
-   if (elm_fileselector_expandable_get(fs))
-     elm_fileselector_expandable_set(fs, EINA_FALSE);
-   else
-     elm_fileselector_expandable_set(fs, EINA_TRUE);
-}
 
 static void _hidden_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
@@ -105,39 +33,65 @@ static void _sort_selected_cb(void *data, Evas_Object *obj, void *event_info)
 static void _tiny_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    Evas_Object *fs = data;
-   Evas_Coord w, h;
 
-   elm_fileselector_thumbnail_size_get(fs, &w, &h);
    elm_fileselector_thumbnail_size_set(fs, 16, 16);
 }
 
 static void _small_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    Evas_Object *fs = data;
-   Evas_Coord w, h;
 
-   elm_fileselector_thumbnail_size_get(fs, &w, &h);
    elm_fileselector_thumbnail_size_set(fs, 32, 32);
 }
 
 static void _middle_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    Evas_Object *fs = data;
-   Evas_Coord w, h;
 
-   elm_fileselector_thumbnail_size_get(fs, &w, &h);
    elm_fileselector_thumbnail_size_set(fs, 64, 64);
 }
 
 static void _big_icon_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    Evas_Object *fs = data;
-   Evas_Coord w, h;
 
-   elm_fileselector_thumbnail_size_get(fs, &w, &h);
    elm_fileselector_thumbnail_size_set(fs, 128, 128);
 }
 
+static void _OK_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+   Evas_Object *fs = data;
+
+   if (elm_fileselector_multi_select_get(fs))
+   {
+     Eina_List const *files = elm_fileselector_selected_paths_get(fs), *i;
+     char *file;
+
+     printf("SELECTED files : \n");
+     EINA_LIST_FOREACH(files, i, file)
+     {
+       printf("              %s\n", file);
+     }
+   }
+   else
+   {
+     char const *file = elm_fileselector_selected_get(fs);
+
+     printf("SELECTED file : %s\n", file);
+   }
+}
+
+static void _CANCEL_clicked(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
+{
+//   Evas_Object *fs = data;
+}
+
+static void my_fileselector_activated(void *data, Evas_Object *obj, void *event_info)
+{
+   _OK_clicked(data, obj, event_info);
+}
+
+#if 0
 static Eina_Bool _all_filter(const char *path EINA_UNUSED, Eina_Bool dir EINA_UNUSED, void *data EINA_UNUSED)
 {
    return EINA_TRUE;
@@ -152,10 +106,40 @@ static Eina_Bool _edje_filter(const char *path, Eina_Bool dir, void *data EINA_U
      return EINA_TRUE;
    return EINA_FALSE;
 }
+#endif
+
+// TODO - This is to work around a bug in Elm entry, remove it when the bug is fixed.
+//   The bug is that editable entry widgets cause the app to hang on exit.
+//   In this case, we have the name and path entry widgets.
+void _on_fs_del(void *data, Evas_Object *obj, void *event_info)
+{
+  // Make sure name entry is not editable.
+  elm_fileselector_is_save_set(obj, EINA_FALSE);
+
+/*  For future reference, these are the swallowed parts as of 2014-05-04 -
+   SWALLOW("elm.swallow.up", sd->up_button);
+   SWALLOW("elm.swallow.home", sd->home_button);
+   SWALLOW("elm.swallow.spinner", sd->spinner);
+
+   elm_layout_content_set(obj, "elm.swallow.files", sd->files_view);
+
+   SWALLOW("elm.swallow.path", sd->path_entry);
+   SWALLOW("elm.swallow.filename", sd->name_entry);
+
+   SWALLOW("elm.swallow.filters", sd->filter_hoversel);
+   SWALLOW("elm.swallow.cancel", sd->cancel_button);
+   SWALLOW("elm.swallow.ok", sd->ok_button);
+*/
+
+  // Make sure path entry is not editable.  We have to dig it out using private info here.
+  obj = elm_layout_content_get(obj, "elm.swallow.path");
+  elm_entry_editable_set(obj, EINA_FALSE);
+}
 
 fangWin *files_add(globals *ourGlobals)
 {
   fangWin *me;
+  Widget  *wid;
   Evas_Object *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
   me = fang_win_add(ourGlobals);
@@ -169,35 +153,36 @@ fangWin *files_add(globals *ourGlobals)
   elm_win_resize_object_add(me->win, bx);
 
   fs = eo_add(ELM_OBJ_FILESELECTOR_CLASS, bx);
+  wid = widgetAdd(me);
+  wid->obj = fs;
+  wid->on_del = _on_fs_del;
   eo_do(fs,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+    elm_obj_fileselector_buttons_ok_cancel_set(EINA_FALSE),
+    elm_interface_fileselector_expandable_set(EINA_TRUE),
+    elm_interface_fileselector_folder_only_set(EINA_FALSE),
     evas_obj_visibility_set(EINA_TRUE)
        );
   elm_box_pack_end(bx, fs);
 
-   /* disnable the fs file name entry */
-   elm_fileselector_is_save_set(fs, EINA_FALSE);
-   /* make the file list a tree with dir expandable in place */
-   elm_fileselector_expandable_set(fs, EINA_FALSE);
-   /* start the fileselector in the home dir */
-   elm_fileselector_path_set(fs, getenv("HOME"));
-   elm_fileselector_folder_only_set(fs, EINA_FALSE);
-   elm_fileselector_buttons_ok_cancel_set(fs, EINA_TRUE);
-   elm_fileselector_multi_select_set(fs, EINA_TRUE);
+  // TODO - Should allow these to be set from the caller.
+  elm_fileselector_path_set(fs, elm_app_data_dir_get());
+  elm_fileselector_is_save_set(fs, EINA_FALSE);
+  elm_fileselector_multi_select_set(fs, EINA_TRUE);
 
-   /* add filesters */
-   elm_fileselector_custom_filter_append(fs, _all_filter, NULL, "all files");
-   elm_fileselector_custom_filter_append(fs, _edje_filter, NULL, "edje files");
-   elm_fileselector_mime_types_filter_append(fs, "image/*", "image files");
-   elm_fileselector_mime_types_filter_append(fs, "text/*", "text files");
+  // TODO - Should allow these to be set from the caller.
+  // TODO - Don't do these, it adds a horribly out of place button.
+  // Either fix Elm file selector to be more general purpose,
+  //        clone and fix the fileselector theme,
+  //        or write my own file selector.
+//  elm_fileselector_custom_filter_append(fs, _all_filter, NULL, "all files");
+//  elm_fileselector_custom_filter_append(fs, _edje_filter, NULL, "edje files");
+//  elm_fileselector_mime_types_filter_append(fs, "image/*", "image files");
+//  elm_fileselector_mime_types_filter_append(fs, "text/*", "text files");
 
-   evas_object_smart_callback_add(fs, "done", my_fileselector_done, win);
-   evas_object_smart_callback_add(fs, "selected", my_fileselector_selected, win);
-   evas_object_smart_callback_add(fs, "selected,invalid", my_fileselector_invalid, win);
-   evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, win);
-
-  eo_unref(fs);
+  // Call back for double click or Enter pressed on file.
+  evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, fs);
 
   vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win);
   eo_do(vbox,
@@ -206,69 +191,94 @@ fangWin *files_add(globals *ourGlobals)
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
 
-   bt = elm_check_add(vbox);
-   elm_object_text_set(bt, "tree");
-   elm_check_state_set(bt, elm_fileselector_expandable_get(fs));
-   evas_object_smart_callback_add(bt, "changed", _expandable_clicked, fs);
-   elm_box_pack_end(vbox, bt);
-   evas_object_show(bt);
+  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox);
+  elm_object_text_set(hoversel, "sorting");
+  eo_do(hoversel, 
+    elm_obj_hoversel_hover_parent_set(me->win),
+    eo_key_data_set("fileselector", fs, NULL),
+    elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
+    elm_obj_hoversel_item_add("name(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_DESC),
+    elm_obj_hoversel_item_add("type(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_ASC),
+    elm_obj_hoversel_item_add("type(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_DESC),
+    elm_obj_hoversel_item_add("size(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_ASC),
+    elm_obj_hoversel_item_add("size(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_DESC),
+    elm_obj_hoversel_item_add("time(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_ASC),
+    elm_obj_hoversel_item_add("time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC),
+    evas_obj_visibility_set(EINA_TRUE)
+    );
+  elm_box_pack_end(vbox, hoversel);
+  eo_unref(hoversel);
 
-   bt = elm_check_add(vbox);
-   elm_object_text_set(bt, "hidden");
-   elm_check_state_set(bt, elm_fileselector_hidden_visible_get(fs));
-   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
-   elm_box_pack_end(vbox, bt);
-   evas_object_show(bt);
-
-   rdg = rd = elm_radio_add(vbox);
-   elm_radio_state_value_set(rd, ELM_FILESELECTOR_LIST);
-   elm_object_text_set(rd, "list");
-   elm_box_pack_end(vbox, rd);
-   evas_object_show(rd);
-   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
-
-   rd = elm_radio_add(vbox);
-   elm_radio_group_add(rd, rdg);
-   elm_radio_state_value_set(rd, ELM_FILESELECTOR_GRID);
-   elm_object_text_set(rd, "grid");
-   elm_box_pack_end(vbox, rd);
-   evas_object_show(rd);
-   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
+  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox);
+  elm_object_text_set(hoversel, "size");
+  eo_do(hoversel, 
+    elm_obj_hoversel_hover_parent_set(me->win),
+    eo_key_data_set("fileselector", fs, NULL),
+    elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
+    elm_obj_hoversel_item_add("small",  NULL, ELM_ICON_NONE, _small_icon_clicked,  fs),
+    elm_obj_hoversel_item_add("medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs),
+    elm_obj_hoversel_item_add("big",    NULL, ELM_ICON_NONE, _big_icon_clicked,    fs),
+    evas_obj_visibility_set(EINA_TRUE)
+    );
+  elm_box_pack_end(vbox, hoversel);
+  // Make sure it starts off as small, works around "hitting grid mode before hitting size not showing anything" bug.
+  _small_icon_clicked(fs, hoversel, NULL);
+  eo_unref(hoversel);
 
 
-   hoversel = elm_hoversel_add(vbox);
-   elm_hoversel_hover_parent_set(hoversel, me->win);
-   evas_object_data_set(hoversel, "fileselector", fs);
-   elm_object_text_set(hoversel, "sorting");
+  bt = eo_add(ELM_OBJ_CHECK_CLASS, vbox);
+  elm_object_text_set(bt, "hidden");
+  eo_do(bt,
+   elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
+    evas_obj_visibility_set(EINA_TRUE)
+    );
+  evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
+  elm_box_pack_end(vbox, bt);
+  eo_unref(bt);
 
-   elm_hoversel_item_add(hoversel, "name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC);
-   elm_hoversel_item_add(hoversel, "name(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_DESC);
-   elm_hoversel_item_add(hoversel, "type(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_ASC);
-   elm_hoversel_item_add(hoversel, "type(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_DESC);
-   elm_hoversel_item_add(hoversel, "size(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_ASC);
-   elm_hoversel_item_add(hoversel, "size(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_DESC);
-   elm_hoversel_item_add(hoversel, "time(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_ASC);
-   elm_hoversel_item_add(hoversel, "time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC);
+  rdg = rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox);
+  elm_object_text_set(rd, "grid");
+  eo_do(rd,
+    elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
+    evas_obj_visibility_set(EINA_TRUE)
+    );
+  elm_box_pack_end(vbox, rd);
+  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
+  // Make it start in grid mode.  It defaults to list mode, so this swaps it over.
+  _mode_changed_cb(fs, rd, NULL);
+  eo_unref(rd);
 
-   elm_box_pack_end(vbox, hoversel);
-   evas_object_show(hoversel);
+  rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox);
+  elm_radio_group_add(rd, rdg);
+  elm_object_text_set(rd, "list");
+  eo_do(rd,
+    elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
+    evas_obj_visibility_set(EINA_TRUE)
+    );
+  elm_box_pack_end(vbox, rd);
+  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
+  eo_unref(rd);
+  // No need to unref this, it's taken care of already.
+  //eo_unref(rdg);
 
-   hoversel = elm_hoversel_add(vbox);
-   elm_hoversel_hover_parent_set(hoversel, me->win);
-   evas_object_data_set(hoversel, "fileselector", fs);
-   elm_object_text_set(hoversel, "size");
+  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
+  elm_object_text_set(bt, "OK");
+  eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
+  evas_object_smart_callback_add(bt, "clicked", _OK_clicked, fs);
+  elm_box_pack_end(vbox, bt);
+  eo_unref(bt);
 
-   elm_hoversel_item_add(hoversel, "tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs);
-   elm_hoversel_item_add(hoversel, "small",  NULL, ELM_ICON_NONE, _small_icon_clicked,  fs);
-   elm_hoversel_item_add(hoversel, "medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs);
-   elm_hoversel_item_add(hoversel, "big",    NULL, ELM_ICON_NONE, _big_icon_clicked,    fs);
+  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win);
+  elm_object_text_set(bt, "CANCEL");
+  eo_do(bt, evas_obj_visibility_set(EINA_TRUE));
+  evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, fs);
+  elm_box_pack_end(vbox, bt);
+  eo_unref(bt);
 
-   elm_box_pack_end(vbox, hoversel);
-   evas_object_show(hoversel);
-
-   elm_box_pack_end(bx, vbox);
-   evas_object_show(vbox);
+  elm_box_pack_end(bx, vbox);
+  evas_object_show(vbox);
   evas_object_show(bx);
+  eo_unref(vbox);
   eo_unref(bx);
 
   fang_win_complete(ourGlobals, me, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500);

@@ -413,7 +413,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //    overlay_add(&ourGlobals);
     woMan = woMan_add(&ourGlobals);
     chat = chat_add(&ourGlobals);
-//    files = files_add(&ourGlobals);
+    files = files_add(&ourGlobals);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
