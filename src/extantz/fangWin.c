@@ -174,13 +174,23 @@ void overlay_add(globals *ourGlobals)
   evas_object_show(gld->winwin);
 }
 
-Widget *widgetAdd(fangWin *win)
+Widget *widgetAdd(fangWin *win, const Eo_Class *klass, Evas_Object *parent, char *title)
 {
   Widget *result;
 
   result = calloc(1, sizeof(Widget));
   strcpy(result->magic, "Widget");
   eina_clist_add_head(&win->widgets, &result->node);
+
+  if (parent)
+  {
+    result->obj = eo_add(klass, parent,
+      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+      evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+      evas_obj_visibility_set(EINA_TRUE)
+    );
+    if (title)  elm_object_text_set(result->obj, title);
+  }
 
   return result;
 }

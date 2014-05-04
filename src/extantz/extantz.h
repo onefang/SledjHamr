@@ -242,6 +242,8 @@ typedef struct _globals
   GLData gld;
   Scene_Data	*scene;
 
+  Eina_Clist	windows;
+
   fangWin	*files;
 } globals;
 
@@ -273,7 +275,7 @@ fangWin *fang_win_add(globals *ourGlobals);
 void fang_win_complete(globals *ourGlobals, fangWin *win, int x, int y, int w, int h);
 void fang_win_del(globals *ourGlobals, fangWin *win);
 void overlay_add(globals *ourGlobals);
-Widget *widgetAdd(fangWin *win);
+Widget *widgetAdd(fangWin *win, const Eo_Class *klass, Evas_Object *parent, char *title);
 
 fangWin *chat_add(globals *ourGlobals);
 fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);

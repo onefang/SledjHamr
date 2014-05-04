@@ -35,19 +35,13 @@ fangWin *chat_add(globals *ourGlobals)
   elm_box_pack_end(bx, en);
   eo_unref(en);
 
-  en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win);
-  wid = widgetAdd(me);
-  wid->obj = en;
+  wid = widgetAdd(me, ELM_OBJ_ENTRY_CLASS, me->win, "");
   wid->on_del = _on_entry_del;
-  elm_object_text_set(en, "");
-  eo_do(en,
+  eo_do(wid->obj,
     elm_obj_entry_scrollable_set(EINA_TRUE),
-    elm_obj_entry_editable_set(EINA_TRUE),
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-    evas_obj_visibility_set(EINA_TRUE)
+    elm_obj_entry_editable_set(EINA_TRUE)
        );
-  elm_box_pack_end(bx, en);
+  elm_box_pack_end(bx, wid->obj);
 
   evas_object_show(bx);
   eo_unref(bx);

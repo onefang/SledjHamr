@@ -155,19 +155,15 @@ fangWin *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   );
   elm_win_resize_object_add(me->win, bx);
 
-  fs = eo_add(ELM_OBJ_FILESELECTOR_CLASS, bx);
-  me->data = fs;
-  wid = widgetAdd(me);
-  wid->obj = fs;
+  wid = widgetAdd(me, ELM_OBJ_FILESELECTOR_CLASS, bx, NULL);
+  fs = wid->obj;
   wid->data = ourGlobals;
   wid->on_del = _on_fs_del;
+  me->data = fs;
   eo_do(fs,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     elm_obj_fileselector_buttons_ok_cancel_set(EINA_FALSE),
     elm_interface_fileselector_expandable_set(EINA_TRUE),
-    elm_interface_fileselector_folder_only_set(EINA_FALSE),
-    evas_obj_visibility_set(EINA_TRUE)
+    elm_interface_fileselector_folder_only_set(EINA_FALSE)
        );
   elm_box_pack_end(bx, fs);
 
