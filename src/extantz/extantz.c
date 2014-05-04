@@ -510,7 +510,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
 	EINA_CLIST_FOR_EACH_ENTRY(win, &ourGlobals.winFangs, winFang, node)
 	{
-	  winFangDel(&ourGlobals, win);
+	  winFangDel(win);
 	}
 	eo_unref(ourGlobals.bx);
 	evas_object_del(ourGlobals.win);

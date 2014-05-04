@@ -67,19 +67,18 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
-winFang *winFangAdd(globals *ourGlobals)
+winFang *winFangAdd(Evas_Object *parent)
 {
   winFang *result;
   Evas_Object *bg;
 
   result = calloc(1, sizeof(winFang));
-  eina_clist_add_head(&ourGlobals->winFangs, &result->node);
   eina_clist_init(&result->widgets);
 
   // In theory this should create an EWS window, in practice, I'm not seeing any difference.
   // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
 //  elm_config_engine_set("ews");
-  result->win = elm_win_add(ourGlobals->win, "inlined", ELM_WIN_INLINED_IMAGE);
+  result->win = elm_win_add(parent, "inlined", ELM_WIN_INLINED_IMAGE);
   // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
   // According to the Elm inlined image window example, this is what's needed to.
   evas_object_event_callback_add(elm_win_inlined_image_object_get(result->win), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
@@ -96,7 +95,7 @@ winFang *winFangAdd(globals *ourGlobals)
   return result;
 }
 
-void winFangComplete(globals *ourGlobals, winFang *win, int x, int y, int w, int h)
+void winFangComplete(winFang *win, int x, int y, int w, int h)
 {
   Evas_Object *obj  = elm_win_inlined_image_object_get(win->win);
   Evas_Object *obj2 = evas_object_evas_get(obj);
@@ -150,7 +149,7 @@ void winFangComplete(globals *ourGlobals, winFang *win, int x, int y, int w, int
   }
 }
 
-void winFangDel(globals *ourGlobals, winFang *win)
+void winFangDel(winFang *win)
 {
   Widget *wid;
 

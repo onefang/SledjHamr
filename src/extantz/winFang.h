@@ -1,9 +1,6 @@
 #include <Elementary.h>
 
 
-// Forward references.
-typedef struct _globals globals;
-
 typedef struct _winFang
 {
   Evas_Object	*win;
@@ -33,10 +30,10 @@ typedef struct _Widget
   Evas_Smart_Cb on_del;
 } Widget;
 
-winFang *winFangAdd(globals *ourGlobals);
-void winFangComplete(globals *ourGlobals, winFang *win, int x, int y, int w, int h);
+winFang *winFangAdd(Evas_Object *parent);
+void winFangComplete(winFang *win, int x, int y, int w, int h);
 void winFangHide(winFang *win);
 void winFangShow(winFang *win);
-void winFangDel(globals *ourGlobals, winFang *win);
+void winFangDel(winFang *win);
 
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
