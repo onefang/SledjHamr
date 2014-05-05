@@ -1,6 +1,7 @@
 #include "extantz.h"
 
 
+// TODO - Rotate the direction vector by the rotation to convert from input to camera coords.
 Eina_Bool animateCamera(Scene_Data *scene)
 {
   Evas_Real x, y, z, w;
@@ -150,6 +151,7 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
   else printf("Camera input not ready\n");
 }
 
+/* While it's true that image is an Elm image, seems this Elm input event callbacrk doesn't work.
 // Elm style event callback.
 static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
 {
@@ -173,10 +175,11 @@ static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Ev
 
     default :
       printf("Unknown GL input event.\n");
-  } /* switch */
+  }
 
   return processed;
 }
+*/
 
 Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
 {
@@ -201,7 +204,8 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
   // In this code, we are making our own camera, so grab it's input when we are focused.
   evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, scene->move);
   evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   scene->move);
-  elm_object_event_callback_add(image, _cb_event_GL, NULL);
+  // While it's true that image is an Elm image, seems this Elm input event callbacrk doesn't work.
+//  elm_object_event_callback_add(image, _cb_event_GL, NULL);
 
   return result;
 }
