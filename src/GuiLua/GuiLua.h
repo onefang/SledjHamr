@@ -13,11 +13,4 @@
 #define THINGASM	"thingasm"
 
 
-typedef struct _globals
-{
-  winFang	*win;
-  int		logDom;		// Our logging domain.
-} globals;
-
-
 void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop);

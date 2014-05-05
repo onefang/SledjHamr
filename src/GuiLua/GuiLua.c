@@ -144,8 +144,7 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 
 static int logDom;	// Our logging domain.
-globals ourGlobals;
-static const char *globName  = "ourGlobals";
+static winFang *win;
 
 
 /* Sooo, how to do this -
@@ -161,13 +160,12 @@ win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Th
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
-  globals *ourGlobals;
-  lua_State *L = data;
-  Widget *wid;
+  Widget *wid = data;
 
-  wid = evas_object_data_get(obj, "Widget");
   if (wid)
   {
+    lua_State *L = wid->data;
+
     PD("Doing action %s", wid->action);
     if (0 != luaL_dostring(L, wid->action))
       PE("Error running - %s", wid->action);
@@ -177,14 +175,9 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
 // TODO - skang.thingasm() should pass us the winFang pointer it has as the parent module.
 static int widget(lua_State *L)
 {
-  globals *ourGlobals;
   char *type = "label";
   char *title = ":";
   int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
 
   pull_lua(L, 1, "$type $title %x %y %w %h", &type, &title, &x, &y, &w, &h);
 
@@ -195,16 +188,15 @@ static int widget(lua_State *L)
     Widget *wid;
 
     // These two lines are likely the only ones that will be different for the different sorts of widgets.
-    wid = widgetAdd(ourGlobals->win, ELM_OBJ_BUTTON_CLASS, ourGlobals->win->win, title);
-    evas_object_smart_callback_add(wid->obj, "clicked", _on_click, L);
-
+    wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, win->win, title);
+    wid->data = L;
     eo_do(wid->obj,
-//	elm_obj_widget_part_text_set(NULL, wid->label),
 	evas_obj_size_set(w, h),
 	evas_obj_position_set(x, y),
 	evas_obj_visibility_set(EINA_TRUE),
 	eo_key_data_set("Widget", wid, NULL)
 	);
+    evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
     /* Evas_Object *bt isn't a real pointer it seems.  At least Lua bitches about it -
          PANIC: unprotected error in call to Lua API (bad light userdata pointer)
@@ -226,7 +218,7 @@ static int action(lua_State *L)
   pull_lua(L, 2, "$", &action);
   if (wid && strcmp(wid->magic, "Widget") == 0)
   {
-printf(">>>>>>>>>> Setting action : %s\n", action);
+PD("Setting action : %s\n", action);
     wid->action = strdup(action);
   }
   return 0;
@@ -241,22 +233,16 @@ static int colour(lua_State *L)
 
 static int window(lua_State *L)
 {
-  globals *ourGlobals;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
-  int result = 0;
   int w = WIDTH, h = HEIGHT;
 
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-
   pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
-  ourGlobals->win = winFangAdd(NULL, 0, 0, w, h, title, name);
-  lua_pushlightuserdata(L, &ourGlobals->win);
-  result = 1;
+  win = winFangAdd(NULL, 0, 0, w, h, title, name);
 
-  return result;
+  lua_pushlightuserdata(L, &win);
+
+  return 1;
 }
 
 static int clear(lua_State *L)
@@ -268,13 +254,7 @@ static int clear(lua_State *L)
 
 static int loopWindow(lua_State *L)
 {
-  globals *ourGlobals;
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-
-  if (ourGlobals->win)
+  if (win)
     elm_run();
 
   return 0;
@@ -289,13 +269,7 @@ static int quit(lua_State *L)
 
 static int closeWindow(lua_State *L)
 {
-  globals *ourGlobals;
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-
-  winFangDel(ourGlobals->win);
+  winFangDel(win);
 
   if (logDom >= 0)
   {
@@ -341,10 +315,6 @@ int luaopen_GuiLua(lua_State *L)
 //    LUA_ENVIRONINDEX - C function environment, in this case luaopen_GuiLUa() is the C function
 //    LUA_REGISTRYINDEX - C registry, global, for unique keys use the module name as a string, or a lightuserdata address to a C object in our module.
 //    lua_upvalueindex(n) - C function upvalues
-
-  // Shove ourGlobals into the registry.
-  lua_pushlightuserdata(L, &ourGlobals);
-  lua_setfield(L, LUA_REGISTRYINDEX, globName);
 
   // The skang module should have been loaded by now, so we can just grab it out of package.loaded[].
   lua_getglobal(L, "package");
