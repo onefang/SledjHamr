@@ -880,7 +880,7 @@ thingasm = function (names, ...)
     local args, err = loadstring('return ' .. thingy.widget)
     if args then
       setfenv(args, parent)
-      thingy.Cwidget = widget(args())
+      thingy.Cwidget = widget(parent.window, args())
 print('\nNO IDEA WHY this does isValid() three times on the action, and the first one being a string.')
       parent.W[name] = thingy
     else

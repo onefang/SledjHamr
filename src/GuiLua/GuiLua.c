@@ -143,8 +143,8 @@ and ordinary elementary widgets.  Proper introspection can come later.
 #include "GuiLua.h"
 
 
-static int logDom;	// Our logging domain.
-static winFang *win;
+static int		logDom;		// Our logging domain.
+static Eina_Clist	winFangs;	// The windows we might open.
 
 
 /* Sooo, how to do this -
@@ -156,7 +156,6 @@ win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Th
 */
 
 
-// TODO - These functions should be able to deal with multiple windows.
 // TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
@@ -172,14 +171,14 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   }
 }
 
-// TODO - skang.thingasm() should pass us the winFang pointer it has as the parent module.
 static int widget(lua_State *L)
 {
-  char *type = "label";
+  winFang *win = NULL;
+  char *type = "button";
   char *title = ":";
   int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
 
-  pull_lua(L, 1, "$type $title %x %y %w %h", &type, &title, &x, &y, &w, &h);
+  pull_lua(L, 1, "*window $type $title %x %y %w %h", &win, &type, &title, &x, &y, &w, &h);
 
   // Poor mans introspection, until I write real introspection into EFL.
   // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?
@@ -198,11 +197,6 @@ static int widget(lua_State *L)
 	);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
-    /* Evas_Object *bt isn't a real pointer it seems.  At least Lua bitches about it -
-         PANIC: unprotected error in call to Lua API (bad light userdata pointer)
-       So we wrap the _Widget instead of the Evas_Object.
-       TODO - Might as well make _Widget a full userdata.
-    */
     lua_pushlightuserdata(L, (void *) wid);
     return 1;
   }
@@ -231,16 +225,22 @@ static int colour(lua_State *L)
   return 0;
 }
 
+/*  userdata vs light userdata
+  Lua wants to allocate the memory for userdata itself.
+  Light user data an actual pointer.
+*/
+
 static int window(lua_State *L)
 {
+  winFang *win = NULL;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
 
   pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
   win = winFangAdd(NULL, 0, 0, w, h, title, name);
-
-  lua_pushlightuserdata(L, &win);
+  eina_clist_add_head(&winFangs, &win->node);
+  lua_pushlightuserdata(L, win);
 
   return 1;
 }
@@ -254,8 +254,7 @@ static int clear(lua_State *L)
 
 static int loopWindow(lua_State *L)
 {
-  if (win)
-    elm_run();
+  elm_run();
 
   return 0;
 }
@@ -269,7 +268,12 @@ static int quit(lua_State *L)
 
 static int closeWindow(lua_State *L)
 {
-  winFangDel(win);
+  winFang *win;
+
+  EINA_CLIST_FOR_EACH_ENTRY(win, &winFangs, winFang, node)
+  {
+    winFangDel(win);
+  }
 
   if (logDom >= 0)
   {
@@ -310,6 +314,8 @@ int luaopen_GuiLua(lua_State *L)
   elm_config_finger_size_set(0);
   elm_config_scale_set(1.0);
 
+  eina_clist_init(&winFangs);
+
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
 //    LUA_ENVIRONINDEX - C function environment, in this case luaopen_GuiLUa() is the C function
@@ -330,7 +336,11 @@ int luaopen_GuiLua(lua_State *L)
 //thingasm{'window', 'The size and title of the application Frame.', window, 'x,y,name', acl='GGG'}
   push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "number,number,string", "GGG", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
-  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+PD("GuiLua 2");
+// TODO - This one crashes sometimes.  Figure out why later.
+//  push_lua(L, "@ ( { = $ $ & $ } )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
+  push_lua(L, "@ ( = $ $ & )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
@@ -343,7 +353,6 @@ int luaopen_GuiLua(lua_State *L)
   // Makes no difference what we return, but it's expecting something.
   return 1;
 }
-
 
 void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
 {
