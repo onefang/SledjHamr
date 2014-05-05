@@ -1,5 +1,6 @@
 #include "extantz.h"
 
+
 static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
   globals	      *ourGlobals = data;

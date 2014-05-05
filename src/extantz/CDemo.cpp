@@ -3,7 +3,6 @@
 
 #include <irrlicht.h>
 #include "extantz.h"
-#include "extantzCamera.h"
 #include "CDemo.h"
 
 CDemo::CDemo(GLData *gld, bool a)

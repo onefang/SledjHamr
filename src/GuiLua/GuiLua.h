@@ -1,3 +1,11 @@
+#ifndef _GUILUA_H_
+#define _GUILUA_H_
+
+
+#include "Runnr.h"
+#include "winFang.h"
+
+
 #define WIDTH  (300)
 #define HEIGHT (300)
 
@@ -19,3 +27,5 @@ typedef struct _GuiLua
 } GuiLua;
 
 GuiLua *GuiLuaDo(int argc, char **argv, Evas_Object *parent);
+
+#endif

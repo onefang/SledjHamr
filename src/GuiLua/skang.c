@@ -1,7 +1,4 @@
 #include "SledjHamr.h"
-#include "LumbrJack.h"
-#include "Runnr.h"
-#include "winFang.h"
 #include "GuiLua.h"
 
 

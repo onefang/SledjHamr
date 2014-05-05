@@ -1,19 +1,20 @@
+#ifndef _EXTANTZ_H_
+#define _EXTANTZ_H_
+
 #define USE_PHYSICS 1
 #define USE_IRR     0
 #define USE_DEMO    0
 #define DO_GEARS    0
 
 
-#include "SledjHamr.h"
-#include "LumbrJack.h"
+#include "winFang.h"
+#include "GuiLua.h"
+
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
 #include <EPhysics.h>
-#include "extantzCamera.h"
-#include "winFang.h"
-#include "Runnr.h"
-#include "GuiLua.h"
 
+#include "extantzCamera.h"
 
 #ifdef GL_GLES
 #include <EGL/egl.h>
@@ -263,4 +264,6 @@ winFang *woMan_add(globals *ourGlobals);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

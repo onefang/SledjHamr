@@ -1,5 +1,6 @@
+#ifndef _RUNNR_H_
+#define _RUNNR_H_
 
-#include <stdio.h>
 #include <ctype.h>
 
 #include <Eina.h>
@@ -13,3 +14,5 @@
 void dumpStack(lua_State *L, int i);
 int pull_lua(lua_State *L, int i, char *params, ...);
 int push_lua(lua_State *L, char *params, ...);
+
+#endif

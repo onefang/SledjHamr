@@ -139,12 +139,8 @@ and ordinary elementary widgets.  Proper introspection can come later.
 */
 
 
-#include "SledjHamr.h"
 #include "LumbrJack.h"
-#include "Runnr.h"
-#include "winFang.h"
 #include "GuiLua.h"
-//#include <stdio.h>
 
 
 static int		logDom;		// Our logging domain.

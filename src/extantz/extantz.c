@@ -1,4 +1,6 @@
 #include "extantz.h"
+#include "SledjHamr.h"
+#include "LumbrJack.h"
 
 
 static int logDom;	// Our logging domain.

@@ -1,3 +1,7 @@
+#ifndef _WINFANG_H_
+#define _WINFANG_H_
+
+
 #define EFL_API_OVERRIDE 1
 /* Enable access to unstable EFL API that are still in beta */
 #define EFL_BETA_API_SUPPORT 1
@@ -47,3 +51,5 @@ void winFangShow(winFang *win);
 void winFangDel(winFang *win);
 
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
+
+#endif
