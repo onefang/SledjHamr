@@ -254,7 +254,7 @@ EAPI void Evas_3D_Demo_add(globals *ourGlobals);
 Eina_Bool _animate_scene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
-Scene_Data *scenriAdd(globals *ourGlobals);
+Scene_Data *scenriAdd(Evas *evas, Evas_Object *win);
 Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
 

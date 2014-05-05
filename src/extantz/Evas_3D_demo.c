@@ -448,7 +448,7 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
 
 void Evas_3D_Demo_add(globals *ourGlobals)
 {
-  ourGlobals->scene = scenriAdd(ourGlobals);
+  ourGlobals->scene = scenriAdd(ourGlobals->evas, ourGlobals->win);
 
   _cube_setup(ourGlobals,   ourGlobals->scene);
   _sonic_setup(ourGlobals,  ourGlobals->scene);

@@ -85,7 +85,7 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
     ev->output.x, ev->output.y, ev->canvas.x, ev->canvas.y, obj_x, obj_y, scene_x, scene_y, s, t, n, name, m);
 }
 
-Scene_Data *scenriAdd(globals *ourGlobals)
+Scene_Data *scenriAdd(Evas *evas, Evas_Object *win)
 {
   Scene_Data *scene;
   Evas_Object *obj, *temp;
@@ -94,17 +94,17 @@ Scene_Data *scenriAdd(globals *ourGlobals)
 
   // TODO - I have no idea how this should work.
   // It seems the people that wrote the examples don't know either.  lol
-//  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
-  scene->root_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
+//  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, evas, EVAS_3D_NODE_TYPE_NODE);
+  scene->root_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_NODE);
 
-  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas,
+  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
     evas_3d_scene_root_node_set(scene->root_node),
     evas_3d_scene_size_set(512, 512),
     evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
   );
 
   // Add an image object for 3D scene rendering.
-  obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
+  obj = eo_add(ELM_OBJ_IMAGE_CLASS, win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     evas_obj_visibility_set(EINA_TRUE),
@@ -113,16 +113,16 @@ Scene_Data *scenriAdd(globals *ourGlobals)
   elm_object_tooltip_text_set(obj, "");
   elm_object_tooltip_hide(obj);
   scene->image = obj;
-  scene->camera_node = cameraAdd(ourGlobals->evas, scene, obj);
+  scene->camera_node = cameraAdd(evas, scene, obj);
 
-  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas,
+  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, evas,
     evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_directional_set(EINA_TRUE)
   );
 
-  scene->light_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_LIGHT);
+  scene->light_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_LIGHT);
   eo_do(scene->light_node,
     evas_3d_node_light_set(scene->light),
     evas_3d_node_position_set(1000.0, 0.0, 1000.0),
@@ -136,7 +136,7 @@ Scene_Data *scenriAdd(globals *ourGlobals)
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, scene);
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
 
-  elm_win_resize_object_add(ourGlobals->win, obj);
+  elm_win_resize_object_add(win, obj);
 
   return scene;
 }
