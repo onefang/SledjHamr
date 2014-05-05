@@ -45,6 +45,7 @@ void dumpStack(lua_State *L, int i)
 //  str		$
 //  bool	!
 //  C func	&
+//  lightuserdata	*
 //  table.field	@  Expects an integer and a string.
 //  nil		~
 //  table       {} Starts and stops filling up a new table.
@@ -53,7 +54,6 @@ void dumpStack(lua_State *L, int i)
 // FIXME: Still to do, if we ever use them -
 //  stack	=  Get a value from the stack, expects a stack index.
 //  userdata	+
-//  lightuserdata	*
 //  thread	^
 
 static char *_push_name(lua_State *L, char *q, int *idx)  // Stack usage [-0, +1, e or m]
@@ -167,6 +167,17 @@ int pull_lua(lua_State *L, int i, char *params, ...)         // Stack usage -
                     }
                   break;
                }
+             case '*':
+               {
+                  if (table)  q = _push_name(L, q, &i);                     // Stack usage [-0, +1, e]
+                  if (lua_islightuserdata(L, j))                               // Stack usage [-0, +0, -]
+                    {
+                       void **v = va_arg(vl, void **);
+                       *v = lua_touserdata(L, j);                         // Stack usage [-0, +0, -]
+                       n++;
+                    }
+                  break;
+               }
              default:
                {
                   get = EINA_FALSE;
@@ -255,6 +266,12 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
 
         if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
         lua_getfield(L, tabl, field);           // Stack usage [-0, +1, e]
+        break;
+      }
+      case '*':
+      {
+        if (table)  q = _push_name(L, q, &i);     // Stack usage [-0, +1, m]
+        lua_pushlightuserdata(L, va_arg(vl, void *)); // Stack usage [-0, +1, m]
         break;
       }
       case '&':
