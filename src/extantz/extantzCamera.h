@@ -13,6 +13,7 @@
 #include <SKeyMap.h>
 #include <irrArray.h>
 #include <ICameraSceneNode.h>
+#include "scenri.h"
 
 using namespace irr;
 using namespace scene;
@@ -23,13 +24,6 @@ typedef struct extantzCamera extantzCamera;
 typedef struct ICameraSceneNode ICameraSceneNode;
 #endif
 
-typedef struct
-{
-    float	x, y, z;
-    float	r, s, t;
-    float	jump;
-    float	JumpSpeed, RotateSpeed, MoveSpeed;
-} cameraMove;
 
 cameraMove *getCameraMove(ICameraSceneNode *camera);
 

@@ -9,6 +9,7 @@
 
 #include "winFang.h"
 #include "GuiLua.h"
+#include "scenri.h"
 
 #include <elm_widget_glview.h>
 #include <Evas_GL.h>
@@ -137,7 +138,6 @@ typedef struct _Scene_Data
   Evas_3D_Node     *camera_node;
   Evas_3D_Node     *light_node;
 
-  Evas_3D_Camera   *camera;
   Evas_3D_Light    *light;
 
   Evas_3D_Mesh     *mesh;
@@ -254,7 +254,9 @@ EAPI void Evas_3D_Demo_add(globals *ourGlobals);
 Eina_Bool _animate_scene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
-void cameraAdd(globals *ourGlobals, Evas_Object *win);
+Scene_Data *scenriAdd(globals *ourGlobals);
+Evas_3D_Node *cameraAdd(globals *ourGlobals, Scene_Data *scene, Evas_Object *win);
+Eina_Bool animateCamera(globals *ourGlobals);
 
 winFang *chat_add(globals *ourGlobals);
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);

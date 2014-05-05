@@ -1,7 +1,5 @@
 #include "extantz.h"
-
-
-static Scene_Data ourScene;
+#include "scenri.h"
 
 
 static const float cube_vertices[] =
@@ -80,36 +78,6 @@ static const unsigned int pixels1[] =
    0xff0000ff, 0xff0000ff, 0xffffffff, 0xffffffff,
 };
 
-
-typedef struct _vec4
-{
-    float   x;
-    float   y;
-    float   z;
-    float   w;
-} vec4;
-
-typedef struct _vec3
-{
-    float   x;
-    float   y;
-    float   z;
-} vec3;
-
-typedef struct _vec2
-{
-    float   x;
-    float   y;
-} vec2;
-
-typedef struct _vertex
-{
-    vec3    position;
-    vec3    normal;
-    vec3    tangent;
-    vec4    color;
-    vec3    texcoord;
-} vertex;
 
 static int		vertex_count = 0;
 static vertex	       *sphere_vertices = NULL;
@@ -265,7 +233,6 @@ _sphere_init(int precision)
     }
 }
 
-
 Eina_Bool _animate_scene(globals *ourGlobals)
 {
   static float angle = 0.0f;
@@ -273,10 +240,6 @@ Eina_Bool _animate_scene(globals *ourGlobals)
   static int   frame = 0;
   static int   inc   = 1;
   static int   sonicFrame = 0;
-  Evas_Real x, y, z, w;
-  EPhysics_Quaternion *quat   = ephysics_quaternion_new();
-  EPhysics_Quaternion *quat1  = ephysics_quaternion_new();
-  EPhysics_Quaternion *result = ephysics_quaternion_new();
 
   Scene_Data *scene = ourGlobals->scene;
 
@@ -307,65 +270,7 @@ Eina_Bool _animate_scene(globals *ourGlobals)
     evas_3d_node_orientation_angle_axis_set(angle, 0.0, 1.0, 0.0)
     );
 
-  // Camera movement.
-  ephysics_quaternion_euler_set(quat1, ourGlobals->gld.move->r, ourGlobals->gld.move->s, ourGlobals->gld.move->t);
-  eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &x, &y, &z, &w));
-  ephysics_quaternion_set(quat, x, y, z, w);
-  ephysics_quaternion_multiply(quat, quat1, result);
-  ephysics_quaternion_normalize(result);
-  ephysics_quaternion_get(result, &x, &y, &z, &w);
-  eo_do(scene->camera_node, evas_3d_node_orientation_set(x, y, z, w));
-
-  eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
-  x -= ourGlobals->gld.move->x;
-  y -= ourGlobals->gld.move->y;
-  z -= ourGlobals->gld.move->z;
-  eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
-
-  free(result);
-  free(quat1);
-  free(quat);
-
   return EINA_TRUE;
-}
-
-
-static void
-_camera_setup(globals *ourGlobals, Scene_Data *scene)
-{
-  scene->camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas,
-    evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
-    );
-
-  scene->camera_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_CAMERA);
-  eo_do(scene->camera_node,
-    evas_3d_node_camera_set(scene->camera),
-    evas_3d_node_position_set(50.0, 0.0, 20.0),
-    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
-    );
-
-  eo_do(scene->root_node, evas_3d_node_member_add(scene->camera_node));
-}
-
-static void
-_light_setup(globals *ourGlobals, Scene_Data *scene)
-{
-  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas,
-    evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_directional_set(EINA_TRUE)
-    );
-
-  scene->light_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_LIGHT);
-  eo_do(scene->light_node,
-    evas_3d_node_light_set(scene->light),
-    evas_3d_node_position_set(1000.0, 0.0, 1000.0),
-    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
-    );
-
-  eo_do(scene->root_node, evas_3d_node_member_add(scene->light_node));
-
 }
 
 static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
@@ -541,151 +446,13 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
 }
 
 
-static void
-_scene_setup(globals *ourGlobals, Scene_Data *scene)
-{
-  // TODO - I have no idea how this should work.
-  // It seems the people that wrote the examples don't know either.  lol
-//  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
-  scene->root_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_NODE);
-
-  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, ourGlobals->evas,
-    evas_3d_scene_root_node_set(scene->root_node),
-    evas_3d_scene_size_set(512, 512),
-    evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
-  );
-
-  _camera_setup(ourGlobals, scene);
-  _light_setup(ourGlobals,  scene);
-  _cube_setup(ourGlobals,   scene);
-  _sonic_setup(ourGlobals,  scene);
-  _earth_setup(ourGlobals,  scene);
-
-  eo_do(scene->scene,
-    evas_3d_scene_camera_node_set(scene->camera_node)
-    );
-}
-
-
-static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
-{
-   Scene_Data *scene = data;
-   Evas_Event_Mouse_Move *ev = einfo;
-   Evas_Coord x, y, w, h;
-   Evas_Coord obj_x, obj_y;
-   int scene_w, scene_h;
-   Evas_Real scene_x, scene_y;
-   Evas_Real s, t;
-   Evas_3D_Node *n;
-   Evas_3D_Mesh *m;
-   Eina_Bool pick;
-   char *name = NULL;
-
-   evas_object_geometry_get(o, &x, &y, &w, &h);
-
-   obj_x = ev->cur.canvas.x - x;
-   obj_y = ev->cur.canvas.y - y;
-
-   eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
-
-   scene_x = obj_x * scene_w / (Evas_Real)w;
-   scene_y = obj_y * scene_h / (Evas_Real)h;
-
-   eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
-   if (pick)
-     name = evas_object_data_get(n, "Name");
-   // This is a raw Evas callback, on the Elm image internal Evas_Object.
-   // So we need to get the Elm Image back from the raw Evas_Object.
-   // Which is why we stuffed it in the scene structure.
-   if (name)
-   {
-      elm_object_tooltip_text_set(scene->image, name);
-      elm_object_tooltip_show(scene->image);
-   }
-   else
-   {
-      elm_object_tooltip_text_set(scene->image, "");
-      elm_object_tooltip_hide(scene->image);
-   }
-}
-
-static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
-{
-   Scene_Data *scene = data;
-   Evas_Event_Mouse_Down *ev = einfo;
-   Evas_Coord x, y, w, h;
-   Evas_Coord obj_x, obj_y;
-   int scene_w, scene_h;
-   Evas_Real scene_x, scene_y;
-   Evas_Real s, t;
-   Evas_3D_Node *n;
-   Evas_3D_Mesh *m;
-   Eina_Bool pick;
-   char *name = NULL;
-
-   // Set the focus onto us.
-   elm_object_focus_set(o, EINA_TRUE);
-
-   evas_object_geometry_get(o, &x, &y, &w, &h);
-
-   obj_x = ev->canvas.x - x;
-   obj_y = ev->canvas.y - y;
-
-   eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
-
-   scene_x = obj_x * scene_w / (Evas_Real)w;
-   scene_y = obj_y * scene_h / (Evas_Real)h;
-
-   eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
-   if (pick)
-   {
-     name = evas_object_data_get(n, "Name");
-     printf("Picked     : ");
-   }
-   else
-     printf("Not picked : ");
-   if (NULL == name)
-     name = "";
-
-    printf("output(%d, %d) canvas(%d, %d) object(%d, %d) scene(%f, %f) texcoord(%f, %f) "
-           "node(%p) %s mesh(%p)\n",
-           ev->output.x, ev->output.y,
-           ev->canvas.x, ev->canvas.y,
-           obj_x, obj_y,
-           scene_x, scene_y,
-           s, t, n, name, m);
-}
-
 void Evas_3D_Demo_add(globals *ourGlobals)
 {
-  Evas_Object *obj, *temp;
+  ourGlobals->scene = scenriAdd(ourGlobals);
 
-  ourGlobals->scene = &ourScene;
-  _scene_setup(ourGlobals, &ourScene);
-
-  // Add an image object for 3D scene rendering.
-  obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    elm_obj_image_fill_outside_set(EINA_TRUE),
-    evas_obj_visibility_set(EINA_TRUE),
-    temp = elm_obj_image_object_get()
-  );
-  elm_object_tooltip_text_set(obj, "");
-  elm_object_tooltip_hide(obj);
-  ourScene.image = obj;
-
-  eo_do(temp,
-    evas_obj_image_scene_set(ourScene.scene)
-  );
-  // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
-  evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, &ourScene);
-  evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, &ourScene);
-
-  cameraAdd(ourGlobals, obj);
-  elm_win_resize_object_add(ourGlobals->win, obj);
-//  elm_box_pack_end(ourGlobals->gld.bx, obj);
-
-  ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
+  _cube_setup(ourGlobals,   ourGlobals->scene);
+  _sonic_setup(ourGlobals,  ourGlobals->scene);
+  _earth_setup(ourGlobals,  ourGlobals->scene);
 }
 
 void Evas_3D_Demo_fini(globals *ourGlobals)

@@ -170,6 +170,7 @@ static void _draw_gl(Evas_Object *obj)
 #endif
 
   _animate_scene(ourGlobals);
+  animateCamera(ourGlobals);
 
 #if USE_IRR
   drawIrr_end(ourGlobals);
@@ -363,7 +364,7 @@ void overlay_add(globals *ourGlobals)
   // According to the Elm inlined image window example, this is what's needed to.
   evas_object_event_callback_add(elm_win_inlined_image_object_get(gld->winwin), EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
   // In this code, we are making our own camera, so grab it's input when we are focused.
-  cameraAdd(ourGlobals, gld->winwin);
+//  cameraAdd(ourGlobals, gld->winwin);
 
   elm_win_alpha_set(gld->winwin, EINA_TRUE);
   // Apparently transparent is not good enough for ELM backgrounds, so make it a rectangle.

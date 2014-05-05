@@ -1,6 +1,37 @@
 #include "extantz.h"
 
 
+Eina_Bool animateCamera(globals *ourGlobals)
+{
+  Evas_Real x, y, z, w;
+  EPhysics_Quaternion *quat   = ephysics_quaternion_new();
+  EPhysics_Quaternion *quat1  = ephysics_quaternion_new();
+  EPhysics_Quaternion *result = ephysics_quaternion_new();
+
+  Scene_Data *scene = ourGlobals->scene;
+
+  // Camera movement.
+  ephysics_quaternion_euler_set(quat1, ourGlobals->gld.move->r, ourGlobals->gld.move->s, ourGlobals->gld.move->t);
+  eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &x, &y, &z, &w));
+  ephysics_quaternion_set(quat, x, y, z, w);
+  ephysics_quaternion_multiply(quat, quat1, result);
+  ephysics_quaternion_normalize(result);
+  ephysics_quaternion_get(result, &x, &y, &z, &w);
+  eo_do(scene->camera_node, evas_3d_node_orientation_set(x, y, z, w));
+
+  eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
+  x -= ourGlobals->gld.move->x;
+  y -= ourGlobals->gld.move->y;
+  z -= ourGlobals->gld.move->z;
+  eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
+
+  free(result);
+  free(quat1);
+  free(quat);
+
+  return EINA_TRUE;
+}
+
 static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
   globals	      *ourGlobals = data;
@@ -151,10 +182,31 @@ static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Ev
   return processed;
 }
 
-void cameraAdd(globals *ourGlobals, Evas_Object *win)
+Evas_3D_Node *cameraAdd(globals *ourGlobals, Scene_Data *scene, Evas_Object *image)
 {
+  Evas_3D_Node   *result = NULL;
+  Evas_3D_Camera *camera;
+
+  camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas,
+    evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
+    );
+
+  result = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_CAMERA);
+  eo_do(result,
+    evas_3d_node_camera_set(camera),
+    evas_3d_node_position_set(50.0, 0.0, 20.0),
+    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
+    );
+
+  eo_do(scene->root_node, evas_3d_node_member_add(result));
+  eo_do(scene->scene, evas_3d_scene_camera_node_set(result));
+
   // In this code, we are making our own camera, so grab it's input when we are focused.
-  evas_object_event_callback_add(win, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, ourGlobals);
-  evas_object_event_callback_add(win, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   ourGlobals);
-  elm_object_event_callback_add(win, _cb_event_GL, ourGlobals);
+  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, ourGlobals);
+  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   ourGlobals);
+  elm_object_event_callback_add(image, _cb_event_GL, ourGlobals);
+
+  ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
+
+  return result;
 }
