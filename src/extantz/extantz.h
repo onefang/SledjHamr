@@ -11,6 +11,8 @@
 #include <EPhysics.h>
 #include "extantzCamera.h"
 #include "winFang.h"
+#include "Runnr.h"
+#include "GuiLua.h"
 
 
 #ifdef GL_GLES

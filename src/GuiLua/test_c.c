@@ -10,6 +10,10 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 */
 
 
+#include "SledjHamr.h"
+#include "LumbrJack.h"
+#include "Runnr.h"
+#include "winFang.h"
 #include "GuiLua.h"
 
 

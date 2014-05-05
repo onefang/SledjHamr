@@ -4,9 +4,10 @@ do	-- Only I'm not gonna indent this.
 
 local skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
-  local win = skang.window(500, 500, "G'day planet.", 'testWindow')
+  local win = skang.window(200, 100, "G'day planet.", 'testWindow')
   skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 30'}
-  win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translat 'quit' into the Lua 'skang.quit()'?
+  win.W.quitter.action = 'skang.quit()'  -- TODO Should look it up in ThingSpace.commands, and translate 'quit' into the Lua 'skang.quit()'?
+  skang.thingasm{win, 'ffuncer', 'Calls ffunc', types = 'widget', widget='"button", "ffunc()", 10, 40, 100, 30', action='test.ffunc(3, 4)'}
 ]])
 
 print('code')

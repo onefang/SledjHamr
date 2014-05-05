@@ -139,8 +139,12 @@ and ordinary elementary widgets.  Proper introspection can come later.
 */
 
 
-
+#include "SledjHamr.h"
+#include "LumbrJack.h"
+#include "Runnr.h"
+#include "winFang.h"
 #include "GuiLua.h"
+//#include <stdio.h>
 
 
 static int		logDom;		// Our logging domain.
@@ -232,17 +236,20 @@ static int colour(lua_State *L)
 static int window(lua_State *L)
 {
   winFang *win = NULL;
+  Evas_Object *parent = NULL;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
   GuiLua *gl;
 
+  pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
+
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
   lua_pop(L, 1);
+  if (gl && gl->parent)  parent = gl->parent;
 
-  pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
-  win = winFangAdd(NULL, 0, 0, w, h, title, name);
+  win = winFangAdd(parent, 25, 25, w, h, title, name);
   eina_clist_add_head(&gl->winFangs, &win->node);
   lua_pushlightuserdata(L, win);
 
@@ -285,15 +292,6 @@ static int closeWindow(lua_State *L)
     winFangDel(win);
   }
 
-  if (logDom >= 0)
-  {
-    eina_log_domain_unregister(logDom);
-    logDom = -1;
-  }
-
-  // This shuts down Elementary, but keeps the main loop running until all ecore_evas are freed.
-  elm_shutdown();
-
   return 0;
 }
 
@@ -313,6 +311,7 @@ int luaopen_GuiLua(lua_State *L)
 {
   int skang;
 
+printf("**********************require GuiLua\n");
   // In theory this function only ever gets called once.
   logDom = loggingStartup("GuiLua", logDom);
 
@@ -362,7 +361,7 @@ PD("GuiLua 3");
   return 1;
 }
 
-GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
+GuiLua *GuiLuaDo(int argc, char **argv, Evas_Object *parent)
 {
   GuiLua *result;
   lua_State  *L;
@@ -409,6 +408,14 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
         PE("Error running - skang.loopWindow()");
       lua_pop(L, closeWindow(L));
       lua_close(L);
+      if (logDom >= 0)
+      {
+	eina_log_domain_unregister(logDom);
+	logDom = -1;
+      }
+
+      // This shuts down Elementary, but keeps the main loop running until all ecore_evas are freed.
+      elm_shutdown();
     }
   }
   else

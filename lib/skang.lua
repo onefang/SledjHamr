@@ -135,7 +135,9 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
   end
   _M.VERSION = version .. versionName .. timestamp
   _M.VERSION_DESC = versionDesc
+
   -- If there is a .skang file, read that in and override the passed in skin.
+  -- TODO - At this point it would be nice if we knew where the module came from, so we can search for the skin file in THAT directory.
   local f = io.open(name .. '.skang')
   if f then
     skin = f:read('*l')
@@ -1010,7 +1012,7 @@ end
 
 -- Get our C functions installed into skang.
 -- This has to be after thingasm is defined.
-package.cpath = package.cpath .. ';../../lib/lib?.so'
+package.cpath = package.cpath .. ';./lib/lib?.so;../lib/lib?.so;../../lib/lib?.so'
 local GuiLua = require 'GuiLua'
 
 

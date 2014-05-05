@@ -472,6 +472,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     woMan_add(&ourGlobals);
     chat_add(&ourGlobals);
     ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
+    char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
+    GuiLua *test = GuiLuaDo(5, args, ourGlobals.win);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
@@ -508,6 +510,11 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
+
+	EINA_CLIST_FOR_EACH_ENTRY(win, &test->winFangs, winFang, node)
+	{
+	  winFangDel(win);
+	}
 
 	EINA_CLIST_FOR_EACH_ENTRY(win, &ourGlobals.winFangs, winFang, node)
 	{
