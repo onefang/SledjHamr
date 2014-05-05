@@ -158,6 +158,7 @@ typedef struct _Scene_Data
   Evas_3D_Material *material3;
   Evas_3D_Texture  *texture_diffuse;
 
+  cameraMove       *move;
 } Scene_Data;
 
 // Elm GL view related data here.
@@ -178,7 +179,6 @@ typedef struct _GLData
     IVideoDriver	*driver;
     ISceneManager	*smgr;
     ICameraSceneNode	*camera;
-
     cameraMove		*move;
 
 #if DO_GEARS
@@ -255,8 +255,8 @@ Eina_Bool _animate_scene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
 Scene_Data *scenriAdd(globals *ourGlobals);
-Evas_3D_Node *cameraAdd(globals *ourGlobals, Scene_Data *scene, Evas_Object *win);
-Eina_Bool animateCamera(globals *ourGlobals);
+Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
+Eina_Bool animateCamera(Scene_Data *scene);
 
 winFang *chat_add(globals *ourGlobals);
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);

@@ -1,17 +1,15 @@
 #include "extantz.h"
 
 
-Eina_Bool animateCamera(globals *ourGlobals)
+Eina_Bool animateCamera(Scene_Data *scene)
 {
   Evas_Real x, y, z, w;
   EPhysics_Quaternion *quat   = ephysics_quaternion_new();
   EPhysics_Quaternion *quat1  = ephysics_quaternion_new();
   EPhysics_Quaternion *result = ephysics_quaternion_new();
 
-  Scene_Data *scene = ourGlobals->scene;
-
   // Camera movement.
-  ephysics_quaternion_euler_set(quat1, ourGlobals->gld.move->r, ourGlobals->gld.move->s, ourGlobals->gld.move->t);
+  ephysics_quaternion_euler_set(quat1, scene->move->r, scene->move->s, scene->move->t);
   eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &x, &y, &z, &w));
   ephysics_quaternion_set(quat, x, y, z, w);
   ephysics_quaternion_multiply(quat, quat1, result);
@@ -20,9 +18,9 @@ Eina_Bool animateCamera(globals *ourGlobals)
   eo_do(scene->camera_node, evas_3d_node_orientation_set(x, y, z, w));
 
   eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
-  x -= ourGlobals->gld.move->x;
-  y -= ourGlobals->gld.move->y;
-  z -= ourGlobals->gld.move->z;
+  x -= scene->move->x;
+  y -= scene->move->y;
+  z -= scene->move->z;
   eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
 
   free(result);
@@ -34,11 +32,10 @@ Eina_Bool animateCamera(globals *ourGlobals)
 
 static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-  globals	      *ourGlobals = data;
-  GLData	      *gld	  = &ourGlobals->gld;
-  Evas_Event_Key_Down *ev	  = event_info;
+  cameraMove		*move	= data;
+  Evas_Event_Key_Down	*ev	= event_info;
 
-  if (gld->move)
+  if (move)
   {
     // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
@@ -47,15 +44,15 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     if (0 == strcmp(ev->key, "Escape"))
     {
     }
-    else if (0 == strcmp(ev->key, "Left"))	gld->move->r = 2.0;
-    else if (0 == strcmp(ev->key, "Right"))	gld->move->r = -2.0;
-    else if (0 == strcmp(ev->key, "Up"))	gld->move->x = 2.0;
-    else if (0 == strcmp(ev->key, "Down"))	gld->move->x = -2.0;
-    else if (0 == strcmp(ev->key, "Prior"))	gld->move->z = -2.0;
-    else if (0 == strcmp(ev->key, "Next"))	gld->move->z = 2.0;
-    else if (0 == strcmp(ev->key, "Home"))	gld->move->y = 2.0;
-    else if (0 == strcmp(ev->key, "End"))	gld->move->y = -2.0;
-    else if (0 == strcmp(ev->key, "space"))	gld->move->jump = 1.0;
+    else if (0 == strcmp(ev->key, "Left"))	move->r = 2.0;
+    else if (0 == strcmp(ev->key, "Right"))	move->r = -2.0;
+    else if (0 == strcmp(ev->key, "Up"))	move->x = 2.0;
+    else if (0 == strcmp(ev->key, "Down"))	move->x = -2.0;
+    else if (0 == strcmp(ev->key, "Prior"))	move->z = -2.0;
+    else if (0 == strcmp(ev->key, "Next"))	move->z = 2.0;
+    else if (0 == strcmp(ev->key, "Home"))	move->y = 2.0;
+    else if (0 == strcmp(ev->key, "End"))	move->y = -2.0;
+    else if (0 == strcmp(ev->key, "space"))	move->jump = 1.0;
     else printf("Unexpected down keystroke - %s\n", ev->key);
   }
   else printf("Camera input not ready\n");
@@ -127,11 +124,10 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
 
 static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-  globals	    *ourGlobals = data;
-  GLData	    *gld	= &ourGlobals->gld;
-  Evas_Event_Key_Up *ev		= event_info;
+  cameraMove		*move	= data;
+  Evas_Event_Key_Up	*ev	= event_info;
 
-  if (gld->move)
+  if (move)
   {
     // TODO - Careful, gld->move MIGHT be read at the other end by another thread.  MIGHT, coz I really don't know at what point the camera animate routine is actually called.
 
@@ -140,15 +136,15 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     if (0 == strcmp(ev->key, "Escape"))
     {
     }
-    else if (0 == strcmp(ev->key, "Left"))	gld->move->r = 0.0;
-    else if (0 == strcmp(ev->key, "Right"))	gld->move->r = 0.0;
-    else if (0 == strcmp(ev->key, "Up"))	gld->move->x = 0.0;
-    else if (0 == strcmp(ev->key, "Down"))	gld->move->x = 0.0;
-    else if (0 == strcmp(ev->key, "Prior"))	gld->move->z = 0.0;
-    else if (0 == strcmp(ev->key, "Next"))	gld->move->z = 0.0;
-    else if (0 == strcmp(ev->key, "Home"))	gld->move->y = 0.0;
-    else if (0 == strcmp(ev->key, "End"))	gld->move->y = 0.0;
-    else if (0 == strcmp(ev->key, "space"))	gld->move->jump = 0.0;
+    else if (0 == strcmp(ev->key, "Left"))	move->r = 0.0;
+    else if (0 == strcmp(ev->key, "Right"))	move->r = 0.0;
+    else if (0 == strcmp(ev->key, "Up"))	move->x = 0.0;
+    else if (0 == strcmp(ev->key, "Down"))	move->x = 0.0;
+    else if (0 == strcmp(ev->key, "Prior"))	move->z = 0.0;
+    else if (0 == strcmp(ev->key, "Next"))	move->z = 0.0;
+    else if (0 == strcmp(ev->key, "Home"))	move->y = 0.0;
+    else if (0 == strcmp(ev->key, "End"))	move->y = 0.0;
+    else if (0 == strcmp(ev->key, "space"))	move->jump = 0.0;
     else printf("Unexpected up keystroke - %s\n", ev->key);
   }
   else printf("Camera input not ready\n");
@@ -182,16 +178,16 @@ static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Ev
   return processed;
 }
 
-Evas_3D_Node *cameraAdd(globals *ourGlobals, Scene_Data *scene, Evas_Object *image)
+Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
 {
   Evas_3D_Node   *result = NULL;
   Evas_3D_Camera *camera;
 
-  camera = eo_add(EVAS_3D_CAMERA_CLASS, ourGlobals->evas,
+  camera = eo_add(EVAS_3D_CAMERA_CLASS, evas,
     evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
     );
 
-  result = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_CAMERA);
+  result = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_CAMERA);
   eo_do(result,
     evas_3d_node_camera_set(camera),
     evas_3d_node_position_set(50.0, 0.0, 20.0),
@@ -201,12 +197,11 @@ Evas_3D_Node *cameraAdd(globals *ourGlobals, Scene_Data *scene, Evas_Object *ima
   eo_do(scene->root_node, evas_3d_node_member_add(result));
   eo_do(scene->scene, evas_3d_scene_camera_node_set(result));
 
+  scene->move = calloc(1, sizeof(cameraMove));
   // In this code, we are making our own camera, so grab it's input when we are focused.
-  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, ourGlobals);
-  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   ourGlobals);
-  elm_object_event_callback_add(image, _cb_event_GL, ourGlobals);
-
-  ourGlobals->gld.move = calloc(1, sizeof(cameraMove));
+  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, scene->move);
+  evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   scene->move);
+  elm_object_event_callback_add(image, _cb_event_GL, NULL);
 
   return result;
 }

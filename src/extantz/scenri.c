@@ -113,7 +113,7 @@ Scene_Data *scenriAdd(globals *ourGlobals)
   elm_object_tooltip_text_set(obj, "");
   elm_object_tooltip_hide(obj);
   scene->image = obj;
-  scene->camera_node = cameraAdd(ourGlobals, scene, obj);
+  scene->camera_node = cameraAdd(ourGlobals->evas, scene, obj);
 
   scene->light = eo_add(EVAS_3D_LIGHT_CLASS, ourGlobals->evas,
     evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),

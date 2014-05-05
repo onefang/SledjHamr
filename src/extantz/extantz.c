@@ -170,7 +170,7 @@ static void _draw_gl(Evas_Object *obj)
 #endif
 
   _animate_scene(ourGlobals);
-  animateCamera(ourGlobals);
+  animateCamera(ourGlobals->scene);
 
 #if USE_IRR
   drawIrr_end(ourGlobals);
@@ -487,6 +487,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     init_evas_gl(&ourGlobals);
 
     Evas_3D_Demo_add(&ourGlobals);
+    // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+    ourGlobals.gld.move = ourGlobals.scene->move;
     evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
     evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
 
