@@ -5,19 +5,13 @@
 #include <Eina.h>
 
 
-#define PC(...) EINA_LOG_DOM_CRIT(ourGlobals->logDom, __VA_ARGS__)
-#define PE(...) EINA_LOG_DOM_ERR(ourGlobals->logDom, __VA_ARGS__)
-#define PW(...) EINA_LOG_DOM_WARN(ourGlobals->logDom, __VA_ARGS__)
-#define PD(...) EINA_LOG_DOM_DBG(ourGlobals->logDom, __VA_ARGS__)
-#define PI(...) EINA_LOG_DOM_INFO(ourGlobals->logDom, __VA_ARGS__)
+#define PC(...) EINA_LOG_DOM_CRIT(logDom, __VA_ARGS__)
+#define PE(...) EINA_LOG_DOM_ERR(logDom, __VA_ARGS__)
+#define PW(...) EINA_LOG_DOM_WARN(logDom, __VA_ARGS__)
+#define PD(...) EINA_LOG_DOM_DBG(logDom, __VA_ARGS__)
+#define PI(...) EINA_LOG_DOM_INFO(logDom, __VA_ARGS__)
 
-#define PCm(...) EINA_LOG_DOM_CRIT(ourGlobals.logDom, __VA_ARGS__)
-#define PEm(...) EINA_LOG_DOM_ERR(ourGlobals.logDom, __VA_ARGS__)
-#define PWm(...) EINA_LOG_DOM_WARN(ourGlobals.logDom, __VA_ARGS__)
-#define PDm(...) EINA_LOG_DOM_DBG(ourGlobals.logDom, __VA_ARGS__)
-#define PIm(...) EINA_LOG_DOM_INFO(ourGlobals.logDom, __VA_ARGS__)
-
-#define D()	PD("DEBUG")
+//#define D()	PD("DEBUG")
 
 
 // "01:03:52 01-01-1973\n\0"

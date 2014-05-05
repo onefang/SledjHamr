@@ -1,6 +1,7 @@
 #include "extantz.h"
 
 
+static int logDom;	// Our logging domain.
 globals ourGlobals;
 
 
@@ -404,7 +405,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
     fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
 
-    ourGlobals.logDom = loggingStartup("extantz", ourGlobals.logDom);
+    logDom = loggingStartup("extantz", logDom);
 
     // Don't do this, we need to clean up other stuff to, so set a clean up function below.
     //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
@@ -516,10 +517,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	evas_object_del(ourGlobals.win);
     }
 
-    if (ourGlobals.logDom >= 0)
+    if (logDom >= 0)
     {
-	eina_log_domain_unregister(ourGlobals.logDom);
-	ourGlobals.logDom = -1;
+	eina_log_domain_unregister(logDom);
+	logDom = -1;
     }
 
     elm_shutdown();

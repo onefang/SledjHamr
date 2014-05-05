@@ -2,6 +2,7 @@
 #include "LuaSL.h"
 
 
+int logDom;	// Our logging domain.
 static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
@@ -43,7 +44,7 @@ static script *findThem(gameGlobals *ourGlobals, const char *base, const char *t
 
 static void resetScript(script *victim)
 {
-    gameGlobals *ourGlobals = victim->game;
+//    gameGlobals *ourGlobals = victim->game;
 
     PD("Resetting %s", victim->fileName);
     // TODO - now what?
@@ -206,7 +207,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 
 static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Del *ev)
 {
-    gameGlobals *ourGlobals = data;
+//    gameGlobals *ourGlobals = data;
 
     if (ev->client)
     {
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
-	ourGlobals.logDom = loggingStartup("LuaSL", ourGlobals.logDom);
+	logDom = loggingStartup("LuaSL", logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 	ourGlobals.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_con_init())
@@ -256,7 +257,7 @@ int main(int argc, char **argv)
 			for (i = 0; i < CPUs; i++)
 			{
 			    if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
-				PEm("Error creating luaproc worker thread.");
+				PE("Error creating luaproc worker thread.");
 			}
 			ecore_main_loop_begin();
 
@@ -265,18 +266,18 @@ int main(int argc, char **argv)
 			edje_shutdown();
 		    }
 		    else
-			PCm("Failed to init edje!");
+			PC("Failed to init edje!");
 		}
 		else
-		    PCm("Failed to add server!");
+		    PC("Failed to add server!");
 		ecore_con_shutdown();
 	    }
 	    else
-		PCm("Failed to init ecore_con!");
+		PC("Failed to init ecore_con!");
 	    ecore_shutdown();
 	}
 	else
-	    PCm("Failed to init ecore!");
+	    PC("Failed to init ecore!");
     }
     else
 	fprintf(stderr, "Failed to init eina!");

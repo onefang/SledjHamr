@@ -42,6 +42,8 @@ typedef struct _LSL_Script		LSL_Script;
 
 extern LSL_Token **tokens;
 extern int lowestToken;
+extern int logDom;	// Our logging domain.
+
 
 typedef int LSL_Type;
 

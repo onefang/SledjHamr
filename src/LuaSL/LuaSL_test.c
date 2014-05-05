@@ -2,6 +2,7 @@
 #include "LuaSL.h"
 
 
+int logDom;	// Our logging domain.
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
@@ -313,7 +314,7 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
-	ourGlobals.logDom = loggingStartup("LuaSL_test", ourGlobals.logDom);
+	logDom = loggingStartup("LuaSL_test", logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 
 	if (ecore_con_init())
@@ -373,7 +374,7 @@ int main(int argc, char **argv)
 				ourGlobals.ee = ecore_evas_new(NULL, 0, 0, WIDTH, HEIGHT, NULL);
 				if (!ourGlobals.ee)
 				{
-				    PEm("You got to have at least one evas engine built and linked up to ecore-evas for this example to run properly.");
+				    PE("You got to have at least one evas engine built and linked up to ecore-evas for this example to run properly.");
 				    edje_shutdown();
 				    ecore_evas_shutdown();
 				    return -1;
@@ -397,7 +398,7 @@ int main(int argc, char **argv)
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
 				    const char *errmsg = edje_load_error_str(err);
-				    PEm("Could not load '%s' from %s: %s\n", group, buf, errmsg);
+				    PE("Could not load '%s' from %s: %s\n", group, buf, errmsg);
 
 				    evas_object_del(ourGlobals.edje);
 				    ecore_evas_free(ourGlobals.ee);
@@ -447,18 +448,18 @@ int main(int argc, char **argv)
 			edje_shutdown();
 		    }
 		    else
-			PCm("Failed to init edje!");
+			PC("Failed to init edje!");
 		    ecore_evas_shutdown();
 		}
 		else
-		    PCm("Failed to init ecore_evas!");
+		    PC("Failed to init ecore_evas!");
 	    }
 	    else
-		PCm("Failed to connect to server!");
+		PC("Failed to connect to server!");
 	    ecore_con_shutdown();
 	}
 	else
-	    PCm("Failed to init ecore_con!");
+	    PC("Failed to init ecore_con!");
     }
     else
 	fprintf(stderr, "Failed to init eina!");

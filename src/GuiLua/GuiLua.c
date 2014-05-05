@@ -143,7 +143,7 @@ and ordinary elementary widgets.  Proper introspection can come later.
 #include "GuiLua.h"
 
 
-
+static int logDom;	// Our logging domain.
 globals ourGlobals;
 static const char *globName  = "ourGlobals";
 
@@ -164,10 +164,6 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   globals *ourGlobals;
   lua_State *L = data;
   Widget *wid;
-
-  lua_getfield(L, LUA_REGISTRYINDEX, globName);
-  ourGlobals = lua_touserdata(L, -1);
-  lua_pop(L, 1);
 
   wid = evas_object_data_get(obj, "Widget");
   if (wid)
@@ -301,10 +297,10 @@ static int closeWindow(lua_State *L)
 
   winFangDel(ourGlobals->win);
 
-  if (ourGlobals->logDom >= 0)
+  if (logDom >= 0)
   {
-    eina_log_domain_unregister(ourGlobals->logDom);
-    ourGlobals->logDom = -1;
+    eina_log_domain_unregister(logDom);
+    logDom = -1;
   }
 
   // This shuts down Elementary, but keeps the main loop running until all ecore_evas are freed.
@@ -330,7 +326,7 @@ int luaopen_GuiLua(lua_State *L)
   int skang;
 
   // In theory this function only ever gets called once.
-  ourGlobals.logDom = loggingStartup("GuiLua", ourGlobals.logDom);
+  logDom = loggingStartup("GuiLua", logDom);
 
   elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
   elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
@@ -414,7 +410,7 @@ void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
       // Run the main loop via a Lua call.
       // This does nothing if no module opened a window.
       if (0 != luaL_dostring(L, "skang.loopWindow()"))
-        PEm("Error running - skang.loopWindow()");
+        PE("Error running - skang.loopWindow()");
       lua_pop(L, closeWindow(L));
       lua_close(L);
     }

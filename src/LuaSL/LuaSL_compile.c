@@ -991,7 +991,7 @@ LSL_Leaf *addFor(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_L
 
 LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
-    gameGlobals *ourGlobals = compiler->game;
+//    gameGlobals *ourGlobals = compiler->game;
     LSL_Statement *stat = calloc(1, sizeof(LSL_Statement));
     boolean justOne = FALSE;
 
@@ -1112,17 +1112,17 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	}
 
-#if LUASL_DIFF_CHECK
 	if (justOne && (flow))
 	{
+#if LUASL_DIFF_CHECK
 	    stat->ignorable = calloc(2, sizeof(Eina_Strbuf *));
 	    if (stat->ignorable)
 	    {
 		stat->ignorable[1] = flow->ignorable;
 		flow->ignorable = NULL;
 	    }
-	}
 #endif
+	}
 
 	if (lval)
 	{
