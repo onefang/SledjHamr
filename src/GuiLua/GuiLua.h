@@ -13,4 +13,15 @@
 #define THINGASM	"thingasm"
 
 
-void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop);
+typedef struct _GuiLua
+{
+  lua_State	*L;
+  winFang	*parent;	// Our parent window, if it exists.
+  Eina_Clist	winFangs;	// The windows we might open.
+
+  Eina_Clist	node;
+  void		*data;
+  Evas_Smart_Cb on_del;
+} GuiLua;
+
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);

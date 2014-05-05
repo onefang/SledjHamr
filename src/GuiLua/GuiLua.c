@@ -144,8 +144,7 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 
 static int		logDom;		// Our logging domain.
-static Eina_Clist	winFangs;	// The windows we might open.
-
+static const char	*glName = "ourGuiLua";
 
 /* Sooo, how to do this -
 widget has to be a light userdata
@@ -236,10 +235,15 @@ static int window(lua_State *L)
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
+  GuiLua *gl;
+
+  lua_getfield(L, LUA_REGISTRYINDEX, glName);
+  gl = lua_touserdata(L, -1);
+  lua_pop(L, 1);
 
   pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
   win = winFangAdd(NULL, 0, 0, w, h, title, name);
-  eina_clist_add_head(&winFangs, &win->node);
+  eina_clist_add_head(&gl->winFangs, &win->node);
   lua_pushlightuserdata(L, win);
 
   return 1;
@@ -269,8 +273,14 @@ static int quit(lua_State *L)
 static int closeWindow(lua_State *L)
 {
   winFang *win;
+  GuiLua *gl;
 
-  EINA_CLIST_FOR_EACH_ENTRY(win, &winFangs, winFang, node)
+  lua_getfield(L, LUA_REGISTRYINDEX, glName);
+  gl = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+
+
+  EINA_CLIST_FOR_EACH_ENTRY(win, &gl->winFangs, winFang, node)
   {
     winFangDel(win);
   }
@@ -314,8 +324,6 @@ int luaopen_GuiLua(lua_State *L)
   elm_config_finger_size_set(0);
   elm_config_scale_set(1.0);
 
-  eina_clist_init(&winFangs);
-
 // pseudo-indices, special tables that can be accessed like the stack -
 //    LUA_GLOBALSINDEX - thread environment, where globals are
 //    LUA_ENVIRONINDEX - C function environment, in this case luaopen_GuiLUa() is the C function
@@ -354,14 +362,20 @@ PD("GuiLua 3");
   return 1;
 }
 
-void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
 {
+  GuiLua *result;
   lua_State  *L;
   lua_Number  i;
+
+  result = calloc(1, sizeof(GuiLua));
+  result->parent = parent;
+  eina_clist_init(&result->winFangs);
 
   L = luaL_newstate();
   if (L)
   {
+    result->L = L;
     luaL_openlibs(L);
 
     // Pass all our command line arguments to Lua.
@@ -375,6 +389,9 @@ void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
     }
     lua_setfield(L, LUA_GLOBALSINDEX, "arg");
 
+    // Shove our structure into the registry.
+    lua_pushlightuserdata(L, result);
+    lua_setfield(L, LUA_REGISTRYINDEX, glName);
 
     // When we do this, skang will process all the arguments passed to GuiLuaDo().
     // This likely includes a module load, which likely opens a window.
@@ -384,7 +401,7 @@ void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
     lua_setfield(L, LUA_GLOBALSINDEX, SKANG);
 
 
-    if (mainloop)
+    if (!parent)
     {
       // Run the main loop via a Lua call.
       // This does nothing if no module opened a window.
@@ -396,4 +413,6 @@ void GuiLuaDo(int argc, char **argv, Eina_Bool mainloop)
   }
   else
     fprintf(stderr, "Failed to start Lua!\n");
+
+  return result;
 }
