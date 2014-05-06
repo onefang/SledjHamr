@@ -75,7 +75,7 @@ void winFangShow(winFang *win)
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name)
 {
   winFang *result;
-  Evas_Object *obj, *obj2, *bg;
+  Evas_Object *obj, *obj2;
   char buf[PATH_MAX];
   int i;
 
@@ -152,15 +152,17 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   }
 
   elm_win_title_set(result->win, title);
-  // Apparently transparent is not good enough for ELM backgrounds, so make it an Evas rectangle.
-  // Apparently coz ELM prefers stuff to have edjes.  A bit over the top if all I want is a transparent rectangle.
-  bg = eo_add(EVAS_OBJ_RECTANGLE_CLASS, evas_object_evas_get(result->win),
+
+  snprintf(buf, sizeof(buf), "%s/sky_04.jpg", elm_app_data_dir_get());
+  result->bg = eo_add(ELM_OBJ_IMAGE_CLASS, result->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    elm_obj_image_fill_outside_set(EINA_TRUE),
+    elm_obj_image_file_set(buf, NULL),
     evas_obj_color_set(50, 0, 100, 100),
     evas_obj_visibility_set(EINA_TRUE)
   );
-  elm_win_resize_object_add(result->win, bg);
-  eo_unref(bg);
+  elm_win_resize_object_add(result->win, result->bg);
+
 
   evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);
@@ -175,6 +177,7 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
+  eo_unref(win->bg);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
