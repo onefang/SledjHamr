@@ -140,8 +140,6 @@ static void _on_open(void *data, Evas_Object *obj EINA_UNUSED, void *event_info 
 
 static void _on_done(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
-//    GLData *gld = data;
-
     elm_exit();
 }
 
@@ -420,13 +418,14 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     elm_config_finger_size_set(0);
     elm_config_scale_set(1.0);
 
-    eina_clist_init(&ourGlobals.winFangs);
     gld = &ourGlobals.gld;
     gldata_init(gld);
 
     // Set the engine to opengl_x11, then open our window.
     elm_config_preferred_engine_set("opengl_x11");
-    ourGlobals.win = elm_win_util_standard_add("extantz", "extantz virtual world viewer");
+
+    ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz");
+    ourGlobals.win = ourGlobals.mainWindow->win;
     // Set preferred engine back to default from config
     elm_config_preferred_engine_set(NULL);
 
@@ -444,7 +443,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	return 1;
 #endif
 
-    evas_object_smart_callback_add(ourGlobals.win, "delete,request", _on_done, gld);
     evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
 
     // Get the screen size.
@@ -476,7 +474,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     chat_add(&ourGlobals);
     ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
     char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
-    GuiLua *test = GuiLuaDo(5, args, ourGlobals.win);
+    GuiLua *test = GuiLuaDo(5, args, ourGlobals.mainWindow);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?
@@ -511,22 +509,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
     if (ourGlobals.win)
     {
-	winFang *win;
-
 	Evas_3D_Demo_fini(&ourGlobals);
 	eo_unref(ourGlobals.tb);
-
-	EINA_CLIST_FOR_EACH_ENTRY(win, &test->winFangs, winFang, node)
-	{
-	  winFangDel(win);
-	}
-
-	EINA_CLIST_FOR_EACH_ENTRY(win, &ourGlobals.winFangs, winFang, node)
-	{
-	  winFangDel(win);
-	}
 	eo_unref(ourGlobals.bx);
-	evas_object_del(ourGlobals.win);
+	winFangDel(ourGlobals.mainWindow);
     }
 
     if (logDom >= 0)

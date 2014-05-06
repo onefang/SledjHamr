@@ -216,6 +216,7 @@ typedef struct _globals
   Evas_Object	*bx;		// Our box.
   int		logDom;		// Our logging domain.
 
+  winFang	*mainWindow;
   int		scr_w, scr_h;	// The size of the screen.
   int		win_w, win_h;	// The size of the window.
   int		win_x, win_y;	// The position of the window.
@@ -224,8 +225,6 @@ typedef struct _globals
 
   GLData gld;
   Scene_Data	*scene;
-
-  Eina_Clist	winFangs;
 
   winFang	*files;
 } globals;

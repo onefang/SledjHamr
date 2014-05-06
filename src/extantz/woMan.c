@@ -159,8 +159,7 @@ winFang *woMan_add(globals *ourGlobals)
     char buf[PATH_MAX];
     int i;
 
-    me = winFangAdd(ourGlobals->win, 30, 150, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan");
-    eina_clist_add_head(&ourGlobals->winFangs, &me->node);
+    me = winFangAdd(ourGlobals->mainWindow, 30, 150, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan");
 
     bx = elm_box_add(me->win);
     elm_win_resize_object_add(me->win, bx);

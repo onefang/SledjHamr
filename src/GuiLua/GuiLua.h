@@ -18,7 +18,7 @@
 typedef struct _GuiLua
 {
   lua_State	*L;
-  Evas_Object	*parent;	// Our parent window, if it exists.
+  winFang	*parent;	// Our parent window, if it exists.
   Eina_Clist	winFangs;	// The windows we might open.
 
   Eina_Clist	node;
@@ -26,6 +26,6 @@ typedef struct _GuiLua
   Evas_Smart_Cb on_del;
 } GuiLua;
 
-GuiLua *GuiLuaDo(int argc, char **argv, Evas_Object *parent);
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);
 
 #endif

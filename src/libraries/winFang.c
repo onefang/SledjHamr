@@ -72,7 +72,7 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
-winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title, char *name)
+winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name)
 {
   winFang *result;
   Evas_Object *obj, *obj2, *bg;
@@ -81,6 +81,7 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title
 
   result = calloc(1, sizeof(winFang));
   eina_clist_init(&result->widgets);
+  eina_clist_init(&result->winFangs);
 
   if (parent)	result->internal = EINA_TRUE;
 
@@ -94,7 +95,8 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title
 //  elm_config_engine_set("ews");
   if (result->internal)
   {
-    result->win = elm_win_add(parent, name, ELM_WIN_INLINED_IMAGE);
+    result->win = elm_win_add(parent->win, name, ELM_WIN_INLINED_IMAGE);
+    eina_clist_add_head(&parent->winFangs, &result->node);
     obj  = elm_win_inlined_image_object_get(result->win);
     // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
     // According to the Elm inlined image window example, this is what's needed to.
@@ -144,7 +146,7 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title
   }
   else
   {
-    result->win = elm_win_add(parent, name, ELM_WIN_BASIC);
+    result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
     evas_object_move(result->win, result->x, result->y);
     evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
   }
@@ -168,9 +170,15 @@ winFang *winFangAdd(Evas_Object *parent, int x, int y, int w, int h, char *title
 
 void winFangDel(winFang *win)
 {
-  Widget *wid;
+  winFang *wf;
+  Widget  *wid;
 
   if (!win)  return;
+
+  EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
+  {
+    winFangDel(wf);
+  }
 
   // Elm will delete our widgets, but if we are using eo, we need to unref them.
   EINA_CLIST_FOR_EACH_ENTRY(wid, &win->widgets, Widget, node)

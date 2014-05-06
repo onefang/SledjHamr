@@ -232,7 +232,7 @@ static int colour(lua_State *L)
 static int window(lua_State *L)
 {
   winFang *win = NULL;
-  Evas_Object *parent = NULL;
+  winFang *parent = NULL;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
@@ -246,7 +246,12 @@ static int window(lua_State *L)
   if (gl && gl->parent)  parent = gl->parent;
 
   win = winFangAdd(parent, 25, 25, w, h, title, name);
-  eina_clist_add_head(&gl->winFangs, &win->node);
+  // If there's no parent, we become the parent.
+  if (gl && !parent)
+  {
+    gl->parent = win;
+    eina_clist_add_head(&gl->winFangs, &win->node);
+  }
   lua_pushlightuserdata(L, win);
 
   return 1;
@@ -282,10 +287,12 @@ static int closeWindow(lua_State *L)
   gl = lua_touserdata(L, -1);
   lua_pop(L, 1);
 
-
-  EINA_CLIST_FOR_EACH_ENTRY(win, &gl->winFangs, winFang, node)
+  if (gl)
   {
-    winFangDel(win);
+    EINA_CLIST_FOR_EACH_ENTRY(win, &gl->winFangs, winFang, node)
+    {
+      winFangDel(win);
+    }
   }
 
   return 0;
@@ -357,7 +364,7 @@ PD("GuiLua 3");
   return 1;
 }
 
-GuiLua *GuiLuaDo(int argc, char **argv, Evas_Object *parent)
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
 {
   GuiLua *result;
   lua_State  *L;

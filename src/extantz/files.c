@@ -146,8 +146,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   Widget  *wid;
   Evas_Object *bx, *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
-  me = winFangAdd(ourGlobals->win, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500, "file selector", "files");
-  eina_clist_add_head(&ourGlobals->winFangs, &me->node);
+  me = winFangAdd(ourGlobals->mainWindow, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500, "file selector", "files");
 
   bx = eo_add(ELM_OBJ_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
