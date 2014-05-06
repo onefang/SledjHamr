@@ -299,14 +299,10 @@ static int quit(lua_State *L)
 
 static int closeWindow(lua_State *L)
 {
-  GuiLua *gl;
+  winFang *win = NULL;
 
-  lua_getfield(L, LUA_REGISTRYINDEX, glName);
-  gl = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-
-  if (gl)
-    winFangDel(gl->parent);
+  pull_lua(L, 1, "*window", &win);
+  if (win) winFangDel(win);
 
   return 0;
 }
@@ -368,7 +364,7 @@ PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
-  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "closeWindow",	"Closes our window.",				closeWindow, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, 0); // TODO - closeWindow, "userdata");
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
