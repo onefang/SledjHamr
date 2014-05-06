@@ -248,10 +248,7 @@ static int window(lua_State *L)
   win = winFangAdd(parent, 25, 25, w, h, title, name);
   // If there's no parent, we become the parent.
   if (gl && !parent)
-  {
     gl->parent = win;
-    eina_clist_add_head(&gl->winFangs, &win->node);
-  }
   lua_pushlightuserdata(L, win);
 
   return 1;
@@ -280,7 +277,6 @@ static int quit(lua_State *L)
 
 static int closeWindow(lua_State *L)
 {
-  winFang *win;
   GuiLua *gl;
 
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
@@ -288,12 +284,7 @@ static int closeWindow(lua_State *L)
   lua_pop(L, 1);
 
   if (gl)
-  {
-    EINA_CLIST_FOR_EACH_ENTRY(win, &gl->winFangs, winFang, node)
-    {
-      winFangDel(win);
-    }
-  }
+    winFangDel(gl->parent);
 
   return 0;
 }
@@ -372,7 +363,6 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
 
   result = calloc(1, sizeof(GuiLua));
   result->parent = parent;
-  eina_clist_init(&result->winFangs);
 
   L = luaL_newstate();
   if (L)
