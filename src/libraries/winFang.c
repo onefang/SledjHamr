@@ -163,6 +163,14 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   );
   elm_win_resize_object_add(result->win, result->bg);
 
+  // Every window gets a free vertical box.
+  // TODO - Any widgets created without positon and size get packed to the end.
+  result->box = eo_add(ELM_OBJ_BOX_CLASS, result->win,
+    elm_obj_box_homogeneous_set(EINA_FALSE),
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
+       );
+  elm_win_resize_object_add(result->win, result->box);
 
   evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);
@@ -177,6 +185,7 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
+  eo_unref(win->box);
   eo_unref(win->bg);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
   {

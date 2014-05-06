@@ -19,6 +19,7 @@ typedef struct _winFang
 {
   Evas_Object	*win;
   Evas_Object	*bg;
+  Evas_Object	*box;
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
   int		x, y, w, h;
