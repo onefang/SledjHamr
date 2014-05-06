@@ -255,7 +255,6 @@ static int window(lua_State *L)
   if (gl && gl->parent)  parent = gl->parent;
 
   win = winFangAdd(parent, 25, 25, w, h, title, name);
-  // If there's no parent, we become the parent.
   if (gl)
   {
     // If there's no parent, we become the parent.
