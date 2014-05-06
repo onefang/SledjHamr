@@ -18,7 +18,9 @@
 typedef struct _GuiLua
 {
   lua_State	*L;
+  winFang	*us;		// Our window, if it exists.
   winFang	*parent;	// Our parent window, if it exists.
+  int		inDel;
 
   Eina_Clist	node;
   void		*data;
@@ -26,5 +28,6 @@ typedef struct _GuiLua
 } GuiLua;
 
 GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);
+void GuiLuaDel(GuiLua *gl);
 
 #endif

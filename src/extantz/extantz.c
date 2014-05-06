@@ -474,7 +474,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     chat_add(&ourGlobals);
     ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
     char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
-    GuiLua *test = GuiLuaDo(5, args, ourGlobals.mainWindow);
+    GuiLuaDo(5, args, ourGlobals.mainWindow);
 
     // Gotta do this after adding the windows, otherwise the menu renders under the window.
     //   This sucks, gotta redefine this menu each time we create a new window?

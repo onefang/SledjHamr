@@ -229,6 +229,15 @@ static int colour(lua_State *L)
   Light user data an actual pointer.
 */
 
+static void _on_us_del(void *data, Evas_Object *obj, void *event_info)
+{
+  winFang *win = data;
+  GuiLua *gl = win->data;
+
+  gl->inDel = 1;
+  GuiLuaDel(gl);
+}
+
 static int window(lua_State *L)
 {
   winFang *win = NULL;
@@ -247,8 +256,21 @@ static int window(lua_State *L)
 
   win = winFangAdd(parent, 25, 25, w, h, title, name);
   // If there's no parent, we become the parent.
-  if (gl && !parent)
-    gl->parent = win;
+  if (gl)
+  {
+    // If there's no parent, we become the parent.
+    if (!parent)
+      gl->parent = win;
+    // If there's no us, we must be the first, so we are us.
+    if (!gl->us)
+    {
+      gl->us = win;
+      // TODO - If this invocation of GuiLuaDo never opens a window, then this GuiLua will never get deleted.
+      //        Also, who ever opened this window might have other plans for on_del or data.
+      win->data = gl;
+      win->on_del = _on_us_del;
+    }
+  }
   lua_pushlightuserdata(L, win);
 
   return 1;
@@ -399,8 +421,8 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
       // This does nothing if no module opened a window.
       if (0 != luaL_dostring(L, "skang.loopWindow()"))
         PE("Error running - skang.loopWindow()");
-      lua_pop(L, closeWindow(L));
-      lua_close(L);
+      GuiLuaDel(result);
+      result = NULL;
       if (logDom >= 0)
       {
 	eina_log_domain_unregister(logDom);
@@ -415,4 +437,15 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
     fprintf(stderr, "Failed to start Lua!\n");
 
   return result;
+}
+
+void GuiLuaDel(GuiLua *gl)
+{
+  if (gl)
+  {
+    gl->us->on_del = NULL;
+    if (!gl->inDel)  winFangDel(gl->us);
+    if (gl->L) lua_close(gl->L);
+    free(gl);
+  }
 }
