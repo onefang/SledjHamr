@@ -241,8 +241,8 @@ static void init_evas_gl(globals *ourGlobals)
     elm_glview_resize_func_set(gld->elmGl, _resize_gl);
     elm_glview_render_func_set(gld->elmGl, (Elm_GLView_Func_Cb) _draw_gl);
 
+    elm_win_resize_object_add(ourGlobals->win, gld->elmGl);
     evas_object_show(gld->elmGl);
-    elm_box_pack_end(ourGlobals->bx, gld->elmGl);
   }
 
   // TODO - apparently the proper way to deal with the new async rendering is to have this animator do the dirty thing, and call the Irrlicht rendering stuff in the _draw_gl call set above.
@@ -385,50 +385,53 @@ void overlay_add(globals *ourGlobals)
 
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-    Evas_Object *obj;
-    EPhysics_World *world;
-    GLData *gld = NULL;
-    char buf[PATH_MAX];
-//    Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
+  EPhysics_World *world;
+  GLData *gld = NULL;
+  char buf[PATH_MAX];
+//  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
-    /* Set the locale according to the system pref.
-     * If you don't do so the file selector will order the files list in
-     * a case sensitive manner
-     */
-    setlocale(LC_ALL, "");
+  /* Set the locale according to the system pref.
+   * If you don't do so the file selector will order the files list in
+   * a case sensitive manner
+   */
+  setlocale(LC_ALL, "");
 
-    elm_need_ethumb();
-    elm_need_efreet();
+  elm_need_ethumb();
+  elm_need_efreet();
 
-    HamrTime(elm_main, "extantz");
-    fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
-    fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
-    fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
-    fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
+  HamrTime(elm_main, "extantz");
+  fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
+  fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
+  fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
+  fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
 
-    logDom = loggingStartup("extantz", logDom);
+  logDom = loggingStartup("extantz", logDom);
 
-    // Don't do this, we need to clean up other stuff to, so set a clean up function below.
-    //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
-    elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
-    elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
-    elm_policy_set(ELM_POLICY_THROTTLE,	ELM_POLICY_THROTTLE_HIDDEN_ALWAYS);
+  // Don't do this, we need to clean up other stuff to, so set a clean up function below.
+  //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
+  elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
+  elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
+  elm_policy_set(ELM_POLICY_THROTTLE,	ELM_POLICY_THROTTLE_HIDDEN_ALWAYS);
 
-    // These are set via the elementary_config tool, which is hard to find.
-    elm_config_finger_size_set(0);
-    elm_config_scale_set(1.0);
+  // These are set via the elementary_config tool, which is hard to find.
+  elm_config_finger_size_set(0);
+  elm_config_scale_set(1.0);
 
-    gld = &ourGlobals.gld;
-    gldata_init(gld);
+#if USE_PHYSICS
+  if (!ephysics_init())
+    return 1;
+#endif
 
-    // Set the engine to opengl_x11, then open our window.
-    elm_config_preferred_engine_set("opengl_x11");
+  gld = &ourGlobals.gld;
+  gldata_init(gld);
 
-    ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz");
-    ourGlobals.win = ourGlobals.mainWindow->win;
-    // Set preferred engine back to default from config
-    elm_config_preferred_engine_set(NULL);
+  // Set the engine to opengl_x11, then open our window.
+  elm_config_preferred_engine_set("opengl_x11");
+  ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz");
+  // Set preferred engine back to default from config
+  elm_config_preferred_engine_set(NULL);
 
+  ourGlobals.win = ourGlobals.mainWindow->win;
   // TODO, or not TODO - I keep getting rid of these, but keep bringing them back.
   // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
   ourGlobals.evas = evas_object_evas_get(ourGlobals.win);
@@ -438,92 +441,99 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.ee = ecore_evas_ecore_evas_get(ourGlobals.evas);	// Only use this on Evas that was created with Ecore_Evas.
 #endif
 
+  evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
+
+  // Get the screen size.
+  elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
+  ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
+  ourGlobals.win_w = ourGlobals.scr_w / 2;
+  ourGlobals.win_h = ourGlobals.scr_h - 30;
+  evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
+  evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
+
+  /*  Our "layers".
+
+      Elm win		- our real main window
+        These have some sort of inlined image if they are internal.
+        Elm image	- purple shaded sky image
+        Elm box		- so everyone gets a freebie
+
+      Elm glview	- added by init_evas_gl() if this is Irrlicht
+
+      Elm image		- added by Evas_3D_Demo_add() -> scenriAdd()
+        Evas image is extracted to pass to Evas_3d functions,
+          to catch hovers and clicks
+          and to catch input for the camera
+
+//      Elm win		- added by overlay_add()
+//        Evas rectangle added, a fully transparent one to catch clicks
+//          added to  evas_object_evas_get(gld->winwin)
+
+      The various internal windows.
+
+      Elm toolbar
+
+      Ephysics objects
+  */
+
+  // Override the background image
+  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
+  eo_do(ourGlobals.mainWindow->bg,
+    elm_obj_image_file_set(buf, NULL),
+    evas_obj_color_set(255, 255, 255, 255)
+  );
+
+  init_evas_gl(&ourGlobals);
+//  elm_box_pack_end(ourGlobals.mainWindow->box, gld->elmGl);
+
+  Evas_3D_Demo_add(&ourGlobals);
+  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+  ourGlobals.gld.move = ourGlobals.scene->move;
+  evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
+  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
+
+//  overlay_add(&ourGlobals);
+  woMan_add(&ourGlobals);
+  chat_add(&ourGlobals);
+  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
+  char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
+  GuiLuaDo(5, args, ourGlobals.mainWindow);
+
+  // Gotta do this after adding the windows, otherwise the menu renders under the window.
+  //   This sucks, gotta redefine this menu each time we create a new window?
+  // Also, GL focus gets lost when any menu is used.  sigh
+  makeMainMenu(&ourGlobals);
+
 #if USE_PHYSICS
-    if (!ephysics_init())
-	return 1;
+  world = ephysicsAdd(&ourGlobals);
 #endif
 
-    evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
+  evas_object_show(ourGlobals.mainWindow->box);
+  _resize_winwin(gld);
 
-    // Get the screen size.
-    elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
-    ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
-    ourGlobals.win_w = ourGlobals.scr_w / 2;
-    ourGlobals.win_h = ourGlobals.scr_h - 30;
-
-    // Add a background image object.
-    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
-    obj = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals.win,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	elm_obj_image_fill_outside_set(EINA_TRUE),
-	elm_obj_image_file_set(buf, NULL),
-	evas_obj_visibility_set(EINA_TRUE)
-	);
-    elm_win_resize_object_add(ourGlobals.win, obj);
-    eo_unref(obj);
-
-    ourGlobals.bx = eo_add(ELM_OBJ_BOX_CLASS, ourGlobals.win,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_visibility_set(EINA_TRUE)
-	);
-    elm_win_resize_object_add(ourGlobals.win, ourGlobals.bx);
-
-//    overlay_add(&ourGlobals);
-    woMan_add(&ourGlobals);
-    chat_add(&ourGlobals);
-    ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
-    char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
-    GuiLuaDo(5, args, ourGlobals.mainWindow);
-
-    // Gotta do this after adding the windows, otherwise the menu renders under the window.
-    //   This sucks, gotta redefine this menu each time we create a new window?
-    // Also, GL focus gets lost when any menu is used.  sigh
-    makeMainMenu(&ourGlobals);
-
-    // This does elm_box_pack_end(), so needs to be after the others.
-    init_evas_gl(&ourGlobals);
-
-    Evas_3D_Demo_add(&ourGlobals);
-    // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
-    ourGlobals.gld.move = ourGlobals.scene->move;
-    evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
-    evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
+  elm_run();
 
 #if USE_PHYSICS
-    world = ephysicsAdd(&ourGlobals);
+  ephysics_world_del(world);
+  ephysics_shutdown();
 #endif
 
-    evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
-    evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
-    evas_object_show(ourGlobals.win);
+  if (ourGlobals.win)
+  {
+    Evas_3D_Demo_fini(&ourGlobals);
+    eo_unref(ourGlobals.tb);
+    winFangDel(ourGlobals.mainWindow);
+  }
 
-    _resize_winwin(gld);
+  if (logDom >= 0)
+  {
+    eina_log_domain_unregister(logDom);
+    logDom = -1;
+  }
 
-    elm_run();
+  elm_shutdown();
 
-#if USE_PHYSICS
-    ephysics_world_del(world);
-    ephysics_shutdown();
-#endif
-
-    if (ourGlobals.win)
-    {
-	Evas_3D_Demo_fini(&ourGlobals);
-	eo_unref(ourGlobals.tb);
-	eo_unref(ourGlobals.bx);
-	winFangDel(ourGlobals.mainWindow);
-    }
-
-    if (logDom >= 0)
-    {
-	eina_log_domain_unregister(logDom);
-	logDom = -1;
-    }
-
-    elm_shutdown();
-
-    return 0;
+  return 0;
 }
 ELM_MAIN()
 

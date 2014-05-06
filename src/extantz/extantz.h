@@ -2,8 +2,8 @@
 #define _EXTANTZ_H_
 
 #define USE_PHYSICS 1
-#define USE_IRR     0
-#define USE_DEMO    0
+#define USE_IRR     1
+#define USE_DEMO    1
 #define DO_GEARS    0
 
 
@@ -213,7 +213,6 @@ typedef struct _globals
   Evas	*evas;
   Evas_Object	*win;		// Our Elm window.
   Evas_Object	*tb;		// Our Elm toolbar.
-  Evas_Object	*bx;		// Our box.
   int		logDom;		// Our logging domain.
 
   winFang	*mainWindow;
@@ -253,7 +252,7 @@ EAPI void Evas_3D_Demo_add(globals *ourGlobals);
 Eina_Bool _animate_scene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
-Scene_Data *scenriAdd(Evas *evas, Evas_Object *win);
+Scene_Data *scenriAdd(Evas_Object *win);
 Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
 
