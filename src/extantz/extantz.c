@@ -484,7 +484,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   );
 
   init_evas_gl(&ourGlobals);
-//  elm_box_pack_end(ourGlobals.mainWindow->box, gld->elmGl);
 
   Evas_3D_Demo_add(&ourGlobals);
   // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
