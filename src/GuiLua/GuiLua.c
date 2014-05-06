@@ -344,9 +344,9 @@ printf("**********************require GuiLua\n");
   // The skang module should have been loaded by now, so we can just grab it out of package.loaded[].
   lua_getglobal(L, "package");
   lua_getfield(L, lua_gettop(L), "loaded");
-  lua_remove(L, -2);					// Removes "package"
+  lua_remove(L, -2);				// Removes "package"
   lua_getfield(L, lua_gettop(L), SKANG);
-  lua_remove(L, -2);					// Removes "loaded"
+  lua_remove(L, -2);				// Removes "loaded"
   lua_setfield(L, LUA_REGISTRYINDEX, SKANG);
   lua_getfield(L, LUA_REGISTRYINDEX, SKANG);	// Puts the skang table back on the stack.
   skang = lua_gettop(L);
@@ -358,7 +358,7 @@ printf("**********************require GuiLua\n");
 PD("GuiLua 2");
 // TODO - This one crashes sometimes.  Figure out why later.
 //  push_lua(L, "@ ( { = $ $ & $ } )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
-  push_lua(L, "@ ( = $ $ & )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
 PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
@@ -409,7 +409,6 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
     lua_pushstring(L, SKANG);
     lua_call(L, 1, 1);
     lua_setfield(L, LUA_GLOBALSINDEX, SKANG);
-
 
     if (!parent)
     {
