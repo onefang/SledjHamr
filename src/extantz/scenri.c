@@ -85,11 +85,14 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
     ev->output.x, ev->output.y, ev->canvas.x, ev->canvas.y, obj_x, obj_y, scene_x, scene_y, s, t, n, name, m);
 }
 
-Scene_Data *scenriAdd(Evas *evas, Evas_Object *win)
+Scene_Data *scenriAdd(Evas_Object *win)
 {
   Scene_Data *scene;
-  Evas_Object *obj, *temp;
+  Evas_Object *evas, *temp;
+  int w, h;
 
+  evas = evas_object_evas_get(win);
+  eo_do(win, evas_obj_size_get(&w, &h));
   scene = calloc(1, sizeof(Scene_Data));
 
   // TODO - I have no idea how this should work.
@@ -97,23 +100,26 @@ Scene_Data *scenriAdd(Evas *evas, Evas_Object *win)
 //  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, evas, EVAS_3D_NODE_TYPE_NODE);
   scene->root_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_NODE);
 
+  // -TODO - set the size based on the size of the enclosing window.
   scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
     evas_3d_scene_root_node_set(scene->root_node),
-    evas_3d_scene_size_set(512, 512),
+    evas_3d_scene_size_set(w, h),
     evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
   );
 
   // Add an image object for 3D scene rendering.
-  obj = eo_add(ELM_OBJ_IMAGE_CLASS, win,
+  // Any colour or texture applied to this window gets applied to the scene, including transparency.
+  // Interestingly enough, the position and size of the render seems to NOT depend on the position and size of this image?
+  // Note that we can't reuse the windows background image, Evas_3D needs both images.
+  scene->image = eo_add(ELM_OBJ_IMAGE_CLASS, win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     evas_obj_visibility_set(EINA_TRUE),
     temp = elm_obj_image_object_get()
   );
-  elm_object_tooltip_text_set(obj, "");
-  elm_object_tooltip_hide(obj);
-  scene->image = obj;
-  scene->camera_node = cameraAdd(evas, scene, obj);
+  elm_object_tooltip_text_set(scene->image, "");
+  elm_object_tooltip_hide(scene->image);
+  scene->camera_node = cameraAdd(evas, scene, scene->image);
 
   scene->light = eo_add(EVAS_3D_LIGHT_CLASS, evas,
     evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
@@ -121,22 +127,21 @@ Scene_Data *scenriAdd(Evas *evas, Evas_Object *win)
     evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_directional_set(EINA_TRUE)
   );
-
   scene->light_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_LIGHT);
   eo_do(scene->light_node,
     evas_3d_node_light_set(scene->light),
     evas_3d_node_position_set(1000.0, 0.0, 1000.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
   );
-
   eo_do(scene->root_node, evas_3d_node_member_add(scene->light_node));
 
   eo_do(temp, evas_obj_image_scene_set(scene->scene));
+
   // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, scene);
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
 
-  elm_win_resize_object_add(win, obj);
+  elm_win_resize_object_add(win, scene->image);
 
   return scene;
 }
