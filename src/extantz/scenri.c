@@ -97,7 +97,6 @@ Scene_Data *scenriAdd(Evas_Object *win)
 
   scene->root_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
 
-  // -TODO - set the size based on the size of the enclosing window.
   scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
     evas_3d_scene_root_node_set(scene->root_node),
     evas_3d_scene_size_set(w, h),
