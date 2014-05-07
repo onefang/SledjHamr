@@ -95,10 +95,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   eo_do(win, evas_obj_size_get(&w, &h));
   scene = calloc(1, sizeof(Scene_Data));
 
-  // TODO - I have no idea how this should work.
-  // It seems the people that wrote the examples don't know either.  lol
-//  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, evas, EVAS_3D_NODE_TYPE_NODE);
-  scene->root_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_NODE);
+  scene->root_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
 
   // -TODO - set the size based on the size of the enclosing window.
   scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
@@ -127,8 +124,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
     evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_directional_set(EINA_TRUE)
   );
-  scene->light_node = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_LIGHT);
-  eo_do(scene->light_node,
+  scene->light_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_LIGHT),
     evas_3d_node_light_set(scene->light),
     evas_3d_node_position_set(1000.0, 0.0, 1000.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)

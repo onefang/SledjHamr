@@ -190,8 +190,7 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
     evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
     );
 
-  result = evas_3d_node_add(evas, EVAS_3D_NODE_TYPE_CAMERA);
-  eo_do(result,
+  result = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_CAMERA),
     evas_3d_node_camera_set(camera),
     evas_3d_node_position_set(50.0, 0.0, 20.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
@@ -204,7 +203,7 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
   // In this code, we are making our own camera, so grab it's input when we are focused.
   evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_DOWN, _on_camera_input_down, scene->move);
   evas_object_event_callback_add(image, EVAS_CALLBACK_KEY_UP,   _on_camera_input_up,   scene->move);
-  // While it's true that image is an Elm image, seems this Elm input event callbacrk doesn't work.
+  // While it's true that image is an Elm image, seems this Elm input event callback doesn't work.
 //  elm_object_event_callback_add(image, _cb_event_GL, NULL);
 
   return result;

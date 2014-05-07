@@ -340,8 +340,7 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_mesh_frame_material_set(20, scene->material1)
     );
 
-  scene->mesh_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->mesh_node,
+  scene->mesh_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "cube", NULL),
     evas_3d_node_position_set(40.0, 3.5, 23.0),
     evas_3d_node_mesh_add(scene->mesh)
@@ -383,8 +382,7 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
     );
 
-  scene->mesh2_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->mesh2_node,
+  scene->mesh2_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "sonic", NULL),
     evas_3d_node_mesh_add(scene->mesh2)
     );
@@ -435,8 +433,7 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_DIFFUSE)
   );
 
-  scene->mesh3_node = evas_3d_node_add(ourGlobals->evas, EVAS_3D_NODE_TYPE_MESH);
-  eo_do(scene->mesh3_node,
+  scene->mesh3_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "earth", NULL),
     evas_3d_node_position_set(40.0, -3.5, 23.0),
     evas_3d_node_mesh_add(scene->mesh3)
