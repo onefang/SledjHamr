@@ -2,7 +2,7 @@
 #define _EXTANTZ_H_
 
 #define USE_PHYSICS 1
-#define USE_IRR     1
+#define USE_IRR     0
 #define USE_DEMO    1
 #define DO_GEARS    0
 
@@ -256,9 +256,9 @@ Scene_Data *scenriAdd(Evas_Object *win);
 Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
 
-winFang *chat_add(globals *ourGlobals);
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);
 void     filesShow(winFang *me, Evas_Smart_Cb func, void *data);
+winFang *purkleAdd(globals *ourGlobals);
 winFang *woMan_add(globals *ourGlobals);
 
 

@@ -3,20 +3,20 @@
 
 // TODO - This is to work around a bug in Elm entry, remove it when the bug is fixed.
 //   The bug is that editable entry widgets cause the app to hang on exit.
-void _on_entry_del(void *data, Evas_Object *obj, void *event_info)
+static void _on_entry_del(void *data, Evas_Object *obj, void *event_info)
 {
 //  winFang *me = data;
 
   elm_entry_editable_set(obj, EINA_FALSE);
 }
 
-winFang *chat_add(globals *ourGlobals)
+winFang *purkleAdd(globals *ourGlobals)
 {
   winFang *me;
   Widget  *wid;
   Evas_Object *en;
 
-  me = winFangAdd(ourGlobals->mainWindow, 30, 520, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "chatter box", "chat");
+  me = winFangAdd(ourGlobals->mainWindow, 30, 520, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "chatter box", "purkle");
 
   en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win,
     elm_obj_entry_scrollable_set(EINA_TRUE),
