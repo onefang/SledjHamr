@@ -515,11 +515,12 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   makeMainMenu(&ourGlobals);
 
 //  overlay_add(&ourGlobals);
-  woMan_add(&ourGlobals);
-  purkleAdd(&ourGlobals);
-  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
   char *args[] = {"extantz", "-l", "test", "-foo", "COMBINED!", NULL};
   GuiLuaDo(5, args, ourGlobals.mainWindow);
+  woMan_add(&ourGlobals);
+  args[2] = "purkle";
+  GuiLuaDo(3, args, ourGlobals.mainWindow);
+  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
 #if USE_PHYSICS
   world = ephysicsAdd(&ourGlobals);

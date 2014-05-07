@@ -258,7 +258,6 @@ Eina_Bool animateCamera(Scene_Data *scene);
 
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);
 void     filesShow(winFang *me, Evas_Smart_Cb func, void *data);
-winFang *purkleAdd(globals *ourGlobals);
 winFang *woMan_add(globals *ourGlobals);
 
 

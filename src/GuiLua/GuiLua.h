@@ -27,6 +27,8 @@ typedef struct _GuiLua
   Evas_Smart_Cb on_del;
 } GuiLua;
 
+extern const char	*glName;
+
 GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);
 void GuiLuaDel(GuiLua *gl);
 

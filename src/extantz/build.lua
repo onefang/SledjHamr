@@ -18,11 +18,11 @@ LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
 libs    = libs    .. ' -lIrrlicht -lGL -lbz2 -lGuiLua -lwinFang -lRunnr'
 
 removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', 'gears.o', 'ephysics_demo.o', 'Evas_3D_demo.o', '../../media/extantz.edj'})
-removeFiles(dir, {'../../extantz', 'camera.o', 'purkle.o', 'files.o', 'scenri.o', 'woMan.o'})
+removeFiles(dir, {'../../extantz', 'camera.o', 'files.o', 'scenri.o', 'woMan.o'})
 
 runCommand('edje_cc',		dir, 'edje_cc ' .. EDJE_FLAGS .. ' extantz.edc ../../media/extantz.edj')
 runCommand('Irrlicht files',	dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c crappisspuke.cpp -o crappisspuke.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c CDemo.cpp -o CDemo.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c extantzCamera.cpp -o extantzCamera.o ' .. LDFLAGS)
 CFLAGS = CFLAGS .. ' -Wl,-export-dynamic'
-compileFiles('../../extantz',	dir, {'gears', 'ephysics_demo', 'camera', 'Evas_3D_demo', 'purkle', 'files', 'scenri', 'woMan', 'extantz'}, 'crappisspuke.o CDemo.o extantzCamera.o')
+compileFiles('../../extantz',	dir, {'gears', 'ephysics_demo', 'camera', 'Evas_3D_demo', 'files', 'scenri', 'woMan', 'extantz'}, 'crappisspuke.o CDemo.o extantzCamera.o')

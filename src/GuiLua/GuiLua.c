@@ -144,7 +144,7 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 
 static int		logDom;		// Our logging domain.
-static const char	*glName = "ourGuiLua";
+const char	*glName = "ourGuiLua";
 
 /* Sooo, how to do this -
 widget has to be a light userdata
