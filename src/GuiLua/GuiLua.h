@@ -30,6 +30,7 @@ typedef struct _GuiLua
 extern const char	*glName;
 
 GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);
+void GuiLuaLoad(char *module, winFang *parent);
 void GuiLuaDel(GuiLua *gl);
 
 #endif

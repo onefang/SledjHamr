@@ -433,6 +433,14 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
   return result;
 }
 
+void GuiLuaLoad(char *module, winFang *parent)
+{
+  char *args[] = {"GuiLUa", "-l", ""};
+
+  args[2] = module;
+  GuiLuaDo(3, args, parent);
+}
+
 void GuiLuaDel(GuiLua *gl)
 {
   if (gl)
