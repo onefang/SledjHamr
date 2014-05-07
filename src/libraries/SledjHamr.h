@@ -8,7 +8,8 @@
 /* Enable access to unstable EFL EO API. */
 #define EFL_EO_API_SUPPORT 1
 
-#include <ctype.h>
+//#include <ctype.h>
+#include <stdlib.h>
 
 #include <Elementary.h>
 

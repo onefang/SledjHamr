@@ -2,6 +2,8 @@
 
 void HamrTime(void *elm_main, char *domain)
 {
+  char *env, cwd[PATH_MAX], temp[PATH_MAX * 2];
+
   elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
   elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
   elm_app_compile_lib_dir_set(PACKAGE_LIB_DIR);
@@ -20,4 +22,15 @@ void HamrTime(void *elm_main, char *domain)
   elm_app_info_set(elm_main, domain, "checkme.txt");
   // Once this is all setup, the code can do -
   // elm_app_prefix_dir_get();  // or bin, lib, data, locale.
+
+  getcwd(cwd, PATH_MAX);
+  env = getenv("LUA_CPATH");
+  if (!env)  env = "";
+  sprintf(temp, "%s;%s/lib?.so;%s/?.so;%s/?.so", env, elm_app_lib_dir_get(), elm_app_lib_dir_get(), cwd);
+  setenv("LUA_CPATH", temp, 1);
+
+  env = getenv("LUA_PATH");
+  if (!env)  env = "";
+  sprintf(temp, "%s;%s/?.lua;%s/?.lua", env, elm_app_lib_dir_get(), cwd);
+  setenv("LUA_PATH", temp, 1);
 }

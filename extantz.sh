@@ -2,6 +2,6 @@
 
 wd=$(pwd)
 
-export LUA_PATH="$wd/lib/?.lua;$wd/src/GuiLua/?.lua"
-export LUA_CPATH="$wd/lib/lib?.so;$wd/lib/?.so;$wd/src/GuiLua/?.so"
+export LUA_PATH="$wd/src/GuiLua/?.lua"
+export LUA_CPATH="$wd/src/GuiLua/?.so"
 ./extantz
