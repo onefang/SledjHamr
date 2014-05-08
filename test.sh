@@ -7,7 +7,7 @@ wd=$(pwd)
 ./build.lua || exit
 
 echo "_______________ TESTING extantz _______________"
-./extantz &
+./extantz.sh &
 sleep 1
 
 echo "_______________ TESTING GuiLua _______________"
