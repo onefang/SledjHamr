@@ -190,7 +190,7 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
   else printf("Camera input not ready\n");
 }
 
-/* While it's true that image is an Elm image, seems this Elm input event callbacrk doesn't work.
+/* While it's true that image is an Elm image, seems this Elm input event callback doesn't work.
 // Elm style event callback.
 static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
 {
