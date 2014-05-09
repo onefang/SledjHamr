@@ -1,32 +1,71 @@
 #include "extantz.h"
 
+#include "evas_3d_utils.h"
 
-// TODO - Rotate the direction vector by the rotation to convert from input to camera coords.
+static inline void evas_euler_to_quaternion(Evas_Vec4 *out, Evas_Vec3 *in)
+{
+  // Assuming the angles are in radians.
+  Evas_Real c1 = cos(in->y / 2.0);  // heading  (yaw/spin)  ..  y
+  Evas_Real s1 = sin(in->y / 2.0);
+  Evas_Real c2 = cos(in->z / 2.0);  // attitude (pitch)     ..  x
+  Evas_Real s2 = sin(in->z / 2.0);
+  Evas_Real c3 = cos(in->x / 2.0);  // bank     (roll)      ..  z
+  Evas_Real s3 = sin(in->x / 2.0);
+  Evas_Real c1c2 = c1 * c2;
+  Evas_Real s1s2 = s1 * s2;
+
+  out->w =c1c2 * c3 - s1s2 * s3;
+  out->x =c1c2 * s3 + s1s2 * c3;
+  out->y =s1 * c2 * c3 + c1 * s2 * s3;
+  out->z =c1 * s2 * c3 - s1 * c2 * s3;
+}
+
+static inline void evas_quaternion_normalise(Evas_Vec4 *in)
+{
+  Evas_Real n = sqrt(in->x * in->x + in->y * in->y + in->z * in->z + in->w * in->w);
+  in->x /= n;
+  in->y /= n;
+  in->z /= n;
+  in->w /= n;
+}
+
+static inline void evas_quaternion_multiply(Evas_Vec4 *out, const Evas_Vec4 *q1, const Evas_Vec4 *q2)
+{
+  out->x =  q1->x * q2->w + q1->y * q2->z - q1->z * q2->y + q1->w * q2->x;
+  out->y = -q1->x * q2->z + q1->y * q2->w + q1->z * q2->x + q1->w * q2->y;
+  out->z =  q1->x * q2->y - q1->y * q2->x + q1->z * q2->w + q1->w * q2->z;
+  out->w = -q1->x * q2->x - q1->y * q2->y - q1->z * q2->z + q1->w * q2->w;
+}
+
+static inline void evas_quaternion_conjugate(Evas_Vec4 *in)
+{
+  in->x = -in->x;
+  in->y = -in->y;
+  in->z = -in->z;
+  in->w = in->w;
+}
+
 Eina_Bool animateCamera(Scene_Data *scene)
 {
-  Evas_Real x, y, z, w;
-  EPhysics_Quaternion *quat   = ephysics_quaternion_new();
-  EPhysics_Quaternion *quat1  = ephysics_quaternion_new();
-  EPhysics_Quaternion *result = ephysics_quaternion_new();
+  Evas_Vec3 pos, rotate;
+  Evas_Vec4 orient, rotateQ, result, move;
 
-  // Camera movement.
-  ephysics_quaternion_euler_set(quat1, scene->move->r, scene->move->s, scene->move->t);
-  eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &x, &y, &z, &w));
-  ephysics_quaternion_set(quat, x, y, z, w);
-  ephysics_quaternion_multiply(quat, quat1, result);
-  ephysics_quaternion_normalize(result);
-  ephysics_quaternion_get(result, &x, &y, &z, &w);
-  eo_do(scene->camera_node, evas_3d_node_orientation_set(x, y, z, w));
+  evas_vec3_set(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
+  eo_do(scene->camera_node, evas_3d_node_orientation_get(EVAS_3D_SPACE_PARENT, &orient.x, &orient.y, &orient.z, &orient.w));
+  evas_euler_to_quaternion(&rotateQ, &rotate);
+  evas_quaternion_multiply(&result, &orient, &rotateQ);
+  evas_quaternion_normalise(&result);
+  eo_do(scene->camera_node, evas_3d_node_orientation_set(result.x, result.y, result.z, result.w));
 
-  eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &x, &y, &z));
-  x -= scene->move->x;
-  y -= scene->move->y;
-  z -= scene->move->z;
-  eo_do(scene->camera_node, evas_3d_node_position_set(x, y, z));
-
-  free(result);
-  free(quat1);
-  free(quat);
+  evas_vec4_set(&move,   scene->move->x, scene->move->y, scene->move->z, 0);
+  eo_do(scene->camera_node, evas_3d_node_position_get(EVAS_3D_SPACE_PARENT, &pos.x, &pos.y, &pos.z));
+  evas_quaternion_multiply(&rotateQ, &result, &move);
+  evas_quaternion_conjugate(&result);
+  evas_quaternion_multiply(&move, &rotateQ, &result);
+  pos.x += move.x;
+  pos.y += move.y;
+  pos.z += move.z;
+  eo_do(scene->camera_node, evas_3d_node_position_set(pos.x, pos.y, pos.z));
 
   return EINA_TRUE;
 }
@@ -45,14 +84,14 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     if (0 == strcmp(ev->key, "Escape"))
     {
     }
-    else if (0 == strcmp(ev->key, "Left"))	move->r = 2.0;
-    else if (0 == strcmp(ev->key, "Right"))	move->r = -2.0;
-    else if (0 == strcmp(ev->key, "Up"))	move->x = 2.0;
-    else if (0 == strcmp(ev->key, "Down"))	move->x = -2.0;
-    else if (0 == strcmp(ev->key, "Prior"))	move->z = -2.0;
-    else if (0 == strcmp(ev->key, "Next"))	move->z = 2.0;
-    else if (0 == strcmp(ev->key, "Home"))	move->y = 2.0;
-    else if (0 == strcmp(ev->key, "End"))	move->y = -2.0;
+    else if (0 == strcmp(ev->key, "Left"))	move->s = 2.0;
+    else if (0 == strcmp(ev->key, "Right"))	move->s = -2.0;
+    else if (0 == strcmp(ev->key, "Up"))	move->z = -2.0;
+    else if (0 == strcmp(ev->key, "Down"))	move->z = 2.0;
+    else if (0 == strcmp(ev->key, "Prior"))	move->y = 2.0;	// Pg Up for humans.
+    else if (0 == strcmp(ev->key, "Next"))	move->y = -2.0;	// Pg Dn for humans.
+    else if (0 == strcmp(ev->key, "Home"))	move->x = -2.0;
+    else if (0 == strcmp(ev->key, "End"))	move->x = 2.0;
     else if (0 == strcmp(ev->key, "space"))	move->jump = 1.0;
     else printf("Unexpected down keystroke - %s\n", ev->key);
   }
@@ -137,14 +176,14 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     if (0 == strcmp(ev->key, "Escape"))
     {
     }
-    else if (0 == strcmp(ev->key, "Left"))	move->r = 0.0;
-    else if (0 == strcmp(ev->key, "Right"))	move->r = 0.0;
-    else if (0 == strcmp(ev->key, "Up"))	move->x = 0.0;
-    else if (0 == strcmp(ev->key, "Down"))	move->x = 0.0;
-    else if (0 == strcmp(ev->key, "Prior"))	move->z = 0.0;
-    else if (0 == strcmp(ev->key, "Next"))	move->z = 0.0;
-    else if (0 == strcmp(ev->key, "Home"))	move->y = 0.0;
-    else if (0 == strcmp(ev->key, "End"))	move->y = 0.0;
+    else if (0 == strcmp(ev->key, "Left"))	move->s = 0.0;
+    else if (0 == strcmp(ev->key, "Right"))	move->s = 0.0;
+    else if (0 == strcmp(ev->key, "Up"))	move->z = 0.0;
+    else if (0 == strcmp(ev->key, "Down"))	move->z = 0.0;
+    else if (0 == strcmp(ev->key, "Prior"))	move->y = 0.0;
+    else if (0 == strcmp(ev->key, "Next"))	move->y = 0.0;
+    else if (0 == strcmp(ev->key, "Home"))	move->x = 0.0;
+    else if (0 == strcmp(ev->key, "End"))	move->x = 0.0;
     else if (0 == strcmp(ev->key, "space"))	move->jump = 0.0;
     else printf("Unexpected up keystroke - %s\n", ev->key);
   }
@@ -187,13 +226,14 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
   Evas_3D_Camera *camera;
 
   camera = eo_add(EVAS_3D_CAMERA_CLASS, evas,
-    evas_3d_camera_projection_perspective_set(60.0, 1.0, 1.0, 500.0)
+    evas_3d_camera_projection_perspective_set(90.0, 1.0, 1.0, 1024.0)
     );
 
   result = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_CAMERA),
     evas_3d_node_camera_set(camera),
-    evas_3d_node_position_set(50.0, 0.0, 20.0),
-    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 0.0, 1.0)
+    evas_3d_node_position_set(0.0, 20.0, 30.0),
+//    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
+    evas_3d_node_orientation_set(0.0, 0.0, 0.0, 1.0)
     );
 
   eo_do(scene->root_node, evas_3d_node_member_add(result));

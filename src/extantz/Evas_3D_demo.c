@@ -342,7 +342,7 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
 
   scene->mesh_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "cube", NULL),
-    evas_3d_node_position_set(40.0, 3.5, 23.0),
+    evas_3d_node_position_set(0.0, 4.0, 10.0),
     evas_3d_node_mesh_add(scene->mesh)
     );
 
@@ -384,6 +384,8 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
 
   scene->mesh2_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "sonic", NULL),
+    evas_3d_node_position_set(0.0, 0.0, 0.0),
+    evas_3d_node_orientation_set(-0.7071067811865475, 0.0, 0.0, 0.7071067811865475),
     evas_3d_node_mesh_add(scene->mesh2)
     );
 
@@ -435,7 +437,7 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
 
   scene->mesh3_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", "earth", NULL),
-    evas_3d_node_position_set(40.0, -3.5, 23.0),
+    evas_3d_node_position_set(0.0, 0.0, 0.0),
     evas_3d_node_mesh_add(scene->mesh3)
   );
 
