@@ -22,3 +22,6 @@ lol
 Extantz will handle all the 3D rendering.  The other parts can use nails
 to control the world that is rendered, and GuiLua to present their UI
 on top of the rendered world.
+
+http://www.euclideanspace.com/ seems to be a decent site for learning
+about the maths of this sort of thing.
