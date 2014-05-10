@@ -5,67 +5,31 @@
 // Evas style event callback.
 static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
-    Evas_Event_Mouse_Down *ev = event_info;
-
-    if (1 == ev->button)
-	elm_object_focus_set(obj, EINA_TRUE);
-}
-
-static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-   Evas_Event_Mouse_Move *ev = event_info;
-   Evas_Object *orig = data;
-   Evas_Coord x, y;
-   Evas_Map *p;
-   int i, w, h;
-
-   if (!ev->buttons) return;
-   evas_object_geometry_get(obj, &x, &y, NULL, NULL);
-   evas_object_move(obj,
-                    x + (ev->cur.canvas.x - ev->prev.output.x),
-                    y + (ev->cur.canvas.y - ev->prev.output.y));
-   evas_object_image_size_get(orig, &w, &h);
-   p = evas_map_new(4);
-   evas_object_map_enable_set(orig, EINA_TRUE);
-//   evas_object_raise(orig);
-   for (i = 0; i < 4; i++)
-     {
-        Evas_Object *hand;
-        char key[32];
-
-        snprintf(key, sizeof(key), "h-%i\n", i);
-        hand = evas_object_data_get(orig, key);
-        evas_object_raise(hand);
-        evas_object_geometry_get(hand, &x, &y, NULL, NULL);
-        x += 15;
-        y += 15;
-        evas_map_point_coord_set(p, i, x, y, 0);
-        if (i == 0) evas_map_point_image_uv_set(p, i, 0, 0);
-        else if (i == 1) evas_map_point_image_uv_set(p, i, w, 0);
-        else if (i == 2) evas_map_point_image_uv_set(p, i, w, h);
-        else if (i == 3) evas_map_point_image_uv_set(p, i, 0, h);
-     }
-   evas_object_map_set(orig, p);
-   evas_map_free(p);
-}
-
-static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-  Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
-  Evas_Coord x, y, w, h;
+  Evas_Event_Mouse_Down *ev = event_info;
+
+  if (1 == ev->button)
+  {
+    Evas_Object *objs = evas_object_top_at_pointer_get(win->e);
+
+// TODO - This always returns the elm_win.  So how the hell do you tell what got clicked on?
+printf("%s  %s\n", evas_object_type_get(objs), evas_object_name_get(objs));
+
+    elm_object_focus_set(obj, EINA_TRUE);
+  }
+}
+
+static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Coord w, Evas_Coord h)
+{
   Evas_Object *img = elm_win_inlined_image_object_get(win->win), *test;
   Eina_List *objs, *this;
+  Evas_Coord mw, mh;
   int padding = 1, i = 0, overs[4][2];
 
-  if (obj != img)  return;
-  if (1 != ev->buttons)  return;
+  // Sanity check.
+  if ((20 > w) || (20 > h))
+    return;
 
-  // Looks like ePhysics wont cooperate about coords and other things, so plan B.
-
-  evas_object_geometry_get(img, &x, &y, &w, &h);
-  x += ev->cur.canvas.x - ev->prev.output.x;
-  y += ev->cur.canvas.y - ev->prev.output.y;
   overs[0][0] = x - padding;		overs[0][1] = y - padding;
   overs[1][0] = x + padding + w;	overs[1][1] = y - padding;
   overs[2][0] = x + padding + w;	overs[2][1] = y + padding + h;
@@ -85,17 +49,94 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
   }
 
   // Check if we are outside the parent window.
-  evas_object_geometry_get(win->parent->win, NULL, NULL, &w, &h);
+  evas_object_geometry_get(win->parent->win, NULL, NULL, &mw, &mh);
   if ((overs[0][0] < 0) || (overs[0][1] < 0))
   {
     return;
   }
-  if ((overs[2][0] > w) || (overs[2][1] > h))
+  if ((overs[2][0] > mw) || (overs[2][1] > mh))
   {
     return;
   }
 
-  evas_object_move(img, x, y);
+  // All good, do it.
+  win->x = x;  win->y = y;
+  win->w = w;  win->h = h;
+  evas_object_geometry_set(img, x, y, w, h);
+  for (i = 0; i < 4; i++)
+  {
+    int cx = win->x, cy = win->y;
+
+         if (i == 1)   cx += win->w;
+    else if (i == 2)  {cx += win->w;  cy += win->h;}
+    else if (i == 3)   cy += win->h;
+    evas_object_move(win->hand[i], cx - 15, cy - 15);
+  }
+  // TODO - This just stretches everything, we don't really want that.
+}
+
+static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  Evas_Event_Mouse_Move *ev = event_info;
+  winFang *win = data;
+  Evas_Coord x, y, w, h, dx = 0, dy = 0, dw = 0, dh = 0, mx, my;
+  Evas_Object *img = elm_win_inlined_image_object_get(win->win);
+  int i;
+
+  if (!ev->buttons) return;
+
+  mx = ev->cur.canvas.x - ev->prev.output.x;
+  my = ev->cur.canvas.y - ev->prev.output.y;
+  evas_object_geometry_get(img, &x, &y, &w, &h);
+
+  for (i = 0; i < 4; i++)
+  {
+    if (obj == win->hand[i])
+    {
+      switch (i)
+      {
+        case 0 :
+        {
+          dw -= mx;  dh -= my;  dx += mx;  dy += my;
+          break;
+        }
+        case 1 :
+        {
+          dw += mx;  dh -= my;  dy += my;
+          break;
+        }
+        case 2 :
+        {
+          dw += mx;  dh += my;
+          break;
+        }
+        case 3 :
+        {
+          dw -= mx;  dh += my;  dx += mx;
+          break;
+        }
+      }
+      _checkWindowBounds(win, x + dx, y + dy, w + dw, h + dh);
+      return;
+    }
+  }
+}
+
+static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  Evas_Event_Mouse_Move *ev = event_info;
+  winFang *win = data;
+  Evas_Object *img = elm_win_inlined_image_object_get(win->win);
+  Evas_Coord x, y, w, h;
+
+  if (1 != ev->buttons)  return;
+
+  // Looks like ePhysics wont cooperate about coords and other things, so plan B.
+
+  evas_object_geometry_get(img, &x, &y, &w, &h);
+  x += ev->cur.canvas.x - ev->prev.output.x;
+  y += ev->cur.canvas.y - ev->prev.output.y;
+  _checkWindowBounds(win, x, y, w, h);
 }
 
 static void _on_done(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
@@ -152,7 +193,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_object_name_set(obj, "winFang");
     // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
     // According to the Elm inlined image window example, this is what's needed to.
-    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, result);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
     elm_win_alpha_set(result->win, EINA_TRUE);
 
@@ -175,16 +216,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       else if (i == 2)  {cx += result->w;  cy += result->h;}
       else if (i == 3)   cy += result->h;
       snprintf(key, sizeof(key), "h-%i\n", i);
-#if 1
-      result->hand[i] = evas_object_image_filled_add(obj2);
-      evas_object_image_file_set(result->hand[i], buf, NULL);
-      evas_object_resize(result->hand[i], 31, 31);
-      evas_object_move(result->hand[i], cx - 15, cy - 15);
-      evas_object_data_set(obj, key, result->hand[i]);
-      evas_object_show(result->hand[i]);
-      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
-#else
-// TODO - No idea why, but using this version makes the window vanish when you click on a handle.
       result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_file_set(buf, NULL),
@@ -193,9 +224,8 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	eo_key_data_set(key, result->hand[i], NULL),
 	evas_obj_visibility_set(EINA_TRUE)
       );
-      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, obj);
+      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, result);
       eo_unref(result->hand[i]);
-#endif
     }
   }
   else
