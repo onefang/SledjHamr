@@ -13,13 +13,13 @@ static void _on_entry_del(void *data, Evas_Object *obj, void *event_info)
   elm_entry_editable_set(obj, EINA_FALSE);
 }
 
-static winFang *purkleAdd(winFang *parent, int w, int h)
+static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
   winFang *me;
   Widget  *wid;
   Evas_Object *en;
 
-  me = winFangAdd(parent, 30, 520, w, h, "chatter box", "purkle");
+  me = winFangAdd(parent, 30, 520, w, h, "chatter box", "purkle", world);
 
   en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win,
     elm_obj_entry_scrollable_set(EINA_TRUE),
@@ -52,7 +52,7 @@ int luaopen_purkle(lua_State *L)
 {
   GuiLua *gl;
   winFang *parent = NULL;
-
+  EPhysics_World *world = NULL;
 
 // local skang = require 'skang'
   lua_getglobal(L, "require");
@@ -71,9 +71,13 @@ int luaopen_purkle(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
   lua_pop(L, 1);
-  if (gl && gl->parent)  parent = gl->parent;
+  if (gl)
+  {
+    parent = gl->parent;
+    world = gl->world;
+  }
 
-  purkleAdd(parent, 300, 400);
+  purkleAdd(parent, 300, 400, world);
 
   push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 

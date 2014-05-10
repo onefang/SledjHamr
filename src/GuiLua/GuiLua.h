@@ -20,6 +20,7 @@ typedef struct _GuiLua
   lua_State	*L;
   winFang	*us;		// Our window, if it exists.
   winFang	*parent;	// Our parent window, if it exists.
+  EPhysics_World *world;	// Our world, if it exists.
   int		inDel;
 
   Eina_Clist	node;
@@ -29,8 +30,8 @@ typedef struct _GuiLua
 
 extern const char	*glName;
 
-GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent);
-void GuiLuaLoad(char *module, winFang *parent);
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world);
+void GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world);
 void GuiLuaDel(GuiLua *gl);
 
 #endif

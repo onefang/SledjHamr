@@ -1,7 +1,6 @@
 #ifndef _EXTANTZ_H_
 #define _EXTANTZ_H_
 
-#define USE_PHYSICS 1
 #define USE_IRR     0
 #define USE_DEMO    1
 #define DO_GEARS    0
@@ -224,6 +223,8 @@ typedef struct _globals
 
   GLData gld;
   Scene_Data	*scene;
+
+  EPhysics_World *world;
 
   winFang	*files;
 } globals;

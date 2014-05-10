@@ -89,6 +89,8 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
     evas_obj_size_hint_min_get(NULL, &h),
     evas_obj_size_set(ourGlobals->win_w, h)
     );
+  if (ourGlobals->world)
+    ephysics_world_render_geometry_set(ourGlobals->world, 0, 0, -50, ourGlobals->win_w, ourGlobals->win_h, 100);
   _resize(gld);
 }
 
@@ -403,7 +405,6 @@ void overlay_add(globals *ourGlobals)
 
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-  EPhysics_World *world;
   GLData *gld = NULL;
   char buf[PATH_MAX];
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
@@ -435,17 +436,15 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   elm_config_finger_size_set(0);
   elm_config_scale_set(1.0);
 
-#if USE_PHYSICS
   if (!ephysics_init())
     return 1;
-#endif
 
   gld = &ourGlobals.gld;
   gldata_init(gld);
 
   // Set the engine to opengl_x11, then open our window.
   elm_config_preferred_engine_set("opengl_x11");
-  ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz");
+  ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
   // Set preferred engine back to default from config
   elm_config_preferred_engine_set(NULL);
 
@@ -514,17 +513,15 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   // Also, GL focus gets lost when any menu is used.  sigh
   makeMainMenu(&ourGlobals);
 
+  ourGlobals.world = ephysicsAdd(&ourGlobals);
+
 //  overlay_add(&ourGlobals);
-  GuiLuaLoad("test", ourGlobals.mainWindow);
+  GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
   woMan_add(&ourGlobals);
-  GuiLuaLoad("purkle", ourGlobals.mainWindow);
+  GuiLuaLoad("purkle", ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
-#if USE_PHYSICS
-  world = ephysicsAdd(&ourGlobals);
-#endif
-
-  // Bump the top toolbar above the windows.
+   // Bump the top toolbar above the windows.
   evas_object_raise(ourGlobals.tb);
 
   evas_object_show(ourGlobals.mainWindow->box);
@@ -532,10 +529,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   elm_run();
 
-#if USE_PHYSICS
-  ephysics_world_del(world);
+  ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();
-#endif
 
   if (ourGlobals.win)
   {

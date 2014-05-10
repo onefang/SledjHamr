@@ -242,6 +242,7 @@ static int window(lua_State *L)
 {
   winFang *win = NULL;
   winFang *parent = NULL;
+  EPhysics_World *world = NULL;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
@@ -252,9 +253,13 @@ static int window(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
   lua_pop(L, 1);
-  if (gl && gl->parent)  parent = gl->parent;
+  if (gl)
+  {
+    parent = gl->parent;
+    world = gl->world;
+  }
 
-  win = winFangAdd(parent, 25, 25, w, h, title, name);
+  win = winFangAdd(parent, 25, 25, w, h, title, name, world);
   if (gl)
   {
     // If there's no parent, we become the parent.
@@ -372,7 +377,7 @@ PD("GuiLua 3");
   return 1;
 }
 
-GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
 {
   GuiLua *result;
   lua_State  *L;
@@ -380,6 +385,7 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
 
   result = calloc(1, sizeof(GuiLua));
   result->parent = parent;
+  result->world = world;
 
   L = luaL_newstate();
   if (L)
@@ -433,12 +439,12 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent)
   return result;
 }
 
-void GuiLuaLoad(char *module, winFang *parent)
+void GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world)
 {
   char *args[] = {"GuiLUa", "-l", ""};
 
   args[2] = module;
-  GuiLuaDo(3, args, parent);
+  GuiLuaDo(3, args, parent, world);
 }
 
 void GuiLuaDel(GuiLua *gl)

@@ -159,7 +159,7 @@ winFang *woMan_add(globals *ourGlobals)
     char buf[PATH_MAX];
     int i;
 
-    me = winFangAdd(ourGlobals->mainWindow, 30, 150, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan");
+    me = winFangAdd(ourGlobals->mainWindow, 30, 150, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan", ourGlobals->world);
 
     // A tab thingy.
     tb = elm_toolbar_add(me->win);

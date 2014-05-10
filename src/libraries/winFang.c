@@ -72,7 +72,7 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
-winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name)
+winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world)
 {
   winFang *result;
   Evas_Object *obj, *obj2;
@@ -143,6 +143,16 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       eo_unref(result->hand[i]);
 #endif
     }
+      if (world)
+      {
+        result->body = ephysics_body_box_add(world);
+        ephysics_body_evas_object_set(result->body, obj, EINA_TRUE);
+        ephysics_body_restitution_set(result->body, 0.7);
+        ephysics_body_friction_set(result->body, 0);
+        ephysics_body_linear_velocity_set(result->body, 80, -60, 0);
+        ephysics_body_angular_velocity_set(result->body, 0, 0, 360);
+        ephysics_body_sleeping_threshold_set(result->body, 0.1, 0.1);
+      }
   }
   else
   {
