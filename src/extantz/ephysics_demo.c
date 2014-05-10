@@ -44,7 +44,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_evas_object_set(box_body1, box1, EINA_TRUE);
   ephysics_body_restitution_set(box_body1, 0.7);
   ephysics_body_friction_set(box_body1, 0);
-  ephysics_body_linear_velocity_set(box_body1, -1500, 2000, 0);
+  ephysics_body_linear_velocity_set(box_body1, -150, 20, 0);
   ephysics_body_angular_velocity_set(box_body1, 0, 0, 36);
   ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
   eo_unref(box1);

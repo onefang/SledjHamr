@@ -49,6 +49,55 @@ static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_
    evas_map_free(p);
 }
 
+static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  Evas_Event_Mouse_Move *ev = event_info;
+  winFang *win = data;
+  Evas_Coord x, y, w, h;
+  Evas_Object *img = elm_win_inlined_image_object_get(win->win), *test;
+  Eina_List *objs, *this;
+  int padding = 1, i = 0, overs[4][2];
+
+  if (obj != img)  return;
+  if (1 != ev->buttons)  return;
+
+  // Looks like ePhysics wont cooperate about coords and other things, so plan B.
+
+  evas_object_geometry_get(img, &x, &y, &w, &h);
+  x += ev->cur.canvas.x - ev->prev.output.x;
+  y += ev->cur.canvas.y - ev->prev.output.y;
+  overs[0][0] = x - padding;		overs[0][1] = y - padding;
+  overs[1][0] = x + padding + w;	overs[1][1] = y - padding;
+  overs[2][0] = x + padding + w;	overs[2][1] = y + padding + h;
+  overs[3][0] = x - padding;		overs[3][1] = y + padding + h;
+
+  // If we are over two or more windows, stop.
+  objs = evas_objects_in_rectangle_get(win->e, overs[0][0], overs[0][1], w + (padding * 2), h + (padding * 2), EINA_TRUE, EINA_FALSE);
+  EINA_LIST_FOREACH(objs, this, test)
+  {
+    const char * name = evas_object_name_get(test);
+    if (name && (strcmp("winFang", name) == 0))
+      i++;
+  }
+  if (2 <= i)
+  {
+    return;
+  }
+
+  // Check if we are outside the parent window.
+  evas_object_geometry_get(win->parent->win, NULL, NULL, &w, &h);
+  if ((overs[0][0] < 0) || (overs[0][1] < 0))
+  {
+    return;
+  }
+  if ((overs[2][0] > w) || (overs[2][1] > h))
+  {
+    return;
+  }
+
+  evas_object_move(img, x, y);
+}
+
 static void _on_done(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
   elm_exit();
@@ -75,7 +124,8 @@ void winFangShow(winFang *win)
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world)
 {
   winFang *result;
-  Evas_Object *obj, *obj2;
+  Evas_Object *obj, *obj1;
+  Evas *obj2;
   char buf[PATH_MAX];
   int i;
 
@@ -84,6 +134,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   eina_clist_init(&result->winFangs);
 
   if (parent)	result->internal = EINA_TRUE;
+  result->parent = parent;
 
   result->x = x;
   result->y = y;
@@ -98,9 +149,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     result->win = elm_win_add(parent->win, name, ELM_WIN_INLINED_IMAGE);
     eina_clist_add_head(&parent->winFangs, &result->node);
     obj  = elm_win_inlined_image_object_get(result->win);
+    evas_object_name_set(obj, "winFang");
     // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
     // According to the Elm inlined image window example, this is what's needed to.
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, NULL);
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
     elm_win_alpha_set(result->win, EINA_TRUE);
 
     // image object for win is unlinked to its pos/size - so manual control
@@ -110,6 +163,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_object_resize(obj, result->w, result->h);
 
     obj2 = evas_object_evas_get(obj);
+    result->e = obj2;
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
     for (i = 0; i < 4; i++)
@@ -143,16 +197,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       eo_unref(result->hand[i]);
 #endif
     }
-      if (world)
-      {
-        result->body = ephysics_body_box_add(world);
-        ephysics_body_evas_object_set(result->body, obj, EINA_TRUE);
-        ephysics_body_restitution_set(result->body, 0.7);
-        ephysics_body_friction_set(result->body, 0);
-        ephysics_body_linear_velocity_set(result->body, 80, -60, 0);
-        ephysics_body_angular_velocity_set(result->body, 0, 0, 360);
-        ephysics_body_sleeping_threshold_set(result->body, 0.1, 0.1);
-      }
   }
   else
   {
@@ -181,6 +225,44 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
        );
   elm_win_resize_object_add(result->win, result->box);
+
+  if (result->internal)
+  {
+    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_object_style_set(result->title, "slide_bounce");
+    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
+    elm_object_text_set(result->title, buf);
+    elm_box_pack_end(result->box, result->title);
+    eo_unref(result->title);
+
+#if 0
+    // EPysics enable the window.
+    if (world)
+    {
+      result->body = ephysics_body_box_add(world);
+      ephysics_body_evas_object_set(result->body, obj, EINA_TRUE);
+      ephysics_body_mass_set(result->body, 0);
+//      ephysics_body_restitution_set(result->body, 0.7);
+//      ephysics_body_friction_set(result->body, 0);
+//      ephysics_body_linear_velocity_set(result->body, 0, 0, 0);
+//      ephysics_body_angular_velocity_set(result->body, 0, 0, 0);
+      ephysics_body_sleeping_threshold_set(result->body, 0.1, 0.1);
+    }
+#endif
+
+    obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	elm_obj_separator_horizontal_set(EINA_TRUE),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_box_pack_end(result->box, obj1);
+    eo_unref(obj1);
+  }
 
   evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);

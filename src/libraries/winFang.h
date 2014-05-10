@@ -18,7 +18,10 @@
 
 typedef struct _winFang
 {
+  Evas		*e;
+  struct _winFang *parent;
   Evas_Object	*win;
+  Evas_Object	*title;
   Evas_Object	*bg;
   Evas_Object	*box;
   EPhysics_Body *body;

@@ -95,5 +95,6 @@ if 'nil' == type(args) then
   buildSub('libraries',	'src/libraries')
   buildSub('LuaSL',	'src/LuaSL')
   buildSub('GuiLua',	'src/GuiLua')
+  buildSub('purkle',	'src/purkle')
   buildSub('extantz',	'src/extantz')
 end

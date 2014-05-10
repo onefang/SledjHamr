@@ -196,6 +196,8 @@ static int widget(lua_State *L)
 	);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
+    evas_object_show(win->box);
+
     lua_pushlightuserdata(L, (void *) wid);
     return 1;
   }
@@ -259,7 +261,7 @@ static int window(lua_State *L)
     world = gl->world;
   }
 
-  win = winFangAdd(parent, 25, 25, w, h, title, name, world);
+  win = winFangAdd(parent, 25, 55, w, h, title, name, world);
   if (gl)
   {
     // If there's no parent, we become the parent.
