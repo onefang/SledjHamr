@@ -20,6 +20,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
   Evas_Object *en;
 
   me = winFangAdd(parent, 30, 590, w, h, "chatter box", "purkle", world);
+  useBox(me);
 
   en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win,
     elm_obj_entry_scrollable_set(EINA_TRUE),

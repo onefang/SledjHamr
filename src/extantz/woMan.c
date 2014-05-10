@@ -160,6 +160,7 @@ winFang *woMan_add(globals *ourGlobals)
     int i;
 
     me = winFangAdd(ourGlobals->mainWindow, 30, 200, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan", ourGlobals->world);
+    useBox(me);
 
     // A tab thingy.
     tb = elm_toolbar_add(me->win);

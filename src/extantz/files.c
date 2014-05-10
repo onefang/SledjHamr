@@ -147,6 +147,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   Evas_Object *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
   me = winFangAdd(ourGlobals->mainWindow, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500, "file selector", "files", ourGlobals->world);
+  useBox(me);
 
   wid = widgetAdd(me, ELM_OBJ_FILESELECTOR_CLASS, me->box, NULL);
   fs = wid->obj;

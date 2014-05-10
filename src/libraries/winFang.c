@@ -262,6 +262,14 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       );
     elm_box_pack_end(result->box, obj1);
     eo_unref(obj1);
+
+    result->content = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+        evas_obj_color_set(0, 0, 0, 0),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_box_pack_end(result->box, result->content);
   }
 
   evas_object_resize(result->win, result->w, result->h);
@@ -277,6 +285,7 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
+  eo_unref(win->content);
   eo_unref(win->box);
   eo_unref(win->bg);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
@@ -292,6 +301,15 @@ void winFangDel(winFang *win)
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
   evas_object_del(win->win);
+}
+
+void useBox(winFang *win)
+{
+  eo_do(win->content,
+    evas_obj_visibility_set(EINA_FALSE),
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+    evas_obj_size_set(0, 0)
+  );
 }
 
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title)

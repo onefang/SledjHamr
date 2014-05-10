@@ -175,9 +175,12 @@ static int widget(lua_State *L)
   winFang *win = NULL;
   char *type = "button";
   char *title = ":";
-  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
+  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3, cy;
 
   pull_lua(L, 1, "*window $type $title %x %y %w %h", &win, &type, &title, &x, &y, &w, &h);
+
+  evas_object_geometry_get(win->content, NULL, &cy, NULL, NULL);
+  y += cy;
 
   // Poor mans introspection, until I write real introspection into EFL.
   // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?

@@ -24,6 +24,7 @@ typedef struct _winFang
   Evas_Object	*title;
   Evas_Object	*bg;
   Evas_Object	*box;
+  Evas_Object	*content;
   EPhysics_Body *body;
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
@@ -58,6 +59,7 @@ void winFangHide(winFang *win);
 void winFangShow(winFang *win);
 void winFangDel(winFang *win);
 
+void useBox(winFang *win);
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
 
 #endif
