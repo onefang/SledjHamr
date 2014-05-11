@@ -132,7 +132,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
 
   eo_do(temp, evas_obj_image_scene_set(scene->scene));
 
-  // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas calbacks instead.
+  // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas callbacks instead.
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, scene);
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
 
