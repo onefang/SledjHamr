@@ -17,7 +17,7 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
   overs[2][0] = x + padding + w;	overs[2][1] = y + padding + h;
   overs[3][0] = x - padding;		overs[3][1] = y + padding + h;
 
-  // If we are over two or more windows, stop.
+  // If we are over other windows, stop.
   objs = evas_objects_in_rectangle_get(win->e, overs[0][0], overs[0][1], w + (padding * 2), h + (padding * 2), EINA_TRUE, EINA_FALSE);
   EINA_LIST_FOREACH(objs, this, test)
   {
@@ -56,20 +56,19 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
   }
 }
 
-static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+static void _onHandleMove(void *data, Evas *evas, Evas_Object *obj, void *event_info)
 {
   Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
-  Evas_Coord x, y, w, h, dx = 0, dy = 0, dw = 0, dh = 0, mx, my;
+  Evas_Coord x, y, w, h, dx, dy;
   Evas_Object *img = win->win;
   int i;
 
   if (!ev->buttons) return;
 
-  mx = ev->cur.canvas.x - ev->prev.output.x;
-  my = ev->cur.canvas.y - ev->prev.output.y;
+  dx = ev->cur.canvas.x - ev->prev.output.x;
+  dy = ev->cur.canvas.y - ev->prev.output.y;
   evas_object_geometry_get(img, &x, &y, &w, &h);
-
   for (i = 0; i < 4; i++)
   {
     if (obj == win->hand[i])
@@ -78,26 +77,26 @@ static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_
       {
         case 0 :
         {
-          dw -= mx;  dh -= my;  dx += mx;  dy += my;
+          w -= dx;  h -= dy;  x += dx;  y += dy;
           break;
         }
         case 1 :
         {
-          dw += mx;  dh -= my;  dy += my;
+          w += dx;  h -= dy;  y += dy;
           break;
         }
         case 2 :
         {
-          dw += mx;  dh += my;
+          w += dx;  h += dy;
           break;
         }
         case 3 :
         {
-          dw -= mx;  dh += my;  dx += mx;
+          w -= dx;  h += dy;  x += dx;
           break;
         }
       }
-      _checkWindowBounds(win, x + dx, y + dy, w + dw, h + dh);
+      _checkWindowBounds(win, x, y, w, h);
       return;
     }
   }
@@ -115,9 +114,7 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
   // Looks like ePhysics wont cooperate about coords and other things, so plan B.
 
   evas_object_geometry_get(img, &x, &y, &w, &h);
-  x += ev->cur.canvas.x - ev->prev.output.x;
-  y += ev->cur.canvas.y - ev->prev.output.y;
-  _checkWindowBounds(win, x, y, w, h);
+  _checkWindowBounds(win, x + ev->cur.canvas.x - ev->prev.output.x, y + ev->cur.canvas.y - ev->prev.output.y, w, h);
 }
 
 static void _onBgUnclick(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -126,6 +123,7 @@ static void _onBgUnclick(void *data, Evas *evas, Evas_Object *obj, void *event_i
 
   if (1 == ev->button)
   {
+    // Stop moving the window.
     evas_object_event_callback_del(obj, EVAS_CALLBACK_MOUSE_UP,   _onBgUnclick);
     evas_object_event_callback_del(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove);
   }
@@ -137,6 +135,7 @@ static void _onBgClick(void *data, Evas *evas, Evas_Object *obj, void *event_inf
 
   if (1 == ev->button)
   {
+    // Start moving the window.
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_UP,   _onBgUnclick, data);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, data);
   }
@@ -264,7 +263,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	evas_obj_position_set(cx - 15, cy - 15),
 	evas_obj_visibility_set(EINA_TRUE)
       );
-      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, result);
+      evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
       eo_unref(result->hand[i]);
     }
   }
