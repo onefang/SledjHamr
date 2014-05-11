@@ -1,137 +1,158 @@
-// The images we use.
 images
 {
-   image: "bubble.png"		COMP;  // COMP means to use lossless compression.
-   image: "bubble_sh.png"	COMP;
-   image: "logo.png"		COMP;
-   image: "pt.png"		COMP;
-   image: "sky_01.jpg"		COMP;
-   image: "sky_02.jpg"		COMP;
-   image: "sky_03.jpg"		COMP;
-   image: "sky_04.jpg"		COMP;
+  image: "bubble.png"		COMP;  // COMP means to use lossless compression.
+  image: "bubble_sh.png"	COMP;
+  image: "logo.png"		COMP;
+  image: "pt.png"		COMP;
+  image: "sky_01.jpg"		COMP;
+  image: "sky_02.jpg"		COMP;
+  image: "sky_03.jpg"		COMP;
+  image: "sky_04.jpg"		COMP;
 }
 
-collections {
-
-   group {
-      name: "winFang/layout";
-
-      data {
-         item: "title" "<b>Layout based internal window</b>";
+collections
+{
+  group
+  {
+    name: "winFang/layout";
+    parts
+    {
+      part
+      { name: "winFang/background";
+	type: IMAGE;
+	// Ignore mouse events.
+	mouse_events: 0;
+	// Each part has one or more descriptions, or states.
+	// They all have to have at least this default state.
+	description
+	{ state: "default" 0.0;
+	  // RGBA, so this is purple, and semi transparent.
+//	  color: 50   0  100   100;  // pre multiplied  R = (r * a) / 255
+	  color: 126  0  255   100;  //                 r = (R * 255) / a
+	  aspect_preference: HORIZONTAL;
+	  image{normal: "sky_04.jpg";}
+	}
       }
 
-      parts {
+      part
+      { name: "winFang/underlay";
+	type: SWALLOW;
+	mouse_events: 1;
 
-	    // The first part, the black background RECTangle of the screens.
-	    part
-	    { name: "winFang/background";
-		type: IMAGE;
-		// Ignore mouse events.
-		mouse_events: 0;
-		// Each part has one or more descriptions, or states.
-		// They all have to have at least this default state.
-		description
-		{ state: "default" 0.0;
-		    // RGBA, so this is purple, and semi transparent.
-//		    color: 50   0  100   100;  // pre multiplied  R = (r * a) / 255
-		    color: 126  0  255   100;  //                 r = (R * 255) / a
-               aspect_preference: HORIZONTAL;
-               image {
-                  normal: "sky_04.jpg";
-               }
-	      }
-	    }
+	description
+	{ state: "default" 0.0;
+	  rel1
+	  {
+	    relative: 0.0 0.0;
+	    to: "winFang/background";
+	  }
+	  rel2
+	  {
+	    relative: 1.0 1.0;
+	    to: "winFang/background";
+	  }
+	}
+      } // winFang/underlay
 
-         part {
-            name: "winFang/underlay";
-            type: SWALLOW;
-	    mouse_events: 1;
+      part
+      { name: "winFang/title";
+	type: SWALLOW;
+	mouse_events: 0;
 
-            description {
-               state: "default" 0.0;
+	description
+	{ state: "default" 0.0;
+	  visible: 0;
+	}
 
-               rel1 {
-                  relative: 0.0 0.0;
-		  to: "winFang/background";
-               }
-               rel2 {
-                  relative: 1.0 1.0;
-		  to: "winFang/background";
-               }
-            }
-         } // winFang/underlay
-
-         part {
-            name: "winFang/title";
-            type: TEXT;
-	    mouse_events: 0;
-
-            description {
-               state: "default" 0.0;
-               color: 255 255 255 255;
-               rel1 {
-                  relative: 0.0 0.0;
-		  to: "winFang/background";
-               }
-               rel2 {
-                  relative: 1.0 0.0;
-		  to: "winFang/background";
-		  offset: 0 15;
-               }
-               text {
-                  text: "";
-                  size: 10;
-                  font: "sans";
-                  min: 0 1;
-                  max: 0 1;
-               }
-            }
-         }
-
-         part {
-            name: "winFang/box";
-            type: BOX;
-	    mouse_events: 1;
-
-            description {
-               state: "default" 0.0;
-
-               box {
-                  layout: "vertical";
-               }
-               rel1 {
-                  relative: 0.0 0.0;
-		  to: "winFang/title";
-		  offset: 0 15;
-               }
-               rel2 {
-                  relative: 1.0 1.0;
-		  to: "winFang/background";
-               }
-            }
-         } // winFang/box
-
-         part {
-            name: "winFang/content";
-            type: SWALLOW;
-	    mouse_events: 1;
-
-            description {
-               state: "default" 0.0;
-               fixed: 1 1;
-
-               rel1 {
-                  relative: 0.0 0.0;
-		  to: "winFang/title";
-		  offset: 0 15;
-               }
-               rel2 {
-                  relative: 1.0 1.0;
-		  to: "winFang/background";
-               }
-            }
-         } // winFang/content
-
+	description
+	{ state: "internal" 0.0;
+	  inherit: "default" 0;
+	  visible: 1;
+	  rel1
+	  {
+	    relative: 0.0 0.0;
+	    to: "winFang/background";
+	  }
+	  rel2
+	  {
+	    relative: 1.0 0.0;
+	    to: "winFang/background";
+	    offset: 0 15;
+	  }
+	}
       }
-   }
+
+      part
+      { name: "winFang/box";
+	type: BOX;
+	mouse_events: 1;
+
+	description
+	{
+	  state: "default" 0.0;
+	  box{layout: "vertical";}
+	  rel1
+	  {
+	     relative: 0.0 0.0;
+	    to: "winFang/background";
+	  }
+	  rel2
+	  {
+	    relative: 1.0 1.0;
+	    to: "winFang/background";
+	  }
+	}
+
+	description
+	{ state: "internal" 0.0;
+	  inherit: "default" 0;
+	  rel1
+	  {
+	     relative: 0.0 0.0;
+	    to: "winFang/title";
+		offset: 0 15;
+	  }
+	  rel2
+	  {
+	    relative: 1.0 1.0;
+	    to: "winFang/background";
+	  }
+	}
+      } // winFang/box
+
+      part
+      { name: "winFang/content";
+	type: SWALLOW;
+	mouse_events: 1;
+
+	description
+	{ state: "default" 0.0;
+	  fixed: 1 1;
+	  rel1
+	  {
+	    relative: 0.0 0.0;
+	    to: "winFang/box";
+	  }
+	  rel2
+	  {
+	    relative: 1.0 1.0;
+	    to: "winFang/box";
+	  }
+	}
+      } // winFang/content
+
+      programs
+      {
+	program
+	{ name: "isInternal";
+	  signal: "isInternal";
+	  source: "isInternal";
+	  action: STATE_SET "internal" 0.0;
+	  target: "winFang/title";
+	  target: "winFang/box";
+	}
+      }
+
+    }
+  }
 }
