@@ -254,9 +254,8 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_visibility_set(EINA_TRUE)
       );
-    elm_object_style_set(result->title, "slide_bounce");
-    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
-    elm_object_text_set(result->title, buf);
+    elm_object_style_set(result->title, "marker");
+    elm_object_text_set(result->title, title);
     elm_object_part_content_set(result->layout, WF_TITLE, result->title);
     eo_unref(result->title);
   }
