@@ -8,6 +8,8 @@
 /* Enable access to unstable EFL EO API. */
 #define EFL_EO_API_SUPPORT 1
 
+#define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*array))
+
 
 #include <Eo.h>
 #include <Eina.h>
@@ -22,6 +24,29 @@
 #define WF_TITLE	"winFang/title"
 #define WF_BOX		"winFang/box"
 #define WF_SWALLOW	"winFang/content"
+
+
+typedef struct _widgetSpec
+{
+  char *name;
+  const Eo_Class *klass;
+} widgetSpec;
+
+#define WT_CHECK	"check"
+#define WT_BOX		"box"
+#define WT_BUTTON	"button"
+#define WT_FILES	"files"
+#define WT_ENTRY	"entry"
+#define WT_GRID		"grid"
+#define WT_HOVER	"hoversel"
+#define WT_IMAGE	"image"
+#define WT_LABEL	"label"
+#define WT_LAYOUT	"layout"
+#define WT_RADIO	"radio"
+#define WT_RECT		"rectangle"
+#define WT_TEXT		"text"
+#define WT_TEXTBOX	"textbox"
+#define WT_TOOLBAR	"toolbar"
 
 
 typedef struct _winFang
@@ -48,6 +73,7 @@ typedef struct _winFang
 typedef struct _Widget
 {
   char		magic[8];
+  char		type[16];
   Evas_Object	*obj;
 
   char		*label, *look, *action, *help;
@@ -67,6 +93,7 @@ void winFangShow(winFang *win);
 void winFangCalcMinSize(winFang *win);
 void winFangDel(winFang *win);
 
-Widget *widgetAdd(winFang *win, const Eo_Class *klass, char *title, int x, int y, int w, int h);
+Widget *widgetAdd(winFang *win, char *type, char *title, int x, int y, int w, int h);
+void widgetDel(Widget *wid);
 
 #endif

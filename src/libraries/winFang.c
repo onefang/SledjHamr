@@ -1,6 +1,8 @@
 #include "winFang.h"
 
 
+
+
 static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Coord w, Evas_Coord h)
 {
   Evas_Object *test;
@@ -341,43 +343,93 @@ void winFangDel(winFang *win)
   EINA_CLIST_FOR_EACH_ENTRY(wid, &win->widgets, Widget, node)
   {
     if (wid->on_del)  wid->on_del(wid, wid->obj, NULL);
+    widgetDel(wid);
     eo_unref(wid->obj);
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
   evas_object_del(win->win);
 }
 
-Widget *widgetAdd(winFang *win, const Eo_Class *klass, char *title, int x, int y, int w, int h)
+
+static widgetSpec widgetClasses[15];
+
+Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, int h)
 {
   Widget *result;
+  const Eo_Class *klass = NULL;
+  int i;
 
-  result = calloc(1, sizeof(Widget));
-  strcpy(result->magic, "Widget");
-  eina_clist_add_head(&win->widgets, &result->node);
-
-  result->obj = eo_add(klass, win->win,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-    evas_obj_visibility_set(EINA_TRUE),
-    eo_key_data_set("Widget", result, NULL)
-  );
-
-  if (x < 0)
-    elm_layout_box_append(win->win, WF_BOX, result->obj);
-  else
-    elm_grid_pack(win->grid, result->obj, x, y, w, h);
-  winFangCalcMinSize(win);
-
-  if (title)
+  // Poor mans introspection.
+  if (NULL == widgetClasses[0].name)
   {
-    result->label = strdup(title);
-    elm_object_text_set(result->obj, result->label);
-    evas_object_name_set(result->obj, title);
+    i = 0;
+    widgetClasses[i].name = WT_CHECK;	widgetClasses[i++].klass = 	ELM_OBJ_CHECK_CLASS;
+    widgetClasses[i].name = WT_BOX;	widgetClasses[i++].klass = 	ELM_OBJ_BOX_CLASS;
+    widgetClasses[i].name = WT_BUTTON;	widgetClasses[i++].klass = 	ELM_OBJ_BUTTON_CLASS;
+    widgetClasses[i].name = WT_ENTRY;	widgetClasses[i++].klass = 	ELM_OBJ_ENTRY_CLASS;
+    widgetClasses[i].name = WT_FILES;	widgetClasses[i++].klass = 	ELM_OBJ_FILESELECTOR_CLASS;
+    widgetClasses[i].name = WT_GRID;	widgetClasses[i++].klass = 	ELM_OBJ_GRID_CLASS;
+    widgetClasses[i].name = WT_HOVER;	widgetClasses[i++].klass = 	ELM_OBJ_HOVERSEL_CLASS;
+    widgetClasses[i].name = WT_IMAGE;	widgetClasses[i++].klass = 	ELM_OBJ_IMAGE_CLASS;
+    widgetClasses[i].name = WT_LABEL;	widgetClasses[i++].klass = 	ELM_OBJ_LABEL_CLASS;
+    widgetClasses[i].name = WT_LAYOUT;	widgetClasses[i++].klass = 	ELM_OBJ_LAYOUT_CLASS;
+    widgetClasses[i].name = WT_RADIO;	widgetClasses[i++].klass = 	ELM_OBJ_RADIO_CLASS;
+    widgetClasses[i].name = WT_RECT;	widgetClasses[i++].klass = 	EVAS_OBJ_RECTANGLE_CLASS;
+    widgetClasses[i].name = WT_TEXT;	widgetClasses[i++].klass = 	EVAS_OBJ_TEXT_CLASS;
+    widgetClasses[i].name = WT_TEXTBOX; widgetClasses[i++].klass = 	ELM_OBJ_ENTRY_CLASS;
+    widgetClasses[i].name = WT_TOOLBAR;	widgetClasses[i++].klass = 	ELM_OBJ_TOOLBAR_CLASS;
+  }
+
+  for (i = 0; i < ARRAY_LENGTH(widgetClasses); i++)
+  {
+    if (strcmp(type, widgetClasses[i].name) == 0)
+    {
+      klass = widgetClasses[i].klass;
+      break;
+    }
+  }
+
+  if (klass)
+  {
+    result = calloc(1, sizeof(Widget));
+    strcpy(result->magic, "Widget");
+    strcpy(result->type, type);
+    eina_clist_add_head(&win->widgets, &result->node);
+
+    result->obj = eo_add(klass, win->win,
+      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+      evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+      evas_obj_visibility_set(EINA_TRUE),
+      eo_key_data_set("Widget", result, NULL)
+    );
+
+    if (x < 0)
+      elm_layout_box_append(win->win, WF_BOX, result->obj);
+    else
+      elm_grid_pack(win->grid, result->obj, x, y, w, h);
+    winFangCalcMinSize(win);
+
+    if (title)
+    {
+      result->label = strdup(title);
+      elm_object_text_set(result->obj, result->label);
+      evas_object_name_set(result->obj, title);
+    }
   }
 
   return result;
 }
 
+void widgetDel(Widget *wid)
+{
+  if (wid)
+  {
+    // TODO - This is to work around a bug in Elm entry, remove it when the bug is fixed.
+    //   The bug is that editable entry widgets cause the app to hang on exit.
+    if (strcmp(WT_ENTRY, wid->type) == 0)
+      elm_entry_editable_set(wid->obj, EINA_FALSE);
+  }
+}
 
 /*  CALLBACK types
 

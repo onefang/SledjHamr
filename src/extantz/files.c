@@ -148,7 +148,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   me = winFangAdd(ourGlobals->mainWindow, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 300, 500, "file selector", "files", ourGlobals->world);
 
-  wid = widgetAdd(me, ELM_OBJ_FILESELECTOR_CLASS, NULL, -1, -1, -1, -1);
+  wid = widgetAdd(me, WT_FILES, NULL, -1, -1, -1, -1);
   fs = wid->obj;
   wid->data = ourGlobals;
   wid->on_del = _on_fs_del;

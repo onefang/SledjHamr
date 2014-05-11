@@ -14,6 +14,9 @@
 #include <Elementary.h>
 
 
+#define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*array))
+
+
 void HamrTime(void *elm_main, char *domain);
 
 #endif

@@ -173,20 +173,16 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
 static int widget(lua_State *L)
 {
   winFang *win = NULL;
+  Widget *wid;
   char *type = "button";
   char *title = ":";
   int x = -1, y = -1, w = -1, h = -1;
 
   pull_lua(L, 1, "*window $type $title %x %y %w %h", &win, &type, &title, &x, &y, &w, &h);
 
-  // Poor mans introspection, until I write real introspection into EFL.
-  // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?
-  if (strcmp(type, "button") == 0)
+  wid = widgetAdd(win, type, title, x, y, w, h);
+  if (wid)
   {
-    Widget *wid;
-
-    // These two lines are likely the only ones that will be different for the different sorts of widgets.
-    wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, title, x, y, w, h);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
     wid->data = L;
 
