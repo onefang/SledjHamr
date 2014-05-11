@@ -175,7 +175,7 @@ static int widget(lua_State *L)
   winFang *win = NULL;
   char *type = "button";
   char *title = ":";
-  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
+  int x = -1, y = -1, w = -1, h = -1;
 
   pull_lua(L, 1, "*window $type $title %x %y %w %h", &win, &type, &title, &x, &y, &w, &h);
 
@@ -185,7 +185,7 @@ static int widget(lua_State *L)
   {
     Widget *wid;
 
-    // These two lines are likely the only ones that will be different for the different sorts of widgets.
+    // This two lines is likely the only one that will be different for the different sorts of widgets.
     wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, win->win, title);
     wid->data = L;
     eo_do(wid->obj,
@@ -193,15 +193,10 @@ static int widget(lua_State *L)
 	eo_key_data_set("Widget", wid, NULL)
 	);
 
-    if (win->grid)
-      elm_grid_pack(win->grid, wid->obj, x, y, w, h);
+    if (x < 0)
+      elm_layout_box_append(win->win, WF_BOX, wid->obj);
     else
-    {
-      eo_do(wid->obj,
-	evas_obj_size_set(w, h),
-	evas_obj_position_set(x, y)
-      );
-    }
+      elm_grid_pack(win->grid, wid->obj, x, y, w, h);
     winFangCalcMinSize(win);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
