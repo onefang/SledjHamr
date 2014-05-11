@@ -89,6 +89,8 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
     evas_obj_size_hint_min_get(NULL, &h),
     evas_obj_size_set(ourGlobals->win_w, h)
     );
+  // Stop internal windows going under the toolbar.
+  evas_object_resize(ourGlobals->mainWindow->layout, ourGlobals->win_w, h);
   if (ourGlobals->world)
     ephysics_world_render_geometry_set(ourGlobals->world, 0, 0, -50, ourGlobals->win_w, ourGlobals->win_h, 100);
   _resize(gld);
