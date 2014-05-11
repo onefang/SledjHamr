@@ -67,6 +67,6 @@ void winFangShow(winFang *win);
 void winFangCalcMinSize(winFang *win);
 void winFangDel(winFang *win);
 
-Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
+Widget *widgetAdd(winFang *win, const Eo_Class *klass, char *title, int x, int y, int w, int h);
 
 #endif

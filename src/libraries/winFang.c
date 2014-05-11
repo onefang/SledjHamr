@@ -347,7 +347,7 @@ void winFangDel(winFang *win)
   evas_object_del(win->win);
 }
 
-Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title)
+Widget *widgetAdd(winFang *win, const Eo_Class *klass, char *title, int x, int y, int w, int h)
 {
   Widget *result;
 
@@ -355,19 +355,24 @@ Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char
   strcpy(result->magic, "Widget");
   eina_clist_add_head(&win->widgets, &result->node);
 
-  if (parent)
+  result->obj = eo_add(klass, win->win,
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+    evas_obj_visibility_set(EINA_TRUE),
+    eo_key_data_set("Widget", result, NULL)
+  );
+
+  if (x < 0)
+    elm_layout_box_append(win->win, WF_BOX, result->obj);
+  else
+    elm_grid_pack(win->grid, result->obj, x, y, w, h);
+  winFangCalcMinSize(win);
+
+  if (title)
   {
-    result->obj = eo_add(klass, parent,
-      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-      evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-      evas_obj_visibility_set(EINA_TRUE)
-    );
-    if (title)
-    {
-      result->label = strdup(title);
-      elm_object_text_set(result->obj, result->label);
-      evas_object_name_set(result->obj, title);
-    }
+    result->label = strdup(title);
+    elm_object_text_set(result->obj, result->label);
+    evas_object_name_set(result->obj, title);
   }
 
   return result;

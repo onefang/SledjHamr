@@ -32,13 +32,13 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
   elm_layout_box_append(me->win, WF_BOX, en);
   eo_unref(en);
 
-  wid = widgetAdd(me, ELM_OBJ_ENTRY_CLASS, me->win, "");
+  wid = widgetAdd(me, ELM_OBJ_ENTRY_CLASS, "", -1, -1, -1, -1);
   wid->on_del = _on_entry_del;
   eo_do(wid->obj,
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_TRUE)
        );
-  elm_layout_box_append(me->win, WF_BOX, wid->obj);
+
   winFangCalcMinSize(me);
 
   return me;

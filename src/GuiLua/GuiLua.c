@@ -185,20 +185,10 @@ static int widget(lua_State *L)
   {
     Widget *wid;
 
-    // This two lines is likely the only one that will be different for the different sorts of widgets.
-    wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, win->win, title);
-    wid->data = L;
-    eo_do(wid->obj,
-	evas_obj_visibility_set(EINA_TRUE),
-	eo_key_data_set("Widget", wid, NULL)
-	);
-
-    if (x < 0)
-      elm_layout_box_append(win->win, WF_BOX, wid->obj);
-    else
-      elm_grid_pack(win->grid, wid->obj, x, y, w, h);
-    winFangCalcMinSize(win);
+    // These two lines are likely the only ones that will be different for the different sorts of widgets.
+    wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, title, x, y, w, h);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
+    wid->data = L;
 
     lua_pushlightuserdata(L, (void *) wid);
     return 1;
