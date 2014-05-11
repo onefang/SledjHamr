@@ -280,5 +280,7 @@ winFang *woMan_add(globals *ourGlobals)
     elm_layout_box_append(me->win, WF_BOX, bt);
     eo_unref(bt);
 
+    winFangCalcMinSize(me);
+
     return me;
 }

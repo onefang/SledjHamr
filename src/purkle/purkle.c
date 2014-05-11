@@ -39,6 +39,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
     elm_obj_entry_editable_set(EINA_TRUE)
        );
   elm_layout_box_append(me->win, WF_BOX, wid->obj);
+  winFangCalcMinSize(me);
 
   return me;
 }

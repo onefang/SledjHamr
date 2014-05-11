@@ -3,13 +3,13 @@
 
 static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Coord w, Evas_Coord h)
 {
-  Evas_Object *img = win->win, *test;
+  Evas_Object *test;
   Eina_List *objs, *this;
   Evas_Coord mw, mh;
   int padding = 1, i = 0, overs[4][2];
 
   // Sanity check.
-  if ((20 > w) || (20 > h))
+  if ((win->mw > w) || (win->mh > h))
     return;
 
   overs[0][0] = x - padding;		overs[0][1] = y - padding;
@@ -44,7 +44,9 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
   // All good, do it.
   win->x = x;  win->y = y;
   win->w = w;  win->h = h;
-  evas_object_geometry_set(img, x, y, w, h);
+  evas_object_geometry_set(win->layout, x, y, w, h);
+  evas_object_resize(win->title, w, 15);
+  elm_layout_sizing_eval(win->layout);
   for (i = 0; i < 4; i++)
   {
     int cx = win->x, cy = win->y;
@@ -61,14 +63,13 @@ static void _onHandleMove(void *data, Evas *evas, Evas_Object *obj, void *event_
   Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
   Evas_Coord x, y, w, h, dx, dy;
-  Evas_Object *img = win->win;
   int i;
 
   if (!ev->buttons) return;
 
   dx = ev->cur.canvas.x - ev->prev.output.x;
   dy = ev->cur.canvas.y - ev->prev.output.y;
-  evas_object_geometry_get(img, &x, &y, &w, &h);
+  evas_object_geometry_get(win->layout, &x, &y, &w, &h);
   for (i = 0; i < 4; i++)
   {
     if (obj == win->hand[i])
@@ -106,14 +107,13 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
 {
   Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
-  Evas_Object *img = win->win;
   Evas_Coord x, y, w, h;
 
   if (1 != ev->buttons)  return;
 
   // Looks like ePhysics wont cooperate about coords and other things, so plan B.
 
-  evas_object_geometry_get(img, &x, &y, &w, &h);
+  evas_object_geometry_get(win->layout, &x, &y, &w, &h);
   _checkWindowBounds(win, x + ev->cur.canvas.x - ev->prev.output.x, y + ev->cur.canvas.y - ev->prev.output.y, w, h);
 }
 
@@ -250,8 +250,8 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     }
 
     result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->layout,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_visibility_set(EINA_TRUE)
       );
     elm_object_style_set(result->title, "slide_bounce");
@@ -294,8 +294,33 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);
+  winFangCalcMinSize(result);
 
   return result;
+}
+
+void winFangCalcMinSize(winFang *win)
+{
+  Evas_Object *edje = elm_layout_edje_get(win->layout);
+  int w, h;
+
+  // Would be nice if everything properly set their minimums, but they don't.
+  //   Actually it looks like BOX gets it's minimum width set to the width of the window.
+  win->mw = 0;  win->mh = 0;
+  evas_object_size_hint_min_get(edje_object_part_object_get(edje, WF_BOX), &w, &h);
+  if (w > win->mw)  win->mw = w;
+  if (h > win->mh)  win->mh = h;
+  // SWALLOW just returns 0.
+  evas_object_size_hint_min_get(edje_object_part_object_get(edje, WF_SWALLOW), &w, &h);
+  if (w > win->mw)  win->mw = w;
+  if (h > win->mh)  win->mh = h;
+  if (win->title)
+  {
+    // This at least returns proper values.
+    evas_object_size_hint_min_get(win->title, &w, &h);
+    if (w > win->mw)  win->mw = w;
+    win->mh += h;
+  }
 }
 
 void winFangDel(winFang *win)

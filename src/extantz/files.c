@@ -267,6 +267,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_layout_box_append(me->win, WF_BOX, vbox);
   evas_object_show(vbox);
   eo_unref(vbox);
+  winFangCalcMinSize(me);
 
   winFangHide(me);
   return me;

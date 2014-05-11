@@ -36,7 +36,7 @@ typedef struct _winFang
   EPhysics_Body *body;
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
-  int		x, y, w, h;
+  int		x, y, w, h, mw, mh;
 
   Evas_Object *hand[4];
 
@@ -64,6 +64,7 @@ typedef struct _Widget
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world);
 void winFangHide(winFang *win);
 void winFangShow(winFang *win);
+void winFangCalcMinSize(winFang *win);
 void winFangDel(winFang *win);
 
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);

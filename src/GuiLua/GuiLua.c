@@ -202,6 +202,7 @@ static int widget(lua_State *L)
 	evas_obj_position_set(x, y)
       );
     }
+    winFangCalcMinSize(win);
     evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
     lua_pushlightuserdata(L, (void *) wid);
