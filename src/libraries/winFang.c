@@ -172,44 +172,68 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   eina_clist_init(&result->widgets);
   eina_clist_init(&result->winFangs);
 
-  if (parent)	result->internal = EINA_TRUE;
   result->parent = parent;
-
   result->x = x;
   result->y = y;
   result->w = w;
   result->h = h;
 
-  if (result->internal)
+  if (result->parent)
   {
     eina_clist_add_head(&parent->winFangs, &result->node);
 
-    result->win = elm_layout_add(parent->win);
-    evas_object_name_set(result->win, "winFang");
-    evas_object_size_hint_weight_set(result->win, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
     snprintf(buf, sizeof(buf), "%s/winFang.edj", elm_app_data_dir_get());
-    elm_layout_file_set(result->win, buf, "winFang/layout");
-    if (title)
-      elm_object_part_text_set(result->win, TITLE, title);
-
-    result->grid = elm_grid_add(parent->win);
-    elm_grid_size_set(result->grid, result->w, result->h);
-    evas_object_size_hint_weight_set(result->grid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    evas_object_size_hint_align_set(result->grid, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    elm_object_part_content_set(result->win, SWALLOW, result->grid);
-    evas_object_show(result->grid);
-
-    evas_object_resize(result->win, result->w, result->h);
-    evas_object_move(result->win, result->x, result->y);
-    elm_layout_sizing_eval(result->win);
-    evas_object_show(result->win);
+    result->win = eo_add(ELM_OBJ_LAYOUT_CLASS, parent->win,
+	evas_obj_size_set(result->w, result->h),
+	evas_obj_position_set(result->x, result->y),
+	evas_obj_name_set("winFang"),
+	elm_obj_layout_file_set(buf, "winFang/layout"),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    result->e = evas_object_evas_get(result->win);
 
     // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
     // According to the Elm inlined image window example, this is what's needed to.
     evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, result);
     evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
 
-    result->e = evas_object_evas_get(result->win);
+/*
+    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_object_style_set(result->title, "slide_bounce");
+    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
+    elm_object_text_set(result->title, buf);
+    elm_box_pack_end(result->box, result->title);
+    eo_unref(result->title);
+*/
+/*
+    obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	elm_obj_separator_horizontal_set(EINA_TRUE),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_box_pack_end(result->box, obj1);
+    eo_unref(obj1);
+*/
+
+    if (title)
+      elm_object_part_text_set(result->win, TITLE, title);
+
+    result->grid = eo_add(ELM_OBJ_GRID_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	// TODO - Actually, this should be minus the size of the title stuff.
+	elm_obj_grid_size_set(result->w, result->h),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_object_part_content_set(result->win, SWALLOW, result->grid);
+
+    elm_layout_sizing_eval(result->win);
+
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
     for (i = 0; i < 4; i++)
@@ -229,7 +253,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, result);
       eo_unref(result->hand[i]);
     }
-
   }
   else
   {
@@ -250,20 +273,8 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_object_resize(result->win, result->w, result->h);
   }
 
-  if (result->internal)
+  if (result->parent)
   {
-/*
-    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_object_style_set(result->title, "slide_bounce");
-    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
-    elm_object_text_set(result->title, buf);
-    elm_box_pack_end(result->box, result->title);
-    eo_unref(result->title);
-*/
 #if 0
     // EPysics enable the window.
     if (world)
@@ -279,16 +290,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     }
 #endif
 
-/*
-    obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	elm_obj_separator_horizontal_set(EINA_TRUE),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_box_pack_end(result->box, obj1);
-    eo_unref(obj1);
-*/
   }
 
   evas_object_show(result->win);
@@ -303,7 +304,8 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
-  if (win->bg)  eo_unref(win->bg);
+  if (win->bg)    eo_unref(win->bg);
+  if (win->grid)  eo_unref(win->grid);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
@@ -316,6 +318,7 @@ void winFangDel(winFang *win)
     eo_unref(wid->obj);
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
+  if (win->parent)  eo_unref(win->win);
   evas_object_del(win->win);
 }
 

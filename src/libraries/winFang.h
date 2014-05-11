@@ -33,7 +33,6 @@ typedef struct _winFang
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
   int		x, y, w, h;
-  Eina_Bool	internal;
 
   Evas_Object *hand[4];
 
