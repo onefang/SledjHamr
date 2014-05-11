@@ -184,68 +184,47 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   if (result->parent)
   {
     eina_clist_add_head(&parent->winFangs, &result->node);
+    obj = parent->win;
+  }
+  else
+  {
+    result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
+    evas_object_move(result->win, result->x, result->y);
+    evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
+    elm_win_title_set(result->win, title);
 
-    snprintf(buf, sizeof(buf), "%s/winFang.edj", elm_app_data_dir_get());
-    result->win = eo_add(ELM_OBJ_LAYOUT_CLASS, parent->win,
-	evas_obj_size_set(result->w, result->h),
-	evas_obj_position_set(result->x, result->y),
-	evas_obj_name_set(WF_LAYOUT),
-	elm_obj_layout_file_set(buf, WF_LAYOUT),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    result->e = evas_object_evas_get(result->win);
+    obj = result->win;
+    x = 0;  y = 0;
+  }
 
+  snprintf(buf, sizeof(buf), "%s/winFang.edj", elm_app_data_dir_get());
+  result->layout = eo_add(ELM_OBJ_LAYOUT_CLASS, obj,
+    evas_obj_size_set(result->w, result->h),
+    evas_obj_position_set(x, y),
+    evas_obj_name_set(WF_LAYOUT),
+    elm_obj_layout_file_set(buf, WF_LAYOUT),
+    evas_obj_visibility_set(EINA_TRUE)
+  );
+  result->e = evas_object_evas_get(result->layout);
+
+//  result->bg = edje_object_part_object_get(elm_layout_edje_get(result->layout), WF_BACKGROUND);
+
+  if (result->parent)
+  {
+result->win = result->layout;
 
     // Something to catch clicks on the background, for moving the window.
-    // Cov Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
-    obj = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->win,
+    // Coz Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
+    obj = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->layout,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_name_set(WF_UNDERLAY),
         evas_obj_color_set(0, 0, 0, 0),
 	evas_obj_visibility_set(EINA_TRUE)
       );
-    elm_object_part_content_set(result->win, WF_UNDERLAY, obj);
+    elm_object_part_content_set(result->layout, WF_UNDERLAY, obj);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
     eo_unref(obj);
-
-    if (title)
-      elm_object_part_text_set(result->win, WF_TITLE, title);
-/*
-    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_object_style_set(result->title, "slide_bounce");
-    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
-    elm_object_text_set(result->title, buf);
-    elm_box_pack_end(result->box, result->title);
-    eo_unref(result->title);
-*/
-
-/*
-    obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	elm_obj_separator_horizontal_set(EINA_TRUE),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_box_pack_end(result->box, obj1);
-    eo_unref(obj1);
-*/
-
-    result->grid = eo_add(ELM_OBJ_GRID_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	evas_obj_name_set(WF_SWALLOW),
-	// TODO - Actually, this should be minus the size of the title stuff.
-	elm_obj_grid_size_set(result->w, result->h),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_object_part_content_set(result->win, WF_SWALLOW, result->grid);
-
-    elm_layout_sizing_eval(result->win);
 
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
@@ -266,25 +245,45 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
       eo_unref(result->hand[i]);
     }
-  }
-  else
-  {
-    result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
-    evas_object_move(result->win, result->x, result->y);
-    evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
-    elm_win_title_set(result->win, title);
 
-    snprintf(buf, sizeof(buf), "%s/sky_04.jpg", elm_app_data_dir_get());
-    result->bg = eo_add(ELM_OBJ_IMAGE_CLASS, result->win,
-      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-      elm_obj_image_fill_outside_set(EINA_TRUE),
-      elm_obj_image_file_set(buf, NULL),
-      evas_obj_color_set(50, 0, 100, 100),
-      evas_obj_visibility_set(EINA_TRUE)
-    );
-    elm_win_resize_object_add(result->win, result->bg);
-    evas_object_resize(result->win, result->w, result->h);
+    if (title)
+      elm_object_part_text_set(result->layout, WF_TITLE, title);
+/*
+    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->layout,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_object_style_set(result->title, "slide_bounce");
+    snprintf(buf, PATH_MAX, "<b>%s</b>", title);
+    elm_object_text_set(result->title, buf);
+    elm_box_pack_end(result->box, result->title);
+    eo_unref(result->title);
+*/
+
+/*
+    obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->layout,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+	elm_obj_separator_horizontal_set(EINA_TRUE),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_box_pack_end(result->box, obj1);
+    eo_unref(obj1);
+*/
   }
+
+  result->grid = eo_add(ELM_OBJ_GRID_CLASS, result->layout,
+    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    evas_obj_name_set(WF_SWALLOW),
+    // TODO - Actually, this should be minus the size of the title stuff.
+    elm_obj_grid_size_set(result->w, result->h),
+    evas_obj_visibility_set(EINA_TRUE)
+  );
+  elm_object_part_content_set(result->layout, WF_SWALLOW, result->grid);
+
+  elm_layout_sizing_eval(result->layout);
 
   if (result->parent)
   {
@@ -305,6 +304,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   }
 
+  evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);
 
   return result;
@@ -317,8 +317,9 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
-  if (win->bg)    eo_unref(win->bg);
-  if (win->grid)  eo_unref(win->grid);
+  if (win->bg)      eo_unref(win->bg);
+  if (win->grid)    eo_unref(win->grid);
+  if (win->layout)  eo_unref(win->layout);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
@@ -331,7 +332,6 @@ void winFangDel(winFang *win)
     eo_unref(wid->obj);
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
-  if (win->parent)  eo_unref(win->win);
   evas_object_del(win->win);
 }
 

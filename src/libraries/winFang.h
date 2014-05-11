@@ -16,6 +16,7 @@
 #include <EPhysics.h>
 
 
+#define WF_BACKGROUND	"winFang/background"
 #define WF_LAYOUT	"winFang/layout"
 #define WF_UNDERLAY	"winFang/underlay"
 #define WF_TITLE	"winFang/title"
@@ -28,6 +29,7 @@ typedef struct _winFang
   Evas		*e;
   struct _winFang *parent;
   Evas_Object	*win;
+  Evas_Object	*layout;
   Evas_Object	*title;
   Evas_Object	*bg;
   Evas_Object	*grid;

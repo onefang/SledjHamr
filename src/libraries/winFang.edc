@@ -79,7 +79,7 @@ collections {
 		  offset: 0 15;
                }
                text {
-                  text: "bla";
+                  text: "";
                   size: 10;
                   font: "sans";
                   min: 0 1;
