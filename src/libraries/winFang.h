@@ -16,6 +16,11 @@
 #include <EPhysics.h>
 
 
+#define BOX	"winFang/box"
+#define TITLE	"winFang/title"
+#define SWALLOW	"winFang/content"
+
+
 typedef struct _winFang
 {
   Evas		*e;
@@ -23,8 +28,7 @@ typedef struct _winFang
   Evas_Object	*win;
   Evas_Object	*title;
   Evas_Object	*bg;
-  Evas_Object	*box;
-  Evas_Object	*content;
+  Evas_Object	*grid;
   EPhysics_Body *body;
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
@@ -59,7 +63,6 @@ void winFangHide(winFang *win);
 void winFangShow(winFang *win);
 void winFangDel(winFang *win);
 
-void useBox(winFang *win);
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title);
 
 #endif

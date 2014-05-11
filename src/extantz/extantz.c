@@ -524,7 +524,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
    // Bump the top toolbar above the windows.
   evas_object_raise(ourGlobals.tb);
 
-  evas_object_show(ourGlobals.mainWindow->box);
   _on_resize(&ourGlobals, NULL, NULL, NULL);
 
   elm_run();

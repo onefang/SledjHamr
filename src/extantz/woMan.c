@@ -160,7 +160,6 @@ winFang *woMan_add(globals *ourGlobals)
     int i;
 
     me = winFangAdd(ourGlobals->mainWindow, 30, 200, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan", ourGlobals->world);
-    useBox(me);
 
     // A tab thingy.
     tb = elm_toolbar_add(me->win);
@@ -185,7 +184,7 @@ winFang *woMan_add(globals *ourGlobals)
     elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
 
     // The toolbar needs to be packed into the box AFTER the menus are added.
-    elm_box_pack_end(me->box, tb);
+    elm_layout_box_append(me->win, BOX, tb);
     evas_object_show(tb);
 
     gridList = elm_genlist_add(me->win);
@@ -268,7 +267,7 @@ winFang *woMan_add(globals *ourGlobals)
     tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
     tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
-    elm_box_pack_end(me->box, nf);
+    elm_layout_box_append(me->win, BOX, nf);
 
     bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
 //		evas_obj_text_set("Login"),
@@ -278,9 +277,8 @@ winFang *woMan_add(globals *ourGlobals)
 	);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
-    elm_box_pack_end(me->box, bt);
+    elm_layout_box_append(me->win, BOX, bt);
     eo_unref(bt);
-    evas_object_show(me->box);
 
     return me;
 }

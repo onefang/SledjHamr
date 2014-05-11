@@ -21,7 +21,7 @@ printf("%s  %s\n", evas_object_type_get(objs), evas_object_name_get(objs));
 
 static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Coord w, Evas_Coord h)
 {
-  Evas_Object *img = elm_win_inlined_image_object_get(win->win), *test;
+  Evas_Object *img = win->win, *test;
   Eina_List *objs, *this;
   Evas_Coord mw, mh;
   int padding = 1, i = 0, overs[4][2];
@@ -80,7 +80,7 @@ static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_
   Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
   Evas_Coord x, y, w, h, dx = 0, dy = 0, dw = 0, dh = 0, mx, my;
-  Evas_Object *img = elm_win_inlined_image_object_get(win->win);
+  Evas_Object *img = win->win;
   int i;
 
   if (!ev->buttons) return;
@@ -126,7 +126,7 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
 {
   Evas_Event_Mouse_Move *ev = event_info;
   winFang *win = data;
-  Evas_Object *img = elm_win_inlined_image_object_get(win->win);
+  Evas_Object *img = win->win;
   Evas_Coord x, y, w, h;
 
   if (1 != ev->buttons)  return;
@@ -165,8 +165,6 @@ void winFangShow(winFang *win)
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world)
 {
   winFang *result;
-  Evas_Object *obj, *obj1;
-  Evas *obj2;
   char buf[PATH_MAX];
   int i;
 
@@ -182,84 +180,81 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   result->w = w;
   result->h = h;
 
-  // In theory this should create an EWS window, in practice, I'm not seeing any difference.
-  // Guess I'll have to implement my own internal window manager.  I don't think a basic one will be that hard.  Famous last words.
-//  elm_config_engine_set("ews");
   if (result->internal)
   {
-    result->win = elm_win_add(parent->win, name, ELM_WIN_INLINED_IMAGE);
     eina_clist_add_head(&parent->winFangs, &result->node);
-    obj  = elm_win_inlined_image_object_get(result->win);
-    evas_object_name_set(obj, "winFang");
+
+    result->win = elm_layout_add(parent->win);
+    evas_object_name_set(result->win, "winFang");
+    evas_object_size_hint_weight_set(result->win, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    snprintf(buf, sizeof(buf), "%s/winFang.edj", elm_app_data_dir_get());
+    elm_layout_file_set(result->win, buf, "winFang/layout");
+    if (title)
+      elm_object_part_text_set(result->win, TITLE, title);
+
+    result->grid = elm_grid_add(parent->win);
+    elm_grid_size_set(result->grid, result->w, result->h);
+    evas_object_size_hint_weight_set(result->grid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    evas_object_size_hint_align_set(result->grid, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_object_part_content_set(result->win, SWALLOW, result->grid);
+    evas_object_show(result->grid);
+
+    evas_object_resize(result->win, result->w, result->h);
+    evas_object_move(result->win, result->x, result->y);
+    elm_layout_sizing_eval(result->win);
+    evas_object_show(result->win);
+
     // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
     // According to the Elm inlined image window example, this is what's needed to.
-    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, result);
-    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
-    elm_win_alpha_set(result->win, EINA_TRUE);
+    evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, result);
+    evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
 
-    // image object for win is unlinked to its pos/size - so manual control
-    // this allows also for using map and other things with it.
-    evas_object_move(obj, result->x, result->y);
-    // Odd, it needs to be resized twice.  WTF?
-    evas_object_resize(obj, result->w, result->h);
-
-    obj2 = evas_object_evas_get(obj);
-    result->e = obj2;
+    result->e = evas_object_evas_get(result->win);
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", elm_app_data_dir_get());
     for (i = 0; i < 4; i++)
     {
-      char key[32];
       int cx = result->x, cy = result->y;
 
            if (i == 1)   cx += result->w;
       else if (i == 2)  {cx += result->w;  cy += result->h;}
       else if (i == 3)   cy += result->h;
-      snprintf(key, sizeof(key), "h-%i\n", i);
-      result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, obj2,
+      result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, result->e,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_file_set(buf, NULL),
 	evas_obj_size_set(31, 31),
 	evas_obj_position_set(cx - 15, cy - 15),
-	eo_key_data_set(key, result->hand[i], NULL),
 	evas_obj_visibility_set(EINA_TRUE)
       );
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, cb_mouse_move, result);
       eo_unref(result->hand[i]);
     }
+
   }
   else
   {
     result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
     evas_object_move(result->win, result->x, result->y);
     evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
+    elm_win_title_set(result->win, title);
+
+    snprintf(buf, sizeof(buf), "%s/sky_04.jpg", elm_app_data_dir_get());
+    result->bg = eo_add(ELM_OBJ_IMAGE_CLASS, result->win,
+      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+      elm_obj_image_fill_outside_set(EINA_TRUE),
+      elm_obj_image_file_set(buf, NULL),
+      evas_obj_color_set(50, 0, 100, 100),
+      evas_obj_visibility_set(EINA_TRUE)
+    );
+    elm_win_resize_object_add(result->win, result->bg);
+    evas_object_resize(result->win, result->w, result->h);
   }
-
-  elm_win_title_set(result->win, title);
-
-  snprintf(buf, sizeof(buf), "%s/sky_04.jpg", elm_app_data_dir_get());
-  result->bg = eo_add(ELM_OBJ_IMAGE_CLASS, result->win,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    elm_obj_image_fill_outside_set(EINA_TRUE),
-    elm_obj_image_file_set(buf, NULL),
-    evas_obj_color_set(50, 0, 100, 100),
-    evas_obj_visibility_set(EINA_TRUE)
-  );
-  elm_win_resize_object_add(result->win, result->bg);
-
-  // Every window gets a free vertical box.
-  // TODO - Any widgets created without positon and size get packed to the end.
-  result->box = eo_add(ELM_OBJ_BOX_CLASS, result->win,
-    elm_obj_box_homogeneous_set(EINA_FALSE),
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
-       );
-  elm_win_resize_object_add(result->win, result->box);
 
   if (result->internal)
   {
+/*
     result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	evas_obj_visibility_set(EINA_TRUE)
       );
@@ -268,7 +263,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     elm_object_text_set(result->title, buf);
     elm_box_pack_end(result->box, result->title);
     eo_unref(result->title);
-
+*/
 #if 0
     // EPysics enable the window.
     if (world)
@@ -284,25 +279,18 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     }
 #endif
 
+/*
     obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	elm_obj_separator_horizontal_set(EINA_TRUE),
 	evas_obj_visibility_set(EINA_TRUE)
       );
     elm_box_pack_end(result->box, obj1);
     eo_unref(obj1);
-
-    result->content = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->win,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-        evas_obj_color_set(0, 0, 0, 0),
-	evas_obj_visibility_set(EINA_TRUE)
-      );
-    elm_box_pack_end(result->box, result->content);
+*/
   }
 
-  evas_object_resize(result->win, result->w, result->h);
   evas_object_show(result->win);
 
   return result;
@@ -315,9 +303,7 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
-  eo_unref(win->content);
-  eo_unref(win->box);
-  eo_unref(win->bg);
+  if (win->bg)  eo_unref(win->bg);
   EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
@@ -331,15 +317,6 @@ void winFangDel(winFang *win)
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
   evas_object_del(win->win);
-}
-
-void useBox(winFang *win)
-{
-  eo_do(win->content,
-    evas_obj_visibility_set(EINA_FALSE),
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-    evas_obj_size_set(0, 0)
-  );
 }
 
 Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char *title)

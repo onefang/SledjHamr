@@ -175,12 +175,9 @@ static int widget(lua_State *L)
   winFang *win = NULL;
   char *type = "button";
   char *title = ":";
-  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3, cy;
+  int x = 1, y = 1, w = WIDTH/3, h = HEIGHT/3;
 
   pull_lua(L, 1, "*window $type $title %x %y %w %h", &win, &type, &title, &x, &y, &w, &h);
-
-  evas_object_geometry_get(win->content, NULL, &cy, NULL, NULL);
-  y += cy;
 
   // Poor mans introspection, until I write real introspection into EFL.
   // TODO - The alternative is to just lookup the ELM_*_CLASS in a hash table?
@@ -192,14 +189,20 @@ static int widget(lua_State *L)
     wid = widgetAdd(win, ELM_OBJ_BUTTON_CLASS, win->win, title);
     wid->data = L;
     eo_do(wid->obj,
-	evas_obj_size_set(w, h),
-	evas_obj_position_set(x, y),
 	evas_obj_visibility_set(EINA_TRUE),
 	eo_key_data_set("Widget", wid, NULL)
 	);
-    evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
-    evas_object_show(win->box);
+    if (win->grid)
+      elm_grid_pack(win->grid, wid->obj, x, y, w, h);
+    else
+    {
+      eo_do(wid->obj,
+	evas_obj_size_set(w, h),
+	evas_obj_position_set(x, y)
+      );
+    }
+    evas_object_smart_callback_add(wid->obj, "clicked", _on_click, wid);
 
     lua_pushlightuserdata(L, (void *) wid);
     return 1;

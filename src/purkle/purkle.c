@@ -20,7 +20,6 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
   Evas_Object *en;
 
   me = winFangAdd(parent, 30, 590, w, h, "chatter box", "purkle", world);
-  useBox(me);
 
   en = eo_add(ELM_OBJ_ENTRY_CLASS, me->win,
     elm_obj_entry_scrollable_set(EINA_TRUE),
@@ -30,7 +29,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
     evas_obj_visibility_set(EINA_TRUE)
        );
   elm_object_text_set(en, "History is shown here");
-  elm_box_pack_end(me->box, en);
+  elm_layout_box_append(me->win, BOX, en);
   eo_unref(en);
 
   wid = widgetAdd(me, ELM_OBJ_ENTRY_CLASS, me->win, "");
@@ -39,9 +38,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_TRUE)
        );
-  elm_box_pack_end(me->box, wid->obj);
-
-  evas_object_show(me->box);
+  elm_layout_box_append(me->win, BOX, wid->obj);
 
   return me;
 }

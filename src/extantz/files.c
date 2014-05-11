@@ -147,9 +147,8 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   Evas_Object *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
   me = winFangAdd(ourGlobals->mainWindow, ourGlobals->win_w - 380, ourGlobals->win_w - 530, 350, 500, "file selector", "files", ourGlobals->world);
-  useBox(me);
 
-  wid = widgetAdd(me, ELM_OBJ_FILESELECTOR_CLASS, me->box, NULL);
+  wid = widgetAdd(me, ELM_OBJ_FILESELECTOR_CLASS, me->win, NULL);
   fs = wid->obj;
   wid->data = ourGlobals;
   wid->on_del = _on_fs_del;
@@ -159,7 +158,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_interface_fileselector_expandable_set(EINA_TRUE),
     elm_interface_fileselector_folder_only_set(EINA_FALSE)
        );
-  elm_box_pack_end(me->box, fs);
+  elm_layout_box_append(me->win, BOX, fs);
 
   elm_fileselector_path_set(fs, path);
   elm_fileselector_is_save_set(fs, save);
@@ -265,9 +264,8 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  elm_box_pack_end(me->box, vbox);
+  elm_layout_box_append(me->win, BOX, vbox);
   evas_object_show(vbox);
-  evas_object_show(me->box);
   eo_unref(vbox);
 
   winFangHide(me);
