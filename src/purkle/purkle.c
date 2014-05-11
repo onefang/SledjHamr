@@ -76,7 +76,7 @@ int luaopen_purkle(lua_State *L)
     world = gl->world;
   }
 
-  purkleAdd(parent, 300, 400, world);
+  purkleAdd(parent, 200, 400, world);
 
   push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 
