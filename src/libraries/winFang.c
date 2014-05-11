@@ -1,24 +1,6 @@
 #include "winFang.h"
 
 
-// Elm inlined image windows needs this to change focus on mouse click.
-// Evas style event callback.
-static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
-{
-  winFang *win = data;
-  Evas_Event_Mouse_Down *ev = event_info;
-
-  if (1 == ev->button)
-  {
-    Evas_Object *objs = evas_object_top_at_pointer_get(win->e);
-
-// TODO - This always returns the elm_win.  So how the hell do you tell what got clicked on?
-printf("%s  %s\n", evas_object_type_get(objs), evas_object_name_get(objs));
-
-    elm_object_focus_set(obj, EINA_TRUE);
-  }
-}
-
 static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Coord w, Evas_Coord h)
 {
   Evas_Object *img = win->win, *test;
@@ -40,7 +22,7 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
   EINA_LIST_FOREACH(objs, this, test)
   {
     const char * name = evas_object_name_get(test);
-    if (name && (strcmp("winFang", name) == 0))
+    if (name && (strcmp(WF_LAYOUT, name) == 0))
       i++;
   }
   if (2 <= i)
@@ -72,7 +54,6 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
     else if (i == 3)   cy += win->h;
     evas_object_move(win->hand[i], cx - 15, cy - 15);
   }
-  // TODO - This just stretches everything, we don't really want that.
 }
 
 static void cb_mouse_move(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -139,6 +120,28 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
   _checkWindowBounds(win, x, y, w, h);
 }
 
+static void _onBgUnclick(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  Evas_Event_Mouse_Down *ev = event_info;
+
+  if (1 == ev->button)
+  {
+    evas_object_event_callback_del(obj, EVAS_CALLBACK_MOUSE_UP,   _onBgUnclick);
+    evas_object_event_callback_del(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove);
+  }
+}
+
+static void _onBgClick(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+{
+  Evas_Event_Mouse_Down *ev = event_info;
+
+  if (1 == ev->button)
+  {
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_UP,   _onBgUnclick, data);
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, data);
+  }
+}
+
 static void _on_done(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
   elm_exit();
@@ -165,6 +168,7 @@ void winFangShow(winFang *win)
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world)
 {
   winFang *result;
+  Evas_Object *obj;
   char buf[PATH_MAX];
   int i;
 
@@ -186,17 +190,28 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     result->win = eo_add(ELM_OBJ_LAYOUT_CLASS, parent->win,
 	evas_obj_size_set(result->w, result->h),
 	evas_obj_position_set(result->x, result->y),
-	evas_obj_name_set("winFang"),
-	elm_obj_layout_file_set(buf, "winFang/layout"),
+	evas_obj_name_set(WF_LAYOUT),
+	elm_obj_layout_file_set(buf, WF_LAYOUT),
 	evas_obj_visibility_set(EINA_TRUE)
       );
     result->e = evas_object_evas_get(result->win);
 
-    // On mouse down we try to shift focus to the backing image, this seems to be the correct thing to force focus onto it's widgets.
-    // According to the Elm inlined image window example, this is what's needed to.
-    evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_DOWN, _cb_mouse_down_elm, result);
-    evas_object_event_callback_add(result->win, EVAS_CALLBACK_MOUSE_MOVE, _onBgMove, result);
 
+    // Something to catch clicks on the background, for moving the window.
+    // Cov Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
+    obj = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->win,
+	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_name_set(WF_UNDERLAY),
+        evas_obj_color_set(0, 0, 0, 0),
+	evas_obj_visibility_set(EINA_TRUE)
+      );
+    elm_object_part_content_set(result->win, WF_UNDERLAY, obj);
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
+    eo_unref(obj);
+
+    if (title)
+      elm_object_part_text_set(result->win, WF_TITLE, title);
 /*
     result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->win,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
@@ -209,6 +224,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     elm_box_pack_end(result->box, result->title);
     eo_unref(result->title);
 */
+
 /*
     obj1 = eo_add(ELM_OBJ_SEPARATOR_CLASS, result->win,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, 1.0),
@@ -220,17 +236,15 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     eo_unref(obj1);
 */
 
-    if (title)
-      elm_object_part_text_set(result->win, TITLE, title);
-
     result->grid = eo_add(ELM_OBJ_GRID_CLASS, result->win,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_name_set(WF_SWALLOW),
 	// TODO - Actually, this should be minus the size of the title stuff.
 	elm_obj_grid_size_set(result->w, result->h),
 	evas_obj_visibility_set(EINA_TRUE)
       );
-    elm_object_part_content_set(result->win, SWALLOW, result->grid);
+    elm_object_part_content_set(result->win, WF_SWALLOW, result->grid);
 
     elm_layout_sizing_eval(result->win);
 
@@ -341,6 +355,7 @@ Widget *widgetAdd(winFang *win, const Eo_Class *klass, Evas_Object *parent, char
     {
       result->label = strdup(title);
       elm_object_text_set(result->obj, result->label);
+      evas_object_name_set(result->obj, title);
     }
   }
 

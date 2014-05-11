@@ -158,7 +158,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_interface_fileselector_expandable_set(EINA_TRUE),
     elm_interface_fileselector_folder_only_set(EINA_FALSE)
        );
-  elm_layout_box_append(me->win, BOX, fs);
+  elm_layout_box_append(me->win, WF_BOX, fs);
 
   elm_fileselector_path_set(fs, path);
   elm_fileselector_is_save_set(fs, save);
@@ -264,7 +264,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  elm_layout_box_append(me->win, BOX, vbox);
+  elm_layout_box_append(me->win, WF_BOX, vbox);
   evas_object_show(vbox);
   eo_unref(vbox);
 

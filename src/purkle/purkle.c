@@ -29,7 +29,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
     evas_obj_visibility_set(EINA_TRUE)
        );
   elm_object_text_set(en, "History is shown here");
-  elm_layout_box_append(me->win, BOX, en);
+  elm_layout_box_append(me->win, WF_BOX, en);
   eo_unref(en);
 
   wid = widgetAdd(me, ELM_OBJ_ENTRY_CLASS, me->win, "");
@@ -38,7 +38,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_TRUE)
        );
-  elm_layout_box_append(me->win, BOX, wid->obj);
+  elm_layout_box_append(me->win, WF_BOX, wid->obj);
 
   return me;
 }

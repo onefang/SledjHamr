@@ -16,9 +16,11 @@
 #include <EPhysics.h>
 
 
-#define BOX	"winFang/box"
-#define TITLE	"winFang/title"
-#define SWALLOW	"winFang/content"
+#define WF_LAYOUT	"winFang/layout"
+#define WF_UNDERLAY	"winFang/underlay"
+#define WF_TITLE	"winFang/title"
+#define WF_BOX		"winFang/box"
+#define WF_SWALLOW	"winFang/content"
 
 
 typedef struct _winFang
