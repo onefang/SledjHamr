@@ -487,7 +487,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
   evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
 
-  /*  Our "layers".
+  /*  Our "layers".  TODO - This is out of date, I should update it.
 
       Elm win		- our real main window
         These have some sort of inlined image if they are internal.
