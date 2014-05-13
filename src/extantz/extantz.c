@@ -536,6 +536,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   sprintf(buf, "%s;%s/src/GuiLua/?.lua", env, elm_app_bin_dir_get());
   setenv("LUA_PATH", buf, 1);
 
+  // TODO - Should use Ecore_Exe for this sort of thing, and write a more robust way of connecting to servers than random sleeps.
   sprintf(buf, "%s/love &", elm_app_bin_dir_get());
   system(buf);
   sleep(1);
