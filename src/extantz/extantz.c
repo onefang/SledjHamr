@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "extantz.h"
 #include "SledjHamr.h"
 #include "LumbrJack.h"
@@ -408,7 +410,7 @@ void overlay_add(globals *ourGlobals)
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
   GLData *gld = NULL;
-  char buf[PATH_MAX];
+  char buf[PATH_MAX * 2], *env;
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
   /* Set the locale according to the system pref.
@@ -427,6 +429,21 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
 
   logDom = loggingStartup("extantz", logDom);
+
+  // Add extras, so we can run test.lua later.
+  env = getenv("LUA_CPATH");
+  if (!env)  env = "";
+  sprintf(buf, "%s;%s/src/GuiLua/?.so", env, elm_app_bin_dir_get());
+  setenv("LUA_CPATH", buf, 1);
+
+  env = getenv("LUA_PATH");
+  if (!env)  env = "";
+  sprintf(buf, "%s;%s/src/GuiLua/?.lua", env, elm_app_bin_dir_get());
+  setenv("LUA_PATH", buf, 1);
+
+  sprintf(buf, "%s/love &", elm_app_bin_dir_get());
+  system(buf);
+  sleep(1);
 
   // Don't do this, we need to clean up other stuff to, so set a clean up function below.
   //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);

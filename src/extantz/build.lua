@@ -15,7 +15,7 @@ end
 
 CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include -I../GuiLua'
 LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
-libs    = libs    .. ' -lIrrlicht -lGL -lbz2 -lGuiLua -lwinFang'
+libs    = libs    .. ' -lIrrlicht -lGL -lbz2 -lGuiLua -lwinFang -lRunnr'
 
 removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', 'gears.o', 'ephysics_demo.o', 'Evas_3D_demo.o', '../../media/extantz.edj'})
 removeFiles(dir, {'../../extantz', 'camera.o', 'files.o', 'scenri.o', 'woMan.o'})

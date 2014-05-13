@@ -15,6 +15,6 @@ cd $wd/src/GuiLua
 ./test.sh &
 sleep 1
 
-echo "_______________ TESTING LuaSL _______________"
-cd $wd/src/LuaSL
-./test.sh $0
+echo "_______________ TESTING love and LuaSL _______________"
+cd $wd
+./love $0

@@ -11,6 +11,8 @@ Dedicated to my girl Boots, coz she means the world to me.
 #include <Ecore_File.h>
 #include <Edje.h>
 
+#include <unistd.h>
+
 #include "LumbrJack.h"
 #include "Runnr.h"
 
@@ -377,6 +379,11 @@ int main(int argc, char **argv)
     char *programName = argv[0];
     boolean badArgs = FALSE;
     int result = EXIT_FAILURE;
+    char buf[PATH_MAX];
+
+    sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
+    system(buf);
+    sleep(1);
 
     memset(&ourGlobals, 0, sizeof(gameGlobals));
     ourGlobals.address = "127.0.0.1";

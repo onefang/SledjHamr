@@ -221,8 +221,23 @@ static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_De
 
 int main(int argc, char **argv)
 {
-    gameGlobals ourGlobals;
-    int result = EXIT_FAILURE;
+  gameGlobals ourGlobals;
+  char *env, cwd[PATH_MAX], temp[PATH_MAX * 2];
+  int result = EXIT_FAILURE;
+
+  // Sigh, Elm has this great thing for dealing with bin, lib, and data directories, but this is not an Elm app,
+  // And Elm is too heavy for just that little bit.
+  // So just duplicate a bit of what we need here.  Sorta.
+  getcwd(cwd, PATH_MAX);
+  env = getenv("LUA_CPATH");
+  if (!env)  env = "";
+  sprintf(temp, "%s;%s/lib?.so;%s/?.so;%s/?.so", env, PACKAGE_LIB_DIR, PACKAGE_LIB_DIR, cwd);
+  setenv("LUA_CPATH", temp, 1);
+
+  env = getenv("LUA_PATH");
+  if (!env)  env = "";
+  sprintf(temp, "%s;%s/?.lua;%s/?.lua", env, PACKAGE_LIB_DIR, cwd);
+  setenv("LUA_PATH", temp, 1);
 
     memset(&ourGlobals, 0, sizeof(gameGlobals));
     ourGlobals.address = "127.0.0.1";
