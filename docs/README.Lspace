@@ -1,1 +1,3 @@
-Sim contents server, which is pretty much a web server.
+Sim contents server, which is pretty much a web server.  Should support
+WebDAV so people can point their file browsers at it.  More details in
+love.txt.

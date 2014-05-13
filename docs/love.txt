@@ -1,0 +1,67 @@
+Love makes the world go around.  Though in this case, it's the name of
+the world server, the module that directly controls what happens to the
+content of the virtual world.
+
+The love world server that deals with changing the world.  It manages
+the on disk representation of the world, and lets others screw with it
+via nails pumps.  Love also sends nails events on changes.
+
+World server vs local world.
+----------------------------
+
+Extantz defaults to running a local world at start up.  Lspace serves
+the content for a networked world.  They may be the same world if the
+local world is also networked.  Nails pumps commands to and from the
+world.
+
+Lspace just serves the results as a web server.  The love world server
+changes on disk content, Lspace checks on disk modified time stamps to
+deal with "do you have a newer version" HTTP requests.  Standard web
+server stuff really, though a mod_nails might be useful to catch events
+in order to invalidate any internal web caches.
+
+For networked worlds, Extantz fetches new content from Lspace, and hooks
+up to the nails pump of the love server for changes.  For local worlds,
+extantz would basically BE the world server?  No, that duplicates
+things, it can just run a local love server, then connect to it like
+every one else.  No need to connect to a local Lspace server, just deal
+with the file system direct.
+
+The local love server would be configured to listen on 127.0.0.1, and/or
+the outside IP address.  Extantz checks to see if there's one running on
+127.0.0.1 first before starting one if needed.
+
+Separate vs combined.
+---------------------
+
+There's two ways of doing this.  The world server could be part of
+Lspace, or they could be separate modules.  What we really have is a web
+server, backing store, and command pump.  The command pump is nails, and
+should be a library that is shared, since both ends of the protocol
+would be needed by most modules.
+
+Combined might be useful to conserve resources.  They both need to deal
+with the contents of the world.  Lspace just serves it to the outside
+world via HTTP, but needs to track changes.  Love makes those changes,
+and also sends changes via nails to every one.  Keeping the current
+working set in memory only once saves a lot of memory.
+
+The down sides of combined is that one might bog down the other, and it
+gets harder to use standard web servers.
+
+Separated is good coz Lspace might just be any ordinary web server. 
+They already have mechanisms in place to serve dynamic data, and even
+deal with changes to the files.
+
+The down side of separated is that changes might be slower propogating
+to the web server, and there might be two copies of any given set of
+assets in memory at once.
+
+A third option is to be separated, but any given web server could have a
+mod_love type module written for it.  This could share memory with the
+love server process.  So tighter integration is an option, but they can
+work apart.  Changes happen in this shared memory, driven by the command
+pump in the love server.  Lspace just needs read access, and just
+serves the current state of the world.  Love server persists to disk
+when it's ready to, though the shared memory can just be memory mapped
+files.

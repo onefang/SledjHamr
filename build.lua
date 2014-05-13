@@ -94,6 +94,7 @@ if 'nil' == type(args) then
   runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
   buildSub('libraries',	'src/libraries')
   buildSub('LuaSL',	'src/LuaSL')
+  buildSub('love',	'src/love')
   buildSub('GuiLua',	'src/GuiLua')
   buildSub('purkle',	'src/purkle')
   buildSub('extantz',	'src/extantz')

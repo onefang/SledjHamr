@@ -1,5 +1,5 @@
 
-#include "LuaSL.h"
+#include "../LuaSL/LuaSL.h"
 
 
 int logDom;	// Our logging domain.
@@ -314,7 +314,7 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
-	logDom = loggingStartup("LuaSL_test", logDom);
+	logDom = loggingStartup("love", logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 
 	if (ecore_con_init())
@@ -380,7 +380,7 @@ int main(int argc, char **argv)
 				    return -1;
 				}
 				ourGlobals.canvas = ecore_evas_get(ourGlobals.ee);
-				ecore_evas_title_set(ourGlobals.ee, "LuaSL test harness");
+				ecore_evas_title_set(ourGlobals.ee, "love test harness (snickers)");
 				ecore_evas_show(ourGlobals.ee);
 
 				ourGlobals.bg = evas_object_rectangle_add(ourGlobals.canvas);
@@ -393,7 +393,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "LuaSL");
+				snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "love");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);

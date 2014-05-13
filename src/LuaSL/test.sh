@@ -20,8 +20,8 @@ case $@ in
 	echo "_______________ STARTING LuaSL _______________"
 	../../LuaSL &
 	sleep 1
-	echo "_______________ STARTING LuaSL_test _______________"
-	./LuaSL_test
+	echo "_______________ STARTING love _______________"
+	../../love
 	;;
 
 esac
