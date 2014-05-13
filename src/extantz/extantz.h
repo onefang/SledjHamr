@@ -158,6 +158,8 @@ typedef struct _Scene_Data
   Evas_3D_Texture  *texture_diffuse;
 
   cameraMove       *move;
+
+  Evas_Object_Event_Cb clickCb;
 } Scene_Data;
 
 // Elm GL view related data here.

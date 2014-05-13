@@ -83,6 +83,27 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
+static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
+{
+  Evas_3D_Node *n = data;
+//  Evas_Event_Mouse_Down *ev = einfo;
+
+  if (n)
+  {
+    char *name = NULL;
+
+    name = evas_object_data_get(n, "Name");
+    if (strcmp("cube", name) == 0)
+    {
+      char SID[64];
+
+      // CUBE_UUID.events.touch_start(1), but we just make one up for now.
+      snprintf(SID, sizeof(SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+      sendForth(ourGlobals.server, SID, "events.touch_start(1)");
+    }
+  }
+}
+
 static void gldata_init(GLData *gld)
 {
     gld->useIrr = USE_IRR;
@@ -643,6 +664,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   }
   else
     PC("Failed to connect to server!");
+
+  // Setup our callback for clicking in world.
+  ourGlobals.scene->clickCb = _onWorldClick;
 
   elm_run();
 

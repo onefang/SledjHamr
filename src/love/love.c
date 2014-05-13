@@ -372,7 +372,7 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
 
 static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *ev)
 {
-//    gameGlobals *ourGlobals = data;
+    gameGlobals *ourGlobals = data;
 //    char buf[PATH_MAX];
     char SID[PATH_MAX];
     const char *command;
@@ -393,63 +393,22 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 	    ext[0] = '\0';
 	    command = ext + 1;
 
-#if 0	// Replace this with code to parse what viewers send.
-	    if (0 == strncmp(command, "compile(", 8))
+	    if (0 == strncmp(command, "events.touch_start(", 19))
 	    {
-		char *temp;
-		char *file;
-
-		strcpy(buf, &command[8]);
-		temp = buf;
-		file = temp;
-		while (')' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-
-		PD("Compiling %s, %s.", SID, file);
-		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
-		{
-		    script *me = calloc(1, sizeof(script));
-
-		    gettimeofday(&me->startTime, NULL);
-		    strncpy(me->SID, SID, sizeof(me->SID));
-		    strncpy(me->fileName, file, sizeof(me->fileName));
-		    me->game = ourGlobals;
-		    me->client = ev->client;
-		    eina_hash_add(ourGlobals->scripts, me->SID, me);
-		    eina_hash_add(ourGlobals->names, me->fileName, me);
-		    sendBack(ev->client, SID, "compiled(true)");
-		}
-		else
-		    sendBack(ev->client, SID, "compiled(false)");
-	    }
-	    else if (0 == strcmp(command, "run()"))
-	    {
+	        Eina_Iterator *scripts;
 		script *me;
-		char buf[PATH_MAX];
 
-		me = eina_hash_find(ourGlobals->scripts, SID);
-		if (me)
+		// TODO - For now, just send it to everyone.
+		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+		while(eina_iterator_next(scripts, (void **) &me))
 		{
-		    sprintf(buf, "%s.lua.out", me->fileName);
-		    newProc(buf, TRUE, me);
+		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
+		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
 		}
-	    }
-	    else if (0 == strcmp(command, "exit()"))
-	    {
-		PD("Told to exit.");
-		ecore_main_loop_quit();
 	    }
 	    else
-	    {
-		const char *status = NULL;
-
-		status = sendToChannel(ourGlobals, SID, command);
-		if (status)
-		    PE("Error sending command %s to script %s : %s", command, SID, status);
-	    }
-#endif
-
+	      PW("Unknown command from client - %s", command);
 	}
 
 	// Get the next blob to check it.

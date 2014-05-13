@@ -75,6 +75,7 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
   {
     name = evas_object_data_get(n, "Name");
     printf("Picked     : ");
+    if (scene->clickCb)  scene->clickCb(n, e, o, einfo);
   }
   else
     printf("Not picked : ");
@@ -83,6 +84,7 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
 
   printf("output(%d, %d) canvas(%d, %d) object(%d, %d) scene(%f, %f) texcoord(%f, %f) node(%p) %s mesh(%p)\n",
     ev->output.x, ev->output.y, ev->canvas.x, ev->canvas.y, obj_x, obj_y, scene_x, scene_y, s, t, n, name, m);
+
 }
 
 Scene_Data *scenriAdd(Evas_Object *win)
