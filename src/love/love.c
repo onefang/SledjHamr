@@ -1,3 +1,9 @@
+/* love world server - The central server that manages the virtual world.
+
+Dedicated to my girl Boots, coz she means the world to me.
+
+*/
+
 
 #include "../LuaSL/LuaSL.h"
 
