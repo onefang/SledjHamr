@@ -7,7 +7,85 @@
 
 static int logDom;	// Our logging domain.
 globals ourGlobals;
+static Eina_Strbuf *serverStream;
 
+
+
+static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
+{
+  globals *ourGlobals = data;
+
+  ourGlobals->server = ev->server;
+  return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
+{
+//  globals *ourGlobals = data;
+//  char buf[PATH_MAX];
+  char SID[PATH_MAX];
+  const char *command;
+  char *ext;
+
+  eina_strbuf_append_length(serverStream, ev->data, ev->size);
+  command = eina_strbuf_string_get(serverStream);
+  while ((ext = index(command, '\n')))
+  {
+    int length = ext - command;
+
+    strncpy(SID, command, length + 1);
+    SID[length] = '\0';
+    eina_strbuf_remove(serverStream, 0, length + 1);
+    ext = index(SID, '.');
+    if (ext)
+    {
+        ext[0] = '\0';
+        command = ext + 1;
+        if (0 == strncmp(command, "llOwnerSay(", 11))
+        {
+          PI("Saying to owner from %s - %s", SID, command);
+        }
+        else if (0 == strncmp(command, "llWhisper(", 10))
+        {
+          PI("Whispering from %s - %s", SID, command);
+        }
+	else if (0 == strncmp(command, "llSay(", 6))
+	{
+	  PI("Saying from %s - %s", SID, command);
+	}
+	else if (0 == strncmp(command, "llShout(", 8))
+	{
+	  PI("Shouting from %s - %s", SID, command);
+	}
+	else if (0 == strncmp(command, "llDialog(", 9))
+	{
+	  PI("Dialog from %s - %s", SID, command);
+	}
+	else
+	{
+	  PI("Some random command %s", command);
+	}
+    }
+
+    // Get the next blob to check it.
+    command = eina_strbuf_string_get(serverStream);
+  }
+
+  return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
+{
+  globals *ourGlobals = data;
+
+  if (ev->server)
+  {
+    ourGlobals->server = NULL;
+    ecore_con_server_del(ev->server);
+  }
+
+  return ECORE_CALLBACK_RENEW;
+}
 
 static void gldata_init(GLData *gld)
 {
@@ -556,7 +634,22 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   _on_resize(&ourGlobals, NULL, NULL, NULL);
 
+  // Try to connect to the love server we started before.
+  ourGlobals.address = "127.0.0.1";
+  ourGlobals.port = 8211;
+  if ((ourGlobals.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
+  {
+    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
+    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
+    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
+    serverStream = eina_strbuf_new();
+  }
+  else
+    PC("Failed to connect to server!");
+
   elm_run();
+
+  if (ourGlobals.server)  ecore_con_server_del(ourGlobals.server);
 
   ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();

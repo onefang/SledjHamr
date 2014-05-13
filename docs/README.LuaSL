@@ -280,16 +280,19 @@ Extantz fires up love, which in turn fires up LuaSL.  Love then
 basically does what LuaSL_test does, sending it scripts to compile and
 run from test sim/objects.  Except for the timed fake events.
 
-Generate touch events when user touchs the 3D cube.  It will pretend to be
-the "onefang's test bed" object.  Fake up llDetected* stuff.
-
-extantz -> love -> LuaSL
-
-
 Respond to llSay() and friends by putting them in purkle's history box. 
 With time stamps.
 
+SID.llSay(123, "foo")
 LuaSL -> love -> extantz
+
+
+Generate touch events when user touchs the 3D cube.  It will pretend to be
+the "onefang's test bed" object.  Fake up llDetected* stuff.
+
+CUBE_UUID.events.detected*(USER_UUID)
+CUBE_UUID.events.touch_start(1)
+extantz -> love -> LuaSL
 
 
 Fake llGetOwner(), llGetFreeMemory(), and llSameGroup().
@@ -334,5 +337,6 @@ LuaSL (maybe with a round trip to love as well)
 
 Implement llListen(), llDialog() and generate listen() events.
 
+SID.llDialog(USER_UUID, "My menu", arseBackwardsMenuList, 456)
+USER_UUID.llRegionSay(456, "button text")
 LuaSL -> love -> extantz -> love -> LuaSL
-

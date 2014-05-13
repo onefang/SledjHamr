@@ -227,6 +227,11 @@ typedef struct _globals
   EPhysics_World *world;
 
   winFang	*files;
+
+  Ecore_Con_Server	*server;
+  const char		*address;
+  int			port;
+
 } globals;
 
 extern globals ourGlobals;

@@ -31,7 +31,9 @@ typedef struct _gameGlobals
     Evas		*canvas;	// The canvas for drawing directly onto.
     Evas_Object		*bg;		// Our background edje, also the game specific stuff.
     Evas_Object		*edje;		// The edje of the background.
+    Ecore_Con_Server	*serverLuaSL;
     Ecore_Con_Server	*server;
+    Ecore_Con_Client	*client;	// TODO - Really should be a bunch of these.
     Eina_Hash		*scripts;
     const char		*address;
     int			port;
@@ -50,6 +52,8 @@ typedef struct _script
 
 
 int logDom;	// Our logging domain.
+//static int CPUs = 4;
+static Eina_Strbuf *LuaSLStream;
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
@@ -90,7 +94,6 @@ static float timeDiff(struct timeval *now, struct timeval *then)
     else
 	return 0.0;
 }
-
 
 static void
 _edje_signal_cb(void *data, Evas_Object *obj, const char  *emission, const char  *source)
@@ -166,7 +169,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	    snprintf(me->SID, sizeof(me->SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(ourGlobals->scripts, me->SID, me);
-	    sendForth(ourGlobals->server, me->SID, "compile(%s)", me->fileName);
+	    sendForth(ourGlobals->serverLuaSL, me->SID, "compile(%s)", me->fileName);
 	}
     }
 }
@@ -177,25 +180,39 @@ static Eina_Bool _timer_cb(void *data)
     Eina_Iterator *scripts;
     script *me;
     boolean exit = FALSE;
+    char buf[PATH_MAX];
+
+    if (5 == timedEvent)
+    {
+	gettimeofday(&startTime, NULL);
+	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+	eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
+    }
+
+    if (5 >= timedEvent)
+    {
+	timedEvent++;
+	return ECORE_CALLBACK_RENEW;
+    }
 
     scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
     while(eina_iterator_next(scripts, (void **) &me))
     {
 	switch (timedEvent)
 	{
-	    case 5 :
+	    case 10 :
 	    {
-		sendForth(ourGlobals->server, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
-		sendForth(ourGlobals->server, me->SID, "events.detectedNames({\"%s\"})", ownerName);
-		sendForth(ourGlobals->server, me->SID, "events.touch_start(1)");
+		sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
+		sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+		sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
 		break;
 	    }
-	    case 9 :
+	    case 15 :
 	    {
-		sendForth(ourGlobals->server, me->SID, "quit()");
+		sendForth(ourGlobals->serverLuaSL, me->SID, "quit()");
 		break;
 	    }
-	    case 11 :
+	    case 20 :
 	    {
 		exit = TRUE;
 		break;
@@ -206,28 +223,24 @@ static Eina_Bool _timer_cb(void *data)
 
     if (exit)
     {
-	sendForth(ourGlobals->server, ownerKey, "exit()");
+	sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
 	ecore_main_loop_quit();
 	return ECORE_CALLBACK_CANCEL;
     }
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
+static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
     gameGlobals *ourGlobals = data;
-    char buf[PATH_MAX];
 
-    ourGlobals->server = ev->server;
-    gettimeofday(&startTime, NULL);
-    snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
-    eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
-    // Wait awhile, then start sending events for testing.
+    ourGlobals->serverLuaSL = ev->server;
+    // Wait a while, then start sending events for testing.
     ecore_timer_add(0.5, _timer_cb, ourGlobals);
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
+static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 {
     gameGlobals *ourGlobals = data;
 
@@ -236,15 +249,15 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
     const char *command;
     char *ext;
 
-    eina_strbuf_append_length(clientStream, ev->data, ev->size);
-    command = eina_strbuf_string_get(clientStream);
+    eina_strbuf_append_length(LuaSLStream, ev->data, ev->size);
+    command = eina_strbuf_string_get(LuaSLStream);
     while ((ext = index(command, '\n')))
     {
 	int length = ext - command;
 
 	strncpy(SID, command, length + 1);
 	SID[length] = '\0';
-	eina_strbuf_remove(clientStream, 0, length + 1);
+	eina_strbuf_remove(LuaSLStream, 0, length + 1);
 	ext = index(SID, '.');
 	if (ext)
 	{
@@ -320,55 +333,188 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 			PD("TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
 		}
 //		PD("The compile of %s worked, running it now.", SID);
-		sendForth(ourGlobals->server, SID, "run()");
+		sendForth(ourGlobals->serverLuaSL, SID, "run()");
 	    }
 	    else
 	    {
 		// Send back some random or fixed values for testing.
 		if (0 == strcmp(command, "llGetKey()"))
-		    sendForth(ourGlobals->server, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 		else if (0 == strcmp(command, "llGetOwner()"))
-		    sendForth(ourGlobals->server, SID, "return \"%s\"", ownerKey);
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
 		else if (0 == strcmp(command, "llGetPos()"))
-		    sendForth(ourGlobals->server, SID, "return {x=128.0, y=128.0, z=128.0}");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
 		else if (0 == strcmp(command, "llGetRot()"))
-		    sendForth(ourGlobals->server, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
 		else if (0 == strcmp(command, "llGetObjectDesc()"))
-		    sendForth(ourGlobals->server, SID, "return \"\"");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \"\"");
 		else if (0 == strncmp(command, "llGetAlpha(", 11))
-		    sendForth(ourGlobals->server, SID, "return 1.0");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return 1.0");
 		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
-		    sendForth(ourGlobals->server, SID, "return 3");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return 3");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
-		    sendForth(ourGlobals->server, SID, "return \".readme\"");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \".readme\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
-		    sendForth(ourGlobals->server, SID, "return \".POSITIONS\"");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
-		    sendForth(ourGlobals->server, SID, "return \".MENUITEMS\"");
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
+		// Send "back" stuff on to the one and only client.
+		else if (0 == strncmp(command, "llOwnerSay(", 11))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		}
+		else if (0 == strncmp(command, "llWhisper(", 10))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		}
+		else if (0 == strncmp(command, "llSay(", 6))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		}
+		else if (0 == strncmp(command, "llShout(", 8))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		}
+		else if (0 == strncmp(command, "llDialog(", 9))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		}
 		else
 		    PI("Script %s sent command %s", SID, command);
 	    }
 	}
 
 	// Get the next blob to check it.
-	command = eina_strbuf_string_get(clientStream);
+	command = eina_strbuf_string_get(LuaSLStream);
     }
 
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
+static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
     gameGlobals *ourGlobals = data;
 
     if (ev->server)
     {
-	ourGlobals->server = NULL;
+	ourGlobals->serverLuaSL = NULL;
 	ecore_con_server_del(ev->server);
 	if (!ourGlobals->ui)
 	    ecore_main_loop_quit();
     }
 
+    return ECORE_CALLBACK_RENEW;
+}
+
+
+static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev)
+{
+    gameGlobals *ourGlobals = data;
+
+    ourGlobals->client = ev->client;
+    ecore_con_client_timeout_set(ev->client, 0);
+    return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *ev)
+{
+//    gameGlobals *ourGlobals = data;
+//    char buf[PATH_MAX];
+    char SID[PATH_MAX];
+    const char *command;
+    char *ext;
+
+    eina_strbuf_append_length(clientStream, ev->data, ev->size);
+    command = eina_strbuf_string_get(clientStream);
+    while ((ext = index(command, '\n')))
+    {
+	int length = ext - command;
+
+	strncpy(SID, command, length + 1);
+	SID[length] = '\0';
+	eina_strbuf_remove(clientStream, 0, length + 1);
+	ext = index(SID, '.');
+	if (ext)
+	{
+	    ext[0] = '\0';
+	    command = ext + 1;
+
+#if 0	// Replace this with code to parse what viewers send.
+	    if (0 == strncmp(command, "compile(", 8))
+	    {
+		char *temp;
+		char *file;
+
+		strcpy(buf, &command[8]);
+		temp = buf;
+		file = temp;
+		while (')' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+
+		PD("Compiling %s, %s.", SID, file);
+		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
+		{
+		    script *me = calloc(1, sizeof(script));
+
+		    gettimeofday(&me->startTime, NULL);
+		    strncpy(me->SID, SID, sizeof(me->SID));
+		    strncpy(me->fileName, file, sizeof(me->fileName));
+		    me->game = ourGlobals;
+		    me->client = ev->client;
+		    eina_hash_add(ourGlobals->scripts, me->SID, me);
+		    eina_hash_add(ourGlobals->names, me->fileName, me);
+		    sendBack(ev->client, SID, "compiled(true)");
+		}
+		else
+		    sendBack(ev->client, SID, "compiled(false)");
+	    }
+	    else if (0 == strcmp(command, "run()"))
+	    {
+		script *me;
+		char buf[PATH_MAX];
+
+		me = eina_hash_find(ourGlobals->scripts, SID);
+		if (me)
+		{
+		    sprintf(buf, "%s.lua.out", me->fileName);
+		    newProc(buf, TRUE, me);
+		}
+	    }
+	    else if (0 == strcmp(command, "exit()"))
+	    {
+		PD("Told to exit.");
+		ecore_main_loop_quit();
+	    }
+	    else
+	    {
+		const char *status = NULL;
+
+		status = sendToChannel(ourGlobals, SID, command);
+		if (status)
+		    PE("Error sending command %s to script %s : %s", command, SID, status);
+	    }
+#endif
+
+	}
+
+	// Get the next blob to check it.
+	command = eina_strbuf_string_get(clientStream);
+    }
+
+   return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev)
+{
+//    gameGlobals *ourGlobals = data;
+
+    if (ev->client)
+    {
+	PD("No more clients, exiting.");
+	ecore_con_client_del(ev->client);
+	ecore_main_loop_quit();
+    }
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -396,12 +542,26 @@ int main(int argc, char **argv)
 
 	if (ecore_con_init())
 	{
-	    if ((ourGlobals.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
+	    if ((ourGlobals.serverLuaSL = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 	    {
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
-		clientStream = eina_strbuf_new();
+		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _addLuaSL,  &ourGlobals);
+		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _dataLuaSL, &ourGlobals);
+		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _delLuaSL,  &ourGlobals);
+		LuaSLStream = eina_strbuf_new();
+
+		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
+		{
+//		    int i;
+
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _addClient,  &ourGlobals);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _dataClient, &ourGlobals);
+		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _delClient,  &ourGlobals);
+		    ecore_con_server_timeout_set(ourGlobals.server, 0);
+		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
+		    ecore_con_server_timeout_set(ourGlobals.server, 10);
+		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
+		    clientStream = eina_strbuf_new();
+
 
 		if (ecore_evas_init())
                 {
@@ -530,6 +690,11 @@ int main(int argc, char **argv)
 		}
 		else
 		    PC("Failed to init ecore_evas!");
+
+		}
+		else
+		    PC("Failed to add server!");
+
 	    }
 	    else
 		PC("Failed to connect to server!");
