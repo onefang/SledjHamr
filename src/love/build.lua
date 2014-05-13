@@ -24,4 +24,4 @@ CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'    .. lib_d    .. '\\"'
 CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"'   .. data_d   .. '\\"'
 CFLAGS = CFLAGS .. ' -DPACKAGE_LOCALE_DIR=\\"' .. locale_d .. '\\"'
 
-compileFiles('../../love', dir, {'love', '../LuaSL/LuaSL_utilities'}, '')
+compileFiles('../../love', dir, {'love'}, '')
