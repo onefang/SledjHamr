@@ -227,6 +227,7 @@ typedef struct _globals
   EPhysics_World *world;
 
   winFang	*files;
+  GuiLua	*purkle;
 
   Ecore_Con_Server	*server;
   const char		*address;

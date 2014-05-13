@@ -18,6 +18,7 @@
 typedef struct _GuiLua
 {
   lua_State	*L;
+  char		*name;		// Name of the module.
   winFang	*us;		// Our window, if it exists.
   winFang	*parent;	// Our parent window, if it exists.
   EPhysics_World *world;	// Our world, if it exists.
@@ -31,7 +32,7 @@ typedef struct _GuiLua
 extern const char	*glName;
 
 GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world);
-void GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world);
+GuiLua *GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world);
 void GuiLuaDel(GuiLua *gl);
 
 #endif

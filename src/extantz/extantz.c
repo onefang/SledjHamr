@@ -626,7 +626,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //  overlay_add(&ourGlobals);
   GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
   woMan_add(&ourGlobals);
-  GuiLuaLoad("purkle", ourGlobals.mainWindow, ourGlobals.world);
+  ourGlobals.purkle = GuiLuaLoad("purkle", ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
    // Bump the top toolbar above the windows.

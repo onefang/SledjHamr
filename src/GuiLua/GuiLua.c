@@ -429,12 +429,15 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
   return result;
 }
 
-void GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world)
+GuiLua *GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world)
 {
+  GuiLua *result;
   char *args[] = {"GuiLUa", "-l", ""};
 
   args[2] = module;
-  GuiLuaDo(3, args, parent, world);
+  result = GuiLuaDo(3, args, parent, world);
+  result->name = module;
+  return result;
 }
 
 void GuiLuaDel(GuiLua *gl)
