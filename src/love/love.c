@@ -315,25 +315,35 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
 		// Send "back" stuff on to the one and only client.
+		// TODO - All of these output functions should just use one thing to append stuff to either local or an IM tab.
+		//        Love filtering out stuff that should not go there.
+		//        Extantz registering any channel it wants to listen to, mostly for client side scripts.
+		//        Extantz is then only responsible for the registered channels, it can do what it likes with them.
+		//        Dialogs, notifications, and other stuff goes through some other functions.
 		else if (0 == strncmp(command, "llOwnerSay(", 11))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
 		}
 		else if (0 == strncmp(command, "llWhisper(", 10))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
 		}
 		else if (0 == strncmp(command, "llSay(", 6))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
 		}
 		else if (0 == strncmp(command, "llShout(", 8))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
 		}
 		else if (0 == strncmp(command, "llDialog(", 9))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
 		}
 		else
 		    PI("Script %s sent command %s", SID, command);
