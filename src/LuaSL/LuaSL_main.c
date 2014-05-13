@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 	logDom = loggingStartup("LuaSL", logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 	ourGlobals.names = eina_hash_string_superfast_new(NULL);
-	if (ecore_con_init())
+	if (ecore_init())
 	{
 	    if (ecore_con_init())
 	    {
