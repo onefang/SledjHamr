@@ -59,7 +59,7 @@ static int scriptCount = 0;
 static int compiledCount = 0;
 static float compileTime = 0.0;
 static struct timeval startTime;
-static int timedEvent = 0;
+//static int timedEvent = 0;
 static char *ownerKey = "12345678-1234-4321-abcd-0123456789ab";
 static char *ownerName = "onefang rejected";
 
@@ -176,58 +176,14 @@ static void dirList_compile(const char *name, const char *path, void *data)
 
 static Eina_Bool _timer_cb(void *data)
 {
-    gameGlobals *ourGlobals = data;
-    Eina_Iterator *scripts;
-    script *me;
-    boolean exit = FALSE;
-    char buf[PATH_MAX];
+//  gameGlobals *ourGlobals = data;
+  char buf[PATH_MAX];
 
-    if (5 == timedEvent)
-    {
-	gettimeofday(&startTime, NULL);
-	snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
-	eina_file_dir_list(buf, EINA_TRUE, dirList_compile, ourGlobals);
-    }
+  gettimeofday(&startTime, NULL);
+  snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+  eina_file_dir_list(buf, EINA_TRUE, dirList_compile, data);
 
-    if (5 >= timedEvent)
-    {
-	timedEvent++;
-	return ECORE_CALLBACK_RENEW;
-    }
-
-    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
-    while(eina_iterator_next(scripts, (void **) &me))
-    {
-	switch (timedEvent)
-	{
-	    case 10 :
-	    {
-		sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
-		sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
-		sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
-		break;
-	    }
-	    case 15 :
-	    {
-		sendForth(ourGlobals->serverLuaSL, me->SID, "quit()");
-		break;
-	    }
-	    case 20 :
-	    {
-		exit = TRUE;
-		break;
-	    }
-	}
-    }
-    timedEvent++;
-
-    if (exit)
-    {
-	sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
-	ecore_main_loop_quit();
-	return ECORE_CALLBACK_CANCEL;
-    }
-    return ECORE_CALLBACK_RENEW;
+  return ECORE_CALLBACK_CANCEL;
 }
 
 static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
@@ -235,8 +191,8 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
     gameGlobals *ourGlobals = data;
 
     ourGlobals->serverLuaSL = ev->server;
-    // Wait a while, then start sending events for testing.
-    ecore_timer_add(0.5, _timer_cb, ourGlobals);
+    // Wait a while before compiling and running scripts.
+    ecore_timer_add(3.0, _timer_cb, ourGlobals);
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -397,8 +353,6 @@ static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 
     if (ev->server)
     {
-	ourGlobals->serverLuaSL = NULL;
-	ecore_con_server_del(ev->server);
 	if (!ourGlobals->ui)
 	    ecore_main_loop_quit();
     }
@@ -507,13 +461,27 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 
 static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev)
 {
-//    gameGlobals *ourGlobals = data;
+    gameGlobals *ourGlobals = data;
 
     if (ev->client)
     {
-	PD("No more clients, exiting.");
+	Eina_List const *clients;
 	ecore_con_client_del(ev->client);
-	ecore_main_loop_quit();
+
+	// This is only really for testing, normally it just runs 24/7, or until told to.
+	clients = ecore_con_server_clients_get(ourGlobals->server);
+        if (0 == eina_list_count(clients))
+        {
+	    PD("No more clients, exiting.");
+	    sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
+	    ecore_main_loop_quit();
+	}
+	else
+	{
+	    PD("Some %d more clients, exiting anyway.", eina_list_count(clients));
+	    sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
+	    ecore_main_loop_quit();
+	}
     }
     return ECORE_CALLBACK_RENEW;
 }
@@ -527,6 +495,9 @@ int main(int argc, char **argv)
     int result = EXIT_FAILURE;
     char buf[PATH_MAX];
 
+// TODO - Just a temporary kill command until I can fix the LuaSL hanging on exit bug.
+system("killall -KILL LuaSL");
+sleep(2);
     sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
     system(buf);
     sleep(1);
@@ -558,8 +529,6 @@ int main(int argc, char **argv)
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _delClient,  &ourGlobals);
 		    ecore_con_server_timeout_set(ourGlobals.server, 0);
 		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-		    ecore_con_server_timeout_set(ourGlobals.server, 10);
-		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
 		    clientStream = eina_strbuf_new();
 
 
@@ -675,6 +644,11 @@ int main(int argc, char **argv)
 			    }
 
 			    ecore_main_loop_begin();
+			    PD("Fell out of the main loop");
+
+			    ecore_con_server_del(ourGlobals.server);
+			    ecore_con_server_del(ourGlobals.serverLuaSL);
+
 			    if (ourGlobals.ui)
 			    {
 				ecore_animator_del(ani);
@@ -706,5 +680,6 @@ int main(int argc, char **argv)
     else
 	fprintf(stderr, "Failed to init eina!");
 
+    PD("Falling out of main()");
     return result;
 }

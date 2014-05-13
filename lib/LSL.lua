@@ -771,7 +771,7 @@ function LSL.mainLoop(sid, name, x)
 
   LSL.stateChange(x);
   waitAndProcess(false)
-  msg("Script quitting.")
+  msg("LSL.Lua: Script quitting.")
 end
 
 function waitAndProcess(returnWanted)

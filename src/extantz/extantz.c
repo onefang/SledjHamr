@@ -76,8 +76,8 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 
   if (ev->server)
   {
+    ecore_con_server_del(ourGlobals->server);
     ourGlobals->server = NULL;
-    ecore_con_server_del(ev->server);
   }
 
   return ECORE_CALLBACK_RENEW;
@@ -633,6 +633,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   // Try to connect to the love server we started before.
   ourGlobals.address = "127.0.0.1";
   ourGlobals.port = 8211;
+  sleep(2);
   if ((ourGlobals.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
   {
     ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);

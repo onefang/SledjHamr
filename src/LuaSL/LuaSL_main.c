@@ -255,14 +255,16 @@ int main(int argc, char **argv)
 		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 		{
 		    int i;
+		    Eina_Iterator *scripts;
+		    script *me;
 
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
 		    ecore_con_server_timeout_set(ourGlobals.server, 0);
 		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-		    ecore_con_server_timeout_set(ourGlobals.server, 10);
-		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
+//		    ecore_con_server_timeout_set(ourGlobals.server, 10);
+//		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
 		    clientStream = eina_strbuf_new();
 
 		    result = 0;
@@ -274,8 +276,21 @@ int main(int argc, char **argv)
 			PE("Error creating luaproc worker thread.");
 		    }
 		    ecore_main_loop_begin();
+		    PD("Fell out of the main loop.");
 
-		    // TODO - this is what hangs the system, should change from raw pthreads to ecore threads.
+		    scripts = eina_hash_iterator_data_new(ourGlobals.scripts);
+		    while(eina_iterator_next(scripts, (void **) &me))
+		    {
+			const char *status = NULL;
+
+			status = sendToChannel(&ourGlobals, me->SID, "quit()");
+			if (status)
+			    PE("Error sending command quit() to script %s : %s", me->SID, status);
+		    }
+
+		    PD("Finished quitting scripts.");
+		    // TODO - This is what hangs the system, should change from raw pthreads to ecore threads.
+		    //        Or perhaps just run the main loop for a bit longer so all the scripts can quit?
 		    sched_join_workerthreads();
 		}
 		else
@@ -292,6 +307,7 @@ int main(int argc, char **argv)
     else
 	fprintf(stderr, "Failed to init eina!");
 
+    PD("Falling out of main()");
     return result;
 }
 
