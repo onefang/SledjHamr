@@ -61,7 +61,7 @@ forever processing any event.
 
 Some form of serialization will need to be created for saving script
 state during shutdowns, passing script state to other threads /
-processes / computers.  Aparently Lua is good at this.
+processes / computers.  Apparently Lua is good at this.
 
 There will have to be a MySQL (and maybe SQLite) client in the system,
 so we can talk directly to the local sim database.  Esskyuehl may be
@@ -97,4 +97,242 @@ etc.
 
 Performance testing will have to be done on 5000 scripts, to see how
 that compares against XEngine.
+
+
+The next goal.
+--------------
+
+The next goal is to support llDialog() in extantz.  Extantz has enough
+GUI infrastructure now to support a window with a bunch of buttons. 
+LuaLSL has always used MLP as the test scripts, which in turn reads some
+note cards and pops up llDialog to suit.  I think I have enough bits to
+get this all linked up, or at least start to, and see what missing bits
+there are.
+
+
+  Just off the top of my head -
+  -----------------------------
+
+MLP uses llGetInventory*() functions to find out what note cards are in
+the objects inventory.  Then uses llGetNotecardLine() to read the
+notecards.  In response, the server sends dataserver events with each
+line, and the system loops until all lines are read.
+
+MLP sets up a listener with llListen(), then uses llDialog() to send a
+"menu" to the client.  The client sends a channel message back to the
+server when the user makes a choice.  These go to the listen event.
+
+
+  In "reality" -
+  --------------
+
+LuaSL
+  starts up
+  opens an Ecore_Con TCP server at 127.0.0.1:8211
+  sets up the compiler
+  starts luaproc worker thread system
+  waits for input
+    compile() -> compile the script, report warnings and errors
+    run()     -> create new Lua state, put it on the worker queue
+    exit()    -> shutdown
+    *         -> send to SID Lua state
+
+LuaSL_test
+  starts up
+  connects to LuaSL server
+  loops through Test sim/objects looking for *.lsl
+    generates random SID
+    sends "SID compile file.lsl" to LuaSL
+    deal with returned results
+      PW warnings
+      PE errors
+      if compiled send "SID run()" to LuaSL
+      for various llGet*() functions, return random data to LuaSL
+        This includes the llGetInventory*() functions mentioned above.
+  waits for a few seconds
+    sends pretend touch events to LuaSL
+    sends quit() to LuaSL
+    sends exit() to LuaSL
+
+Test sim/objects
+  onefangs test bed
+    the usual MLP style scripts
+    .MENUITEMS
+    .POSITIONS
+    ball object
+
+MLP
+  ~run
+    llSay() to balls telling left over ones to die
+    llGetOwner()
+    loop through an internal list of script names
+      llGetInventoryType() to check if they are there and are scripts.
+      llSetScriptState() to stop them
+      llResetOtherScript()
+    llOwnerSay() to let owner know MLP is turned off
+
+    touch_start()
+      llDetectedKey() to check if it's the owner (current version of MLP doesn't do this)
+      switch to run state
+
+    run state
+      loop through scripts again, turning them on this time.
+
+
+  ~memory
+    llGetInventoryNumber() to count the notecards
+    llGetInventoryName() to find .POSITIONS cards
+    llGetNoteCardLine()
+
+    dataserver()
+      llGetNoteCardLine()
+      change to state on when finished
+
+    on state
+      llMessageLinked()
+
+    link_message()
+      llWhisper()
+
+
+  ~menucfg
+    Same as ~memory.
+    llGetScriptName()
+    llGetFreeMemory()
+
+
+  ~menu
+    llSetTimerEvent() - NOTE doesn't actually setup a timer in the default state.
+    llSleep()
+
+    link_message()
+      llGetLinkNumber()
+      switch to state on
+
+    on state
+      llGetKey() to figure out it's channel
+      llListen()
+
+    listen()
+      llSameGroup()
+      llDialog()
+      llResetTime()
+
+    link_message()
+
+    touch_start()
+      llDetectedKey()
+      llDetectedGroup()
+
+    timer()
+
+Not to mention copius use of list and string functions.
+
+
+LSL.Lua
+  All event stuff is hooked up.
+  events.detected*(list) is all hooked up to save the list in detected* tables.
+  llDetected*() functions return those tables.
+
+  copius list functions implemented, though there's a TODO about negative indexes.  Dunno which ones are missing.
+
+  String functions implemented.  Actually only llGetSubString() and llSubStringIndex()
+
+  llGetScriptName() implemented.
+
+  State changes implemented, with a TODO about clearing out pending events.
+
+
+  Not implemented -
+    llSay + friends, including llOwnerSay().
+    llGetOwner()
+    llGetInventory*()
+    llGetInventoryType() faked to just return script.
+    llSetScriptState() and llResetOtherScript()
+    llResetTime()
+    llGetNoteCardLine()
+    llMessageLinked()
+    llGetFreeMemory()
+    llSleep() - sorta, not sure how the comment there makes sense.  lol
+    llSetTimerEvent()
+    llGetLinkNumber()
+    llGetKey()
+    llDialog()
+    llListen()
+    llSameGroup()
+
+
+  Uses newFunc() to create all the LSL functions.
+    If there is no return type then sends function and arguments to LuaSL's client.
+    If there is a  return type then sends function and arguments to LuaSL"s client, then waits for the response.
+      response should be a Lua value as a string.  It gets pcall()'d
+  If we implement a function ourselves, then we override the newFunc created definition with our own function.
+
+
+  Uses waitAndProcess() as the main loop, or to wait for responses.
+    Which just runs what ever Lua strings are sent to us from the LuaSL client, unless it's waiting for a response above.
+
+
+  What needs to be done -
+  -----------------------
+
+Extantz fires up love, which in turn fires up LuaSL.  Love then
+basically does what LuaSL_test does, sending it scripts to compile and
+run from test sim/objects.  Except for the timed fake events.
+
+Generate touch events when user touchs the 3D cube.  It will pretend to be
+the "onefang's test bed" object.  Fake up llDetected* stuff.
+
+extantz -> love -> LuaSL
+
+
+Respond to llSay() and friends by putting them in purkle's history box. 
+With time stamps.
+
+LuaSL -> love -> extantz
+
+
+Fake llGetOwner(), llGetFreeMemory(), and llSameGroup().
+
+LuaSL -> love -> LuaSL
+
+
+Fake llGetLinkNumber() and llGetKey()?
+
+LuaSL -> love -> LuaSL
+
+
+Implement llGetInventory*() by actually looking at the files in the
+"object".  While we could hard code where the "object" is, since we are
+starting the run ourselves, we can track which object the scripts are
+in.  Again, this should be in the love server part.
+
+LuaSL -> love -> LuaSL
+
+
+Implement llSetScriptState() and friends.  Perhaps they should be
+implemented in LuaSL?  Though they need to know what other scripts are
+in the "object", so perhaps not?  Do them in love for now.
+
+LuaSL (maybe with a round trip to love as well)
+
+
+Implement llSleep(), llSetTimerEvent, and generate timer() events.
+
+LuaSL only.
+
+
+Implement llGetNotecardLine() and generate dataserver() events.
+
+LuaSL -> love
+
+
+Implement llMessageLink() and generate link_message() events.
+
+LuaSL (maybe with a round trip to love as well)
+
+
+Implement llListen(), llDialog() and generate listen() events.
+
+LuaSL -> love -> extantz -> love -> LuaSL
 
