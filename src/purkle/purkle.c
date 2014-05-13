@@ -4,21 +4,24 @@
 #include "winFang.h"
 
 
+static const char *ourName = "purkle";
+static int skang, _M;
+static Widget *entry, *history;
+
 static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
   winFang *me;
-  Widget  *wid;
 
   me = winFangAdd(parent, 30, 590, w, h, "chatter box", "purkle", world);
 
-  wid = widgetAdd(me, WT_TEXTBOX, "History is shown here", -1, -1, -1, -1);
-  eo_do(wid->obj,
+  history = widgetAdd(me, WT_TEXTBOX, "History is shown here", -1, -1, -1, -1);
+  eo_do(history->obj,
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_FALSE)
        );
 
-  wid = widgetAdd(me, WT_ENTRY, "", -1, -1, -1, -1);
-  eo_do(wid->obj,
+  entry = widgetAdd(me, WT_ENTRY, "", -1, -1, -1, -1);
+  eo_do(entry->obj,
     elm_obj_entry_scrollable_set(EINA_TRUE),
     elm_obj_entry_editable_set(EINA_TRUE)
        );
@@ -28,8 +31,23 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
   return me;
 }
 
-static const char *ourName = "purkle";
-static int skang, _M;
+static int append(lua_State *L)
+{
+  char *text = NULL;
+
+  pull_lua(L, 1, "$", &text);
+  if (text)
+  {
+    eo_do(history->obj,
+      elm_obj_entry_entry_append("<br/>"),
+      // TODO - Add a time stamp, and log to a file.
+      elm_obj_entry_entry_append(text),
+      // TODO - really need a "scroll to the bottom" here, this cursor down wont work if lines get wrapped onto multiple lines.
+      elm_obj_entry_cursor_down()
+    );
+  }
+  return 0;
+}
 
 int luaopen_purkle(lua_State *L)
 {
@@ -51,6 +69,8 @@ int luaopen_purkle(lua_State *L)
   lua_getfield(L, LUA_REGISTRYINDEX, ourName);
   _M = lua_gettop(L);
 
+  push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, _M, "append", "Append text to the history box.", append, "string", 0);
+
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
   lua_pop(L, 1);
@@ -60,8 +80,7 @@ int luaopen_purkle(lua_State *L)
     world = gl->world;
   }
 
-  purkleAdd(parent, 200, 400, world);
-
+  purkleAdd(parent, 500, 420, world);
   push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 
   // Return _M, the table itself, not the index.

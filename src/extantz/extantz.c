@@ -21,8 +21,8 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
 static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 {
-//  globals *ourGlobals = data;
-//  char buf[PATH_MAX];
+  globals *ourGlobals = data;
+  char buf[PATH_MAX];
   char SID[PATH_MAX];
   const char *command;
   char *ext;
@@ -39,23 +39,19 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
     ext = index(SID, '.');
     if (ext)
     {
-        ext[0] = '\0';
-        command = ext + 1;
-        if (0 == strncmp(command, "llOwnerSay(", 11))
-        {
-          PI("Saying to owner from %s - %s", SID, command);
-        }
-        else if (0 == strncmp(command, "llWhisper(", 10))
-        {
-          PI("Whispering from %s - %s", SID, command);
-        }
-	else if (0 == strncmp(command, "llSay(", 6))
+	ext[0] = '\0';
+	command = ext + 1;
+	if ((0 == strncmp(command, "llOwnerSay(", 11))
+	  || (0 == strncmp(command, "llWhisper(", 10))
+	  || (0 == strncmp(command, "llSay(", 6))
+	  || (0 == strncmp(command, "llShout(", 8)))
 	{
-	  PI("Saying from %s - %s", SID, command);
-	}
-	else if (0 == strncmp(command, "llShout(", 8))
-	{
-	  PI("Shouting from %s - %s", SID, command);
+	  int _M;
+
+	  sprintf(buf, "%s: %s", SID, command);
+	  lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
+	  _M = lua_gettop(ourGlobals->purkle->L);
+	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _M, "append", buf, 0);
 	}
 	else if (0 == strncmp(command, "llDialog(", 9))
 	{
