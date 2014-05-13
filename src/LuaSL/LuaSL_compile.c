@@ -1,5 +1,6 @@
 
 #include "LuaSL.h"
+#include "Runnr.h"
 
 /* TODO - problem de jour
 */
@@ -316,7 +317,6 @@ static LSL_Leaf *findVariable(LuaSL_compiler *compiler, const char *name)
 
 LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf *dot, LSL_Leaf *sub)
 {
-    gameGlobals *ourGlobals = compiler->game;
     const char *search;
 
     if (dot)
@@ -358,7 +358,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	else
 	{
 	    compiler->script.bugCount++;
-	    sendBack(ourGlobals, compiler->client, compiler->SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -367,8 +367,6 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 
 LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right)
 {
-    gameGlobals *ourGlobals = compiler->game;
-
     if (lval)
     {
 	opType lType, rType;
@@ -402,7 +400,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == lType)
 	    {
 		compiler->script.warningCount++;
-		sendBack(ourGlobals, compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+		sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -430,7 +428,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == rType)
 	    {
 		compiler->script.warningCount++;
-		sendBack(ourGlobals, compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+		sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -587,7 +585,7 @@ else
 	    }
 
 	    compiler->script.bugCount++;
-	    sendBack(ourGlobals, compiler->client, compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+	    sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	}
     }
 
@@ -991,7 +989,6 @@ LSL_Leaf *addFor(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_L
 
 LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow, LSL_Leaf *left, LSL_Leaf *expr, LSL_Leaf *right, LSL_Leaf *block, LSL_Leaf *identifier)
 {
-//    gameGlobals *ourGlobals = compiler->game;
     LSL_Statement *stat = calloc(1, sizeof(LSL_Statement));
     boolean justOne = FALSE;
 
@@ -2220,7 +2217,7 @@ boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID,
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(ourGlobals, compiler.client, compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    sendBack(compiler.client, compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
 	secondPass(&compiler, compiler.ast);

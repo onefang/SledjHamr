@@ -243,18 +243,18 @@ LSL.Lua
   State changes implemented, with a TODO about clearing out pending events.
 
 
-  Not implemented -
+  Not implemented (? means I think it's implemented in scriptSendBack) -
     llSay + friends, including llOwnerSay().
     llGetOwner()
     llGetInventory*()
     llGetInventoryType() faked to just return script.
-    llSetScriptState() and llResetOtherScript()
+?    llSetScriptState() and llResetOtherScript()
     llResetTime()
     llGetNoteCardLine()
     llMessageLinked()
     llGetFreeMemory()
-    llSleep() - sorta, not sure how the comment there makes sense.  lol
-    llSetTimerEvent()
+?    llSleep() - sorta, not sure how the comment there makes sense.  lol
+?    llSetTimerEvent()
     llGetLinkNumber()
     llGetKey()
     llDialog()

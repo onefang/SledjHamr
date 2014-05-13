@@ -4,8 +4,47 @@ Dedicated to my girl Boots, coz she means the world to me.
 
 */
 
+#include <Eet.h>
+#include <Ecore.h>
+#include <Ecore_Con.h>
+#include <Ecore_Evas.h>
+#include <Ecore_File.h>
+#include <Edje.h>
 
-#include "../LuaSL/LuaSL.h"
+#include "LumbrJack.h"
+#include "Runnr.h"
+
+
+#define WIDTH  (512)
+#define HEIGHT (384)
+
+
+#define TABLE_WIDTH	7
+#define TABLE_HEIGHT	42
+
+
+typedef struct _gameGlobals
+{
+    Ecore_Evas		*ee;		// Our window.
+    Evas		*canvas;	// The canvas for drawing directly onto.
+    Evas_Object		*bg;		// Our background edje, also the game specific stuff.
+    Evas_Object		*edje;		// The edje of the background.
+    Ecore_Con_Server	*server;
+    Eina_Hash		*scripts;
+    const char		*address;
+    int			port;
+    boolean		ui;		// Wether we actually start up the UI.
+} gameGlobals;
+
+typedef struct _script
+{
+    char		SID[PATH_MAX];
+    char		fileName[PATH_MAX];
+    struct timeval	startTime;
+    float		compileTime;
+    int			bugs, warnings;
+    boolean		running;
+} script;
 
 
 int logDom;	// Our logging domain.
@@ -26,8 +65,33 @@ static const char *names[] =
 };
 
 
+static float timeDiff(struct timeval *now, struct timeval *then)
+{
+    if (0 == gettimeofday(now, 0))
+    {
+	struct timeval thisTime = { 0, 0 };
+	double  result = 0.0;
+
+	thisTime.tv_sec = now->tv_sec;
+	thisTime.tv_usec = now->tv_usec;
+	if (thisTime.tv_usec < then->tv_usec)
+	{
+	    thisTime.tv_sec--;
+	    thisTime.tv_usec += 1000000;
+	}
+	thisTime.tv_usec -= then->tv_usec;
+	thisTime.tv_sec -= then->tv_sec;
+	result = ((double) thisTime.tv_usec) / ((double) 1000000.0);
+	result += thisTime.tv_sec;
+	return result;
+    }
+    else
+	return 0.0;
+}
+
+
 static void
-_edje_signal_cb(void *data, Evas_Object *obj __UNUSED__, const char  *emission, const char  *source)
+_edje_signal_cb(void *data, Evas_Object *obj, const char  *emission, const char  *source)
 {
 //    gameGlobals *ourGlobals = data;
 }
@@ -78,7 +142,7 @@ Eina_Bool anim(void *data)
 }
 
 static void
-_on_delete(Ecore_Evas *ee __UNUSED__)
+_on_delete(Ecore_Evas *ee)
 {
     ecore_main_loop_quit();
 }
@@ -100,7 +164,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	    snprintf(me->SID, sizeof(me->SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(ourGlobals->scripts, me->SID, me);
-	    sendForth(ourGlobals, me->SID, "compile(%s)", me->fileName);
+	    sendForth(ourGlobals->server, me->SID, "compile(%s)", me->fileName);
 	}
     }
 }
@@ -119,14 +183,14 @@ static Eina_Bool _timer_cb(void *data)
 	{
 	    case 5 :
 	    {
-		sendForth(ourGlobals, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
-		sendForth(ourGlobals, me->SID, "events.detectedNames({\"%s\"})", ownerName);
-		sendForth(ourGlobals, me->SID, "events.touch_start(1)");
+		sendForth(ourGlobals->server, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
+		sendForth(ourGlobals->server, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+		sendForth(ourGlobals->server, me->SID, "events.touch_start(1)");
 		break;
 	    }
 	    case 9 :
 	    {
-		sendForth(ourGlobals, me->SID, "quit()");
+		sendForth(ourGlobals->server, me->SID, "quit()");
 		break;
 	    }
 	    case 11 :
@@ -140,14 +204,14 @@ static Eina_Bool _timer_cb(void *data)
 
     if (exit)
     {
-	sendForth(ourGlobals, ownerKey, "exit()");
+	sendForth(ourGlobals->server, ownerKey, "exit()");
 	ecore_main_loop_quit();
 	return ECORE_CALLBACK_CANCEL;
     }
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Add *ev)
+static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
     gameGlobals *ourGlobals = data;
     char buf[PATH_MAX];
@@ -161,7 +225,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Ad
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Data *ev)
+static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 {
     gameGlobals *ourGlobals = data;
 
@@ -254,31 +318,31 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
 			PD("TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
 		}
 //		PD("The compile of %s worked, running it now.", SID);
-		sendForth(ourGlobals, SID, "run()");
+		sendForth(ourGlobals->server, SID, "run()");
 	    }
 	    else
 	    {
 		// Send back some random or fixed values for testing.
 		if (0 == strcmp(command, "llGetKey()"))
-		    sendForth(ourGlobals, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+		    sendForth(ourGlobals->server, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 		else if (0 == strcmp(command, "llGetOwner()"))
-		    sendForth(ourGlobals, SID, "return \"%s\"", ownerKey);
+		    sendForth(ourGlobals->server, SID, "return \"%s\"", ownerKey);
 		else if (0 == strcmp(command, "llGetPos()"))
-		    sendForth(ourGlobals, SID, "return {x=128.0, y=128.0, z=128.0}");
+		    sendForth(ourGlobals->server, SID, "return {x=128.0, y=128.0, z=128.0}");
 		else if (0 == strcmp(command, "llGetRot()"))
-		    sendForth(ourGlobals, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+		    sendForth(ourGlobals->server, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
 		else if (0 == strcmp(command, "llGetObjectDesc()"))
-		    sendForth(ourGlobals, SID, "return \"\"");
+		    sendForth(ourGlobals->server, SID, "return \"\"");
 		else if (0 == strncmp(command, "llGetAlpha(", 11))
-		    sendForth(ourGlobals, SID, "return 1.0");
+		    sendForth(ourGlobals->server, SID, "return 1.0");
 		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
-		    sendForth(ourGlobals, SID, "return 3");
+		    sendForth(ourGlobals->server, SID, "return 3");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
-		    sendForth(ourGlobals, SID, "return \".readme\"");
+		    sendForth(ourGlobals->server, SID, "return \".readme\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
-		    sendForth(ourGlobals, SID, "return \".POSITIONS\"");
+		    sendForth(ourGlobals->server, SID, "return \".POSITIONS\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
-		    sendForth(ourGlobals, SID, "return \".MENUITEMS\"");
+		    sendForth(ourGlobals->server, SID, "return \".MENUITEMS\"");
 		else
 		    PI("Script %s sent command %s", SID, command);
 	    }
@@ -291,7 +355,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Server_D
     return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Server_Del *ev)
+static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
     gameGlobals *ourGlobals = data;
 

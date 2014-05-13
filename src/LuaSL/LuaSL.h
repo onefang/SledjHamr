@@ -8,9 +8,7 @@
 #include <Eet.h>
 #include <Ecore.h>
 #include <Ecore_Con.h>
-#include <Ecore_Evas.h>
 #include <Ecore_File.h>
-#include <Edje.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -26,26 +24,12 @@ typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h
 #include "LumbrJack.h"
 
 
-#define WIDTH  (512)
-#define HEIGHT (384)
-
-
-#define TABLE_WIDTH	7
-#define TABLE_HEIGHT	42
-
-
 struct _gameGlobals
 {
-    Ecore_Evas		*ee;		// Our window.
-    Evas		*canvas;	// The canvas for drawing directly onto.
-    Evas_Object		*bg;		// Our background edje, also the game specific stuff.
-    Evas_Object		*edje;		// The edje of the background.
     Ecore_Con_Server	*server;
     Eina_Hash		*scripts, *names;
-    int			logDom;
     const char		*address;
     int			port;
-    boolean		ui;		// Wether we actually start up the UI.
 };
 
 struct _script
@@ -56,9 +40,7 @@ struct _script
     char		fileName[PATH_MAX];
     lua_State		*L;
     struct timeval	startTime;
-    float		compileTime, timerTime;
-    int			bugs, warnings;
-    boolean		running;
+    float		timerTime;
     int			status;
     int			args;
     Eina_Clist		messages;
@@ -75,8 +57,5 @@ typedef struct
 
 
 void scriptSendBack(void * data);
-void sendBack(gameGlobals *ourGlobals, Ecore_Con_Client *client, const char *SID, const char *message, ...);
-void sendForth(gameGlobals *ourGlobals, const char *SID, const char *message, ...);
-float timeDiff(struct timeval *now, struct timeval *then);
 
 #include "LuaSL_LSL_tree.h"

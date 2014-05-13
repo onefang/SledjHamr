@@ -1,5 +1,6 @@
 
 #include "LuaSL.h"
+#include "Runnr.h"
 
 
 int logDom;	// Our logging domain.
@@ -110,7 +111,7 @@ void scriptSendBack(void * data)
     else if (0 == strncmp(message->message, "llResetScript(", 14))
 	resetScript(message->script);
     else
-	sendBack(ourGlobals, message->script->client, message->script->SID, message->message);
+	sendBack(message->script->client, message->script->SID, message->message);
     free(message);
 }
 
@@ -166,10 +167,10 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    me->client = ev->client;
 		    eina_hash_add(ourGlobals->scripts, me->SID, me);
 		    eina_hash_add(ourGlobals->names, me->fileName, me);
-		    sendBack(ourGlobals, ev->client, SID, "compiled(true)");
+		    sendBack(ev->client, SID, "compiled(true)");
 		}
 		else
-		    sendBack(ourGlobals, ev->client, SID, "compiled(false)");
+		    sendBack(ev->client, SID, "compiled(false)");
 	    }
 	    else if (0 == strcmp(command, "run()"))
 	    {
@@ -238,6 +239,8 @@ int main(int argc, char **argv)
 	    {
 		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 		{
+		    int i;
+
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
@@ -247,26 +250,18 @@ int main(int argc, char **argv)
 		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
 		    clientStream = eina_strbuf_new();
 
-		    if (edje_init())
+		    result = 0;
+		    compilerSetup(&ourGlobals);
+		    luaprocInit();
+		    for (i = 0; i < CPUs; i++)
 		    {
-			int i;
-
-			result = 0;
-			compilerSetup(&ourGlobals);
-			luaprocInit();
-			for (i = 0; i < CPUs; i++)
-			{
-			    if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
-				PE("Error creating luaproc worker thread.");
-			}
-			ecore_main_loop_begin();
-
-			// TODO - this is what hangs the system, should change from raw pthreads to ecore threads.
-			sched_join_workerthreads();
-			edje_shutdown();
+			if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
+			PE("Error creating luaproc worker thread.");
 		    }
-		    else
-			PC("Failed to init edje!");
+		    ecore_main_loop_begin();
+
+		    // TODO - this is what hangs the system, should change from raw pthreads to ecore threads.
+		    sched_join_workerthreads();
 		}
 		else
 		    PC("Failed to add server!");
