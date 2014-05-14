@@ -308,6 +308,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return 1.0");
 		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return 3");
+		else if (0 == strcmp(command, "llGetLinkNumber()"))
+		    sendForth(ourGlobals->serverLuaSL, SID, "return 1");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".readme\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
@@ -344,6 +346,18 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
 		    else PW("No where to send %s", command);
+		}
+		else if (0 == strncmp(command, "llMessageLinked(", 16))
+		{
+		    Eina_Iterator *scripts;
+		    script *me;
+
+		    // TODO - For now, just send it to everyone.
+		    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+		    while(eina_iterator_next(scripts, (void **) &me))
+		    {
+			sendForth(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
+		    }
 		}
 		else
 		    PI("Script %s sent command %s", SID, command);
