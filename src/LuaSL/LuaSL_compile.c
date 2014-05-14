@@ -1790,7 +1790,7 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 	    if (MF_PREDEC  & statement->flags)	fprintf(file, "local function _preDecrement_%s() %s = %s - 1;  return %s;  end\n", name, name, name, name);
 	    if (MF_PREINC  & statement->flags)	fprintf(file, "local function _preIncrement_%s() %s = %s + 1;  return %s;  end\n", name, name, name, name);
 	    if (MF_POSTDEC & statement->flags)	fprintf(file, "local function _postDecrement_%s() local _temp = %s; %s = %s - 1;  return _temp;  end\n", name, name, name, name);
-	    if (MF_POSTINC & statement->flags)	fprintf(file, "local function _postDecrement_%s() local _temp = %s; %s = %s + 1;  return _temp;  end\n", name, name, name, name);
+	    if (MF_POSTINC & statement->flags)	fprintf(file, "local function _postIncrement_%s() local _temp = %s; %s = %s + 1;  return _temp;  end\n", name, name, name, name);
 	}
 
 	if (statement->elseBlock)
