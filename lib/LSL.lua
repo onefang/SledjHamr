@@ -686,7 +686,7 @@ end
 
 function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending)
   local result = {}
-  local x = 0
+  local x = 1
 
   -- TODO - Deal with stride and ascending.
   for i = 1,#l do
@@ -806,7 +806,6 @@ function waitAndProcess(returnWanted)
 	      return result1
             end
 	    -- Otherwise, just run it and keep looping.
---	      print("RUNNING " .. result1)
 	    -- TODO - Not sure why I had this here.  "sid" is not set anywhere, and SID would just send it to ourselves.
 --	    status, errorMsg = luaproc.send(sid, result1)
 --	    if not status then
@@ -910,7 +909,6 @@ function LSL.listConcat(a, b)
   local result = a
 
   table.insert(result, i + 1, b)
-
   return result;
 end
 
