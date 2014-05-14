@@ -112,7 +112,7 @@ state load {
         while (n-- > 0) {
             item = llGetInventoryName(INVENTORY_NOTECARD, n);
             if (llSubStringIndex(item, ".MENUITEMS") != -1) {
-                ConfigCards += (list) item;
+                ConfigCards += item;
             }
         }
 
