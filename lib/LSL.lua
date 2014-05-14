@@ -686,10 +686,12 @@ end
 
 function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer]] ascending)
   local result = {}
+  local x = 0
 
   -- TODO - Deal with stride and ascending.
   for i = 1,#l do
-    result[x] = l[i];  x = x + 1
+    result[x] = l[i];
+    x = x + 1
   end
   table.sort(result)
 
