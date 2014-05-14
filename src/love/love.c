@@ -12,6 +12,9 @@ Dedicated to my girl Boots, coz she means the world to me.
 #include <Edje.h>
 
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "LumbrJack.h"
 #include "Runnr.h"
@@ -196,6 +199,26 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
     return ECORE_CALLBACK_RENEW;
 }
 
+
+// Borrowed from toybox, though it's real slow.
+// TODO - Replace this quick and dirty llGetNotecardLine() with something using mmap and cached files that assumes more lines will be read soon.
+char *get_rawline(int fd, long *plen, char end)
+{
+  char c, *buf = NULL;
+  long len = 0;
+
+  for (;;) {
+    if (1>read(fd, &c, 1)) break;
+    if (!(len & 63)) buf=realloc(buf, len+65);
+    if ((buf[len++]=c) == end) break;
+  }
+  if (buf) buf[len]=0;
+  if (plen) *plen = len;
+
+  return buf;
+}
+
+
 static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 {
     gameGlobals *ourGlobals = data;
@@ -360,6 +383,65 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    {
 			sendForth(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
 		    }
+		}
+		else if (0 == strncmp(command, "llGetNotecardLine(", 18))
+		{
+		    char *notecard, *temp, *line, key[PATH_MAX];
+		    int  lineNo, fd;
+
+		    strcpy(buf, &command[19]);
+		    notecard = buf;
+		    temp = notecard;
+		    while ('"' != temp[0])
+			temp++;
+		    temp[0] = '\0';
+		    while (',' != temp[0])
+			temp++;
+		    while (' ' != temp[0])
+			temp++;
+		    line = temp;
+		    while (')' != temp[0])
+			temp++;
+		    temp[0] = '\0';
+		    lineNo = atoi(line);
+		    snprintf(key, sizeof(key), "%s/Test sim/objects/onefang%%27s%%20test%%20bed.5cb927d5-1304-4f1a-9947-308251ef2df0/%s", PACKAGE_DATA_DIR, notecard);
+
+		    fd = open(key, O_RDONLY);
+		    if (-1 != fd)
+		    {
+			Eina_Iterator *scripts;
+			script *me;
+			long len;
+
+			temp = NULL;
+			do
+			{
+			    temp = get_rawline(fd, &len, '\n');
+			    if (temp)
+			    {
+				if (temp[len - 1] == '\n')
+				    temp[--len] = '\0';
+			    }
+			} while (temp && (0 < lineNo--));
+
+			sprintf(key, "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+			sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", key);
+
+			// TODO - For now, just send it to everyone.
+			scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+			while(eina_iterator_next(scripts, (void **) &me))
+			{
+			    if (temp)
+			    {
+				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"%s\")", key, temp);
+			    }
+			    else
+				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", [[\\n\\n\\n]])", key);
+			}
+
+			close(fd);
+		    }
+
 		}
 		else
 		    PI("Script %s sent command %s", SID, command);

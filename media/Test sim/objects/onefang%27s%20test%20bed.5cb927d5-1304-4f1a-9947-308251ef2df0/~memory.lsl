@@ -44,7 +44,7 @@ integer myListFind(list a, string b) {
             return x;
         }
     }
-    
+
     return -1;
 }
 
@@ -83,7 +83,7 @@ string adjust(integer doOffset, vector pos, vector erot, vector amt) {
         pos += amt/100.;
         return (vround(pos) + " " + vround(erot));
     }
-    
+
     rotation amount = llEuler2Rot(amt * DEG_TO_RAD);
     erot *= DEG_TO_RAD;
     
@@ -167,7 +167,7 @@ add_pose(string name, string data) {
     if (ix != -1) {
         llOwnerSay("===> WARNING: Multiple .POSITIONS* entries for '" + name + "'");
     } else {
-        Poses += (list) name;
+        Poses += name;
         ix = ++PosCount;
     }   
     store_pose(data, ix-1);
