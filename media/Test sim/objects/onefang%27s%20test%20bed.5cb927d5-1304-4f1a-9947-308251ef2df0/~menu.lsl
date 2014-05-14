@@ -420,7 +420,7 @@ default {
     }
 
     link_message(integer from, integer num, string str, key id) {
-        if (from != llGetLinkNumber()) { return; }
+//        if (from != llGetLinkNumber()) { return; }
         if (num >= 0) { return;}
         
         // LMs from ~memory, passing configuration
