@@ -45,10 +45,27 @@ static script *findThem(gameGlobals *ourGlobals, const char *base, const char *t
 
 static void resetScript(script *victim)
 {
-//    gameGlobals *ourGlobals = victim->game;
+  gameGlobals *ourGlobals = victim->game;
+  script *me;
+  char buf[PATH_MAX];
 
-    PD("Resetting %s", victim->fileName);
-    // TODO - now what?
+  PD("RESETTING %s", victim->name);
+  sendToChannel(ourGlobals, victim->SID, "quit()");
+  eina_hash_del(ourGlobals->scripts, victim->SID, NULL);
+  eina_hash_del(ourGlobals->names, victim->fileName, NULL);
+
+  // The old one will eventually die, create a new one.
+  me = calloc(1, sizeof(script));
+  gettimeofday(&me->startTime, NULL);
+  strncpy(me->SID, victim->SID, sizeof(me->SID));
+  strncpy(me->fileName, victim->fileName, sizeof(me->fileName));
+  me->name = &me->fileName[sizeof(PACKAGE_DATA_DIR)];
+  me->game = ourGlobals;
+  me->client = victim->client;
+  eina_hash_add(ourGlobals->scripts, me->SID, me);
+  eina_hash_add(ourGlobals->names, me->fileName, me);
+  sprintf(buf, "%s.lua.out", me->fileName);
+  newProc(buf, TRUE, me);
 }
 
 void scriptSendBack(void * data)

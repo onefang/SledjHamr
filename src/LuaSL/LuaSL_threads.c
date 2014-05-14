@@ -298,26 +298,30 @@ void newProc(const char *code, int file, script *lp)
     recycled *trash;
 
     // Try to recycle a Lua state, otherwise create one from scratch.
+#if 0	// TODO - something about this causes a crash.
     pthread_mutex_lock(&mutex_recycle_list);
     /* pop list head */
     if ((trash = (recycled *) eina_clist_head(&recyclelp)))
     {
+	printf("  Reusing Lua trash.\n");
 	eina_clist_remove(&(trash->node));
 	lp->L = trash->L;
 	free(trash);
     }
     pthread_mutex_unlock(&mutex_recycle_list);
+#endif
 
     if (NULL == lp->L)
     {
 	lp->L = luaL_newstate();
 
-	/* store the script struct in its own Lua state */
-	lua_pushlightuserdata(lp->L, lp);
-	lua_setfield(lp->L, LUA_REGISTRYINDEX, "_SELF");
 	luaL_openlibs(lp->L);
 	luaL_register(lp->L, "luaproc", luaproc_funcs_child);
     }
+
+    /* store the script struct in its own Lua state */
+    lua_pushlightuserdata(lp->L, lp);
+    lua_setfield(lp->L, LUA_REGISTRYINDEX, "_SELF");
 
     lp->status = LUAPROC_STAT_IDLE;
     lp->args = 0;
