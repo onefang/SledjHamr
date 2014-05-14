@@ -298,6 +298,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 		else if (0 == strcmp(command, "llGetOwner()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+		else if (0 == strcmp(command, "llGetPermissionsKey()"))
+		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
 		else if (0 == strcmp(command, "llGetPos()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
 		else if (0 == strcmp(command, "llGetRot()"))
