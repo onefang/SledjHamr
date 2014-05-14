@@ -654,7 +654,7 @@ function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer
     x = x + 1
   end
   y = x
-  for i = 1,#ll do
+  for i = 1,#l1 do
     result[x] = ll[i]
     x = x + 1
   end
@@ -669,7 +669,7 @@ function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[inte
   local result = {}
   local x = 1
   local y
-  for i = 1,index do
+  for i = 1,start+1 do
     result[x] = l[i]
     x = x + 1
   end
@@ -677,7 +677,7 @@ function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[inte
     result[x] = part[i]
     x = x + 1
   end
-  for i = index,#l do
+  for i = eNd+1,#l do
     result[x] = l[i]
     x = x + 1
   end
