@@ -722,11 +722,24 @@ function --[[string]] LSL.llGetSubString(--[[string]] text, --[[integer]] start,
 end
 
 function --[[integer]] LSL.llSubStringIndex(--[[string]] text, --[[string]] sub)
+  if nil == text then return -1 end
+  if nil == sub then return -1 end
   local start, End = string.find(text, sub, 1, true)
 
   if nil == start then return -1 else return start - 1 end
 end
 
+function LSL.llStringTrim(--[[string]] text, --[[integer]] Type)
+  -- Trims spaces (ASCII 32), tabs (ASCII 9) '\t', and new lines (ASCII 10) '\n'
+  -- Lua doesn't document what it considers to be "space characters"
+  if (Type == LSL.STRING_TRIM_HEAD) or (Type == LSL.STRING_TRIM) then
+    text = string.gsub(text, '^%s*(.*)', '%1')
+  end
+  if (Type == LSL.STRING_TRIM_TAIL) or (Type == LSL.STRING_TRIM) then
+    text = string.gsub(text, '(.-)%s*$', '%1')
+  end
+  return text
+end
 
 -- Crements stuff.
 
