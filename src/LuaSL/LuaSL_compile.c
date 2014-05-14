@@ -2338,38 +2338,42 @@ boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID,
 		fclose(out);
 
 		// Compile the Lua source code.
-		L = luaL_newstate();
-		luaL_openlibs(L);
-		// This ends up pushing a function onto the stack.  The function is the compiled code.
-		err = luaL_loadfile(L, luaName);
-		if (err)
+		if ((L = luaL_newstate()))
 		{
-		    compiler.script.bugCount++;
-		    if (LUA_ERRSYNTAX == err)
-			PE("Lua syntax error in %s: %s", luaName, lua_tostring(L, -1));
-		    else if (LUA_ERRFILE == err)
-			PE("Lua compile file error in %s: %s", luaName, lua_tostring(L, -1));
-		    else if (LUA_ERRMEM == err)
-			PE("Lua compile memory allocation error in %s: %s", luaName, lua_tostring(L, -1));
-		}
-		else
-		{
-		    // Write the compiled code to a file.
-		    strcat(luaName, ".out");
-		    out = fopen(luaName, "w");
-		    if (out)
+		    luaL_openlibs(L);
+		    // This ends up pushing a function onto the stack.  The function is the compiled code.
+		    err = luaL_loadfile(L, luaName);
+		    if (err)
 		    {
-			err = lua_dump(L, luaWriter, out);
-			if (err)
-			{
-			    compiler.script.bugCount++;
-			    PE("Lua compile file error writing to %s", luaName);
-			}
-			fclose(out);
+			compiler.script.bugCount++;
+			if (LUA_ERRSYNTAX == err)
+			    PE("Lua syntax error in %s: %s", luaName, lua_tostring(L, -1));
+			else if (LUA_ERRFILE == err)
+			    PE("Lua compile file error in %s: %s", luaName, lua_tostring(L, -1));
+			else if (LUA_ERRMEM == err)
+			    PE("Lua compile memory allocation error in %s: %s", luaName, lua_tostring(L, -1));
 		    }
 		    else
-			PC("Unable to open file %s for writing!", luaName);
+		    {
+			// Write the compiled code to a file.
+			strcat(luaName, ".out");
+			out = fopen(luaName, "w");
+			if (out)
+			{
+			    err = lua_dump(L, luaWriter, out);
+			    if (err)
+			    {
+				compiler.script.bugCount++;
+				PE("Lua compile file error writing to %s", luaName);
+			    }
+			    fclose(out);
+			}
+			else
+			    PC("Unable to open file %s for writing!", luaName);
+		    }
 		}
+		else
+		    PE("Can't create a new Lua state!");
 	    }
 	    else
 		PC("Unable to open file %s for writing!", luaName);
