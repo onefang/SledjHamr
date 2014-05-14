@@ -327,6 +327,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
 		else if (0 == strcmp(command, "llGetRot()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+		else if (0 == strcmp(command, "llGetFreeMemory()"))
+		    sendForth(ourGlobals->serverLuaSL, SID, "return 654321");
 		else if (0 == strcmp(command, "llGetObjectDesc()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \"\"");
 		else if (0 == strncmp(command, "llGetAlpha(", 11))
