@@ -788,24 +788,24 @@ function waitAndProcess(returnWanted)
       if paused then
 	if "start()" == message then paused = false  end
       else
-	result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
+	local result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
 	  msg("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	else
 	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
 	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
-	  --        Meh, seems to be working fine as it is.
+	  --        Meh, seems to be working fine as it is.  Or not.
 	  setfenv(result, getfenv(1))
-	  status, result = pcall(result)
+	  local status, result1 = pcall(result)
 	  if not status then
-	    msg("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result)
-	  elseif result then
+	    msg("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1)
+	  elseif result1 then
 	    -- Check if we are waiting for a return, and got it.
 	    if returnWanted and string.match(message, "^return ") then
-	      return result
+	      return result1
             end
 	    -- Otherwise, just run it and keep looping.
-	    status, errorMsg = luaproc.send(sid, result)
+	    status, errorMsg = luaproc.send(sid, result1)
 	    if not status then
 	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	    end
@@ -853,7 +853,7 @@ end
 
 -- Called at compiler set up time, to produce the constants.lsl file.
 function LSL.gimmeLSL()
-  for i,v in ipairs(constants) do
+  for i, v in ipairs(constants) do
     local value = LSL[v.name]
 
     print(v.Type .. " " .. v.name .. " = " .. value2string(value, v.Type) .. ";")
