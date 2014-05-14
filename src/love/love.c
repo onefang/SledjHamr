@@ -435,7 +435,6 @@ static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev
     if (ev->client)
     {
 	Eina_List const *clients;
-	ecore_con_client_del(ev->client);
 
 	// This is only really for testing, normally it just runs 24/7, or until told to.
 	clients = ecore_con_server_clients_get(ourGlobals->server);
@@ -615,8 +614,8 @@ sleep(2);
 			    ecore_main_loop_begin();
 			    PD("Fell out of the main loop");
 
-			    ecore_con_server_del(ourGlobals.server);
-			    ecore_con_server_del(ourGlobals.serverLuaSL);
+			    if (ourGlobals.server)       ecore_con_server_del(ourGlobals.server);
+			    if (ourGlobals.serverLuaSL)  ecore_con_server_del(ourGlobals.serverLuaSL);
 
 			    if (ourGlobals.ui)
 			    {
