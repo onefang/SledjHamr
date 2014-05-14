@@ -259,7 +259,7 @@ default {
         while (n-- > 0) {
             item = llGetInventoryName(INVENTORY_NOTECARD, n);
             if (llSubStringIndex(item, ".POSITIONS") != -1) {
-                ConfigCards += (list) item;
+                ConfigCards += item;
             }
         }
 

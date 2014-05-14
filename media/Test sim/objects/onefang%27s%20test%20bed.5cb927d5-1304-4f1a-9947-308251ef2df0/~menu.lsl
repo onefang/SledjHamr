@@ -415,7 +415,7 @@ default {
         llResetOtherScript("~poser 3");
         llResetOtherScript("~poser 4");
         llResetOtherScript("~poser 5");
-        alpha = llGetAlpha(0);                                          //store object transparancy (alpha)
+//        alpha = llGetAlpha(0);                                          //store object transparancy (alpha)
         if (alpha < 0.1) alpha = 0.5; else visible = 1;                 //if invisible store a visible alpha
     }
 
