@@ -165,6 +165,8 @@ expr(A) ::= LSL_BIT_NOT(B)			expr(C).				{ A = addOperation(compiler, NULL, B, C
 expr(A) ::= LSL_BOOL_NOT(B)			expr(C).				{ A = addOperation(compiler, NULL, B, C); }
 expr(A) ::= LSL_SUBTRACT(B)			expr(C).		[LSL_NEGATION]	{ A = addOperation(compiler, NULL, B, C); }
 
+%left LSL_LIST_CONCAT LSL_LIST_ADD LSL_LIST_ADD_LIST.
+
 // Types, typecasts, and expression reordering.
 
 %right  LSL_TYPECAST_OPEN LSL_TYPECAST_CLOSE.

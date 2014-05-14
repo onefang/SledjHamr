@@ -145,6 +145,10 @@ LSL_Token LSL_Tokens[] =
     {LSL_STATE,			ST_NONE,	"state",	LSL_NONE,				outputStateToken},
     {LSL_SCRIPT,		ST_NONE,	"",		LSL_NONE,				NULL},
 
+    {LSL_LIST_CONCAT,		ST_CONCATENATION,"listconcat",	LSL_RIGHT2LEFT | LSL_ASSIGNMENT,	NULL},
+    {LSL_LIST_ADD,		ST_ADD,		"listadd",	LSL_LEFT2RIGHT,				NULL},
+    {LSL_LIST_ADD_LIST,		ST_ADD,		"listaddlist",	LSL_LEFT2RIGHT,				NULL},
+
     {LSL_UNKNOWN,		ST_NONE,	"unknown",	LSL_NONE,				NULL},
 
     // A sentinal.
@@ -470,6 +474,28 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 				    }
 				    else
 					lval->basicType = OT_vector;
+				}
+				break;
+
+			    case ST_ADD :
+				// TODO - This doesn't work if the right side has been cast to a list.
+				if (OT_listList == lval->basicType)
+				{
+				    lval->basicType = OT_list;
+				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
+				}
+				else if (OT_list == lType)
+				{
+				    lval->basicType = OT_list;
+				    lval->toKen = tokens[LSL_LIST_ADD - lowestToken];
+				}
+				break;
+
+			    case ST_CONCATENATION :
+				if ((OT_list == lType) && (OT_list != rType))
+				{
+				    lval->basicType = OT_list;
+				    lval->toKen = tokens[LSL_LIST_CONCAT - lowestToken];
 				}
 				break;
 			    default :
@@ -1349,7 +1375,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	if ((OM_LUA == mode) &&(ST_BITWISE != leaf->toKen->subType))
+	if ((OM_LUA == mode) && (ST_BITWISE != leaf->toKen->subType) && (LSL_LIST_ADD != leaf->toKen->type) && (LSL_LIST_ADD_LIST != leaf->toKen->type))
 	    outputLeaf(file, mode, leaf->left);
 #if LUASL_DIFF_CHECK
 	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorable))
@@ -1375,7 +1401,15 @@ else
 		}
 		if ((LSL_ASSIGNMENT & leaf->toKen->flags) && (LSL_ASSIGNMENT_PLAIN != leaf->toKen->type))
 		{
-		    if (leaf->left->value.identifierValue->sub)
+		    if (LSL_LIST_CONCAT == leaf->toKen->type)
+		    {
+			fprintf(file, " = _LSL.listConcat(");
+			outputLeaf(file, mode, leaf->left);
+			fprintf(file, ", ");
+			outputLeaf(file, mode, leaf->right);
+			fprintf(file, ") ");
+		    }
+		    else if (leaf->left->value.identifierValue->sub)
 			fprintf(file, " --[[%s]] = %s.%s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->left->value.identifierValue->sub, leaf->toKen->toKen);
 		    else
 			fprintf(file, " --[[%s]] = %s %.1s ", leaf->toKen->toKen, leaf->left->value.identifierValue->name.text, leaf->toKen->toKen);
@@ -1396,13 +1430,29 @@ else
 		    fprintf(file, " .. ");
 		else if (LSL_NOT_EQUAL == leaf->toKen->type)
 		    fprintf(file, " ~= ");
+		else if (LSL_LIST_ADD == leaf->toKen->type)
+		{
+		    fprintf(file, " _LSL.listAdd(");
+		    outputLeaf(file, mode, leaf->left);
+		    fprintf(file, ", ");
+		    outputLeaf(file, mode, leaf->right);
+		    fprintf(file, ") ");
+		}
+		else if (LSL_LIST_ADD_LIST == leaf->toKen->type)
+		{
+		    fprintf(file, " _LSL.listAddList(");
+		    outputLeaf(file, mode, leaf->left);
+		    fprintf(file, ", ");
+		    outputLeaf(file, mode, leaf->right);
+		    fprintf(file, ") ");
+		}
 		else
 		    fprintf(file, "%s", leaf->toKen->toKen);
 	    }
 	    else
 		fprintf(file, "%s", leaf->toKen->toKen);
 	}
-	if ((OM_LUA == mode) &&(ST_BITWISE != leaf->toKen->subType))
+	if ((OM_LUA == mode) && (ST_BITWISE != leaf->toKen->subType) && (LSL_LIST_ADD != leaf->toKen->type) && (LSL_LIST_CONCAT != leaf->toKen->type) && (LSL_LIST_ADD_LIST != leaf->toKen->type))
 	    outputLeaf(file, mode, leaf->right);
     }
 }

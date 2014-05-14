@@ -871,5 +871,46 @@ function LSL.gimmeLSL()
   end
 end
 
+-- Misc support functions.
+
+function LSL.listAddList(a, b)
+  local i = 1
+  local result = {}
+
+  for j, v in ipairs(a) do
+    i = i + 1
+    table.insert(result, i, v)
+  end
+
+  for j, v in ipairs(b) do
+    i = i + 1
+    table.insert(result, i, v)
+  end
+
+  return result;
+end
+
+function LSL.listAdd(a, b)
+  local i = 1
+  local result = {}
+
+  for j, v in ipairs(a) do
+    i = i + 1
+    table.insert(result, i, v)
+  end
+
+  table.insert(result, i, b)
+
+  return result;
+end
+
+function LSL.listConcat(a, b)
+  local i = table.maxn(a)
+  local result = a
+
+  table.insert(result, i + 1, b)
+
+  return result;
+end
 
 return LSL;
