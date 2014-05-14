@@ -38,6 +38,7 @@ struct _script
     gameGlobals		*game;
     char		SID[PATH_MAX];
     char		fileName[PATH_MAX];
+    char		*name;
     lua_State		*L;
     struct timeval	startTime;
     float		timerTime;

@@ -13,7 +13,7 @@ static Eina_Bool _sleep_timer_cb(void *data)
     script *script = data;
     gameGlobals *ourGlobals = script->game;
 
-    PD("Waking up %s", script->SID);
+    PD("Waking up %s", script->name);
     sendToChannel(ourGlobals, script->SID, "return 0.0");
     return ECORE_CALLBACK_CANCEL;
 }
@@ -23,7 +23,7 @@ static Eina_Bool _timer_timer_cb(void *data)
     script *script = data;
     gameGlobals *ourGlobals = script->game;
 
-    PD("Timer for %s", script->SID);
+    PD("Timer for %s", script->name);
     sendToChannel(ourGlobals, script->SID, "events.timer()");
     return ECORE_CALLBACK_RENEW;
 }
@@ -87,10 +87,10 @@ void scriptSendBack(void * data)
 		    sendToChannel(ourGlobals, them->SID, "start()");
 		else
 		    sendToChannel(ourGlobals, them->SID, "stop()");
-		PD("Stopped %s", them->fileName);
+		PD("Stopped %s", them->name);
 	    }
 	    else
-		PE("Missing script state in llSetScriptState(%s, )", them->fileName);
+		PE("Missing script state in llSetScriptState(%s, )", them->name);
 	}
 	else
 	{
@@ -147,6 +147,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    {
 		char *temp;
 		char *file;
+		char *name;
 
 		strcpy(buf, &command[8]);
 		temp = buf;
@@ -155,7 +156,8 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    temp++;
 		temp[0] = '\0';
 
-		PD("Compiling %s, %s.", SID, file);
+		name = &file[sizeof(PACKAGE_DATA_DIR)];
+		PD("Compiling %s, %s.", SID, name);
 		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
 		{
 		    script *me = calloc(1, sizeof(script));
@@ -163,6 +165,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    gettimeofday(&me->startTime, NULL);
 		    strncpy(me->SID, SID, sizeof(me->SID));
 		    strncpy(me->fileName, file, sizeof(me->fileName));
+		    me->name = &me->fileName[sizeof(PACKAGE_DATA_DIR)];
 		    me->game = ourGlobals;
 		    me->client = ev->client;
 		    eina_hash_add(ourGlobals->scripts, me->SID, me);
