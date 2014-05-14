@@ -802,9 +802,11 @@ function waitAndProcess(returnWanted)
 	  elseif result1 then
 	    -- Check if we are waiting for a return, and got it.
 	    if returnWanted and string.match(message, "^return ") then
+--	      print("RETURNING " .. result1)
 	      return result1
             end
 	    -- Otherwise, just run it and keep looping.
+--	      print("RUNNING " .. result1)
 	    status, errorMsg = luaproc.send(sid, result1)
 	    if not status then
 	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)

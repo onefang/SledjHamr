@@ -51,6 +51,7 @@ static void resetScript(script *victim)
 
   PD("RESETTING %s", victim->name);
   sendToChannel(ourGlobals, victim->SID, "quit()");
+
   eina_hash_del(ourGlobals->scripts, victim->SID, NULL);
   eina_hash_del(ourGlobals->names, victim->fileName, NULL);
 
@@ -72,6 +73,12 @@ void scriptSendBack(void * data)
 {
     scriptMessage *message = data;
     gameGlobals *ourGlobals = message->script->game;
+
+    if (!message->script)
+    {
+      PE("scriptSendBack script is NULL");
+      return;
+    }
 
     if (0 == strncmp(message->message, "llSleep(", 8))
 	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);

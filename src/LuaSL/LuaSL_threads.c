@@ -186,20 +186,24 @@ static void *workermain( void *args ) {
 		/* check if process finished its whole execution, then recycle it */
 		if (procstat == 0)
 		{
-		    recycled *trash = malloc(sizeof(recycled));
+//		    recycled *trash = malloc(sizeof(recycled));
 
+		    // TODO - Trash stuff trashes memory, fix it.
+		    //        Later, it's an optimization we don't need right now.
+/*
 		    if (trash)
 		    {
 			trash->L = lp->L;
 			pthread_mutex_lock(&mutex_recycle_list);
 			eina_clist_add_tail(&recyclelp, &(trash->node));
 			pthread_mutex_unlock(&mutex_recycle_list);
-			sched_lpcount_dec();
 		    }
+*/
+		    sched_lpcount_dec();
 		    lua_close(lp->L);
 		    if (lp->timer)
 			ecore_timer_del(lp->timer);
-		    free(lp);
+//		    free(lp);
 		}
 
 		/* check if process yielded */
@@ -295,7 +299,7 @@ int sched_create_worker(void)
 void newProc(const char *code, int file, script *lp)
 {
     int ret;
-    recycled *trash;
+//    recycled *trash;
 
     // Try to recycle a Lua state, otherwise create one from scratch.
 #if 0	// TODO - something about this causes a crash.
@@ -400,6 +404,13 @@ const char *sendToChannel(gameGlobals *ourGlobals, const char *SID, const char *
 {
     const char *result = NULL;
     script *dstlp;
+
+    if (!message)
+    {
+	PE("sendToChannel NULL message to %s", SID);
+	return NULL;
+    }
+//    PD("sendToChannel message to %s -> %s", SID, message);
 
     /* get exclusive access to operate on channels */
     pthread_mutex_lock(&mutex_channel);
