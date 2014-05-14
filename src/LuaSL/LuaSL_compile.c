@@ -1613,11 +1613,12 @@ static void outputRawStatement(FILE *file, outputMode mode, LSL_Statement *state
 		    fprintf(file, " ");
 		    if (LSL_ELSE != statement->type)
 		    {
+			fprintf(file, "_LSL.toBool(");
 			if (statement->parenthesis)
 			    outputRawParenthesisToken(file, mode, statement->parenthesis, "");
 			else
 			    outputLeaf(file, mode, statement->expressions);
-			fprintf(file, " then\n");
+			fprintf(file, ") then\n");
 		    }
 		    if (statement->block)
 			outputRawBlock(file, mode, statement->block, FALSE);

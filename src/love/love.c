@@ -436,7 +436,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"%s\")", key, temp);
 			    }
 			    else
-				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", [[\\n\\n\\n]])", key);
+				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"EndOfFuckingAround\")", key);
 			}
 
 			close(fd);

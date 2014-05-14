@@ -169,6 +169,7 @@ local function value2string(value, Type)
   local temp = ""
 
   if  	 "float"	== Type then temp = temp .. value
+--  elseif "boolean"	== Type then if value then temp = '"true"' else temp = '"false"' end
   elseif "integer"	== Type then temp = temp .. value
   elseif "key"		== Type then temp = "\"" .. value .. "\""
   elseif "list"		== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
@@ -388,7 +389,8 @@ local constants =
   newConst("integer", "TYPE_INVALID",		0),
 
   newConst("string", "NULL_KEY",		"00000000-0000-0000-0000-000000000000"),
-  newConst("string", "EOF",			"\\n\\n\\n"),	-- Corner case, dealt with later.
+--  newConst("string", "EOF",			"\\n\\n\\n"),	-- Corner case, dealt with later.
+  newConst("string", "EOF",			"EndOfFuckingAround"),	-- Corner case, dealt with later.
 
   newConst("rotation", "ZERO_ROTATION",		{x=0.0, y=0.0, z=0.0, s=1.0}),
   newConst("vector", "ZERO_VECTOR",		{x=0.0, y=0.0, z=0.0}),
@@ -770,7 +772,8 @@ function LSL.mainLoop(sid, name, x)
 
   SID = sid
   scriptName = name
-  LSL.EOF = "\n\n\n"	-- Fix this up now.
+--  LSL.EOF = "\n\n\n"	-- Fix this up now.
+  LSL.EOF = "EndOfFuckingAround"	-- Fix this up now.
 
   LSL.stateChange(x);
   waitAndProcess(false)
@@ -910,6 +913,17 @@ function LSL.listConcat(a, b)
 
   table.insert(result, i + 1, b)
   return result;
+end
+
+-- Lua really hates 0, it's not false, and it can't be a table index.
+function LSL.toBool(x)
+  local v = x
+  local t = type(v)
+  if 'boolean' == t then return v end
+  if 'number' == t then return (v ~= 0) end
+  if 'nil' == t then return false end
+  -- Is an empty string, empty list, zero vector/rotation false?  Fucked if I know.
+  return true
 end
 
 return LSL;
