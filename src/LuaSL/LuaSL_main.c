@@ -13,7 +13,7 @@ static Eina_Bool _sleep_timer_cb(void *data)
     script *script = data;
     gameGlobals *ourGlobals = script->game;
 
-    PD("Waking up %s", script->name);
+//    PD("Waking up %s", script->name);
     sendToChannel(ourGlobals, script->SID, "return 0.0");
     return ECORE_CALLBACK_CANCEL;
 }
@@ -49,7 +49,7 @@ static void resetScript(script *victim)
   script *me;
   char buf[PATH_MAX];
 
-  PD("RESETTING %s", victim->name);
+//  PD("RESETTING %s", victim->name);
   sendToChannel(ourGlobals, victim->SID, "quit()");
 
   eina_hash_del(ourGlobals->scripts, victim->SID, NULL);
@@ -111,7 +111,7 @@ void scriptSendBack(void * data)
 		    sendToChannel(ourGlobals, them->SID, "start()");
 		else
 		    sendToChannel(ourGlobals, them->SID, "stop()");
-		PD("Stopped %s", them->name);
+//		PD("Stopped %s", them->name);
 	    }
 	    else
 		PE("Missing script state in llSetScriptState(%s, )", them->name);

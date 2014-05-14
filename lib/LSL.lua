@@ -743,7 +743,7 @@ function LSL.stateChange(x)
     if nil ~= currentState.state_exit then
       currentState.state_exit();
     end
-    msg("LSL.Lua: State change on " .. scriptName)
+--    msg("LSL.Lua: State change on " .. scriptName)
     currentState = x;
     --[[  Never return to the current states event handler.  In theory.  lol
 	  Notably, it's not actually legal to do a state change from a function, only from handlers.
@@ -774,7 +774,7 @@ function LSL.mainLoop(sid, name, x)
 
   LSL.stateChange(x);
   waitAndProcess(false)
-  msg("LSL.Lua: Script quitting " .. scriptName)
+--  msg("LSL.Lua: Script quitting " .. scriptName)
 end
 
 function waitAndProcess(returnWanted)
