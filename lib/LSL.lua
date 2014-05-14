@@ -807,10 +807,11 @@ function waitAndProcess(returnWanted)
             end
 	    -- Otherwise, just run it and keep looping.
 --	      print("RUNNING " .. result1)
-	    status, errorMsg = luaproc.send(sid, result1)
-	    if not status then
-	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
-	    end
+	    -- TODO - Not sure why I had this here.  "sid" is not set anywhere, and SID would just send it to ourselves.
+--	    status, errorMsg = luaproc.send(sid, result1)
+--	    if not status then
+--	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+--	    end
 	  end
 	end
       end
