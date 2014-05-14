@@ -31,7 +31,7 @@ skang.moduleEnd(_M)
 
 end
 
-
+--[[
 -- Test it.
 local skang = require 'skang'
 local test = require 'test'
@@ -210,3 +210,4 @@ print(stuff.S['record2'].field1)
 --skang.printTableStart(getmetatable(stuff.S), '', 'stuff.S metatable')
 
 --skang.printTableStart(getmetatable(test), '', 'test metatable')
+]]
