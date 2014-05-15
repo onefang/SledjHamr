@@ -657,7 +657,7 @@ function --[[list]]	LSL.llListInsertList(--[[list]] l, --[[list]] l1,--[[integer
   end
   y = x
   for i = 1,#l1 do
-    result[x] = ll[i]
+    result[x] = l1[i]
     x = x + 1
   end
   for i = y,#l do
