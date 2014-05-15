@@ -559,19 +559,20 @@ else
 	 * That's what this code and the matching code in addParenthesis() does.
 	 */
 	// TODO - Only got one of these in my test scripts, so leave all this debugging shit in until it's been tested more.
+	//        Still need to fetch the "x" identifier out, so we can pass that onto the output code.
 	if (left)
 	{
 	    if (left->flags & MF_ASSIGNEXP)
 	    {
-//if ((left) && (right))
-//    printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
-//else if (left)
-//    printf("%s %s NORIGHT\n", left->toKen->toKen, lval->toKen->toKen);
-//else if (right)
-//    printf("NOLEFT %s %s\n", lval->toKen->toKen, right->toKen->toKen);
-//else
-//    printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
-//		printf("############################################################################## left\n");
+if ((left) && (right))
+    printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
+else if (left)
+    printf("%s %s NORIGHT\n", left->toKen->toKen, lval->toKen->toKen);
+else if (right)
+    printf("NOLEFT %s %s\n", lval->toKen->toKen, right->toKen->toKen);
+else
+    printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
+		printf("############################################################################## left\n");
 		left->flags |= MF_WRAPFUNC;
 		if (LSL_PARENTHESIS_OPEN == left->toKen->type)
 		    left->value.parenthesis->flags |= MF_WRAPFUNC;
@@ -1539,7 +1540,8 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
     else
 	outputLeaf(file, mode, parenthesis->contents);
     if ((OM_LUA == mode) && (MF_WRAPFUNC & parenthesis->flags))
-	fprintf(file, "; return x; end)() ");
+	// TODO - Need to fetc the identifier before, but we only have one in my test code, so fake it.
+	fprintf(file, "; return ix; end)() ");
     else
     {
 #if LUASL_DIFF_CHECK
