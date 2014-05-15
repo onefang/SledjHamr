@@ -691,8 +691,8 @@ end
 function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[integer]] start,--[[integer]] eNd)
   local result = {}
   local x = 1
-  local y
-  for i = 1,start+1 do
+
+  for i = 1,start do
     result[x] = l[i]
     x = x + 1
   end
@@ -700,7 +700,7 @@ function --[[list]]	LSL.llListReplaceList(--[[list]] l, --[[list]] part,--[[inte
     result[x] = part[i]
     x = x + 1
   end
-  for i = eNd+1,#l do
+  for i = eNd+2,#l do
     result[x] = l[i]
     x = x + 1
   end
