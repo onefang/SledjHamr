@@ -74,7 +74,7 @@ function print_table(table, space)
 end
 
 function msg(...)
-  print(SID, ...)  -- The comma adds a tab, fancy that.  B-)
+  print(SID, scriptName, ...)  -- The comma adds a tab, fancy that.  B-)
 end
 
 
