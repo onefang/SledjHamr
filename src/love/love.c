@@ -368,6 +368,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
 		    else PW("No where to send %s", command);
+		    // TODO - Temporary so we have a place to log stuff from LSL.
+		    PD("SHOUTING %s", command);
 		}
 		else if (0 == strncmp(command, "llDialog(", 9))
 		{
