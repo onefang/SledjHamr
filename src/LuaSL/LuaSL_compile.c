@@ -1287,6 +1287,8 @@ LSL_Leaf *addTypecast(LSL_Leaf *lval, LSL_Leaf *type, LSL_Leaf *rval, LSL_Leaf *
 	    lval->basicType = type->basicType;
 	    if ((expr) && (OT_integer == type->basicType))  // TODO - Should be from string, but I guess I'm not propagating basic types up from function calls and parenthesis?
 		lval->value.parenthesis->flags |= MF_TYPECAST;
+	    if ((expr) && (OT_list == type->basicType))
+		lval->value.parenthesis->flags |= MF_TYPECAST;
 	}
 	// Actualy, at this point, type is no longer needed.
 	lval->toKen = tokens[LSL_TYPECAST_OPEN - lowestToken];
