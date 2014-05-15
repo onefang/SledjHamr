@@ -986,7 +986,7 @@ end
 
 -- Misc support functions.
 
-function LSL.listAddList(a, b)
+function LSL.listAdd(a, b)
   local i = 1
   local result = {}
 
@@ -1003,20 +1003,6 @@ function LSL.listAddList(a, b)
     i = i + 1
     table.insert(result, i, v)
   end
-
-  return result;
-end
-
-function LSL.listAdd(a, b)
-  local i = 1
-  local result = {}
-
-  for j, v in ipairs(a) do
-    i = i + 1
-    table.insert(result, i, v)
-  end
-
-  table.insert(result, i, b)
 
   return result;
 end

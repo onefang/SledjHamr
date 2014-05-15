@@ -478,25 +478,41 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 				break;
 
 			    case ST_ADD :
+				// someList = (list) notAList + someList	-> someList = _LSL.listAddList( _LSL.listTypecast(notAList), someList)
+				// someList = aList + bList			-> someList = _LSL.listAddList(aList, bList)
 				if (OT_listList == lval->basicType)
 				{
 				    lval->basicType = OT_list;
 				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
 				}
-				else if (OT_list == lType)
+				// This one is not turning up in my test code, so not tested.
+				// someList = notAList + someList		-> someList = _LSL.listAddList( notAList, someList)
+				// someList = someList + notAList		-> someList = _LSL.listAddList( someList, notAList)
+				else if ((OT_list == lType) || (OT_list == rType))
 				{
+
+if ((left) && (right))
+    printf("LA LINE %d - %s %s %s\n", lval->line, left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
+else if (left)
+    printf("LA LINE %d - %s %s NORIGHT\n", lval->line, left->toKen->toKen, lval->toKen->toKen);
+else if (right)
+    printf("LA LINE %d - NOLEFT %s %s\n", lval->line, lval->toKen->toKen, right->toKen->toKen);
+else
+    printf("LA LINE %d - NOLEFT %s NORIGHT\n", lval->line, lval->toKen->toKen);
+
 				    lval->basicType = OT_list;
-				    lval->toKen = tokens[LSL_LIST_ADD - lowestToken];
+				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
 				}
 				break;
 
 			    case ST_CONCATENATION :
-				// This is if the right side has been cast to a list.
+				// someList += (list) notAList			-> someList = _LSL.listAddList(someList, _LSL.listTypecast(notAList))
 				if ((LSL_ASSIGNMENT_PLAIN != lval->toKen->type) && (OT_listList == lval->basicType))
 				{
 				    lval->basicType = OT_list;
-				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
+				    lval->toKen = tokens[LSL_LIST_ADD - lowestToken];
 				}
+				// someList += notAList				-> someList = _LSL.listConcat(someList, notAList)
 				else if ((OT_list == lType) && (OT_list != rType))
 				{
 				    lval->basicType = OT_list;
@@ -1382,7 +1398,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 {
     if (leaf)
     {
-	if ((OM_LUA == mode) && (ST_BITWISE != leaf->toKen->subType) && (LSL_LIST_ADD != leaf->toKen->type) && (LSL_LIST_ADD_LIST != leaf->toKen->type))
+	if ((OM_LUA == mode) && (ST_BITWISE != leaf->toKen->subType) /*&& (LSL_LIST_ADD != leaf->toKen->type)*/ && (LSL_LIST_ADD_LIST != leaf->toKen->type))
 	    outputLeaf(file, mode, leaf->left);
 #if LUASL_DIFF_CHECK
 	if ((!(LSL_NOIGNORE & leaf->toKen->flags)) && (leaf->ignorable))
@@ -1439,7 +1455,7 @@ else
 		    fprintf(file, " ~= ");
 		else if (LSL_LIST_ADD == leaf->toKen->type)
 		{
-		    fprintf(file, " _LSL.listAdd(");
+		    fprintf(file, " = _LSL.listAdd(");
 		    outputLeaf(file, mode, leaf->left);
 		    fprintf(file, ", ");
 		    outputLeaf(file, mode, leaf->right);
@@ -1447,7 +1463,7 @@ else
 		}
 		else if (LSL_LIST_ADD_LIST == leaf->toKen->type)
 		{
-		    fprintf(file, " _LSL.listAddList(");
+		    fprintf(file, " _LSL.listAdd(");
 		    outputLeaf(file, mode, leaf->left);
 		    fprintf(file, ", ");
 		    outputLeaf(file, mode, leaf->right);
