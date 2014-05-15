@@ -630,6 +630,9 @@ end
 function --[[string]]	LSL.llList2String(--[[list]] l,--[[integer]] index)
   local result = l[index+1]
 
+  if 'boolean' == type(result) then
+    if result then result = 'true' else result = 'false' end
+  end
   if 'table' == type(result) then
     -- Figure out if things are vectors or rotations, so we can output <> instead of [].
     if nil == result.x then
