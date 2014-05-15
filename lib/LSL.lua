@@ -709,6 +709,7 @@ function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --
   local c = 1
   local lastE = 0
 
+--[[
 print("LSL.llParseStringKeepNulls(" .. In .. ") " .. #In)
 for i, v in ipairs(l) do
   print("  [" .. v .. "]")
@@ -717,6 +718,7 @@ print(",")
 for i, v in ipairs(l1) do
   print("  {" .. v .. "}")
 end
+]]
 
   -- Start scanning at the beginning of the string.
   repeat
@@ -766,10 +768,12 @@ end
     result[i] = string.sub(In, v[1], v[2])
   end
 
+--[[
 print("RESULT = ")
 for i, v in ipairs(result) do
   print("  {" .. v .. "}")
 end
+]]
 
   return result
 end
@@ -787,10 +791,12 @@ function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[li
     end
   end
 
+--[[
 print("RESULT SANS NULLS = ")
 for i, v in ipairs(result) do
   print("  {" .. v .. "}")
 end
+]]
 
   return result
 end
