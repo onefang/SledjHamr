@@ -700,8 +700,101 @@ function --[[list]]	LSL.llListSort(--[[list]] l,--[[integer]] stride,--[[integer
   return result
 end
 
---function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
---function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1) return {} end;
+function --[[list]]	LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1)
+  local result = {}
+  local temp = {}
+  local len = #l
+  local slen = string.len(In)
+  local b = 1
+  local c = 1
+  local lastE = 0
+
+print("LSL.llParseStringKeepNulls(" .. In .. ") " .. #In)
+for i, v in ipairs(l) do
+  print("  [" .. v .. "]")
+end
+print(",")
+for i, v in ipairs(l1) do
+  print("  {" .. v .. "}")
+end
+
+  -- Start scanning at the beginning of the string.
+  repeat
+    local f = {slen, -slen, 0}
+    local t = l
+
+    -- Search for the first of all the matches.
+    for j = 1, len + #l1 do
+      local k = j
+
+      if j > len then t = l1;  k = j - len end
+      local s, e = string.find(In, t[j], b, true)
+      if s then
+        if s < f[1] then
+          f = {s, e, j}
+          lastE = e
+        end
+      end
+    end
+
+    -- We found at least one of them, save it.
+    if f[2] > 0 then
+      temp[c] = {b, f[1] - 1}
+      -- Split at and keep spacers.
+      if f[3] > len then
+        c = c + 1
+        temp[c] = {f[1], f[2]}
+      end
+      c = c + 1
+      b = f[2]
+    end
+
+    -- Continue on from the next character, possibly after the match.
+    b = b + 1
+  until b >= slen
+
+  -- Save any left over, including the entire string if no matches found.
+  if lastE < slen then
+    temp[c] = {lastE + 1, slen}
+  end
+
+  -- Sort the findings.
+  table.sort(temp, function(a, b) return a[1] < b[1] end)
+
+  -- Construct the result.
+  for i, v in ipairs(temp) do
+    result[i] = string.sub(In, v[1], v[2])
+  end
+
+print("RESULT = ")
+for i, v in ipairs(result) do
+  print("  {" .. v .. "}")
+end
+
+  return result
+end
+
+function --[[list]]	LSL.llParseString2List(--[[string]] In, --[[list]] l, --[[list]] l1)
+  local temp = LSL.llParseStringKeepNulls(--[[string]] In, --[[list]] l, --[[list]] l1)
+  local result = {}
+  local c = 1
+
+  -- Strip out the NULLS.
+  for i, v in ipairs(temp) do
+    if "" ~= v then
+      result[c] = v
+      c = c + 1
+    end
+  end
+
+print("RESULT SANS NULLS = ")
+for i, v in ipairs(result) do
+  print("  {" .. v .. "}")
+end
+
+  return result
+end
+
 
 
 -- LSL script functions
@@ -722,8 +815,6 @@ function --[[string]] LSL.llGetSubString(--[[string]] text, --[[integer]] start,
 end
 
 function --[[integer]] LSL.llSubStringIndex(--[[string]] text, --[[string]] sub)
-  if nil == text then return -1 end
-  if nil == sub then return -1 end
   local start, End = string.find(text, sub, 1, true)
 
   if nil == start then return -1 else return start - 1 end
