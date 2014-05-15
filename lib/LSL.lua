@@ -1031,10 +1031,10 @@ end
 
 -- Lua really hates 0, it's not false, and it can't be a table index.
 function LSL.toBool(x)
-  local v = x
-  local t = type(v)
-  if 'boolean' == t then return v end
-  if 'number' == t then return (v ~= 0) end
+  local t = type(x)
+
+  if 'boolean' == t then return x end
+  if 'number' == t then return (x ~= 0) end
   if 'nil' == t then return false end
   -- Is an empty string, empty list, zero vector/rotation false?  Fucked if I know.
   return true
