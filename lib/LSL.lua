@@ -1009,17 +1009,17 @@ function LSL.listAdd(a, b)
   local result = {}
 
   -- Deal with implicit typecasts.
-  if 'list' ~= type(a) then a = {a} end
-  if 'list' ~= type(b) then b = {b} end
+  if 'table' ~= type(a) then a = {a} end
+  if 'table' ~= type(b) then b = {b} end
 
   for j, v in ipairs(a) do
-    i = i + 1
     table.insert(result, i, v)
+    i = i + 1
   end
 
   for j, v in ipairs(b) do
-    i = i + 1
     table.insert(result, i, v)
+    i = i + 1
   end
 
   return result;
