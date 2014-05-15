@@ -465,7 +465,7 @@ newFunc("integer",	"llList2Integer", "list l", "integer index")
 newFunc("key",		"llList2Key", "list l", "integer index")
 newFunc("list",		"llList2List", "list l", "integer start", "integer End")
 newFunc("string",	"llList2String", "list l", "integer index")
-newFunc("rotation",	"llList2Rotation", "list l", "integer index")
+newFunc("rotation",	"llList2Rot", "list l", "integer index")
 newFunc("vector",	"llList2Vector", "list l", "integer index")
 newFunc("integer",	"llListFindList", "list l", "list l1")
 newFunc("list",		"llListInsertList", "list l", "list l1", "integer index")
@@ -576,7 +576,7 @@ function --[[string]]	LSL.llDumpList2String(--[[list]] l, --[[string]] separator
   local result = ""
   for i = 1,#l do
     if "" ~= result then result = result .. separator end
-    result = result .. l[i]
+    result = result .. LSL.llList2String(l, i)
   end
   return result
 end
@@ -586,7 +586,7 @@ function --[[integer]] 	LSL.llGetListLength(--[[list]] l)
 end
 
 function --[[string]]	LSL.llList2CSV(--[[list]] l)
-  return LSL.llDumpList2String(l, ",")
+  return LSL.llDumpList2String(l, ", ")
 end
 
 function --[[float]] 	LSL.llList2Float(--[[list]] l,--[[integer]] index)
@@ -629,20 +629,38 @@ end
 
 function --[[string]]	LSL.llList2String(--[[list]] l,--[[integer]] index)
   local result = l[index+1]
+
+  if 'table' == type(result) then
+    -- Figure out if things are vectors or rotations, so we can output <> instead of [].
+    if nil == result.x then
+      result = '[' .. LSL.llDumpList2String(result, ', ') .. ']'
+    else
+      result = '<' .. LSL.llDumpList2String(result, ', ') .. '>'
+    end
+  end
   if result then return "" .. result else return "" end
 end
 
-function --[[rotation]]	LSL.llList2Rotation(--[[list]] l,--[[integer]] index)
+function --[[rotation]]	LSL.llList2Rot(--[[list]] l,--[[integer]] index)
   local result = l[index+1]
   if nil == result then result = LSL.ZERO_ROTATION end
-  -- TODO - check if it's not an actual rotation, then return LSS.ZERO_ROTATION
+  -- Check if it's not an actual rotation, then return LSS.ZERO_ROTATION
+  if 'table' ~= type(result) then result = LSL.ZERO_ROTATION end
+  if nil == result.x then result = LSL.ZERO_ROTATION end
+  if nil == result.y then result = LSL.ZERO_ROTATION end
+  if nil == result.z then result = LSL.ZERO_ROTATION end
+  if nil == result.s then result = LSL.ZERO_ROTATION end
   return result
 end
 
 function --[[vector]]	LSL.llList2Vector(--[[list]] l,--[[integer]] index)
   local result = l[index+1]
   if nil == result then result = LSL.ZERO_VECTOR end
-  -- TODO - check if it's not an actual rotation, then return LSS.ZERO_VECTOR
+  -- Check if it's not an actual rotation, then return LSS.ZERO_VECTOR
+  if 'table' ~= type(result) then result = LSL.ZERO_VECTOR end
+  if nil == result.x then result = LSL.ZERO_VECTOR end
+  if nil == result.y then result = LSL.ZERO_VECTOR end
+  if nil == result.z then result = LSL.ZERO_VECTOR end
   return result
 end
 
