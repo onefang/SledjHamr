@@ -984,6 +984,10 @@ function LSL.listAddList(a, b)
   local i = 1
   local result = {}
 
+  -- Deal with implicit typecasts.
+  if 'list' ~= type(a) then a = {a} end
+  if 'list' ~= type(b) then b = {b} end
+
   for j, v in ipairs(a) do
     i = i + 1
     table.insert(result, i, v)

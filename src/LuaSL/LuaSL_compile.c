@@ -478,7 +478,6 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 				break;
 
 			    case ST_ADD :
-				// TODO - This doesn't work if the right side has been cast to a list.
 				if (OT_listList == lval->basicType)
 				{
 				    lval->basicType = OT_list;
@@ -492,7 +491,13 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 				break;
 
 			    case ST_CONCATENATION :
-				if ((OT_list == lType) && (OT_list != rType))
+				// TODO - This doesn't work if the right side has been cast to a list.
+				if (OT_listList == lval->basicType)
+				{
+				    lval->basicType = OT_list;
+				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
+				}
+				else if ((OT_list == lType) && (OT_list != rType))
 				{
 				    lval->basicType = OT_list;
 				    lval->toKen = tokens[LSL_LIST_CONCAT - lowestToken];
