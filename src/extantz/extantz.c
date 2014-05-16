@@ -62,6 +62,7 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  _M = lua_gettop(ourGlobals->purkle->L);
 	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _M, "append", buf, 0);
 	  PI("Dialog from %s - %s", SID, command);
+	  // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
 	}
 	else
 	{
