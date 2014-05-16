@@ -32,6 +32,9 @@ scripts can have a poper GUI for a change.
 
 NOTES and TODOs -
 
+Should be able to open external and internal windows, and even switch
+between them on the fly.
+
 Lua scripts do -
   require 'widget'  -> loads widget.c
   Widget.c is a library like test_c.
@@ -176,8 +179,6 @@ static int traceBack(lua_State *L)
   return 1;
 }
 
-
-// TODO - Should be able to open external and internal windows, and even switch between them on the fly.
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
   Widget *wid = data;
