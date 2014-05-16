@@ -8,6 +8,7 @@ static const char *ourName = "purkle";
 static int skang, _M;
 static Widget *entry, *history;
 static winFang *me;
+static Ecore_Con_Server *server;
 
 static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
@@ -50,6 +51,23 @@ static int append(lua_State *L)
   return 0;
 }
 
+static int say(lua_State *L)
+{
+  char *name = "", *id = NULL, *text = NULL, buf[PATH_MAX];
+  int channel;
+
+printf("PURKLE.SAY .....\n");
+  // TODO - Should include origin and distance?
+  pull_lua(L, 1, "%channel $name $id $text", &channel, &name, &id, &text);
+  if (id && text)
+  {
+    snprintf(buf, sizeof(buf), "events.listen(%d, %s, %s, %s)", channel, name, id, text);
+printf("PURKLE.SAY -%s.%s\n", id, buf);
+    if (server)  sendForth(server, id, buf);
+  }
+  return 0;
+}
+
 int luaopen_purkle(lua_State *L)
 {
   GuiLua *gl;
@@ -69,6 +87,7 @@ int luaopen_purkle(lua_State *L)
   _M = lua_gettop(L);
 
   push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, _M, "append", "Append text to the history box.", append, "string", 0);
+  push_lua(L, "@ ( = $ $ & $ )", skang, THINGASM, _M, "say",    "Send chat to a channel.",         say,    "number,string,string,string", 0);
 
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
@@ -77,6 +96,7 @@ int luaopen_purkle(lua_State *L)
   {
     parent = gl->parent;
     world = gl->world;
+    server = gl->server;
   }
 
   if (!me)  me = purkleAdd(parent, 500, 420, world);
