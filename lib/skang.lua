@@ -884,7 +884,7 @@ thingasm = function (names, ...)
     if args then
       setfenv(args, parent)
       thingy.Cwidget = widget(parent.window, args())
-print('\nNO IDEA WHY this does isValid() three times on the action, and the first one being a string.')
+--print('\nNO IDEA WHY this does isValid() three times on the action, and the first one being a string.')
       parent.W[name] = thingy
     else
       print("ERROR - " .. err)
@@ -1037,7 +1037,7 @@ local aIsValid = function (self, parent)
 
   if result then
     local value = parent[self.names[1] ]
-print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value .. '   ' .. type(parent.Cwidget))
+--print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value .. '   ' .. type(parent.Cwidget))
     action(parent.Cwidget, value)
   end
   return result

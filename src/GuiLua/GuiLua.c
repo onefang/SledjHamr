@@ -204,7 +204,6 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
       _A = lua_gettop(L);
       if (wid->win->module)
       {
-        PD("Setting environment for Lua pcall to %s", wid->win->module);
         lua_getfield(L, LUA_REGISTRYINDEX, wid->win->module);
 
         // Consistancy would be good, just sayin'.
@@ -264,7 +263,7 @@ static int action(lua_State *L)
   pull_lua(L, 2, "$", &action);
   if (wid && strcmp(wid->magic, "Widget") == 0)
   {
-PD("Setting action : %s\n", action);
+//PD("Setting action : %s\n", action);
     wid->action = strdup(action);
   }
   return 0;

@@ -56,14 +56,15 @@ static int say(lua_State *L)
   char *name = "", *id = NULL, *text = NULL, buf[PATH_MAX];
   int channel;
 
-printf("PURKLE.SAY .....\n");
   // TODO - Should include origin and distance?
   pull_lua(L, 1, "%channel $name $id $text", &channel, &name, &id, &text);
   if (id && text)
   {
-    snprintf(buf, sizeof(buf), "events.listen(%d, %s, %s, %s)", channel, name, id, text);
-printf("PURKLE.SAY -%s.%s\n", id, buf);
-    if (server)  sendForth(server, id, buf);
+    snprintf(buf, sizeof(buf), "events.listen(%d, '%s', '%s', '%s')", channel, name, id, text);
+    if (server)
+      sendForth(server, id, buf);
+    else
+      printf("PURKLE NOT SAY, no where to send %s", buf);
   }
   return 0;
 }
