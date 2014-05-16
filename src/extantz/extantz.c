@@ -652,18 +652,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   ourGlobals.world = ephysicsAdd(&ourGlobals);
 
-//  overlay_add(&ourGlobals);
-  GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
-  woMan_add(&ourGlobals);
-  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
-  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
-  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
-
-   // Bump the top toolbar above the windows.
-  evas_object_raise(ourGlobals.tb);
-
-  _on_resize(&ourGlobals, NULL, NULL, NULL);
-
   // Try to connect to the love server we started before.
   ourGlobals.address = "127.0.0.1";
   ourGlobals.port = 8211;
@@ -678,15 +666,27 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   else
     PC("Failed to connect to server!");
 
+//  overlay_add(&ourGlobals);
+//  GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
+  woMan_add(&ourGlobals);
+  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.server, ourGlobals.world);
+  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.server, ourGlobals.world);
+  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
+
+   // Bump the top toolbar above the windows.
+  evas_object_raise(ourGlobals.tb);
+
+  _on_resize(&ourGlobals, NULL, NULL, NULL);
+
   // Setup our callback for clicking in world.
   ourGlobals.scene->clickCb = _onWorldClick;
 
   elm_run();
 
-  if (ourGlobals.server)  ecore_con_server_del(ourGlobals.server);
-
   ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();
+
+  if (ourGlobals.server)  ecore_con_server_del(ourGlobals.server);
 
   if (ourGlobals.win)
   {

@@ -429,7 +429,7 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
   return result;
 }
 
-GuiLua *GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world)
+GuiLua *GuiLuaLoad(char *module, winFang *parent, Ecore_Con_Server *server, EPhysics_World *world)
 {
   GuiLua *result;
   char *args[] = {"GuiLUa", "-l", ""};
@@ -437,6 +437,7 @@ GuiLua *GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world)
   args[2] = module;
   result = GuiLuaDo(3, args, parent, world);
   result->name = module;
+  result->server = server;
   return result;
 }
 
