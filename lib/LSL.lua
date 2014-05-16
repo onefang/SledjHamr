@@ -864,6 +864,11 @@ end
 
 -- LSL string functions
 
+function --[[integer]] 	LSL.llStringLength(--[[string]] s)
+  return string.len(s)
+end
+
+
 function --[[string]] LSL.llGetSubString(--[[string]] text, --[[integer]] start, --[[integer]] End)
   -- Deal with the impedance mismatch.
   if 0 <= start  then  start = start + 1  end
