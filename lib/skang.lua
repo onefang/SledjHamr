@@ -1058,6 +1058,36 @@ wMum.__call = function (func, ...)
 end
 ]]
 
+--[[  TODO - Widgets doing the right thing, in the right place.
+
+GOAL - GuiLua.c -> _on_click()  -> lauL_dostring(L, wid->action)
+       We want this action to be performed in the environment of the module that created the widget.
+       Or the one that set the action.
+
+  purkle
+    local purkle = require 'purkle'
+    local win = skang.window(....
+      win = copy(widgets ....
+      win.window = Cwindow( ....
+        lightuserdata *winFang
+    skang.thingasm{win, 'button1' ....  types = 'widget', widget='"button", ....
+      args = loadstring('"button", ....
+      setfenv(args, win)
+      thingy.Cwidget = widget(win.window, args())
+        winFang *(win.window)
+        Widget->data = L
+        Widget->obj "clicked" callback = _on_click, Widget *
+        lightuserdata *widget
+      parent.W[name] = thingy
+    win.W.button1.action = 'purkle.say(' ....
+      aIsValid(....
+        action(button1, ....
+          Widget->action = ....
+
+Store the name of the module that created a window in winFang.
+Store the winFang a widget is in in Widget.
+]]
+
 window = function(w, h, title, name)
   name = name or 'myWindow'
   local win = {}
