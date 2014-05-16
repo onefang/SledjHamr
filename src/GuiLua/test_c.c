@@ -65,8 +65,6 @@ int luaopen_test_c(lua_State *L)
 
 // local _M = skang.moduleBegin('test_c', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', nil, false)
   push_lua(L, "@ ( $ ~ $ $ $ ~ ! )", skang, MODULEBEGIN, ourName, "Copyright 2014 David Seikel", "0.1", "2014-03-27 03:57:00", 0, 1);
-  lua_setfield(L, LUA_REGISTRYINDEX, ourName);
-  lua_getfield(L, LUA_REGISTRYINDEX, ourName);
   _M = lua_gettop(L);
 
 // This uses function{} style.

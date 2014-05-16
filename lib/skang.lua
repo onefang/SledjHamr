@@ -95,6 +95,7 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
 			-- Returning it at the end does the same thing.
 			-- This is so that we can have all the module stuff at the top, in this function.
 			-- Should do this before any further require(), so that circular references don't blow out.
+  debug.getregistry()[name] = _M	-- Stuff the result in the C registry.
 
   -- Save the callers environment.
   local savedEnvironment
