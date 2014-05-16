@@ -61,6 +61,10 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
 	  _M = lua_gettop(ourGlobals->purkle->L);
 	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _M, "append", buf, 0);
+
+	  lua_getfield(ourGlobals->LSLGuiMess->L, LUA_REGISTRYINDEX, ourGlobals->LSLGuiMess->name);
+	  _M = lua_gettop(ourGlobals->LSLGuiMess->L);
+
 	  PI("Dialog from %s - %s", SID, command);
 	  // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
 	}
@@ -651,7 +655,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //  overlay_add(&ourGlobals);
   GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
   woMan_add(&ourGlobals);
-  ourGlobals.purkle = GuiLuaLoad("purkle", ourGlobals.mainWindow, ourGlobals.world);
+  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
+  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
 
    // Bump the top toolbar above the windows.

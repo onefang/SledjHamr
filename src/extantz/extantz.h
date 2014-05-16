@@ -230,6 +230,7 @@ typedef struct _globals
 
   winFang	*files;
   GuiLua	*purkle;
+  GuiLua	*LSLGuiMess;
 
   Ecore_Con_Server	*server;
   const char		*address;

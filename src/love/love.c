@@ -368,7 +368,6 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
 		    else PW("No where to send %s", command);
-		    PD("DIALOG %s", command);
 		}
 		else if (0 == strncmp(command, "llMessageLinked(", 16))
 		{
