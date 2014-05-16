@@ -529,6 +529,18 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
 		}
 	    }
+	    else if (0 == strncmp(command, "events.listen(", 14))
+	    {
+	        Eina_Iterator *scripts;
+		script *me;
+
+		// TODO - For now, just send it to everyone.
+		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+		while(eina_iterator_next(scripts, (void **) &me))
+		{
+		    sendForth(ourGlobals->serverLuaSL, me->SID, command);
+		}
+	    }
 	    else
 	      PW("Unknown command from client - %s", command);
 	}
