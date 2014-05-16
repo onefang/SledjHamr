@@ -6,7 +6,8 @@ do
   local skang = require 'skang'
   -- This module has no default skin, it creates windows as needed.
   local _M = skang.moduleBegin('LSLGuiMess', nil, 'Copyright 2014 David Seikel', '0.1', '2014-05-16 11:07:00')
-  local purkle = require 'purkle'
+  -- This has to be global so that the action below works.
+  purkle = require 'purkle'
 
 
 --[[ TODO -
