@@ -18,6 +18,7 @@ Dedicated to my girl Boots, coz she means the world to me.
 
 #include "LumbrJack.h"
 #include "Runnr.h"
+#include "SledjHamr.h"
 
 
 #define WIDTH  (512)

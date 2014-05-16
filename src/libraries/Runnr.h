@@ -4,7 +4,6 @@
 #include <ctype.h>
 
 #include <Eina.h>
-#include <Ecore_Con.h>
 
 #include <lua.h>
 #include <luajit.h>
@@ -16,8 +15,5 @@ void dumpStack(lua_State *L, int i);
 void doLuaString(lua_State *L, char *string, char *module);
 int pull_lua(lua_State *L, int i, char *params, ...);
 int push_lua(lua_State *L, char *params, ...);
-
-void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ...);
-void sendForth(Ecore_Con_Server *server, const char *SID, const char *message, ...);
 
 #endif

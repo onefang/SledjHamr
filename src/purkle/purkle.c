@@ -1,7 +1,7 @@
 //#include "LumbrJack.h"
 #include "GuiLua.h"
 #include "Runnr.h"
-#include "winFang.h"
+#include "SledjHamr.h"
 
 
 static const char *ourName = "purkle";

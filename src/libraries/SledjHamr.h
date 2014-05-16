@@ -8,15 +8,14 @@
 /* Enable access to unstable EFL EO API. */
 #define EFL_EO_API_SUPPORT 1
 
-//#include <ctype.h>
 #include <stdlib.h>
 
-#include <Elementary.h>
+#include <Ecore_Con.h>
 
 
 #define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*array))
 
-
-void HamrTime(void *elm_main, char *domain);
+void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ...);
+void sendForth(Ecore_Con_Server *server, const char *SID, const char *message, ...);
 
 #endif

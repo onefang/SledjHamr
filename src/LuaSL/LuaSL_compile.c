@@ -1,6 +1,7 @@
 
 #include "LuaSL.h"
 #include "Runnr.h"
+#include "SledjHamr.h"
 
 /* TODO - problem de jour
 */
