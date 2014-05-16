@@ -245,7 +245,9 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
       case '$':
       {
         if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
-        lua_pushstring(L, va_arg(vl, char *));  // Stack usage [-0, +1, m]
+        char *t = va_arg(vl, char *);
+//printf("push_lua %s string %s\n", p, t);
+        lua_pushstring(L, t);  // Stack usage [-0, +1, m]
         break;
       }
       case '!':
