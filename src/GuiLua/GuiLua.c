@@ -233,12 +233,13 @@ static int window(lua_State *L)
   winFang *win = NULL;
   winFang *parent = NULL;
   EPhysics_World *world = NULL;
+  char *module = NULL;
   char *name = "GuiLua";
   char *title = "GuiLua test harness";
   int w = WIDTH, h = HEIGHT;
   GuiLua *gl;
 
-  pull_lua(L, 1, "%w %h $title $name", &w, &h, &title, &name);
+  pull_lua(L, 1, "$module %w %h $title $name", &module, &w, &h, &title, &name);
 
   lua_getfield(L, LUA_REGISTRYINDEX, glName);
   gl = lua_touserdata(L, -1);
@@ -250,6 +251,7 @@ static int window(lua_State *L)
   }
 
   win = winFangAdd(parent, 25, 55, w, h, title, name, world);
+  win->module = module;
   if (gl)
   {
     // If there's no parent, we become the parent.
@@ -347,7 +349,7 @@ printf("**********************require GuiLua\n");
 
   // Define our functions.
 //thingasm{'window', 'The size and title of the application Frame.', window, 'x,y,name', acl='GGG'}
-  push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "number,number,string", "GGG", 0);
+  push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "string,number,number,string", "GGG", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
 PD("GuiLua 2");
 // TODO - This one crashes sometimes.  Figure out why later.

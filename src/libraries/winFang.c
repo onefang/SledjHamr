@@ -395,6 +395,7 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
     strcpy(result->magic, "Widget");
     strcpy(result->type, type);
     eina_clist_add_head(&win->widgets, &result->node);
+    result->win = win;
 
     result->obj = eo_add(klass, win->win,
       evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),

@@ -61,6 +61,7 @@ typedef struct _winFang
   EPhysics_Body *body;
   Eina_Clist	widgets;
   Eina_Clist	winFangs;
+  char		*module;
   int		x, y, w, h, mw, mh;
 
   Evas_Object *hand[4];
@@ -75,6 +76,7 @@ typedef struct _Widget
   char		magic[8];
   char		type[16];
   Evas_Object	*obj;
+  winFang	*win;
 
   char		*label, *look, *action, *help;
   // foreground / background colour

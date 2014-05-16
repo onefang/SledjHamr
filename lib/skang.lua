@@ -1089,12 +1089,13 @@ Store the winFang a widget is in in Widget.
 ]]
 
 window = function(w, h, title, name)
+  local caller = getfenv(2)._NAME
   name = name or 'myWindow'
   local win = {}
   win = copy(widgets, name)
   local wMum, wThingy = getStuffed(win.W, 'a')
   wThingy.isValid = aIsValid
-  win.window = Cwindow(w, h, title, name)
+  win.window = Cwindow(caller, w, h, title, name)
   return win
 end
 
