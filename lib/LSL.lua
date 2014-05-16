@@ -589,6 +589,37 @@ function --[[string]]	LSL.llList2CSV(--[[list]] l)
   return LSL.llDumpList2String(l, ", ")
 end
 
+function --[[list]]	LSL.llCSV2List(--[[string]] text)
+  local result = {}
+  local i = 1
+  local b = 1
+  local len = string.len(text)
+  local s, e
+
+  -- Apparently llCSV2List() really is this dumb.  http://lslwiki.net/lslwiki/wakka.php?wakka=llCSV2List
+  repeat
+    s, e = string.find(text, ', ', b, true)
+    if s then
+      local temp = string.sub(text, b, s - 1)
+      local s1, e1 = string.find(temp, '<', 1, true)
+
+      -- Skip commas enclosed in <>, even if it's just garbage.
+      if s1 then
+        local s2, e2 = string.find(text, '>', b + e1, true)
+        if s1 then
+          temp = string.sub(text, b, e2)
+          e = e2
+        end
+      end
+      result[i] = temp
+      i = i + 1
+      b = e + 1
+    end
+  until nil == s
+
+  return result
+end
+
 function --[[float]] 	LSL.llList2Float(--[[list]] l,--[[integer]] index)
   local result = tonumber(l[index])
   if nil == result then result = 0.0 end
