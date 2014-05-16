@@ -86,3 +86,27 @@ char *getDateTime(struct tm **nowOut, char *dateOut, time_t *timeOut)
   strftime(date, DATE_TIME_LEN, "%d/%m/%Y %H:%M:%S\r", newTime);
   return (dateTime);
 }
+
+float timeDiff(struct timeval *now, struct timeval *then)
+{
+    if (0 == gettimeofday(now, 0))
+    {
+	struct timeval thisTime = { 0, 0 };
+	double  result = 0.0;
+
+	thisTime.tv_sec = now->tv_sec;
+	thisTime.tv_usec = now->tv_usec;
+	if (thisTime.tv_usec < then->tv_usec)
+	{
+	    thisTime.tv_sec--;
+	    thisTime.tv_usec += 1000000;
+	}
+	thisTime.tv_usec -= then->tv_usec;
+	thisTime.tv_sec -= then->tv_sec;
+	result = ((double) thisTime.tv_usec) / ((double) 1000000.0);
+	result += thisTime.tv_sec;
+	return result;
+    }
+    else
+	return 0.0;
+}

@@ -33,5 +33,7 @@ typedef enum
 
 int loggingStartup(char *name, int logDom);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);
+float timeDiff(struct timeval *now, struct timeval *then);
+
 
 #endif
