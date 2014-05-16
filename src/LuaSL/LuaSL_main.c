@@ -82,6 +82,30 @@ void scriptSendBack(void * data)
 
     if (0 == strncmp(message->message, "llSleep(", 8))
 	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);
+    else if (0 == strncmp(message->message, "llResetTime(", 12))
+    {
+	gettimeofday(&message->script->startTime, NULL);
+    }
+    else if (0 == strncmp(message->message, "llGetTime(", 10))
+    {
+	struct timeval now;
+	float time = timeDiff(&now, &message->script->startTime);
+	char result[128];
+
+	snprintf(result, sizeof(result), "return %f", time);
+	sendToChannel(ourGlobals, message->script->SID, result);
+    }
+    else if (0 == strncmp(message->message, "llGetAndResetTime(", 18))
+    {
+	struct timeval now;
+	float time = timeDiff(&now, &message->script->startTime);
+	char result[128];
+
+	// Reset it before doing anything else once the result is known.
+	gettimeofday(&message->script->startTime, NULL);
+	snprintf(result, sizeof(result), "return %f", time);
+	sendToChannel(ourGlobals, message->script->SID, result);
+    }
     else if (0 == strncmp(message->message, "llSetTimerEvent(", 16))
     {
 	message->script->timerTime = atof(&(message->message)[16]);
@@ -208,6 +232,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		if (me)
 		{
 		    sprintf(buf, "%s.lua.out", me->fileName);
+		    gettimeofday(&me->startTime, NULL);
 		    newProc(buf, TRUE, me);
 		}
 	    }
