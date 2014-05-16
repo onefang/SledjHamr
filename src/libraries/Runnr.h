@@ -13,6 +13,7 @@
 
 
 void dumpStack(lua_State *L, int i);
+void doLuaString(lua_State *L, char *string, char *module);
 int pull_lua(lua_State *L, int i, char *params, ...);
 int push_lua(lua_State *L, char *params, ...);
 

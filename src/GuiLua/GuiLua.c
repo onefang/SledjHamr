@@ -144,6 +144,7 @@ and ordinary elementary widgets.  Proper introspection can come later.
 
 #include "LumbrJack.h"
 #include "GuiLua.h"
+#include "Runnr.h"
 
 
 static int		logDom;		// Our logging domain.
@@ -158,77 +159,16 @@ win.quitter.colour.r = 5     -> direct access to the table, well "direct" via Th
 */
 
 
-static int traceBack(lua_State *L)
-{
-  const char *msg = "";
-  int top = lua_gettop(L);
-//  int i;
-
-//  printf("Stack is %d deep\n", top);
-//  for (i = 1; i <= top; i++)
-//    dumpStack(L, i);
-
-  if (top)
-    msg = lua_tostring(L, 1);
-  lua_getglobal(L, "debug");
-  push_lua(L, "@ ( )", lua_gettop(L), "traceback", 1);
-  lua_pushstring(L, "\n");
-  lua_pushstring(L, msg);
-  lua_concat(L, 3);
-
-  return 1;
-}
-
 static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
   Widget *wid = data;
 
   if (wid)
   {
-    int _T, _A, err;
     lua_State *L = wid->data;
 
     PD("Doing action %s", wid->action);
-
-    lua_pushcfunction(L, traceBack);
-    _T = lua_gettop(L);
-
-    if (luaL_loadstring(L, wid->action))
-    {
-      const char *err = lua_tostring(L, 1);
-
-      PE("Error parsing - %s, ERROR %s", wid->action, err);
-    }
-    else
-    {
-      _A = lua_gettop(L);
-      if (wid->win->module)
-      {
-        lua_getfield(L, LUA_REGISTRYINDEX, wid->win->module);
-
-        // Consistancy would be good, just sayin'.
-        if (0 == lua_setfenv(L, _A))
-        {
-          PE("Error setting environment for - %s", wid->action);
-          return;
-        }
-      }
-
-      if ((err = lua_pcall(L, 0, LUA_MULTRET, _T)))
-      {
-	const char *err_type;
-
-	switch (err)
-	{
-	  case LUA_ERRRUN:	err_type = "runtime";		break;
-	  case LUA_ERRSYNTAX:	err_type = "syntax";		break;
-	  case LUA_ERRMEM:	err_type = "memory allocation";	break;
-	  case LUA_ERRERR:	err_type = "error handler";	break;
-	  default:		err_type = "unknown";		break;
-	}
-        PE("Error running - %s, \n%s - %s", wid->action, err_type, lua_tostring(L, -1));
-      }
-    }
+    doLuaString(L, wid->action, wid->win->module);
   }
 }
 

@@ -38,6 +38,72 @@ void dumpStack(lua_State *L, int i)
   }
 }
 
+static int traceBack(lua_State *L)
+{
+  const char *msg = "";
+  int top = lua_gettop(L);
+//  int i;
+
+//  printf("Stack is %d deep\n", top);
+//  for (i = 1; i <= top; i++)
+//    dumpStack(L, i);
+
+  if (top)
+    msg = lua_tostring(L, 1);
+  lua_getglobal(L, "debug");
+  push_lua(L, "@ ( )", lua_gettop(L), "traceback", 1);
+  lua_pushstring(L, "\n");
+  lua_pushstring(L, msg);
+  lua_concat(L, 3);
+
+  return 1;
+}
+
+void doLuaString(lua_State *L, char *string, char *module)
+{
+  int _T, _A, err;
+
+  lua_pushcfunction(L, traceBack);
+  _T = lua_gettop(L);
+
+  if (luaL_loadstring(L, string))
+  {
+    const char *err = lua_tostring(L, 1);
+
+    printf("Error parsing - %s, ERROR %s", string, err);
+  }
+  else
+  {
+    _A = lua_gettop(L);
+    if (module)
+    {
+      lua_getfield(L, LUA_REGISTRYINDEX, module);
+
+      // Consistancy would be good, just sayin'.
+      if (0 == lua_setfenv(L, _A))
+      {
+        printf("Error setting environment for - %s", string);
+        return;
+      }
+    }
+
+    if ((err = lua_pcall(L, 0, LUA_MULTRET, _T)))
+    {
+      const char *err_type;
+
+      switch (err)
+      {
+	case LUA_ERRRUN:	err_type = "runtime";		break;
+	case LUA_ERRSYNTAX:	err_type = "syntax";		break;
+	case LUA_ERRMEM:	err_type = "memory allocation";	break;
+	case LUA_ERRERR:	err_type = "error handler";	break;
+	default:		err_type = "unknown";		break;
+      }
+      printf("Error running - %s, \n%s - %s", string, err_type, lua_tostring(L, -1));
+    }
+  }
+}
+
 
 // These are what the various symbols are for each type -
 //  int		%
