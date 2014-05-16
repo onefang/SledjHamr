@@ -351,14 +351,14 @@ printf("**********************require GuiLua\n");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
 PD("GuiLua 2");
 // TODO - This one crashes sometimes.  Figure out why later.
-//  push_lua(L, "@ ( { = $ $ & $ } )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
-  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
+  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
+///  push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
 PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
-  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, 0); // TODO - closeWindow, "userdata");
+  push_lua(L, "@ ( = $ $ & $ )",			skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, "userdata", 0); // TODO - closeWindow, "userdata");
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
