@@ -331,7 +331,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    if (0 == strcmp(buf, ownerKey))
 		      temp = ownerName;
 		    else
-		      temp = "Unkown User";
+		      temp = "Unknown User";
 		    // TODO - Sanitize the name, no telling what weird shit people put in their names.
 		    snprintf(buf, sizeof(buf), "return \"%s\"", temp);
 		    sendForth(ourGlobals->serverLuaSL, SID, buf);
