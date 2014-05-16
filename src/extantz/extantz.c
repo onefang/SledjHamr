@@ -47,14 +47,14 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  || (0 == strncmp(command, "llShout(", 8)))
 	{
 	  int _P;
-char *name = "that's me";
+//	  char *name = "that's me";
 
 	  lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
 	  _P = lua_gettop(ourGlobals->purkle->L);
 
 	  sprintf(buf, "%s: %s", SID, command);
 	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
-//	  push_lua(ourGlobals->purkle->L, "@ ( $ %a $b $c $d )", _P, "say", _P, name, SID, buf, 0);
+//	  push_lua(ourGlobals->purkle->L, "@ ( $ % $ $ $ )", _P, "say", _P, name, SID, buf, 0);
 	}
 	else if (0 == strncmp(command, "llDialog(", 9))
 	{
@@ -64,7 +64,6 @@ char *name = "that's me";
 	  _M = lua_gettop(ourGlobals->LSLGuiMess->L);
 
 	  // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
-	  sprintf(buf, "%s: %s", SID, command);
 	  push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
 
 	}
