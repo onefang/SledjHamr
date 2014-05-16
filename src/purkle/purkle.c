@@ -7,6 +7,7 @@
 static const char *ourName = "purkle";
 static int skang, _M;
 static Widget *entry, *history;
+static winFang *me;
 
 static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
@@ -78,7 +79,7 @@ int luaopen_purkle(lua_State *L)
     world = gl->world;
   }
 
-  purkleAdd(parent, 500, 420, world);
+  if (!me)  me = purkleAdd(parent, 500, 420, world);
   push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 
   // Return _M, the table itself, not the index.
