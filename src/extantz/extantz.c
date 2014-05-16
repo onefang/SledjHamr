@@ -55,6 +55,12 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	}
 	else if (0 == strncmp(command, "llDialog(", 9))
 	{
+	  int _M;
+
+	  sprintf(buf, "%s: %s", SID, command);
+	  lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
+	  _M = lua_gettop(ourGlobals->purkle->L);
+	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _M, "append", buf, 0);
 	  PI("Dialog from %s - %s", SID, command);
 	}
 	else

@@ -119,11 +119,11 @@ setup_pose() {
 
 
 unauth(string button, string who) {
-        llDialog(user0, "\n" + button + " button allowed only for " + who, ["OK"], -1);
+        llDialog(user0, button + " button allowed only for " + who, ["OK"], -1);
 }
 
 continMenu(string str) {
-    llDialog(user0, "\n"+str+llKey2Name(user)+" is using the menu, continue?", ["Yes","Cancel"], ch - 1);
+    llDialog(user0, str+llKey2Name(user)+" is using the menu, continue?", ["Yes","Cancel"], ch - 1);
 }
 
 mainMenu() {
@@ -172,7 +172,7 @@ doMenu(integer inhibit_showing) {
             + llList2List(buttons1, -9, -7)
             + llList2List(buttons1, -12, -10);
     }
-    llDialog(user, Version + "\n\n" + llList2String(menus,menu), buttons1, ch - 1);
+    llDialog(user, Version + ":- " + llList2String(menus,menu), buttons1, ch - 1);
     llResetTime();
 }
 
