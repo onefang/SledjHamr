@@ -51,7 +51,8 @@ void dumpStack(lua_State *L, int i)
 //  table       {} Starts and stops filling up a new table.
 //              (  Just syntax sugar for call.
 //  call        )  Expects an integer, the number of results left after the call.
-// FIXME: Still to do, if we ever use them -
+// TODO: Still to do, if we ever use them -
+//  table	Some way to specify an arbitrary table, though this sucks, coz C can't deal with them easily.
 //  stack	=  Get a value from the stack, expects a stack index.
 //  userdata	+
 //  thread	^
