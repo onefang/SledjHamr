@@ -431,7 +431,7 @@ PD("GuiLua 3");
   return 1;
 }
 
-GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, Ecore_Con_Server *server, EPhysics_World *world)
 {
   GuiLua *result;
   lua_State  *L;
@@ -439,6 +439,7 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
 
   result = calloc(1, sizeof(GuiLua));
   result->parent = parent;
+  result->server = server;
   result->world = world;
 
   L = luaL_newstate();
@@ -499,9 +500,8 @@ GuiLua *GuiLuaLoad(char *module, winFang *parent, Ecore_Con_Server *server, EPhy
   char *args[] = {"GuiLUa", "-l", ""};
 
   args[2] = module;
-  result = GuiLuaDo(3, args, parent, world);
+  result = GuiLuaDo(3, args, parent, server, world);
   result->name = module;
-  result->server = server;
   return result;
 }
 
