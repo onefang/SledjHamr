@@ -319,6 +319,23 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
+		else if (0 == strncmp(command, "llKey2Name(", 11))
+		{
+		    char *temp;
+
+		    strcpy(buf, &command[12]);
+		    temp = buf;
+		    while (')' != temp[0])
+			temp++;
+		    temp[0] = '\0';
+		    if (0 == strcmp(buf, ownerKey))
+		      temp = ownerName;
+		    else
+		      temp = "Unkown User";
+		    // TODO - Sanitize the name, no telling what weird shit people put in their names.
+		    snprintf(buf, sizeof(buf), "return \"%s\"", temp);
+		    sendForth(ourGlobals->serverLuaSL, SID, buf);
+		}
 		// Send "back" stuff on to the one and only client.
 		// TODO - All of these output functions should just use one thing to append stuff to either local or an IM tab.
 		//        Love filtering out stuff that should not go there.
