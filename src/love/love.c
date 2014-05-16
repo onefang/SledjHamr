@@ -352,6 +352,11 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
 		    else PW("No where to send %s", command);
 		}
+		else if (0 == strncmp(command, "llRegionSay(", 12))
+		{
+		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+		    else PW("No where to send %s", command);
+		}
 		else if (0 == strncmp(command, "llSay(", 6))
 		{
 		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
