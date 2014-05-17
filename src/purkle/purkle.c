@@ -12,7 +12,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
   winFang *me;
 
-  me = winFangAdd(parent, 30, 590, w, h, "chatter box", "purkle", world);
+  me = winFangAdd(parent, 300, 26, w, h, "chatter box", "purkle", world);
 
   history = widgetAdd(me, WT_TEXTBOX, "History is shown here", -1, -1, -1, -1);
   eo_do(history->obj,
@@ -106,7 +106,7 @@ int luaopen_purkle(lua_State *L)
     world = gl->world;
   }
 
-  if (!me)  me = purkleAdd(parent, 500, 420, world);
+  if (!me)  me = purkleAdd(parent, 600, 420, world);
   push_lua(L, "@ ( = )", skang, MODULEEND, _M, 0);
 
   // Return _M, the table itself, not the index.
