@@ -30,6 +30,9 @@ llSetTouchText(string text)
 
 --[[ llDialog(key id, string message, list buttons, integer chat_channel)
      http://lslwiki.net/lslwiki/wakka.php?wakka=llDialog
+
+TODO - Like the files window, just reuse a single window, hiding and showing it when needed.
+       The switch button shows the buttons from the next one.
 ]]
   llDialog = function (id, message, buttons, channel)
     local w = 80
