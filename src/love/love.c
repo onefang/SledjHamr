@@ -300,6 +300,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
 		else if (0 == strcmp(command, "llGetPermissionsKey()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+		else if (0 == strncmp(command, "llRequestPermissions(", 21))
+		    PI("Faked %s", command);
 		else if (0 == strcmp(command, "llGetPos()"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
 		else if (0 == strcmp(command, "llGetRot()"))
@@ -322,7 +324,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
 		else if (0 == strncmp(command, "llListen(", 9))
 		{
-		    PI("Random listen requested %s", command);
+		    PI("Faked %s", command);
 		    sendForth(ourGlobals->serverLuaSL, SID, "return %d", random());
 		}
 		else if (0 == strncmp(command, "llSameGroup(", 12))
