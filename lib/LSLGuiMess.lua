@@ -36,12 +36,12 @@ TODO - Like the files window, just reuse a single window, hiding and showing it 
 ]]
 
   local dialogs = {count = 0, current = 0}
+  local buttCount = 12 * 8
   local w = 80
   local h = 20
   local x = 2 + (((1 - 1) % 3) * w)
   local y = h * math.floor((1 - 1) / 3)
-  local buttCount = 12 * 8
-  local dialog = skang.window(4 + w * 3, h * math.ceil((--[[#buttons]] buttCount + 1) / 3), message, 'llDialogWindow')
+  local dialog = skang.window(4 + w * 3, h * math.ceil((buttCount + 1) / 3), message, 'llDialogWindow')
 
   for i = 1, buttCount do
     x = 2 + (((i - 1) % 3) * w)
@@ -50,14 +50,11 @@ TODO - Like the files window, just reuse a single window, hiding and showing it 
     skang.hide(dialog.W['button' .. i].Cwidget)
   end
   x = 2 + (((3 - 1) % 3) * w)
-  y = h * math.floor((--[[#buttons]] buttCount + 1) / 3)
+  y = h * math.floor((buttCount + 1) / 3)
   skang.thingasm{dialog, 'ignore', 'Ignore this dialog',    types = 'widget', widget='"button", "ignore", ' .. x            .. ', ' .. y ..  ', ' .. w - 20 .. ', ' .. h}
   skang.thingasm{dialog, 'switch', 'Switch to next dialog', types = 'widget', widget='"button", ">", '      .. (x + w - 20) .. ', ' .. y ..  ', ' .. 20     .. ', ' .. h}
 
   llDialog = function (id, message, buttons, channel)
-    local x = 2 + (((1 - 1) % 3) * w)
-    local y = h * math.floor((1 - 1) / 3)
-
     dialogs.count = dialogs.count + 1
     dialogs[dialogs.count] = buttons
     -- Hide the last set of buttons
@@ -69,11 +66,9 @@ TODO - Like the files window, just reuse a single window, hiding and showing it 
     dialogs.current = dialogs.count
 
     for i, v in ipairs(buttons) do
-      x = 2 + (((i - 1) % 3) * w)
-      y = h * math.floor((i - 1) / 3)
-      skang.show(dialog.W['button' .. i].Cwidget)
-      dialog.W['button' .. i].text = v
       dialog.W['button' .. i].action = 'purkle.say(' .. channel .. ', "onefang Rejected", "' .. id .. '", "' .. v .. '")'
+      dialog.W['button' .. i].text = v
+      skang.show(dialog.W['button' .. i].Cwidget)
     end
   end
 
