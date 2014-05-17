@@ -234,6 +234,24 @@ static int widShow(lua_State *L)
   return 0;
 }
 
+static int winHide(lua_State *L)
+{
+  winFang *win = lua_touserdata(L, 1);
+
+  if (win)
+    winFangHide(win);
+  return 0;
+}
+
+static int winShow(lua_State *L)
+{
+  winFang *win = lua_touserdata(L, 1);
+
+  if (win)
+    winFangShow(win);
+  return 0;
+}
+
 static int text(lua_State *L)
 {
   Widget *wid = lua_touserdata(L, 1);
@@ -394,6 +412,9 @@ PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "hide",		"Hide a widget.",				widHide, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "show",		"Show a widget.",				widShow, 0);
   push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "text",		"Set the text for a widget.",			text, "string", 0);
+
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "vanish",	"Hide a window.",				winHide, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "appear",	"Show a window.",				winShow, 0);
 
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
