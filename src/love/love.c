@@ -154,26 +154,19 @@ static void dirList_compile(const char *name, const char *path, void *data)
     }
 }
 
-static Eina_Bool _timer_cb(void *data)
+static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
-//  gameGlobals *ourGlobals = data;
+  gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
+  ourGlobals->serverLuaSL = ev->server;
+
+  // Compile and run scripts.
   gettimeofday(&startTime, NULL);
   snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
   eina_file_dir_list(buf, EINA_TRUE, dirList_compile, data);
 
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
-{
-    gameGlobals *ourGlobals = data;
-
-    ourGlobals->serverLuaSL = ev->server;
-    // Wait a while before compiling and running scripts.
-    ecore_timer_add(3.0, _timer_cb, ourGlobals);
-    return ECORE_CALLBACK_RENEW;
+  return ECORE_CALLBACK_RENEW;
 }
 
 
