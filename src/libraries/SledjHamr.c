@@ -32,16 +32,23 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Del *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
+static Eina_Bool _delTimer(void *data)
+{
+  struct _conct *this = data;
+
+  reachOut(this->address, this->port, this->pointer, this->addCb, this->dataCb, this->delCb);
+  return ECORE_CALLBACK_CANCEL;
+}
+
 static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   struct _conct *this = data;
 
-  printf("FAILED to connect to server %s:%d, trying again!\n", this->address, this->port);
+  printf("FAILED to connect to server %s:%d, trying again in a second!\n", this->address, this->port);
   ecore_event_handler_del(this->add);
   ecore_event_handler_del(this->del);
   if (ev->server)  ecore_con_server_del(ev->server);
-  sleep(1);
-  reachOut(this->address, this->port, this->pointer, this->addCb, this->dataCb, this->delCb);
+  ecore_timer_add(1.0, _delTimer, this);
   return ECORE_CALLBACK_CANCEL;
 }
 
