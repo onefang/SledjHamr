@@ -32,12 +32,22 @@ llSetTouchText(string text)
      http://lslwiki.net/lslwiki/wakka.php?wakka=llDialog
 ]]
   llDialog = function (id, message, buttons, channel)
-    local win = skang.window(200, 25 + 25 * #buttons, message, 'llDialogWindow')
+    local w = 80
+    local h = 20
+    local x = 2 + (((1 - 1) % 3) * w)
+    local y = h * math.floor((1 - 1) / 3)
+    local dialog = skang.window(4 + w * 3, h * math.ceil((#buttons + 1) / 3), message, 'llDialogWindow')
 
     for i, v in ipairs(buttons) do
-      skang.thingasm{win, 'button' .. i, 'Selects button ' .. i, types = 'widget', widget='"button", "' .. v .. '", 10, ' .. (25 * i) ..  ', 60, 25'}
-      win.W['button' .. i].action = 'purkle.say(' .. channel .. ', "onefang Rejected", "' .. id .. '", "' .. v .. '")'
+      x = 2 + (((i - 1) % 3) * w)
+      y = h * math.floor((i - 1) / 3)
+      skang.thingasm{dialog, 'button' .. i, 'Selects button ' .. i, types = 'widget', widget='"button", "' .. v .. '", ' .. x .. ', ' .. y ..  ', ' .. w .. ', ' .. h}
+      dialog.W['button' .. i].action = 'purkle.say(' .. channel .. ', "onefang Rejected", "' .. id .. '", "' .. v .. '")'
     end
+    x = 2 + (((3 - 1) % 3) * w)
+    y = h * math.floor((#buttons + 1) / 3)
+    skang.thingasm{dialog, 'ignore', 'Ignore this dialog',    types = 'widget', widget='"button", "ignore", ' .. x            .. ', ' .. y ..  ', ' .. w - 20 .. ', ' .. h}
+    skang.thingasm{dialog, 'switch', 'Switch to next dialog', types = 'widget', widget='"button", ">", '      .. (x + w - 20) .. ', ' .. y ..  ', ' .. 20     .. ', ' .. h}
   end
 
 
