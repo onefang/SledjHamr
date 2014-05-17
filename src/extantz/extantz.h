@@ -220,6 +220,7 @@ typedef struct _globals
   int		scr_w, scr_h;	// The size of the screen.
   int		win_w, win_h;	// The size of the window.
   int		win_x, win_y;	// The position of the window.
+  int		running : 1;
 
   Ecore_Animator  *animator;
 
@@ -233,8 +234,6 @@ typedef struct _globals
   GuiLua	*LSLGuiMess;
 
   Ecore_Con_Server	*server;
-  const char		*address;
-  int			port;
 
 } globals;
 

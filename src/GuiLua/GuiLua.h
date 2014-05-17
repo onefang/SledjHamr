@@ -32,8 +32,8 @@ typedef struct _GuiLua
 
 extern const char	*glName;
 
-GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, Ecore_Con_Server *server, EPhysics_World *world);
-GuiLua *GuiLuaLoad(char *module, winFang *parent, Ecore_Con_Server *server, EPhysics_World *world);
+GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world);
+GuiLua *GuiLuaLoad(char *module, winFang *parent, EPhysics_World *world);
 void GuiLuaDel(GuiLua *gl);
 
 #endif

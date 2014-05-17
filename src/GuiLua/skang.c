@@ -5,7 +5,7 @@
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
   HamrTime(elm_main, "GuiLua");
-  GuiLuaDo(argc, argv, NULL, NULL, NULL);
+  GuiLuaDo(argc, argv, NULL, NULL);
 
   return 0;
 }

@@ -5,6 +5,10 @@
 #include "LumbrJack.h"
 
 
+static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo);
+static void on_pixels(void *data, Evas_Object *obj);
+
+
 static int logDom;	// Our logging domain.
 globals ourGlobals;
 static Eina_Strbuf *serverStream;
@@ -15,7 +19,19 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
   globals *ourGlobals = data;
 
+  PI("Server connected.");
   ourGlobals->server = ev->server;
+  if (ourGlobals->LSLGuiMess)  ourGlobals->LSLGuiMess->server = ourGlobals->server;
+  if (ourGlobals->purkle)      ourGlobals->purkle->server     = ourGlobals->server;
+
+  Evas_3D_Demo_add(ourGlobals);
+  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+  ourGlobals->gld.move = ourGlobals->scene->move;
+  evas_object_data_set(elm_image_object_get(ourGlobals->scene->image), "glob", ourGlobals);
+  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals->scene->image), on_pixels, ourGlobals);
+  // Setup our callback for clicking in world.
+  ourGlobals->scene->clickCb = _onWorldClick;
+
   return ECORE_CALLBACK_RENEW;
 }
 
@@ -46,25 +62,33 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  || (0 == strncmp(command, "llSay(", 6))
 	  || (0 == strncmp(command, "llShout(", 8)))
 	{
-	  int _P;
-//	  char *name = "that's me";
-
-	  lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
-	  _P = lua_gettop(ourGlobals->purkle->L);
 
 	  sprintf(buf, "%s: %s", SID, command);
-	  push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
-//	  push_lua(ourGlobals->purkle->L, "@ ( $ % $ $ $ )", _P, "say", _P, name, SID, buf, 0);
+	  if (ourGlobals->purkle)
+	  {
+	    int _P;
+
+	    lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
+	    _P = lua_gettop(ourGlobals->purkle->L);
+	    push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
+	  }
+	  else
+	    PW("No purkle to put - %s", buf);
 	}
 	else if (0 == strncmp(command, "llDialog(", 9))
 	{
-	  int _M;
+	  if (ourGlobals->LSLGuiMess)
+	  {
+	    int _M;
 
-	  lua_getfield(ourGlobals->LSLGuiMess->L, LUA_REGISTRYINDEX, ourGlobals->LSLGuiMess->name);
-	  _M = lua_gettop(ourGlobals->LSLGuiMess->L);
+	    lua_getfield(ourGlobals->LSLGuiMess->L, LUA_REGISTRYINDEX, ourGlobals->LSLGuiMess->name);
+	    _M = lua_gettop(ourGlobals->LSLGuiMess->L);
 
-	  // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
-	  push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
+	    // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
+	    push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
+	  }
+	  else
+	    PE("No LSLGuiMess to send - %s", command);
 
 	}
 	else
@@ -86,11 +110,16 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 
   if (ev->server)
   {
-    ecore_con_server_del(ourGlobals->server);
+    ecore_con_server_del(ev->server);
     ourGlobals->server = NULL;
+    if (ourGlobals->running)
+    {
+      PW("Server dropped out, trying to reconnect.");
+      ourGlobals->server = reachOut("127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
+    }
   }
 
-  return ECORE_CALLBACK_RENEW;
+  return ECORE_CALLBACK_CANCEL;
 }
 
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
@@ -317,7 +346,7 @@ static Eina_Bool doFrame(void *data)
   // Either way, _draw_gl gets called eventully.
   if (gld->elmGl)
     elm_glview_changed_set(gld->elmGl);
-  else if (ourGlobals->scene->image)
+  else if ((ourGlobals->scene) && (ourGlobals->scene->image))
   {
 //    evas_object_image_pixels_dirty_set(elm_image_object_get(ourGlobals->scene->image), EINA_TRUE);
     _draw_gl(elm_image_object_get(ourGlobals->scene->image));
@@ -534,6 +563,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
 
   logDom = loggingStartup("extantz", logDom);
+  ourGlobals.running = 1;
 
   // Add extras, so we can run test.lua later.
   env = getenv("LUA_CPATH");
@@ -638,12 +668,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   init_evas_gl(&ourGlobals);
 
-  Evas_3D_Demo_add(&ourGlobals);
-  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
-  ourGlobals.gld.move = ourGlobals.scene->move;
-  evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
-  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
-
   // Gotta do this after adding the windows, otherwise the menu renders under the window.
   //   This sucks, gotta redefine this menu each time we create a new window?
   // Also, GL focus gets lost when any menu is used.  sigh
@@ -651,36 +675,24 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   ourGlobals.world = ephysicsAdd(&ourGlobals);
 
-  // Try to connect to the love server we started before.
-  ourGlobals.address = "127.0.0.1";
-  ourGlobals.port = 8211;
-  sleep(2);
-  if ((ourGlobals.server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
-  {
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
-    serverStream = eina_strbuf_new();
-  }
-  else
-    PC("Failed to connect to server!");
-
 //  overlay_add(&ourGlobals);
 //  GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
   woMan_add(&ourGlobals);
-  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.server, ourGlobals.world);
-  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.server, ourGlobals.world);
+  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
+  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
+
+  // Try to connect to the love server we started before.
+  serverStream = eina_strbuf_new();
+  reachOut("127.0.0.1", 8211 + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
 
    // Bump the top toolbar above the windows.
   evas_object_raise(ourGlobals.tb);
 
   _on_resize(&ourGlobals, NULL, NULL, NULL);
 
-  // Setup our callback for clicking in world.
-  ourGlobals.scene->clickCb = _onWorldClick;
-
   elm_run();
+  ourGlobals.running = 0;
 
   ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();
