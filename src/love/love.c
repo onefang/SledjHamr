@@ -479,14 +479,32 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
     return ECORE_CALLBACK_RENEW;
 }
 
+// Forward declare a circular reference.
+static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev);
+
+static Eina_Bool _serverDelTimer(void *data)
+{
+  gameGlobals *ourGlobals = data;
+
+  ourGlobals->serverLuaSL = reachOut("127.0.0.1", 8211, ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, (Ecore_Event_Handler_Cb) _dataLuaSL, (Ecore_Event_Handler_Cb) _delLuaSL);
+  return ECORE_CALLBACK_CANCEL;
+}
+
 static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
     gameGlobals *ourGlobals = data;
 
     if (ev->server)
     {
+	ecore_con_server_del(ev->server);
+	ourGlobals->serverLuaSL = NULL;
 	if (!ourGlobals->ui)
 	    ecore_main_loop_quit();
+	else
+	{
+	    PW("Server dropped out, trying to reconnect.");
+	    ecore_timer_add(1.0, _serverDelTimer, ourGlobals);
+	}
     }
 
     return ECORE_CALLBACK_RENEW;
@@ -597,12 +615,8 @@ int main(int argc, char **argv)
     int result = EXIT_FAILURE;
     char buf[PATH_MAX];
 
-// TODO - Just a temporary kill command until I can fix the LuaSL hanging on exit bug.
-system("killall -KILL LuaSL");
-sleep(2);
     sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
     system(buf);
-    sleep(1);
 
     memset(&ourGlobals, 0, sizeof(gameGlobals));
     ourGlobals.address = "127.0.0.1";
@@ -615,23 +629,17 @@ sleep(2);
 
 	if (ecore_con_init())
 	{
-	    if ((ourGlobals.serverLuaSL = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
-	    {
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) _addLuaSL,  &ourGlobals);
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) _dataLuaSL, &ourGlobals);
-		ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) _delLuaSL,  &ourGlobals);
-		LuaSLStream = eina_strbuf_new();
+	    LuaSLStream = eina_strbuf_new();
+	    clientStream = eina_strbuf_new();
+	    reachOut("127.0.0.1", 8211, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, (Ecore_Event_Handler_Cb) _dataLuaSL, (Ecore_Event_Handler_Cb) _delLuaSL);
 
 		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
 		{
-//		    int i;
-
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _addClient,  &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _dataClient, &ourGlobals);
 		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _delClient,  &ourGlobals);
 		    ecore_con_server_timeout_set(ourGlobals.server, 0);
 		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-		    clientStream = eina_strbuf_new();
 
 
 		if (ecore_evas_init())
@@ -771,9 +779,6 @@ sleep(2);
 		else
 		    PC("Failed to add server!");
 
-	    }
-	    else
-		PC("Failed to connect to server!");
 	    ecore_con_shutdown();
 	}
 	else
