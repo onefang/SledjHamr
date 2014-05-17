@@ -1031,14 +1031,18 @@ local widgets = {}
 --thingasm{widgets, 'window', 'The window.', types='userdata'}
 thingasm{widgets, 'W', 'Holds all the widgets', types='Keyed'}
 widgets.W{'Cwidget', 'The widget.', types='userdata'}
-widgets.W{'action,a', 'The action for the widget.', 'nada', types='string'}
+widgets.W{'action,a', 'The action for the widget.', 'nada()', types='string'}
+widgets.W{'text,t', 'The text for the widget.', '', types='string'}
 local aIsValid = function (self, parent)
   local result = Thing.isValid(self, parent)
 
   if result then
     local value = parent[self.names[1] ]
+    if 'userdata' == type(parent.Cwidget) then
 --print('NEW ACTION - ' .. self.names[1] .. ' = ' .. value .. '   ' .. type(parent.Cwidget))
-    action(parent.Cwidget, value)
+      if ('action' == self.names[1]) and ('nada()' ~= value) then  action(parent.Cwidget, value) end
+      if ('text'   == self.names[1]) and (''       ~= value) then  text  (parent.Cwidget, value) end
+    end
   end
   return result
 end
@@ -1094,6 +1098,8 @@ window = function(w, h, title, name)
   local win = {}
   win = copy(widgets, name)
   local wMum, wThingy = getStuffed(win.W, 'a')
+  wThingy.isValid = aIsValid
+  local wMum, wThingy = getStuffed(win.W, 't')
   wThingy.isValid = aIsValid
   win.window = Cwindow(caller, w, h, title, name)
   return win

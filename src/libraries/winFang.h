@@ -94,6 +94,8 @@ void HamrTime(void *elm_main, char *domain);
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world);
 void winFangHide(winFang *win);
 void winFangShow(winFang *win);
+void widgetHide(Widget *wid);
+void widgetShow(Widget *wid);
 void winFangCalcMinSize(winFang *win);
 void winFangDel(winFang *win);
 

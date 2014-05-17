@@ -199,6 +199,16 @@ void winFangShow(winFang *win)
     evas_object_show(win->hand[i]);
 }
 
+void widgetHide(Widget *wid)
+{
+  evas_object_hide(wid->obj);
+}
+
+void widgetShow(Widget *wid)
+{
+  evas_object_show(wid->obj);
+}
+
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world)
 {
   winFang *result;

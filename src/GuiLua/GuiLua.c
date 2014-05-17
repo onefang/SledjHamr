@@ -216,6 +216,37 @@ static int colour(lua_State *L)
   return 0;
 }
 
+static int widHide(lua_State *L)
+{
+  Widget *wid = lua_touserdata(L, 1);
+
+  if (wid && strcmp(wid->magic, "Widget") == 0)
+    widgetHide(wid);
+  return 0;
+}
+
+static int widShow(lua_State *L)
+{
+  Widget *wid = lua_touserdata(L, 1);
+
+  if (wid && strcmp(wid->magic, "Widget") == 0)
+    widgetShow(wid);
+  return 0;
+}
+
+static int text(lua_State *L)
+{
+  Widget *wid = lua_touserdata(L, 1);
+  char *text = "";
+
+  pull_lua(L, 2, "$", &text);
+  if (wid && strcmp(wid->magic, "Widget") == 0)
+  {
+    elm_object_text_set(wid->obj, text);
+  }
+  return 0;
+}
+
 /*  userdata vs light userdata
   Lua wants to allocate the memory for userdata itself.
   Light user data an actual pointer.
@@ -358,11 +389,15 @@ PD("GuiLua 2");
 //  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
   push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
 PD("GuiLua 3");
-  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, 0);
+  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, "string", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "hide",		"Hide a widget.",				widHide, 0);
+  push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "show",		"Show a widget.",				widShow, 0);
+  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "text",		"Set the text for a widget.",			text, "string", 0);
+
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
-  push_lua(L, "@ ( = $ $ & $ )",			skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, "userdata", 0); // TODO - closeWindow, "userdata");
+  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, "userdata", 0); // TODO - closeWindow, "userdata");
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);
