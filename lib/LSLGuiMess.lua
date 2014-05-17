@@ -34,25 +34,48 @@ llSetTouchText(string text)
 TODO - Like the files window, just reuse a single window, hiding and showing it when needed.
        The switch button shows the buttons from the next one.
 ]]
+
+  local dialogs = {count = 0, current = 0}
+  local w = 80
+  local h = 20
+  local x = 2 + (((1 - 1) % 3) * w)
+  local y = h * math.floor((1 - 1) / 3)
+  local buttCount = 12 * 8
+  local dialog = skang.window(4 + w * 3, h * math.ceil((--[[#buttons]] buttCount + 1) / 3), message, 'llDialogWindow')
+
+  for i = 1, buttCount do
+    x = 2 + (((i - 1) % 3) * w)
+    y = h * math.floor((i - 1) / 3)
+    skang.thingasm{dialog, 'button' .. i, 'Selects button ' .. i, types = 'widget', widget='"button", "' .. i .. '", ' .. x .. ', ' .. y ..  ', ' .. w .. ', ' .. h}
+    skang.hide(dialog.W['button' .. i].Cwidget)
+  end
+  x = 2 + (((3 - 1) % 3) * w)
+  y = h * math.floor((--[[#buttons]] buttCount + 1) / 3)
+  skang.thingasm{dialog, 'ignore', 'Ignore this dialog',    types = 'widget', widget='"button", "ignore", ' .. x            .. ', ' .. y ..  ', ' .. w - 20 .. ', ' .. h}
+  skang.thingasm{dialog, 'switch', 'Switch to next dialog', types = 'widget', widget='"button", ">", '      .. (x + w - 20) .. ', ' .. y ..  ', ' .. 20     .. ', ' .. h}
+
   llDialog = function (id, message, buttons, channel)
-    local w = 80
-    local h = 20
     local x = 2 + (((1 - 1) % 3) * w)
     local y = h * math.floor((1 - 1) / 3)
-    local dialog = skang.window(4 + w * 3, h * math.ceil((#buttons + 1) / 3), message, 'llDialogWindow')
+
+    dialogs.count = dialogs.count + 1
+    dialogs[dialogs.count] = buttons
+    -- Hide the last set of buttons
+    if 0 ~= dialogs.current then
+      for i, v in ipairs(dialogs[dialogs.current]) do
+        skang.hide(dialog.W['button' .. i].Cwidget)
+      end
+    end
+    dialogs.current = dialogs.count
 
     for i, v in ipairs(buttons) do
       x = 2 + (((i - 1) % 3) * w)
       y = h * math.floor((i - 1) / 3)
-      skang.thingasm{dialog, 'button' .. i, 'Selects button ' .. i, types = 'widget', widget='"button", "' .. v .. '", ' .. x .. ', ' .. y ..  ', ' .. w .. ', ' .. h}
+      skang.show(dialog.W['button' .. i].Cwidget)
+      dialog.W['button' .. i].text = v
       dialog.W['button' .. i].action = 'purkle.say(' .. channel .. ', "onefang Rejected", "' .. id .. '", "' .. v .. '")'
     end
-    x = 2 + (((3 - 1) % 3) * w)
-    y = h * math.floor((#buttons + 1) / 3)
-    skang.thingasm{dialog, 'ignore', 'Ignore this dialog',    types = 'widget', widget='"button", "ignore", ' .. x            .. ', ' .. y ..  ', ' .. w - 20 .. ', ' .. h}
-    skang.thingasm{dialog, 'switch', 'Switch to next dialog', types = 'widget', widget='"button", ">", '      .. (x + w - 20) .. ', ' .. y ..  ', ' .. 20     .. ', ' .. h}
   end
-
 
   local doLua = function (command)
     -- Yes I know, it hurt my brain just writing this.  lol
