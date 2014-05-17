@@ -320,6 +320,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
 		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
 		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
+		else if (0 == strncmp(command, "llSameGroup(", 12))
+		    sendForth(ourGlobals->serverLuaSL, SID, "return true");
 		else if (0 == strncmp(command, "llKey2Name(", 11))
 		{
 		    char *temp;
