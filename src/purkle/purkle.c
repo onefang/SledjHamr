@@ -15,17 +15,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
   me = winFangAdd(parent, 300, 26, w, h, "chatter box", "purkle", world);
 
   history = widgetAdd(me, WT_TEXTBOX, "History is shown here", -1, -1, -1, -1);
-  eo_do(history->obj,
-    elm_obj_entry_scrollable_set(EINA_TRUE),
-    elm_obj_entry_editable_set(EINA_FALSE)
-       );
-
   entry = widgetAdd(me, WT_ENTRY, "", -1, -1, -1, -1);
-  eo_do(entry->obj,
-    elm_obj_entry_scrollable_set(EINA_TRUE),
-    elm_obj_entry_editable_set(EINA_TRUE)
-       );
-
   winFangCalcMinSize(me);
 
   return me;

@@ -447,11 +447,25 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
       eo_key_data_set("Widget", result, NULL)
     );
 
+    if (strcmp(WT_ENTRY, type) == 0)
+    {
+      eo_do(result->obj,
+        elm_obj_entry_scrollable_set(EINA_TRUE),
+        elm_obj_entry_editable_set(EINA_TRUE)
+      );
+    }
+    else if (strcmp(WT_TEXTBOX, type) == 0)
+    {
+      eo_do(result->obj,
+        elm_obj_entry_scrollable_set(EINA_TRUE),
+        elm_obj_entry_editable_set(EINA_FALSE)
+      );
+    }
+
     if (x < 0)
       elm_layout_box_append(win->win, WF_BOX, result->obj);
     else
       elm_grid_pack(win->grid, result->obj, x, y, w, h);
-    winFangCalcMinSize(win);
 
     if (title)
     {
@@ -459,6 +473,7 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
       elm_object_text_set(result->obj, result->label);
       evas_object_name_set(result->obj, title);
     }
+    winFangCalcMinSize(win);
   }
 
   return result;
