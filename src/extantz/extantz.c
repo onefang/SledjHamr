@@ -104,6 +104,17 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
+// Forward declare a circular reference.
+static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev);
+
+static Eina_Bool _serverDelTimer(void *data)
+{
+  globals *ourGlobals = data;
+
+  ourGlobals->server = reachOut("127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
+  return ECORE_CALLBACK_CANCEL;
+}
+
 static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   globals *ourGlobals = data;
@@ -115,7 +126,7 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
     if (ourGlobals->running)
     {
       PW("Server dropped out, trying to reconnect.");
-      ourGlobals->server = reachOut("127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
+      ecore_timer_add(1.0, _serverDelTimer, ourGlobals);
     }
   }
 
