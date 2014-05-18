@@ -38,6 +38,18 @@ future.
 
 THIS IS WHERE WE ARE RIGHT NOW.
 
+Should implement embedded Lua somehow.  Probaly the best thing to do is
+to have comments like -
+
+//Lua: local t = {1, 3, 42, x='something', 'something else}
+/*Lua: print(t.x) */
+
+The LSL parser picks these up and stores them in the AST as Lua
+snippets, then the compiler output functions just inserts them in the
+Lua code it is generating.  Obviously these Lua snippets can access the
+rest of the generated Lua code.  They should also be able to access
+skang and thus do proper GUI stuff on viewers that support skang.
+
 Nails will be used to pump commands in and out of the LuaSL system. 
 Incoming commands invoke LSL events via the LuaSL state metatable.  LL
 and OS functions that impact the world will be converted to nails
@@ -98,202 +110,4 @@ etc.
 Performance testing will have to be done on 5000 scripts, to see how
 that compares against XEngine.
 
-
-The next goal.
---------------
-
-The next goal is to support llDialog() in extantz.  Extantz has enough
-GUI infrastructure now to support a window with a bunch of buttons. 
-LuaLSL has always used MLP as the test scripts, which in turn reads some
-note cards and pops up llDialog to suit.  I think I have enough bits to
-get this all linked up, or at least start to, and see what missing bits
-there are.
-
-
-  Just off the top of my head -
-  -----------------------------
-
-MLP uses llGetInventory*() functions to find out what note cards are in
-the objects inventory.  Then uses llGetNotecardLine() to read the
-notecards.  In response, the server sends dataserver events with each
-line, and the system loops until all lines are read.
-
-MLP sets up a listener with llListen(), then uses llDialog() to send a
-"menu" to the client.  The client sends a channel message back to the
-server when the user makes a choice.  These go to the listen event.
-
-
-  In "reality" -
-  --------------
-
-LuaSL
-  starts up
-  opens an Ecore_Con TCP server at 127.0.0.1:8211
-  sets up the compiler
-  starts luaproc worker thread system
-  waits for input
-    compile() -> compile the script, report warnings and errors
-    run()     -> create new Lua state, put it on the worker queue
-    exit()    -> shutdown
-    *         -> send to SID Lua state
-
-LuaSL_test
-  starts up
-  connects to LuaSL server
-  loops through Test sim/objects looking for *.lsl
-    generates random SID
-    sends "SID compile file.lsl" to LuaSL
-    deal with returned results
-      PW warnings
-      PE errors
-      if compiled send "SID run()" to LuaSL
-      for various llGet*() functions, return random data to LuaSL
-        This includes the llGetInventory*() functions mentioned above.
-  waits for a few seconds
-    sends pretend touch events to LuaSL
-    sends quit() to LuaSL
-    sends exit() to LuaSL
-
-Test sim/objects
-  onefangs test bed
-    the usual MLP style scripts
-    .MENUITEMS
-    .POSITIONS
-    ball object
-
-MLP
-  ~run
-    llSay() to balls telling left over ones to die
-    llGetOwner()
-    loop through an internal list of script names
-      llGetInventoryType() to check if they are there and are scripts.
-      llSetScriptState() to stop them
-      llResetOtherScript()
-    llOwnerSay() to let owner know MLP is turned off
-
-    touch_start()
-      llDetectedKey() to check if it's the owner (current version of MLP doesn't do this)
-      switch to run state
-
-    run state
-      loop through scripts again, turning them on this time.
-
-
-  ~memory
-    llGetInventoryNumber() to count the notecards
-    llGetInventoryName() to find .POSITIONS cards
-    llGetNoteCardLine()
-
-    dataserver()
-      llGetNoteCardLine()
-      change to state on when finished
-
-    on state
-      llMessageLinked()
-
-    link_message()
-      llWhisper()
-
-
-  ~menucfg
-    Same as ~memory.
-    llGetScriptName()
-    llGetFreeMemory()
-
-
-  ~menu
-    llSetTimerEvent() - NOTE doesn't actually setup a timer in the default state.
-    llSleep()
-
-    link_message()
-      llGetLinkNumber()
-      switch to state on
-
-    on state
-      llGetKey() to figure out it's channel
-      llListen()
-
-    listen()
-      llSameGroup()
-      llDialog()
-      llResetTime()
-
-    link_message()
-
-    touch_start()
-      llDetectedKey()
-      llDetectedGroup()
-
-    timer()
-
-Not to mention copius use of list and string functions.
-
-
-LSL.Lua
-  All event stuff is hooked up.
-  events.detected*(list) is all hooked up to save the list in detected* tables.
-  llDetected*() functions return those tables.
-
-  copius list functions implemented, though there's a TODO about negative indexes.  Dunno which ones are missing.
-
-  String functions implemented.  Actually only llGetSubString() and llSubStringIndex()
-
-  llGetScriptName() implemented.
-
-  State changes implemented, with a TODO about clearing out pending events.
-  
-  Bunch of ll*() functions faked.
-
-
-  Not implemented
-    llResetTime()
-    llGetNoteCardLine()
-    llGetFreeMemory()
-    llGetKey()
-    llDialog()
-    llListen()
-    llSameGroup()
-
-
-  Uses newFunc() to create all the LSL functions.
-    If there is no return type then sends function and arguments to LuaSL's client.
-    If there is a  return type then sends function and arguments to LuaSL"s client, then waits for the response.
-      response should be a Lua value as a string.  It gets pcall()'d
-  If we implement a function ourselves, then we override the newFunc created definition with our own function.
-
-
-  Uses waitAndProcess() as the main loop, or to wait for responses.
-    Which just runs what ever Lua strings are sent to us from the LuaSL client, unless it's waiting for a response above.
-
-
-  What needs to be done -
-  -----------------------
-
-Implement llGetNotecardLine() and generate dataserver() events.
-
-LuaSL -> love
-
-
-Fake llGetFreeMemory(), and llSameGroup().
-
-LuaSL -> love -> LuaSL
-
-
-Fake llGetKey()?
-
-LuaSL -> love -> LuaSL
-
-
-Implement llGetInventory*() by actually looking at the files in the
-"object".  While we could hard code where the "object" is, since we are
-starting the run ourselves, we can track which object the scripts are
-in.  Again, this should be in the love server part.
-
-LuaSL -> love -> LuaSL
-
-
-Implement llListen(), llDialog() and generate listen() events.
-
-SID.llDialog(USER_UUID, "My menu", arseBackwardsMenuList, 456)
-USER_UUID.llRegionSay(456, "button text")
-LuaSL -> love -> extantz -> love -> LuaSL
+The test harness became the love world server.
