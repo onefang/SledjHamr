@@ -472,37 +472,33 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
     return ECORE_CALLBACK_RENEW;
 }
 
-// Forward declare a circular reference.
-static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev);
-
-static Eina_Bool _serverDelTimer(void *data)
-{
-  gameGlobals *ourGlobals = data;
-
-  ourGlobals->serverLuaSL = reachOut("127.0.0.1", 8211, ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, (Ecore_Event_Handler_Cb) _dataLuaSL, (Ecore_Event_Handler_Cb) _delLuaSL);
-  return ECORE_CALLBACK_CANCEL;
-}
-
 static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
-    gameGlobals *ourGlobals = data;
+  gameGlobals *ourGlobals = data;
+  static int count = 0;
 
-    if (ev->server)
-    {
-	ecore_con_server_del(ev->server);
-	ourGlobals->serverLuaSL = NULL;
-	if (!ourGlobals->ui)
-	    ecore_main_loop_quit();
-	else
-	{
-	    PW("Server dropped out, trying to reconnect.");
-	    ecore_timer_add(1.0, _serverDelTimer, ourGlobals);
-	}
-    }
+  ourGlobals->serverLuaSL = NULL;
 
+  // Let it fail a couple of times during startup, then try to start our own script server.
+  count++;
+  if (1 < count)
+  {
+    char buf[PATH_MAX];
+
+    PW("Failed to connect to a script server, starting our own.");
+    sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
+    system(buf);
+    count = 0;
+  }
+
+  // TODO - May want to renew even if it's not running the GUI, but then we still need some sort of "shut down" signal, which we don't need during testing.
+//  if (ourGlobals->ui)
     return ECORE_CALLBACK_RENEW;
-}
 
+//  ecore_main_loop_quit();
+
+//  return ECORE_CALLBACK_CANCEL;
+}
 
 static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev)
 {
@@ -606,10 +602,6 @@ int main(int argc, char **argv)
     char *programName = argv[0];
     boolean badArgs = FALSE;
     int result = EXIT_FAILURE;
-    char buf[PATH_MAX];
-
-    sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
-    system(buf);
 
     memset(&ourGlobals, 0, sizeof(gameGlobals));
     ourGlobals.address = "127.0.0.1";

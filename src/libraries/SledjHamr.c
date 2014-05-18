@@ -16,18 +16,10 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   struct _conct *this = data;
 
-  ecore_event_handler_del(this->add);
-  ecore_event_handler_del(this->del);
-
   if (this->addCb)
-  {
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  this->addCb,  this->pointer);
     this->addCb(this->pointer, type, ev);
-  }
   if (this->dataCb)
     ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, this->dataCb, this->pointer);
-  if (this->delCb)
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  this->delCb,  this->pointer);
 
   return ECORE_CALLBACK_RENEW;
 }
@@ -44,11 +36,18 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   struct _conct *this = data;
 
-  printf("FAILED to connect to server %s:%d, trying again in a second!\n", this->address, this->port);
+  printf("FAILED connection to server %s:%d, trying again in a second!\n", this->address, this->port);
   ecore_event_handler_del(this->add);
   ecore_event_handler_del(this->del);
+
+  if (this->delCb)
+  {
+    if (ECORE_CALLBACK_RENEW == this->delCb(this->pointer, type, ev))
+      ecore_timer_add(1.0, _delTimer, this);
+  }
+
   if (ev->server)  ecore_con_server_del(ev->server);
-  ecore_timer_add(1.0, _delTimer, this);
+
   return ECORE_CALLBACK_CANCEL;
 }
 

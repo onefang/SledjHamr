@@ -19,7 +19,7 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
   globals *ourGlobals = data;
 
-  PI("Server connected.");
+  PI("Connected to love server.");
   ourGlobals->server = ev->server;
   if (ourGlobals->LSLGuiMess)  ourGlobals->LSLGuiMess->server = ourGlobals->server;
   if (ourGlobals->purkle)      ourGlobals->purkle->server     = ourGlobals->server;
@@ -104,32 +104,29 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
-// Forward declare a circular reference.
-static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev);
-
-static Eina_Bool _serverDelTimer(void *data)
-{
-  globals *ourGlobals = data;
-
-  ourGlobals->server = reachOut("127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
-  return ECORE_CALLBACK_CANCEL;
-}
-
 static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   globals *ourGlobals = data;
+  static int count = 0;
 
-  if (ev->server)
+  ourGlobals->server = NULL;
+
+  // Let it fail a couple of times during startup, then try to start our own love server.
+  count++;
+  if (1 < count)
   {
-    ecore_con_server_del(ev->server);
-    ourGlobals->server = NULL;
-    if (ourGlobals->running)
-    {
-      PW("Server dropped out, trying to reconnect.");
-      ecore_timer_add(1.0, _serverDelTimer, ourGlobals);
-    }
+    char buf[PATH_MAX];
+
+    PW("Failed to connect to a world server, starting our own.");
+
+    // TODO - Should use Ecore_Exe for this sort of thing.
+    sprintf(buf, "%s/love &", elm_app_bin_dir_get());
+    system(buf);
+    count = 0;
   }
 
+  if (ourGlobals->running)
+    return ECORE_CALLBACK_RENEW;
   return ECORE_CALLBACK_CANCEL;
 }
 
@@ -576,9 +573,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   logDom = loggingStartup("extantz", logDom);
   ourGlobals.running = 1;
 
-  // TODO - Should use Ecore_Exe for this sort of thing.
-  sprintf(buf, "%s/love &", elm_app_bin_dir_get());
-  system(buf);
 
   // Don't do this, we need to clean up other stuff to, so set a clean up function below.
   //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
