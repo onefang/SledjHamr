@@ -34,19 +34,23 @@ llSetTouchText(string text)
   local buttCount = 12 * 8
   local w = 80
   local h = 20
+  local l = 4
   local x = 2 + (((1 - 1) % 3) * w)
   local y = h * math.floor((1 - 1) / 3)
-  local dialog = skang.window(4 + w * 3, (h * 3) + (h * math.ceil((buttCount + 1) / 3)), message, 'llDialogWindow')
+  local dialog = skang.window(4 + w * 3, (h * l) + (h * math.ceil((buttCount + 1) / 3)), message, 'llDialogWindow')
 
-  skang.thingasm{dialog, 'message', 'Dialog message',    types = 'widget', widget='"textbox", "", ' .. 2 .. ', ' .. 2 ..  ', ' .. (w * 3) .. ', ' .. (h * 3)}
+  skang.thingasm{dialog, 'message', 'Dialog message',    types = 'widget', widget='"textbox", "", ' .. 2 .. ', ' .. 2 ..  ', ' .. (w * 3) .. ', ' .. (h * l)}
   for i = 1, buttCount do
     x = 2 + (((i - 1) % 3) * w)
-    y = (h * 3) + (h * math.floor((i - 1) / 3))
+    y = 2 + (h * l) + (h * math.floor((i - 1) / 3))
     skang.thingasm{dialog, 'button' .. i, 'Selects button ' .. i, types = 'widget', widget='"button", "' .. i .. '", ' .. x .. ', ' .. y ..  ', ' .. w .. ', ' .. h}
     skang.hide(dialog.W['button' .. i].Cwidget)
   end
   x = 2 + (((3 - 1) % 3) * w)
-  y = (h * 3) + (h * math.floor((buttCount + 1) / 3))
+  y = 2 + (h * l) + (h * math.floor((buttCount + 1) / 3))
+  -- TODO - LL's V3 has a block button to.  Dunno how I'll deal with blocking stuff, think about that later.
+  -- TODO - Not sure of the point of an ignore button once I have close buttons in the window titles.
+  --        Though I guess if it's showing multiple dialogs, then you could ignore individual ones.
   skang.thingasm{dialog, 'ignore', 'Ignore this dialog',    types = 'widget', widget='"button", "ignore", ' .. x            .. ', ' .. y ..  ', ' .. w - 20 .. ', ' .. h}
   dialog.W['ignore'].action = 'dialogIgnore()'
   skang.thingasm{dialog, 'switch', 'Switch to next dialog', types = 'widget', widget='"button", ">", '      .. (x + w - 20) .. ', ' .. y ..  ', ' .. 20     .. ', ' .. h}
