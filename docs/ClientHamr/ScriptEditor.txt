@@ -1,0 +1,26 @@
+One idea I had, though this will only work if the stars align, is to use
+my toybox editor to edit scripts.  This saves effort, and results in a
+more user friendly editor, since people can pick their preferred editor
+style.
+
+The theory is that I'm writing a generic editor for toybox, and it needs
+to A) emulate a few popular historic editors like vi, emacs, nano, and
+mcedit.  B) gradually morph into a half decent source code editor. 
+Since I basically would have to do B) for extantz anyway, might as well
+just write it once and use it twice.
+
+As a bonus you get a shell in world, with toybox commands, and could
+also run a Lua interpreter in it.
+
+Aligning stars might mean something like this -
+
+Rasters terminology is available as a widget that edje can swallow.
+
+An edje swallowed terminology can run a given command, then go away once
+the command finishes.  Naturally that command could be "vi script.lsl",
+"lua", or even "toybox sh".
+
+Toybox and terminology works under cygwin and Mac OS X.
+
+Rob pulls his finger out and starts putting my editting stuff in toybox
+so I can progress with this.
