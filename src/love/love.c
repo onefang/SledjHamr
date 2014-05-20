@@ -55,7 +55,7 @@ typedef struct _script
 } script;
 
 
-int logDom;	// Our logging domain.
+int logDom = -1;	// Our logging domain.
 //static int CPUs = 4;
 static Eina_Strbuf *LuaSLStream;
 static Eina_Strbuf *clientStream;
@@ -166,7 +166,7 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
   // Compile and run scripts.
   gettimeofday(&startTime, NULL);
-  snprintf(buf, sizeof(buf), "%s/Test sim/objects", PACKAGE_DATA_DIR);
+  snprintf(buf, sizeof(buf), "%s/Test sim/objects", prefix_data_get());
   eina_file_dir_list(buf, EINA_TRUE, dirList_compile, data);
 
   return ECORE_CALLBACK_RENEW;
@@ -413,7 +413,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 			temp++;
 		    temp[0] = '\0';
 		    lineNo = atoi(line);
-		    snprintf(key, sizeof(key), "%s/Test sim/objects/onefang%%27s%%20test%%20bed.5cb927d5-1304-4f1a-9947-308251ef2df0/%s", PACKAGE_DATA_DIR, notecard);
+		    snprintf(key, sizeof(key), "%s/Test sim/objects/onefang%%27s%%20test%%20bed.5cb927d5-1304-4f1a-9947-308251ef2df0/%s", prefix_data_get(), notecard);
 
 		    fd = open(key, O_RDONLY);
 		    if (-1 != fd)
@@ -493,7 +493,7 @@ static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
     char buf[PATH_MAX];
 
     PW("Failed to connect to a script server, starting our own.");
-    sprintf(buf, "%s/LuaSL &", PACKAGE_BIN_DIR);
+    sprintf(buf, "%s/LuaSL &", prefix_bin_get());
     system(buf);
     count = 0;
   }
@@ -618,7 +618,7 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
-	logDom = loggingStartup("love", logDom);
+	logDom = HamrTime(argv[0], main, logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 
 	if (ecore_con_init())
@@ -703,7 +703,7 @@ int main(int argc, char **argv)
 				evas_object_focus_set(ourGlobals.bg, EINA_TRUE);
 
 				ourGlobals.edje = edje_object_add(ourGlobals.canvas);
-				snprintf(buf, sizeof(buf), "%s/%s.edj", PACKAGE_DATA_DIR, "love");
+				snprintf(buf, sizeof(buf), "%s/%s.edj", prefix_data_get(), "love");
 				if (!edje_object_file_set(ourGlobals.edje, buf, group))
 				{
 				    int err = edje_object_load_error_get(ourGlobals.edje);
@@ -720,7 +720,7 @@ int main(int argc, char **argv)
 				evas_object_resize(ourGlobals.edje, WIDTH, HEIGHT);
 				evas_object_show(ourGlobals.edje);
 
-				snprintf(buf, sizeof(buf), "%s/bubble_sh.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/bubble_sh.png", prefix_data_get());
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    sh = evas_object_image_filled_add(ourGlobals.canvas);
@@ -730,7 +730,7 @@ int main(int argc, char **argv)
 				    evas_object_data_set(ourGlobals.bg, names[(i * 2) + 1], sh);
 				}
 
-				snprintf(buf, sizeof(buf), "%s/bubble.png", PACKAGE_DATA_DIR);
+				snprintf(buf, sizeof(buf), "%s/bubble.png", prefix_data_get());
 				for (i = 0; i < (sizeof(names) / sizeof(char *) / 2); i++)
 				{
 				    bub = evas_object_image_filled_add(ourGlobals.canvas);
@@ -779,6 +779,7 @@ int main(int argc, char **argv)
 	    PC("Failed to init ecore_con!");
 
 	eina_hash_free(ourGlobals.scripts);
+	pantsOff(logDom);
     }
     else
 	fprintf(stderr, "Failed to init eina!");

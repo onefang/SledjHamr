@@ -2,14 +2,13 @@
 
 #include "extantz.h"
 #include "SledjHamr.h"
-#include "LumbrJack.h"
 
 
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo);
 static void on_pixels(void *data, Evas_Object *obj);
 
 
-static int logDom;	// Our logging domain.
+int logDom = -1;	// Our logging domain.
 globals ourGlobals;
 static Eina_Strbuf *serverStream;
 
@@ -120,7 +119,7 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
     PW("Failed to connect to a world server, starting our own.");
 
     // TODO - Should use Ecore_Exe for this sort of thing.
-    sprintf(buf, "%s/love &", elm_app_bin_dir_get());
+    sprintf(buf, "%s/love &", prefix_bin_get());
     system(buf);
     count = 0;
   }
@@ -555,6 +554,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   char buf[PATH_MAX * 2];
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
+  logDom = HamrTime(argv[0], elm_main, logDom);
+
   /* Set the locale according to the system pref.
    * If you don't do so the file selector will order the files list in
    * a case sensitive manner
@@ -564,13 +565,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   elm_need_ethumb();
   elm_need_efreet();
 
-  HamrTime(elm_main, "extantz");
-  fprintf(stdout, "prefix was set to: %s\n", elm_app_prefix_dir_get());
-  fprintf(stdout, "data directory is: %s\n", elm_app_data_dir_get());
-  fprintf(stdout, "library directory is: %s\n", elm_app_lib_dir_get());
-  fprintf(stdout, "locale directory is: %s\n", elm_app_locale_dir_get());
-
-  logDom = loggingStartup("extantz", logDom);
   ourGlobals.running = 1;
 
 
@@ -643,7 +637,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   // Override the background image
 #if 1
-  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   ourGlobals.mainWindow->bg = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals.mainWindow->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
@@ -652,7 +646,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   );
   elm_win_resize_object_add(ourGlobals.mainWindow->win, ourGlobals.mainWindow->bg);
 #else
-  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   eo_do(ourGlobals.mainWindow->bg,
     elm_obj_image_file_set(buf, NULL),
     evas_obj_color_set(255, 255, 255, 255)
@@ -673,7 +667,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   woMan_add(&ourGlobals);
   ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
-  ourGlobals.files = filesAdd(&ourGlobals, (char *) elm_app_data_dir_get(), EINA_TRUE, EINA_FALSE);
+  ourGlobals.files = filesAdd(&ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
   // Try to connect to the love server we started before.
   serverStream = eina_strbuf_new();
@@ -701,11 +695,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     winFangDel(ourGlobals.mainWindow);
   }
 
-  if (logDom >= 0)
-  {
-    eina_log_domain_unregister(logDom);
-    logDom = -1;
-  }
+  pantsOff(logDom);
+  logDom = -1;
 
   elm_shutdown();
 

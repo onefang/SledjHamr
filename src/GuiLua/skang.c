@@ -1,11 +1,13 @@
-#include "SledjHamr.h"
 #include "GuiLua.h"
 
 
+int logDom = -1;
+
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
-  HamrTime(elm_main, "GuiLua");
+  logDom = HamrTime(argv[0], elm_main, logDom);
   GuiLuaDo(argc, argv, NULL, NULL);
+  pantsOff(logDom);
 
   return 0;
 }

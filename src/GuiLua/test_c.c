@@ -10,7 +10,6 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 */
 
 
-//#include "LumbrJack.h"
 #include "Runnr.h"
 #include "GuiLua.h"
 
@@ -23,7 +22,7 @@ static int cfunc (lua_State *L)
   double arg1 = luaL_checknumber(L, 1);
   const char *arg2 = luaL_checkstring(L, 2);
 
-  printf("Inside %s.cfunc(%f, %s)\n", ourName, arg1, arg2);
+  PI("Inside %s.cfunc(%f, %s)\n", ourName, arg1, arg2);
   return 0;
 }
 

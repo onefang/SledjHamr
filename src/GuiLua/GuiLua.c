@@ -142,12 +142,10 @@ and ordinary elementary widgets.  Proper introspection can come later.
 */
 
 
-#include "LumbrJack.h"
 #include "GuiLua.h"
 #include "Runnr.h"
 
 
-static int		logDom;		// Our logging domain.
 const char	*glName = "ourGuiLua";
 
 /* Sooo, how to do this -
@@ -373,7 +371,6 @@ int luaopen_GuiLua(lua_State *L)
 
 printf("**********************require GuiLua\n");
   // In theory this function only ever gets called once.
-  logDom = loggingStartup("GuiLua", logDom);
 
   elm_policy_set(ELM_POLICY_EXIT,	ELM_POLICY_EXIT_NONE);
   elm_policy_set(ELM_POLICY_QUIT,	ELM_POLICY_QUIT_NONE);
@@ -474,18 +471,13 @@ GuiLua *GuiLuaDo(int argc, char **argv, winFang *parent, EPhysics_World *world)
         PE("Error running - skang.loopWindow()");
       GuiLuaDel(result);
       result = NULL;
-      if (logDom >= 0)
-      {
-	eina_log_domain_unregister(logDom);
-	logDom = -1;
-      }
 
       // This shuts down Elementary, but keeps the main loop running until all ecore_evas are freed.
       elm_shutdown();
     }
   }
   else
-    fprintf(stderr, "Failed to start Lua!\n");
+    PE("Failed to start Lua!");
 
   return result;
 }

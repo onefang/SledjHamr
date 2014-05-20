@@ -2,15 +2,6 @@
 #define _WINFANG_H_
 
 
-#define EFL_API_OVERRIDE 1
-/* Enable access to unstable EFL API that are still in beta */
-#define EFL_BETA_API_SUPPORT 1
-/* Enable access to unstable EFL EO API. */
-#define EFL_EO_API_SUPPORT 1
-
-#define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*array))
-
-
 #include <Eo.h>
 #include <Eina.h>
 #include <Evas.h>
@@ -88,8 +79,6 @@ typedef struct _Widget
   void		*data;
   Evas_Smart_Cb on_del;
 } Widget;
-
-void HamrTime(void *elm_main, char *domain);
 
 winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, char *name, EPhysics_World *world);
 void winFangHide(winFang *win);

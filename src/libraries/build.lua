@@ -13,6 +13,12 @@ if 'nil' == type(dir) then
   dir = workingDir
 end
 
+-- For EFL apps, these are all centrally controlled in libLumbrJack.
+CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'    .. bin_d    .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'    .. lib_d    .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"'   .. data_d   .. '\\"'
+CFLAGS = CFLAGS .. ' -DPACKAGE_LOCALE_DIR=\\"' .. locale_d .. '\\"'
+
 LDFLAGS = '-L ' .. dir .. ' ' .. LDFLAGS
 
 removeFiles(dir, {'LumbrJack.o', lib_d .. '/libLumbrJack.so', 'Runnr.o', lib_d .. '/libRunnr.so', 'SledjHamr.o', lib_d .. '/libSledjHamr.so', '../../media/winFang.edj', 'winFang.o', lib_d .. '/libwinFang.so'})
@@ -23,11 +29,6 @@ runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libLumbrJack.so
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -fPIC -c Runnr.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libRunnr.so -o ' .. lib_d .. '/libRunnr.so Runnr.o')
 
--- For Elm apps, these are all centrally controlled in libSledjHamr.
-CFLAGS = CFLAGS .. ' -DPACKAGE_BIN_DIR=\\"'    .. bin_d    .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LIB_DIR=\\"'    .. lib_d    .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_DATA_DIR=\\"'   .. data_d   .. '\\"'
-CFLAGS = CFLAGS .. ' -DPACKAGE_LOCALE_DIR=\\"' .. locale_d .. '\\"'
 
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -fPIC -c SledjHamr.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libSledjHamr.so -o ' .. lib_d .. '/libSledjHamr.so SledjHamr.o')

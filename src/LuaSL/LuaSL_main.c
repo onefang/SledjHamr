@@ -4,7 +4,7 @@
 #include "SledjHamr.h"
 
 
-int logDom;	// Our logging domain.
+int logDom = -1;	// Our logging domain.
 static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
@@ -61,7 +61,7 @@ static void resetScript(script *victim)
   gettimeofday(&me->startTime, NULL);
   strncpy(me->SID, victim->SID, sizeof(me->SID));
   strncpy(me->fileName, victim->fileName, sizeof(me->fileName));
-  me->name = &me->fileName[sizeof(PACKAGE_DATA_DIR)];
+  me->name = &me->fileName[strlen(prefix_data_get())];
   me->game = ourGlobals;
   me->client = victim->client;
   eina_hash_add(ourGlobals->scripts, me->SID, me);
@@ -205,7 +205,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    temp++;
 		temp[0] = '\0';
 
-		name = &file[sizeof(PACKAGE_DATA_DIR)];
+		name = &file[strlen(prefix_data_get())];
 		PD("Compiling %s, %s.", SID, name);
 		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
 		{
@@ -214,7 +214,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    gettimeofday(&me->startTime, NULL);
 		    strncpy(me->SID, SID, sizeof(me->SID));
 		    strncpy(me->fileName, file, sizeof(me->fileName));
-		    me->name = &me->fileName[sizeof(PACKAGE_DATA_DIR)];
+		    me->name = &me->fileName[strlen(prefix_data_get())];
 		    me->game = ourGlobals;
 		    me->client = ev->client;
 		    eina_hash_add(ourGlobals->scripts, me->SID, me);
@@ -275,22 +275,7 @@ static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_De
 int main(int argc, char **argv)
 {
   gameGlobals ourGlobals;
-  char *env, cwd[PATH_MAX], temp[PATH_MAX * 2];
   int result = EXIT_FAILURE;
-
-  // Sigh, Elm has this great thing for dealing with bin, lib, and data directories, but this is not an Elm app,
-  // And Elm is too heavy for just that little bit.
-  // So just duplicate a bit of what we need here.  Sorta.
-  getcwd(cwd, PATH_MAX);
-  env = getenv("LUA_CPATH");
-  if (!env)  env = "";
-  sprintf(temp, "%s;%s/lib?.so;%s/?.so;%s/?.so", env, PACKAGE_LIB_DIR, PACKAGE_LIB_DIR, cwd);
-  setenv("LUA_CPATH", temp, 1);
-
-  env = getenv("LUA_PATH");
-  if (!env)  env = "";
-  sprintf(temp, "%s;%s/?.lua;%s/?.lua", env, PACKAGE_LIB_DIR, cwd);
-  setenv("LUA_PATH", temp, 1);
 
     memset(&ourGlobals, 0, sizeof(gameGlobals));
     ourGlobals.address = "127.0.0.1";
@@ -298,7 +283,7 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
-	logDom = loggingStartup("LuaSL", logDom);
+	logDom = HamrTime(argv[0], main, logDom);
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 	ourGlobals.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_init())
@@ -356,6 +341,7 @@ int main(int argc, char **argv)
 	}
 	else
 	    PC("Failed to init ecore!");
+	pantsOff(logDom);
     }
     else
 	fprintf(stderr, "Failed to init eina!");

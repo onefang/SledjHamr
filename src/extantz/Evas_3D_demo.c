@@ -286,7 +286,7 @@ static void _cube_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels1[0])
     );
 
-  snprintf(buf, sizeof(buf), "%s/normal_lego.png", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/normal_lego.png", prefix_data_get());
   scene->texture_normal = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_file_set(buf, NULL)
     );
@@ -354,7 +354,7 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
   char buf[PATH_MAX];
 
   // Setup an MD2 mesh.
-  snprintf(buf, sizeof(buf), "%s/sonic.png", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/sonic.png", prefix_data_get());
   scene->texture2 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_file_set(buf, NULL),
     evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),
@@ -375,7 +375,7 @@ static void _sonic_setup(globals *ourGlobals, Scene_Data *scene)
     evas_3d_material_shininess_set(50.0)
   );
 
-  snprintf(buf, sizeof(buf), "%s/sonic.md2", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/sonic.md2", prefix_data_get());
   scene->mesh2 = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
     evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL),
     evas_3d_mesh_frame_material_set(0, scene->material2),
@@ -397,7 +397,7 @@ static void _earth_setup(globals *ourGlobals, Scene_Data *scene)
   char buf[PATH_MAX];
 
   // Setup earth material.
-  snprintf(buf, sizeof(buf), "%s/EarthDiffuse.png", elm_app_data_dir_get());
+  snprintf(buf, sizeof(buf), "%s/EarthDiffuse.png", prefix_data_get());
   scene->texture_diffuse = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
     evas_3d_texture_file_set(buf, NULL),
     evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR)

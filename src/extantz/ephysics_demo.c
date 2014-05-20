@@ -32,7 +32,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_restitution_set(boundary, 1);
   ephysics_body_friction_set(boundary, 0);
 
-  sprintf(buf, "%s/%s.edj", elm_app_data_dir_get(), EPHYSICS_TEST_THEME);
+  sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box1 = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
     elm_obj_image_file_set(buf, "blue-cube"),
     evas_obj_size_set(70, 70),
@@ -49,7 +49,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
   eo_unref(box1);
 
-  sprintf(buf, "%s/%s.edj", elm_app_data_dir_get(), EPHYSICS_TEST_THEME);
+  sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
     elm_obj_image_file_set(buf, "purple-cube"),
     evas_obj_size_set(70, 70),

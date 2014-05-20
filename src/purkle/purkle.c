@@ -61,7 +61,7 @@ static int say(lua_State *L)
     if (server)
       sendForth(server, id, buf);
     else
-      printf("PURKLE NOT SAY, no where to send %s", buf);
+      PW("PURKLE NOT SAY, no where to send %s", buf);
   }
   return 0;
 }

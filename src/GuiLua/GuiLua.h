@@ -2,6 +2,7 @@
 #define _GUILUA_H_
 
 
+#include "LumbrJack.h"
 #include "Runnr.h"
 #include "winFang.h"
 

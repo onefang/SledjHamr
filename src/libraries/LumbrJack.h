@@ -2,6 +2,15 @@
 #define _LUMBRJACK_H_
 
 
+#define EFL_API_OVERRIDE 1
+/* Enable access to unstable EFL API that are still in beta */
+#define EFL_BETA_API_SUPPORT 1
+/* Enable access to unstable EFL EO API. */
+#define EFL_EO_API_SUPPORT 1
+
+#define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*array))
+
+
 #include <stdio.h>
 #include <ctype.h>
 
@@ -30,6 +39,16 @@ typedef enum
 } boolean;
 #endif
 
+
+extern int logDom;
+
+int HamrTime(char *argv0, void *main, int logDom);
+const char *prefix_get(void);
+const char *prefix_bin_get(void);
+const char *prefix_data_get(void);
+const char *prefix_lib_get(void);
+const char *prefix_locale_get(void);
+void pantsOff(int logDom);
 
 int loggingStartup(char *name, int logDom);
 char *getDateTime(struct tm **nowOut, char *dateOut, time_t *tiemOut);

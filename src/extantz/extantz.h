@@ -6,6 +6,7 @@
 #define DO_GEARS    0
 
 
+#include "LumbrJack.h"
 #include "winFang.h"
 #include "GuiLua.h"
 #include "scenri.h"
