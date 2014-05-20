@@ -369,28 +369,29 @@ void winFangCalcMinSize(winFang *win)
 
 void winFangDel(winFang *win)
 {
-  winFang *wf;
-  Widget  *wid;
+  winFang *wf, *wf2;
+  Widget  *wid, *wid2;
 
   if (!win)  return;
 
   if (win->bg)      eo_unref(win->bg);
   if (win->grid)    eo_unref(win->grid);
   if (win->layout)  eo_unref(win->layout);
-  EINA_CLIST_FOR_EACH_ENTRY(wf, &win->winFangs, winFang, node)
+  EINA_CLIST_FOR_EACH_ENTRY_SAFE(wf, wf2, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
   }
 
   // Elm will delete our widgets, but if we are using eo, we need to unref them.
-  EINA_CLIST_FOR_EACH_ENTRY(wid, &win->widgets, Widget, node)
+  EINA_CLIST_FOR_EACH_ENTRY_SAFE(wid, wid2, &win->widgets, Widget, node)
   {
     if (wid->on_del)  wid->on_del(wid, wid->obj, NULL);
     widgetDel(wid);
-    eo_unref(wid->obj);
   }
   if (win->on_del)  win->on_del(win, win->win, NULL);
   evas_object_del(win->win);
+  free(win->module);
+  free(win);
 }
 
 
@@ -483,10 +484,14 @@ void widgetDel(Widget *wid)
 {
   if (wid)
   {
+    free(wid->action);
+    free(wid->label);
     // TODO - This is to work around a bug in Elm entry, remove it when the bug is fixed.
     //   The bug is that editable entry widgets cause the app to hang on exit.
     if (strcmp(WT_ENTRY, wid->type) == 0)
       elm_entry_editable_set(wid->obj, EINA_FALSE);
+    eo_unref(wid->obj);
+    free(wid);
   }
 }
 

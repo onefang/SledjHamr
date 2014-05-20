@@ -606,8 +606,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.ee = ecore_evas_ecore_evas_get(ourGlobals.evas);	// Only use this on Evas that was created with Ecore_Evas.
 #endif
 
-  evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
-
   // Get the screen size.
   elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
   ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
@@ -615,6 +613,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.win_h = ourGlobals.scr_h - 30;
   evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
   evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
+
+  evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
 
   /*  Our "layers".  TODO - This is out of date, I should update it.
 
@@ -694,7 +694,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   if (ourGlobals.win)
   {
+    ecore_animator_del(ourGlobals.animator);
     Evas_3D_Demo_fini(&ourGlobals);
+    scenriDel(ourGlobals.scene);
     eo_unref(ourGlobals.tb);
     winFangDel(ourGlobals.mainWindow);
   }

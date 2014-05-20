@@ -47,6 +47,9 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
   }
 
   if (ev->server)  ecore_con_server_del(ev->server);
+  // TODO - Hmm, I think this is where this should be freed, but it causes a seggie in reachOut's while loop.
+  //        Which is odd, so leave it commented for now and investigate later.
+//  free(this);
 
   return ECORE_CALLBACK_CANCEL;
 }

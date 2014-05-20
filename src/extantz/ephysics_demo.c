@@ -34,7 +34,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
 
   sprintf(buf, "%s/%s.edj", elm_app_data_dir_get(), EPHYSICS_TEST_THEME);
   box1 = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
-    elm_obj_image_file_set(strdup(buf), "blue-cube"),
+    elm_obj_image_file_set(buf, "blue-cube"),
     evas_obj_size_set(70, 70),
     evas_obj_position_set(ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
     evas_obj_visibility_set(EINA_TRUE)
@@ -49,10 +49,9 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
   eo_unref(box1);
 
-
   sprintf(buf, "%s/%s.edj", elm_app_data_dir_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals->win,
-    elm_obj_image_file_set(strdup(buf), "purple-cube"),
+    elm_obj_image_file_set(buf, "purple-cube"),
     evas_obj_size_set(70, 70),
     evas_obj_position_set(ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
     evas_obj_visibility_set(EINA_TRUE)

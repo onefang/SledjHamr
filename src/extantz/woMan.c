@@ -245,6 +245,7 @@ winFang *woMan_add(globals *ourGlobals)
     viewer_gic->func.del = NULL;
     for (i = 0; NULL != viewerTest[i][0]; i++)
     {
+	// TODO - Should free this later, but this entire thing needs a rewrite anyway.
 	ezViewer *thisViewer = calloc(1, sizeof(ezViewer));
 	
 	if (thisViewer)
@@ -265,6 +266,7 @@ winFang *woMan_add(globals *ourGlobals)
 
     sprintf(buf, "%s/%s", elm_app_data_dir_get(), img3);
     tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    // TODO - This strdup leaks, but this is just temporary test code anyway, it will go away.
     tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_layout_box_append(me->win, WF_BOX, nf);

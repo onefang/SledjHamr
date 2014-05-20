@@ -143,7 +143,20 @@ Scene_Data *scenriAdd(Evas_Object *win)
   return scene;
 }
 
-void scenriDel(globals *ourGlobals)
+void scenriDel(Scene_Data *scene)
 {
-  eo_unref(ourGlobals->scene->image);
+  // TODO - I should probably free up all this Evas_3D stuff.  Oddly Eo doesn't bitch about it, only valgrind.
+  //        Eo bitches if they are unref'd here.
+  //        So either Eo or valgrind bitches, depending on what I do.  I'll leave them commented out, let valgrind bitch, and blame Evas_3D.
+//  eo_unref(scene->light_node);
+//  eo_unref(scene->light);
+
+  // TODO - Should have a separate cameraDel() for these.
+  free(scene->move);
+//  eo_unref(scene->camera_node);
+
+  eo_unref(scene->image);
+  eo_unref(scene->scene);
+//  eo_unref(scene->root_node);
+  free(scene);
 }

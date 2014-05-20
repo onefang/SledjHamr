@@ -142,6 +142,9 @@ static void dirList_compile(const char *name, const char *path, void *data)
     {
 	if (0 == strcmp(ext, ".lsl"))
 	{
+	    // TODO - We are leaking these, coz we don't know when scripts get deleted in the script server.
+	    //        On the other hand, the main use for this is a temporary hack that sends events to all scripts.
+	    //        So that part will get a rewrite when we make it real later anyway.
 	    script *me = calloc(1, sizeof(script));
 
 	    scriptCount++;
@@ -388,6 +391,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    {
 			sendForth(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
 		    }
+		    eina_iterator_free(scripts);
 		}
 		else if (0 == strncmp(command, "llGetNotecardLine(", 18))
 		{
@@ -421,6 +425,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 			temp = NULL;
 			do
 			{
+			    free(temp);
 			    temp = get_rawline(fd, &len, '\n');
 			    if (temp)
 			    {
@@ -455,6 +460,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 			    else
 				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"EndOfFuckingAround\")", key);
 			}
+			eina_iterator_free(scripts);
+			free(temp);
 
 			close(fd);
 		    }
@@ -545,6 +552,7 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
 		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
 		}
+		eina_iterator_free(scripts);
 	    }
 	    else if (0 == strncmp(command, "events.listen(", 14))
 	    {
@@ -557,6 +565,7 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 		{
 		    sendForth(ourGlobals->serverLuaSL, me->SID, command);
 		}
+		eina_iterator_free(scripts);
 	    }
 	    else
 	      PW("Unknown command from client - %s", command);
@@ -768,6 +777,8 @@ int main(int argc, char **argv)
 	}
 	else
 	    PC("Failed to init ecore_con!");
+
+	eina_hash_free(ourGlobals.scripts);
     }
     else
 	fprintf(stderr, "Failed to init eina!");

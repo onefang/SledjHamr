@@ -456,7 +456,6 @@ void Evas_3D_Demo_add(globals *ourGlobals)
 
 void Evas_3D_Demo_fini(globals *ourGlobals)
 {
-  eo_unref(ourGlobals->scene->image);
   free(sphere_vertices);
   free(sphere_indices);
 }

@@ -151,6 +151,9 @@ static char *_push_name(lua_State *L, char *q, int *idx)  // Stack usage [-0, +1
   return q;
 }
 
+/* It's the callers job to stash things safely before returning from the Lua to C function call.
+ * Coz things like strings might go away after the stack is freed.
+ */
 int pull_lua(lua_State *L, int i, char *params, ...)         // Stack usage -
                                                              // if i is a table
                                                              //   [-n, +n, e]
@@ -210,16 +213,15 @@ int pull_lua(lua_State *L, int i, char *params, ...)         // Stack usage -
                   if (lua_isstring(L, j))                                // Stack usage [-0, +0, -]
                     {
                        char **v = va_arg(vl, char **);
-                       size_t len;
-                       char *temp = (char *) lua_tolstring(L, j, &len);  // Stack usage [-0, +0, m]
 
-                       len++;  // Cater for the null at the end.
-                       *v = malloc(len);
-                       if (*v)
-                         {
-                            memcpy(*v, temp, len);
-                            n++;
-                         }
+                       // We could strdup the string, but that causes leaks.
+                       // The problem is that the caller doesn't know if we allocated or not,
+                       // since the incoming pointer could already be pointing to a default value.
+                       // Lua says the string is valid until it's popped off the stack,
+                       // and this is used only in calls to C functions from Lua.
+                       // So just document that it's the callers job to stash it safely if needed after returning.
+                       *v = (char *) lua_tostring(L, j);
+                       n++;
                     }
                   break;
                }

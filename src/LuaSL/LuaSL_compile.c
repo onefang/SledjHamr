@@ -985,6 +985,7 @@ LSL_Leaf *addState(LuaSL_compiler *compiler, LSL_Leaf *state, LSL_Leaf *identifi
 	{
 	    func->state = result->name.text;
 	}
+	eina_iterator_free(handlers);
 	result->block = block->value.blockValue;
 	if (state)
 	{
@@ -1541,7 +1542,7 @@ static void outputRawParenthesisToken(FILE *file, outputMode mode, LSL_Parenthes
     else
 	outputLeaf(file, mode, parenthesis->contents);
     if ((OM_LUA == mode) && (MF_WRAPFUNC & parenthesis->flags))
-	// TODO - Need to fetc the identifier before, but we only have one in my test code, so fake it.
+	// TODO - Need to fetch the identifier before, but we only have one in my test code, so fake it.
 	fprintf(file, "; return ix; end)() ");
     else
     {

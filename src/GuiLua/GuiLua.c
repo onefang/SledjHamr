@@ -204,6 +204,7 @@ static int action(lua_State *L)
   if (wid && strcmp(wid->magic, "Widget") == 0)
   {
 //PD("Setting action : %s\n", action);
+    free(wid->action);
     wid->action = strdup(action);
   }
   return 0;
@@ -302,7 +303,7 @@ static int window(lua_State *L)
   }
 
   win = winFangAdd(parent, 5, 26, w, h, title, name, world);
-  win->module = module;
+  win->module = strdup(module);
   if (gl)
   {
     // If there's no parent, we become the parent.
@@ -418,7 +419,7 @@ PD("GuiLua 3");
 
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "loopWindow",	"Run our windows main loop.",			loopWindow, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "quit",		"Quit, exit, remove thyself.",			quit, 0);
-  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, "userdata", 0); // TODO - closeWindow, "userdata");
+  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "closeWindow",	"Closes a window.",				closeWindow, "userdata", 0);
 
   // A test of the array building stuff.
   push_lua(L, "@ ( { = $ $ % $widget !required } )", skang, THINGASM, skang, "wibble", "It's wibbly!", 1, "'edit', 'The wibblinator:', 1, 1, 10, 50", 1, 0);

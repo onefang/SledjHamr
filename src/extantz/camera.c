@@ -235,6 +235,7 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
 //    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
     evas_3d_node_orientation_set(0.0, 0.0, 0.0, 1.0)
     );
+//  eo_unref(camera);
 
   eo_do(scene->root_node, evas_3d_node_member_add(result));
   eo_do(scene->scene, evas_3d_scene_camera_node_set(result));
