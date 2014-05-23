@@ -11,6 +11,8 @@ static void on_pixels(void *data, Evas_Object *obj);
 int logDom = -1;	// Our logging domain.
 globals ourGlobals;
 static Eina_Strbuf *serverStream;
+static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
+//static char *myName = "onefang rejected";
 
 
 
@@ -20,6 +22,10 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
   PI("Connected to love server.");
   ourGlobals->server = ev->server;
+
+  // Pretend we logged in.
+  strcpy(ourGlobals->uuid, myKey);
+
   if (ourGlobals->LSLGuiMess)  ourGlobals->LSLGuiMess->server = ourGlobals->server;
   if (ourGlobals->purkle)      ourGlobals->purkle->server     = ourGlobals->server;
 

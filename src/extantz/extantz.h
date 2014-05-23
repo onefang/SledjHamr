@@ -235,6 +235,7 @@ typedef struct _globals
   GuiLua	*LSLGuiMess;
 
   Ecore_Con_Server	*server;
+  char			uuid[42];
 
 } globals;
 

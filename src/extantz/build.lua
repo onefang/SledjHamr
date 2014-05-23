@@ -13,7 +13,7 @@ if 'nil' == type(dir) then
   dir = workingDir
 end
 
-CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include -I../GuiLua'
+CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include -I../GuiLua -I../love'
 LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
 libs    = libs    .. ' -lIrrlicht -lephysics -lGL -lbz2 -lGuiLua -lwinFang -lRunnr'
 

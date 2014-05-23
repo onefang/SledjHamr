@@ -1,6 +1,8 @@
 #ifndef _SCENRI_H_
 #define _SCENRI_H_
 
+#include "love.h"
+
 typedef struct _cameraMove
 {
     float	x, y, z;

@@ -1,3 +1,8 @@
+#ifndef _LOVE_H_
+#define _LOVE_H_
+
+
+
 /*
 
 What do we need as an internal world object format?
@@ -73,6 +78,8 @@ love needs
     calling card
 */
 
+#include <Eina.h>
+
 typedef struct _material
 {
   int	face;
@@ -87,8 +94,8 @@ typedef struct _mesh
 {
   char		fileName[PATH_MAX];
   //type
-  Evas_Vec3	pos;
-  Evas_Vec4	rot;
+//  Evas_Vec3	pos;
+//  Evas_Vec4	rot;
   Eina_Inarray	materials;	// Material
   Eina_Inarray	parts;		// Mesh
 } Mesh;
@@ -100,7 +107,7 @@ typedef struct _stuffs
   union
   {
     Mesh	*mesh;
-    script	*script;
+//    script	*script;
     void	*other;
   } details;
 } Stuffs;
@@ -115,8 +122,8 @@ typedef struct _loveStuffs
 typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
-  Evas_3D_Mesh	*mesh;
-  Evas_3D_Node	*mesh_node;
+//  Evas_3D_Mesh	*mesh;
+//  Evas_3D_Node	*mesh_node;
   Eina_Inarray	*materials;	// Evas_3D_Material
   Eina_Inarray	*textures;	// Evas_3D_Texture
 } ExtantzStuffs;
@@ -161,3 +168,5 @@ Extantz client starts up
             changes that bit and stores on disk
             send update nails commands to everyone/thing watching
 */
+
+#endif
