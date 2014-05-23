@@ -1,0 +1,32 @@
+Stuffs =
+{
+  UUID = '5cb927d5-1304-4f1a-9947-308251ef2df0',
+  name = "onefang's test bed",
+  description = 'Just a pretend bed with MLP scripts for testing SledjHamr.',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      fileName = 'cube.lua',
+      materials = {'normal_lego.png'},
+      parts = 
+      {
+        Mesh = 
+        {
+          fileName = 'sonic.md2',
+--          pos = {1.23, 4.56, 789.0},
+--          rot = { , , , ,},
+          materials = {'sonic.png'},
+        },
+        Mesh = 
+        {
+          fileName = 'earth.lua',
+--          pos = {1.23, 4.56, 789.0},
+--          rot = { , , , ,},
+          materials = {'EarthDiffuse.png'},
+        },
+      },
+    },
+  },
+}

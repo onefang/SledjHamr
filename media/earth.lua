@@ -1,0 +1,4 @@
+Shape =
+{
+  kind = 'sphere'
+}
