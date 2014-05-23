@@ -55,14 +55,6 @@ typedef enum
 
 typedef void (*outputToken) (FILE *file, outputMode mode, LSL_Leaf *content);
 
-//#ifndef FALSE
-//typedef enum
-//{
-//    FALSE	= 0,
-//    TRUE	= 1
-//} boolean;
-//#endif
-
 typedef enum
 {
     LSL_NONE		= 0,
@@ -409,7 +401,7 @@ typedef struct
 
 
 boolean compilerSetup(gameGlobals *ourGlobals);
-boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants);
+boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants);
 void burnLeaf(void *data);
 
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);

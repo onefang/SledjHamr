@@ -469,10 +469,12 @@ http://creativecommons.org/licenses/publicdomain
 ===============================================================================
 
 --------------------------------------------------------------------------------
+[Note, luaproc is no longer included, but it's source is still in the git history.]
 
-Note that luaproc has been extensively rewritten by me, but large parts
+Note that luaproc had been extensively rewritten by me, but large parts
 of it still exist in the original form, and the rewritten bits tended to
-stick with the original design.
+stick with the original design.  And now, the entire thing was rewritten
+from scratch as part of Runnr.c
 
 Luaproc is covered by this copyright notice and license -
 

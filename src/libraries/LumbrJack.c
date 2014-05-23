@@ -15,7 +15,7 @@ int HamrTime(char *argv0, void *main, int logDom)
 {
   Eina_Array *path;
   char *env, name[PATH_MAX], cwd[PATH_MAX], temp[PATH_MAX * 2];
-  int i, len = strlen(argv0);
+  int i, len;
 
   if (!eina_init())
   {
@@ -30,6 +30,7 @@ int HamrTime(char *argv0, void *main, int logDom)
   logDom = loggingStartup(name, logDom);
   eina_array_free(path);
 
+  len = strlen(name);
   temp[len] = 0;
   cwd[len]  = 0;
   for (i = 0;  i < len;  i++)
@@ -39,9 +40,7 @@ int HamrTime(char *argv0, void *main, int logDom)
   }
 
   if (!(prefix = eina_prefix_new(argv0, main, temp, cwd, "checkme.txt", PACKAGE_BIN_DIR, PACKAGE_LIB_DIR, PACKAGE_DATA_DIR, PACKAGE_LOCALE_DIR)))
-  {
     PC("Can't find application prefix!");
-  }
 
   PD("%s is installed in %s", name, eina_prefix_get(prefix));
   PD("The binaries are in %s", eina_prefix_bin_get(prefix));
@@ -67,7 +66,7 @@ const char *prefix_get()		{return eina_prefix_get(prefix);}
 const char *prefix_bin_get()		{return eina_prefix_bin_get(prefix);}
 const char *prefix_data_get()		{return eina_prefix_data_get(prefix);}
 const char *prefix_lib_get()		{return eina_prefix_lib_get(prefix);}
-const char *prefix_locale_get()	{return eina_prefix_locale_get(prefix);}
+const char *prefix_locale_get()		{return eina_prefix_locale_get(prefix);}
 
 void pantsOff(int logDom)
 {

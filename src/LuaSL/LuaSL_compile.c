@@ -2170,6 +2170,14 @@ static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
 }
 
+static void _compileCb(LuaCompiler *compiler)
+{
+  free(compiler->luaName);
+  free(compiler->SID);
+  free(compiler->file);
+  free(compiler);
+}
+
 boolean compilerSetup(gameGlobals *ourGlobals)
 {
     int i;
@@ -2184,6 +2192,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     if (tokens)
     {
 	char buf[PATH_MAX];
+	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
@@ -2197,7 +2206,12 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	snprintf(buf, sizeof(buf), "lua -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
 	system(buf);
 	snprintf(buf, sizeof(buf), "%s/constants.lsl", prefix_lib_get());
-	compileLSL(ourGlobals, NULL, "FAKE_SID", buf, TRUE);
+	compiler->file = strdup(buf);
+	compiler->SID = strdup("FAKE_SID");
+	compiler->data = ourGlobals;
+	compiler->cb = _compileCb;
+	if (!compileLSL(compiler, ourGlobals, NULL, "FAKE_SID", buf, TRUE))
+	  _compileCb(compiler);
 
 	return TRUE;
     }
@@ -2207,17 +2221,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     return FALSE;
 }
 
-static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
-{
-    FILE *out = ud;
-    int result = 0;
-
-    if (sz != fwrite(p, 1, sz, out))
-	result = -1;
-    return result;
-}
-
-boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants)
+boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants)
 {
     boolean result = FALSE;
     LuaSL_compiler compiler;
@@ -2348,8 +2352,6 @@ boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID,
 	    // Generate the Lua source code.
 	    if (out)
 	    {
-		lua_State *L;
-		int err;
 		char *ext;
 
 		fprintf(out, "--// Generated code goes here.\n\n");
@@ -2366,49 +2368,14 @@ boolean compileLSL(gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID,
 		fclose(out);
 
 		// Compile the Lua source code.
-		if ((L = luaL_newstate()))
-		{
-		    luaL_openlibs(L);
-		    // This ends up pushing a function onto the stack.  The function is the compiled code.
-		    err = luaL_loadfile(L, luaName);
-		    if (err)
-		    {
-			compiler.script.bugCount++;
-			if (LUA_ERRSYNTAX == err)
-			    PE("Lua syntax error in %s: %s", luaName, lua_tostring(L, -1));
-			else if (LUA_ERRFILE == err)
-			    PE("Lua compile file error in %s: %s", luaName, lua_tostring(L, -1));
-			else if (LUA_ERRMEM == err)
-			    PE("Lua compile memory allocation error in %s: %s", luaName, lua_tostring(L, -1));
-		    }
-		    else
-		    {
-			// Write the compiled code to a file.
-			strcat(luaName, ".out");
-			out = fopen(luaName, "w");
-			if (out)
-			{
-			    err = lua_dump(L, luaWriter, out);
-			    if (err)
-			    {
-				compiler.script.bugCount++;
-				PE("Lua compile file error writing to %s", luaName);
-			    }
-			    fclose(out);
-			}
-			else
-			    PC("Unable to open file %s for writing!", luaName);
-		    }
-		}
-		else
-		    PE("Can't create a new Lua state!");
+		lCompiler->luaName = strdup(luaName);
+		lCompiler->bugCount = compiler.script.bugCount;
+		compileScript(lCompiler);
+		result = TRUE;
 	    }
 	    else
 		PC("Unable to open file %s for writing!", luaName);
 	}
-
-	if (0 == compiler.script.bugCount)
-	    result = TRUE;
     }
 
     if (NULL != compiler.file)

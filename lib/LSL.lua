@@ -199,7 +199,7 @@ function args2string(doType, ...)
 end
 
 function mt.callAndReturn(name, ...)
-  luaproc.sendback(name .. "(" .. args2string(true, ...) .. ")")
+  Runnr.send(nil, name .. "(" .. args2string(true, ...) .. ")")
 end
 
 function mt.callAndWait(name, ...)
@@ -952,8 +952,9 @@ function waitAndProcess(returnWanted)
 
   if returnWanted then Type = "result" end
   while running do
-    local message = luaproc.receive(SID)
+    local message = Runnr.receive()
     if message then
+--print('GOT MESSAGE for  script ' .. scriptName .. ' - "' .. message .. '"')
       -- TODO - should we be discarding return values while paused?  I don't think so, so we need to process those,
       if paused then
 	if "start()" == message then paused = false  end
@@ -977,7 +978,7 @@ function waitAndProcess(returnWanted)
             end
 	    -- Otherwise, just run it and keep looping.
 	    -- TODO - Not sure why I had this here.  "sid" is not set anywhere, and SID would just send it to ourselves.
---	    status, errorMsg = luaproc.send(sid, result1)
+--	    status, errorMsg = Runnr.send(nil, result1)
 --	    if not status then
 --	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 --	    end

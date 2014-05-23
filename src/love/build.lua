@@ -17,5 +17,4 @@ end
 removeFiles(dir, {'../../love', '*.o', '../../media/love.edj'})
 
 runCommand('edje_cc', dir, 'edje_cc ' .. EDJE_FLAGS .. ' love.edc ../../media/love.edj')
-
 compileFiles('../../love', dir, {'love'}, '')

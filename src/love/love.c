@@ -44,7 +44,7 @@ typedef struct _gameGlobals
     boolean		ui;		// Wether we actually start up the UI.
 } gameGlobals;
 
-typedef struct _script
+typedef struct _Lscript
 {
     char		SID[PATH_MAX];
     char		fileName[PATH_MAX];
@@ -52,11 +52,10 @@ typedef struct _script
     float		compileTime;
     int			bugs, warnings;
     boolean		running;
-} script;
+} LoveScript;
 
 
 int logDom = -1;	// Our logging domain.
-//static int CPUs = 4;
 static Eina_Strbuf *LuaSLStream;
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
@@ -145,7 +144,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	    // TODO - We are leaking these, coz we don't know when scripts get deleted in the script server.
 	    //        On the other hand, the main use for this is a temporary hack that sends events to all scripts.
 	    //        So that part will get a rewrite when we make it real later anyway.
-	    script *me = calloc(1, sizeof(script));
+	    LoveScript *me = calloc(1, sizeof(LoveScript));
 
 	    scriptCount++;
 	    gettimeofday(&me->startTime, NULL);
@@ -213,7 +212,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 	ext = index(SID, '.');
 	if (ext)
 	{
-	    script *me;
+	    LoveScript *me;
 
 	    ext[0] = '\0';
 	    command = ext + 1;
@@ -383,7 +382,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		else if (0 == strncmp(command, "llMessageLinked(", 16))
 		{
 		    Eina_Iterator *scripts;
-		    script *me;
+		    LoveScript *me;
 
 		    // TODO - For now, just send it to everyone.
 		    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
@@ -419,7 +418,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		    if (-1 != fd)
 		    {
 			Eina_Iterator *scripts;
-			script *me;
+			LoveScript *me;
 			long len;
 
 			temp = NULL;
@@ -542,7 +541,7 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 	    if (0 == strncmp(command, "events.touch_start(", 19))
 	    {
 	        Eina_Iterator *scripts;
-		script *me;
+		LoveScript *me;
 
 		// TODO - For now, just send it to everyone.
 		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
@@ -557,7 +556,7 @@ static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *
 	    else if (0 == strncmp(command, "events.listen(", 14))
 	    {
 	        Eina_Iterator *scripts;
-		script *me;
+		LoveScript *me;
 
 		// TODO - For now, just send it to everyone.
 		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
@@ -586,7 +585,7 @@ static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev
     {
 	Eina_List const *clients;
 
-	// This is only really for testing, normally it just runs 24/7, or until told to.
+	// This is only really for testing, normally it just runs 24/7, or until told not to.
 	clients = ecore_con_server_clients_get(ourGlobals->server);
         if (0 == eina_list_count(clients))
         {
@@ -606,7 +605,6 @@ static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev
 
 int main(int argc, char **argv)
 {
-    /* put here any init specific to this app like parsing args etc. */
     gameGlobals ourGlobals;
     char *programName = argv[0];
     boolean badArgs = FALSE;

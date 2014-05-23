@@ -669,7 +669,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
-  // Try to connect to the love server we started before.
+  // Try to connect to a local love server.
   serverStream = eina_strbuf_new();
   reachOut("127.0.0.1", 8211 + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
 

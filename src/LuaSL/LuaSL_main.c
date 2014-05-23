@@ -1,31 +1,27 @@
 
 #include "LuaSL.h"
-#include "Runnr.h"
 #include "SledjHamr.h"
 
 
 int logDom = -1;	// Our logging domain.
-static int CPUs = 4;
 static Eina_Strbuf *clientStream;
 
 
 static Eina_Bool _sleep_timer_cb(void *data)
 {
     script *script = data;
-    gameGlobals *ourGlobals = script->game;
 
 //    PD("Waking up %s", script->name);
-    sendToChannel(ourGlobals, script->SID, "return 0.0");
+    send2script(script->SID, "return 0.0");
     return ECORE_CALLBACK_CANCEL;
 }
 
 static Eina_Bool _timer_timer_cb(void *data)
 {
     script *script = data;
-    gameGlobals *ourGlobals = script->game;
 
-    PD("Timer for %s", script->name);
-    sendToChannel(ourGlobals, script->SID, "events.timer()");
+//    PD("Timer for %s", script->name);
+    send2script(script->SID, "events.timer()");
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -44,88 +40,63 @@ static script *findThem(gameGlobals *ourGlobals, const char *base, const char *t
     return eina_hash_find(ourGlobals->names, name);
 }
 
-static void resetScript(script *victim)
+void send2server(script *me, const char *message)
 {
-  gameGlobals *ourGlobals = victim->game;
-  script *me;
-  char buf[PATH_MAX];
+    gameGlobals *ourGlobals = me->data;
 
-//  PD("RESETTING %s", victim->name);
-  sendToChannel(ourGlobals, victim->SID, "quit()");
+//printf("GOT MESSAGE from script %s - '%s'\n", me->name, message);
 
-  eina_hash_del(ourGlobals->scripts, victim->SID, NULL);
-  eina_hash_del(ourGlobals->names, victim->fileName, NULL);
-
-  // The old one will eventually die, create a new one.
-  me = calloc(1, sizeof(script));
-  gettimeofday(&me->startTime, NULL);
-  strncpy(me->SID, victim->SID, sizeof(me->SID));
-  strncpy(me->fileName, victim->fileName, sizeof(me->fileName));
-  me->name = &me->fileName[strlen(prefix_data_get())];
-  me->game = ourGlobals;
-  me->client = victim->client;
-  eina_hash_add(ourGlobals->scripts, me->SID, me);
-  eina_hash_add(ourGlobals->names, me->fileName, me);
-  sprintf(buf, "%s.lua.out", me->fileName);
-  newProc(buf, TRUE, me);
-}
-
-void scriptSendBack(void * data)
-{
-    scriptMessage *message = data;
-    gameGlobals *ourGlobals = message->script->game;
-
-    if (!message->script)
+    if (0 == strncmp(message, "llSleep(", 8))
+	ecore_timer_add(atof(&(message)[8]), _sleep_timer_cb, me);
+    else if (0 == strncmp(message, "llResetTime(", 12))
     {
-      PE("scriptSendBack script is NULL");
-      return;
+	takeScript(me);
+	gettimeofday(&me->startTime, NULL);
+	releaseScript(me);
     }
-
-    if (0 == strncmp(message->message, "llSleep(", 8))
-	ecore_timer_add(atof(&(message->message)[8]), _sleep_timer_cb, message->script);
-    else if (0 == strncmp(message->message, "llResetTime(", 12))
-    {
-	gettimeofday(&message->script->startTime, NULL);
-    }
-    else if (0 == strncmp(message->message, "llGetTime(", 10))
+    else if (0 == strncmp(message, "llGetTime(", 10))
     {
 	struct timeval now;
-	float time = timeDiff(&now, &message->script->startTime);
+	float time = timeDiff(&now, &me->startTime);
 	char result[128];
 
 	snprintf(result, sizeof(result), "return %f", time);
-	sendToChannel(ourGlobals, message->script->SID, result);
+	send2script(me->SID, result);
     }
-    else if (0 == strncmp(message->message, "llGetAndResetTime(", 18))
+    else if (0 == strncmp(message, "llGetAndResetTime(", 18))
     {
 	struct timeval now;
-	float time = timeDiff(&now, &message->script->startTime);
+	float time = timeDiff(&now, &me->startTime);
 	char result[128];
 
+	takeScript(me);
 	// Reset it before doing anything else once the result is known.
-	gettimeofday(&message->script->startTime, NULL);
+	gettimeofday(&me->startTime, NULL);
+	releaseScript(me);
 	snprintf(result, sizeof(result), "return %f", time);
-	sendToChannel(ourGlobals, message->script->SID, result);
+	send2script(me->SID, result);
     }
-    else if (0 == strncmp(message->message, "llSetTimerEvent(", 16))
+    else if (0 == strncmp(message, "llSetTimerEvent(", 16))
     {
-	message->script->timerTime = atof(&(message->message)[16]);
-	if (0.0 == message->script->timerTime)
+	takeScript(me);
+	me->timerTime = atof(&(message)[16]);
+	if (0.0 == me->timerTime)
 	{
-	    if (message->script->timer)
-		ecore_timer_del(message->script->timer);
-	    message->script->timer = NULL;
+	    if (me->timer)
+		ecore_timer_del(me->timer);
+	    me->timer = NULL;
 	}
 	else
-	    message->script->timer = ecore_timer_add(message->script->timerTime, _timer_timer_cb, message->script);
+	    me->timer = ecore_timer_add(me->timerTime, _timer_timer_cb, me);
+	releaseScript(me);
     }
-    else if (0 == strncmp(message->message, "llSetScriptState(", 17))
+    else if (0 == strncmp(message, "llSetScriptState(", 17))
     {
 	script *them;
 
-	if ((them = findThem(ourGlobals, message->script->fileName, &(message->message[18]))))
+	if ((them = findThem(ourGlobals, me->fileName, &(message[18]))))
 	{
-	    char *temp = rindex(&(message->message[18]), ',');
+	    char *temp = rindex(&(message[18]), ',');
 
 	    if (temp)
 	    {
@@ -133,9 +104,9 @@ void scriptSendBack(void * data)
 		while (isspace(*temp))
 		    temp++;
 		if ('1' == *temp)
-		    sendToChannel(ourGlobals, them->SID, "start()");
+		    send2script(them->SID, "start()");
 		else
-		    sendToChannel(ourGlobals, them->SID, "stop()");
+		    send2script(them->SID, "stop()");
 //		PD("Stopped %s", them->name);
 	    }
 	    else
@@ -143,31 +114,59 @@ void scriptSendBack(void * data)
 	}
 	else
 	{
-	    char *temp = rindex(&(message->message[18]), '"');
+	    char *temp = rindex(&(message[18]), '"');
 
 	    if (temp)
 		*temp = '\0';
-	    PE("Can't stop script, can't find %s", &(message->message[18]));
+	    PE("Can't stop script, can't find %s", &(message[18]));
 	}
     }
-    else if (0 == strncmp(message->message, "llResetOtherScript(", 19))
+    else if (0 == strncmp(message, "llResetOtherScript(", 19))
     {
 	script *them;
 
-	if ((them = findThem(ourGlobals, message->script->fileName, &(message->message[20]))))
+	if ((them = findThem(ourGlobals, me->fileName, &(message[20]))))
+	{
+	    PD("RESETTING OTHER %s", them->name);
 	    resetScript(them);
+	}
     }
-    else if (0 == strncmp(message->message, "llResetScript(", 14))
-	resetScript(message->script);
+    else if (0 == strncmp(message, "llResetScript(", 14))
+    {
+	PD("RESETTING %s", me->name);
+	resetScript(me);
+    }
     else
-	sendBack(message->script->client, message->script->SID, message->message);
-    free(message);
+    {
+	takeScript(me);
+	sendBack(me->client, me->SID, message);
+	releaseScript(me);
+    }
 }
 
 static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
 {
     ecore_con_client_timeout_set(ev->client, 0);
     return ECORE_CALLBACK_RENEW;
+}
+
+static void _compileCb(LuaCompiler *compiler)
+{
+  if (0 == compiler->bugCount)
+  {
+    gameGlobals *ourGlobals = compiler->data;
+    script *me = scriptAdd(compiler->file, compiler->SID, send2server, ourGlobals);
+
+    me->client = compiler->client;
+    eina_hash_add(ourGlobals->names, me->fileName, me);
+    sendBack(compiler->client, compiler->SID, "compiled(true)");
+  }
+  else
+    sendBack(compiler->client, compiler->SID, "compiled(false)");
+  free(compiler->luaName);
+  free(compiler->SID);
+  free(compiler->file);
+  free(compiler);
 }
 
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
@@ -197,6 +196,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		char *temp;
 		char *file;
 		char *name;
+		LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
 
 		strcpy(buf, &command[8]);
 		temp = buf;
@@ -207,34 +207,27 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 
 		name = &file[strlen(prefix_data_get())];
 		PD("Compiling %s, %s.", SID, name);
-		if (compileLSL(ourGlobals, ev->client, SID, file, FALSE))
+		compiler->file = strdup(file);
+		compiler->SID = strdup(SID);
+		compiler->client = ev->client;
+		compiler->data = ourGlobals;
+		compiler->cb = _compileCb;
+		if (!compileLSL(compiler, ourGlobals, ev->client, SID, file, FALSE))
 		{
-		    script *me = calloc(1, sizeof(script));
-
-		    gettimeofday(&me->startTime, NULL);
-		    strncpy(me->SID, SID, sizeof(me->SID));
-		    strncpy(me->fileName, file, sizeof(me->fileName));
-		    me->name = &me->fileName[strlen(prefix_data_get())];
-		    me->game = ourGlobals;
-		    me->client = ev->client;
-		    eina_hash_add(ourGlobals->scripts, me->SID, me);
-		    eina_hash_add(ourGlobals->names, me->fileName, me);
-		    sendBack(ev->client, SID, "compiled(true)");
+		  compiler->bugCount++;
+		  PE("Compile of %s failed in a mysterious way.", file);
+		  _compileCb(compiler);
 		}
-		else
-		    sendBack(ev->client, SID, "compiled(false)");
 	    }
 	    else if (0 == strcmp(command, "run()"))
 	    {
 		script *me;
-		char buf[PATH_MAX];
 
-		me = eina_hash_find(ourGlobals->scripts, SID);
+		me = getScript(SID);
 		if (me)
 		{
-		    sprintf(buf, "%s.lua.out", me->fileName);
-		    gettimeofday(&me->startTime, NULL);
-		    newProc(buf, TRUE, me);
+		    runScript(me);
+		    releaseScript(me);
 		}
 	    }
 	    else if (0 == strcmp(command, "exit()"))
@@ -243,13 +236,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		ecore_main_loop_quit();
 	    }
 	    else
-	    {
-		const char *status = NULL;
-
-		status = sendToChannel(ourGlobals, SID, command);
-		if (status)
-		    PE("Error sending command %s to script %s : %s", command, SID, status);
-	    }
+		send2script(SID, command);
 	}
 
 	// Get the next blob to check it.
@@ -272,6 +259,12 @@ static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_De
     return ECORE_CALLBACK_RENEW;
 }
 
+//static Eina_Bool _statusTimer(void *data)
+//{
+//  printScriptsStatus();
+//  return ECORE_CALLBACK_RENEW;
+//}
+
 int main(int argc, char **argv)
 {
   gameGlobals ourGlobals;
@@ -284,7 +277,6 @@ int main(int argc, char **argv)
     if (eina_init())
     {
 	logDom = HamrTime(argv[0], main, logDom);
-	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 	ourGlobals.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_init())
 	{
@@ -292,7 +284,7 @@ int main(int argc, char **argv)
 	    {
 		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 		{
-		    int i;
+//		    int i;
 		    Eina_Iterator *scripts;
 		    script *me;
 
@@ -307,29 +299,20 @@ int main(int argc, char **argv)
 
 		    result = 0;
 		    compilerSetup(&ourGlobals);
-		    luaprocInit();
-		    for (i = 0; i < CPUs; i++)
-		    {
-			if ( sched_create_worker( ) != LUAPROC_SCHED_OK )
-			PE("Error creating luaproc worker thread.");
-		    }
+
+//		    ecore_timer_add(3.0, _statusTimer, &ourGlobals);
+
 		    ecore_main_loop_begin();
 		    PD("Fell out of the main loop.");
 
-		    scripts = eina_hash_iterator_data_new(ourGlobals.scripts);
+		    scripts = eina_hash_iterator_data_new(ourGlobals.names);
 		    while(eina_iterator_next(scripts, (void **) &me))
 		    {
-			const char *status = NULL;
-
-			status = sendToChannel(&ourGlobals, me->SID, "quit()");
-			if (status)
-			    PE("Error sending command quit() to script %s : %s", me->SID, status);
+			if (me->SID[0])
+			    send2script(me->SID, "quit()");
 		    }
 
 		    PD("Finished quitting scripts.");
-		    // TODO - This is what hangs the system, should change from raw pthreads to ecore threads.
-		    //        Or perhaps just run the main loop for a bit longer so all the scripts can quit?
-		    sched_join_workerthreads();
 		}
 		else
 		    PC("Failed to add server!");
@@ -424,33 +407,6 @@ _elua_custom_panic(lua_State *L)                   // Stack usage [-0, +0, m]
    return 0;
 }
 
-static void
-_edje_lua2_error_full(const char *file, const char *fnc, int line,
-                      lua_State *L, int err_code)            // Stack usage [-0, +0, m]
-{
-   const char *err_type;
-
-   switch (err_code)
-     {
-     case LUA_ERRRUN:
-        err_type = "runtime";
-        break;
-     case LUA_ERRSYNTAX:
-        err_type = "syntax";
-        break;
-     case LUA_ERRMEM:
-        err_type = "memory allocation";
-        break;
-     case LUA_ERRERR:
-        err_type = "error handler";
-        break;
-     default:
-        err_type = "unknown";
-        break;
-     }
-   printf("Lua %s error: %s\n", err_type, lua_tostring(L, -1));  // Stack usage [-0, +0, m]
-}
-
 static int errFunc(lua_State *L)
 {
     int i = 0;
@@ -510,7 +466,8 @@ void runLuaFile(gameGlobals *ourGlobals, const char *filename)
  * Watchdog thread.
  *
  *   It's easy enough to have a watchdog thread wake up every now and then to check if any given Lua state has been hogging it's CPU for too long.
- *   The hard part is forcing Lua states to yield cleanly, without slowing performance too much.
+ *   The hard part is forcing Lua states to yield cleanly, without slowing performance too much.  On the other hand, it might be valid to just 
+ *   kill CPU hogs and tell the user.
  *
  * Identifying scripts. - OpenSim/Region/ScriptEngine/Interfaces/IScriptInstance.cs
  *
@@ -650,7 +607,8 @@ void runLuaFile(gameGlobals *ourGlobals, const char *filename)
  *     Oops, names can have directory slashes in them.  lol
  *   On the other hand, sim objects CAN have the same name.
  *
- *   So we got sim directories, with an objects directory inside it, with object directories inside that.  The object directories have object files in them.  This is all like the test setup that is here.
+ *   So we got sim directories, with an objects directory inside it, with object directories inside that.  The object directories have object files in them.
+ *   This is all like the test setup that is here.
  *   We need metadata.  Sim metadata, object metadata, and object contents metadata.  That can be done with a "foo.omg" file at each level.
  *     sim/index.omg - the list of object name.UUIDs, their X,Y,Z location, size, and rotation.
  *     sim/objects/objectName_UUID/index.omg - the list of contents names, item UUIDs, asset UUIDs, and types.
@@ -763,7 +721,7 @@ void runLuaFile(gameGlobals *ourGlobals, const char *filename)
  *
  * Serialise the script state, send it somewhere.
  *
- *   Lua can generally serialise itself as as a string of code to be executed at the destination.  There might be some C side state that needs to be take care of as well.  We shall see.
+ *   Lua can generally serialise itself as a string of code to be executed at the destination.  There might be some C side state that needs to be take care of as well.  We shall see.
  *
  * Email, HTTP, XML-RPC?
  *
