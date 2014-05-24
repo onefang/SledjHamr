@@ -86,23 +86,23 @@ love needs
 
 typedef struct _vec4
 {
-    float   x;
-    float   y;
-    float   z;
-    float   w;
+  float   x;
+  float   y;
+  float   z;
+  float   w;
 } vec4;
 
 typedef struct _vec3
 {
-    float   x;
-    float   y;
-    float   z;
+  float   x;
+  float   y;
+  float   z;
 } vec3;
 
 typedef struct _vec2
 {
-    float   x;
-    float   y;
+  float   x;
+  float   y;
 } vec2;
 
 
