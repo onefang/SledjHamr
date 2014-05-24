@@ -14,7 +14,7 @@ if 'nil' == type(dir) then
 end
 
 
-removeFiles(dir, {'../../LuaSL', '*.o', '*.output', '*.backup', 'LuaSL_lexer.h', 'LuaSL_lexer.c', 'LuaSL_lemon_yaccer.h', 'LuaSL_lemon_yaccer.c', 'LuaSL_lemon_yaccer.out'})
+removeFiles(dir, {'*.output', '*.backup', 'LuaSL_lexer.h', 'LuaSL_lexer.c', 'LuaSL_lemon_yaccer.h', 'LuaSL_lemon_yaccer.c', 'LuaSL_lemon_yaccer.out'})
 
 -- Run lemon first, flex depends on it to define the symbol values.
 runCommand('lemon',   dir, '../../libraries/lemon/lemon -s -T../../libraries/lemon/lempar.c LuaSL_lemon_yaccer.y')

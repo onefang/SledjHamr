@@ -16,7 +16,6 @@ pkgConfig = function (what, name)
 end
 
 removeFiles = function (dir, files)
-  print('clean')
   for i, v in ipairs(files) do
     os.execute('rm -f ' .. dir .. '/' .. v)
   end
@@ -30,6 +29,10 @@ end
 compileFiles = function (name, dir, files, extras)
   local objects = ''
   print('\n' .. name)
+  removeFiles(dir, {name})
+  for i, v in ipairs(files) do
+    removeFiles(dir, {v .. '.o'})
+  end
   for i, v in ipairs(files) do
     print('  ' .. v)
     os.execute('cd ' .. dir .. '; gcc ' .. CFLAGS .. ' -c -o ' .. v .. '.o ' .. v .. '.c')
@@ -81,7 +84,6 @@ EDJE_FLAGS = '-id ' .. baseDir .. '/media -fd ' .. baseDir .. '/media'
 if 'nil' == type(args) then
   -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
   print('_______________ BUILDING lemon _______________')
-  removeFiles('libraries/lemon', {'*.o', 'lemon'})
   compileFiles('lemon', 'libraries/lemon', {'lemon'}, '')
   print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.

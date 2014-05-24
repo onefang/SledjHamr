@@ -17,8 +17,7 @@ CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/inc
 LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
 libs    = libs    .. ' -lIrrlicht -lephysics -lGL -lbz2 -lGuiLua'
 
-removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', 'gears.o', 'ephysics_demo.o', 'Evas_3D_demo.o', '../../media/extantz.edj'})
-removeFiles(dir, {'../../extantz', 'camera.o', 'files.o', 'scenri.o', 'woMan.o'})
+removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', '../../media/extantz.edj'})
 
 runCommand('edje_cc',		dir, 'edje_cc ' .. EDJE_FLAGS .. ' extantz.edc ../../media/extantz.edj')
 runCommand('Irrlicht files',	dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c crappisspuke.cpp -o crappisspuke.o ' .. LDFLAGS)
