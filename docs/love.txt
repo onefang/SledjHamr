@@ -65,3 +65,187 @@ pump in the love server.  Lspace just needs read access, and just
 serves the current state of the world.  Love server persists to disk
 when it's ready to, though the shared memory can just be memory mapped
 files.
+
+
+Thoughts about directory structure.
+========================================
+
+A major goal is to have the disk structure of a sim (and inventory) be
+decently human readable.  The assets should be stored as normal files of
+the appropriate type, so that they can be edited with normal editing
+software like blender, gimp, a text editor, etc.  Oter goals include not
+duplicating assets, and making it easy to move assets around.
+
+Names.
+------
+
+A major LL created problem is that in world objects can have the same
+name, though stuff in an objects inventory is forced to have unique
+names by automatically adding numbers to the names.  In inventory you
+can have stuff with the same name to.  The same named objects don't have
+to be the same object, they can be completely different.  A simple
+object name to file name matching, with directories for contents, just
+wont work.  Need to munge the names anyway.
+
+All name munging should produce names that are compatible with various
+OS file systems, compatible with URLs, add "_123" numbers at the end for
+duplicate names in the same directory, and auto add a file extension if
+one is missing.  Probably should check the file type if there IS a file
+extension.
+
+Links and URLs.
+---------------
+
+Any asset file could be a stuffs.lnk file, which holds a relative path
+name or full URL pointing to the real asset.  An external lspace server
+would return the .omg file when the stuffs URL is requested, or an
+actual asset file when those are requested.
+
+Would have to do copy on write for editing and other state changes, not
+including script state changes.
+
+Probably need to store other info in the .lnk file if it's a URL, SHA-1
+of the original file, other web cache info.  Which starts to encroach on
+web proxy / cache territory, which we may not want to do, since we want
+to use real ones instead of crappy LL cache.
+
+Actually, file names / URLs in .omg files would mostly be relative to
+the file name / URL of the sim, and all the way down, so relative to the
+directory things are in.  It's up to the client to keep track of where
+they are and build appropriate full URL / full path file names.
+
+UUIDS.
+------
+
+Original LL UUIDs are the usual 36 byte string representing 32 lower
+case hex characters and some dashes, encoding a 128 bit number.  I was
+inspired by git using SHA-1 hashes for content addressable assets. 
+SHA-1 hashes are 40 character hex codes representing 160 bit numbers
+that are calculated based on the content.  So the same content will give
+the same SHA-1 hash.  Git has proved that you only need the first digits
+of the SHA-1 hash to ensure uniqueness, so it's feasable to use only the
+first 128 bits of SHA-1 hashes to squeeze it into a UUID for the
+purposes of uniquely identifying assets.  Precisely what git does.  This
+means it could be backwards compatible with LL's use of UUIDs.
+
+Since the SHA-1 code of identical files is the same, we could use this
+to reduce duplicated large assets that never change, like textures and
+sounds.  This will be a big win.
+
+I think we can get away with not storing SHA-1 hashes permanently, just
+use them for in memory references, but cache them to disk separately. 
+The caches can be recreated at any time, since the SHA-1 hashes can be
+calculated based on the data in the assets. So no UUIDs stored in .omg
+files, just relative file / URL friendly names.  The UUID / SHA-1 hashes
+are mostly for keeping in memory as keys to stuff, coz they can shrink
+down to a long long 128 bit integer.
+
+Each asset file, whether texture, script, mesh, text file, etc, comes
+with a matching .sha1 file that holds the SHA-1 hash of that file.  .lnk
+files get hashed to, so that each copy of a linked stuffs gets it's own
+SHA-1 hash, but in this case the "content" is the relative path name.
+The .sha1 files of the real asset .lnk files point to can be found in
+the same place the real asset file is.
+
+There will be a .sha1 directory full of files with the SHA-1 hashes as
+part of the name, and the rest being similar to a .lnk file, a path to
+the asset or .lnk file.  Would save love server needing to keep that all
+in memory all the time.
+
+If the file system date stamp for the asset file is later than the one
+for the .sha1 file, then someone edited the file, recreate the .sha1
+files.
+
+All the SHA-1 hashes can be recreated at any time, using file system
+date stamps to tell if one is stale.  They are only used internally to a
+running system, to pass small identifiers around, and to fake LL UUIDs
+for LSL scripts.  When a SHA-1 hash is calculated for a new asset, it
+gets stored in the .sha1, but if it already exists in .sha1, then the
+asset is replaced by that sha1.lnk file, thus automatically
+deduplicating assets.
+
+On disk structure.
+------------------
+
+"some sim name" -> some%20sim%20name/index.omg
+  list of stuffs rezzed in the sim
+    stuffs position, orientation, and size
+    relative file / URL name pointing to the stuffs
+    no need for the in world name, those interested in that will likely grab the stuffs.omg file anyway
+
+  "a stuffs" -> a%20stuffs.omg
+    in world name, description
+      list of stuffs similar to the sim index.omg, only this is for the various meshes that make up this stuffs.
+        stuffs position, orientation, and size
+        relative file / URL name pointing to the mesh and textures
+        extra info for each material
+
+    a%20stuffs/ directory
+      files that are the contents of this stuffs
+      could be .lnk files
+      .sha1 files
+
+    a%20stuffs/index.omg
+      used to be a list of content file names, type, and UUID
+      file names are right there in the directory
+      UUID ala SHA-1 can now be calculated based on those files
+        and stored in a asset.sha1 file
+      type can use the magic/file/MIME system to identify file types
+    can get rid of this file, though maybe have it in a .types directory,
+    coz we would want to cache the file type
+    or just use a poor mans magic/file/MIME thingy based on file extension,
+      since we only have a small number of file types
+      note cards should have a .txt, scripts a .lsl or .lua
+
+People could even be free to use their own organising directory
+structure.  A directory for ground level, and one for each sky box for
+instance.  Relative paths inside .omg files sorts that all out.
+
+A sims index.omg file might be constantly updated for busy sims.  Could
+generate it on the fly by the lspace server, based on the actual
+contents of the sim directory.  Alternative lspace servers could just
+use a CMS system for all of this anyway.  They would still use the same
+structure for URLs and .omg files.
+
+Avatars.
+--------
+
+Storing avatars in this way isn't such a good idea?  Avatars could have
+their own avatar.omg dealing with shape, skin, clothes, attachments,
+etc.  But instead of a client asking for a list, avatar arrivals and
+departures are driven by love.  Though try to keep avatars as "just
+ordinary object, but with a person controlling it".  Still, they move
+around a lot.
+
+Avatar.omg would live on the users hard drive, but sent to the love
+server on login, and after any change.
+
+Misc.
+-----
+
+Right now I'm using Lua style .omg files, but eet would be a better
+choice I think.  Saves having to write a Lua table to C structure
+system, which eet already has, sorta.  Lua tables are at least more
+readable while I consider the design, but likely use eet instead when I
+have to write code to read the suckers.  .omg files are managed by the
+love server, so fiddling with them is an expert thing anyway.
+
+Should have a tool to validate a sims files and recreate te caches.
+
+Remaining issues.
+-----------------
+
+Owner / group UUID might be better dealt with elsewhere?  Coz links. 
+Also, we wont replicate the LL user / group stuff exactly, but morph
+into more standardised variations.  Jabber users, jabber group rosters,
+OS users, web site users, etc.  So just provide an abstraction, and an
+example or two.
+
+The asset files, plus things like compiled script binaries and temporaries
+  might be better to move compiled scripts and generated Lua source to the LuaSL server's own private store?
+  LuaSL needs to assign UUIDs to compiled script binaries, so it knows which running script is which
+    coz there might be lots of copies of scripts
+    on the other hand, each copy is uniquely named inside some objects contents,
+    even if it's a link,
+    so the UUID of the stuffs plus the UUID within the stuffs contents, for this copy / link of the script should suffice?
+
