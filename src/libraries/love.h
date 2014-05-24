@@ -145,15 +145,6 @@ typedef struct _loveStuffs
   Eina_Inarray	contents;	// Stuffs
 } LoveStuffs;
 
-typedef struct _extantzStuffs
-{
-  Stuffs	stuffs;
-//  Evas_3D_Mesh	*mesh;
-//  Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
-  Eina_Inarray	*materials;	// Evas_3D_Material
-  Eina_Inarray	*textures;	// Evas_3D_Texture
-} ExtantzStuffs;
-
 
 /* Data flow
 

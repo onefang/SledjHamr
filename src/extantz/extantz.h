@@ -163,6 +163,15 @@ typedef struct _Scene_Data
   Evas_Object_Event_Cb clickCb;
 } Scene_Data;
 
+typedef struct _extantzStuffs
+{
+  Stuffs	stuffs;
+  Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
+  Eina_Inarray	*mesh;		// Evas_3D_Mesh
+  Eina_Inarray	*materials;	// Evas_3D_Material
+  Eina_Inarray	*textures;	// Evas_3D_Texture
+} ExtantzStuffs;
+
 // Elm GL view related data here.
 typedef struct _GLData
 {
