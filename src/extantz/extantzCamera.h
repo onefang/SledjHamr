@@ -5,7 +5,6 @@
 #ifndef __EXTANTZ_CAMERA_H_INCLUDED__
 #define __EXTANTZ_CAMERA_H_INCLUDED__
 
-
 #ifdef __cplusplus
 #include <ISceneNodeAnimator.h>
 #include <vector2d.h>
@@ -13,7 +12,6 @@
 #include <SKeyMap.h>
 #include <irrArray.h>
 #include <ICameraSceneNode.h>
-#include "scenri.h"
 
 using namespace irr;
 using namespace scene;

@@ -3,6 +3,7 @@
 
 #include "love.h"
 
+
 typedef struct _cameraMove
 {
     float	x, y, z;
@@ -10,27 +11,6 @@ typedef struct _cameraMove
     float	jump;
     float	JumpSpeed, RotateSpeed, MoveSpeed;
 } cameraMove;
-
-typedef struct _vec4
-{
-    float   x;
-    float   y;
-    float   z;
-    float   w;
-} vec4;
-
-typedef struct _vec3
-{
-    float   x;
-    float   y;
-    float   z;
-} vec3;
-
-typedef struct _vec2
-{
-    float   x;
-    float   y;
-} vec2;
 
 typedef struct _vertex
 {

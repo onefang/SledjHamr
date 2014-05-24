@@ -11,7 +11,6 @@ http://lua-users.org/lists/lua-l/2008-01/msg00671.html
 
 
 #include "LumbrJack.h"
-#include "Runnr.h"
 #include "GuiLua.h"
 
 

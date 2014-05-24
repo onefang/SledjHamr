@@ -78,7 +78,33 @@ love needs
     calling card
 */
 
-#include <Eina.h>
+#include "evas_macros.h"
+#include "evas_3d_utils.h"	// TODO - Hopefully I can convince the authors to make this public.
+
+#include "Runnr.h"
+
+
+typedef struct _vec4
+{
+    float   x;
+    float   y;
+    float   z;
+    float   w;
+} vec4;
+
+typedef struct _vec3
+{
+    float   x;
+    float   y;
+    float   z;
+} vec3;
+
+typedef struct _vec2
+{
+    float   x;
+    float   y;
+} vec2;
+
 
 typedef struct _material
 {
@@ -94,8 +120,8 @@ typedef struct _mesh
 {
   char		fileName[PATH_MAX];
   //type
-//  Evas_Vec3	pos;
-//  Evas_Vec4	rot;
+  vec3		pos;
+  vec4		rot;
   Eina_Inarray	materials;	// Material
   Eina_Inarray	parts;		// Mesh
 } Mesh;
@@ -107,7 +133,7 @@ typedef struct _stuffs
   union
   {
     Mesh	*mesh;
-//    script	*script;
+    script	*scrip;	// Not a typo, C++ is fussy about reusing names like this.
     void	*other;
   } details;
 } Stuffs;
@@ -123,7 +149,7 @@ typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
 //  Evas_3D_Mesh	*mesh;
-//  Evas_3D_Node	*mesh_node;
+//  Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
   Eina_Inarray	*materials;	// Evas_3D_Material
   Eina_Inarray	*textures;	// Evas_3D_Texture
 } ExtantzStuffs;

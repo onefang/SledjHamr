@@ -142,8 +142,8 @@ and ordinary elementary widgets.  Proper introspection can come later.
 */
 
 
+#include "LumbrJack.h"
 #include "GuiLua.h"
-#include "Runnr.h"
 
 
 const char	*glName = "ourGuiLua";

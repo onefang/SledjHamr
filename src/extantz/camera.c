@@ -1,6 +1,5 @@
 #include "extantz.h"
 
-#include "evas_3d_utils.h"
 
 static inline void evas_euler_to_quaternion(Evas_Vec4 *out, Evas_Vec3 *in)
 {

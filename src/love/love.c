@@ -4,9 +4,8 @@ Dedicated to my girl Boots, coz she means the world to me.
 
 */
 
-#include <Eet.h>
-#include <Ecore.h>
-#include <Ecore_Con.h>
+#include "LumbrJack.h"		// Have to include this first, to turn on the Eo and beta API stuff.
+
 #include <Ecore_Evas.h>
 #include <Ecore_File.h>
 #include <Edje.h>
@@ -16,8 +15,6 @@ Dedicated to my girl Boots, coz she means the world to me.
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "LumbrJack.h"
-#include "Runnr.h"
 #include "SledjHamr.h"
 #include "love.h"
 

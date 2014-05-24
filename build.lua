@@ -69,17 +69,11 @@ CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
 CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eo')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'eet')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-con')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-evas')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'ecore-file')
-CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'edje')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
-LDFLAGS = '-L ' .. baseDir .. '/lib ' .. pkgConfig('libs-only-L', 'luajit') .. ' -L /usr/lib -L /lib'
-libs = '-lLumbrJack -lRunnr -lSledjHamr ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lpthread -lm -Wl,-rpath,' .. baseDir .. '/lib'
+LDFLAGS = '-L ' .. baseDir .. '/lib ' .. pkgConfig('libs-only-L', 'luajit')
+libs = '-lLumbrJack -lRunnr -lSledjHamr -lwinFang ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lm -Wl,-rpath,' .. baseDir .. '/lib'
 LFLAGS = '-d'
 EDJE_FLAGS = '-id ' .. baseDir .. '/media -fd ' .. baseDir .. '/media'
 

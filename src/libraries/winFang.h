@@ -2,9 +2,6 @@
 #define _WINFANG_H_
 
 
-#include <Eo.h>
-#include <Eina.h>
-#include <Evas.h>
 #include <Elementary.h>
 #include <EPhysics.h>
 

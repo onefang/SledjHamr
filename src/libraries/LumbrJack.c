@@ -3,8 +3,8 @@
 */
 
 
-#include "LumbrJack.h"
 #include <unistd.h>
+#include "LumbrJack.h"
 
 
 static char dateTime[DATE_TIME_LEN];

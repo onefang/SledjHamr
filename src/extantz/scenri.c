@@ -1,5 +1,4 @@
 #include "extantz.h"
-#include "scenri.h"
 
 static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {

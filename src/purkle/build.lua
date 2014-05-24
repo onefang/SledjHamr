@@ -15,7 +15,7 @@ end
 
 CFLAGS  = CFLAGS  .. ' -I../GuiLua'
 LDFLAGS = '-L ' .. dir .. ' ' .. LDFLAGS
-libs    = libs    .. ' -lGuiLua -lwinFang -lRunnr'
+libs    = libs    .. ' -lGuiLua'
 
 removeFiles(dir, {lib_d .. '/purkle.so'})
 

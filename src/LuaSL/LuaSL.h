@@ -5,16 +5,7 @@
 #endif
 
 #include <Eet.h>
-#include <Ecore.h>
-#include <Ecore_Con.h>
 #include <Ecore_File.h>
-#include <stdio.h>
-#include <ctype.h>
-
-#include <lua.h>
-#include <luajit.h>
-#include <lualib.h>
-#include <lauxlib.h>
 
 typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h can use it.
 

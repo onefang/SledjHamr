@@ -1,5 +1,4 @@
 #include "extantz.h"
-#include "scenri.h"
 
 
 static const float cube_vertices[] =

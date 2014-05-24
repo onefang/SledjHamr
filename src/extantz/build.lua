@@ -13,9 +13,9 @@ if 'nil' == type(dir) then
   dir = workingDir
 end
 
-CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include -I../GuiLua -I../love'
+CFLAGS  = CFLAGS  .. ' -I../../libraries/irrlicht-1.8.1/include -I/usr/X11R6/include -I../GuiLua'
 LDFLAGS = LDFLAGS .. ' -L../../libraries/irrlicht-1.8.1/lib/Linux'
-libs    = libs    .. ' -lIrrlicht -lephysics -lGL -lbz2 -lGuiLua -lwinFang -lRunnr'
+libs    = libs    .. ' -lIrrlicht -lephysics -lGL -lbz2 -lGuiLua'
 
 removeFiles(dir, {'crappisspuke.o', 'CDemo.o', 'extantzCamera.o', 'gears.o', 'ephysics_demo.o', 'Evas_3D_demo.o', '../../media/extantz.edj'})
 removeFiles(dir, {'../../extantz', 'camera.o', 'files.o', 'scenri.o', 'woMan.o'})

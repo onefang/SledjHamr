@@ -12,6 +12,9 @@
 // Initally I'll make it SecondLife like, coz that's what my muscle memory is used to.
 // It will get extended and made generic though.
 
+#include <irrlicht.h>
+#include "extantz.h"
+
 #include "extantzCamera.h"
 #include "IVideoDriver.h"
 #include "ISceneManager.h"
