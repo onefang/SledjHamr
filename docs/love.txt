@@ -51,7 +51,11 @@ gets harder to use standard web servers.
 
 Separated is good coz Lspace might just be any ordinary web server. 
 They already have mechanisms in place to serve dynamic data, and even
-deal with changes to the files.
+deal with changes to the files.  This is the whole point of basing the
+major asset shifting part of the protocol on the web, people can use all
+the major amounts of web infrastructure that already exists and already
+solves most of the problems that currently plague virtual worlds based
+on SL tech.
 
 The down side of separated is that changes might be slower propogating
 to the web server, and there might be two copies of any given set of
@@ -64,7 +68,7 @@ work apart.  Changes happen in this shared memory, driven by the command
 pump in the love server.  Lspace just needs read access, and just
 serves the current state of the world.  Love server persists to disk
 when it's ready to, though the shared memory can just be memory mapped
-files.
+files.  This is the best of both worlds, excuse the pun.
 
 
 Thoughts about directory structure.
