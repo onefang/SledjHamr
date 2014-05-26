@@ -1,18 +1,20 @@
 You will need the Enlightenment Foundation Libraries (EFL) and
 Elementary installed before you can build this.  Since I started
 experimenting with the new Evas_3D stuff, that means you will need the
-1.10 versions, which have not been released yet.  Beta tarballs can be
-found here -
+1.10 versions.  Source tarballs, and pointers to some pre packaged
+binary releases are here -
 
-http://download.enlightenment.org/rel/libs/efl/efl-1.10.0-beta1.tar.bz2
+http://enlightenment.org/p.php?p=download&l=en
 
-http://download.enlightenment.org/rel/libs/elementary/elementary-1.10.0-beta1.tar.bz2
+Also included on that page is the list of dependencies and compile
+order.  You only need EFL, Evas Generic Loaders, Emotion Generic
+Players, and  Elementary, plus the dependencies.
 
-Or you can use git HEAD -
 
-git clone git://git.enlightenment.org/core/efl.git
+Or you can use git -
 
-git clone git://git.enlightenment.org/core/elementary.git
+http://git.enlightenment.org/core/
+
 
 It should all work under X window managers other than Enlightenment,
 though this has not been tested.  The same applies to Linux distros
@@ -26,14 +28,6 @@ needed, Emotion generic players likely wont be needed (yet), except as a
 requirement of Elementary.  Enlightenment and other apps are not
 needed.
 
-http://download.enlightenment.org/rel/libs/evas_generic_loaders/evas_generic_loaders-1.10.0-beta1.tar.bz2
-
-http://download.enlightenment.org/rel/libs/emotion_generic_players/emotion_generic_players-1.10.0-beta1.tar.bz2
-
-git clone git://git.enlightenment.org/core/evas_generic_loaders.git
-
-git clone git://git.enlightenment.org/core/emotion_generic_players.git
-
 Once you have spent hours struggling with getting EFL and Elementary
 complied and installed, simply run build.lua from the top level
 directory here to build all of this SledjHamr stuff.  There's no
@@ -43,20 +37,22 @@ development, plus nothing does anything useful yet.
 In src/extantz/extantz.h, at the top, are a bunch of #defines you can
 turn on and off.  Try them out.
 
-Running test.sh from the top level will build it all, then run it all. 
-You should see a lot of logging style output and two windows.  Most of
+Running ./extantz at the top level will run most of the system, since
+extantz starts up the love server, and love starts up the LuaSL server. 
+Extantz makes ues of GuiLua, purkle, and the other stuff for it's
+windows.
+
+You should see a lot of logging style output and a big window.  Most of
 the logging style output is from the LSL script runner as it compiles
-then runs a copy of the MLP scripts.  The two windows are a small one
-with two buttons in it, and a bigger one with 3D stuff in it.  The big
-3D window has it's own internal windows, including that small one again. 
-The rest of the non logging style output is just testing things, which
-will include some ERROR messages, which is just testing several error
-conditions, so don't be alarmed.  You will see this non logging style
-output twice, since it comes from the little window, which is invoked
-twice, as a stand alone window, and as on internal window of the big 3D
-application.
+then runs a copy of the MLP scripts.  The big 3D window has it's own
+internal windows.  Try clicking on the rotating cube at te bottom, then
+wait until the output from that has stopped, and click again.  The cube
+is pretending to be furniture with MLP scripts in it, and is actually
+running the test MLP scripts.
 
 You really can't do anything useful with all of this yet.  Yes, I know
-the Irrlicht stuff flickers like crazy.
+the Irrlicht stuff flickers like crazy, that's why it's disabled by
+default.
+
 
 Have lots of fun.
