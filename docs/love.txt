@@ -77,8 +77,8 @@ Thoughts about directory structure.
 A major goal is to have the disk structure of a sim (and inventory) be
 decently human readable.  The assets should be stored as normal files of
 the appropriate type, so that they can be edited with normal editing
-software like blender, gimp, a text editor, etc.  Oter goals include not
-duplicating assets, and making it easy to move assets around.
+software like blender, gimp, a text editor, etc.  Other goals include
+not duplicating assets, and making it easy to move assets around.
 
 Names.
 ------
@@ -149,7 +149,9 @@ with a matching .sha1 file that holds the SHA-1 hash of that file.  .lnk
 files get hashed to, so that each copy of a linked stuffs gets it's own
 SHA-1 hash, but in this case the "content" is the relative path name.
 The .sha1 files of the real asset .lnk files point to can be found in
-the same place the real asset file is.
+the same place the real asset file is.  Hmm, this means that reference
+counting will be needed, otherwise the one real copy of an asset can get
+deleted while links still point to it.
 
 There will be a .sha1 directory full of files with the SHA-1 hashes as
 part of the name, and the rest being similar to a .lnk file, a path to
@@ -168,6 +170,12 @@ gets stored in the .sha1, but if it already exists in .sha1, then the
 asset is replaced by that sha1.lnk file, thus automatically
 deduplicating assets.
 
+Reference counting.
+-------------------
+
+Dunno yet, just realised the need for this, will come up with something
+soon.
+
 On disk structure.
 ------------------
 
@@ -180,7 +188,7 @@ On disk structure.
   "a stuffs" -> a%20stuffs.omg
     in world name, description
       list of stuffs similar to the sim index.omg, only this is for the various meshes that make up this stuffs.
-        stuffs position, orientation, and size
+        stuffs position, orientation, and size, relative to this stuffs
         relative file / URL name pointing to the mesh and textures
         extra info for each material
 
@@ -193,7 +201,7 @@ On disk structure.
       used to be a list of content file names, type, and UUID
       file names are right there in the directory
       UUID ala SHA-1 can now be calculated based on those files
-        and stored in a asset.sha1 file
+        and stored in an asset.sha1 file
       type can use the magic/file/MIME system to identify file types
     can get rid of this file, though maybe have it in a .types directory,
     coz we would want to cache the file type
@@ -234,7 +242,7 @@ readable while I consider the design, but likely use eet instead when I
 have to write code to read the suckers.  .omg files are managed by the
 love server, so fiddling with them is an expert thing anyway.
 
-Should have a tool to validate a sims files and recreate te caches.
+Should have a tool to validate a sims files and recreate the caches.
 
 Remaining issues.
 -----------------
@@ -242,10 +250,9 @@ Remaining issues.
 Owner / group UUID might be better dealt with elsewhere?  Coz links. 
 Also, we wont replicate the LL user / group stuff exactly, but morph
 into more standardised variations.  Jabber users, jabber group rosters,
-OS users, web site users, etc.  So just provide an abstraction, and an
-example or two.
+OS users, LDAP users and groups, web site users, etc.  So just provide
+an abstraction, and an example or two.
 
-The asset files, plus things like compiled script binaries and temporaries
   might be better to move compiled scripts and generated Lua source to the LuaSL server's own private store?
   LuaSL needs to assign UUIDs to compiled script binaries, so it knows which running script is which
     coz there might be lots of copies of scripts
