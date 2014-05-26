@@ -16,13 +16,413 @@ It's all very experimental at the moment, and currently does nothing
 useful.
 
 
+Design goals and methods.
+=========================
+
+As mentioned, this is all highly experimental.  Everything you find here
+is subject to change without notice.  We do have some overall design
+goals and methods though.
+
+Simulating a world is what virtual world software does.  The real world
+is full of lots and lots of stuff, and lots of that stuff has lots and
+lots of fiddly little details to make it work.  So simulating a world
+involves thousands, if not millions, of fiddly little details.
+
+So yes you can have a working model of a car that you can actually get
+inside and drive around a virtual world.  It doesn't have to have an
+actually working internal combustion engine, GPS, radio, or air
+conditioning.  The "engine" could just be a roughly engine shaped mesh
+object with engine like textures wrapped around it to make it look like
+a car engine.  Or the "engine" could just be a red cube on the front of
+the car.  The "air conditioning" could just be a photo of a grill that's
+part of the texture used for the "dash board".  Same for the "radio",
+"GPS", or pretty much most of the other fiddly bits of a real car.  In
+virtual worlds you can program a bare cube to act like a car that you
+sit on and drive, the rest is mostly for looks.
+
+There's no such thing as virtual wind in your hair, or smog in your
+nostrils, but if that eventualy gets invented, a generic virtual world
+system should be able to hook into it easily enough.
+
+Generic.
+--------
+
+The trick is to design generic stuff that can fake most if it well
+enough to at least not annoy people.  Too much.
+
+My experience is that if you do a good job of designing small useful
+generic code, it becomes very easy to build things you never dreamed of
+when you made the small generic bits.  It is also part of the Unix
+philosophy, and you can do almost anything with the usual collection of
+small Unix tools.
+
+So the design of SledjHamr involves lots of little bits of generic code
+that all work together seemlessly.  A major design goal is to be as
+generic, yet useful, as possible, to support future stuff that hasn't
+been invented yet.  As well as supporting stuff we need to do now.
+
+If we do this right, then future work becomes really really easy. 
+Virtual world development can then accelerate.
+
+Small.
+------
+
+Small is the next major design goal.  For far to long people have argued
+that computer storage, memory, and CPU power are all very cheap, so why
+bother making things small.  Any long term computer user might have
+noticed that despite our modern computers being many orders of magnitude
+faster and bigger than they where a decade or two ago, everything runs
+slower than it did then.  This proves the falacy of "everything is cheap
+and getting cheaper, lets be wasteful" theory.  People are just too
+comfortable with their wasteful habits.  Not to mention that the
+computer industry loves to get every one to throw out their computers
+every couple of years and replace them with new shiny ones, just to make
+big profits.  So every year normal software needs more powerful
+computers, just to do what it did fine last year.
+
+Even a small virtual world can use up huge amounts of storage, large
+amounts of memory and CPU power, and large amounts of network bandwidth. 
+This is the problem with simulating worlds, the bits might be small, but
+there's an aweful lot of them.  You can run a busy web site on a $5 per
+month web host, but you need to spend at least $100 per month on a
+hosted server that's powerful enough to run a small OpenSim based
+virtual world.
+
+The problem is scaling up to the level of detail needed.  So keeping
+things small is an important design goal.  The generic design mentioned
+above works for keeping things small, since you need less special
+purpose code for all those special purpose fiddly details.
+
+See the "Fast" section below about keeping network protocol and file
+sizes small.
+
+Fast.
+-----
+
+Ask any current virtual world user, at least of the types based on SL
+technology, what the number one biggest problem is and they will tell
+you it's lag.  So speed is important to everyone.  Which makes me wonder
+why people use slow bloated things like interpretted scripting languages
+and human readable network protocols / file formats for damn near
+everything?
+
+People use interpretted scripting languages coz it's easy and convenient
+for them.  Not so convenient for the user though when it causes more
+lag.  People invent human readable network protocols and file formats
+coz it makes it easy for them to read when they need to debug the
+system.  But 99.9999% of the time these human readable network and file
+formats are NEVER READ BY HUMANS.  Computers don't find them easy to
+read at all.  It takes more effort for the computer to figure it out,
+more space on your hard drive, more space in your memory, and more
+bandwidth to send.  All they do is slow everything down massively most
+of the time.
+
+So basically a small handful of developers are taking the easy way out,
+but that inconveniences the vast majority of people.  Mind you, you cant
+always blame the developers, money is involved, which means people are
+forced by management to take what ever shortcuts they can now, even if
+it means pain later.  That's economics for you.
+
+We wont follow that bullshit here.
+
+Once again it's a matter of scale for virtual worlds.  Each part by
+itself might be barely fast enough that people don't notice, but it all
+adds up when you deal with the huge multitude of fiddly little details
+in a virtual world.  Which results in the number one problem being ...
+lag.  Often everything slows down so much it becomens unusable.
+
+We can have our cake and eat it to.  So long as the crucial heavily used
+parts of the system that need speed are written efficiently in a
+decently fast language, then we can still use easy interpretted
+scripting languages for other parts that wont suffer from scaling
+issues.  So long as we stick with efficient binary based network
+protocols and file formats, the tiny percentage of developers that need
+to actually read it can use specialised tools for that job that turn
+them into human readable forms, but not slow down every body else.
+
+It's my experience, and that of other people that work with code that
+needs to be low level, fast, and small, that the C language, with help
+from assembler sometimes, is the best choice for fast working code. 
+Assembler and C is used for OS kernels, embedded software, and other
+things that need to be efficient.  So C is the major language used for
+SledjHamr.  Bits of assembler might be used if needed.
+
+For the interpretted scripting language of choice used in SledjHamr, I
+chose Lua.  It's very generic in nature with it's wonderful tables and
+meta tables.  It's tiny, designed to be embedded inside other languages. 
+With the LuaJIT just in time compiler, it's the fastest scripting
+language around.  These three things fit our major design goals.  On top
+of those things, it's popular with other 3D online environments,
+especially WoW.  It's also very easy to use and can be quite fast for
+development, which is why you use a scripting language in the first
+place.  The ability to be embedded in other code means that Lua tends to
+actually be embedded in many other projects.  Which can then use Lua to
+build all manner of oddball mash ups.  Exactly what virtual worlds need.
+
+While on the subject of languages, see the stuff below about EFL.  Also,
+when Apple based their new version of Mac Os X on BSD Unix, the OS wars
+where over.  Everything now is some sort of Unix, except Windows.  Hell,
+iPhones OS is based on Mac OS X, and Android is based on Linux, so even
+the great majority of phones these days are Unix.  Every one is a Unix
+user, wether they know it or not.
+
+Windows makes a nod to being Posix compliant, though it's barely a nod. 
+Cygwin however can be installed on Windows to make it more like the Unix
+used in the rest of the world.  So in general Posix and Unix style stuff
+should be used.  Try to keep the Windows specific stuff well isolated,
+small, and preferably based on Cygwin.  This should lead to A) maximum
+portability.  B) Less stress for the SledjHamr head developer, who got
+burnt out working with Windows crap long ago and really really REALLY
+wants to avoid it as much as possible now.  The OS wars are over, Unix
+won, fucking get over it Microsoft.
+
+Modular.
+--------
+
+This is actually part of being generic and small.  If everything is a
+small module, then you only need to use those modules that do the things
+you are doing right now.  The rest you don't need, so you don't load
+them up.  No need to cater for all of those fiddly little details in one
+massive world simulating blob, break it down into small modular and
+generic bits that talk to each other using common protocols and
+standards.
+
+This can also be useful to support the great variety of other file
+formats and protocols already being used.  Need to support some obscure
+file format no one has heard of?  Write a small module for it.  All the
+major file formats can be supported out of the box.  Want to join up
+with an obscure virtual world platform?  Write a module to support it. 
+All the common virtual world tasks will be already supported by
+SledjHamr, you just need to translate between the file format or network
+protocol in your module.  OpenSim, SL, and later Cobalt, will be the
+initially supported virtual world network protocols.
+
+For the purposes of using the old SL type technology as a crutch during
+development, being modular makes a lot of sense.  When any given module
+is good enough to start using, we can hook it up to Imprudence or
+OpenSim to start using it for real.  When that module gets mature, we
+can rip the relevant code out of those older systems.  Eventually those
+older code bases morph into SledjHamr based ones.
+
+Standards based.
+----------------
+
+OK, we will cheat a bit here.  No such thing as a decently small and
+fast virtual world protocol standard, so we are inventing our own.
+
+On the other hand, we intend to use open standards based network
+protocols (even if they are bloated human readable ones) to take care of
+the various bits not specifically related to virtual worlds.  Like
+Jabber/XMMP for text communications, HTTP for asset transfers, etc. 
+These protocols are well used, well understood, and in general not TOO
+bloated for their intended use cases.  These use cases are close enough
+to our own that we can leverage this huge installed base of code and
+expertise to deal with the problems that virtual worlds would share. 
+Much less work for us all.  People can use the software they are used to
+to interface with those bits.
+
+Standard texture file formats tend to be very well compressed, and the
+libraries for them more or less mature.  Lots of research and
+standardisation effort has gone into the major popular ones.  So we
+don't really need to deal with that.  Problem solved already.  Well,
+except for JPEG 2000, which outside of SL and medical use, no one has
+even heard of.  It's library support is not so good, and made even wosre
+by the fact that the best decoding algorithm for it is patented and out
+of reach to open source developers.  Still, lots and lots of SL and
+OpenSim content is in JPEG 2000 format, and it is good as a network
+texture format, so we just have to deal with it.
+
+Mesh file formats are a bit less standardised, and a bit less well
+compressed, but the libg3d mesh loading library deals with that well
+enough, and it's good to be able to use all that content out there.  On
+the other hand, OpenSim OAR and IAR files are some what common, but best
+to use just for importing OpenSim based worlds into SledjHamr.  They are
+not pretty on the inside.  On the gripping hand, SL viewers never really
+standardised on prim file formats.  In general you need to use the
+viewer you used to export to import them.  However, this is the sort of
+thing the modularity is made for.  Write small modules to deal with
+these SL inspired file formats.  Make them libg3d modules.
+
+OpenGL is the worlds open 3D standard, and even works on Windows.  It's
+well known that Microsoft (at least in the past) made their OpenGL
+implementation slower than their own 3D system, specifically so they
+could claim theirs was better.  OpenGL works fine on Windows, lets use
+it.  Any slowness issues we just blame on Microsoft.
+
+Secure.
+-------
+
+One of our developers is a cypherpunk / cryptogeek / whatever term she's
+comfortable being labelled as.  Our team is very privacy focused.  So
+security and privacy are important goals as well.  Small modular code is
+better for security, is there is less code to look at to do security
+audits, and less places for things to go wrong, or escape attention. 
+Commonly used security and privacy protocols also tend to be built in
+modular ways, so we can make use of these things ourselves.
+
+Pretty and skinable.
+--------------------
+
+The Enlightenment Foundation Libraries (EFL) where written to support
+the Enlightenment X window manager, DR17 (E17).  Enlightenment is known for
+it's eye candy.  The early DR16 version was popular, but known to be a
+heavy resource user.  That was many years ago, and the most popular X
+window managers these days far surpassed Enlightenment DR16 for bloat,
+without coming close for eye candy.
+
+E17 was rewritten from scratch, and I helped with that rewrite in
+various ways.  E17 is a lot less "bloated", but I think that's mainly
+coz everything else passed it in bloatedness, even though much work was
+done to ensure E17 would work great on small embedded systems.  I have
+used EFL on professional embedded systems, and it worked well, even on
+the tiny x486 embedded board I used.  In general EFL fits well with my
+personal coding standards, and fits well with the SledjHamr goals.  This
+is why I continue to work with it, and used it for SledjHamr.
+
+Basically, you can think of EFL as a replacement for the GTK that SL
+viewers use.  They both offer more or less a similar feature set, and
+both use more or less the same standard libraries underneath.  GTK uses
+the GLib main loop, which EFL supports via wrappers.  I think that EFL
+fits the SLedjHamr design goals much better though.
+
+As a bonus, lots and lots of eye candy, complete with a system for
+writing your own eye candy, and over riding the system supplied eye
+candy.  So very pretty GUI skins are supported.  As a special bonus,
+works great on small systems.  EFL is being used for Samsungs Tizen, in
+fact half the EFL developers now work for Samsung.
+
+Flexible.
+---------
+
+The generic and modular qualities mean that people can build their own
+virtual worlds in any way they like.  Use a file based asset store, or a
+database based one, or generate it on the fly using genetic algorithms,
+what ever floats your boat.  Serve assets with Apache, Nginx, lighttp,
+or any other web server.  Use ejabberd, or the Lua based Prosody for
+text based communications.  Maybe you want to use a CMS like Drupal to
+deal with assets, users, groups, and permissions?  Let your users
+manipulate their inventory, or the world, using WebDav.  Use LDAP for
+users and groups.  Roll your own if you don't like any of the other
+choices for any specific module.  SledjHamr wont stand in your way, and
+will help you use the virtual world specific bits any way you want.
+
+Users get this flexibility to.  Use GIMP or Photoshop to edit textures
+directly.  Or Blender to create new meshes in world.  Keep your
+inventory on your own hard drive, so you can use the tools you are
+comfortable with to manage it all.  Store your inventory in "the cloud". 
+Easily send things from your inventory to others without even logging in
+world, using what ever method you like.  Share some of your inventory on
+social media.
+
+Create what ever sort of mash up you can bend your tools to do.  Hook up
+an IRC bot to an in world group chat room.  Run on online business that
+prints in world objects on 3D printers, using standard E business
+software and a virtual world as your shop front end.
+
+The virtual world is your oyster, go nuts.
+
+Er, but experimental for now.
+-----------------------------
+
+Still early days, and even though a few helped with the first design
+docs, so far all the coding work has been done by one person.  So much
+to do for a virtual world system.  This is why the git repo has an empty
+master branch, it's all in the experimental branch.  So far only bits
+and pieces, which have only recently been tied together into one system.
+
+As experimental software, it's all up in the air as we try out different
+things, explode our own careless thought bubbles, rip things out and
+start from scratch, and in general mess with things to our hearts
+content.  Nothing is set in stone yet.  We write some small bit of code
+that seems at least slightly sane, or cobble something together quickly
+that might be totally insane.  Then tinker with it to see what works, or
+to make it closer to our goals.  Eventually we will make bits that we
+think are stable enough for actual use and move them to the master
+branch.  Don't go holding your breath though.
+
+Lua has been great for quickly building prototype stuff.  So far most of
+the network protocols and file formats have been based on Lua.  Which
+goes against our goals, so expect that to be temporary.  Specifically,
+once we get around to actually implementing the nails protocol stuff,
+some of the Lua network and file formats will get replaced be nails.
+
+The Lua GUI code is losely based on my ancient matrix-RAD stuff that was
+written in Java.  The fact that I had most of it working within a week
+is a tribute to how easy Lua is.  The original Java took me years to
+write.  On the other hand, I'm not that happy with the syntax of the
+results, so that is likely to change.
+
+Other developers could use their own favourite languages for
+experimental work, but I highly encourage them to eventually produce C
+or Lua code depending on the requirements of that module.
+
+The specific coding style used is all over the place at the moment. 
+Lots of code I wrote for other projects has been dragged in and morphed
+into our requirements, but it all came with it's own style from those
+projects.  I've produced an uncrustify file for cleaning up C code, but
+not applied it to most code yet.  Even that uncrustify file is subject
+to tweaking.
+
+The LuaSL code is the most stable, but that's not surprising, it's the
+first thing I wrote.  On the other hand, all of the actual world
+changing LL function calls have not been written yet, there's no actual
+world code to put them in.  Some one volunteered to interface LuaSL to
+OpenSim, which would pass the world changing functions to that to deal
+with, but they vanished before they started.  LuaSL at least uses a
+network socket to feed the world changing functions to a world server,
+so that part can be modular and support OpenSim, the SledjHamr love
+server, or anything else.
+
+I've not settled on which 3D rendering system to use yet.  The options I
+have short listed and experimented with are Irrlicht and Evas_3D.
+
+I had looked at various open source 3D render systems, including things
+like Orge, with a specific set of goals in mind.  A major goal was to
+support the plethora of low powered laptops every one uses for virtual
+worlds that have bare minimum 3D support, or even none at all.  Irrlicht
+has a great software renderer for people with no 3D hardware.  That got
+my vote, so I experimented with it.  There was no EFL integration, so I
+had to write some, which wasn't that hard.  A year later, a new version
+of EFL managed to bit rot my EFL/Irrlicht integration, so I fixed that. 
+But now it flickers like crazy.  After much discussion with other EFL
+develpors, and some preliminary work by the Irrlicht developers, an
+experimental version of Irrlicht is underway that might integrate better
+with EFL.  I've not tried it yet, but it was on my TODO.
+
+In the mean time, and so recently that it only gets released later
+today, Evas_3D was added to EFL.  Evas is one of the sub libraries of
+EFL that deals with canvasses, it's a 3D mesh, camera, and light system
+designed to be part of Evas.  So it has the major advantage of already
+being well integrated, it's part of EFL.  I've added test code for it
+now, and no flickering.  I even have test code using both Irrlicht and
+Evas_3D in the same window space.  It's major disadvantage is that it's
+only a very recent project that has (until later today) not been
+released, Irrlicht is much more mature.  So Evas_3D only has basic
+stuff, though it's mostly complete basic stuff.  On the other hand, a
+lot of what's missing in Evas_3D I was thinking about rewriting for
+Irrlicht anyway.  So far one major missing bit is Bullet Physics
+intergration, or any other physics engine.  Irrlicht has Bullet, and
+another part of EFL also has Bullet.  I'm hoping the authors of that
+other EFL part get together with the Evas_3D authors and figure
+something out.
+
+So right now I'm leaning more in the Evas_3D direction, and that's
+currently the default.  In neither case had I written anything to
+actually create a proper virtual world, merely modifications to the
+examples provided to see how they fit in to the rest, and give me
+something to play with.  I think I'll see how far I can get with Evas_3D
+before making a decision.
+
+
 The bits (or some of them).
----------------------------
+===========================
 
 extantz
     GuiLua front end for other programs it starts
     3D rendering of multiple virtual worlds in tabs
 	    including the same virtual world logged in more than once with different accounts
+	    or even just different camera views
+	    could use the same thing for generating two views for stereo viewing.
     Nails interface to virtual world backend modules.  Each module converts nails commands to / from it's own network protocol.
 	A SledjHamr grid, which definately should be running independantly, 
 	    so others can log on and stay on when extantz closes down
@@ -36,7 +436,7 @@ extantz
 	    getting OS/SL network crap from the grid
 		translating and sending nails commands to extantz so it can update it's 3D models
 		  including nails encapsulated GuiLUa commands to deal the with OS/SL GUI stuff
-	An Open Croquet module.
+	An Open Croquet / Cobalt module.
     importer / exporter
 	Which basically grabs an area / selected objects from the current tabs world,
 	then sends them as nails commands to -
@@ -103,6 +503,7 @@ in world object editor
 inventory browser
     Good to be separate, coz often you spend a lot of time NOT dealing with inventory.
 	On the other hand, people might have their inventory window open all the time, I do.  lol
+	Naturaly you could be dealing with inventory while NOT being logged in world.
     handles local inventory as the usual nails files
 
 LuaSL
@@ -110,6 +511,8 @@ LuaSL
     LSL -> LuaSL compiler
     LuaSL script runner - likely to be running thousands of scripts
 	LuaJIT to speed it up, EFL luaproc to run them as worker threads
+	Has since been rewritten to be an Ecore_Thread  / cooperative multitasking based system, depending on compile options.
+	  Should make that choosable at run time after more testing.
     LSL constants and functions implemented as a Lua library
 	The functions want to use nails to talk to the server backend.
 	Currently just sending Lua function() call strings instead.
@@ -139,6 +542,7 @@ IM client
     Separate coz it could also be used as a normal IM client.
     either sending the GuiLua to extantz, or dealing with it itself
     calls libpurple for the hard work
+      Or maybe not, I've gone off libpurple, even after naming the IM stuff purkle.
     needs stuff for extantz / woMan to feed it IM / group / local chat stuffs from grids
 	gotta be modular, perhaps same module that handles other grid stuff for extantz?
 	or a libpurple module for OS/SL, and have authentication credentials for those grids passed from elsewhere (woMan?)
