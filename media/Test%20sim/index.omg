@@ -1,2 +1,33 @@
-<125.432899,128.229706,3500.5> <0.5,5.,5.> <0.,270.,180.> objects/onefang%27s%20test%20bed.5cb927d5-1304-4f1a-9947-308251ef2df0/index.omg
-
+Stuffs =
+{
+  name = "Test sim",
+  description = 'onefangs test SledjHamr sim.',
+--  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    stuffs = 
+    {
+      Mesh = 
+      {
+        fileName = 'onefang%27s%20test%20bed.omg',
+        pos = {0.0, 4.0, 10.0},
+        size = {1.0, 1.0, 1.0},
+        rot = {1.0, 0.0, 0.0, 0.0},
+      },
+      Mesh = 
+      {
+        fileName = 'sonic.omg',
+        pos = {0.0, 0.0, 0.0},
+        size = {1.0, 1.0, 1.0},
+        rot = {-0.7071067811865475, 0.0, 0.0, 0.7071067811865475},
+      },
+      Mesh = 
+      {
+        fileName = 'earth.omg',
+        pos = {0.0, 0.0, 0.0},
+        size = {1.0, 1.0, 1.0},
+        rot = {1.0, 0.0, 0.0, 0.0},
+      },
+    },
+  },
+}

@@ -1,0 +1,14 @@
+Stuffs =
+{
+  name = "Sonic the bed hog.",
+  description = 'Just a pretend avatar for testing SledjHamr.',
+--  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      fileName = 'sonic.md2',
+      materials = {'sonic.png'},
+    },
+  },
+}

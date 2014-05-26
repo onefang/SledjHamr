@@ -132,9 +132,10 @@ typedef struct _stuffs
   //type
   union
   {
-    Mesh	*mesh;
-    script	*scrip;	// Not a typo, C++ is fussy about reusing names like this.
-    void	*other;
+    Eina_Inarray	stuffs;		// Stuffs in the sim
+    Mesh		*mesh;
+    script		*scrip;	// Not a typo, C++ is fussy about reusing names like this.
+    void		*other;
   } details;
 } Stuffs;
 

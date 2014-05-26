@@ -163,7 +163,7 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
   // Compile and run scripts.
   gettimeofday(&startTime, NULL);
-  snprintf(buf, sizeof(buf), "%s/Test sim/objects", prefix_data_get());
+  snprintf(buf, sizeof(buf), "%s/Test%%20sim", prefix_data_get());
   eina_file_dir_list(buf, EINA_TRUE, dirList_compile, data);
 
   return ECORE_CALLBACK_RENEW;
@@ -410,7 +410,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 			temp++;
 		    temp[0] = '\0';
 		    lineNo = atoi(line);
-		    snprintf(key, sizeof(key), "%s/Test sim/objects/onefang%%27s%%20test%%20bed.5cb927d5-1304-4f1a-9947-308251ef2df0/%s", prefix_data_get(), notecard);
+		    snprintf(key, sizeof(key), "%s/Test%%20sim/onefang%%27s%%20test%%20bed/%s", prefix_data_get(), notecard);
 
 		    fd = open(key, O_RDONLY);
 		    if (-1 != fd)

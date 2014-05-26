@@ -174,21 +174,30 @@ Reference counting.
 -------------------
 
 Dunno yet, just realised the need for this, will come up with something
-soon.
+soon.  Will solve this problem when we implement links, wont need it
+until then anyway.
+
+Obviously the count has to be kept with the real asset file, there's a
+few ways to go about that.  I've been thinking that the .sha1 file might
+be a good place to keep other meta data, like perhaps owner and group
+info.  So one way is to include the reference count there to.  Another
+option is a separate .ref file with the count inside.  A third option,
+just tack the count onto the end of a file name.  This is likely a bit
+quicker than updating a file.
 
 On disk structure.
 ------------------
 
 "some sim name" -> some%20sim%20name/index.omg
   list of stuffs rezzed in the sim
-    stuffs position, orientation, and size
+    stuffs position, size, and orientation
     relative file / URL name pointing to the stuffs
     no need for the in world name, those interested in that will likely grab the stuffs.omg file anyway
 
   "a stuffs" -> a%20stuffs.omg
     in world name, description
       list of stuffs similar to the sim index.omg, only this is for the various meshes that make up this stuffs.
-        stuffs position, orientation, and size, relative to this stuffs
+        stuffs position, size, and orientation, relative to this stuffs
         relative file / URL name pointing to the mesh and textures
         extra info for each material
 
