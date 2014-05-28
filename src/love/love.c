@@ -146,7 +146,7 @@ static void dirList_compile(const char *name, const char *path, void *data)
 
 	    scriptCount++;
 	    gettimeofday(&me->startTime, NULL);
-	    snprintf(me->SID, sizeof(me->SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+	    snprintf(me->SID, sizeof(me->SID), FAKE_UUID);
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(ourGlobals->scripts, me->SID, me);
 	    sendForth(ourGlobals->serverLuaSL, me->SID, "compile(%s)", me->fileName);
@@ -431,7 +431,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 			    }
 			} while (temp && (0 < lineNo--));
 
-			sprintf(key, "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+			sprintf(key, FAKE_UUID);
 			sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", key);
 
 			// TODO - For now, just send it to everyone.

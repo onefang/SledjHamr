@@ -83,6 +83,7 @@ love needs
 
 #include "Runnr.h"
 
+#define FAKE_UUID "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random()
 
 typedef struct _vec4
 {

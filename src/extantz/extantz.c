@@ -150,7 +150,7 @@ static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void 
       char SID[64];
 
       // CUBE_UUID.events.touch_start(1), but we just make one up for now.
-      snprintf(SID, sizeof(SID), "%08lx-%04lx-%04lx-%04lx-%012lx", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+      snprintf(SID, sizeof(SID), FAKE_UUID);
       sendForth(ourGlobals.server, SID, "events.touch_start(1)");
     }
   }
