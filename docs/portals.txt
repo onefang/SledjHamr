@@ -1,0 +1,105 @@
+SledjHamrs killer feature, or one of them.
+
+A major reason for SledjHamr is to break down the garden walls.  We do
+this by allowing free travel between peoples virtual worlds.  In OpenSim
+this is done by HyperGrid, which is clunky and hard to use.  Second Life
+deliberatly has no such system.  Even worse, it's hard convincing people
+in SL to visit your grid, coz it's all very hard, again due to
+deliberate policy decisions by LL.  LL knows their content is the key to
+their business, even though almost all of it was created by the users,
+LL locks it up tight.  So people visiting OpenSim grids from SL have to
+create a new avatar from scratch, which is such a major pain that most
+people balk at that and don't bother.  And they can't bring their
+inventory with them, inventory they paid for and spent years collecting.
+
+In SledjHamr, as well as allowing completely unrestricted and easy
+access to lots of content, we should make it easy to travel between
+virtual worlds.  Part of this is to include compatibility layers in
+separate modules to be compatible with what ever virtual world systems
+aer around.  You would still need to create accounts and log onto those
+worlds though.  How can we mix them up?  I imagine easy to use portal
+objects.  Let's start with the basics, and work out some more complex
+examples.
+
+As mentioned in the no_accounts.txt document, every SledjHamr user has
+their own little world running on their computer by default when they
+start up the extantz client.  There is a star gate on this default
+world, an already setup portal that can connect to a bunch of default
+external worlds.  The user can use this star gate, and other peoples
+portals to travel around other peoples worlds.  Initially this could be
+using OpenSim and its HyperGrid system.  Later it would be SledjHamr
+style worlds as well.
+
+A portal would be like Cobalt style portals, you can see the destination
+in real time, and step through it to go there.  They can be permenant,
+or temporary.  You can carry them in your inventory, they could just be
+normal scripted in world objects.
+
+So you travel around the virtual worlds, meeting people, and you want to
+invite some one to your home, or a group of people.  You right click on
+them and select "Invite them home" from the menu.  Extantz knows your
+home world, that's where you started and it's running on the same
+computer.  Extantz communicates to that home server, or starts it up
+first.  The home server adds this new person to it's access list. 
+Extant creates a portal object and offers it to the person, so they can
+rez it anywhere.  Or you could rez this portal object in the world you
+are in.  Either way, once the portal is in a world, it connects to your
+home world, showing a view of your front gate, maybe including your
+lovely garden in your front yard.  The portal connects to the "front
+gate" of your homeworld.
+
+Any one on your home worlds access list can step through this portal to
+get to your home world.  Simple to use, no figuring out HyperGate URLs
+and copy pasting them, no manual messing with hard to use acces systems. 
+Though it would still be possible to create URLs to in world places, to
+store as landmarks, to email to someone, or to copy'n'paste into
+farcebook.
+
+Portals rezzed in world could be temporary, and vanish after who ever
+you invited to come stepped through it.  Or time out several minutes
+later so as not to clutter the universe with left over portals.  Or
+deleted by the owner / managers of the world you left them, or deleted
+yourself from your own world.  Portals could be permenant.  Say you
+found a larger world that you and the owner decide you wish to be a part
+of.  Portals could be left on both worlds linking them.  The "portal"
+could just be reconfiguring each world to locate the other world near
+them, like neighbouring sims.  Still, that should be done via the portal
+interface, just a simple click.
+
+Portals can be fully open if you want to run a public world.  People can
+be banned.  Or private worlds with specific groups and people allowed. 
+Similar to many web sites, you could have your own account system on
+your world, people with accounts are allowed to build, or allowed to
+with certain limits, or are the only ones allowed to visit.  Privacy can
+be applied to the portal, only those that can step through can see
+through, or semi private, you can see a limited area, but not step
+through.  A portal could include a "door bell", people that want to
+visit ring the door bell, someone might answer and let them in, but can
+chat with them across the portal first.  Perhaps getting dressed first.
+
+For those hard to reach places, I'm looking at you SL, a portal could be
+coded as an LSL script in a SL prim object that you keep in your SL
+inventory.  It can operate in two modes, depending on who is looking. 
+If someone using a SledjHamr aware client looks, they see the usual
+portal view mentioned above, and can easily step through it as usual. 
+Others would see a still photo of the view through the portal, or
+perhaps a live video stream if the other world server has enough
+bandwidth to support that.  Or they could see just a logo if the world
+owner hasn't bothered to pay LL to upload a suitable photo.  If the user
+of the viewer that is not SledjHamr aware clicks on or tries to step
+through the portal, they are sent to a web page that lets them download
+SledjHamr aware clients, with instructions on what to do to actually get
+to that world.
+
+Once a user of that closed world steps through the portal using a
+SledjHamr aware client, their client knows what that person looks like,
+and has access to that persons inventory in that closed world, so they
+can bring it all with them with no need to do anything other than step
+through.  The user remains logged on to the closed world, coz SledjHamr
+needs no actual accounts.  What their avatar is left doing in the closed
+world for others to see is an open question.  Perhaps sitting on some
+chair on the portal prims, snoozing.  Likely LL will ban this in their
+TOS, and ban SLedjHamr aware viewers, they are anal like that, and want
+to own your content to keep people locked in their walled garden. 
+Here's a SledjHamr for you all, break those walls open.  B-)
+
