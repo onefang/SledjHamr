@@ -1,0 +1,14 @@
+The Naminator eliminates human readable names, to make way for computer
+names for SkyNet.  Or something.
+
+In world names can be anything, but they map more or less to file names
+and URLs, so the names have to be munged accordingly.  A further issue
+is that different in world objects can have the same name.  Lots of
+copies of the same thing, or two different things that happen to be
+called the same thing.  No one is gonna individually name each tree in a
+forest, or every lampost in the city.  File names and URLs have to be
+unique.  The Naminator deals with munging names to deal with these
+issues.  It should generate names that are compatible with a variety of
+operating and file systems, as well as being URL compatible.  This is
+such a useful thing to do that it should be a shared library, even if it
+will be tiny.
