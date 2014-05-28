@@ -1,0 +1,29 @@
+We don need no stinkin' accounts.
+
+We don't really need accounts, so we can do away with them.  Though
+obviously since SledjHamr is designed to be a flexible set of tools
+rather than one big take it or leave it system, people can use what ever
+accounts system they need for their purposes.  SledjHamr not only doesn't
+impose an accounts system, we eliminate the need for one in the general
+case.  So we don't have to write one.  B-)
+
+When a user fires up the extantz client for the first time, it can use
+their local computer account name as the users name (I think most
+operating systems make you create one when you install them).  Extantz
+could also do a reverse DNS lookup on the computers IP, and likely end
+up with an ISPs dynamic IP reverse mapping, or maybe a real domain name.
+
+Extantz then tries to connect to a love server running on the same
+computer, or starts one if it can't find one.  This local love server by
+default runs a small grid, with maybe a nice little cottage, and a star
+gate.  This is the users home, they can do what ever they like with it.
+
+The star gate works similar to current OpenSim hypergates, linking to
+external grids and allowing HyperGrid access to them.  Since the user
+already has a local name and domain name, with the local love server
+acting as the users home HyperGrid server, they are good to go visit
+other grids.  No real in world account need ever be created.
+
+The drawback is that the virtual worlds will be filled with lots of
+root@123_231.bigisp-dyn.com users.  Naturally it should be simple for
+users to change the default name to anything they want.
