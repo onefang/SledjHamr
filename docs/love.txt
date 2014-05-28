@@ -57,7 +57,7 @@ the major amounts of web infrastructure that already exists and already
 solves most of the problems that currently plague virtual worlds based
 on SL tech.
 
-The down side of separated is that changes might be slower propogating
+The down side of separated is that changes might be slower propagating
 to the web server, and there might be two copies of any given set of
 assets in memory at once.
 
@@ -127,7 +127,7 @@ inspired by git using SHA-1 hashes for content addressable assets.
 SHA-1 hashes are 40 character hex codes representing 160 bit numbers
 that are calculated based on the content.  So the same content will give
 the same SHA-1 hash.  Git has proved that you only need the first digits
-of the SHA-1 hash to ensure uniqueness, so it's feasable to use only the
+of the SHA-1 hash to ensure uniqueness, so it's feasible to use only the
 first 128 bits of SHA-1 hashes to squeeze it into a UUID for the
 purposes of uniquely identifying assets.  Precisely what git does.  This
 means it could be backwards compatible with LL's use of UUIDs.

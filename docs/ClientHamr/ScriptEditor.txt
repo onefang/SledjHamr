@@ -22,5 +22,5 @@ the command finishes.  Naturally that command could be "vi script.lsl",
 
 Toybox and terminology works under cygwin and Mac OS X.
 
-Rob pulls his finger out and starts putting my editting stuff in toybox
+Rob pulls his finger out and starts putting my editing stuff in toybox
 so I can progress with this.

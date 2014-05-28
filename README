@@ -41,7 +41,7 @@ virtual worlds you can program a bare cube to act like a car that you
 sit on and drive, the rest is mostly for looks.
 
 There's no such thing as virtual wind in your hair, or smog in your
-nostrils, but if that eventualy gets invented, a generic virtual world
+nostrils, but if that eventually gets invented, a generic virtual world
 system should be able to hook into it easily enough.
 
 Generic.
@@ -57,7 +57,7 @@ philosophy, and you can do almost anything with the usual collection of
 small Unix tools.
 
 So the design of SledjHamr involves lots of little bits of generic code
-that all work together seemlessly.  A major design goal is to be as
+that all work together seamlessly.  A major design goal is to be as
 generic, yet useful, as possible, to support future stuff that hasn't
 been invented yet.  As well as supporting stuff we need to do now.
 
@@ -72,7 +72,7 @@ that computer storage, memory, and CPU power are all very cheap, so why
 bother making things small.  Any long term computer user might have
 noticed that despite our modern computers being many orders of magnitude
 faster and bigger than they where a decade or two ago, everything runs
-slower than it did then.  This proves the falacy of "everything is cheap
+slower than it did then.  This proves the fallacy of "everything is cheap
 and getting cheaper, lets be wasteful" theory.  People are just too
 comfortable with their wasteful habits.  Not to mention that the
 computer industry loves to get every one to throw out their computers
@@ -83,7 +83,7 @@ computers, just to do what it did fine last year.
 Even a small virtual world can use up huge amounts of storage, large
 amounts of memory and CPU power, and large amounts of network bandwidth. 
 This is the problem with simulating worlds, the bits might be small, but
-there's an aweful lot of them.  You can run a busy web site on a $5 per
+there's an awful lot of them.  You can run a busy web site on a $5 per
 month web host, but you need to spend at least $100 per month on a
 hosted server that's powerful enough to run a small OpenSim based
 virtual world.
@@ -102,11 +102,11 @@ Fast.
 Ask any current virtual world user, at least of the types based on SL
 technology, what the number one biggest problem is and they will tell
 you it's lag.  So speed is important to everyone.  Which makes me wonder
-why people use slow bloated things like interpretted scripting languages
+why people use slow bloated things like interpreted scripting languages
 and human readable network protocols / file formats for damn near
 everything?
 
-People use interpretted scripting languages coz it's easy and convenient
+People use interpreted scripting languages coz it's easy and convenient
 for them.  Not so convenient for the user though when it causes more
 lag.  People invent human readable network protocols and file formats
 coz it makes it easy for them to read when they need to debug the
@@ -129,11 +129,11 @@ Once again it's a matter of scale for virtual worlds.  Each part by
 itself might be barely fast enough that people don't notice, but it all
 adds up when you deal with the huge multitude of fiddly little details
 in a virtual world.  Which results in the number one problem being ...
-lag.  Often everything slows down so much it becomens unusable.
+lag.  Often everything slows down so much it becomes unusable.
 
 We can have our cake and eat it to.  So long as the crucial heavily used
 parts of the system that need speed are written efficiently in a
-decently fast language, then we can still use easy interpretted
+decently fast language, then we can still use easy interpreted
 scripting languages for other parts that wont suffer from scaling
 issues.  So long as we stick with efficient binary based network
 protocols and file formats, the tiny percentage of developers that need
@@ -147,7 +147,7 @@ Assembler and C is used for OS kernels, embedded software, and other
 things that need to be efficient.  So C is the major language used for
 SledjHamr.  Bits of assembler might be used if needed.
 
-For the interpretted scripting language of choice used in SledjHamr, I
+For the interpreted scripting language of choice used in SledjHamr, I
 chose Lua.  It's very generic in nature with it's wonderful tables and
 meta tables.  It's tiny, designed to be embedded inside other languages. 
 With the LuaJIT just in time compiler, it's the fastest scripting
@@ -164,7 +164,7 @@ when Apple based their new version of Mac Os X on BSD Unix, the OS wars
 where over.  Everything now is some sort of Unix, except Windows.  Hell,
 iPhones OS is based on Mac OS X, and Android is based on Linux, so even
 the great majority of phones these days are Unix.  Every one is a Unix
-user, wether they know it or not.
+user, whether they know it or not.
 
 Windows makes a nod to being Posix compliant, though it's barely a nod. 
 Cygwin however can be installed on Windows to make it more like the Unix
@@ -253,7 +253,7 @@ Secure.
 -------
 
 One of our developers is a cypherpunk / cryptogeek / whatever term she's
-comfortable being labelled as.  Our team is very privacy focused.  So
+comfortable being labeled as.  Our team is very privacy focused.  So
 security and privacy are important goals as well.  Small modular code is
 better for security, is there is less code to look at to do security
 audits, and less places for things to go wrong, or escape attention. 
@@ -346,7 +346,7 @@ goes against our goals, so expect that to be temporary.  Specifically,
 once we get around to actually implementing the nails protocol stuff,
 some of the Lua network and file formats will get replaced be nails.
 
-The Lua GUI code is losely based on my ancient matrix-RAD stuff that was
+The Lua GUI code is loosely based on my ancient matrix-RAD stuff that was
 written in Java.  The fact that I had most of it working within a week
 is a tribute to how easy Lua is.  The original Java took me years to
 write.  On the other hand, I'm not that happy with the syntax of the
@@ -385,7 +385,7 @@ my vote, so I experimented with it.  There was no EFL integration, so I
 had to write some, which wasn't that hard.  A year later, a new version
 of EFL managed to bit rot my EFL/Irrlicht integration, so I fixed that. 
 But now it flickers like crazy.  After much discussion with other EFL
-develpors, and some preliminary work by the Irrlicht developers, an
+developers, and some preliminary work by the Irrlicht developers, an
 experimental version of Irrlicht is underway that might integrate better
 with EFL.  I've not tried it yet, but it was on my TODO.
 
@@ -401,7 +401,7 @@ released, Irrlicht is much more mature.  So Evas_3D only has basic
 stuff, though it's mostly complete basic stuff.  On the other hand, a
 lot of what's missing in Evas_3D I was thinking about rewriting for
 Irrlicht anyway.  So far one major missing bit is Bullet Physics
-intergration, or any other physics engine.  Irrlicht has Bullet, and
+integration, or any other physics engine.  Irrlicht has Bullet, and
 another part of EFL also has Bullet.  I'm hoping the authors of that
 other EFL part get together with the Evas_3D authors and figure
 something out.
@@ -428,7 +428,7 @@ extantz
 	    or even just different camera views
 	    could use the same thing for generating two views for stereo viewing.
     Nails interface to virtual world backend modules.  Each module converts nails commands to / from it's own network protocol.
-	A SledjHamr grid, which definately should be running independantly, 
+	A SledjHamr grid, which definitely should be running independently, 
 	    so others can log on and stay on when extantz closes down
 	    which may be a local or remote grid
 	    might be part of some other grid (a sim)
@@ -464,7 +464,7 @@ GuiLua
 
 Edje Lua
     Lua embedded in edje files, and sandboxed to them.
-    add table marshalling into an edje message
+    add table marshaling into an edje message
     add host proggy supplied Lua functions
 	So we can add nails.foo(), GuiLua.foo(), and maybe even LSL.foo().
 	    All users of GuiLua and nails probably want to be sandboxed, the scripts should be loaded up by extantz, OpenSim, or SledjHamr, not run from the operating system.

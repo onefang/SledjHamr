@@ -28,6 +28,6 @@ versions of the libraries needed in that.  If not found, it could invoke
 an OS specific method of installing a suitable library.  If that fails,
 it can download a SledjHamr specific version into the SledjHamr
 installed directory.  So it tries to do the right thing first, and
-gradually fallsback to doing the wrong thing like LL does.
+gradually falls back to doing the wrong thing like LL does.
 
 That's the theory, in practice, gonna be a pain.

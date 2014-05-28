@@ -97,7 +97,7 @@ something else), then unmarshal the result before sending it back to
 Lua.
 
 The second alternative, which the host app must REALLY request, is for
-the host app to say "I'm REALLY going out of my way to be threadsafe,
+the host app to say "I'm REALLY going out of my way to be thread safe,
 just call me direct".  No edje wrapper function, BUT the host app still
 has to use edje to register this function.
 
@@ -568,8 +568,8 @@ Windows with widgets relative to each other.
 Manual association of widgets to methods.
 Can include tool tip string, enabled, visible, hover cursor, bounding rectangle?, mouse opaque?, tab groups, font (name, size, style, and alignment).
     More stuff, typically hidden in the OO somewhere.  sigh
-Generally uses fixed image and colour names, which skins overide.
-Skins can also overide the XML files.
+Generally uses fixed image and colour names, which skins override.
+Skins can also override the XML files.
 Translations provide override XML files that need only override the text bits.
 
 

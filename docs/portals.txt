@@ -3,7 +3,7 @@ SledjHamrs killer feature, or one of them.
 A major reason for SledjHamr is to break down the garden walls.  We do
 this by allowing free travel between peoples virtual worlds.  In OpenSim
 this is done by HyperGrid, which is clunky and hard to use.  Second Life
-deliberatly has no such system.  Even worse, it's hard convincing people
+deliberately has no such system.  Even worse, it's hard convincing people
 in SL to visit your grid, coz it's all very hard, again due to
 deliberate policy decisions by LL.  LL knows their content is the key to
 their business, even though almost all of it was created by the users,
@@ -31,7 +31,7 @@ using OpenSim and its HyperGrid system.  Later it would be SledjHamr
 style worlds as well.
 
 A portal would be like Cobalt style portals, you can see the destination
-in real time, and step through it to go there.  They can be permenant,
+in real time, and step through it to go there.  They can be permanent,
 or temporary.  You can carry them in your inventory, they could just be
 normal scripted in world objects.
 
@@ -46,7 +46,7 @@ rez it anywhere.  Or you could rez this portal object in the world you
 are in.  Either way, once the portal is in a world, it connects to your
 home world, showing a view of your front gate, maybe including your
 lovely garden in your front yard.  The portal connects to the "front
-gate" of your homeworld.
+gate" of your home world.
 
 Any one on your home worlds access list can step through this portal to
 get to your home world.  Simple to use, no figuring out HyperGate URLs
@@ -59,7 +59,7 @@ Portals rezzed in world could be temporary, and vanish after who ever
 you invited to come stepped through it.  Or time out several minutes
 later so as not to clutter the universe with left over portals.  Or
 deleted by the owner / managers of the world you left them, or deleted
-yourself from your own world.  Portals could be permenant.  Say you
+yourself from your own world.  Portals could be permanent.  Say you
 found a larger world that you and the owner decide you wish to be a part
 of.  Portals could be left on both worlds linking them.  The "portal"
 could just be reconfiguring each world to locate the other world near
