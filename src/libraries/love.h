@@ -107,11 +107,23 @@ typedef struct _vec2
 } vec2;
 
 
+typedef enum
+{
+  TT_NORMAL = -1
+} TextureType;
+
+typedef enum
+{
+  MT_CUBE,
+  MT_SPHERE
+} MeshType;
+
+
 typedef struct _material
 {
-  int	face;
-  //type?
-  char	texture[PATH_MAX];
+  int		face;
+  TextureType	type;
+  char		texture[PATH_MAX];
   //colour
   //alpha
   //other stuff
@@ -120,16 +132,16 @@ typedef struct _material
 typedef struct _mesh
 {
   char		fileName[PATH_MAX];
-  //type
+  MeshType	type;
   vec3		pos;
   vec4		rot;
-  Eina_Inarray	materials;	// Material
-  Eina_Inarray	parts;		// Mesh
+  Eina_Inarray	*materials;	// Material
+  Eina_Inarray	*parts;		// Mesh
 } Mesh;
 
 typedef struct _stuffs
 {
-  char UUID[32], *name, *description, owner[32];
+  char UUID[45], *name, *description, owner[45];
   //type
   union
   {
@@ -144,7 +156,7 @@ typedef struct _stuffs
 typedef struct _loveStuffs
 {
   Stuffs	stuffs;
-  Eina_Inarray	contents;	// Stuffs
+  Eina_Inarray	*contents;	// Stuffs
 } LoveStuffs;
 
 

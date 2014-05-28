@@ -167,9 +167,10 @@ typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
   Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
-  Eina_Inarray	*mesh;		// Evas_3D_Mesh
-  Eina_Inarray	*materials;	// Evas_3D_Material
-  Eina_Inarray	*textures;	// Evas_3D_Texture
+  // Can't use in arrays here, can't find the element sizes of incomplete types.
+  Eina_Array	*mesh;		// Evas_3D_Mesh
+  Eina_Array	*materials;	// Evas_3D_Material
+  Eina_Array	*textures;	// Evas_3D_Texture
 } ExtantzStuffs;
 
 // Elm GL view related data here.
