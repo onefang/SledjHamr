@@ -141,7 +141,7 @@ typedef struct _mesh
 
 typedef struct _stuffs
 {
-  char UUID[45], *name, *description, owner[45];
+  char UUID[45], name[PATH_MAX], description[PATH_MAX], owner[45];
   //type
   union
   {

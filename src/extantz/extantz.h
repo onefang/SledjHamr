@@ -163,6 +163,8 @@ typedef struct _Scene_Data
   Evas_Object_Event_Cb clickCb;
 } Scene_Data;
 
+typedef void (* aniStuffs)(void *stuffs);
+
 typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
@@ -171,7 +173,13 @@ typedef struct _extantzStuffs
   Eina_Array	*mesh;		// Evas_3D_Mesh
   Eina_Array	*materials;	// Evas_3D_Material
   Eina_Array	*textures;	// Evas_3D_Texture
+  Eina_Accessor *aMesh;
+  Eina_Accessor *aMaterial;
+  Eina_Accessor *aTexture;
+  aniStuffs	animateStuffs;
+  Eina_Clist	node;
 } ExtantzStuffs;
+
 
 // Elm GL view related data here.
 typedef struct _GLData
@@ -237,6 +245,7 @@ typedef struct _globals
 
   GLData gld;
   Scene_Data	*scene;
+  Eina_Clist	stuffs;
 
   EPhysics_World *world;
 

@@ -145,7 +145,7 @@ static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void 
     char *name = NULL;
 
     name = evas_object_data_get(n, "Name");
-    if (strcmp("cube", name) == 0)
+    if (strcmp("onefang's test bed", name) == 0)
     {
       char SID[64];
 
@@ -587,6 +587,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   if (!ephysics_init())
     return 1;
 
+  eina_clist_init(&(ourGlobals.stuffs));
   gld = &ourGlobals.gld;
   gldata_init(gld);
 
