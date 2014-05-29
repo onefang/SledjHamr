@@ -109,12 +109,14 @@ typedef struct _vec2
 
 typedef enum
 {
+  TT_FACE = -2,
   TT_NORMAL = -1
 } TextureType;
 
 typedef enum
 {
   MT_CUBE,
+  MT_MESH,
   MT_SPHERE
 } MeshType;
 

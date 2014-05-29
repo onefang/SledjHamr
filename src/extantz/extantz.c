@@ -324,7 +324,7 @@ static void _draw_gl(Evas_Object *obj)
   drawGears(gld);
 #endif
 
-  _animate_scene(ourGlobals);
+  animateScene(ourGlobals);
   animateCamera(ourGlobals->scene);
 
 #if USE_IRR

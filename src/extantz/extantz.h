@@ -279,13 +279,18 @@ EAPI void finishIrr(globals *ourGlobals);
 void overlay_add(globals *ourGlobals);
 
 EAPI void Evas_3D_Demo_add(globals *ourGlobals);
-Eina_Bool _animate_scene(globals *ourGlobals);
+Eina_Bool animateScene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
 Scene_Data *scenriAdd(Evas_Object *win);
 Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
+Eina_Bool animateScene(globals *ourGlobals);
 void scenriDel(Scene_Data *scene);
+void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, int fake);
+ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
+  char *file, MeshType type, float px, float py, float pz, float rx, float ry, float rz, float rw);
+void addMaterial(ExtantzStuffs *e, int face, TextureType type, char *file);
 
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);
 void     filesShow(winFang *me, Evas_Smart_Cb func, void *data);
