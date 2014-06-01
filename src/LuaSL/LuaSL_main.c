@@ -1,3 +1,33 @@
+/* LuaSL - Server for compiling and running LSL scripts.
+
+It should be able to handle pureLSL scripts, pure Lua scripts, as well
+as hybrid LSL / Lua scripts.
+
+The script engine is separate from the world server.  This is for
+security and scalability.  The entire SledjHamr system does share Lua
+script running infrastructure in the Runnr shared library.
+
+For instance you could have a big server farm for a huge grid, with
+script servers on lots of servers, starting them up and bringing them
+down to suit the current load.  Running independently from the sim
+servers, so there's not a big spike of activity each time a heavily
+script laden avatar moves from one sim to the next as their scripts also
+transfer.  Just leave the avatars scripts running on what ever script
+server they are on.
+
+Another example could be your popular home world.  Dedicate one script
+server with two cores for the owner and trusted friends scripts.  One
+more server with one core in a chroot could be running externally
+sourced scripts that are not trusted.  A third server, running on a VM
+using one core, could be used for all scripts from the general public
+that drop in.
+
+Keep it flexible and light, people can do what they wish with their
+servers.
+
+*/
+
+
 
 #include "LuaSL.h"
 #include "SledjHamr.h"
