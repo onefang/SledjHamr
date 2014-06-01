@@ -2,26 +2,26 @@ Stuffs =
 {
   name = "Test sim",
   description = 'onefangs test SledjHamr sim.',
---  owner = '12345678-1234-4321-abcd-0123456789ab',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
   details = 
   {
     stuffs = 
     {
-      Mesh = 
+      ['onefang%27s%20test%20bed'] = 
       {
         fileName = 'onefang%27s%20test%20bed.omg',
         pos = {0.0, 4.0, 10.0},
         size = {1.0, 1.0, 1.0},
         rot = {1.0, 0.0, 0.0, 0.0},
       },
-      Mesh = 
+      ['sonic'] = 
       {
         fileName = 'sonic.omg',
         pos = {0.0, 0.0, 0.0},
         size = {1.0, 1.0, 1.0},
         rot = {-0.7071067811865475, 0.0, 0.0, 0.7071067811865475},
       },
-      Mesh = 
+      ['earth'] = 
       {
         fileName = 'earth.omg',
         pos = {0.0, 0.0, 0.0},

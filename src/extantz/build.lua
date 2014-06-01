@@ -24,4 +24,4 @@ runCommand('Irrlicht files',	dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c crappissp
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c CDemo.cpp -o CDemo.o ' .. LDFLAGS)
 runCommand(nil,			dir, 'g++ ' .. CFLAGS .. ' -ffast-math -c extantzCamera.cpp -o extantzCamera.o ' .. LDFLAGS)
 CFLAGS = CFLAGS .. ' -Wl,-export-dynamic'
-compileFiles('../../extantz',	dir, {'gears', 'ephysics_demo', 'camera', 'Evas_3D_demo', 'files', 'scenri', 'woMan', 'extantz'}, 'crappisspuke.o CDemo.o extantzCamera.o')
+compileFiles('../../extantz',	dir, {'gears', 'ephysics_demo', 'camera', 'files', 'scenri', 'woMan', 'extantz'}, 'crappisspuke.o CDemo.o extantzCamera.o')

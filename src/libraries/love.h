@@ -175,7 +175,7 @@ love server starts up
 Extantz client starts up
   -> love login(name, password)
           loads user details
-  <- love this is your user uuid
+  <- love this is your user uuid and start sim
   get sim details from lspace at this URL (or local disk directory file://)
   -> lspace gimme the sim (or just pick up the index.omg file from disk)
   <- lspace index.omg

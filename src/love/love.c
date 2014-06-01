@@ -506,11 +506,18 @@ static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 
 static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev)
 {
-    gameGlobals *ourGlobals = data;
+  gameGlobals *ourGlobals = data;
 
-    ourGlobals->client = ev->client;
-    ecore_con_client_timeout_set(ev->client, 0);
-    return ECORE_CALLBACK_RENEW;
+  ourGlobals->client = ev->client;
+  ecore_con_client_timeout_set(ev->client, 0);
+
+  if (ourGlobals->client)
+  {
+    // TODO - Sending the currently hard coded ownerKey here, should actually deal with logging in / hypergrid TP style things instead.
+    sendBack(ourGlobals->client, ownerKey, "loadSim('file://%s/Test%%20sim')", prefix_data_get());
+  }
+
+  return ECORE_CALLBACK_RENEW;
 }
 
 static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *ev)

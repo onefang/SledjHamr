@@ -11,7 +11,7 @@ static void on_pixels(void *data, Evas_Object *obj);
 int logDom = -1;	// Our logging domain.
 globals ourGlobals;
 static Eina_Strbuf *serverStream;
-static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
+//static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
 //static char *myName = "onefang rejected";
 
 
@@ -22,20 +22,11 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
   PI("Connected to love server.");
   ourGlobals->server = ev->server;
-
-  // Pretend we logged in.
-  strcpy(ourGlobals->uuid, myKey);
-
   if (ourGlobals->LSLGuiMess)  ourGlobals->LSLGuiMess->server = ourGlobals->server;
   if (ourGlobals->purkle)      ourGlobals->purkle->server     = ourGlobals->server;
 
-  Evas_3D_Demo_add(ourGlobals);
-  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
-  ourGlobals->gld.move = ourGlobals->scene->move;
-  evas_object_data_set(elm_image_object_get(ourGlobals->scene->image), "glob", ourGlobals);
-  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals->scene->image), on_pixels, ourGlobals);
-  // Setup our callback for clicking in world.
-  ourGlobals->scene->clickCb = _onWorldClick;
+  // TODO - If this is not a local love server, we should attempt to log in here.
+  //        Or attempt a hypergrid style TP.
 
   return ECORE_CALLBACK_RENEW;
 }
@@ -95,6 +86,40 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  else
 	    PE("No LSLGuiMess to send - %s", command);
 
+	}
+	else if (0 == strncmp(command, "loadSim(", 8))
+	{
+	  char *p, *t;
+	  int scenriLua;
+
+          // Pretend we logged in.  Actually in the case of a local love server, we realy have logged in now.
+          strcpy(ourGlobals->uuid, SID);
+          PI("Your UUID is %s.", ourGlobals->uuid);
+	  strcpy(buf, &command[8]);
+	  p = buf;
+          while ('"' == p[0])
+	    p++;
+	  while ('\'' == p[0])
+	    p++;
+	  t = p;
+          while (('"' != p[0]) && ('\'' != p[0]))
+	    p++;
+	  p[0] = '\0';
+	  // TODO - For now, assume it's a file:// URL.
+	  t += 7;
+	  //strcat(t, "/index.omg");
+	  PI("Loading local sim from %s", t);
+
+	// TODO - Later do the same with eet files in C code, but keep both implementations.
+	  lua_getglobal(ourGlobals->scene->L, "package");
+	  lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "loaded");
+	  lua_remove(ourGlobals->scene->L, -2);				// Removes "package"
+	  lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "scenriLua");
+	  lua_remove(ourGlobals->scene->L, -2);				// Removes "loaded"
+	  scenriLua = lua_gettop(ourGlobals->scene->L);
+
+	  push_lua(ourGlobals->scene->L, "@ ( $ $ )", scenriLua, "loadSim", t);
+//          Evas_3D_Demo_add(ourGlobals, t);
 	}
 	else
 	{
@@ -587,7 +612,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   if (!ephysics_init())
     return 1;
 
-  eina_clist_init(&(ourGlobals.stuffs));
   gld = &ourGlobals.gld;
   gldata_init(gld);
 
@@ -661,6 +685,14 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 #endif
 
   init_evas_gl(&ourGlobals);
+
+  // Setup our Evas_3D stuff.
+  ourGlobals.scene = scenriAdd(ourGlobals.win);
+  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+  ourGlobals.gld.move = ourGlobals.scene->move;
+  evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
+  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
+  ourGlobals.scene->clickCb = _onWorldClick;
 
   // Gotta do this after adding the windows, otherwise the menu renders under the window.
   //   This sucks, gotta redefine this menu each time we create a new window?

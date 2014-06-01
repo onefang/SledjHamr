@@ -132,6 +132,7 @@ typedef struct
 
 typedef struct _Scene_Data
 {
+  Evas             *evas;
   Evas_Object      *image;		// Our Elm image.
   Evas_3D_Scene    *scene;
   Evas_3D_Node     *root_node;
@@ -140,6 +141,8 @@ typedef struct _Scene_Data
 
   Evas_3D_Light    *light;
 
+  Eina_Clist       stuffs;
+/*
   Evas_3D_Mesh     *mesh;
   Evas_3D_Node     *mesh_node;
   Evas_3D_Material *material0;
@@ -157,10 +160,11 @@ typedef struct _Scene_Data
   Evas_3D_Node     *mesh3_node;
   Evas_3D_Material *material3;
   Evas_3D_Texture  *texture_diffuse;
-
+*/
   cameraMove       *move;
 
   Evas_Object_Event_Cb clickCb;
+  lua_State        *L;
 } Scene_Data;
 
 typedef void (* aniStuffs)(void *stuffs);
@@ -168,6 +172,7 @@ typedef void (* aniStuffs)(void *stuffs);
 typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
+  Scene_Data	*scene;
   Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
   // Can't use in arrays here, can't find the element sizes of incomplete types.
   Eina_Array	*mesh;		// Evas_3D_Mesh
@@ -245,7 +250,6 @@ typedef struct _globals
 
   GLData gld;
   Scene_Data	*scene;
-  Eina_Clist	stuffs;
 
   EPhysics_World *world;
 
@@ -278,7 +282,7 @@ EAPI void finishIrr(globals *ourGlobals);
 
 void overlay_add(globals *ourGlobals);
 
-EAPI void Evas_3D_Demo_add(globals *ourGlobals);
+EAPI void Evas_3D_Demo_add(globals *ourGlobals, char *file);
 Eina_Bool animateScene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
@@ -287,9 +291,9 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
 Eina_Bool animateScene(globals *ourGlobals);
 void scenriDel(Scene_Data *scene);
-void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, int fake);
+void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake);
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
-  char *file, MeshType type, float px, float py, float pz, float rx, float ry, float rz, float rw);
+  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw);
 void addMaterial(ExtantzStuffs *e, int face, TextureType type, char *file);
 
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);

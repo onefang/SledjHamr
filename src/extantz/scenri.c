@@ -1,11 +1,85 @@
+// scenri.c, deals with the in world scenery.
+
+/* TODO - I can see this growing to be very big, so should start to split it up at some point.
+  Base stuff -
+    scenriAdd/Del()
+    mouse hover showing tooltips
+    mouse click on objects
+    world animator that calls animators for stuffs
+    addStuffs/Materials() setupStuffs()
+
+  Scripting hooks
+    Lua hooks
+    LSL wrappers around Lua hooks
+    Lua file loader, maybe have this in libg3d?
+
+  Basic mesh stuff (likely just libg3d) -
+    create cube, sphere, etc
+    load meshes
+
+  In world editing
+
+*/
+
 #include "extantz.h"
 
+
+#define SKANG		"skang"
+#define THINGASM	"thingasm"
+
+
+
+static void _animateCube(ExtantzStuffs *stuffs)
+{
+  static float angle = 0.0f;
+  static int   frame = 0;
+  static int   inc   = 1;
+  Evas_3D_Mesh *m;
+
+  eina_accessor_data_get(stuffs->aMesh, 0, (void **) &m);
+
+  angle += 0.5;
+  if (angle > 360.0)		angle -= 360.0f;
+
+  frame += inc;
+  if (frame >= 20) inc = -1;
+  else if (frame <= 0) inc = 1;
+
+  eo_do(stuffs->mesh_node,
+    evas_3d_node_orientation_angle_axis_set(angle, 1.0, 1.0, 1.0),
+    evas_3d_node_mesh_frame_set(m, frame)
+  );
+}
+
+static void _animateSphere(ExtantzStuffs *stuffs)
+{
+  static float earthAngle = 0.0f;
+
+  earthAngle += 0.3;
+  if (earthAngle > 360.0)	earthAngle -= 360.0f;
+  eo_do(stuffs->mesh_node,
+    evas_3d_node_orientation_angle_axis_set(earthAngle, 0.0, 1.0, 0.0)
+  );
+}
+
+static void _animateSonic(ExtantzStuffs *stuffs)
+{
+  static int   sonicFrame = 0;
+  Evas_3D_Mesh *m;
+
+  eina_accessor_data_get(stuffs->aMesh, 0, (void **) &m);
+  sonicFrame += 32;
+  if (sonicFrame > 256 * 50)	sonicFrame = 0;
+  eo_do(stuffs->mesh_node,
+    evas_3d_node_mesh_frame_set(m, sonicFrame)
+  );
+}
 
 Eina_Bool animateScene(globals *ourGlobals)
 {
   ExtantzStuffs *e;
 
-  EINA_CLIST_FOR_EACH_ENTRY(e, &ourGlobals->stuffs, ExtantzStuffs, node)
+  EINA_CLIST_FOR_EACH_ENTRY(e, &ourGlobals->scene->stuffs, ExtantzStuffs, node)
   {
     if (e->animateStuffs)  e->animateStuffs(e);
   }
@@ -99,6 +173,52 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
 
 }
 
+static int _addStuffsL(lua_State *L)
+{
+  ExtantzStuffs *result = NULL;
+  char *uuid, *name, *description, *owner, *file;
+  int type;
+  double px, py, pz, rx, ry, rz, rw;
+
+  pull_lua(L, 1, "$ $ $ $ $ % # # # # # # #", &uuid, &name, &description, &owner, &file, &type, &px, &py, &pz, &rx, &ry, &rz, &rw);
+  result = addStuffs(uuid, name, description, owner, file, type, px, py, pz, rx, ry, rz, rw);
+  if (result)
+  {
+    lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
+    result->scene = (Scene_Data *) lua_touserdata(L, -1);
+
+    lua_pushlightuserdata(L, (void *) result);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int _addMaterialL(lua_State *L)
+{
+  ExtantzStuffs *e = NULL;
+  int face, type;
+  char *file;
+
+  pull_lua(L, 1, "* % % $", &e, &face, &type, &file);
+  if (e)
+    addMaterial(e, face, type, file);
+
+  return 0;
+}
+
+static int _stuffsSetupL(lua_State *L)
+{
+  ExtantzStuffs *e = NULL;
+  int fake;
+
+  pull_lua(L, 1, "* %", &e, &fake);
+  if (e)
+    stuffsSetup(e, e->scene, fake);
+
+  return 0;
+}
+
 Scene_Data *scenriAdd(Evas_Object *win)
 {
   Scene_Data *scene;
@@ -108,6 +228,8 @@ Scene_Data *scenriAdd(Evas_Object *win)
   evas = evas_object_evas_get(win);
   eo_do(win, evas_obj_size_get(&w, &h));
   scene = calloc(1, sizeof(Scene_Data));
+  scene->evas = evas;
+  eina_clist_init(&(scene->stuffs));
 
   scene->root_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
 
@@ -152,11 +274,61 @@ Scene_Data *scenriAdd(Evas_Object *win)
 
   elm_win_resize_object_add(win, scene->image);
 
+  scene->L = luaL_newstate();
+  if (scene->L)
+  {
+    char buf[PATH_MAX];
+    int skang, scenriLua;
+
+    luaL_openlibs(scene->L);
+    lua_getglobal(scene->L, "require");
+    lua_pushstring(scene->L, "scenriLua");
+    lua_call(scene->L, 1, 1);
+
+    // Shove our structure into the registry.
+    lua_pushlightuserdata(scene->L, scene);
+    lua_setfield(scene->L, LUA_REGISTRYINDEX, "sceneData");
+
+    // The skang module should have been loaded by now, so we can just grab it out of package.loaded[].
+    lua_getglobal(scene->L, "package");
+    lua_getfield(scene->L, lua_gettop(scene->L), "loaded");
+    lua_remove(scene->L, -2);				// Removes "package"
+    lua_getfield(scene->L, lua_gettop(scene->L), SKANG);
+    lua_remove(scene->L, -2);				// Removes "loaded"
+    lua_setfield(scene->L, LUA_REGISTRYINDEX, SKANG);
+    lua_getfield(scene->L, LUA_REGISTRYINDEX, SKANG);	// Puts the skang table back on the stack.
+    skang = lua_gettop(scene->L);
+
+    // Same for the scenriLua module, we just loaded it.
+    lua_getglobal(scene->L, "package");
+    lua_getfield(scene->L, lua_gettop(scene->L), "loaded");
+    lua_remove(scene->L, -2);				// Removes "package"
+    lua_getfield(scene->L, lua_gettop(scene->L), "scenriLua");
+    lua_remove(scene->L, -2);				// Removes "loaded"
+    scenriLua = lua_gettop(scene->L);
+
+    // Define our functions.
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "addStuffs", "Add an in world stuffs.", _addStuffsL,
+      "string,string,string,string,string,number,number,number,number,number,number,number,number", 0);
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "addMaterial", "Add a material to an in world stuffs.", _addMaterialL,
+      "userdata,number,number,string", 0);
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "stuffsSetup", "Render the stuffs.", _stuffsSetupL,
+      "userdata,number", 0);
+
+    // Pass the enums to scenriLua.
+    sprintf(buf, "MeshType = {cube = %d, mesh = %d, sphere = %d}", MT_CUBE, MT_MESH, MT_SPHERE);
+    doLuaString(scene->L, buf, "scenriLua");
+    sprintf(buf, "TextureType = {face = %d, normal = %d}", TT_FACE, TT_NORMAL);
+    doLuaString(scene->L, buf, "scenriLua");
+  }
+
   return scene;
 }
 
 void scenriDel(Scene_Data *scene)
 {
+  lua_close(scene->L);
+
   // TODO - I should probably free up all this Evas_3D stuff.  Oddly Eo doesn't bitch about it, only valgrind.
   //        Eo bitches if they are unref'd here.
   //        So either Eo or valgrind bitches, depending on what I do.  I'll leave them commented out, let valgrind bitch, and blame Evas_3D.
@@ -257,8 +429,8 @@ static vertex	       *sphere_vertices = NULL;
 static int		index_count = 0;
 static unsigned short  *sphere_indices = NULL;
 
-static inline vec3
-_normalize(const vec3 *v)
+
+static inline vec3 _normalize(const vec3 *v)
 {
     double  l = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
     vec3    vec;
@@ -269,7 +441,6 @@ _normalize(const vec3 *v)
 
     return vec;
 }
-
 
 static void _sphere_init(int precision)
 {
@@ -405,7 +576,7 @@ static void _sphere_init(int precision)
 }
 
 
-void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, int fake)
+void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 {
   char buf[PATH_MAX];
   Material *m;
@@ -419,12 +590,12 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   // Textures
   if (1 == fake)
   {
-    t = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
+    t = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
       evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels0[0])
       );
     eina_array_push(stuffs->textures, t);
 
-    t1 = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
+    t1 = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
       evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels1[0])
       );
     eina_array_push(stuffs->textures, t1);
@@ -433,7 +604,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   EINA_INARRAY_FOREACH(stuffs->stuffs.details.mesh->materials, m)
   {
     snprintf(buf, sizeof(buf), "%s/%s", prefix_data_get(), m->texture);
-    ti = eo_add(EVAS_3D_TEXTURE_CLASS, ourGlobals->evas,
+    ti = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
       evas_3d_texture_file_set(buf, NULL),
       evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR),		// Only for sphere originally.
       evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),	// Only for sonic  originally.
@@ -446,7 +617,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   if (1 == fake)
   {
     eina_accessor_data_get(stuffs->aTexture, 0, (void **) &t);
-    mi = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    mi = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
@@ -462,7 +633,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
 
     eina_accessor_data_get(stuffs->aTexture, 1, (void **) &t1);
     eina_accessor_data_get(stuffs->aTexture, 2, (void **) &ti);
-    mj = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    mj = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
@@ -481,7 +652,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   else
   {
     eina_accessor_data_get(stuffs->aTexture, 0, (void **) &t);
-    mi = eo_add(EVAS_3D_MATERIAL_CLASS, ourGlobals->evas,
+    mi = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
       evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, t),
 
       evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
@@ -503,7 +674,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   {
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     eina_accessor_data_get(stuffs->aMaterial, 1, (void **) &mj);
-    me = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
+    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
       evas_3d_mesh_vertex_count_set(24),
       evas_3d_mesh_frame_add(0),
 
@@ -529,7 +700,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
     _sphere_init(100);
 
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
-    me = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
+    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
       evas_3d_mesh_vertex_count_set(vertex_count),
       evas_3d_mesh_frame_add(0),
       evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_POSITION, sizeof(vertex), &sphere_vertices[0].position),
@@ -550,7 +721,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   {
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     snprintf(buf, sizeof(buf), "%s/%s", prefix_data_get(), stuffs->stuffs.details.mesh->fileName);
-    me = eo_add(EVAS_3D_MESH_CLASS, ourGlobals->evas,
+    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
       evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL),
       evas_3d_mesh_frame_material_set(0, mi),
       evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
@@ -559,7 +730,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
   }
 
   eina_accessor_data_get(stuffs->aMesh, 0, (void **) &me);
-  stuffs->mesh_node = eo_add_custom(EVAS_3D_NODE_CLASS, ourGlobals->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
+  stuffs->mesh_node = eo_add_custom(EVAS_3D_NODE_CLASS, scene->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", stuffs->stuffs.name, NULL),
     evas_3d_node_position_set(stuffs->stuffs.details.mesh->pos.x, stuffs->stuffs.details.mesh->pos.y, stuffs->stuffs.details.mesh->pos.z),
     evas_3d_node_orientation_set(stuffs->stuffs.details.mesh->rot.x, stuffs->stuffs.details.mesh->rot.y, stuffs->stuffs.details.mesh->rot.z, stuffs->stuffs.details.mesh->rot.w),
@@ -567,11 +738,19 @@ void stuffsSetup(ExtantzStuffs *stuffs, globals *ourGlobals, Scene_Data *scene, 
     );
 
   eo_do(scene->root_node, evas_3d_node_member_add(stuffs->mesh_node));
-  eina_clist_add_head(&(ourGlobals->stuffs), &(stuffs->node));
+  eina_clist_add_head(&(scene->stuffs), &(stuffs->node));
+
+  if (1 == fake)
+    stuffs->animateStuffs = (aniStuffs) _animateCube;
+  else if (2 == fake)
+    stuffs->animateStuffs = (aniStuffs) _animateSphere;
+  else if (3 == fake)
+    stuffs->animateStuffs = (aniStuffs) _animateSonic;
+
 }
 
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
-  char *file, MeshType type, float px, float py, float pz, float rx, float ry, float rz, float rw)
+  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw)
 {
   ExtantzStuffs *result = calloc(1, sizeof(ExtantzStuffs));
 

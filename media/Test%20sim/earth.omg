@@ -2,14 +2,19 @@ Stuffs =
 {
   name = "onefang's left testicle",
   description = 'Just a pretend world for testing SledjHamr.',
---  owner = '12345678-1234-4321-abcd-0123456789ab',
+  fake = 2,
+  uuid  = '12345678-1234-4321-abcd-012345sphere',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
   details = 
   {
     Mesh = 
     {
       kind = 'sphere',
 -- insert prim parameters here
-      materials = {'EarthDiffuse.png'},
+      materials =
+      {
+        [0] = {kind = 'face', texture = 'EarthDiffuse.png'},
+      },
     },
   },
 }
