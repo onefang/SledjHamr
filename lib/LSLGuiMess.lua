@@ -125,6 +125,8 @@ llSetTouchText(string text)
 
 
   -- TODO - This should be generalised and moved elsewhere.
+  --        Likely as a Lua counterpart to doLuaString() in Runnr.c
+  --        Or just combine them.
   local doLua = function (command)
     -- Yes I know, it hurt my brain just writing this.  lol
     -- It just swaps square brackets for curly ones, coz LSL uses [] to surround lists, and Lua uses {} to surround tables.
