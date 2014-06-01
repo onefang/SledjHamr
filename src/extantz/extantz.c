@@ -108,6 +108,7 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  // TODO - For now, assume it's a file:// URL.
 	  t += 7;
 	  //strcat(t, "/index.omg");
+	  strcpy(ourGlobals->scene->sim, t);
 	  PI("Loading local sim from %s", t);
 
 	// TODO - Later do the same with eet files in C code, but keep both implementations.
@@ -118,8 +119,8 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	  lua_remove(ourGlobals->scene->L, -2);				// Removes "loaded"
 	  scenriLua = lua_gettop(ourGlobals->scene->L);
 
-	  push_lua(ourGlobals->scene->L, "@ ( $ $ )", scenriLua, "loadSim", t);
-//          Evas_3D_Demo_add(ourGlobals, t);
+	  push_lua(ourGlobals->scene->L, "@ ( $ )", scenriLua, "loadSim", t, 0);
+	  PI("Loaded local sim from %s", t);
 	}
 	else
 	{

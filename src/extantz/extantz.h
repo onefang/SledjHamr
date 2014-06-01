@@ -141,26 +141,9 @@ typedef struct _Scene_Data
 
   Evas_3D_Light    *light;
 
-  Eina_Clist       stuffs;
-/*
-  Evas_3D_Mesh     *mesh;
-  Evas_3D_Node     *mesh_node;
-  Evas_3D_Material *material0;
-  Evas_3D_Material *material1;
-  Evas_3D_Texture  *texture0;
-  Evas_3D_Texture  *texture1;
-  Evas_3D_Texture  *texture_normal;
+  char             sim[PATH_MAX];
+  Eina_Clist       stuffs, loading;
 
-  Evas_3D_Mesh     *mesh2;
-  Evas_3D_Node     *mesh2_node;
-  Evas_3D_Material *material2;
-  Evas_3D_Texture  *texture2;
-
-  Evas_3D_Mesh     *mesh3;
-  Evas_3D_Node     *mesh3_node;
-  Evas_3D_Material *material3;
-  Evas_3D_Texture  *texture_diffuse;
-*/
   cameraMove       *move;
 
   Evas_Object_Event_Cb clickCb;
@@ -168,6 +151,16 @@ typedef struct _Scene_Data
 } Scene_Data;
 
 typedef void (* aniStuffs)(void *stuffs);
+
+typedef enum
+{
+  ES_NORMAL = -1,
+  ES_PRE = 1,
+  ES_PART,
+  ES_LOADED,
+  ES_RENDERED,
+  ES_TRASHED
+} ES_Stages;
 
 typedef struct _extantzStuffs
 {
@@ -183,6 +176,8 @@ typedef struct _extantzStuffs
   Eina_Accessor *aTexture;
   aniStuffs	animateStuffs;
   Eina_Clist	node;
+  ES_Stages	stage;
+  int		fake;
 } ExtantzStuffs;
 
 

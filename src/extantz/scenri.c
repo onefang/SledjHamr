@@ -28,6 +28,8 @@
 #define THINGASM	"thingasm"
 
 
+static Ecore_Idle_Enterer	*idler;
+
 
 static void _animateCube(ExtantzStuffs *stuffs)
 {
@@ -173,6 +175,101 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
 
 }
 
+static int _preallocateStuffs(lua_State *L)
+{
+  ExtantzStuffs *result = NULL;
+  Scene_Data *scene = NULL;
+  int count, i;
+
+  pull_lua(L, 1, "%", &count);
+  lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
+  scene = (Scene_Data *) lua_touserdata(L, -1);
+
+  result = calloc(count, sizeof(ExtantzStuffs));
+
+  for (i = 0;  i < count;  i++)
+  {
+    // TODO - using Eina arrays of any sort seems a bit heavy, might be better to just count and realloc?
+    result[i].materials = eina_array_new(3);
+    result[i].mesh      = eina_array_new(3);
+    result[i].textures  = eina_array_new(3);
+    result[i].aMaterial = eina_array_accessor_new(result[i].materials);
+    result[i].aMesh     = eina_array_accessor_new(result[i].mesh);
+    result[i].aTexture  = eina_array_accessor_new(result[i].textures);
+    result[i].stuffs.details.mesh = calloc(1, sizeof(Mesh));
+    result[i].stuffs.details.mesh->materials = eina_inarray_new(sizeof(Material), 1);
+    result[i].stuffs.details.mesh->parts     = eina_inarray_new(sizeof(Mesh), 1);
+    result[i].scene = scene;
+    result[i].stage = ES_PRE;
+    eina_clist_add_head(&(scene->loading), &(result[i].node));
+  }
+
+  return 0;
+}
+
+static int _partFillStuffs(lua_State *L)
+{
+  ExtantzStuffs *result = NULL;
+  Scene_Data *scene = NULL;
+  char *name, *file;
+  double px, py, pz, rx, ry, rz, rw;
+
+  pull_lua(L, 1, "$ $ # # # # # # #", &name, &file, &px, &py, &pz, &rx, &ry, &rz, &rw);
+  lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
+  scene = (Scene_Data *) lua_touserdata(L, -1);
+
+  EINA_CLIST_FOR_EACH_ENTRY(result, &(scene->loading), ExtantzStuffs, node)
+  {
+    if (ES_PRE == result->stage)
+    {
+      strcpy(result->stuffs.name, name);
+
+      strcpy(result->stuffs.file, file);
+      result->stuffs.details.mesh->pos.x = px;  result->stuffs.details.mesh->pos.y = py;  result->stuffs.details.mesh->pos.z = pz;
+      result->stuffs.details.mesh->rot.x = rx;  result->stuffs.details.mesh->rot.y = ry;  result->stuffs.details.mesh->rot.z = rz;  result->stuffs.details.mesh->rot.w = rw;
+      result->stage = ES_PART;
+      break;
+    }
+  }
+
+  return 0;
+}
+
+static int _finishStuffs(lua_State *L)
+{
+  ExtantzStuffs *result = NULL;
+  Scene_Data *scene = NULL;
+  char *uuid, *name, *file, *description, *owner, *mesh;
+  int type, fake;
+
+  pull_lua(L, 1, "$ $ $ $ $ $ % % ", &uuid, &name, &file, &description, &owner, &mesh, &type, &fake);
+  lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
+  scene = (Scene_Data *) lua_touserdata(L, -1);
+
+  EINA_CLIST_FOR_EACH_ENTRY(result, &(scene->loading), ExtantzStuffs, node)
+  {
+    if (strcmp(file, result->stuffs.name) == 0)
+    {
+      strcpy(result->stuffs.UUID, uuid);
+      strcpy(result->stuffs.name, name);
+      strcpy(result->stuffs.description, description);
+      strcpy(result->stuffs.owner, owner);
+      strcpy(result->stuffs.details.mesh->fileName, mesh);
+
+      result->stuffs.details.mesh->type = type;
+      result->fake = fake;
+      result->stage = ES_LOADED;
+
+      lua_pushlightuserdata(L, (void *) result);
+
+      PI("LOADED %s", name);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 static int _addStuffsL(lua_State *L)
 {
   ExtantzStuffs *result = NULL;
@@ -219,6 +316,38 @@ static int _stuffsSetupL(lua_State *L)
   return 0;
 }
 
+static Eina_Bool _stuffsLoader(void *data)
+{
+  ExtantzStuffs *result = NULL, *e1;
+  Scene_Data *scene = data;
+
+  // TODO - If there's lots of them, only do some.
+  EINA_CLIST_FOR_EACH_ENTRY_SAFE(result, e1, &(scene->loading), ExtantzStuffs, node)
+  {
+    if (ES_PART == result->stage)
+    {
+      int scenriLua;
+
+      lua_getglobal(scene->L, "package");
+      lua_getfield(scene->L, lua_gettop(scene->L), "loaded");
+      lua_remove(scene->L, -2);				// Removes "package"
+      lua_getfield(scene->L, lua_gettop(scene->L), "scenriLua");
+      lua_remove(scene->L, -2);				// Removes "loaded"
+      scenriLua = lua_gettop(scene->L);
+
+      push_lua(scene->L, "@ ( $ $ )", scenriLua, "finishLoadStuffs", scene->sim, result->stuffs.file, 0);
+    }
+    if (ES_LOADED == result->stage)
+    {
+      eina_clist_remove(&(result->node));
+      stuffsSetup(result, result->scene, result->fake);
+      result->stage = ES_RENDERED;
+    }
+  }
+
+  return ECORE_CALLBACK_RENEW;
+}
+
 Scene_Data *scenriAdd(Evas_Object *win)
 {
   Scene_Data *scene;
@@ -230,6 +359,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   scene = calloc(1, sizeof(Scene_Data));
   scene->evas = evas;
   eina_clist_init(&(scene->stuffs));
+  eina_clist_init(&(scene->loading));
 
   scene->root_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
 
@@ -308,6 +438,12 @@ Scene_Data *scenriAdd(Evas_Object *win)
     scenriLua = lua_gettop(scene->L);
 
     // Define our functions.
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "preallocateStuffs", "preallocate a bunch of stuffs.", _preallocateStuffs,
+      "number", 0);
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "partFillStuffs", "Put some info into a stuffs.", _partFillStuffs,
+      "string,string,number,number,number,number,number,number,number", 0);
+    push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "finishStuffs", "Put rest of info into a stuffs.", _finishStuffs,
+      "string,string,string,string,string,number,number,number,number,number,number,number,number", 0);
     push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "addStuffs", "Add an in world stuffs.", _addStuffsL,
       "string,string,string,string,string,number,number,number,number,number,number,number,number", 0);
     push_lua(scene->L, "@ ( = $ $ & $ )", skang, THINGASM, scenriLua, "addMaterial", "Add a material to an in world stuffs.", _addMaterialL,
@@ -321,6 +457,8 @@ Scene_Data *scenriAdd(Evas_Object *win)
     sprintf(buf, "TextureType = {face = %d, normal = %d}", TT_FACE, TT_NORMAL);
     doLuaString(scene->L, buf, "scenriLua");
   }
+
+  idler = ecore_idler_add(_stuffsLoader, scene);
 
   return scene;
 }
@@ -575,7 +713,6 @@ static void _sphere_init(int precision)
     }
 }
 
-
 void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 {
   char buf[PATH_MAX];
@@ -584,6 +721,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   Evas_3D_Material *mi, *mj;
   Evas_3D_Mesh     *me;
 
+  PI("REZZING %s", stuffs->stuffs.name);
 // TODO - These examples just don't fit neatly into anything I can whip up quickly as a data format.
 //        So just fake it for now, and expand the data format later.
 
@@ -774,6 +912,7 @@ ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
   result->stuffs.details.mesh->type = type;
   result->stuffs.details.mesh->pos.x = px;  result->stuffs.details.mesh->pos.y = py;  result->stuffs.details.mesh->pos.z = pz;
   result->stuffs.details.mesh->rot.x = rx;  result->stuffs.details.mesh->rot.y = ry;  result->stuffs.details.mesh->rot.z = rz;  result->stuffs.details.mesh->rot.w = rw;
+  result->stage = ES_NORMAL;
 
   return result;
 }
