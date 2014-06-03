@@ -1,6 +1,6 @@
 /* LuaSL - Server for compiling and running LSL scripts.
 
-It should be able to handle pureLSL scripts, pure Lua scripts, as well
+It should be able to handle pure LSL scripts, pure Lua scripts, as well
 as hybrid LSL / Lua scripts.
 
 The script engine is separate from the world server.  This is for
