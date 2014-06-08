@@ -1,0 +1,5 @@
+There is more to come on this subject, but I just want to make a quick
+note about stuff a friend just brought up.
+
+For people that share their computers, should have master passwords for
+each user, and encrypt accounts, logs, log out photos, settings, etc.
