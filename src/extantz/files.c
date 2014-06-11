@@ -176,13 +176,13 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   // Call back for double click or Enter pressed on file.
   evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
 
-  vbox = eo_add(ELM_OBJ_BOX_CLASS, me->win,
+  vbox = eo_add(ELM_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     elm_obj_box_horizontal_set(EINA_TRUE),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
 
-  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox,
+  hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs, NULL),
     elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
@@ -199,7 +199,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, hoversel);
   eo_unref(hoversel);
 
-  hoversel = eo_add(ELM_OBJ_HOVERSEL_CLASS, vbox,
+  hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs, NULL),
     elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
@@ -215,7 +215,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   eo_unref(hoversel);
 
 
-  bt = eo_add(ELM_OBJ_CHECK_CLASS, vbox,
+  bt = eo_add(ELM_CHECK_CLASS, vbox,
     elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
     evas_obj_visibility_set(EINA_TRUE)
     );
@@ -224,7 +224,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  rdg = rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox,
+  rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
     evas_obj_visibility_set(EINA_TRUE)
     );
@@ -235,7 +235,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   _mode_changed_cb(fs, rd, NULL);
   eo_unref(rd);
 
-  rd = eo_add(ELM_OBJ_RADIO_CLASS, vbox,
+  rd = eo_add(ELM_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
     evas_obj_visibility_set(EINA_TRUE)
     );
@@ -247,7 +247,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   // No need to unref this, it's taken care of already.
   //eo_unref(rdg);
 
-  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
+  bt = eo_add(ELM_BUTTON_CLASS, me->win,
     evas_obj_visibility_set(EINA_TRUE)
   );
   elm_object_text_set(bt, "OK");
@@ -255,7 +255,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, bt);
   eo_unref(bt);
 
-  bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
+  bt = eo_add(ELM_BUTTON_CLASS, me->win,
     evas_obj_visibility_set(EINA_TRUE)
   );
   elm_object_text_set(bt, "CANCEL");

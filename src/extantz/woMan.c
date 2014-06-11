@@ -271,7 +271,7 @@ winFang *woMan_add(globals *ourGlobals)
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
     elm_layout_box_append(me->win, WF_BOX, nf);
 
-    bt = eo_add(ELM_OBJ_BUTTON_CLASS, me->win,
+    bt = eo_add(ELM_BUTTON_CLASS, me->win,
 //		evas_obj_text_set("Login"),
 		evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 		evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),

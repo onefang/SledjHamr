@@ -482,7 +482,7 @@ static void makeMainMenu(globals *ourGlobals)
     Elm_Object_Item *tb_it;
 
     // A toolbar thingy.
-    tb = eo_add(ELM_OBJ_TOOLBAR_CLASS, ourGlobals->win,
+    tb = eo_add(ELM_TOOLBAR_CLASS, ourGlobals->win,
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
@@ -670,7 +670,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   // Override the background image
 #if 1
   snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
-  ourGlobals.mainWindow->bg = eo_add(ELM_OBJ_IMAGE_CLASS, ourGlobals.mainWindow->win,
+  ourGlobals.mainWindow->bg = eo_add(ELM_IMAGE_CLASS, ourGlobals.mainWindow->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     elm_obj_image_file_set(buf, NULL),

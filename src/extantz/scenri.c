@@ -373,7 +373,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   // Any colour or texture applied to this window gets applied to the scene, including transparency.
   // Interestingly enough, the position and size of the render seems to NOT depend on the position and size of this image?
   // Note that we can't reuse the windows background image, Evas_3D needs both images.
-  scene->image = eo_add(ELM_OBJ_IMAGE_CLASS, win,
+  scene->image = eo_add(ELM_IMAGE_CLASS, win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     evas_obj_visibility_set(EINA_TRUE),

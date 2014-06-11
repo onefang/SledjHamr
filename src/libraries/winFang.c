@@ -211,7 +211,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   }
 
   snprintf(buf, sizeof(buf), "%s/winFang.edj", prefix_data_get());
-  result->layout = eo_add(ELM_OBJ_LAYOUT_CLASS, obj,
+  result->layout = eo_add(ELM_LAYOUT_CLASS, obj,
     evas_obj_size_set(w, h),
     evas_obj_position_set(x, y),
     evas_obj_name_set(WF_LAYOUT),
@@ -229,7 +229,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
     // Something to catch clicks on the background, for moving the window.
     // Coz Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
-    obj = eo_add(EVAS_OBJ_RECTANGLE_CLASS, result->layout,
+    obj = eo_add(EVAS_RECTANGLE_CLASS, result->layout,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_name_set(WF_UNDERLAY),
@@ -249,7 +249,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
            if (i == 1)   cx += result->w;
       else if (i == 2)  {cx += result->w;  cy += result->h;}
       else if (i == 3)   cy += result->h;
-      result->hand[i] = eo_add(EVAS_OBJ_IMAGE_CLASS, result->e,
+      result->hand[i] = eo_add(EVAS_IMAGE_CLASS, result->e,
 	evas_obj_image_filled_set(EINA_TRUE),
 	evas_obj_image_file_set(buf, NULL),
 	evas_obj_size_set(31, 31),
@@ -260,7 +260,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       eo_unref(result->hand[i]);
     }
 
-    result->title = eo_add(ELM_OBJ_LABEL_CLASS, result->layout,
+    result->title = eo_add(ELM_LABEL_CLASS, result->layout,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_visibility_set(EINA_TRUE)
@@ -271,7 +271,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     eo_unref(result->title);
   }
 
-  result->grid = eo_add(ELM_OBJ_GRID_CLASS, result->layout,
+  result->grid = eo_add(ELM_GRID_CLASS, result->layout,
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     evas_obj_name_set(WF_SWALLOW),
@@ -373,21 +373,21 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
   if (NULL == widgetClasses[0].name)
   {
     i = 0;
-    widgetClasses[i].name = WT_CHECK;	widgetClasses[i++].klass = 	ELM_OBJ_CHECK_CLASS;
-    widgetClasses[i].name = WT_BOX;	widgetClasses[i++].klass = 	ELM_OBJ_BOX_CLASS;
-    widgetClasses[i].name = WT_BUTTON;	widgetClasses[i++].klass = 	ELM_OBJ_BUTTON_CLASS;
-    widgetClasses[i].name = WT_ENTRY;	widgetClasses[i++].klass = 	ELM_OBJ_ENTRY_CLASS;
-    widgetClasses[i].name = WT_FILES;	widgetClasses[i++].klass = 	ELM_OBJ_FILESELECTOR_CLASS;
-    widgetClasses[i].name = WT_GRID;	widgetClasses[i++].klass = 	ELM_OBJ_GRID_CLASS;
-    widgetClasses[i].name = WT_HOVER;	widgetClasses[i++].klass = 	ELM_OBJ_HOVERSEL_CLASS;
-    widgetClasses[i].name = WT_IMAGE;	widgetClasses[i++].klass = 	ELM_OBJ_IMAGE_CLASS;
-    widgetClasses[i].name = WT_LABEL;	widgetClasses[i++].klass = 	ELM_OBJ_LABEL_CLASS;
-    widgetClasses[i].name = WT_LAYOUT;	widgetClasses[i++].klass = 	ELM_OBJ_LAYOUT_CLASS;
-    widgetClasses[i].name = WT_RADIO;	widgetClasses[i++].klass = 	ELM_OBJ_RADIO_CLASS;
-    widgetClasses[i].name = WT_RECT;	widgetClasses[i++].klass = 	EVAS_OBJ_RECTANGLE_CLASS;
-    widgetClasses[i].name = WT_TEXT;	widgetClasses[i++].klass = 	EVAS_OBJ_TEXT_CLASS;
-    widgetClasses[i].name = WT_TEXTBOX; widgetClasses[i++].klass = 	ELM_OBJ_ENTRY_CLASS;
-    widgetClasses[i].name = WT_TOOLBAR;	widgetClasses[i++].klass = 	ELM_OBJ_TOOLBAR_CLASS;
+    widgetClasses[i].name = WT_CHECK;	widgetClasses[i++].klass = 	ELM_CHECK_CLASS;
+    widgetClasses[i].name = WT_BOX;	widgetClasses[i++].klass = 	ELM_BOX_CLASS;
+    widgetClasses[i].name = WT_BUTTON;	widgetClasses[i++].klass = 	ELM_BUTTON_CLASS;
+    widgetClasses[i].name = WT_ENTRY;	widgetClasses[i++].klass = 	ELM_ENTRY_CLASS;
+    widgetClasses[i].name = WT_FILES;	widgetClasses[i++].klass = 	ELM_FILESELECTOR_CLASS;
+    widgetClasses[i].name = WT_GRID;	widgetClasses[i++].klass = 	ELM_GRID_CLASS;
+    widgetClasses[i].name = WT_HOVER;	widgetClasses[i++].klass = 	ELM_HOVERSEL_CLASS;
+    widgetClasses[i].name = WT_IMAGE;	widgetClasses[i++].klass = 	ELM_IMAGE_CLASS;
+    widgetClasses[i].name = WT_LABEL;	widgetClasses[i++].klass = 	ELM_LABEL_CLASS;
+    widgetClasses[i].name = WT_LAYOUT;	widgetClasses[i++].klass = 	ELM_LAYOUT_CLASS;
+    widgetClasses[i].name = WT_RADIO;	widgetClasses[i++].klass = 	ELM_RADIO_CLASS;
+    widgetClasses[i].name = WT_RECT;	widgetClasses[i++].klass = 	EVAS_RECTANGLE_CLASS;
+    widgetClasses[i].name = WT_TEXT;	widgetClasses[i++].klass = 	EVAS_TEXT_CLASS;
+    widgetClasses[i].name = WT_TEXTBOX; widgetClasses[i++].klass = 	ELM_ENTRY_CLASS;
+    widgetClasses[i].name = WT_TOOLBAR;	widgetClasses[i++].klass = 	ELM_TOOLBAR_CLASS;
   }
 
   for (i = 0; i < ARRAY_LENGTH(widgetClasses); i++)
