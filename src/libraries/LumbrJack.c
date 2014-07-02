@@ -131,6 +131,7 @@ int loggingStartup(char *name, int logDom)
   eina_log_domain_level_set("eio", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("ephysics", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("evas", EINA_LOG_LEVEL_WARN);
+  eina_log_domain_level_set("EvasGL", EINA_LOG_LEVEL_WARN);
   eina_log_domain_level_set("evas_main", EINA_LOG_LEVEL_ERR);
 
   return logDom;
