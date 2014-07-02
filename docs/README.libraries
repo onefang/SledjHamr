@@ -20,7 +20,8 @@ https://launchpad.net/~mwild1/+archive/ppa for 12.04.  Not including
 that anymore.
 
 luaproc has been hacked up a bit, and will continue to be hacked up. 
-Merged it into LuaSL, so it's no longer here.
+Merged it into LuaSL, so it's no longer here.  Then replaced it
+completely.
 
 --------------------------------------------------------------------
 

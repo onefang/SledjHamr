@@ -33,8 +33,8 @@ Luaproc is used to start up operating system threads and hand Lua states
 between them.  Luaproc messaging is also being used, but might need to
 change to edje messaging.  Note - luaproc has been extensively rewritten
 for this project, mostly converting it to use EFL.  That rewrite
-substantially shrunk the source code.  More might be rewritten in
-future.
+substantially shrunk the source code.  Then it was all rewritten again
+to use EFL threads, and cooperative multitasking.
 
 THIS IS WHERE WE ARE RIGHT NOW.
 
