@@ -5,3 +5,13 @@ It's in the ClientHamr section coz on the server side, they are just
 dealt with as blobs to be sent to the viewers.  This may change if we
 implement animating link sets, and interaction with the sim physics.
 
+Also -
+======
+
+Some useful links for actually writing animation code -
+
+https://en.wikipedia.org/wiki/Portal:Computer_graphics
+https://en.wikipedia.org/wiki/3D_computer_graphics
+https://en.wikipedia.org/wiki/Skeletal_animation
+https://en.wikipedia.org/wiki/Morph_target_animation
+https://en.wikipedia.org/wiki/Inverse_kinematics
