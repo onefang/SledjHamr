@@ -7,6 +7,8 @@ TODO - Yes I know this breaks our design goals,
        The system should "compile" Lua based files to eet as well.
        For now Lua based files is easier to debug.
 
+TODO - in index.omg the object file names are in both the stuffs index names and the fileName value.  Should get rid of fileName maybe?
+	Or maybe only get rid of it if it's not a *.omg file.
 ]]
 
 do
