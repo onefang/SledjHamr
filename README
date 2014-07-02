@@ -226,7 +226,7 @@ libraries for them more or less mature.  Lots of research and
 standardisation effort has gone into the major popular ones.  So we
 don't really need to deal with that.  Problem solved already.  Well,
 except for JPEG 2000, which outside of SL and medical use, no one has
-even heard of.  It's library support is not so good, and made even wosre
+even heard of.  It's library support is not so good, and made even worse
 by the fact that the best decoding algorithm for it is patented and out
 of reach to open source developers.  Still, lots and lots of SL and
 OpenSim content is in JPEG 2000 format, and it is good as a network
@@ -283,7 +283,7 @@ Basically, you can think of EFL as a replacement for the GTK that SL
 viewers use.  They both offer more or less a similar feature set, and
 both use more or less the same standard libraries underneath.  GTK uses
 the GLib main loop, which EFL supports via wrappers.  I think that EFL
-fits the SLedjHamr design goals much better though.
+fits the SledjHamr design goals much better though.
 
 As a bonus, lots and lots of eye candy, complete with a system for
 writing your own eye candy, and over riding the system supplied eye
@@ -344,7 +344,7 @@ Lua has been great for quickly building prototype stuff.  So far most of
 the network protocols and file formats have been based on Lua.  Which
 goes against our goals, so expect that to be temporary.  Specifically,
 once we get around to actually implementing the nails protocol stuff,
-some of the Lua network and file formats will get replaced be nails.
+some of the Lua network and file formats will get replaced by nails.
 
 The Lua GUI code is loosely based on my ancient matrix-RAD stuff that was
 written in Java.  The fact that I had most of it working within a week
@@ -391,13 +391,13 @@ with EFL.  I've not tried it yet, but it was on my TODO.
 
 In the mean time, and so recently that it only gets released later
 today, Evas_3D was added to EFL.  Evas is one of the sub libraries of
-EFL that deals with canvasses, it's a 3D mesh, camera, and light system
-designed to be part of Evas.  So it has the major advantage of already
-being well integrated, it's part of EFL.  I've added test code for it
-now, and no flickering.  I even have test code using both Irrlicht and
-Evas_3D in the same window space.  It's major disadvantage is that it's
-only a very recent project that has (until later today) not been
-released, Irrlicht is much more mature.  So Evas_3D only has basic
+EFL that deals with canvasses. Evas_3D is a 3D mesh, camera, and light
+system designed to be part of Evas.  So it has the major advantage of
+already being well integrated, it's part of EFL.  I've added test code
+for it now, and no flickering.  I even have test code using both
+Irrlicht and Evas_3D in the same window space.  It's major disadvantage
+is that it's only a very recent project that has (until later today) not
+been released, Irrlicht is much more mature.  So Evas_3D only has basic
 stuff, though it's mostly complete basic stuff.  On the other hand, a
 lot of what's missing in Evas_3D I was thinking about rewriting for
 Irrlicht anyway.  So far one major missing bit is Bullet Physics
@@ -476,7 +476,7 @@ Edje Lua
 		Edje Lua can add the bit library if it detects LuaJIT or 5.2.
 		LuaSL stuff needs to be sandboxed as well, maybe we can use this new host function thingy to add LSL to?
 		Really should investigate if this shit being duplicated in thousands of LuaSL scripts soaks up lots of memory?  And require("LSL") versus this new host function thingy.
-		On the other hand, a lot oy this LSL library would end up being wrappers around nails in the future, which is a shared library.
+		On the other hand, a lot of this LSL library would end up being wrappers around nails in the future, which is a shared library.
     LuaJIT?  Optional?
 	Need to sort out it's memory allocator, coz apparently the one Edje uses is not thread safe, but the LuaJIT one does not limit memory per script like Edje does.
 	    Maybe Edje can use an Eina allocator?

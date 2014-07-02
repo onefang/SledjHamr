@@ -45,7 +45,7 @@ windows.
 You should see a lot of logging style output and a big window.  Most of
 the logging style output is from the LSL script runner as it compiles
 then runs a copy of the MLP scripts.  The big 3D window has it's own
-internal windows.  Try clicking on the rotating cube at te bottom, then
+internal windows.  Try clicking on the rotating cube at the bottom, then
 wait until the output from that has stopped, and click again.  The cube
 is pretending to be furniture with MLP scripts in it, and is actually
 running the test MLP scripts.

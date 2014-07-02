@@ -16,7 +16,7 @@ In SledjHamr, as well as allowing completely unrestricted and easy
 access to lots of content, we should make it easy to travel between
 virtual worlds.  Part of this is to include compatibility layers in
 separate modules to be compatible with what ever virtual world systems
-aer around.  You would still need to create accounts and log onto those
+are around.  You would still need to create accounts and log onto those
 worlds though.  How can we mix them up?  I imagine easy to use portal
 objects.  Let's start with the basics, and work out some more complex
 examples.

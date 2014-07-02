@@ -223,8 +223,8 @@ structure.  A directory for ground level, and one for each sky box for
 instance.  Relative paths inside .omg files sorts that all out.
 
 A sims index.omg file might be constantly updated for busy sims.  Could
-generate it on the fly by the lspace server, based on the actual
-contents of the sim directory.  Alternative lspace servers could just
+generate it on the fly by the Lspace server, based on the actual
+contents of the sim directory.  Alternative Lspace servers could just
 use a CMS system for all of this anyway.  They would still use the same
 structure for URLs and .omg files.
 
