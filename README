@@ -377,7 +377,7 @@ I've not settled on which 3D rendering system to use yet.  The options I
 have short listed and experimented with are Irrlicht and Evas_3D.
 
 I had looked at various open source 3D render systems, including things
-like Orge, with a specific set of goals in mind.  A major goal was to
+like Ogre, with a specific set of goals in mind.  A major goal was to
 support the plethora of low powered laptops every one uses for virtual
 worlds that have bare minimum 3D support, or even none at all.  Irrlicht
 has a great software renderer for people with no 3D hardware.  That got
