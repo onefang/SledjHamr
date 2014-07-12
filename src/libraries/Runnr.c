@@ -484,7 +484,7 @@ void runScript(script *s)
   {
 #if THREADIT
     ecore_thread_feedback_run(_workerFunction, _notify, _end, _cancel, s, EINA_FALSE);
-#elsif
+#else
     _workerFunction(s, NULL);
 #endif
   }
