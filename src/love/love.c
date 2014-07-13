@@ -172,6 +172,7 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
 // Borrowed from toybox, though it's real slow.
 // TODO - Replace this quick and dirty llGetNotecardLine() with something using mmap and cached files that assumes more lines will be read soon.
+//          Keep the mmap and stuff around until a call to dataserver with a notecard line DOESN'T request a new line.
 char *get_rawline(int fd, long *plen, char end)
 {
   char c, *buf = NULL;
