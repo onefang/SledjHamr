@@ -85,9 +85,10 @@ if 'nil' == type(args) then
   -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
   print('_______________ BUILDING lemon _______________')
   compileFiles('lemon', 'libraries/lemon', {'lemon'}, '')
-  print('_______________ BUILDING Irrlicht _______________')
+
+--  print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
-  runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
+--  runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
   buildSub('libraries',	'src/libraries')
   buildSub('LuaSL',	'src/LuaSL')
   buildSub('love',	'src/love')
