@@ -83,8 +83,6 @@ EDJE_FLAGS = '-id ' .. baseDir .. '/media -fd ' .. baseDir .. '/media'
 
 if 'nil' == type(args) then
   -- Building this passes my "holding breath" test, if it can compile while I'm holding my breath, no need for make files.
-  print('_______________ BUILDING lemon _______________')
-  compileFiles('lemon', 'libraries/lemon', {'lemon'}, '')
 
 --  print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
