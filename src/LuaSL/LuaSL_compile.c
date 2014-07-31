@@ -2202,7 +2202,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	}
 
 	// Compile the constants.
-	snprintf(buf, sizeof(buf), "lua -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
+	snprintf(buf, sizeof(buf), "luajit -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
 	system(buf);
 	snprintf(buf, sizeof(buf), "%s/constants.lsl", prefix_lib_get());
 	compiler->file = strdup(buf);
