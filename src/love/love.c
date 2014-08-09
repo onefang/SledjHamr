@@ -46,10 +46,8 @@ typedef struct _Lscript
 {
     char		SID[PATH_MAX];
     char		fileName[PATH_MAX];
-    struct timeval	startTime;
     float		compileTime;
     int			bugs, warnings;
-    boolean		running;
 } LoveScript;
 
 
@@ -58,7 +56,6 @@ static Eina_Strbuf *LuaSLStream;
 static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
-static float compileTime = 0.0;
 static struct timeval startTime;
 //static int timedEvent = 0;
 static char *ownerKey = "12345678-1234-4321-abcd-0123456789ab";
@@ -145,7 +142,6 @@ static void dirList_compile(const char *name, const char *path, void *data)
 	    LoveScript *me = calloc(1, sizeof(LoveScript));
 
 	    scriptCount++;
-	    gettimeofday(&me->startTime, NULL);
 	    snprintf(me->SID, sizeof(me->SID), FAKE_UUID);
 	    snprintf(me->fileName, sizeof(me->fileName), "%s/%s", path, name);
 	    eina_hash_add(ourGlobals->scripts, me->SID, me);
@@ -161,8 +157,14 @@ static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 
   ourGlobals->serverLuaSL = ev->server;
 
-  // Compile and run scripts.
+  // Zero everything.
+  eina_hash_free(ourGlobals->scripts);
+  ourGlobals->scripts = eina_hash_string_superfast_new(NULL);
   gettimeofday(&startTime, NULL);
+  compiledCount = 0;
+  scriptCount = 0;
+
+  // Compile and run scripts.
   snprintf(buf, sizeof(buf), "%s/Test%%20sim", prefix_data_get());
   eina_file_dir_list(buf, EINA_TRUE, dirList_compile, data);
 
@@ -273,12 +275,12 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		{
 		    struct timeval now;
 
-		    me->compileTime = timeDiff(&now, &me->startTime);
 		    compiledCount++;
-		    compileTime += me->compileTime;
-////		    PD("Average compile speed is %f scripts per second", compiledCount / compileTime);
 		    if (compiledCount == scriptCount)
-			PD("TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
+		    {
+			float total = timeDiff(&now, &startTime);
+			PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
+		    }
 		}
 	    }
 	    else if (0 == strcmp(command, "compiled(true)"))
@@ -287,16 +289,14 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 		{
 		    struct timeval now;
 
-		    me->compileTime = timeDiff(&now, &me->startTime);
-		    me->running = TRUE;
 		    compiledCount++;
-		    compileTime += me->compileTime;
-//		    PD("Average compile speed is %f scripts per second", compiledCount / compileTime);
 		    if (compiledCount == scriptCount)
-			PD("TOTAL compile speed is %f scripts per second", compiledCount / timeDiff(&now, &startTime));
+		    {
+			float total = timeDiff(&now, &startTime);
+			PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
+		    }
 		}
-//		PD("The compile of %s worked, running it now.", SID);
-		sendForth(ourGlobals->serverLuaSL, SID, "run()");
+		sendForth(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
 	    }
 	    else
 	    {
