@@ -183,14 +183,7 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Ad
 static void _compileCb(LuaCompiler *compiler)
 {
   if (0 == compiler->bugCount)
-  {
-    gameGlobals *ourGlobals = compiler->data;
-    script *me = scriptAdd(compiler->file, compiler->SID, send2server, ourGlobals);
-
-    me->client = compiler->client;
-    eina_hash_add(ourGlobals->names, me->fileName, me);
     sendBack(compiler->client, compiler->SID, "compiled(true)");
-  }
   else
     sendBack(compiler->client, compiler->SID, "compiled(false)");
   free(compiler->luaName);
@@ -225,7 +218,6 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    {
 		char *temp;
 		char *file;
-		char *name;
 		LuaSL_compiler *compiler = calloc(1, sizeof(LuaSL_compiler));
 
 		strcpy(buf, &command[8]);
@@ -235,7 +227,6 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    temp++;
 		temp[0] = '\0';
 
-		name = &file[strlen(prefix_data_get())];
 		compiler->compiler.file = strdup(file);
 		compiler->compiler.SID = strdup(SID);
 		compiler->compiler.client = ev->client;
@@ -254,10 +245,22 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		}
 #endif
 	    }
-	    else if (0 == strcmp(command, "run()"))
+	    else if (0 == strncmp(command, "run(", 4))
 	    {
+		char *temp;
+		char *file;
 		script *me;
 
+		strcpy(buf, &command[4]);
+		temp = buf;
+		file = temp;
+		while (')' != temp[0])
+		    temp++;
+		temp[0] = '\0';
+		me = scriptAdd(file, SID, send2server, ourGlobals);
+
+		me->client = ev->client;
+		eina_hash_add(ourGlobals->names, me->fileName, me);
 		me = getScript(SID);
 		if (me)
 		{
