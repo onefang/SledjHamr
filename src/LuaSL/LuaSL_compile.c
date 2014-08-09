@@ -2238,6 +2238,8 @@ boolean compileLSL(LuaSL_compiler *compiler)
     compiler->ignorable = eina_strbuf_new();
 #endif
 
+    PI("Compiling %s.", compiler->compiler.file);
+
     compiler->file = fopen(compiler->compiler.file, "r");
     if (NULL == compiler->file)
     {

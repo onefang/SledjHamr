@@ -236,7 +236,6 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		temp[0] = '\0';
 
 		name = &file[strlen(prefix_data_get())];
-		PD("Compiling %s, %s.", SID, name);
 		compiler->compiler.file = strdup(file);
 		compiler->compiler.SID = strdup(SID);
 		compiler->compiler.client = ev->client;
