@@ -36,6 +36,7 @@ typedef struct _LuaCompile
   int			bugCount;
   void			*data;
   Ecore_Con_Client	*client;
+  compileCb		parser;
   compileCb		cb;
 } LuaCompiler;
 

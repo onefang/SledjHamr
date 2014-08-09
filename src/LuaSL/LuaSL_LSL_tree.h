@@ -370,13 +370,10 @@ Need to do something about that.
 
 typedef struct
 {
-    gameGlobals		*game;
-    Ecore_Con_Client	*client;
+    LuaCompiler		compiler;
     void		*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
     int			argc;
     char		**argv;
-    char		SID[37];
-    char		fileName[PATH_MAX];
     FILE		*file;
     LSL_Leaf		*ast;
     LSL_Script		script;
@@ -391,6 +388,8 @@ typedef struct
     int			column, line;
     int			undeclared;
     boolean		inState;
+    boolean		doConstants;
+    boolean		result;
 } LuaSL_compiler;
 
 
@@ -401,7 +400,7 @@ typedef struct
 
 
 boolean compilerSetup(gameGlobals *ourGlobals);
-boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants);
+boolean compileLSL(LuaSL_compiler *lCompiler);
 void burnLeaf(void *data);
 
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);

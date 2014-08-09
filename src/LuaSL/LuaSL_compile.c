@@ -362,7 +362,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	else
 	{
 	    compiler->script.bugCount++;
-	    sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -404,7 +404,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == lType)
 	    {
 		compiler->script.warningCount++;
-//		sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+//		sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -432,7 +432,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == rType)
 	    {
 		compiler->script.warningCount++;
-//		sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+//		sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -633,7 +633,7 @@ else
 	    }
 
 	    compiler->script.bugCount++;
-	    sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	}
     }
 
@@ -2191,7 +2191,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     if (tokens)
     {
 	char buf[PATH_MAX];
-	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+	LuaSL_compiler *compiler = calloc(1, sizeof(LuaSL_compiler));
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
@@ -2205,12 +2205,13 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	snprintf(buf, sizeof(buf), "luajit -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
 	system(buf);
 	snprintf(buf, sizeof(buf), "%s/constants.lsl", prefix_lib_get());
-	compiler->file = strdup(buf);
-	compiler->SID = strdup("FAKE_SID");
-	compiler->data = ourGlobals;
-	compiler->cb = _compileCb;
-	if (!compileLSL(compiler, ourGlobals, NULL, "FAKE_SID", buf, TRUE))
-	  _compileCb(compiler);
+	compiler->compiler.file = strdup(buf);
+	compiler->compiler.SID = strdup("FAKE_SID");
+	compiler->compiler.data = ourGlobals;
+	compiler->compiler.cb = _compileCb;
+	compiler->doConstants = TRUE;
+	if (!compileLSL(compiler))
+	  _compileCb(&compiler->compiler);
 
 	return TRUE;
     }
@@ -2220,74 +2221,66 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     return FALSE;
 }
 
-boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Client *client, char *SID, char *script, boolean doConstants)
+boolean compileLSL(LuaSL_compiler *compiler)
 {
-    boolean result = FALSE;
-    LuaSL_compiler compiler;
     void *pParser = ParseAlloc(malloc);
     int yv;
 
 // Parse the LSL script, validating it and reporting errors.
 //   Just pass all LSL constants and ll*() )function names through to Lua, assume they are globals there.
 
-    memset(&compiler, 0, sizeof(LuaSL_compiler));
-    compiler.game = ourGlobals;
-    compiler.client = client;
-    compiler.script.functions = eina_hash_stringshared_new(burnLeaf);
-    compiler.script.states = eina_hash_stringshared_new(burnLeaf);
-    compiler.script.variables = eina_hash_stringshared_new(burnLeaf);
-    eina_clist_init(&(compiler.danglingCalls));
+    compiler->result = FALSE;
+    compiler->script.functions = eina_hash_stringshared_new(burnLeaf);
+    compiler->script.states = eina_hash_stringshared_new(burnLeaf);
+    compiler->script.variables = eina_hash_stringshared_new(burnLeaf);
+    eina_clist_init(&(compiler->danglingCalls));
 #if LUASL_DIFF_CHECK
-    compiler.ignorable = eina_strbuf_new();
+    compiler->ignorable = eina_strbuf_new();
 #endif
 
-    strncpy(compiler.SID, SID, 36);
-    compiler.SID[36] = '\0';
-    strncpy(compiler.fileName, script, PATH_MAX - 1);
-    compiler.fileName[PATH_MAX - 1] = '\0';
-    compiler.file = fopen(compiler.fileName, "r");
-    if (NULL == compiler.file)
+    compiler->file = fopen(compiler->compiler.file, "r");
+    if (NULL == compiler->file)
     {
-	PE("Error opening file %s.", compiler.fileName);
+	PE("Error opening file %s.", compiler->compiler.file);
 	return FALSE;
     }
-    compiler.ast = NULL;
-    compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
+    compiler->ast = NULL;
+    compiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.
-    compiler.column = 1;
-    compiler.line = 1;
+    compiler->column = 1;
+    compiler->line = 1;
 
-    if (yylex_init_extra(&compiler, &(compiler.scanner)))
-	return result;
+    if (yylex_init_extra(compiler, &(compiler->scanner)))
+	return compiler->result;
     if (LUASL_DEBUG)
     {
-	yyset_debug(1, compiler.scanner);
+	yyset_debug(1, compiler->scanner);
 	ParseTrace(stdout, "LSL_lemon ");
     }
-    yyset_in(compiler.file, compiler.scanner);
+    yyset_in(compiler->file, compiler->scanner);
     // on EOF yylex will return 0
-    while((yv = yylex(compiler.lval, compiler.scanner)) != 0)
+    while((yv = yylex(compiler->lval, compiler->scanner)) != 0)
     {
-	Parse(pParser, yv, compiler.lval, &compiler);
+	Parse(pParser, yv, compiler->lval, compiler);
 	if (LSL_SCRIPT == yv)
 	    break;
-	compiler.lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
+	compiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     }
 
-    yylex_destroy(compiler.scanner);
-    Parse (pParser, 0, compiler.lval, &compiler);
+    yylex_destroy(compiler->scanner);
+    Parse(pParser, 0, compiler->lval, compiler);
     ParseFree(pParser, free);
 
-    if (compiler.undeclared)
+    if (compiler->undeclared)
     {
 //	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
-	if (eina_clist_count(&(compiler.danglingCalls)))
+	if (eina_clist_count(&(compiler->danglingCalls)))
 	{
 	    LSL_FunctionCall *call = NULL;
 
-	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler.danglingCalls), LSL_FunctionCall, dangler)
+	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler->danglingCalls), LSL_FunctionCall, dangler)
 	    {
-		LSL_Leaf *func = findFunction(&(compiler), call->call->value.stringValue);
+		LSL_Leaf *func = findFunction(compiler, call->call->value.stringValue);
 
 		if (func)
 		{
@@ -2298,23 +2291,23 @@ boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Cl
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(compiler.client, compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
-	secondPass(&compiler, compiler.ast);
+	secondPass(compiler, compiler->ast);
 //	PD("Second pass completed.");
     }
 
-    if (doConstants)
+    if (compiler->doConstants)
     {
-	memcpy(&constants, &(compiler.script), sizeof(LSL_Script));
-	result = TRUE;
+	memcpy(&constants, &(compiler->script), sizeof(LSL_Script));
+	compiler->result = TRUE;
     }
     else
     {
-	result = FALSE;
+	compiler->result = FALSE;
 
-	if (compiler.ast)
+	if (compiler->ast)
 	{
 	    FILE *out;
 	    char buffer[PATH_MAX];
@@ -2324,28 +2317,28 @@ boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Cl
 
 	    if (LUASL_DIFF_CHECK)
 	    {
-		strcpy(outName, compiler.fileName);
+		strcpy(outName, compiler->compiler.file);
 		strcat(outName, "2");
 		out = fopen(outName, "w");
 		if (out)
 		{
 		    char diffName[PATH_MAX];
 
-		    strcpy(diffName, compiler.fileName);
+		    strcpy(diffName, compiler->compiler.file);
 		    strcat(diffName, ".diff");
-		    outputLeaf(out, OM_LSL, compiler.ast);
+		    outputLeaf(out, OM_LSL, compiler->ast);
 		    fclose(out);
-		    sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler.fileName, outName, diffName);
+		    sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->compiler.file, outName, diffName);
 		    count = system(buffer);
 		    if (0 != count)
 			PE("LSL output file is different - %s!", outName);
 		    else
-			result = TRUE;
+			compiler->result = TRUE;
 		}
 		else
 		    PC("Unable to open file %s for writing!", outName);
 	    }
-	    strcpy(luaName, compiler.fileName);
+	    strcpy(luaName, compiler->compiler.file);
 	    strcat(luaName, ".lua");
 	    out = fopen(luaName, "w");
 	    // Generate the Lua source code.
@@ -2356,35 +2349,38 @@ boolean compileLSL(LuaCompiler *lCompiler, gameGlobals *ourGlobals, Ecore_Con_Cl
 		fprintf(out, "--// Generated code goes here.\n\n");
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
-		fprintf(out, "local _SID = [=[%s]=]\n\n", compiler.SID);
-		strcpy(buffer, basename(compiler.fileName));
+		fprintf(out, "local _SID = [=[%s]=]\n\n", compiler->compiler.SID);
+		strcpy(buffer, basename(compiler->compiler.file));
 		if ((ext = rindex(buffer, '.')))
 		  ext[0] = '\0';
 		fprintf(out, "local _scriptName = [=[%s]=]\n\n", buffer);
-		outputLeaf(out, OM_LUA, compiler.ast);
+		outputLeaf(out, OM_LUA, compiler->ast);
 		fprintf(out, "\n\n_LSL.mainLoop(_SID, _scriptName, _defaultState)\n");  // This actually starts the script running.
 		fprintf(out, "\n--// End of generated code.\n\n");
 		fclose(out);
 
 		// Compile the Lua source code.
-		lCompiler->luaName = strdup(luaName);
-		lCompiler->bugCount = compiler.script.bugCount;
-		compileScript(lCompiler);
-		result = TRUE;
+		compiler->compiler.luaName = strdup(luaName);
+		compiler->compiler.bugCount = compiler->script.bugCount;
+#if !COMPILE_THREADED
+		compileScript(&compiler->compiler);
+#endif
+		compiler->result = TRUE;
 	    }
 	    else
 		PC("Unable to open file %s for writing!", luaName);
 	}
     }
 
-    if (NULL != compiler.file)
+    if (NULL != compiler->file)
     {
-	fclose(compiler.file);
-	compiler.file = NULL;
+	fclose(compiler->file);
+	compiler->file = NULL;
     }
 
-    if (!doConstants)
-	burnLeaf(compiler.ast);
+    if (!compiler->doConstants)
+	burnLeaf(compiler->ast);
+// end compile thread here
 
-    return result;
+    return compiler->result;
 }

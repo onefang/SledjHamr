@@ -226,7 +226,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		char *temp;
 		char *file;
 		char *name;
-		LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+		LuaSL_compiler *compiler = calloc(1, sizeof(LuaSL_compiler));
 
 		strcpy(buf, &command[8]);
 		temp = buf;
@@ -237,17 +237,23 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 
 		name = &file[strlen(prefix_data_get())];
 		PD("Compiling %s, %s.", SID, name);
-		compiler->file = strdup(file);
-		compiler->SID = strdup(SID);
-		compiler->client = ev->client;
-		compiler->data = ourGlobals;
-		compiler->cb = _compileCb;
-		if (!compileLSL(compiler, ourGlobals, ev->client, SID, file, FALSE))
+		compiler->compiler.file = strdup(file);
+		compiler->compiler.SID = strdup(SID);
+		compiler->compiler.client = ev->client;
+		compiler->compiler.data = ourGlobals;
+		compiler->compiler.cb = _compileCb;
+		compiler->doConstants = FALSE;
+#if COMPILE_THREADED
+		compiler->compiler.parser = (compileCb) compileLSL;
+		compileScript(&compiler->compiler);
+#else
+		if (!compileLSL(compiler))
 		{
-		  compiler->bugCount++;
+		  compiler->compiler.bugCount++;
 		  PE("Compile of %s failed in a mysterious way.", file);
-		  _compileCb(compiler);
+		  _compileCb(&(compiler->compiler));
 		}
+#endif
 	    }
 	    else if (0 == strcmp(command, "run()"))
 	    {

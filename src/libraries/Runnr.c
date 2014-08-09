@@ -423,6 +423,8 @@ static void _compileThread(void *data, Ecore_Thread *thread)
   FILE *out;
   int err;
 
+  if (compiler->parser)  compiler->parser(compiler);
+
   strcpy(name, compiler->luaName);
   if ((L = luaL_newstate()))
   {
