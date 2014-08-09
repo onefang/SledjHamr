@@ -74,7 +74,7 @@ typedef struct
 
 
 script *scriptAdd(char *file, char *SID, RunnrServerCb send2server, void *data);
-void compileScript(LuaCompiler *compiler);
+void compileScript(LuaCompiler *compiler, int threadIt);
 void runScript(script *me);
 void resetScript(script *me);
 script *getScript(char *SID);

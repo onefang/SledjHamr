@@ -471,12 +471,18 @@ static void _compileThread(void *data, Ecore_Thread *thread)
     printf("Can't create a new Lua state!\n");
   }
 
-  ecore_thread_feedback(thread, compiler);
+  if (thread)
+    ecore_thread_feedback(thread, compiler);
+  else
+    _compileNotify(compiler, thread, NULL);
 }
 
-void compileScript(LuaCompiler *compiler)
+void compileScript(LuaCompiler *compiler, int threadIt)
 {
-  ecore_thread_feedback_run(_compileThread, _compileNotify, NULL, NULL, compiler, EINA_FALSE);
+  if (threadIt)
+    ecore_thread_feedback_run(_compileThread, _compileNotify, NULL, NULL, compiler, EINA_FALSE);
+  else
+    _compileThread(compiler, NULL);
 }
 
 // Assumes the scripts mutex is taken already.

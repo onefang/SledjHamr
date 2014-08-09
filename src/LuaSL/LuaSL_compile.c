@@ -2373,9 +2373,7 @@ boolean compileLSL(LuaSL_compiler *compiler)
 		// Compile the Lua source code.
 		compiler->compiler.luaName = strdup(luaName);
 		compiler->compiler.bugCount = compiler->script.bugCount;
-#if !COMPILE_THREADED
-		compileScript(&compiler->compiler);
-#endif
+		compileScript(&compiler->compiler, COMPILE_THREADED);
 		compiler->result = TRUE;
 	    }
 	    else

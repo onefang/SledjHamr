@@ -3,6 +3,7 @@
 #define __LUASL_TREE_H__
 
 #define LUASL_DEBUG		0
+#define COMPILE_THREADED	0
 #define LUASL_DIFF_CHECK	0
 #define LUASL_BAD_CHECK		0
 
