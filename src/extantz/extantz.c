@@ -617,6 +617,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   gldata_init(gld);
 
   // Set the engine to opengl_x11, then open our window.
+  setenv("ELM_ENGINE", "opengl_x11", 1);
   elm_config_preferred_engine_set("opengl_x11");
   ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
   // Set preferred engine back to default from config
