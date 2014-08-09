@@ -2224,6 +2224,9 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 boolean compileLSL(LuaSL_compiler *compiler)
 {
     void *pParser = ParseAlloc(malloc);
+#if LUASL_BAD_CHECK
+    char tempName[PATH_MAX];
+#endif
     int yv;
 
 // Parse the LSL script, validating it and reporting errors.
@@ -2246,6 +2249,12 @@ boolean compileLSL(LuaSL_compiler *compiler)
 	PE("Error opening file %s.", compiler->compiler.file);
 	return FALSE;
     }
+#if LUASL_BAD_CHECK
+    // Mark the file as bad, in case we crash while compiling it.
+    // NOTE - wont work so well when we are threaded.
+    sprintf(tempName, "%s.BAD", compiler->compiler.file);
+    ecore_file_mv(compiler->compiler.file, tempName);
+#endif
     compiler->ast = NULL;
     compiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.
@@ -2382,7 +2391,9 @@ boolean compileLSL(LuaSL_compiler *compiler)
 
     if (!compiler->doConstants)
 	burnLeaf(compiler->ast);
-// end compile thread here
 
+#if LUASL_BAD_CHECK
+    ecore_file_mv(tempName, compiler->compiler.file);
+#endif
     return compiler->result;
 }

@@ -4,6 +4,7 @@
 
 #define LUASL_DEBUG		0
 #define LUASL_DIFF_CHECK	0
+#define LUASL_BAD_CHECK		0
 
 
 #include <stddef.h>	// So we can have NULL defined.
