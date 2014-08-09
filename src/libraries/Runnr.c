@@ -241,7 +241,10 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
 
     err = luaL_loadfile(s->L, s->binName);
     if (err != 0)
+    {
       s->status = RUNNR_FINISHED;
+      printf("Error loading compiled Lua %s.", s->binName);
+    }
     gettimeofday(&s->startTime, NULL);
   }
 
