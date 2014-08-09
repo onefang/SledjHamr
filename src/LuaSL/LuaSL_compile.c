@@ -373,7 +373,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 {
     if (lval)
     {
-	opType lType, rType;
+	opType lType = OT_invalid, rType = OT_invalid;
 
 	lval->left = left;
 	lval->right = right;
