@@ -415,6 +415,8 @@ static void _compileNotify(void *data, Ecore_Thread *thread, void *message)
   if (compiler->cb)  compiler->cb(compiler);
 }
 
+// TODO - Should pass error messages back through a linked list.
+//		To eventually get passed back to the calling app via compiler->cb
 static void _compileThread(void *data, Ecore_Thread *thread)
 {
   LuaCompiler *compiler = data;
