@@ -321,6 +321,9 @@
 *.lsl2
 /libraries/lemon/lemon
 /lib/constants.lsl
+media/bad_scripts/
+media/bulk_scripts_dump/
+media/Test%20sim/test/bulk_scripts_dump/
 /src/LuaSL/LuaSL_test
 /src/LuaSL/LuaSL_lemon_yaccer.c
 /src/LuaSL/LuaSL_lemon_yaccer.h
@@ -330,3 +333,4 @@
 /src/LuaSL/LuaSL_lexer.h
 /src/LuaSL/LuaSL_LSL_lexer.c
 /src/LuaSL/LuaSL_LSL_lexer.h
+valgrind_*.log
