@@ -411,6 +411,74 @@ static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
 }
 
 // TODO - This didn't help the compile time much, perhaps move the rest of the compiling stage into this thread as a callback?
+/*
+
+LuaSL.c : _data( ... "compile(" ...
+    allocate LuaSL_compiler
+    extract SID, file, and name from data stream
+    massage data into LuaCompiler
+    compileLSL(LuaCompiler, FALSE)
+LuaSL_compile.c : compileLSL()
+	init it
+*	open the .LSL file
+*	init lexer
+*	run lexer in a loop
+*	setup second pass in a loop
+*	    may do a sendBack()
+*	secondPass(LuaSL_compiler, ... )
+*	open the .lua file
+*	generate Lua source code
+	compileScript(LuaSL_compiler)
+Runnr;c : compileScript(
+	    start a feedback thread
+
+LuaSL.c : _compileCb
+    scriptAdd( ... )
+	Needs LuaCompiler-> file, SID, client, data
+	adds the compiled script to the list of scripts being run.
+    sendBack results
+    frees LuaCompiler-> luaName, SID, file.  Alse frees LuaCompiler.
+
+
+typedef void (* compileCb)(LuaCompile *compiler);
+
+typedef struct _LuaCompile
+{
+  char			*file, *SID, *luaName;
+  int			bugCount;
+  void			*data;		OurGlobals, Passed to the call back, to be passed to scriptAdd, which stores it as a void pointer, then ... ?????  Don't think it's actually used.
+  Ecore_Con_Client	*client;
+  compileCb		parser;
+  compileCb		cb;
+} LuaCompiler;
+
+typedef struct
+{
+    LuaCompiler		compiler;
+    void		*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
+    int			argc;
+    char		**argv;
+    FILE		*file;
+    LSL_Leaf		*ast;
+    LSL_Script		script;
+    LSL_State		state;
+#if LUASL_DIFF_CHECK
+    Eina_Strbuf		*ignorable;
+#endif
+    LSL_Leaf		*lval;
+    LSL_Block		*currentBlock;
+    LSL_Function	*currentFunction;
+    Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
+    int			column, line;
+    int			undeclared;
+    boolean		inState;
+    boolean		doConstants;
+    boolean		result;
+} LuaSL_compiler;
+
+
+*/
+
 static void _compileNotify(void *data, Ecore_Thread *thread, void *message)
 {
   LuaCompiler *compiler = data;
@@ -420,6 +488,7 @@ static void _compileNotify(void *data, Ecore_Thread *thread, void *message)
 
 // TODO - Should pass error messages back through a linked list.
 //		To eventually get passed back to the calling app via compiler->cb
+// We use - luaName, bugCount, cb
 static void _compileThread(void *data, Ecore_Thread *thread)
 {
   LuaCompiler *compiler = data;
