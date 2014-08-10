@@ -362,7 +362,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	else
 	{
 	    compiler->script.bugCount++;
-	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT found %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -2302,7 +2302,7 @@ boolean compileLSL(LuaSL_compiler *compiler)
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,Undeclared function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
 	secondPass(compiler, compiler->ast);
