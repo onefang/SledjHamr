@@ -235,6 +235,15 @@ local constants =
   newConst("float", "RAD_TO_DEG",		180.0 / LSL.PI),	-- 57.2957795131
   newConst("float", "SQRT2",			1.4142135623730950488016887242097),
 
+  newConst("integer", "AGENT",			0x0001),
+  newConst("integer", "AGENT_BY_LEGACY_NAME",	0x0001),
+  newConst("integer", "ACTIVE",			0x0002),
+  newConst("integer", "PASSIVE",		0x0004),
+  newConst("integer", "SCRIPTED",		0x0008),
+  newConst("integer", "AGENT_BY_USERNAME",	0x0010),
+  newConst("integer", "NPC",			0x0020),
+  newConst("integer", "OS_NPC",			0x01000000),
+
   newConst("integer", "AGENT_FLYING",		0x0001),
   newConst("integer", "AGENT_ATTACHMENTS",	0x0002),
   newConst("integer", "AGENT_SCRIPTED",		0x0004),
@@ -248,6 +257,18 @@ local constants =
   newConst("integer", "AGENT_CROUCHING",	0x0400),
   newConst("integer", "AGENT_BUSY",		0x0800),
   newConst("integer", "AGENT_ALWAYS_RUN",	0x1000),
+
+  newConst("integer", "AGENT_LIST_PARCEL",	0x0001),
+  newConst("integer", "AGENT_LIST_PARCEL_OWNER",0x0002),
+  newConst("integer", "AGENT_LIST_REGION",	0x0004),
+
+  newConst("integer", "ANIM_ON",		0x0001),
+  newConst("integer", "LOOP",			0x0002),
+  newConst("integer", "REVERSE",		0x0004),
+  newConst("integer", "PING_PONG",		0x0008),
+  newConst("integer", "SMOOTH",			0x0010),
+  newConst("integer", "ROTATE",			0x0020),
+  newConst("integer", "SCALE",			0x0040),
 
   newConst("integer", "ATTACH_CHEST",		1),
   newConst("integer", "ATTACH_HEAD",		2),
@@ -278,7 +299,9 @@ local constants =
   newConst("integer", "ATTACH_LLLEG",		27),
   newConst("integer", "ATTACH_BELLY",		28),
   newConst("integer", "ATTACH_RPEC",		29),
+  newConst("integer", "ATTACH_RIGHT_PEC",	29),
   newConst("integer", "ATTACH_LPEC",		30),
+  newConst("integer", "ATTACH_LEFT_PEC",	30),
   newConst("integer", "ATTACH_HUD_CENTER_2",	31),
   newConst("integer", "ATTACH_HUD_TOP_RIGHT",	32),
   newConst("integer", "ATTACH_HUD_TOP_CENTER",	33),
@@ -322,8 +345,10 @@ local constants =
   newConst("integer", "CHANGED_OWNER",		0x0080),
   newConst("integer", "CHANGED_REGION",		0x0100),
   newConst("integer", "CHANGED_TELEPORT",	0x0200),
+  newConst("integer", "CHANGED_REGION_RESTART",	0x0400),
   newConst("integer", "CHANGED_REGION_START",	0x0400),
   newConst("integer", "CHANGED_MEDIA",		0x0800),
+  newConst("integer", "CHANGED_ANIMATION",	0x4000),
 
   newConst("integer", "CLICK_ACTION_NONE",	0),
   newConst("integer", "CLICK_ACTION_TOUCH",	0),
@@ -333,6 +358,7 @@ local constants =
   newConst("integer", "CLICK_ACTION_OPEN",	4),
   newConst("integer", "CLICK_ACTION_PLAY",	5),
   newConst("integer", "CLICK_ACTION_OPEN_MEDIA",6),
+  newConst("integer", "CLICK_ACTION_ZOOM",	7),
 
   newConst("integer", "CONTROL_FWD",		0x0001),
   newConst("integer", "CONTROL_BACK",		0x0002),
@@ -357,6 +383,13 @@ local constants =
 
   newConst("integer", "DEBUG_CHANNEL",		2147483647),
   newConst("integer", "PUBLIC_CHANNEL",		0),
+
+  newConst("integer", "ESTATE_ACCESS_ALLOWED_AGENT_ADD",	0),
+  newConst("integer", "ESTATE_ACCESS_ALLOWED_AGENT_REMOVE",	1),
+  newConst("integer", "ESTATE_ACCESS_ALLOWED_GROUP_ADD",	2),
+  newConst("integer", "ESTATE_ACCESS_ALLOWED_GROUP_REMOVE",	3),
+  newConst("integer", "ESTATE_ACCESS_BANNED_AGENT_ADD",		4),
+  newConst("integer", "ESTATE_ACCESS_BANNED_AGENT_REMOVE",	5),
 
   newConst("integer", "HTTP_METHOD",		0),
   newConst("integer", "HTTP_MIMETYPE",		1),
@@ -388,8 +421,8 @@ local constants =
   newConst("integer", "LAND_LARGE_BRUSH",	3),
 
   newConst("integer", "ALL_SIDES",		-1),
-  newConst("integer", "LINK_SET",		-1),
   newConst("integer", "LINK_ROOT",		1),
+  newConst("integer", "LINK_SET",		-1),
   newConst("integer", "LINK_ALL_OTHERS",	-2),
   newConst("integer", "LINK_ALL_CHILDREN",	-3),
   newConst("integer", "LINK_THIS",		-4),
@@ -406,19 +439,29 @@ local constants =
   newConst("integer", "LIST_STAT_GEOMETRIC_MEAN",	9),
   newConst("integer", "LIST_STAT_HARMONIC_MEAN",	100),
 
+  newConst("integer", "LSL_STATUS_OK",			0),
+  newConst("integer", "LSL_STATUS_MALFORMED_PARAMS",	1000),
+  newConst("integer", "LSL_STATUS_TYPE_MISMATCH",	1001),
+  newConst("integer", "LSL_STATUS_BOUNDS_ERROR",	1002),
+  newConst("integer", "LSL_STATUS_NOT_FOUND",		1003),
+  newConst("integer", "LSL_STATUS_NOT_SUPPORTED",	1004),
+  newConst("integer", "LSL_STATUS_INTERNAL_ERROR",	1999),
+  newConst("integer", "LSL_STATUS_WHITELIST_FAILED",	2001),
+
   newConst("integer", "PAY_HIDE",		-1),
   newConst("integer", "PAY_DEFAULT",		-2),
 
   newConst("integer", "PERM_ALL",		0x7FFFFFFF),
+  newConst("integer", "PERM_TRANSFER",		0x00002000),
   newConst("integer", "PERM_COPY",		0x00008000),
   newConst("integer", "PERM_MODIFY",		0x00004000),
   newConst("integer", "PERM_MOVE",		0x00080000),
-  newConst("integer", "PERM_TRANSFER",		0x00002000),
   newConst("integer", "MASK_BASE",		0),
   newConst("integer", "MASK_OWNER",		1),
   newConst("integer", "MASK_GROUP",		2),
   newConst("integer", "MASK_EVERYONE",		3),
   newConst("integer", "MASK_NEXT",		4),
+
   newConst("integer", "PERMISSION_DEBIT",		0x0002),
   newConst("integer", "PERMISSION_TAKE_CONTROLS",	0x0004),
   newConst("integer", "PERMISSION_REMAP_CONTROLS",	0x0008),
@@ -431,30 +474,56 @@ local constants =
   newConst("integer", "PERMISSION_TRACK_CAMERA",	0x0400),
   newConst("integer", "PERMISSION_CONTROL_CAMERA",	0x0800),
 
-  newConst("integer", "AGENT",			0x0001),
-  newConst("integer", "AGENT_BY_LEGACY_NAME",	0x0001),
-  newConst("integer", "ACTIVE",			0x0002),
-  newConst("integer", "PASSIVE",		0x0004),
-  newConst("integer", "SCRIPTED",		0x0008),
-  newConst("integer", "AGENT_BY_USERNAME",	0x0010),
+  newConst("integer", "OBJECT_UNKNOWN_DETAIL",		-1),
+  newConst("integer", "OBJECT_NAME",			1),
+  newConst("integer", "OBJECT_DESC",			2),
+  newConst("integer", "OBJECT_POS",			3),
+  newConst("integer", "OBJECT_ROT",			4),
+  newConst("integer", "OBJECT_VELOCITY",		5),
+  newConst("integer", "OBJECT_OWNER",			6),
+  newConst("integer", "OBJECT_GROUP",			7),
+  newConst("integer", "OBJECT_CREATOR",			8),
+  newConst("integer", "OBJECT_RUNNING_SCRIPT_COUNT",	9),
+  newConst("integer", "OBJECT_TOTAL_SCRIPT_COUNT",	10),
+  newConst("integer", "OBJECT_SCRIPT_MEMORY",		11),
+  newConst("integer", "OBJECT_SCRIPT_TIME",		12),
+  newConst("integer", "OBJECT_PRIM_EQUIVALENCE",	13),
+  newConst("integer", "OBJECT_SERVER_COST",		14),
+  newConst("integer", "OBJECT_STREAMING_COST",		15),
+  newConst("integer", "OBJECT_PHYSICS_COST",		16),
+  newConst("integer", "OBJECT_CHARACTER_TIME",		17),
+  newConst("integer", "OBJECT_ROOT",			18),
+  newConst("integer", "OBJECT_ATTACHED_POINT",		19),
+  newConst("integer", "OBJECT_PATHFINDING_TYPE",	20),
+  newConst("integer", "OBJECT_PHYSICS",			21),
+  newConst("integer", "OBJECT_PHANTOM",			22),
+  newConst("integer", "OBJECT_TEMP_ON_REZ",		23),
 
-  newConst("integer", "ANIM_ON",		0x0001),
-  newConst("integer", "LOOP",			0x0002),
-  newConst("integer", "REVERSE",		0x0004),
-  newConst("integer", "PING_PONG",		0x0008),
-  newConst("integer", "SMOOTH",			0x0010),
-  newConst("integer", "ROTATE",			0x0020),
-  newConst("integer", "SCALE",			0x0040),
+  newConst("integer", "OPT_OTHER",		-1),
+  newConst("integer", "OPT_LEGACY_LINKSET",	0),
+  newConst("integer", "OPT_AVATAR",		1),
+  newConst("integer", "OPT_CHARACTER",		2),
+  newConst("integer", "OPT_WALKABLE",		3),
+  newConst("integer", "OPT_STATIC_OBSTACLE",	4),
+  newConst("integer", "OPT_MATERIAL_VOLUME",	5),
+  newConst("integer", "OPT_EXCLUSION_VOLUME",	6),
 
-  newConst("integer", "OBJECT_UNKNOWN_DETAIL",	-1),
-  newConst("integer", "OBJECT_NAME",		1),
-  newConst("integer", "OBJECT_DESC",		2),
-  newConst("integer", "OBJECT_POS",		3),
-  newConst("integer", "OBJECT_ROT",		4),
-  newConst("integer", "OBJECT_VELOCITY",	5),
-  newConst("integer", "OBJECT_OWNER",		6),
-  newConst("integer", "OBJECT_GROUP",		7),
-  newConst("integer", "OBJECT_CREATOR",		8),
+  newConst("integer", "OS_ATTACH_MSG_ALL",		-65535),
+  newConst("integer", "OS_ATTACH_MSG_INVERT_POINTS",	0x0001),
+  newConst("integer", "OS_ATTACH_MSG_OBJECT_CREATOR",	0x0002),
+  newConst("integer", "OS_ATTACH_MSG_SCRIPT_CREATOR",	0x0004),
+
+  newConst("integer", "OS_LISTEN_REGEX_NAME",		0x1),
+  newConst("integer", "OS_LISTEN_REGEX_MESSAGE",	0x2),
+
+  newConst("integer", "OS_NPC_SIT_NOW",		0),
+  newConst("integer", "OS_NPC_FLY",		0),
+  newConst("integer", "OS_NPC_NO_FLY",		1),
+  newConst("integer", "OS_NPC_LAND_AT_TARGET",	2),
+  newConst("integer", "OS_NPC_RUNNING",		4),
+  newConst("integer", "OS_NPC_CREATOR_OWNED",	0x0001),
+  newConst("integer", "OS_NPC_NOT_OWNED",	0x0002),
+  newConst("integer", "OS_NPC_SENSE_AS_AGENT",	0x0004),
 
   newConst("integer", "PARCEL_COUNT_TOTAL",	0),
   newConst("integer", "PARCEL_COUNT_OWNER",	1),
@@ -463,12 +532,14 @@ local constants =
   newConst("integer", "PARCEL_COUNT_SELECTED",	4),
   newConst("integer", "PARCEL_COUNT_TEMP",	5),
 
-  newConst("integer", "PARCEL_DETAILS_NAME",	0),
-  newConst("integer", "PARCEL_DETAILS_DESC",	1),
-  newConst("integer", "PARCEL_DETAILS_OWNER",	2),
-  newConst("integer", "PARCEL_DETAILS_GROUP",	3),
-  newConst("integer", "PARCEL_DETAILS_AREA",	4),
-  newConst("integer", "PARCEL_DETAILS_ID",	5),
+  newConst("integer", "PARCEL_DETAILS_NAME",		0),
+  newConst("integer", "PARCEL_DETAILS_DESC",		1),
+  newConst("integer", "PARCEL_DETAILS_OWNER",		2),
+  newConst("integer", "PARCEL_DETAILS_GROUP",		3),
+  newConst("integer", "PARCEL_DETAILS_AREA",		4),
+  newConst("integer", "PARCEL_DETAILS_ID",		5),
+  newConst("integer", "PARCEL_DETAILS_SEE_AVATARS",	6),
+  newConst("integer", "PARCEL_DETAILS_CLAIMDATE",	10),
 
   newConst("integer", "PARCEL_FLAG_ALLOW_FLY",			0x0001),
   newConst("integer", "PARCEL_FLAG_ALLOW_SCRIPTS",		0x0002),
@@ -523,6 +594,10 @@ local constants =
   newConst("integer", "PRIM_NAME",		27),
   newConst("integer", "PRIM_DESC",		28),
   newConst("integer", "PRIM_ROT_LOCAL",		29),
+  newConst("integer", "PRIM_OMEGA",		32),
+  newConst("integer", "PRIM_POS_LOCAL",		33),
+  newConst("integer", "PRIM_LINK_TARGET",	34),
+  newConst("integer", "PRIM_SLICE",		35),
 
   newConst("integer", "PRIM_BUMP_NONE",		0),
   newConst("integer", "PRIM_BUMP_BRIGHT",	1),
@@ -588,6 +663,9 @@ local constants =
   newConst("integer", "PRIM_SCULPT_TYPE_MESH",		5),
   newConst("integer", "PRIM_SCULPT_TYPE_MIMESH",	6),
 
+  newConst("integer", "PRIM_SCULPT_FLAG_INVERT",	0x0040),
+  newConst("integer", "PRIM_SCULPT_FLAG_MIRROR",	0x0080),
+
   newConst("integer", "PRIM_SHINY_NONE",	0),
   newConst("integer", "PRIM_SHINY_LOW",		1),
   newConst("integer", "PRIM_SHINY_MEDIUM",	2),
@@ -604,6 +682,9 @@ local constants =
   newConst("integer", "PRIM_TYPE_TUBE",		5),
   newConst("integer", "PRIM_TYPE_RING",		6),
   newConst("integer", "PRIM_TYPE_SCULPT",	7),
+
+  newConst("integer", "PROFILE_NONE",		0),
+  newConst("integer", "PROFILE_SCRIPT_MEMORY",	1),
 
   newConst("integer", "PSYS_PART_FLAGS",		0),
   newConst("integer", "PSYS_PART_START_COLOR",		1),
@@ -645,6 +726,24 @@ local constants =
   newConst("integer", "PSYS_SRC_PATTERN_ANGLE_CONE",		0x0008),
   newConst("integer", "PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY",	0x0010),
 
+  newConst("integer", "RC_REJECT_TYPES",	0),
+  newConst("integer", "RC_DETECT_PHANTOM",	1),
+  newConst("integer", "RC_DATA_FLAGS",		2),
+  newConst("integer", "RC_MAX_HITS",		3),
+
+  newConst("integer", "RC_REJECT_AGENTS",	1),
+  newConst("integer", "RC_REJECT_PHYSICAL",	2),
+  newConst("integer", "RC_REJECT_NONPHYSICAL",	4),
+  newConst("integer", "RC_REJECT_LAND",		8),
+
+  newConst("integer", "RC_GET_NORMAL",		1),
+  newConst("integer", "RC_GET_ROOT_KEY",	2),
+  newConst("integer", "RC_GET_LINK_NUM",	4),
+
+  newConst("integer", "RCERR_UNKNOWN",		-1),
+  newConst("integer", "RCERR_SIM_PERF_LOW",	-2),
+  newConst("integer", "RCERR_CAST_TIME_EXCEEDED",3),
+
   newConst("integer", "REGION_FLAG_ALLOW_DAMAGE",		0x0001),
   newConst("integer", "REGION_FLAG_FIXED_SUN",			0x0010),
   newConst("integer", "REGION_FLAG_BLOCK_TERRAFORM",		0x0040),
@@ -659,9 +758,27 @@ local constants =
   newConst("integer", "REMOTE_DATA_REQUEST",	2),
   newConst("integer", "REMOTE_DATA_REPLY",	3),
 
-  newConst("integer", "STRING_TRIM_HEAD",	1),
-  newConst("integer", "STRING_TRIM_TAIL",	2),
-  newConst("integer", "STRING_TRIM",		3),
+  newConst("integer", "STATS_TIME_DILATION",		0),
+  newConst("integer", "STATS_SIM_FPS",			1),
+  newConst("integer", "STATS_PHYSICS_FPS",		2),
+  newConst("integer", "STATS_AGENT_UPDATES",		3),
+  newConst("integer", "STATS_ROOT_AGENTS",		4),
+  newConst("integer", "STATS_CHILD_AGENTS",		5),
+  newConst("integer", "STATS_TOTAL_PRIMS",		6),
+  newConst("integer", "STATS_ACTIVE_PRIMS",		7),
+  newConst("integer", "STATS_FRAME_MS",			8),
+  newConst("integer", "STATS_NET_MS",			9),
+  newConst("integer", "STATS_PHYSICS_MS",		10),
+  newConst("integer", "STATS_IMAGE_MS",			11),
+  newConst("integer", "STATS_OTHER_MS",			12),
+  newConst("integer", "STATS_IN_PACKETS_PER_SECOND",	13),
+  newConst("integer", "STATS_OUT_PACKETS_PER_SECOND",	14),
+  newConst("integer", "STATS_UNACKED_BYTES",		15),
+  newConst("integer", "STATS_AGENT_MS",			16),
+  newConst("integer", "STATS_PENDING_DOWNLOADS",	17),
+  newConst("integer", "STATS_PENDING_UPLOADS",		18),
+  newConst("integer", "STATS_ACTIVE_SCRIPTS",		19),
+  newConst("integer", "STATS_SCRIPT_LPS",		20),
 
   newConst("integer", "STATUS_PHYSICS",		0x0001),
   newConst("integer", "STATUS_ROTATE_X",	0x0002),
@@ -674,34 +791,38 @@ local constants =
   newConst("integer", "STATUS_RETURN_AT_EDGE",	0x0100),
   newConst("integer", "STATUS_CAST_SHADOWS",	0x0200),
 
+  newConst("integer", "STRING_TRIM_HEAD",	1),
+  newConst("integer", "STRING_TRIM_TAIL",	2),
+  newConst("integer", "STRING_TRIM",		3),
+
   newConst("integer", "TOUCH_INVALID_FACE",	0x7FFFFFFF),
   newConst("vector",  "TOUCH_INVALID_TEXCOORD",	{x=-1.0, y=-1.0, z=0.0}),
   newConst("vector",  "TOUCH_INVALID_VECTOR",	{x=0.0, y=0.0, z=0.0}),
 
+  newConst("integer", "TYPE_INVALID",		0),
   newConst("integer", "TYPE_INTEGER",		1),
   newConst("integer", "TYPE_FLOAT",		2),
   newConst("integer", "TYPE_STRING",		3),
   newConst("integer", "TYPE_KEY",		4),
   newConst("integer", "TYPE_VECTOR",		5),
   newConst("integer", "TYPE_ROTATION",		6),
-  newConst("integer", "TYPE_INVALID",		0),
 
-  newConst("integer", "VEHICLE_FLAG_NO_DEFLECTION_UP",		1),
-  newConst("integer", "VEHICLE_FLAG_LIMIT_ROLL_ONLY",		2),
-  newConst("integer", "VEHICLE_FLAG_HOVER_WATER_ONLY",		4),
-  newConst("integer", "VEHICLE_FLAG_HOVER_TERRAIN_ONLY",	8),
-  newConst("integer", "VEHICLE_FLAG_HOVER_GLOBAL_HEIGHT",	16),
-  newConst("integer", "VEHICLE_FLAG_HOVER_UP_ONLY",		32),
-  newConst("integer", "VEHICLE_FLAG_LIMIT_MOTOR_UP",		64),
-  newConst("integer", "VEHICLE_FLAG_MOUSELOOK_STEER",		128),
-  newConst("integer", "VEHICLE_FLAG_MOUSELOOK_BANK",		256),
-  newConst("integer", "VEHICLE_FLAG_CAMERA_DECOUPLED",		512),
-  newConst("integer", "VEHICLE_FLAG_NO_X",			1024),
-  newConst("integer", "VEHICLE_FLAG_NO_Y",			2048),
-  newConst("integer", "VEHICLE_FLAG_NO_Z",			4096),
-  newConst("integer", "VEHICLE_FLAG_LOCK_HOVER_HEIGHT",		8192),
-  newConst("integer", "VEHICLE_FLAG_NO_DEFLECTION",		16392),
-  newConst("integer", "VEHICLE_FLAG_LOCK_ROTATION",		32784),
+  newConst("integer", "VEHICLE_FLAG_NO_DEFLECTION_UP",		0x0001),
+  newConst("integer", "VEHICLE_FLAG_LIMIT_ROLL_ONLY",		0x0002),
+  newConst("integer", "VEHICLE_FLAG_HOVER_WATER_ONLY",		0x0004),
+  newConst("integer", "VEHICLE_FLAG_HOVER_TERRAIN_ONLY",	0x0008),
+  newConst("integer", "VEHICLE_FLAG_HOVER_GLOBAL_HEIGHT",	0x0010),
+  newConst("integer", "VEHICLE_FLAG_HOVER_UP_ONLY",		0x0020),
+  newConst("integer", "VEHICLE_FLAG_LIMIT_MOTOR_UP",		0x0040),
+  newConst("integer", "VEHICLE_FLAG_MOUSELOOK_STEER",		0x0080),
+  newConst("integer", "VEHICLE_FLAG_MOUSELOOK_BANK",		0x0100),
+  newConst("integer", "VEHICLE_FLAG_CAMERA_DECOUPLED",		0x0200),
+  newConst("integer", "VEHICLE_FLAG_NO_X",			0x0400),
+  newConst("integer", "VEHICLE_FLAG_NO_Y",			0x0800),
+  newConst("integer", "VEHICLE_FLAG_NO_Z",			0x1000),
+  newConst("integer", "VEHICLE_FLAG_LOCK_HOVER_HEIGHT",		0x2000),
+  newConst("integer", "VEHICLE_FLAG_NO_DEFLECTION",		0x4000),
+  newConst("integer", "VEHICLE_FLAG_LOCK_ROTATION",		0x8000),
 
   newConst("integer", "VEHICLE_TYPE_NONE",	0),
   newConst("integer", "VEHICLE_TYPE_SLED",	1),
@@ -784,6 +905,15 @@ local constants =
   newConst("rotation", "ZERO_ROTATION",		{x=0.0, y=0.0, z=0.0, s=1.0}),
   newConst("vector", "ZERO_VECTOR",		{x=0.0, y=0.0, z=0.0}),
 
+  newConst("string", "TEXTURE_BLANK",		"5748decc-f629-461c-9a36-a35a221fe21f"),
+  newConst("string", "TEXTURE_DEFAULT",		"89556747-24cb-43ed-920b-47caed15465f"),
+  newConst("string", "TEXTURE_PLYWOOD",		"89556747-24cb-43ed-920b-47caed15465f"),
+  newConst("string", "TEXTURE_TRANSPARENT",	"8dcd4a48-2d37-4909-9f78-f7a9eb4ef903"),
+  newConst("string", "TEXTURE_MEDIA",		"8b5fec65-8d8d-9dc5-cda8-8fdf2716e361"),
+
+  newConst("string", "URL_REQUEST_GRANTED",	"URL_REQUEST_GRANTED"),
+  newConst("string", "URL_REQUEST_DENIED",	"URL_REQUEST_DENIED"),
+
 -- TODO - Temporary dummy variables to get vector and rotation thingies to work for now.
 
   newConst("float", "s",			1.0),
@@ -792,21 +922,55 @@ local constants =
   newConst("float", "z",			0.0),
 }
 
--- ll*() function definitions
 
 -- LSL avatar functions
+newFunc("",		"llAttachToAvatar", "integer attachment")
 newFunc("key",		"llAvatarOnSitTarget")
+newFunc("key",		"llAvatarOnLinkSitTarget", "integer linknum")
+newFunc("",		"llClearCameraParams")
+newFunc("",		"llDetachFromAvatar")
+newFunc("",		"llForceMouselook", "integer mouselook")
+newFunc("integer",	"llGetAgentInfo", "string id")
+newFunc("string",	"llGetAgentLanguage", "string id")
+newFunc("list",		"llGetAgentList", "integer scope", "list options")
+newFunc("vector",	"llGetAgentSize", "string id")
+newFunc("string",	"llGetAnimation", "string id")
 newFunc("list",		"llGetAnimationList", "key id")
+newFunc("vector",	"llGetCameraPos")
+newFunc("rotation",	"llGetCameraRot")
+newFunc("string",	"llGetDisplayName", "string id")
 newFunc("integer",	"llGetPermissions")
 newFunc("key",		"llGetPermissionsKey")
+newFunc("string",	"llGetUsername", "string id")
+newFunc("integer",	"llGiveMoney", "string destination", "integer amount")
 newFunc("string",	"llKey2Name", "key avatar")
+newFunc("",		"llPointAt", "vector pos")
+newFunc("",		"llReleaseCamera", "string avatar")
+newFunc("",		"llReleaseControls")
+newFunc("key",		"llRequestAgentData", "string id", "integer data")
+newFunc("string",	"llRequestDisplayName", "string id")
 newFunc("",		"llRequestPermissions", "key avatar", "integer perms")
+newFunc("string",	"llRequestUsername", "string id")
 newFunc("integer",	"llSameGroup", "key avatar")
+newFunc("",		"llSetCameraAtOffset", "vector offset")
+newFunc("",		"llSetCameraEyeOffset", "vector offset")
+newFunc("",		"llSetCameraParams", "list rules")
+newFunc("",		"llSetLinkCamera", "integer link", "vector eye", "vector at")
 newFunc("",		"llStartAnimation", "string anim")
 newFunc("",		"llStopAnimation", "string anim")
+newFunc("",		"llStopPointAt")
+newFunc("",		"llTakeCamera", "string avatar")
+newFunc("",		"llTakeControls", "integer controls", "integer accept", "integer pass_on")
+newFunc("",		"llTeleportAgentHome", "string agent")
+newFunc("",		"llTeleportAgent", "string agent", "string simname", "vector pos", "vector lookAt")
+newFunc("",		"llTeleportAgentGlobalCoords", "string agent", "vector global", "vector pos", "vector lookAt")
 newFunc("",		"llUnSit", "key avatar")
 
 -- LSL collision / detect / sensor functions
+newFunc("list",		"llCastRay", "vector start", "vector End", "list options")
+newFunc("",		"llCollisionFilter", "string name", "string id", "integer accept")
+newFunc("",		"llCollisionSound", "string impact_sound", "float impact_volume")
+newFunc("",		"llCollisionSprite", "string impact_sprite")
 newFunc("integer",	"llDetectedGroup", "integer index")
 newFunc("vector",	"llDetectedGrab", "integer index")
 newFunc("key",		"llDetectedKey", "integer index")
@@ -823,101 +987,543 @@ newFunc("vector",	"llDetectedTouchST", "integer index")
 newFunc("vector",	"llDetectedTouchUV", "integer index")
 newFunc("integer",	"llDetectedType", "integer index")
 newFunc("vector",	"llDetectedVel", "integer index")
-
+newFunc("",		"llPassCollisions", "integer pass")
+newFunc("integer",	"llRotTarget", "rotation rot", "float error")
+newFunc("",		"llRotTargetRemove", "integer number")
+newFunc("",		"llSensor", "string name", "string id", "integer Type", "float range", "float arc")
+newFunc("",		"llSensorRemove")
+newFunc("",		"llSensorRepeat", "string name", "string id", "integer Type", "float range", "float arc", "float rate")
+newFunc("integer",	"llTarget", "vector position", "float range")
+newFunc("",		"llTargetRemove", "integer number")
+newFunc("",		"llVolumeDetect", "integer detect")
 
 -- LSL communications functions
+newFunc("",		"llCloseRemoteDataChannel", "string channel")
 newFunc("",		"llDialog", "key avatar", "string caption", "list arseBackwardsMenu", "integer channel")
+newFunc("",		"llEmail", "string address", "string subject", "string message")
+newFunc("integer",	"llGetFreeURLs")
+newFunc("string",	"llGetHTTPHeader", "key request_id", "string header")
+newFunc("",		"llGetNextEmail", "string address", "string subject")
+newFunc("string",	"llHTTPRequest", "string url", "list parameters", "string body")
+newFunc("",		"llHTTPResponse", "key id", "integer status", "string body")
+newFunc("",		"llInstantMessage", "string user", "string message")
 newFunc("integer",	"llListen", "integer channel", "string name", "key id", "string msg")
+newFunc("",		"llListenControl", "integer number", "integer active")
 newFunc("",		"llListenRemove", "integer handle")
-newFunc("",		"llOwnerSay", "string text")
-newFunc("",		"llSay", "integer channel", "string text")
-newFunc("",		"llShout", "integer channel", "string text")
-newFunc("",		"llWhisper", "integer channel", "string text")
+newFunc("",		"llLoadURL", "string avatar_id", "string message", "string url")
 newFunc("",		"llMessageLinked", "integer link", "integer num", "string text", "key aKey")
+newFunc("",		"llOpenRemoteDataChannel")
+newFunc("",		"llOwnerSay", "string text")
+newFunc("",		"llRefreshPrimURL")
+newFunc("",		"llRegionSay", "integer channelID", "string text")
+newFunc("",		"llRegionSayTo", "string target", "integer channelID", "string text")
+newFunc("",		"llReleaseURL", "string url")
+newFunc("",		"llRemoteDataReply", "string channel", "string message_id", "string sdata", "integer idata")
+newFunc("",		"llRemoteDataSetRegion")
+newFunc("string",	"llRequestSecureURL")
+newFunc("key",		"llRequestURL")
+newFunc("",		"llSay", "integer channel", "string text")
+newFunc("key",		"llSendRemoteData", "string channel", "string dest", "integer idata", "string sdata")
+newFunc("",		"llSetPrimURL", "string url")
+newFunc("",		"llShout", "integer channel", "string text")
+newFunc("",		"llTextBox", "string avatar", "string message", "integer chat_channel")
+newFunc("",		"llWhisper", "integer channel", "string text")
 
 -- LSL inventory functions.
+newFunc("key",		"llGetInventoryCreator", "string item")
+newFunc("key",		"llGetInventoryKey", "string name")
 newFunc("string",	"llGetInventoryName", "integer Type", "integer index")
 newFunc("integer",	"llGetInventoryNumber", "integer Type")
+newFunc("integer",	"llGetInventoryPermMask", "string item", "integer mask")
 newFunc("integer",	"llGetInventoryType", "string name")
 newFunc("key",		"llGetNotecardLine", "string name", "integer index")
+newFunc("key",		"llGetNumberOfNotecardLines", "string name")
+newFunc("",		"llGiveInventory", "string destination", "string inventory")
+newFunc("",		"llGiveInventoryList", "string destination", "string category", "list inventory")
+newFunc("",		"llGodLikeRezObject", "string inventory", "vector pos")
+newFunc("",		"llRemoveInventory", "string item")
+newFunc("key",		"llRequestInventoryData", "string name")
 newFunc("",		"llRezAtRoot", "string name", "vector position", "vector velocity", "rotation rot", "integer channel")
 newFunc("",		"llRezObject", "string name", "vector position", "vector velocity", "rotation rot", "integer channel")
+newFunc("",		"llSetInventoryPermMask", "string item", "integer mask", "integer value")
+
+-- LSL land / parcel / plot / region / sim / weather functions
+newFunc("",		"llAddToLandBanList", "string avatar", "float hours")
+newFunc("",		"llAddToLandPassList", "string avatar", "float hours")
+newFunc("float",	"llCloud", "vector offset")
+newFunc("integer",	"llEdgeOfWorld", "vector pos", "vector dir")
+newFunc("",		"llEjectFromLand", "string pest")
+newFunc("key",		"llGetLandOwnerAt", "vector pos")
+newFunc("list",		"llGetParcelDetails", "vector pos", "list param")
+newFunc("integer",	"llGetParcelFlags", "vector pos")
+newFunc("integer",	"llGetParcelMaxPrims", "vector pos", "integer sim_wide")
+newFunc("integer",	"llGetParcelPrimCount", "vector pos", "integer category", "integer sim_wide")
+newFunc("list",		"llGetParcelPrimOwners", "vector pos")
+newFunc("integer",	"llGetRegionAgentCount")
+newFunc("vector",	"llGetRegionCorner")
+newFunc("integer",	"llGetRegionFlags")
+newFunc("float",	"llGetRegionFPS")
+newFunc("string",	"llGetRegionName")
+newFunc("float",	"llGetRegionTimeDilation")
+newFunc("string",	"llGetSimulatorHostname")
+newFunc("vector",	"llGetSunDirection")
+newFunc("float",	"llGround", "vector offset")
+newFunc("vector",	"llGroundContour", "vector offset")
+newFunc("vector",	"llGroundNormal", "vector offset")
+newFunc("",		"llGroundRepel", "float height", "integer water", "float tau")
+newFunc("vector",	"llGroundSlope", "vector offset")
+newFunc("",		"llMapDestination", "string simname", "vector pos", "vector look_at")
+newFunc("",		"llModifyLand", "integer action", "integer brush")
+newFunc("integer",	"llOverMyLand", "string id")
+newFunc("",		"llRemoveFromLandBanList", "string avatar")
+newFunc("",		"llRemoveFromLandPassList", "string avatar")
+newFunc("key",		"llRequestSimulatorData", "string simulator", "integer data")
+newFunc("",		"llResetLandBanList")
+newFunc("",		"llResetLandPassList")
+newFunc("float",	"llWater", "vector offset")
+newFunc("vector",	"llWind", "vector offset")
+
+-- LSL link / object / prim functions
+newFunc("",		"llAllowInventoryDrop", "integer add")
+newFunc("",		"llBreakAllLinks")
+newFunc("",		"llBreakLink", "integer linknum")
+newFunc("",		"llCreateLink", "string target", "integer parent")
+newFunc("",		"llDie")
+newFunc("integer",	"llGetAttached")
+newFunc("list",		"llGetBoundingBox", "string obj")
+newFunc("string",	"llGetCreator")
+newFunc("float",	"llGetEnergy")
+newFunc("vector",	"llGetGeometricCenter")
+newFunc("key",		"llGetKey")
+newFunc("key",		"llGetLinkKey", "integer linknum")
+newFunc("string",	"llGetLinkName", "integer linknum")
+newFunc("integer",	"llGetLinkNumber")
+newFunc("list",		"llGetLinkPrimitiveParams", "integer linknum", "list rules")
+newFunc("integer",	"llGetNumberOfPrims")
+newFunc("integer",	"llGetNumberOfSides")
+newFunc("string",	"llGetObjectDesc")
+newFunc("list",		"llGetObjectDetails", "string id", "list args")
+newFunc("string",	"llGetObjectName")
+newFunc("integer",	"llGetObjectPermMask", "integer mask")
+newFunc("integer",	"llGetObjectPrimCount", "string object_id")
+newFunc("vector",	"llGetOmega")
+newFunc("key",		"llGetOwner")
+newFunc("key",		"llGetOwnerKey", "string id")
+newFunc("integer",	"llGetLinkNumberOfSides", "integer link")
+newFunc("list",		"llGetLinkMedia", "integer link", "integer face", "list rules")
+newFunc("list",		"llGetLinkPrimitiveParams", "integer linknum", "list rules")
+newFunc("list",		"llGetPrimitiveParams", "list rules")
+newFunc("integer",	"llGetStatus", "integer status")
+newFunc("",		"llLinkParticleSystem", "integer linknum", "list rules")
+newFunc("",		"llLinkSitTarget", "integer link", "vector offset", "rotation rot")
+newFunc("",		"llLookAt", "vector target", "float strength", "float damping")
+newFunc("",		"llMakeExplosion", "integer particles", "float scale", "float vel", "float lifetime", "float arc", "string texture", "vector offset")
+newFunc("",		"llMakeFire", "integer particles", "float scale", "float vel", "float lifetime", "float arc", "string texture", "vector offset")
+newFunc("",		"llMakeFountain", "integer particles", "float scale", "float vel", "float lifetime", "float arc", "integer bounce", "string texture", "vector offset", "float bounce_offset")
+newFunc("",		"llMakeSmoke", "integer particles", "float scale", "float vel", "float lifetime", "float arc", "string texture", "vector offset")
+newFunc("",		"llMoveToTarget", "vector target", "float tau")
+newFunc("",		"llParticleSystem", "list rules")
+newFunc("",		"llPassTouches", "integer pass")
+newFunc("",		"llRotLookAt", "rotation target", "float strength", "float damping")
+newFunc("",		"llSetClickAction", "integer action")
+newFunc("",		"llSetDamage", "float damage")
+newFunc("",		"llSetHoverHeight", "float height", "integer water", "float tau")
+newFunc("",		"llSetLinkPrimitiveParams", "integer linknumber", "list rules")
+newFunc("",		"llSetLinkPrimitiveParamsFast", "integer linknum", "list rules")
+newFunc("",		"llSetObjectDesc", "string text")
+newFunc("",		"llSetObjectName", "string text")
+newFunc("",		"llSetObjectPermMask", "integer mask", "integer value")
+newFunc("",		"llSetPayPrice", "integer price", "list quick_pay_buttons")
+newFunc("",		"llSetPrimitiveParams", "list params")
+newFunc("integer",	"llSetRegionPos", "vector pos")
+newFunc("",		"llSetStatus", "integer status", "integer value")
+newFunc("",		"llSetSitText", "string text")
+newFunc("",		"llSetText", "string text", "vector colour", "float alpha")
+newFunc("",		"llSetTouchText", "string text")
+newFunc("",		"llSitTarget", "vector pos", "rotation rot")
+newFunc("",		"llStopHover")
+newFunc("",		"llStopLookAt")
+newFunc("",		"llStopMoveToTarget")
+newFunc("",		"llTargetOmega", "vector axis", "float spinrate", "float gain")
 
 -- LSL list functions.
 newFunc("list",		"llCSV2List", "string text")
 newFunc("list",		"llDeleteSubList", "list l", "integer start", "integer End")
 newFunc("string",	"llDumpList2String", "list l", "string separator")
+newFunc("integer",	"llGetListEntryType", "list src", "integer index")
 newFunc("integer",	"llGetListLength", "list l")
 newFunc("string",	"llList2CSV", "list l")
 newFunc("float",	"llList2Float", "list l", "integer index")
 newFunc("integer",	"llList2Integer", "list l", "integer index")
 newFunc("key",		"llList2Key", "list l", "integer index")
 newFunc("list",		"llList2List", "list l", "integer start", "integer End")
+newFunc("list",		"llList2ListStrided", "list src", "integer start", "integer eNd", "integer stride")
 newFunc("string",	"llList2String", "list l", "integer index")
 newFunc("rotation",	"llList2Rot", "list l", "integer index")
 newFunc("vector",	"llList2Vector", "list l", "integer index")
 newFunc("integer",	"llListFindList", "list l", "list l1")
 newFunc("list",		"llListInsertList", "list l", "list l1", "integer index")
+newFunc("list",		"llListRandomize", "list src", "integer stride")
 newFunc("list",		"llListReplaceList", "list l", "list part", "integer start", "integer End")
 newFunc("list",		"llListSort", "list l", "integer stride", "integer ascending")
+newFunc("float",	"llListStatistics", "integer operation", "list src")
 newFunc("list",		"llParseString2List", "string In", "list l", "list l1")
 newFunc("list",		"llParseStringKeepNulls", "string In", "list l", "list l1")
 
 -- LSL math functions
+newFunc("integer",	"llAbs", "integer i")
+newFunc("float",	"llAcos", "float val")
+newFunc("float",	"llAngleBetween", "rotation a", "rotation b")
+newFunc("float",	"llAsin", "float val")
+newFunc("float",	"llAtan2", "float x", "float y")
+newFunc("rotation",	"llAxes2Rot", "vector fwd", "vector left", "vector up")
+newFunc("rotation",	"llAxisAngle2Rot", "vector axis", "float angle")
+newFunc("integer",	"llCeil", "float f")
+newFunc("float",	"llCos", "float f")
+newFunc("float",	"llFabs", "float f")
+newFunc("integer",	"llFloor", "float f")
+newFunc("float",	"llFrand", "float mag")
 newFunc("rotation",	"llEuler2Rot", "vector vec")
 newFunc("float",	"llFrand", "float max")
+newFunc("float",	"llLog", "float val")
+newFunc("float",	"llLog10", "float val")
+newFunc("integer",	"llModPow", "integer a", "integer b", "integer c")
 newFunc("float",	"llPow", "float number", "float places")
+newFunc("float",	"llRot2Angle", "rotation rot")
+newFunc("vector",	"llRot2Axis", "rotation rot")
 newFunc("vector",	"llRot2Euler", "rotation rot")
+newFunc("vector",	"llRot2Fwd", "rotation r")
+newFunc("vector",	"llRot2Left", "rotation r")
+newFunc("vector",	"llRot2Up", "rotation r")
+newFunc("rotation",	"llRotBetween", "vector start", "vector eNd")
 newFunc("integer",	"llRound", "float number")
+newFunc("float",	"llSin", "float f")
+newFunc("float",	"llSqrt", "float f")
+newFunc("float",	"llTan", "float f")
+newFunc("float",	"llVecDist", "vector a", "vector b")
+newFunc("float",	"llVecMag", "vector v")
+newFunc("vector",	"llVecNorm", "vector v")
 
 -- LSL media functions
+newFunc("",		"llAdjustSoundVolume", "float volume")
+newFunc("integer",	"llClearLinkMedia", "integer link", "integer face")
+newFunc("integer",	"llClearPrimMedia", "integer face")
+newFunc("",		"llParcelMediaCommandList", "list commandList")
+newFunc("list",		"llParcelMediaQuery", "list aList")
+newFunc("list",		"llGetPrimMediaParams", "integer face", "list rules")
+newFunc("",		"llLoopSound", "string sound", "float volume")
+newFunc("",		"llLoopSoundMaster", "string sound", "float volume")
+newFunc("",		"llLoopSoundSlave", "string sound", "float volume")
 newFunc("",		"llPlaySound", "string name", "float volume")
+newFunc("",		"llPlaySoundSlave", "string sound", "float volume")
+newFunc("",		"llPreloadSound", "string sound")
+newFunc("",		"llTriggerSound", "string sound", "float volume")
+newFunc("",		"llTriggerSoundLimited", "string sound", "float volume", "vector top_north_east", "vector bottom_south_west")
+newFunc("integer",	"llSetLinkMedia", "integer link", "integer face", "list rules")
+newFunc("",		"llSetParcelMusicURL", "string url")
+newFunc("integer",	"llSetPrimMediaParams", "integer face", "list rules")
+newFunc("",		"llSetSoundQueueing", "integer queue")
+newFunc("",		"llSetSoundRadius", "float radius")
+newFunc("",		"llSound", "string sound", "float volume", "integer queue", "integer loop")
+newFunc("",		"llSoundPreload", "string sound")
+newFunc("",		"llStopSound")
 
--- LSL object / prim functions
-newFunc("",		"llDie")
-newFunc("key",		"llGetKey")
-newFunc("integer",	"llGetLinkNumber")
-newFunc("string",	"llGetObjectDesc")
-newFunc("string",	"llGetObjectName")
-newFunc("key",		"llGetOwner")
-newFunc("",		"llSetObjectDesc", "string text")
-newFunc("",		"llSetObjectName", "string text")
-newFunc("",		"llSetPrimitiveParams", "list params")
-newFunc("",		"llSetSitText", "string text")
-newFunc("",		"llSetText", "string text", "vector colour", "float alpha")
-newFunc("",		"llSitTarget", "vector pos", "rotation rot")
+-- LSL physics functions
+newFunc("",		"llApplyImpulse", "vector force", "integer local")
+newFunc("",		"llApplyRotationalImpulse", "vector force", "integer local")
+newFunc("vector",	"llGetAccel")
+newFunc("vector",	"llGetCenterOfMass")
+newFunc("vector",	"llGetForce")
+newFunc("float",	"llGetMass")
+newFunc("float",	"llGetObjectMass", "string id")
+newFunc("vector",	"llGetTorque")
+newFunc("vector",	"llGetVel")
+newFunc("",		"llPushObject", "string target", "vector impulse", "vector ang_impulse", "integer local")
+newFunc("",		"llSetBuoyancy", "float buoyancy")
+newFunc("",		"llSetForce", "vector force", "integer local")
+newFunc("",		"llSetForceAndTorque", "vector force", "vector torque", "integer local")
+newFunc("",		"llSetTorque", "vector torque", "integer local")
 
 -- LSL rotation / scaling / translation functions
+newFunc("vector",	"llGetLocalPos")
+newFunc("rotation",	"llGetLocalRot")
 newFunc("vector",	"llGetPos")
+newFunc("vector",	"llGetRootPosition")
+newFunc("rotation",	"llGetRootRotation")
 newFunc("rotation",	"llGetRot")
+newFunc("vector",	"llGetScale")
+newFunc("",		"llSetLocalRot", "rotation rot")
 newFunc("",		"llSetPos", "vector pos")
 newFunc("",		"llSetRot", "rotation rot")
 newFunc("",		"llSetScale", "vector scale")
 
 -- LSL script functions
 newFunc("integer",	"llGetFreeMemory")
+newFunc("integer",	"llGetMemoryLimit")
 newFunc("string",	"llGetScriptName")
+newFunc("integer",	"llGetScriptState", "string name")
+newFunc("integer",	"llGetSPMaxMemory")
+newFunc("integer",	"llGetStartParameter")
+newFunc("integer",	"llGetUsedMemory")
+newFunc("",		"llRemoteLoadScript", "string target", "string name", "integer running", "integer start_param")
+newFunc("",		"llRemoteLoadScriptPin", "string target", "string name", "integer pin", "integer running", "integer start_param")
 newFunc("",		"llResetOtherScript", "string name")
 newFunc("",		"llResetScript")
+newFunc("integer",	"llScriptDanger", "vector pos")
+newFunc("",		"llScriptProfiler", "integer flag")
+newFunc("integer",	"llSetMemoryLimit", "integer limit")
+newFunc("",		"llSetRemoteScriptAccessPin", "integer pin")
 newFunc("",		"llSetScriptState", "string name", "integer running")
 
 -- LSL string functions
+newFunc("integer",	"llBase64ToInteger", "string str")
+newFunc("string",	"llBase64ToString", "string str")
+newFunc("string",	"llDeleteSubString", "string src", "integer start", "integer eNd")
+newFunc("string",	"llEscapeURL", "string url")
+newFunc("key",		"llGenerateKey")
 newFunc("string",	"llGetSubString", "string text", "integer start", "integer End")
+newFunc("string",	"llInsertString", "string dst", "integer position", "string src")
+newFunc("string",	"llIntegerToBase64", "integer number")
+newFunc("string",	"llMD5String", "string src", "integer nonce")
+newFunc("string",	"llSHA1String", "string src")
 newFunc("integer",	"llStringLength", "string text")
-newFunc("string",	"llStringTrim", "string text", "integer type")
+newFunc("string",	"llStringToBase64", "string str")
+newFunc("string",	"llStringTrim", "string text", "integer Type")
 newFunc("integer",	"llSubStringIndex", "string text", "string sub")
+newFunc("string",	"llToLower", "string source")
+newFunc("string",	"llToUpper", "string source")
+newFunc("string",	"llUnescapeURL", "string url")
+newFunc("string",	"llXorBase64Strings", "string str1", "string str2")
+newFunc("string",	"llXorBase64StringsCorrect", "string str1", "string str2")
 
 -- LSL texture functions
 newFunc("float",	"llGetAlpha", "integer side")
+newFunc("vector",	"llGetColor", "integer face")
+newFunc("string",	"llGetTexture", "integer face")
+newFunc("vector",	"llGetTextureOffset", "integer face")
+newFunc("float",	"llGetTextureRot", "integer side")
+newFunc("vector",	"llGetTextureScale", "integer side")
+newFunc("",		"llOffsetTexture", "float u", "float v", "integer face")
+newFunc("",		"llRotateTexture", "float rot", "integer face")
+newFunc("",		"llScaleTexture", "float u", "float v", "integer face")
 newFunc("",		"llSetAlpha", "float alpha", "integer side")
 newFunc("",		"llSetColor", "vector colour", "integer side")
+newFunc("",		"llSetLinkAlpha", "integer linknumber", "float alpha", "integer face")
+newFunc("",		"llSetLinkColor", "integer linknumber", "vector color", "integer face")
+newFunc("",		"llSetLinkTexture", "integer linknumber", "string texture", "integer face")
+newFunc("",		"llSetLinkTextureAnim", "integer linknum", "integer mode", "integer face", "integer sizex", "integer sizey", "float start", "float length", "float rate")
+newFunc("",		"llSetTexture", "string texture", "integer face")
+newFunc("",		"llSetTextureAnim", "integer mode", "integer face", "integer sizex", "integer sizey", "float start", "float length", "float rate")
 
 -- LSL time functions
+newFunc("float",	"llGetAndResetTime")
+newFunc("string",	"llGetDate")
+newFunc("float",	"llGetGMTclock")
 newFunc("float",	"llGetTime")
+newFunc("float",	"llGetTimeOfDay")
+newFunc("string",	"llGetTimestamp")
+newFunc("integer",	"llGetUnixTime")
+newFunc("float",	"llGetWallclock")
+newFunc("",		"llMinEventDelay", "float delay")
 newFunc("",		"llResetTime")
 newFunc("",		"llSetTimerEvent", "float seconds")
 newFunc("float",	"llSleep", "float seconds")  -- Faked return type, it actually does not return anything.  This forces it to wait.  Actually fully implements llSleep().  B-)
 
+-- LSL vehicle functions
+newFunc("",		"llRemoveVehicleFlags", "integer flags")
+newFunc("",		"llSetVehicleFlags", "integer flags")
+newFunc("",		"llSetVehicleFloatParam", "integer param", "float value")
+newFunc("",		"llSetVehicleRotationParam", "integer param", "rotation rot")
+newFunc("",		"llSetVehicleType", "integer Type")
+newFunc("",		"llSetVehicleVectorParam", "integer param", "vector vec")
+
+
+--- OS functions
+
+-- OS animation functions
+newFunc("",		"osAvatarPlayAnimation", "string avatar", "string animation")
+newFunc("",		"osAvatarStopAnimation", "string avatar", "string animation")
+
+-- OS attachment functions
+newFunc("",		"osDropAttachment")
+newFunc("",		"osDropAttachmentAt", "vector pos", "rotation rot")
+newFunc("",		"osForceAttachToAvatar", "integer attachment")
+newFunc("",		"osForceAttachToAvatarFromInventory", "string itemName", "integer attachment")
+newFunc("",		"osForceAttachToOtherAvatarFromInventory", "string rawAvatarId", "string itemName", "integer attachmentPoint")
+newFunc("",		"osForceDetachFromAvatar")
+newFunc("",		"osForceDropAttachment")
+newFunc("",		"osForceDropAttachmentAt", "vector pos", "rotation rot")
+newFunc("list",		"osGetNumberOfAttachments", "key avatar", "list attachmentPoints")
+newFunc("",		"osMessageAttachments", "key avatar", "string message", "list attachmentPoints", "integer flags")
+
+-- OS avatar functions
+newFunc("key",		"osAgentSaveAppearance", "key agentId", "string notecard")
+newFunc("string",	"osAvatarName2Key", "string firstname", "string lastname")
+newFunc("",		"osCauseDamage", "string avatar", "float damage")
+newFunc("",		"osCauseHealing", "string avatar", "float healing")
+newFunc("integer",	"osEjectFromGroup", "key agentId")
+newFunc("string",	"osGetAgentIP", "string agent")
+newFunc("list",		"osGetAgents")
+newFunc("list",		"osGetAvatarList")
+newFunc("float",	"osGetHealth", "string avatar")
+newFunc("integer",	"osInviteToGroup", "key agentId")
+newFunc("string",	"osKey2Name", "string id")
+newFunc("",		"osKickAvatar", "string FirstName", "string SurName", "string alert")
+newFunc("key",		"osOwnerSaveAppearance", "string notecard")
+newFunc("",		"osSetSpeed", "string UUID", "float SpeedModifier")
+-- TODO - Hmmm, function overloading, Lua doesn't support that directly.  Though it can be faked, as with everything in Lua.  B-)
+newFunc("",		"osTeleportAgent", "string agent", "string regionName", "vector position", "vector lookat")
+newFunc("",		"osTeleportAgent", "string agent", "integer regionX", "integer regionY", "vector position", "vector lookat")
+newFunc("",		"osTeleportAgent", "string agent", "vector position", "vector lookat")
+newFunc("",		"osTeleportOwner", "string regionName", "vector position", "vector lookat")
+newFunc("",		"osTeleportOwner", "integer regionX", "integer regionY", "vector position", "vector lookat")
+newFunc("",		"osTeleportOwner", "vector position", "vector lookat")
+
+-- OS communication functions
+newFunc("integer",	"osListenRegex", "integer channelID", "string name", "string ID", "string msg", "integer regexBitfield")
+newFunc("",		"osMessageObject", "key objectUUID", "string message")
+
+-- OS grid functions
+newFunc("string",	"osGetGridCustom", "string key")
+newFunc("string",	"osGetGridGatekeeperURI")
+newFunc("string",	"osGetGridHomeURI")
+newFunc("string",	"osGetGridLoginURI")
+newFunc("string",	"osGetGridName")
+newFunc("string",	"osGetGridNick")
+
+-- OS inventory functions
+newFunc("string",	"osGetNotecard", "string name")
+newFunc("string",	"osGetNotecardLine", "string name", "integer line")
+newFunc("integer",	"osGetNumberOfNotecardLines", "string name")
+--newFunc("",		"osMakeNotecard","string notecardName", "LSL_Types.list contents")
+
+-- OS land / parcel / plot / region / sim / weather functions
+--newFunc("bool",		"osConsoleCommand", "string Command")
+newFunc("float",	"osGetCurrentSunHour")
+newFunc("key",		"osGetMapTexture")
+newFunc("key",		"osGetRegionMapTexture", "string regionName")
+newFunc("list",		"osGetRegionStats")
+newFunc("integer",	"osGetSimulatorMemory")
+newFunc("string",	"osGetSimulatorVersion")
+newFunc("float",	"osGetSunParam", "string param")
+newFunc("float",	"osGetTerrainHeight", "integer x", "integer y")
+newFunc("float",	"osGetWindParam", "string plugin", "string param")
+newFunc("string",	"osLoadedCreationDate")
+newFunc("string",	"osLoadedCreationID")
+newFunc("string",	"osLoadedCreationTime")
+newFunc("",		"osParcelJoin", "vector pos1", "vector pos2")
+newFunc("",		"osParcelSetDetails", "vector pos", "list rules")
+newFunc("",		"osParcelSubdivide", "vector pos1", "vector pos2")
+newFunc("",		"osRegionNotice", "string msg")
+newFunc("integer",	"osRegionRestart", "float seconds")
+--newFunc("",		"osSetEstateSunSettings", "bool sunFixed", "float sunHour")
+newFunc("",		"osSetParcelDetails", "vector pos", "list rules")
+newFunc("",		"osSetParcelMediaURL", "string url")
+newFunc("",		"osSetParcelSIPAddress", "string SIPAddress")
+--newFunc("",		"osSetRegionSunSettings", "bool useEstateSun", "bool sunFixed", "float sunHour")
+newFunc("",		"osSetRegionWaterHeight", "float height")
+newFunc("",		"osSetSunParam", "string param", "float value")
+newFunc("integer",	"osSetTerrainHeight", "integer x", "integer y", "float val")
+newFunc("",		"osSetTerrainTexture", "integer level", "key texture")
+newFunc("",		"osSetTerrainTextureHeight", "integer corner", "float low", "float high")
+newFunc("",		"osSetWindParam", "string plugin", "string param", "float value")
+newFunc("float",	"osSunGetParam", "string param")
+newFunc("",		"osSunSetParam", "string param", "float value")
+newFunc("",		"osTerrainFlush")
+newFunc("float",	"osTerrainGetHeight", "integer x", "integer y")
+newFunc("integer",	"osTerrainSetHeight", "integer x", "integer y", "float val")
+newFunc("string",	"osWindActiveModelPluginName")
+
+-- OS link / object / prim functions
+newFunc("list",		"osGetLinkPrimitiveParams", "integer linknumber", "list rules")
+newFunc("list",		"osGetPrimitiveParams", "key prim", "list rules")
+newFunc("key",		"osGetRezzingObject")
+newFunc("",		"osSetContentType", "key id", "string type")
+newFunc("",		"osSetPrimFloatOnWater", "integer floatYN")
+--newFunc("",		"osSetProjectionParams", "bool projection", "key texture", "float fov", "float focus", "float amb")
+--newFunc("",		"osSetProjectionParams", "key prim", "bool projection", "key texture", "float fov", "float focus", "float amb")
+
+-- OS list functions
+--newFunc("float",	"osList2Double", "LSL_Types.list src", "integer index")
+
+-- OS math functions
+newFunc("float",	"osMax", "float a", "float b")
+newFunc("float",	"osMin", "float a", "float b")
+
+-- OS NPC functions
+newFunc("key",		"osNpcCreate", "string user", "string name", "vector position", "key cloneFrom")
+newFunc("key",		"osNpcCreate", "string user", "string name", "vector position", "string notecard")
+newFunc("key",		"osNpcCreate", "string user", "string name", "vector position", "string notecard", "integer options")
+newFunc("key",		"osNpcGetOwner", "key npc")
+newFunc("vector",	"osNpcGetPos", "key npc")
+newFunc("rotation",	"osNpcGetRot", "key npc")
+newFunc("integer",	"osIsNpc", "key npc")
+newFunc("",		"osNpcLoadAppearance", "key npc", "string notecard")
+newFunc("",		"osNpcMoveTo", "key npc", "vector position")
+newFunc("",		"osNpcMoveToTarget", "key npc", "vector target", "integer options")
+newFunc("",		"osNpcPlayAnimation", "key npc", "string animation")
+newFunc("",		"osNpcRemove", "key npc")
+newFunc("key",		"osNpcSaveAppearance", "key npc", "string notecard")
+newFunc("",		"osNpcSay", "key npc", "string message")
+newFunc("",		"osNpcSay", "key npc", "integer channel", "string message")
+newFunc("",		"osNpcSetRot", "key npc", "rotation rot")
+newFunc("",		"osNpcShout", "key npc", "integer channel", "string message")
+newFunc("",		"osNpcSit", "key npc", "key target", "integer options")
+newFunc("",		"osNpcStand", "key npc")
+newFunc("",		"osNpcStopAnimation", "key npc", "string animation")
+newFunc("",		"osNpcStopMoveToTarget", "key npc")
+newFunc("",		"osNpcTouch", "key npcLSL_Key", "key object_key", "integer link_num")
+newFunc("",		"osNpcWhisper", "key npc", "integer channel", "string message")
+
+-- OS script functions
+newFunc("string",	"osGetScriptEngineName")
+
+-- OS string functions
+newFunc("integer",	"osIsUUID", "string thing")
+newFunc("string",	"osFormatString", "string str", "list strings")
+newFunc("list",		"osMatchString", "string src", "string pattern", "integer start")
+--newFunc("Hashtable",	"osParseJSON","string JSON")
+newFunc("integer",	"osRegexIsMatch", "string input", "string pattern")
+newFunc("string",	"osReplaceString", "string src", "string pattern", "string replace", "integer count", "integer start")
+
+-- OS texture functions
+newFunc("string",	"osDrawEllipse", "string drawList", "integer width", "integer height")
+newFunc("string",	"osDrawFilledPolygon", "string drawList", "list x", "list y")
+newFunc("string",	"osDrawFilledRectangle", "string drawList", "integer width", "integer height")
+newFunc("string",	"osDrawImage", "string drawList", "integer width", "integer height", "string imageUrl")
+newFunc("string",	"osDrawLine", "string drawList", "integer startX", "integer startY", "integer endX", "integer endY")
+newFunc("string",	"osDrawLine", "string drawList", "integer endX", "integer endY")
+newFunc("string",	"osDrawPolygon", "string drawList", "list x", "list y")
+newFunc("string",	"osDrawRectangle", "string drawList", "integer width", "integer height")
+newFunc("string",	"osDrawText", "string drawList", "string text")
+newFunc("vector",	"osGetDrawStringSize", "string contentType", "string text", "string fontName", "integer fontSize")
+newFunc("string",	"osMovePen", "string drawList", "integer x", "integer y")
+newFunc("string",	"osSetDynamicTextureData", "string dynamicID", "string contentType", "string data", "string extraParams", "integer timer")
+newFunc("string",	"osSetDynamicTextureDataBlend", "string dynamicID", "string contentType", "string data", "string extraParams", "integer timer", "integer alpha")
+--newFunc("string",	"osSetDynamicTextureDataBlendFace", "string dynamicID", "string contentType", "string data", "string extraParams", "bool blend", "integer disp", "integer timer", "integer alpha", "integer face")
+newFunc("string",	"osSetDynamicTextureURL", "string dynamicID", "string contentType", "string url", "string extraParams", "integer timer")
+newFunc("string",	"osSetDynamicTextureURLBlend", "string dynamicID", "string contentType", "string url", "string extraParams", "integer timer", "integer alpha")
+--newFunc("string",	"osSetDynamicTextureURLBlendFace", "string dynamicID", "string contentType", "string url", "string extraParams", "bool blend", "integer disp", "integer timer", "integer alpha", "integer face")
+newFunc("string",	"osSetFontName", "string drawList", "string fontName")
+newFunc("string",	"osSetFontSize", "string drawList", "integer fontSize")
+newFunc("string",	"osSetPenCap", "string drawList", "string direction", "string type")
+newFunc("string",	"osSetPenColor", "string drawList", "string color")
+newFunc("string",	"osSetPenColour", "string drawList", "string colour")
+newFunc("string",	"osSetPenSize", "string drawList", "integer penSize")
+newFunc("",		"osSetStateEvents", "integer events")
+
+-- OS time functions
+--newFunc("string",	"osUnixTimeToTimestamp", "long time")
+
+-- OS windlight functions
+newFunc("",		"lsClearWindlightScene")
+newFunc("list",		"lsGetWindlightScene", "list rules")
+newFunc("integer",	"lsSetWindlightScene", "list rules")
+newFunc("integer",	"lsSetWindlightSceneTargeted", "list rules", "key target")
+
+
+
+-- Function implementations
 
 -- TODO - fake this for now.
 function --[[integer]] 	LSL.llGetInventoryType(--[[string]] name) return LSL.INVENTORY_SCRIPT end;
