@@ -122,8 +122,8 @@ void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ..
     length += vsprintf(&buf[length], message, args);
     va_end(args);
     buf[length++] = '\n';
-    buf[length++] = '\0';
-    ecore_con_client_send(client, buf, strlen(buf));
+    buf[length] = '\0';
+    ecore_con_client_send(client, buf, length);
     ecore_con_client_flush(client);
 }
 
@@ -139,7 +139,7 @@ void sendForth(Ecore_Con_Server	*server, const char *SID, const char *message, .
     length += vsprintf(&buf[length], message, args);
     va_end(args);
     buf[length++] = '\n';
-    buf[length++] = '\0';
-    ecore_con_server_send(server, buf, strlen(buf));
+    buf[length] = '\0';
+    ecore_con_server_send(server, buf, length);
     ecore_con_server_flush(server);
 }
