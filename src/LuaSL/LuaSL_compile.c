@@ -1,6 +1,5 @@
 
 #include "LuaSL.h"
-#include "SledjHamr.h"
 
 /* TODO - problem de jour
 */
@@ -223,7 +222,7 @@ LSL_Script constants;
 int lowestToken = 999999;
 
 
-static void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line)
+void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line)
 {
     message->type   = type;
     message->column = column;
@@ -2318,7 +2317,7 @@ void compileLSL(LuaCompiler *compiler)
 		{
 //		    sendBack(lcompiler->compiler->client, lcompiler->compiler->SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 		    finishMessage(lcompiler->compiler, addMessage(&(lcompiler->compiler->messages), sizeof(compileMessage),
-			"NOT FOUND function %s called)", call->call->value.stringValue),
+			"NOT FOUND function %s called", call->call->value.stringValue),
 			1, call->call->column, call->call->line);
 		}
 	    }

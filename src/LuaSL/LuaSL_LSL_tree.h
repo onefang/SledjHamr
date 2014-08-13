@@ -395,6 +395,7 @@ typedef struct
 #endif
 
 
+void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line);
 
 boolean compilerSetup(gameGlobals *ourGlobals);
 void compileLSL(LuaCompiler *compiler);

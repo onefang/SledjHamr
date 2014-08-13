@@ -241,8 +241,11 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %syntax_error
 {
-    compiler->compiler->bugCount++;
-    PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);
+//    compiler->compiler->bugCount++;
+//    PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);
+    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+	"Syntax error."),
+	1, yyminor.yy0->column, yyminor.yy0->line);
 }
 
 

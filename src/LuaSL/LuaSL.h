@@ -11,6 +11,7 @@ typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h
 
 #include "LumbrJack.h"
 #include "Runnr.h"
+#include "SledjHamr.h"
 
 
 struct _gameGlobals
