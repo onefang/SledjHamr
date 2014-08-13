@@ -182,6 +182,18 @@ static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Ad
 
 static void _compileCb(LuaCompiler *compiler)
 {
+  compileMessage *message = NULL, *safe = NULL;
+
+  EINA_CLIST_FOR_EACH_ENTRY_SAFE(message, safe, &(compiler->messages), compileMessage, node)
+  {
+    if (message->type)
+      sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,%s)",   message->line, message->column, message->message);
+    else
+      sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,%s)", message->line, message->column, message->message);
+    eina_clist_remove(&(message->node));
+    free(message);
+  }
+
   if (0 == compiler->bugCount)
     sendBack(compiler->client, compiler->SID, "compiled(true)");
   else
@@ -223,6 +235,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    temp++;
 		temp[0] = '\0';
 
+		eina_clist_init(&(compiler->messages));
 		compiler->file = strdup(file);
 		compiler->SID = strdup(SID);
 		compiler->client = ev->client;
@@ -304,6 +317,7 @@ int main(int argc, char **argv)
 	ourGlobals.names = eina_hash_string_superfast_new(NULL);
 	if (ecore_init())
 	{
+//	    ecore_thread_max_set(4);
 	    if (ecore_con_init())
 	    {
 		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))

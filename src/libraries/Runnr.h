@@ -30,6 +30,13 @@ typedef enum
 typedef struct _LuaCompile LuaCompile;
 typedef void (* compileCb)(LuaCompile *compiler);
 
+typedef struct _compileMessage
+{
+  Eina_Clist	node;
+  char		*message;
+  int		type, column, line;
+} compileMessage;
+
 typedef struct _LuaCompile
 {
   char			*file, *SID, *luaName;
@@ -38,6 +45,7 @@ typedef struct _LuaCompile
   compileCb		parser;
   compileCb		cb;
   boolean		doConstants;
+  Eina_Clist		messages;	// HEAD for error and warning messages.
 } LuaCompiler;
 
 typedef struct _script script;

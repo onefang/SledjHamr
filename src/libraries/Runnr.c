@@ -421,9 +421,6 @@ static void _compileEnd(void *data, Ecore_Thread *thread)
   free(compiler->SID);
 }
 
-// TODO - Should pass error messages back through a linked list.
-//		To eventually get passed back to the calling app via compiler->errors and compiler->warnings.
-//		Will need ageneric "add this formatted string to a linked list" function, in SledjHamr.c
 static void _compileThread(void *data, Ecore_Thread *thread)
 {
   LuaCompiler *compiler = data;
@@ -487,6 +484,7 @@ static void _compileThread(void *data, Ecore_Thread *thread)
   }
 }
 
+// TODO - Threaded version is consistantly about half the speed.  WTF?
 void compileScript(LuaCompiler *compiler, int threadIt)
 {
   if (threadIt)

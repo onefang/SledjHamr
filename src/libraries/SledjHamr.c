@@ -13,6 +13,12 @@ struct _conct
   Ecore_Event_Handler *add, *data, *del;
 };
 
+struct _message
+{
+  Eina_Clist	node;
+  char		*message;
+};
+
 
 static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
@@ -83,6 +89,25 @@ Ecore_Con_Server *reachOut(char *address, int port, void *data, Ecore_Event_Hand
     printf("Failed to connect to server %s:%d!\n", this->address, this->port);
 
   return server;
+}
+
+void *addMessage(Eina_Clist *list, size_t size, const char *message, ...)
+{
+    va_list args;
+    char buf[PATH_MAX];
+    int length = 0;
+    struct _message *result;
+
+    va_start(args, message);
+    length += vsprintf(&buf[length], message, args);
+    va_end(args);
+    result = calloc(1, size + length + 1);
+    eina_clist_element_init(&(result->node));
+    eina_clist_add_tail(list, &(result->node));
+    result->message = ((char *) result) + size;
+    strcpy(result->message, buf);
+
+    return result;
 }
 
 void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ...)

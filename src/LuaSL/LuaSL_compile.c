@@ -223,6 +223,15 @@ LSL_Script constants;
 int lowestToken = 999999;
 
 
+static void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line)
+{
+    message->type   = type;
+    message->column = column;
+    message->line   = line;
+    if (type)
+	compiler->bugCount++;
+}
+
 static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 {
     LSL_Leaf *leaf = calloc(1, sizeof(LSL_Leaf));
@@ -361,8 +370,11 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	}
 	else
 	{
-	    compiler->compiler->bugCount++;
-	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
+//	    compiler->compiler->bugCount++;
+//	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+		"NOT FOUND variable %s", identifier->value.stringValue),
+		1, identifier->column, identifier->line);
 	}
     }
 
@@ -632,8 +644,11 @@ else
 		rightType = allowed[right->basicType].name;
 	    }
 
-	    compiler->compiler->bugCount++;
-	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+//	    compiler->compiler->bugCount++;
+//	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+	    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+		"Invalid operation [%s(%s) %s %s(%s)]", leftType, leftToken, lval->toKen->toKen, rightType, rightToken),
+		1, lval->column, lval->line);
 	}
     }
 
@@ -2234,7 +2249,7 @@ void compileLSL(LuaCompiler *compiler)
     lcompiler->ignorable = eina_strbuf_new();
 #endif
 
-    PI("Compiling %s.", lcompiler->compiler->file);
+//    PI("Compiling %s.", lcompiler->compiler->file);
 
     in = fopen(lcompiler->compiler->file, "r");
     if (NULL == in)
@@ -2300,7 +2315,12 @@ void compileLSL(LuaCompiler *compiler)
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(lcompiler->compiler->client, lcompiler->compiler->SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		{
+//		    sendBack(lcompiler->compiler->client, lcompiler->compiler->SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    finishMessage(lcompiler->compiler, addMessage(&(lcompiler->compiler->messages), sizeof(compileMessage),
+			"NOT FOUND function %s called)", call->call->value.stringValue),
+			1, call->call->column, call->call->line);
+		}
 	    }
 	}
 	secondPass(lcompiler, lcompiler->ast);
