@@ -34,10 +34,10 @@ typedef struct _LuaCompile
 {
   char			*file, *SID, *luaName;
   int			bugCount;
-  void			*data;
   Ecore_Con_Client	*client;
   compileCb		parser;
   compileCb		cb;
+  boolean		doConstants;
 } LuaCompiler;
 
 typedef struct _script script;

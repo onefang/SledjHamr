@@ -361,8 +361,8 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	}
 	else
 	{
-	    compiler->script.bugCount++;
-	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
+	    compiler->compiler->bugCount++;
+	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
 	}
     }
 
@@ -404,7 +404,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == lType)
 	    {
 		compiler->script.warningCount++;
-//		sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+//		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -432,7 +432,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 	    if (OT_undeclared == rType)
 	    {
 		compiler->script.warningCount++;
-//		sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
+//		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -632,8 +632,8 @@ else
 		rightType = allowed[right->basicType].name;
 	    }
 
-	    compiler->script.bugCount++;
-	    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
+	    compiler->compiler->bugCount++;
+	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	}
     }
 
@@ -1152,7 +1152,7 @@ LSL_Leaf *addStatement(LuaSL_compiler *compiler, LSL_Leaf *lval, LSL_Leaf *flow,
 	    }
 	    default :
 	    {
-		compiler->script.bugCount++;
+		compiler->compiler->bugCount++;
 		PE("Should not be here %d.", stat->type);
 		break;
 	    }
@@ -2169,14 +2169,6 @@ static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
 }
 
-static void _compileCb(LuaCompiler *compiler)
-{
-  free(compiler->luaName);
-  free(compiler->SID);
-  free(compiler->file);
-  free(compiler);
-}
-
 boolean compilerSetup(gameGlobals *ourGlobals)
 {
     int i;
@@ -2191,7 +2183,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     if (tokens)
     {
 	char buf[PATH_MAX];
-	LuaSL_compiler *compiler = calloc(1, sizeof(LuaSL_compiler));
+	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
@@ -2205,13 +2197,11 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	snprintf(buf, sizeof(buf), "luajit -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
 	system(buf);
 	snprintf(buf, sizeof(buf), "%s/constants.lsl", prefix_lib_get());
-	compiler->compiler.file = strdup(buf);
-	compiler->compiler.SID = strdup("FAKE_SID");
-	compiler->compiler.data = ourGlobals;
-	compiler->compiler.cb = _compileCb;
+	compiler->file = strdup(buf);
+	compiler->SID = strdup("FAKE_SID");
 	compiler->doConstants = TRUE;
-	if (!compileLSL(compiler))
-	  _compileCb(&compiler->compiler);
+	compiler->parser = (compileCb) compileLSL;
+	compileScript(compiler, COMPILE_THREADED);
 
 	return TRUE;
     }
@@ -2221,77 +2211,85 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     return FALSE;
 }
 
-boolean compileLSL(LuaSL_compiler *compiler)
+void compileLSL(LuaCompiler *compiler)
 {
+    LuaSL_compiler *lcompiler = calloc(1, sizeof(LuaSL_compiler));
     void *pParser = ParseAlloc(malloc);
 #if LUASL_BAD_CHECK
     char tempName[PATH_MAX];
 #endif
+    FILE *in;
     int yv;
+
+    lcompiler->compiler = compiler;
 
 // Parse the LSL script, validating it and reporting errors.
 //   Just pass all LSL constants and ll*() )function names through to Lua, assume they are globals there.
 
-    compiler->result = FALSE;
-    compiler->script.functions = eina_hash_stringshared_new(burnLeaf);
-    compiler->script.states = eina_hash_stringshared_new(burnLeaf);
-    compiler->script.variables = eina_hash_stringshared_new(burnLeaf);
-    eina_clist_init(&(compiler->danglingCalls));
+    lcompiler->script.functions = eina_hash_stringshared_new(burnLeaf);
+    lcompiler->script.states = eina_hash_stringshared_new(burnLeaf);
+    lcompiler->script.variables = eina_hash_stringshared_new(burnLeaf);
+    eina_clist_init(&(lcompiler->danglingCalls));
 #if LUASL_DIFF_CHECK
-    compiler->ignorable = eina_strbuf_new();
+    lcompiler->ignorable = eina_strbuf_new();
 #endif
 
-    PI("Compiling %s.", compiler->compiler.file);
+    PI("Compiling %s.", lcompiler->compiler->file);
 
-    compiler->file = fopen(compiler->compiler.file, "r");
-    if (NULL == compiler->file)
+    in = fopen(lcompiler->compiler->file, "r");
+    if (NULL == in)
     {
-	PE("Error opening file %s.", compiler->compiler.file);
-	return FALSE;
+	PE("Error opening file %s.", lcompiler->compiler->file);
+	return;
     }
 #if LUASL_BAD_CHECK
     // Mark the file as bad, in case we crash while compiling it.
     // NOTE - wont work so well when we are threaded.
-    sprintf(tempName, "%s.BAD", compiler->compiler.file);
-    ecore_file_mv(compiler->compiler.file, tempName);
+    sprintf(tempName, "%s.BAD", lcompiler->compiler->file);
+    ecore_file_mv(lcompiler->compiler->file, tempName);
 #endif
-    compiler->ast = NULL;
-    compiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
+    lcompiler->ast = NULL;
+    lcompiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.
-    compiler->column = 1;
-    compiler->line = 1;
+    lcompiler->column = 1;
+    lcompiler->line = 1;
 
-    if (yylex_init_extra(compiler, &(compiler->scanner)))
-	return compiler->result;
+    if (yylex_init_extra(lcompiler, &(lcompiler->scanner)))
+	return;
     if (LUASL_DEBUG)
     {
-	yyset_debug(1, compiler->scanner);
+	yyset_debug(1, lcompiler->scanner);
 	ParseTrace(stdout, "LSL_lemon ");
     }
-    yyset_in(compiler->file, compiler->scanner);
+    yyset_in(in, lcompiler->scanner);
     // on EOF yylex will return 0
-    while((yv = yylex(compiler->lval, compiler->scanner)) != 0)
+    while((yv = yylex(lcompiler->lval, lcompiler->scanner)) != 0)
     {
-	Parse(pParser, yv, compiler->lval, compiler);
+	Parse(pParser, yv, lcompiler->lval, lcompiler);
 	if (LSL_SCRIPT == yv)
 	    break;
-	compiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
+	lcompiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     }
 
-    yylex_destroy(compiler->scanner);
-    Parse(pParser, 0, compiler->lval, compiler);
+    yylex_destroy(lcompiler->scanner);
+    Parse(pParser, 0, lcompiler->lval, lcompiler);
     ParseFree(pParser, free);
+    if (NULL != in)
+    {
+	fclose(in);
+	in = NULL;
+    }
 
-    if (compiler->undeclared)
+    if (lcompiler->undeclared)
     {
 //	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
-	if (eina_clist_count(&(compiler->danglingCalls)))
+	if (eina_clist_count(&(lcompiler->danglingCalls)))
 	{
 	    LSL_FunctionCall *call = NULL;
 
-	    EINA_CLIST_FOR_EACH_ENTRY(call, &(compiler->danglingCalls), LSL_FunctionCall, dangler)
+	    EINA_CLIST_FOR_EACH_ENTRY(call, &(lcompiler->danglingCalls), LSL_FunctionCall, dangler)
 	    {
-		LSL_Leaf *func = findFunction(compiler, call->call->value.stringValue);
+		LSL_Leaf *func = findFunction(lcompiler, call->call->value.stringValue);
 
 		if (func)
 		{
@@ -2302,23 +2300,18 @@ boolean compileLSL(LuaSL_compiler *compiler)
 		    call->call->basicType = func->basicType;
 		}
 		else
-		    sendBack(compiler->compiler.client, compiler->compiler.SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
+		    sendBack(lcompiler->compiler->client, lcompiler->compiler->SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 	    }
 	}
-	secondPass(compiler, compiler->ast);
+	secondPass(lcompiler, lcompiler->ast);
 //	PD("Second pass completed.");
     }
 
-    if (compiler->doConstants)
-    {
-	memcpy(&constants, &(compiler->script), sizeof(LSL_Script));
-	compiler->result = TRUE;
-    }
+    if (lcompiler->compiler->doConstants)
+	memcpy(&constants, &(lcompiler->script), sizeof(LSL_Script));
     else
     {
-	compiler->result = FALSE;
-
-	if (compiler->ast)
+	if (lcompiler->ast)
 	{
 	    FILE *out;
 	    char buffer[PATH_MAX];
@@ -2328,28 +2321,32 @@ boolean compileLSL(LuaSL_compiler *compiler)
 
 	    if (LUASL_DIFF_CHECK)
 	    {
-		strcpy(outName, compiler->compiler.file);
+		strcpy(outName, lcompiler->compiler->file);
 		strcat(outName, "2");
 		out = fopen(outName, "w");
 		if (out)
 		{
 		    char diffName[PATH_MAX];
 
-		    strcpy(diffName, compiler->compiler.file);
+		    strcpy(diffName, lcompiler->compiler->file);
 		    strcat(diffName, ".diff");
-		    outputLeaf(out, OM_LSL, compiler->ast);
+		    outputLeaf(out, OM_LSL, lcompiler->ast);
 		    fclose(out);
-		    sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", compiler->compiler.file, outName, diffName);
+		    sprintf(buffer, "diff -u \"%s\" \"%s\" > \"%s\"", lcompiler->compiler->file, outName, diffName);
 		    count = system(buffer);
 		    if (0 != count)
+		    {
+			lcompiler->compiler->bugCount++;
 			PE("LSL output file is different - %s!", outName);
-		    else
-			compiler->result = TRUE;
+		    }
 		}
 		else
+		{
+		    lcompiler->compiler->bugCount++;
 		    PC("Unable to open file %s for writing!", outName);
+		}
 	    }
-	    strcpy(luaName, compiler->compiler.file);
+	    strcpy(luaName, lcompiler->compiler->file);
 	    strcat(luaName, ".lua");
 	    out = fopen(luaName, "w");
 	    // Generate the Lua source code.
@@ -2360,38 +2357,32 @@ boolean compileLSL(LuaSL_compiler *compiler)
 		fprintf(out, "--// Generated code goes here.\n\n");
 		fprintf(out, "local _bit = require(\"bit\")\n");
 		fprintf(out, "local _LSL = require(\"LSL\")\n\n");
-		fprintf(out, "local _SID = [=[%s]=]\n\n", compiler->compiler.SID);
-		strcpy(buffer, basename(compiler->compiler.file));
+		fprintf(out, "local _SID = [=[%s]=]\n\n", lcompiler->compiler->SID);
+		strcpy(buffer, basename(lcompiler->compiler->file));
 		if ((ext = rindex(buffer, '.')))
 		  ext[0] = '\0';
 		fprintf(out, "local _scriptName = [=[%s]=]\n\n", buffer);
-		outputLeaf(out, OM_LUA, compiler->ast);
+		outputLeaf(out, OM_LUA, lcompiler->ast);
 		fprintf(out, "\n\n_LSL.mainLoop(_SID, _scriptName, _defaultState)\n");  // This actually starts the script running.
 		fprintf(out, "\n--// End of generated code.\n\n");
 		fclose(out);
 
-		// Compile the Lua source code.
-		compiler->compiler.luaName = strdup(luaName);
-		compiler->compiler.bugCount = compiler->script.bugCount;
-		compileScript(&compiler->compiler, COMPILE_THREADED);
-		compiler->result = TRUE;
+		// Make sure the output gets compiled by Lua.
+		lcompiler->compiler->luaName = strdup(luaName);
 	    }
 	    else
+	    {
+		lcompiler->compiler->bugCount++;
 		PC("Unable to open file %s for writing!", luaName);
+	    }
 	}
+	burnLeaf(lcompiler->ast);
     }
-
-    if (NULL != compiler->file)
-    {
-	fclose(compiler->file);
-	compiler->file = NULL;
-    }
-
-    if (!compiler->doConstants)
-	burnLeaf(compiler->ast);
 
 #if LUASL_BAD_CHECK
-    ecore_file_mv(tempName, compiler->compiler.file);
+    ecore_file_mv(tempName, lcompiler->compiler->file);
 #endif
-    return compiler->result;
+
+    free(lcompiler);
+    return;
 }

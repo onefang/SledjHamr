@@ -410,85 +410,20 @@ static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
     return result;
 }
 
-// TODO - This didn't help the compile time much, perhaps move the rest of the compiling stage into this thread as a callback?
-/*
-
-LuaSL.c : _data( ... "compile(" ...
-    allocate LuaSL_compiler
-    extract SID, file, and name from data stream
-    massage data into LuaCompiler
-    compileLSL(LuaCompiler, FALSE)
-LuaSL_compile.c : compileLSL()
-	init it
-*	open the .LSL file
-*	init lexer
-*	run lexer in a loop
-*	setup second pass in a loop
-*	    may do a sendBack()
-*	secondPass(LuaSL_compiler, ... )
-*	open the .lua file
-*	generate Lua source code
-	compileScript(LuaSL_compiler)
-Runnr;c : compileScript(
-	    start a feedback thread
-
-LuaSL.c : _compileCb
-    scriptAdd( ... )
-	Needs LuaCompiler-> file, SID, client, data
-	adds the compiled script to the list of scripts being run.
-    sendBack results
-    frees LuaCompiler-> luaName, SID, file.  Alse frees LuaCompiler.
-
-
-typedef void (* compileCb)(LuaCompile *compiler);
-
-typedef struct _LuaCompile
-{
-  char			*file, *SID, *luaName;
-  int			bugCount;
-  void			*data;		OurGlobals, Passed to the call back, to be passed to scriptAdd, which stores it as a void pointer, then ... ?????  Don't think it's actually used.
-  Ecore_Con_Client	*client;
-  compileCb		parser;
-  compileCb		cb;
-} LuaCompiler;
-
-typedef struct
-{
-    LuaCompiler		compiler;
-    void		*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
-    int			argc;
-    char		**argv;
-    FILE		*file;
-    LSL_Leaf		*ast;
-    LSL_Script		script;
-    LSL_State		state;
-#if LUASL_DIFF_CHECK
-    Eina_Strbuf		*ignorable;
-#endif
-    LSL_Leaf		*lval;
-    LSL_Block		*currentBlock;
-    LSL_Function	*currentFunction;
-    Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
-    int			column, line;
-    int			undeclared;
-    boolean		inState;
-    boolean		doConstants;
-    boolean		result;
-} LuaSL_compiler;
-
-
-*/
-
-static void _compileNotify(void *data, Ecore_Thread *thread, void *message)
+// Gets called on the main thread when the compile thread ends or fails.
+static void _compileEnd(void *data, Ecore_Thread *thread)
 {
   LuaCompiler *compiler = data;
 
   if (compiler->cb)  compiler->cb(compiler);
+  free(compiler->file);
+  free(compiler->luaName);
+  free(compiler->SID);
 }
 
 // TODO - Should pass error messages back through a linked list.
-//		To eventually get passed back to the calling app via compiler->cb
-// We use - luaName, bugCount, cb
+//		To eventually get passed back to the calling app via compiler->errors and compiler->warnings.
+//		Will need ageneric "add this formatted string to a linked list" function, in SledjHamr.c
 static void _compileThread(void *data, Ecore_Thread *thread)
 {
   LuaCompiler *compiler = data;
@@ -499,62 +434,68 @@ static void _compileThread(void *data, Ecore_Thread *thread)
 
   if (compiler->parser)  compiler->parser(compiler);
 
-  strcpy(name, compiler->luaName);
-  if ((L = luaL_newstate()))
+  if (compiler->luaName)
   {
-    luaL_openlibs(L);
-    // This ends up pushing a function onto the stack.  The function is the compiled code.
-    err = luaL_loadfile(L, name);
-    if (err)
+    strcpy(name, compiler->luaName);
+    if ((L = luaL_newstate()))
     {
-      compiler->bugCount++;
-      if (LUA_ERRSYNTAX == err)
-	printf("Lua syntax error in %s: %s\n", name, lua_tostring(L, -1));
-      else if (LUA_ERRFILE == err)
-	printf("Lua compile file error in %s: %s\n", name, lua_tostring(L, -1));
-      else if (LUA_ERRMEM == err)
-	printf("Lua compile memory allocation error in %s: %s\n", name, lua_tostring(L, -1));
-    }
-    else
-    {
-      // Write the compiled code to a file.
-      strcat(name, ".out");
-      out = fopen(name, "w");
-      if (out)
+      luaL_openlibs(L);
+      // This ends up pushing a function onto the stack.  The function is the compiled code.
+      err = luaL_loadfile(L, name);
+      if (err)
       {
-	err = lua_dump(L, luaWriter, out);
-	if (err)
-	{
-	  compiler->bugCount++;
-	  printf("Lua compile file error writing to %s\n", name);
-	}
-	fclose(out);
+        compiler->bugCount++;
+	if (LUA_ERRSYNTAX == err)
+	  printf("Lua syntax error in %s: %s\n", name, lua_tostring(L, -1));
+	else if (LUA_ERRFILE == err)
+	  printf("Lua compile file error in %s: %s\n", name, lua_tostring(L, -1));
+	else if (LUA_ERRMEM == err)
+	  printf("Lua compile memory allocation error in %s: %s\n", name, lua_tostring(L, -1));
       }
       else
       {
-	compiler->bugCount++;
-	printf("CRITICAL! Unable to open file %s for writing!\n", name);
+	// Write the compiled code to a file.
+	strcat(name, ".out");
+	out = fopen(name, "w");
+	if (out)
+	{
+	  err = lua_dump(L, luaWriter, out);
+	  if (err)
+	  {
+	    compiler->bugCount++;
+	    printf("Lua compile file error writing to %s\n", name);
+	  }
+	  fclose(out);
+	}
+	else
+	{
+	  compiler->bugCount++;
+	  printf("CRITICAL! Unable to open file %s for writing!\n", name);
+        }
       }
+    }
+    else if (!compiler->doConstants)
+    {
+      compiler->bugCount++;
+      printf("Can't create a new Lua state!\n");
     }
   }
   else
   {
     compiler->bugCount++;
-    printf("Can't create a new Lua state!\n");
+    printf("Nothing for Lua to compile!\n");
   }
-
-  if (thread)
-    ecore_thread_feedback(thread, compiler);
-  else
-    _compileNotify(compiler, thread, NULL);
 }
 
 void compileScript(LuaCompiler *compiler, int threadIt)
 {
   if (threadIt)
-    ecore_thread_feedback_run(_compileThread, _compileNotify, NULL, NULL, compiler, EINA_FALSE);
+    ecore_thread_run(_compileThread, _compileEnd, _compileEnd, compiler);
   else
+  {
     _compileThread(compiler, NULL);
+    _compileEnd(compiler, NULL);
+  }
 }
 
 // Assumes the scripts mutex is taken already.

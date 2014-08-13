@@ -229,19 +229,19 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %parse_failure
 {
-    compiler->script.bugCount++;
+    compiler->compiler->bugCount++;
     PE("Giving up.  Parser is hopelessly lost!");
 }
 
 %stack_overflow
 {
-    compiler->script.bugCount++;
+    compiler->compiler->bugCount++;
     PE("Giving up.  Parser stack overflow @ line %d, column %d!", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
 }
 
 %syntax_error
 {
-    compiler->script.bugCount++;
+    compiler->compiler->bugCount++;
     PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);
 }
 

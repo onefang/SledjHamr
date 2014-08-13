@@ -5,7 +5,7 @@
 #define LUASL_DEBUG		0
 #define COMPILE_THREADED	0
 #define LUASL_DIFF_CHECK	0
-#define LUASL_BAD_CHECK		0
+#define LUASL_BAD_CHECK		1
 
 
 #include <stddef.h>	// So we can have NULL defined.
@@ -300,7 +300,7 @@ struct _LSL_Script
     Eina_Hash		*functions;
     Eina_Hash		*states;
     Eina_Hash		*variables;
-    int			bugCount, warningCount;
+    int			warningCount;
 };
 
 /* Tracking variables.
@@ -372,11 +372,8 @@ Need to do something about that.
 
 typedef struct
 {
-    LuaCompiler		compiler;
+    LuaCompiler		*compiler;
     void		*scanner;	// This should be of type yyscan_t, which is typedef to void * anyway, but that does not get defined until LuaSL_lexer.h, which depends on this struct being defined first.
-    int			argc;
-    char		**argv;
-    FILE		*file;
     LSL_Leaf		*ast;
     LSL_Script		script;
     LSL_State		state;
@@ -390,8 +387,6 @@ typedef struct
     int			column, line;
     int			undeclared;
     boolean		inState;
-    boolean		doConstants;
-    boolean		result;
 } LuaSL_compiler;
 
 
@@ -402,7 +397,7 @@ typedef struct
 
 
 boolean compilerSetup(gameGlobals *ourGlobals);
-boolean compileLSL(LuaSL_compiler *lCompiler);
+void compileLSL(LuaCompiler *compiler);
 void burnLeaf(void *data);
 
 LSL_Leaf *addBlock(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval, LSL_Leaf *right);

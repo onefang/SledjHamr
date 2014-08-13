@@ -186,10 +186,6 @@ static void _compileCb(LuaCompiler *compiler)
     sendBack(compiler->client, compiler->SID, "compiled(true)");
   else
     sendBack(compiler->client, compiler->SID, "compiled(false)");
-  free(compiler->luaName);
-  free(compiler->SID);
-  free(compiler->file);
-  free(compiler);
 }
 
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
@@ -218,7 +214,7 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 	    {
 		char *temp;
 		char *file;
-		LuaSL_compiler *compiler = calloc(1, sizeof(LuaSL_compiler));
+		LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
 
 		strcpy(buf, &command[8]);
 		temp = buf;
@@ -227,23 +223,13 @@ static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_D
 		    temp++;
 		temp[0] = '\0';
 
-		compiler->compiler.file = strdup(file);
-		compiler->compiler.SID = strdup(SID);
-		compiler->compiler.client = ev->client;
-		compiler->compiler.data = ourGlobals;
-		compiler->compiler.cb = _compileCb;
+		compiler->file = strdup(file);
+		compiler->SID = strdup(SID);
+		compiler->client = ev->client;
 		compiler->doConstants = FALSE;
-#if COMPILE_THREADED
-		compiler->compiler.parser = (compileCb) compileLSL;
-		compileScript(&compiler->compiler);
-#else
-		if (!compileLSL(compiler))
-		{
-		  compiler->compiler.bugCount++;
-		  PE("Compile of %s failed in a mysterious way.", file);
-		  _compileCb(&(compiler->compiler));
-		}
-#endif
+		compiler->parser = (compileCb) compileLSL;
+		compiler->cb = _compileCb;
+		compileScript(compiler, COMPILE_THREADED);
 	    }
 	    else if (0 == strncmp(command, "run(", 4))
 	    {
