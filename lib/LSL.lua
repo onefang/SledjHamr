@@ -1384,7 +1384,7 @@ newFunc("integer",	"osListenRegex", "integer channelID", "string name", "string 
 newFunc("",		"osMessageObject", "key objectUUID", "string message")
 
 -- OS grid functions
-newFunc("string",	"osGetGridCustom", "string key")
+newFunc("string",	"osGetGridCustom", "string k")
 newFunc("string",	"osGetGridGatekeeperURI")
 newFunc("string",	"osGetGridHomeURI")
 newFunc("string",	"osGetGridLoginURI")
