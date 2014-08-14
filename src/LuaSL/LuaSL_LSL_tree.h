@@ -6,7 +6,7 @@
 #define COMPILE_THREADED	1
 #define COMPILE_OUTPUT		0
 #define LUASL_DIFF_CHECK	0
-#define LUASL_BAD_CHECK		1
+#define LUASL_BAD_CHECK		0
 
 
 #include <stddef.h>	// So we can have NULL defined.
