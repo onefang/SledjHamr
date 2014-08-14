@@ -442,12 +442,14 @@ static void _compileThread(void *data, Ecore_Thread *thread)
       if (err)
       {
         compiler->bugCount++;
+#if COMPILE_OUTPUT
 	if (LUA_ERRSYNTAX == err)
 	  printf("Lua syntax error in %s: %s\n", name, lua_tostring(L, -1));
 	else if (LUA_ERRFILE == err)
 	  printf("Lua compile file error in %s: %s\n", name, lua_tostring(L, -1));
 	else if (LUA_ERRMEM == err)
 	  printf("Lua compile memory allocation error in %s: %s\n", name, lua_tostring(L, -1));
+#endif
       }
       else
       {
@@ -480,11 +482,15 @@ static void _compileThread(void *data, Ecore_Thread *thread)
   else
   {
     compiler->bugCount++;
+#if COMPILE_OUTPUT
     printf("Nothing for Lua to compile!\n");
+#endif
   }
 }
 
-// TODO - Threaded version is consistantly about half the speed.  WTF?
+// Speed tests scripts per second -	Threaded	Unthreaded
+//					900 - 1400	750 - 800
+// But with outputting to the console -	450 - 700	750 - 800
 void compileScript(LuaCompiler *compiler, int threadIt)
 {
   if (threadIt)

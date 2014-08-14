@@ -186,10 +186,12 @@ static void _compileCb(LuaCompiler *compiler)
 
   EINA_CLIST_FOR_EACH_ENTRY_SAFE(message, safe, &(compiler->messages), compileMessage, node)
   {
+#if COMPILE_OUTPUT
     if (message->type)
       sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,%s)",   message->line, message->column, message->message);
     else
       sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,%s)", message->line, message->column, message->message);
+#endif
     eina_clist_remove(&(message->node));
     free(message);
   }

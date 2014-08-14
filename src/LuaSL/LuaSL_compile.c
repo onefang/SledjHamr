@@ -501,7 +501,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 				// someList = someList + notAList		-> someList = _LSL.listAddList( someList, notAList)
 				else if ((OT_list == lType) || (OT_list == rType))
 				{
-
+#if COMPILE_OUTPUT
 if ((left) && (right))
     printf("LA LINE %d - %s %s %s\n", lval->line, left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
 else if (left)
@@ -510,7 +510,7 @@ else if (right)
     printf("LA LINE %d - NOLEFT %s %s\n", lval->line, lval->toKen->toKen, right->toKen->toKen);
 else
     printf("LA LINE %d - NOLEFT %s NORIGHT\n", lval->line, lval->toKen->toKen);
-
+#endif
 				    lval->basicType = OT_list;
 				    lval->toKen = tokens[LSL_LIST_ADD_LIST - lowestToken];
 				}
@@ -575,6 +575,7 @@ else
 	{
 	    if (left->flags & MF_ASSIGNEXP)
 	    {
+#if COMPILE_OUTPUT
 if ((left) && (right))
     printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
 else if (left)
@@ -584,6 +585,7 @@ else if (right)
 else
     printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
 		printf("############################################################################## left\n");
+#endif
 		left->flags |= MF_WRAPFUNC;
 		if (LSL_PARENTHESIS_OPEN == left->toKen->type)
 		    left->value.parenthesis->flags |= MF_WRAPFUNC;
@@ -609,6 +611,7 @@ else
 	{
 	    if (right->flags & MF_ASSIGNEXP)
 	    {
+#if COMPILE_OUTPUT
 if ((left) && (right))
     printf("%s %s %s\n", left->toKen->toKen, lval->toKen->toKen, right->toKen->toKen);
 else if (left)
@@ -618,6 +621,7 @@ else if (right)
 else
     printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
 		printf("############################################################################## right\n");
+#endif
 		right->flags |= MF_WRAPFUNC;
 	    }
 	}
@@ -643,8 +647,6 @@ else
 		rightType = allowed[right->basicType].name;
 	    }
 
-//	    compiler->compiler->bugCount++;
-//	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,Invalid operation [%s(%s) %s %s(%s)])", lval->line, lval->column, leftType, leftToken, lval->toKen->toKen, rightType, rightToken);
 	    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
 		"Invalid operation [%s(%s) %s %s(%s)]", leftType, leftToken, lval->toKen->toKen, rightType, rightToken),
 		1, lval->column, lval->line);
@@ -1429,6 +1431,7 @@ static void outputLeaf(FILE *file, outputMode mode, LSL_Leaf *leaf)
 		if (MF_WRAPFUNC & leaf->flags)
 		{
 // TODO - Leaving this here in case we trip over one.
+#if COMPILE_OUTPUT
 if ((leaf->left) && (leaf->right))
     printf("%s %s %s\n", leaf->left->toKen->toKen, leaf->toKen->toKen, leaf->right->toKen->toKen);
 else if (leaf->left)
@@ -1437,6 +1440,7 @@ else if (leaf->right)
     printf("NOLEFT %s %s\n", leaf->toKen->toKen, leaf->right->toKen->toKen);
 else
     printf("NOLEFT %s NORIGHT\n", leaf->toKen->toKen);
+#endif
 		}
 		if ((LSL_ASSIGNMENT & leaf->toKen->flags) && (LSL_ASSIGNMENT_PLAIN != leaf->toKen->type))
 		{
@@ -2315,7 +2319,6 @@ void compileLSL(LuaCompiler *compiler)
 		}
 		else
 		{
-//		    sendBack(lcompiler->compiler->client, lcompiler->compiler->SID, "compilerError(%d,%d,NOT FOUND function %s called)", call->call->line, call->call->column, call->call->value.stringValue);
 		    finishMessage(lcompiler->compiler, addMessage(&(lcompiler->compiler->messages), sizeof(compileMessage),
 			"NOT FOUND function %s called", call->call->value.stringValue),
 			1, call->call->column, call->call->line);

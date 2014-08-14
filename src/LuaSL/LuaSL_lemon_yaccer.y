@@ -229,20 +229,20 @@ expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 %parse_failure
 {
-    compiler->compiler->bugCount++;
-    PE("Giving up.  Parser is hopelessly lost!");
+    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+	"Giving up.  Parser is hopelessly lost!"),
+	1, -1, -1);
 }
 
 %stack_overflow
 {
-    compiler->compiler->bugCount++;
-    PE("Giving up.  Parser stack overflow @ line %d, column %d!", yypMinor->yy0->line, yypMinor->yy0->column);  // Gotta love consistancy, if it ever happens.
+    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+	"Giving up.  Parser stack overflow"),  // Gotta love consistancy, if it ever happens.
+	1, yypMinor->yy0->column, yypMinor->yy0->line);
 }
 
 %syntax_error
 {
-//    compiler->compiler->bugCount++;
-//    PE("Syntax error @ line %d, column %d!", yyminor.yy0->line, yyminor.yy0->column);
     finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
 	"Syntax error."),
 	1, yyminor.yy0->column, yyminor.yy0->line);
