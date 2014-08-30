@@ -33,7 +33,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
 
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box1 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
-    elm_obj_image_file_set(buf, "blue-cube"),
+    efl_file_set(buf, "blue-cube"),
     evas_obj_size_set(70, 70),
     evas_obj_position_set(ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
     evas_obj_visibility_set(EINA_TRUE)
@@ -50,7 +50,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
 
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
-    elm_obj_image_file_set(buf, "purple-cube"),
+    efl_file_set(buf, "purple-cube"),
     evas_obj_size_set(70, 70),
     evas_obj_position_set(ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
     evas_obj_visibility_set(EINA_TRUE)

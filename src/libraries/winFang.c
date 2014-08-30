@@ -215,7 +215,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_obj_size_set(w, h),
     evas_obj_position_set(x, y),
     evas_obj_name_set(WF_LAYOUT),
-    elm_obj_layout_file_set(buf, WF_LAYOUT),
+    efl_file_set(buf, WF_LAYOUT),
     evas_obj_visibility_set(EINA_TRUE)
   );
   result->e = evas_object_evas_get(result->layout);
@@ -251,7 +251,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       else if (i == 3)   cy += result->h;
       result->hand[i] = eo_add(EVAS_IMAGE_CLASS, result->e,
 	evas_obj_image_filled_set(EINA_TRUE),
-	evas_obj_image_file_set(buf, NULL),
+	efl_file_set(buf, NULL),
 	evas_obj_size_set(31, 31),
 	evas_obj_position_set(cx - 15, cy - 15),
 	evas_obj_visibility_set(EINA_TRUE)
