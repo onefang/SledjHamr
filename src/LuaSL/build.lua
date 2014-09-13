@@ -18,6 +18,6 @@ removeFiles(dir, {'*.output', '*.backup', 'LuaSL_lexer.h', 'LuaSL_lexer.c', 'Lua
 
 -- Build and run lemon first, flex depends on it to define the symbol values.
 compileFiles('lemon', dir .. '/../../libraries/lemon', {'lemon'}, '')
-runCommand('lemon',   dir, '../../libraries/lemon/lemon -s -T../../libraries/lemon/lempar.c LuaSL_lemon_yaccer.y')
+runCommand('lemon',   dir, '../../libraries/lemon/lemon -qs -T../../libraries/lemon/lempar.c LuaSL_lemon_yaccer.y')
 runCommand('flex',    dir, 'flex -C --outfile=LuaSL_lexer.c --header-file=LuaSL_lexer.h LuaSL_lexer.l')
 compileFiles('../../LuaSL', dir, {'LuaSL_main', 'LuaSL_compile', 'LuaSL_lexer', 'LuaSL_lemon_yaccer'}, '')
