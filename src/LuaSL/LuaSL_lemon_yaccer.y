@@ -216,7 +216,8 @@ expr(A) ::= LSL_BRACKET_OPEN(L) exprList(E) LSL_BRACKET_CLOSE(R).	[LSL_BRACKET_O
 %nonassoc  LSL_ROTATION LSL_VECTOR.
 // Uses the same symbol for less than, greater than, and the rotation / vector delimiters.
 expr(A) ::= LSL_LESS_THAN(L) exprList(E) LSL_GREATER_THAN(R).		[LSL_ANGLE_OPEN]	{ A = addRotVec(L, E, R); }
-%nonassoc  LSL_STRING.
+%nonassoc  LSL_MSTRING LSL_STRING.
+expr(A) ::= LSL_MSTRING(B).									{ B->basicType = OT_string; B->flags |= MF_MSTRING; A = B; }
 expr(A) ::= LSL_STRING(B).									{ B->basicType = OT_string; A = B; }
 
 

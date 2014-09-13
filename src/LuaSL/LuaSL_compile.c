@@ -105,6 +105,7 @@ LSL_Token LSL_Tokens[] =
     {LSL_KEY,			ST_NONE,	"key",		LSL_NONE,				outputStringToken},
     {LSL_LIST,			ST_NONE,	"list",		LSL_NONE,				outputListToken},
     {LSL_ROTATION,		ST_NONE,	"rotation",	LSL_NONE,				outputListToken},
+    {LSL_MSTRING,		ST_NONE,	"string",	LSL_NONE,				outputStringToken},
     {LSL_STRING,		ST_NONE,	"string",	LSL_NONE,				outputStringToken},
     {LSL_VECTOR,		ST_NONE,	"vector",	LSL_NONE,				outputListToken},
 
@@ -2184,7 +2185,15 @@ static void outputStatementToken(FILE *file, outputMode mode, LSL_Leaf *content)
 static void outputStringToken(FILE *file, outputMode mode, LSL_Leaf *content)
 {
     if (content)
-	fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
+    {
+	if (MF_MSTRING & content->flags)
+	{
+	  // TODO - LSL might ignore leading spaces in later lines, but does Lua?
+	  fprintf(file, "[=[%.*s]=]", (int) strlen(content->value.stringValue) - 2, &content->value.stringValue[1]);
+	}
+	else
+	  fprintf(file, "%s", content->value.stringValue);	// The quotes are part of the string value already.
+    }
 }
 
 boolean compilerSetup(gameGlobals *ourGlobals)

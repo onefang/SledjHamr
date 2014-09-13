@@ -27,6 +27,7 @@ IDENTIFIER  (_|[[:alpha:]])(_|[[:alpha:]]|[[:digit:]])*
 CHAR        '(\\.|[^\\'\n])+'
 KEY         \"{HEX}{8}-{HEX}{4}-{HEX}{4}-{HEX}{4}-{HEX}{12}\"
 STRING      \"(\\.|[^\\"\n])*\"
+MSTRING      \"(\\.|[^\\"])*\"
 
 %%
 
@@ -109,6 +110,7 @@ STRING      \"(\\.|[^\\"\n])*\"
 {FLOAT}         %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng);  return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_FLOAT); %}
 {KEY}           %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_KEY); %}
 {STRING}        %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_STRING); %}
+{MSTRING}       %{ yylval->value.stringValue = eina_stringshare_add_length(yytext, yyleng); return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_MSTRING); %}
 
 <<EOF>>         { return common(yylval, yytext, yyleng, yyextra, TRUE, LSL_SCRIPT); }
 

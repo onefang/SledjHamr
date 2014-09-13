@@ -144,7 +144,8 @@ typedef enum
     MF_POSTDEC		= 64,
     MF_POSTINC		= 128,
     MF_LSLCONST		= 256,
-    MF_TYPECAST		= 512
+    MF_TYPECAST		= 512,
+    MF_MSTRING		= 1024
 } miscFlags;
 
 struct _allowedTypes
