@@ -202,6 +202,28 @@ static void _compileCb(LuaCompiler *compiler)
     sendBack(compiler->client, compiler->SID, "compiled(false)");
 }
 
+static void _compileCbSingle(LuaCompiler *compiler)
+{
+  compileMessage *message = NULL, *safe = NULL;
+
+  EINA_CLIST_FOR_EACH_ENTRY_SAFE(message, safe, &(compiler->messages), compileMessage, node)
+  {
+#if COMPILE_OUTPUT
+    if (message->type)
+      printf("compilerError(%d,%d,%s)\n",   message->line, message->column, message->message);
+    else
+      printf("compilerWarning(%d,%d,%s)\n", message->line, message->column, message->message);
+#endif
+    eina_clist_remove(&(message->node));
+    free(message);
+  }
+
+  if (0 == compiler->bugCount)
+    printf("Compiled.\n");
+  else
+    printf("Compile failed!\n");
+}
+
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
 {
     gameGlobals *ourGlobals = data;
@@ -309,68 +331,87 @@ int main(int argc, char **argv)
   gameGlobals ourGlobals;
   int result = EXIT_FAILURE;
 
-    memset(&ourGlobals, 0, sizeof(gameGlobals));
-    ourGlobals.address = "127.0.0.1";
-    ourGlobals.port = 8211;
+  memset(&ourGlobals, 0, sizeof(gameGlobals));
+  ourGlobals.address = "127.0.0.1";
+  ourGlobals.port = 8211;
 
-    if (eina_init())
+  if (eina_init())
+  {
+    logDom = HamrTime(argv[0], main, logDom);
+    ourGlobals.names = eina_hash_string_superfast_new(NULL);
+    if (ecore_init())
     {
-	logDom = HamrTime(argv[0], main, logDom);
-	ourGlobals.names = eina_hash_string_superfast_new(NULL);
-	if (ecore_init())
+//      ecore_thread_max_set(4);
+
+      if (argc > 1)
+      {
+	result = 0;
+	compilerSetup(&ourGlobals);
+        // get the arguments passed in
+        while (--argc > 0 && *++argv != '\0')
+        {
+	  LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+
+	  eina_clist_init(&(compiler->messages));
+	  compiler->file = strdup(*argv);
+	  compiler->SID = strdup("0");
+	  compiler->doConstants = FALSE;
+	  compiler->parser = (compileCb) compileLSL;
+	  compiler->cb = _compileCbSingle;
+	  compileScript(compiler, FALSE);
+        }
+      }
+      else if (ecore_con_init())
+      {
+	if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
 	{
-//	    ecore_thread_max_set(4);
-	    if (ecore_con_init())
+//	    int i;
+	    Eina_Iterator *scripts;
+	    script *me;
+
+	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
+	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
+	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
+	    ecore_con_server_timeout_set(ourGlobals.server, 0);
+	    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
+//	    ecore_con_server_timeout_set(ourGlobals.server, 10);
+//	    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
+	    clientStream = eina_strbuf_new();
+
+	    result = 0;
+	    compilerSetup(&ourGlobals);
+
+//	    ecore_timer_add(3.0, _statusTimer, &ourGlobals);
+
+	    ecore_main_loop_begin();
+	    PD("Fell out of the main loop.");
+
+	    scripts = eina_hash_iterator_data_new(ourGlobals.names);
+	    while(eina_iterator_next(scripts, (void **) &me))
 	    {
-		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
-		{
-//		    int i;
-		    Eina_Iterator *scripts;
-		    script *me;
-
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
-		    ecore_con_server_timeout_set(ourGlobals.server, 0);
-		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-//		    ecore_con_server_timeout_set(ourGlobals.server, 10);
-//		    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
-		    clientStream = eina_strbuf_new();
-
-		    result = 0;
-		    compilerSetup(&ourGlobals);
-
-//		    ecore_timer_add(3.0, _statusTimer, &ourGlobals);
-
-		    ecore_main_loop_begin();
-		    PD("Fell out of the main loop.");
-
-		    scripts = eina_hash_iterator_data_new(ourGlobals.names);
-		    while(eina_iterator_next(scripts, (void **) &me))
-		    {
-			if (me->SID[0])
-			    send2script(me->SID, "quit()");
-		    }
-
-		    PD("Finished quitting scripts.");
-		}
-		else
-		    PC("Failed to add server!");
-		ecore_con_shutdown();
+		if (me->SID[0])
+		    send2script(me->SID, "quit()");
 	    }
-	    else
-		PC("Failed to init ecore_con!");
-	    ecore_shutdown();
+
+	    PD("Finished quitting scripts.");
 	}
 	else
-	    PC("Failed to init ecore!");
-	pantsOff(logDom);
+	    PC("Failed to add server!");
+	ecore_con_shutdown();
+      }
+      else
+	PC("Failed to init ecore_con!");
+      ecore_shutdown();
     }
     else
-	fprintf(stderr, "Failed to init eina!");
+      PC("Failed to init ecore!");
+    pantsOff(logDom);
+  }
+  else
+    fprintf(stderr, "Failed to init eina!");
 
-    PD("Falling out of main()");
-    return result;
+  PD("Falling out of main()");
+  return result;
 }
 
 

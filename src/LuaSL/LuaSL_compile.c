@@ -2219,7 +2219,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	compiler->SID = strdup("FAKE_SID");
 	compiler->doConstants = TRUE;
 	compiler->parser = (compileCb) compileLSL;
-	compileScript(compiler, COMPILE_THREADED);
+	compileScript(compiler, FALSE);
 
 	return TRUE;
     }
@@ -2252,7 +2252,7 @@ void compileLSL(LuaCompiler *compiler)
     lcompiler->ignorable = eina_strbuf_new();
 #endif
 
-//    PI("Compiling %s.", lcompiler->compiler->file);
+    PI("Compiling %s.", lcompiler->compiler->file);
 
     in = fopen(lcompiler->compiler->file, "r");
     if (NULL == in)
