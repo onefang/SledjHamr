@@ -221,7 +221,7 @@ static void _compileCbSingle(LuaCompiler *compiler)
   if (0 == compiler->bugCount)
     printf("Compiled.\n");
   else
-    printf("Compile failed!\n");
+    printf("Compile of %s failed!\n", compiler->file);
 }
 
 static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
