@@ -2241,6 +2241,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 void compileLSL(LuaCompiler *compiler)
 {
     LuaSL_compiler *lcompiler = calloc(1, sizeof(LuaSL_compiler));
+    char first[32];
     void *pParser = ParseAlloc(malloc);
 #if LUASL_BAD_CHECK
     char tempName[PATH_MAX];
@@ -2261,20 +2262,80 @@ void compileLSL(LuaCompiler *compiler)
     lcompiler->ignorable = eina_strbuf_new();
 #endif
 
-    PI("Compiling %s.", lcompiler->compiler->file);
+//    PD("Compiling %s.", lcompiler->compiler->file);
 
     in = fopen(lcompiler->compiler->file, "r");
     if (NULL == in)
     {
 	PE("Error opening file %s.", lcompiler->compiler->file);
+	free(lcompiler);
 	return;
     }
+
+    // Check for first line magic.
+    if (fread(first, 1, 32, in))
+    {
+	first[31] = 0;
+	     if ((0 == strncasecmp(first, "//DotNetEngine:", 15)) || (0 == strncasecmp(first, "//XEngine:", 10)))
+	{
+#if COMPILE_OUTPUT
+	    PE("Illegal script engine requested in %s.", lcompiler->compiler->file);
+#endif
+	    fclose(in);
+	    in = NULL;
+	    free(lcompiler);
+	    return;
+	}
+	else if ((0 == strncasecmp(first, "//LuaSL:", 8)) || (0 == strncasecmp(first, "--LuaSL:", 8)))
+	{
+	    char *p = &first[8];
+	    lcompiler->isLSL = TRUE;
+	    lcompiler->isLua = TRUE;
+	         if (0 == strncasecmp(first, "LSL", 3))
+	    {
+		p+= 3;
+		lcompiler->isLua = FALSE;
+	    }
+	    else if (0 == strncasecmp(first, "Lua", 3))
+	    {
+		p+= 3;
+		lcompiler->isLSL = FALSE;
+	    }
+	    else if (0 == strncasecmp(first, "LuaSL", 5))
+	    {
+		p+= 5;
+	    }
+	    if ((' ' != *p) && ('\t' != *p) && ('\n' != *p) && ('\r' != *p))
+	    {
+#if COMPILE_OUTPUT
+		PE("Unsupported script language requested in %s.", lcompiler->compiler->file);
+#endif
+		fclose(in);
+		in = NULL;
+		free(lcompiler);
+		return;
+	    }
+	}
+	else if (isdigit(first[0]))
+	{
+#if COMPILE_OUTPUT
+	    PW("LuaSL script %s starts with a number, a common method of disabling scripts.", lcompiler->compiler->file);
+#endif
+	    fclose(in);
+	    in = NULL;
+	    free(lcompiler);
+	    return;
+	}
+    }
+    rewind(in);
+
 #if LUASL_BAD_CHECK
     // Mark the file as bad, in case we crash while compiling it.
     // NOTE - wont work so well when we are threaded.
     sprintf(tempName, "%s.BAD", lcompiler->compiler->file);
     ecore_file_mv(lcompiler->compiler->file, tempName);
 #endif
+
     lcompiler->ast = NULL;
     lcompiler->lval = newLeaf(LSL_UNKNOWN, NULL, NULL);
     // Text editors usually start counting at 1, even programmers editors. mcedit is an exception, but you can deal with that yourself.

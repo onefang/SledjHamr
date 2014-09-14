@@ -389,6 +389,8 @@ typedef struct
     int			column, line;
     int			undeclared;
     boolean		inState;
+    boolean		isLSL;
+    boolean		isLua;
 } LuaSL_compiler;
 
 
