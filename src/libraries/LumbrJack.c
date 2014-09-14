@@ -42,11 +42,11 @@ int HamrTime(char *argv0, void *main, int logDom)
   if (!(prefix = eina_prefix_new(argv0, main, temp, cwd, "checkme.txt", PACKAGE_BIN_DIR, PACKAGE_LIB_DIR, PACKAGE_DATA_DIR, PACKAGE_LOCALE_DIR)))
     PC("Can't find application prefix!");
 
-  PD("%s is installed in %s", name, eina_prefix_get(prefix));
-  PD("The binaries are in %s", eina_prefix_bin_get(prefix));
-  PD("The data files are in %s", eina_prefix_data_get(prefix));
-  PD("The libraries are in %s", eina_prefix_lib_get(prefix));
-  PD("The locale files are in %s", eina_prefix_locale_get(prefix));
+//  PD("%s is installed in %s", name, eina_prefix_get(prefix));
+//  PD("The binaries are in %s", eina_prefix_bin_get(prefix));
+//  PD("The data files are in %s", eina_prefix_data_get(prefix));
+//  PD("The libraries are in %s", eina_prefix_lib_get(prefix));
+//  PD("The locale files are in %s", eina_prefix_locale_get(prefix));
 
   getcwd(cwd, PATH_MAX);
   env = getenv("LUA_CPATH");
