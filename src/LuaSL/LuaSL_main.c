@@ -410,7 +410,7 @@ int main(int argc, char **argv)
   else
     fprintf(stderr, "Failed to init eina!");
 
-  PD("Falling out of main()");
+//  printf("Falling out of main()\n");
   return result;
 }
 
