@@ -1,9 +1,6 @@
 
 #include "LuaSL.h"
 
-/* TODO - problem de jour
-*/
-
 
 static void outputBitOp(FILE *file, outputMode mode, LSL_Leaf *leaf);
 static void outputBlockToken(FILE *file, outputMode mode, LSL_Leaf *content);
@@ -433,8 +430,6 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		lType = left->basicType;
 	    if (OT_undeclared == lType)
 	    {
-//		compiler->script.warningCount++;
-//		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -461,8 +456,6 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = right->basicType;
 	    if (OT_undeclared == rType)
 	    {
-//		compiler->script.warningCount++;
-//		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
 	    }
@@ -865,8 +858,9 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 		    if (comma)
 			eina_inarray_push(&(call->params), comma);
 		}
+		// Only stashing the pointer in the inarray, so that other pointers to the actual data are still valid.
+		// Specifically for variable declarations in the second pass.
 		eina_inarray_push(&(call->params), &arg);
-		// At this point, pointers to arg are not pointing to the one in call->params, AND arg is no longer needed.
 	    }
 	}
     }
@@ -2390,7 +2384,6 @@ void compileLSL(LuaCompiler *compiler)
     if (lcompiler->undeclared)
     {
 	lcompiler->pass++;
-//	PW("A second pass is needed to check functions or variables that where used before they where declared.  To avoid this second pass, don't do that.");
 	if (eina_clist_count(&(lcompiler->danglingVars)))
 	{
 	    struct _LSL_DanglingVar *dangleVar = NULL;
@@ -2429,7 +2422,6 @@ void compileLSL(LuaCompiler *compiler)
 // TODO - Should clean up these clists.
 
 	secondPass(lcompiler, lcompiler->ast);
-//	PD("Second pass completed.");
     }
 
     if (lcompiler->compiler->doConstants)

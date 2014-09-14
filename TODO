@@ -3,11 +3,6 @@ FIXES -
     LuaSL crashes
     -------------
 
-In 00b7923f-dcd9-4d13-b850-ce3298943663_script.lsl and lots of similar
-scripts, functions refer to globals that are declared AFTER.  This
-causes LuaSL to segie at output time.  This is apparently legal in LSL,
-at least in OpenSim's version.  At least it's legal in Lua to.
-
 Hmmm, empty functions get no end, that's NOT legal in Lua.
 
     Project paths
@@ -51,8 +46,6 @@ SOOOO ...
 Irrlicht is flickering like crazy.  Hmm, might be Irrlicht's fault,
 mostly it flickers to black, but I've seen it flicker to the first frame
 of the GL demo.  On the other hand, it shows the Elm background usually.
-
-LuaSL grew a couple of bugs when I upgraded to LuaJIT 2.0.1 package.
 
 GL viewport aspect ratio should remain stable through resizes.
 

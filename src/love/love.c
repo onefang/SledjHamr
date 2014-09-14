@@ -270,7 +270,7 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 	    }
 	    else if (0 == strcmp(command, "compiled(false)"))
 	    {
-		PE("The compile of %s failed!", SID);
+//		PE("The compile of %s failed!", SID);
 		if (me)
 		{
 		    struct timeval now;
