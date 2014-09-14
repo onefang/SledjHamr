@@ -235,6 +235,14 @@ struct _LSL_Identifier	// For variables and function parameters.
     miscFlags		flags;
 };
 
+struct _LSL_DanglingVar
+{
+    Eina_Clist		dangler;	// Entry for variables used before they are defined.
+    LSL_Leaf		*identifier;
+    LSL_Leaf		*dot;
+    LSL_Leaf		*sub;
+};
+
 struct _LSL_Statement
 {
     Eina_Clist		statement;	// For block statement lists, this is the entry.
@@ -272,7 +280,7 @@ struct _LSL_Function
 //    LSL_Leaf	*params;	// So we store the parenthesis, and their ignorables.
 				// This points to the params leaf, which is a function, pointing to this structure.  The actual params are in vars.
 #endif
-    Eina_Inarray vars;		// Eina Inarray has not been released yet (Eina 1.2).
+    Eina_Inarray vars;
     LSL_Block	*block;
     miscFlags	flags;
 };
@@ -280,7 +288,7 @@ struct _LSL_Function
 struct _LSL_FunctionCall
 {
     LSL_Function	*function;
-    Eina_Inarray	params;		// Eina Inarray has not been released yet (Eina 1.2).
+    Eina_Inarray	params;
     Eina_Clist		dangler;	// Entry for function calls used before the function is defined.
     LSL_Leaf		*call;		// This is to stash the details for dangling ones, to search later.
 					// The line and column details are needed for bitching, so we need the leaf.
@@ -386,8 +394,9 @@ typedef struct
     LSL_Block		*currentBlock;
     LSL_Function	*currentFunction;
     Eina_Clist		danglingCalls;	// HEAD for function calls used before the function is defined.
-    int			column, line;
-    int			undeclared;
+    Eina_Clist		danglingVars;	// HEAD for variable refs  used before the variable is defined.
+    int			column, line, pass;
+    boolean		undeclared;
     boolean		inState;
     boolean		isLSL;
     boolean		isLua;

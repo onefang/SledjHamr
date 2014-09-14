@@ -346,6 +346,7 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	    if (LUASL_DEBUG)
 		PI("Found %s!", identifier->value.stringValue);
 	    identifier->value.identifierValue = var->value.identifierValue;
+	    identifier->toKen = tokens[LSL_IDENTIFIER - lowestToken];
 	    identifier->basicType = var->basicType;
 	    if ((dot) && (sub))
 	    {
@@ -370,11 +371,28 @@ LSL_Leaf *checkVariable(LuaSL_compiler *compiler, LSL_Leaf *identifier, LSL_Leaf
 	}
 	else
 	{
-//	    compiler->compiler->bugCount++;
-//	    sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerError(%d,%d,NOT FOUND variable %s)", identifier->line, identifier->column, identifier->value.stringValue);
-	    finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
-		"NOT FOUND variable %s", identifier->value.stringValue),
-		1, identifier->column, identifier->line);
+	    struct _LSL_DanglingVar *dangler = calloc(1, sizeof(struct _LSL_DanglingVar));
+
+	    if (LUASL_DEBUG)
+		PW("NOT Found variable %s!", identifier->value.stringValue);
+	    if (0 < compiler->pass)
+	    {
+		finishMessage(compiler->compiler, addMessage(&(compiler->compiler->messages), sizeof(compileMessage),
+		    "NOT FOUND variable %s", identifier->value.stringValue),
+		    1, identifier->column, identifier->line);
+	    }
+	    else
+	    {
+		// It may be declared later, so store it and check later.
+		dangler->identifier = identifier;
+		dangler->dot = dot;
+		dangler->sub = sub;
+		eina_clist_add_tail(&(compiler->danglingVars), &(dangler->dangler));
+		// Here the identifier stringValue needs to be kept for later searching.
+		identifier->toKen = tokens[LSL_UNKNOWN - lowestToken];
+		identifier->basicType = OT_undeclared;
+		compiler->undeclared = TRUE;
+	    }
 	}
     }
 
@@ -415,7 +433,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		lType = left->basicType;
 	    if (OT_undeclared == lType)
 	    {
-		compiler->script.warningCount++;
+//		compiler->script.warningCount++;
 //		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
@@ -443,7 +461,7 @@ LSL_Leaf *addOperation(LuaSL_compiler *compiler, LSL_Leaf *left, LSL_Leaf *lval,
 		rType = right->basicType;
 	    if (OT_undeclared == rType)
 	    {
-		compiler->script.warningCount++;
+//		compiler->script.warningCount++;
 //		sendBack(compiler->compiler->client, compiler->compiler->SID, "compilerWarning(%d,%d,Undeclared identifier issue, deferring this until the second pass)", lval->line, lval->column);
 		lval->basicType = OT_undeclared;
 		return lval;
@@ -833,7 +851,7 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 	    if (call)
 	    {
 		list->value.functionCallValue = call;
-		eina_inarray_step_set(&(call->params), sizeof(Eina_Inarray), sizeof(LSL_Leaf), 3);
+		eina_inarray_step_set(&(call->params), sizeof(Eina_Inarray), sizeof(LSL_Leaf *), 3);
 	    }
 	}
 
@@ -847,7 +865,7 @@ LSL_Leaf *collectArguments(LuaSL_compiler *compiler, LSL_Leaf *list, LSL_Leaf *c
 		    if (comma)
 			eina_inarray_push(&(call->params), comma);
 		}
-		eina_inarray_push(&(call->params), arg);
+		eina_inarray_push(&(call->params), &arg);
 		// At this point, pointers to arg are not pointing to the one in call->params, AND arg is no longer needed.
 	    }
 	}
@@ -2010,7 +2028,7 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
     if (content)
     {
 	LSL_FunctionCall *call = content->value.functionCallValue;
-	LSL_Leaf *param = NULL;
+	LSL_Leaf **param = NULL;
 	boolean first = TRUE;
 
 	// TODO - should output it's own ignorable here.
@@ -2022,7 +2040,7 @@ static void outputFunctionCallToken(FILE *file, outputMode mode, LSL_Leaf *conte
 	{
 	    if ((OM_LUA == mode) && (!first))
 		fprintf(file, ", ");
-	    outputLeaf(file, mode, param);
+	    outputLeaf(file, mode, *param);
 	    first = FALSE;
 	}
 	fprintf(file, ")");
@@ -2081,7 +2099,7 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	if (parens->contents)
 	{
 	    LSL_FunctionCall *call = parens->contents->value.functionCallValue;
-	    LSL_Leaf *param = NULL;
+	    LSL_Leaf **param = NULL;
 	    const char *ig = "";
 
 	    // TODO - should output it's own ignorable here.
@@ -2107,7 +2125,7 @@ static void outputListToken(FILE *file, outputMode mode, LSL_Leaf *content)
 	    }
 	    EINA_INARRAY_FOREACH((&(call->params)), param)
 	    {
-		outputLeaf(file, mode, param);
+		outputLeaf(file, mode, *param);
 		if (OM_LUA == mode)
 		    fprintf(file, ", ");
 	    }
@@ -2258,6 +2276,7 @@ void compileLSL(LuaCompiler *compiler)
     lcompiler->script.states = eina_hash_stringshared_new(burnLeaf);
     lcompiler->script.variables = eina_hash_stringshared_new(burnLeaf);
     eina_clist_init(&(lcompiler->danglingCalls));
+    eina_clist_init(&(lcompiler->danglingVars));
 #if LUASL_DIFF_CHECK
     lcompiler->ignorable = eina_strbuf_new();
 #endif
@@ -2370,7 +2389,18 @@ void compileLSL(LuaCompiler *compiler)
 
     if (lcompiler->undeclared)
     {
-//	PW("A second pass is needed to check if functions where used before they where declared.  To avoid this second pass, don't do that.");
+	lcompiler->pass++;
+//	PW("A second pass is needed to check functions or variables that where used before they where declared.  To avoid this second pass, don't do that.");
+	if (eina_clist_count(&(lcompiler->danglingVars)))
+	{
+	    struct _LSL_DanglingVar *dangleVar = NULL;
+
+	    EINA_CLIST_FOR_EACH_ENTRY(dangleVar, &(lcompiler->danglingVars), struct _LSL_DanglingVar, dangler)
+	    {
+		checkVariable(lcompiler, dangleVar->identifier, dangleVar->dot, dangleVar->sub);
+	    }
+	}
+
 	if (eina_clist_count(&(lcompiler->danglingCalls)))
 	{
 	    LSL_FunctionCall *call = NULL;
@@ -2395,6 +2425,9 @@ void compileLSL(LuaCompiler *compiler)
 		}
 	    }
 	}
+
+// TODO - Should clean up these clists.
+
 	secondPass(lcompiler, lcompiler->ast);
 //	PD("Second pass completed.");
     }
