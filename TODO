@@ -160,3 +160,24 @@ What is -
     Stored surface buffer (Launcher tests)?
 	Just the mapbuf thingy above I think.
 
+
+
+Trees.
+------
+
+From a discussion https://plus.google.com/u/0/105915569012457699790/posts/e5ZXmTQp4ig?cfem=1
+
+By Tara Li.
+
+
+"the Linden Trees are based on L-System generative techniques.  4a) Add
+randomization to those L-System generations, so while the tree looks
+like it's the same species, it's not the exact same specimen over and
+over.  You would need a seed value that might can be locked if you do
+want identical copies, but that could be transmitted with the plant so
+that it looks the same for all viewers, and 4b) Add a flag so that the
+Linden Plant prim includes a particle system with data defining a bark
+texture, a leaf billboard texture, and the parameters of the L-systems,
+so you can define your own 1-prim Linden Plants.  Include editor in the
+client for Linden Plants to modify and create your own."
+
