@@ -361,7 +361,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   eina_clist_init(&(scene->stuffs));
   eina_clist_init(&(scene->loading));
 
-  scene->root_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
+  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
 
   scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
     evas_3d_scene_root_node_set(scene->root_node),
@@ -389,7 +389,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
     evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
     evas_3d_light_directional_set(EINA_TRUE)
   );
-  scene->light_node = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_LIGHT),
+  scene->light_node = eo_add(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_LIGHT),
     evas_3d_node_light_set(scene->light),
     evas_3d_node_position_set(1000.0, 0.0, 1000.0),
     evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
@@ -860,7 +860,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     snprintf(buf, sizeof(buf), "%s/%s", prefix_data_get(), stuffs->stuffs.details.mesh->fileName);
     me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
-      evas_3d_mesh_file_set(EVAS_3D_MESH_FILE_TYPE_MD2, buf, NULL),
+      efl_file_set(buf, NULL),
       evas_3d_mesh_frame_material_set(0, mi),
       evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
     );
@@ -868,7 +868,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   }
 
   eina_accessor_data_get(stuffs->aMesh, 0, (void **) &me);
-  stuffs->mesh_node = eo_add_custom(EVAS_3D_NODE_CLASS, scene->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
+  stuffs->mesh_node = eo_add(EVAS_3D_NODE_CLASS, scene->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
     eo_key_data_set("Name", stuffs->stuffs.name, NULL),
     evas_3d_node_position_set(stuffs->stuffs.details.mesh->pos.x, stuffs->stuffs.details.mesh->pos.y, stuffs->stuffs.details.mesh->pos.z),
     evas_3d_node_orientation_set(stuffs->stuffs.details.mesh->rot.x, stuffs->stuffs.details.mesh->rot.y, stuffs->stuffs.details.mesh->rot.z, stuffs->stuffs.details.mesh->rot.w),

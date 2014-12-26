@@ -228,7 +228,7 @@ Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
     evas_3d_camera_projection_perspective_set(90.0, 1.0, 1.0, 1024.0)
     );
 
-  result = eo_add_custom(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_CAMERA),
+  result = eo_add(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_CAMERA),
     evas_3d_node_camera_set(camera),
     evas_3d_node_position_set(0.0, 20.0, 30.0),
 //    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0),
