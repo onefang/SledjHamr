@@ -181,3 +181,12 @@ texture, a leaf billboard texture, and the parameters of the L-systems,
 so you can define your own 1-prim Linden Plants.  Include editor in the
 client for Linden Plants to modify and create your own."
 
+
+Contacts.
+---------
+
+Have a system of multiple sets of contacts.  The defaults will be
+Everyone and Friends, each set contains an email address, and zero or
+more IM addresses.  Recommend people use a spam catcher for the Everyone
+contact, and don't make it mandatory.  Even the Friends one isn't
+mandatory.  At all times err on the privacy side of things.
