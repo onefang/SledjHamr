@@ -400,11 +400,11 @@ printf("**********************require GuiLua\n");
 //thingasm{'window', 'The size and title of the application Frame.', window, 'x,y,name', acl='GGG'}
   push_lua(L, "@ ( { = $ $ & $ $acl } )",	skang, THINGASM, skang, "Cwindow",	"Opens our window.",				window, "string,number,number,string", "GGG", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "clear",	"The current skin is cleared of all widgets.",	clear, 0);
-PD("GuiLua 2");
+//PD("GuiLua 2");
 // TODO - This one crashes sometimes.  Figure out why later.
 //  push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "widget",	"Create a widget.",				widget, "userdata,string,string,number,number,number,number");
   push_lua(L, "@ ( = $ $ & )", skang, THINGASM, skang, "widget",	"Create a widget.",				widget, 0);
-PD("GuiLua 3");
+//PD("GuiLua 3");
   push_lua(L, "@ ( = $ $ & $ )",		skang, THINGASM, skang, "action",	"Add an action to a widget.",			action, "string", 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "Colour",	"Change widget colours.",			colour, 0);
   push_lua(L, "@ ( = $ $ & )",			skang, THINGASM, skang, "hide",		"Hide a widget.",				widHide, 0);
