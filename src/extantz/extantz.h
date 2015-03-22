@@ -1,6 +1,7 @@
 #ifndef _EXTANTZ_H_
 #define _EXTANTZ_H_
 
+#define USE_EVAS_3D 1
 #define USE_IRR     0
 #define USE_DEMO    1
 #define DO_GEARS    0

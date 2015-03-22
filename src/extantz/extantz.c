@@ -4,8 +4,10 @@
 #include "SledjHamr.h"
 
 
+#if USE_EVAS_3D
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo);
 static void on_pixels(void *data, Evas_Object *obj);
+#endif
 
 
 int logDom = -1;	// Our logging domain.
@@ -89,12 +91,15 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 	}
 	else if (0 == strncmp(command, "loadSim(", 8))
 	{
+#if USE_EVAS_3D
 	  char *p, *t;
 	  int scenriLua;
+#endif
 
           // Pretend we logged in.  Actually in the case of a local love server, we realy have logged in now.
           strcpy(ourGlobals->uuid, SID);
           PI("Your UUID is %s.", ourGlobals->uuid);
+#if USE_EVAS_3D
 	  strcpy(buf, &command[8]);
 	  p = buf;
           while ('"' == p[0])
@@ -121,6 +126,7 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 
 	  push_lua(ourGlobals->scene->L, "@ ( $ )", scenriLua, "loadSim", t, 0);
 	  PI("Loaded local sim from %s", t);
+#endif
 	}
 	else
 	{
@@ -161,6 +167,7 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
   return ECORE_CALLBACK_CANCEL;
 }
 
+#if USE_EVAS_3D
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {
   Evas_3D_Node *n = data;
@@ -181,6 +188,7 @@ static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void 
     }
   }
 }
+#endif
 
 static void gldata_init(GLData *gld)
 {
@@ -369,10 +377,12 @@ static void _draw_gl(Evas_Object *obj)
   gld->resized = 0;
 }
 
+#if USE_EVAS_3D
 static void on_pixels(void *data, Evas_Object *obj)
 {
   _draw_gl(obj);
 }
+#endif
 
 // Callback from the animator.
 static Eina_Bool doFrame(void *data)
@@ -688,6 +698,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   init_evas_gl(&ourGlobals);
 
+#if USE_EVAS_3D
   // Setup our Evas_3D stuff.
   ourGlobals.scene = scenriAdd(ourGlobals.win);
   // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
@@ -695,6 +706,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
   evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
   ourGlobals.scene->clickCb = _onWorldClick;
+#endif
 
   // Gotta do this after adding the windows, otherwise the menu renders under the window.
   //   This sucks, gotta redefine this menu each time we create a new window?
@@ -730,8 +742,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   if (ourGlobals.win)
   {
     ecore_animator_del(ourGlobals.animator);
+#if USE_EVAS_3D
     Evas_3D_Demo_fini(&ourGlobals);
     scenriDel(ourGlobals.scene);
+#endif
 //    eo_unref(ourGlobals.tb);
     winFangDel(ourGlobals.mainWindow);
   }
