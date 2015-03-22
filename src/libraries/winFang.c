@@ -238,7 +238,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       );
     elm_object_part_content_set(result->layout, WF_UNDERLAY, obj);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
-    eo_unref(obj);
+//    eo_unref(obj);
 
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", prefix_data_get());
@@ -257,7 +257,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	evas_obj_visibility_set(EINA_TRUE)
       );
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
-      eo_unref(result->hand[i]);
+//      eo_unref(result->hand[i]);
     }
 
     result->title = eo_add(ELM_LABEL_CLASS, result->layout,
@@ -268,7 +268,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     elm_object_style_set(result->title, "marker");
     elm_object_text_set(result->title, title);
     elm_object_part_content_set(result->layout, WF_TITLE, result->title);
-    eo_unref(result->title);
+//    eo_unref(result->title);
   }
 
   result->grid = eo_add(ELM_GRID_CLASS, result->layout,
@@ -286,7 +286,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   if (result->parent)
   {
 #if 0
-    // EPysics enable the window.
+    // EPhysics enable the window.
     if (world)
     {
       result->body = ephysics_body_box_add(world);
@@ -340,9 +340,9 @@ void winFangDel(winFang *win)
 
   if (!win)  return;
 
-  if (win->bg)      eo_unref(win->bg);
-  if (win->grid)    eo_unref(win->grid);
-  if (win->layout)  eo_unref(win->layout);
+//  if (win->bg)      eo_unref(win->bg);
+//  if (win->grid)    eo_unref(win->grid);
+//  if (win->layout)  eo_unref(win->layout);
   EINA_CLIST_FOR_EACH_ENTRY_SAFE(wf, wf2, &win->winFangs, winFang, node)
   {
     winFangDel(wf);
@@ -456,7 +456,7 @@ void widgetDel(Widget *wid)
     //   The bug is that editable entry widgets cause the app to hang on exit.
     if (strcmp(WT_ENTRY, wid->type) == 0)
       elm_entry_editable_set(wid->obj, EINA_FALSE);
-    eo_unref(wid->obj);
+//    eo_unref(wid->obj);
     free(wid);
   }
 }

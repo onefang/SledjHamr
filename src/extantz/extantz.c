@@ -732,7 +732,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ecore_animator_del(ourGlobals.animator);
     Evas_3D_Demo_fini(&ourGlobals);
     scenriDel(ourGlobals.scene);
-    eo_unref(ourGlobals.tb);
+//    eo_unref(ourGlobals.tb);
     winFangDel(ourGlobals.mainWindow);
   }
 

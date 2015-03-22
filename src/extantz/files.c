@@ -197,7 +197,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     );
   elm_object_text_set(hoversel, "sorting");
   elm_box_pack_end(vbox, hoversel);
-  eo_unref(hoversel);
+//  eo_unref(hoversel);
 
   hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
@@ -212,7 +212,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, hoversel);
   // Make sure it starts off as small, works around "hitting grid mode before hitting size not showing anything" bug.
   _small_icon_clicked(fs, hoversel, NULL);
-  eo_unref(hoversel);
+//  eo_unref(hoversel);
 
 
   bt = eo_add(ELM_CHECK_CLASS, vbox,
@@ -222,7 +222,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_object_text_set(bt, "hidden");
   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
   elm_box_pack_end(vbox, bt);
-  eo_unref(bt);
+//  eo_unref(bt);
 
   rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
@@ -253,7 +253,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_object_text_set(bt, "OK");
   evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
   elm_box_pack_end(vbox, bt);
-  eo_unref(bt);
+//  eo_unref(bt);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
     evas_obj_visibility_set(EINA_TRUE)
@@ -261,11 +261,11 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_object_text_set(bt, "CANCEL");
   evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);
   elm_box_pack_end(vbox, bt);
-  eo_unref(bt);
+//  eo_unref(bt);
 
   elm_layout_box_append(me->win, WF_BOX, vbox);
   evas_object_show(vbox);
-  eo_unref(vbox);
+//  eo_unref(vbox);
   winFangCalcMinSize(me);
 
   winFangHide(me);

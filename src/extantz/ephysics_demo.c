@@ -46,7 +46,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_linear_velocity_set(box_body1, -150, 20, 0);
   ephysics_body_angular_velocity_set(box_body1, 0, 0, 36);
   ephysics_body_sleeping_threshold_set(box_body1, 0.1, 0.1);
-  eo_unref(box1);
+//  eo_unref(box1);
 
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
@@ -63,7 +63,7 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   ephysics_body_linear_velocity_set(box_body2, 800, -600, 0);
   ephysics_body_angular_velocity_set(box_body2, 0, 0, 360);
   ephysics_body_sleeping_threshold_set(box_body2, 0.1, 0.1);
-  eo_unref(box2);
+//  eo_unref(box2);
 
   ephysics_world_gravity_set(world, 0, 0, 0);
 

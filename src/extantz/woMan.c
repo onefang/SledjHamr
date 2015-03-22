@@ -280,7 +280,7 @@ winFang *woMan_add(globals *ourGlobals)
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
     elm_layout_box_append(me->win, WF_BOX, bt);
-    eo_unref(bt);
+//    eo_unref(bt);
 
     winFangCalcMinSize(me);
 

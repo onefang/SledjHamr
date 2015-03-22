@@ -477,8 +477,8 @@ void scenriDel(Scene_Data *scene)
   free(scene->move);
 //  eo_unref(scene->camera_node);
 
-  eo_unref(scene->image);
-  eo_unref(scene->scene);
+//  eo_unref(scene->image);
+//  eo_unref(scene->scene);
 //  eo_unref(scene->root_node);
   free(scene);
 }
