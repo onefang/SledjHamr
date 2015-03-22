@@ -142,7 +142,7 @@ void _on_fs_del(void *data, Evas_Object *obj, void *event_info)
 
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save)
 {
-  winFang *me;
+  winFang *me = NULL;
   Widget  *wid;
   Evas_Object *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
@@ -224,26 +224,26 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   elm_box_pack_end(vbox, bt);
 //  eo_unref(bt);
 
-  rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
-    elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
-    evas_obj_visibility_set(EINA_TRUE)
-    );
-  elm_object_text_set(rd, "grid");
-  elm_box_pack_end(vbox, rd);
-  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
+//  rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
+//    elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
+//    evas_obj_visibility_set(EINA_TRUE)
+//    );
+  //elm_object_text_set(rd, "grid");
+//  elm_box_pack_end(vbox, rd);
+//  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
   // Make it start in grid mode.  It defaults to list mode, so this swaps it over.
-  _mode_changed_cb(fs, rd, NULL);
-  eo_unref(rd);
+//  _mode_changed_cb(fs, rd, NULL);
+//  eo_unref(rd);
 
-  rd = eo_add(ELM_RADIO_CLASS, vbox,
-    elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
-    evas_obj_visibility_set(EINA_TRUE)
-    );
-  elm_radio_group_add(rd, rdg);
-  elm_object_text_set(rd, "list");
-  elm_box_pack_end(vbox, rd);
-  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
-  eo_unref(rd);
+//  rd = eo_add(ELM_RADIO_CLASS, vbox,
+//    elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
+//    evas_obj_visibility_set(EINA_TRUE)
+//    );
+//  elm_radio_group_add(rd, rdg);
+//  elm_object_text_set(rd, "list");
+//  elm_box_pack_end(vbox, rd);
+//  evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
+//  eo_unref(rd);
   // No need to unref this, it's taken care of already.
   //eo_unref(rdg);
 
