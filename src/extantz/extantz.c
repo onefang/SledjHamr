@@ -626,12 +626,11 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   gld = &ourGlobals.gld;
   gldata_init(gld);
 
-  // Set the engine to opengl_x11, then open our window.
+  // One or more of these lets us use the 3D stuff.
   setenv("ELM_ENGINE", "opengl_x11", 1);
-  elm_config_preferred_engine_set("opengl_x11");
+  setenv("ECORE_EVAS_ENGINE", "opengl_x11", 1);
+  elm_config_accel_preference_set("3d");
   ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
-  // Set preferred engine back to default from config
-  elm_config_preferred_engine_set(NULL);
 
   ourGlobals.win = ourGlobals.mainWindow->win;
   // TODO, or not TODO - I keep getting rid of these, but keep bringing them back.
