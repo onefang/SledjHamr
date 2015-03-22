@@ -1069,6 +1069,7 @@ end
 GOAL - GuiLua.c -> _on_click()  -> lauL_dostring(L, wid->action)
        We want this action to be performed in the environment of the module that created the widget.
        Or the one that set the action.
+       NOTE - Can't refer to local variables from within actions.
 
   purkle
     local purkle = require 'purkle'
