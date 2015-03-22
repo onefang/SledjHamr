@@ -165,7 +165,7 @@ static void _on_click(void *data, Evas_Object *obj, void *event_info EINA_UNUSED
   {
     lua_State *L = wid->data;
 
-    PD("Doing action %s", wid->action);
+    PD("Doing action '%s' for module %s", wid->action, wid->win->module);
     doLuaString(L, wid->action, wid->win->module);
   }
 }

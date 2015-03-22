@@ -117,6 +117,8 @@ moduleBegin = function (name, author, copyright, version, timestamp, skin, isLua
   end
 
   _M._M = _M		-- So that references to _M below the setfenv() actually go to the real _M.
+  --[[ TODO - Check if it exists before doing this, or could override standard Lua stuff. ]]
+  _M[name] = _M		-- So that the module can refer to itself internally.
   _M._NAME = name
   _M._PACKAGE = string.gsub(_M._NAME, "[^.]*$", "")	-- Strip the name down to the package name.
   _M.isLua = isLua

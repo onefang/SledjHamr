@@ -2,7 +2,7 @@
 -- By virtue of the fact we are stuffing our result into package.loaded[], just plain running this works as "loading the module".
 do	-- Only I'm not gonna indent this.
 
-local skang = require 'skang'
+skang = require 'skang'
 local _M = skang.moduleBegin('test', nil, 'Copyright 2014 David Seikel', '0.1', '2014-03-27 03:57:00', [[
   local win = skang.window(200, 100, "G'day planet.", 'testWindow')
   skang.thingasm{win, 'quitter', 'Quits the skang window', types = 'widget', widget='"button", "Quit", 10, 10, 100, 30'}
