@@ -355,7 +355,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   int w, h;
 
   evas = evas_object_evas_get(win);
-  eo_do(win, evas_obj_size_get(&w, &h));
+  eo_do(win, efl_gfx_size_get(&w, &h));
   scene = calloc(1, sizeof(Scene_Data));
   scene->evas = evas;
   eina_clist_init(&(scene->stuffs));
@@ -376,7 +376,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   scene->image = eo_add(ELM_IMAGE_CLASS, win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
-    evas_obj_visibility_set(EINA_TRUE),
+    efl_gfx_visible_set(EINA_TRUE),
     temp = elm_obj_image_object_get()
   );
   elm_object_tooltip_text_set(scene->image, "");

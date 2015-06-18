@@ -212,11 +212,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   snprintf(buf, sizeof(buf), "%s/winFang.edj", prefix_data_get());
   result->layout = eo_add(ELM_LAYOUT_CLASS, obj,
-    evas_obj_size_set(w, h),
-    evas_obj_position_set(x, y),
+    efl_gfx_size_set(w, h),
+    efl_gfx_position_set(x, y),
     evas_obj_name_set(WF_LAYOUT),
     efl_file_set(buf, WF_LAYOUT),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
   );
   result->e = evas_object_evas_get(result->layout);
 
@@ -233,8 +233,8 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
 	evas_obj_name_set(WF_UNDERLAY),
-        evas_obj_color_set(0, 0, 0, 0),
-	evas_obj_visibility_set(EINA_TRUE)
+        efl_gfx_color_set(0, 0, 0, 0),
+	efl_gfx_visible_set(EINA_TRUE)
       );
     elm_object_part_content_set(result->layout, WF_UNDERLAY, obj);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
@@ -252,9 +252,9 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       result->hand[i] = eo_add(EVAS_IMAGE_CLASS, result->e,
 	evas_obj_image_filled_set(EINA_TRUE),
 	efl_file_set(buf, NULL),
-	evas_obj_size_set(31, 31),
-	evas_obj_position_set(cx - 15, cy - 15),
-	evas_obj_visibility_set(EINA_TRUE)
+	efl_gfx_size_set(31, 31),
+	efl_gfx_position_set(cx - 15, cy - 15),
+	efl_gfx_visible_set(EINA_TRUE)
       );
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
 //      eo_unref(result->hand[i]);
@@ -263,7 +263,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     result->title = eo_add(ELM_LABEL_CLASS, result->layout,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	evas_obj_visibility_set(EINA_TRUE)
+	efl_gfx_visible_set(EINA_TRUE)
       );
     elm_object_style_set(result->title, "marker");
     elm_object_text_set(result->title, title);
@@ -277,7 +277,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_obj_name_set(WF_SWALLOW),
     // TODO - Actually, this should be minus the size of the title stuff.
     elm_obj_grid_size_set(result->w, result->h),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
   );
   elm_object_part_content_set(result->layout, WF_SWALLOW, result->grid);
 
@@ -410,7 +410,7 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
     result->obj = eo_add(klass, win->win,
       evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
       evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-      evas_obj_visibility_set(EINA_TRUE),
+      efl_gfx_visible_set(EINA_TRUE),
       eo_key_data_set("Widget", result, NULL)
     );
 

@@ -193,7 +193,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_obj_hoversel_item_add("size(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_DESC),
     elm_obj_hoversel_item_add("time(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_ASC),
     elm_obj_hoversel_item_add("time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(hoversel, "sorting");
   elm_box_pack_end(vbox, hoversel);
@@ -206,7 +206,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     elm_obj_hoversel_item_add("small",  NULL, ELM_ICON_NONE, _small_icon_clicked,  fs),
     elm_obj_hoversel_item_add("medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs),
     elm_obj_hoversel_item_add("big",    NULL, ELM_ICON_NONE, _big_icon_clicked,    fs),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(hoversel, "size");
   elm_box_pack_end(vbox, hoversel);
@@ -217,7 +217,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   bt = eo_add(ELM_CHECK_CLASS, vbox,
     elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(bt, "hidden");
   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
@@ -226,7 +226,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(rd, "grid");
   elm_box_pack_end(vbox, rd);
@@ -237,7 +237,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   rd = eo_add(ELM_RADIO_CLASS, vbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
     );
   elm_radio_group_add(rd, rdg);
   elm_object_text_set(rd, "list");
@@ -248,7 +248,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   //eo_unref(rdg);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
   );
   elm_object_text_set(bt, "OK");
   evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
@@ -256,7 +256,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 //  eo_unref(bt);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
   );
   elm_object_text_set(bt, "CANCEL");
   evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);

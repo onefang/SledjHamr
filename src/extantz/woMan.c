@@ -275,7 +275,7 @@ winFang *woMan_add(globals *ourGlobals)
 //		evas_obj_text_set("Login"),
 		evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 		evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-		evas_obj_visibility_set(EINA_TRUE)
+		efl_gfx_visible_set(EINA_TRUE)
 	);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);

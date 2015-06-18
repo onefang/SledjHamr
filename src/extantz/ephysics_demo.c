@@ -34,9 +34,9 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box1 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
     efl_file_set(buf, "blue-cube"),
-    evas_obj_size_set(70, 70),
-    evas_obj_position_set(ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_size_set(70, 70),
+    efl_gfx_position_set(ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
+    efl_gfx_visible_set(EINA_TRUE)
   );
 
   box_body1 = ephysics_body_box_add(world);
@@ -51,9 +51,9 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
     efl_file_set(buf, "purple-cube"),
-    evas_obj_size_set(70, 70),
-    evas_obj_position_set(ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_size_set(70, 70),
+    efl_gfx_position_set(ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
+    efl_gfx_visible_set(EINA_TRUE)
   );
 
   box_body2 = ephysics_body_box_add(world);

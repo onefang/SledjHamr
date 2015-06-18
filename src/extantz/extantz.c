@@ -267,10 +267,10 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
   GLData *gld = &ourGlobals->gld;
   Evas_Coord h;
 
-  eo_do(ourGlobals->win, evas_obj_size_get(&ourGlobals->win_w, &ourGlobals->win_h));
+  eo_do(ourGlobals->win, efl_gfx_size_get(&ourGlobals->win_w, &ourGlobals->win_h));
   eo_do(ourGlobals->tb,
     evas_obj_size_hint_min_get(NULL, &h),
-    evas_obj_size_set(ourGlobals->win_w, h)
+    efl_gfx_size_set(ourGlobals->win_w, h)
     );
   // Stop internal windows going under the toolbar.
   evas_object_resize(ourGlobals->mainWindow->layout, ourGlobals->win_w, h);
@@ -496,7 +496,7 @@ static void makeMainMenu(globals *ourGlobals)
 	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
 	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
-	evas_obj_position_set(0, 0),
+	efl_gfx_position_set(0, 0),
 	elm_obj_toolbar_align_set(0.0)
 	);
     ourGlobals->tb = tb;
@@ -684,14 +684,14 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     efl_file_set(buf, NULL),
-    evas_obj_visibility_set(EINA_TRUE)
+    efl_gfx_visible_set(EINA_TRUE)
   );
   elm_win_resize_object_add(ourGlobals.mainWindow->win, ourGlobals.mainWindow->bg);
 #else
   snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   eo_do(ourGlobals.mainWindow->bg,
     elm_obj_image_file_set(buf, NULL),
-    evas_obj_color_set(255, 255, 255, 255)
+    efl_gfx_color_set(255, 255, 255, 255)
   );
 #endif
 
