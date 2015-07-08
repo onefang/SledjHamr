@@ -12,3 +12,12 @@ skang.thingasm{win, 'ffuncer', 'Calls ffunc', types = 'widget', widget='"button"
 
 test.bar = 'things'
 test.ffunc(1, 'two')
+
+
+--[[  Ideas to make this less verbose.
+
+Maybe we can leave out the "types = 'widget'" part, and assume it's a widget if there's a "widget = '...'" argument.
+
+Perhaps an actual skang.widget.button(), or even a widget.button().
+
+]]
