@@ -165,6 +165,15 @@ This could even allow relative placement as mentioned in the skang TODO -
 
 foo = widget.label(0, "otherWidget+0.1", 0.5, 0, 'Text goes here")
 
+While failing to fall asleep, I had another idea, though not sure how
+feasible it is just yet.  _123 could use a metatable thingy at the
+lowest level, and just translates that to a value, the value being a
+number.  Or something hand wavey like that.  lol
+
+In skang.lua _M is the modules table, and it's a local, it's also a
+proxy table.  So _M's metatable's __index could check if it's a _123,
+then return the 123 as the value.  As a bonus, we could do arithmatic
+via this metatable.
 
 "widget" would be a table with functions for dealing with widgets.  It
 would include metatable stuff for widget set introspection.  So
