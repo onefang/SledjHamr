@@ -5,7 +5,7 @@ similar names, it's not exactly the same.  It's more accurate to say
 this is in the spirit of matrix-RAD.
 
 The ultimate goal is for the various ClientHamr parts to be able to
-either host their own UI, or have it hosted in the in world 3D window. 
+either host their own UI, or have it hosted in the in world 3D window.
 Matrix-RAD's ability to run either server or client side, with no change
 to the code, is great for this sort of thing.  If I can manage the
 ability to "tear off" windows, in other words, pull them out of the 3D
@@ -34,7 +34,7 @@ access to the Edje Lua stuff I've already written, but drag it outside
 of an edje file.
 
 This pretty much means that GuiLua should be a shared library, coz in
-the ClientHamr use case, several programs are gonna be using it at once. 
+the ClientHamr use case, several programs are gonna be using it at once.
 Should also be separate modules for development stuff like the skin
 editor, which could be just another proggy using GuiLua.
 
@@ -56,7 +56,7 @@ probably can deal with that though, I'm not familiar enough with them to
 know.  Eo on the other hand allegedly offers introspection, which was
 always the corner stone of matrix-RAD.  So access to elementary widgets
 via Eo might be possible.  That's kinda the entire hook I'm hoping will
-help to make matrix-RAD style stuff work as well as it did there. 
+help to make matrix-RAD style stuff work as well as it did there.
 Apparently when they promised introspection with Eo, they meant compile
 time, not run time.
 
@@ -75,7 +75,7 @@ interested parties -
 "First step is to write edje functions for generically bundling up one
 or more Lua tables into a message, sending that message, then unpacking
 it again. This will be able to be done from edje, from C, and from Lua
-directly. Perhaps adding that as one more edje messege type.  This is
+directly. Perhaps adding that as one more edje message type.  This is
 for sending Lua tables between threads.  A later addition will be to
 send them through the 'net, probably as eet.
 
@@ -141,7 +141,7 @@ Skang notes
 -----------
 
 So, what will this variation of skang look like?  For a start, the
-syntax will have to be more Lua like, so that's a real basic change. 
+syntax will have to be more Lua like, so that's a real basic change.
 Can't use a space as an argument separator, Lua allows only ',' and
 ';'.  Strings can still use single or double quotes.
 
@@ -168,11 +168,11 @@ foo = widget.label(0, "otherWidget+0.1", 0.5, 0, 'Text goes here")
 While failing to fall asleep, I had another idea, though not sure how
 feasible it is just yet.  _123 could use a metatable thingy at the
 lowest level, and just translates that to a value, the value being a
-number.  Or something hand wavey like that.  lol
+number.  Or something hand wavy like that.  lol
 
 In skang.lua _M is the modules table, and it's a local, it's also a
 proxy table.  So _M's metatable's __index could check if it's a _123,
-then return the 123 as the value.  As a bonus, we could do arithmatic
+then return the 123 as the value.  As a bonus, we could do arithmetic
 via this metatable.
 
 "widget" would be a table with functions for dealing with widgets.  It
@@ -212,7 +212,7 @@ foo = 'bar'	-- Using the metatable to override '=' to set the actual value of th
 bar = foo	-- The reverse of the above.  Though perhaps these can't be done?
 foo = foo .. 'stuff' .. 'more stuff' .. 'another line of the dropdown or whatever'
 
-OK, first two can't be done, metatable only overides that for table elements.  The third one can only be (I might be wrong there) -
+OK, first two can't be done, metatable only overrides that for table elements.  The third one can only be (I might be wrong there) -
 
 foo.value = 'stuff' .. 'more stuff'
 foo.value = foo.value .. 'another line of the dropdown or whatever'
@@ -240,7 +240,7 @@ local other = require('otherPackageName')
 skang.clear
 skang.window(200, 200, "G'day planet.")
 quitter = widget.button('Quit', 0.5, 0.5, 0.5, 0.5)
-quitter:action('quit')   -- 'quit' is looked up in ThingSpcae.commands, and translated into the Lua 'skang.quit()'.
+quitter:action('quit')   -- 'quit' is looked up in ThingSpace.commands, and translated into the Lua 'skang.quit()'.
 other.foo = 'stuff'
 this.bar = other.foo
 
