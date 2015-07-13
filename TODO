@@ -190,3 +190,9 @@ Everyone and Friends, each set contains an email address, and zero or
 more IM addresses.  Recommend people use a spam catcher for the Everyone
 contact, and don't make it mandatory.  Even the Friends one isn't
 mandatory.  At all times err on the privacy side of things.
+
+OTR
+---
+
+Since I would be adding OTR to the IM system anyway, here's a cool idea. 
+Wrap all the data transfers in OTR.
