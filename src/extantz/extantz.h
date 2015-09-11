@@ -5,6 +5,7 @@
 #define USE_IRR     0
 #define USE_DEMO    1
 #define DO_GEARS    0
+#define USE_ELM_IMG 1
 
 
 #include "LumbrJack.h"

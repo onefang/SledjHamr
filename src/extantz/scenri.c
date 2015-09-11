@@ -351,7 +351,10 @@ static Eina_Bool _stuffsLoader(void *data)
 Scene_Data *scenriAdd(Evas_Object *win)
 {
   Scene_Data *scene;
-  Evas_Object *evas, *temp;
+  Evas_Object *evas;
+#if USE_ELM_IMG
+  Evas_Object *temp;
+#endif
   int w, h;
 
   evas = evas_object_evas_get(win);
@@ -373,12 +376,19 @@ Scene_Data *scenriAdd(Evas_Object *win)
   // Any colour or texture applied to this window gets applied to the scene, including transparency.
   // Interestingly enough, the position and size of the render seems to NOT depend on the position and size of this image?
   // Note that we can't reuse the windows background image, Evas_3D needs both images.
+#if USE_ELM_IMG
   scene->image = eo_add(ELM_IMAGE_CLASS, win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     efl_gfx_visible_set(EINA_TRUE),
     temp = elm_obj_image_object_get()
   );
+#else
+  scene->image = evas_object_image_filled_add(evas);
+  evas_object_size_hint_weight_set(scene->image, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+  evas_object_resize(scene->image, WIDTH, HEIGHT);
+  evas_object_show(scene->image);
+#endif
   elm_object_tooltip_text_set(scene->image, "");
   elm_object_tooltip_hide(scene->image);
   scene->camera_node = cameraAdd(evas, scene, scene->image);
@@ -396,11 +406,20 @@ Scene_Data *scenriAdd(Evas_Object *win)
   );
   eo_do(scene->root_node, evas_canvas3d_node_member_add(scene->light_node));
 
+#if USE_ELM_IMG
   eo_do(temp, evas_obj_image_scene_set(scene->scene));
 
   // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas callbacks instead.
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, scene);
   evas_object_event_callback_add(temp, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
+#else
+  eo_do(scene->image, evas_obj_image_scene_set(scene->scene));
+
+  // Elm can't seem to be able to tell us WHERE an image was clicked, so use raw Evas callbacks instead.
+  evas_object_event_callback_add(scene->image, EVAS_CALLBACK_MOUSE_MOVE, _on_mouse_move, scene);
+  evas_object_event_callback_add(scene->image, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
+#endif
+
 
   elm_win_resize_object_add(win, scene->image);
 

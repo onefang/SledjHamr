@@ -398,7 +398,10 @@ static Eina_Bool doFrame(void *data)
   else if ((ourGlobals->scene) && (ourGlobals->scene->image))
   {
 //    evas_object_image_pixels_dirty_set(elm_image_object_get(ourGlobals->scene->image), EINA_TRUE);
+#if USE_ELM_IMG
     _draw_gl(elm_image_object_get(ourGlobals->scene->image));
+#else
+#endif
   }
 
   return EINA_TRUE;	// Keep calling us.
@@ -608,7 +611,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   elm_need_efreet();
 
   ourGlobals.running = 1;
-
 
   // Don't do this, we need to clean up other stuff to, so set a clean up function below.
   //elm_policy_set(ELM_POLICY_QUIT, ELM_POLICY_QUIT_LAST_WINDOW_CLOSED);
