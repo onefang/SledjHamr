@@ -411,7 +411,7 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
       evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
       evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
       efl_gfx_visible_set(EINA_TRUE),
-      eo_key_data_set("Widget", result, NULL)
+      eo_key_data_set("Widget", result)
     );
 
     if (strcmp(WT_ENTRY, type) == 0)

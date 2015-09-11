@@ -184,7 +184,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
-    eo_key_data_set("fileselector", fs, NULL),
+    eo_key_data_set("fileselector", fs),
     elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
     elm_obj_hoversel_item_add("name(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_DESC),
     elm_obj_hoversel_item_add("type(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_ASC),
@@ -201,7 +201,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
   hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
     elm_obj_hoversel_hover_parent_set(me->win),
-    eo_key_data_set("fileselector", fs, NULL),
+    eo_key_data_set("fileselector", fs),
     elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
     elm_obj_hoversel_item_add("small",  NULL, ELM_ICON_NONE, _small_icon_clicked,  fs),
     elm_obj_hoversel_item_add("medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs),

@@ -135,12 +135,12 @@ typedef struct _Scene_Data
 {
   Evas             *evas;
   Evas_Object      *image;		// Our Elm image.
-  Evas_3D_Scene    *scene;
-  Evas_3D_Node     *root_node;
-  Evas_3D_Node     *camera_node;
-  Evas_3D_Node     *light_node;
+  Eo    *scene;
+  Eo     *root_node;
+  Eo     *camera_node;
+  Eo     *light_node;
 
-  Evas_3D_Light    *light;
+  Eo    *light;
 
   char             sim[PATH_MAX];
   Eina_Clist       stuffs, loading;
@@ -167,7 +167,7 @@ typedef struct _extantzStuffs
 {
   Stuffs	stuffs;
   Scene_Data	*scene;
-  Evas_3D_Node	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
+  Eo	*mesh_node;	// Multiple Evas_3D_Mesh's can be in one Evas_3D_Node
   // Can't use in arrays here, can't find the element sizes of incomplete types.
   Eina_Array	*mesh;		// Evas_3D_Mesh
   Eina_Array	*materials;	// Evas_3D_Material
@@ -283,7 +283,7 @@ Eina_Bool animateScene(globals *ourGlobals);
 void Evas_3D_Demo_fini(globals *ourGlobals);
 
 Scene_Data *scenriAdd(Evas_Object *win);
-Evas_3D_Node *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
+Eo *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);
 Eina_Bool animateCamera(Scene_Data *scene);
 Eina_Bool animateScene(globals *ourGlobals);
 void scenriDel(Scene_Data *scene);

@@ -36,7 +36,7 @@ static void _animateCube(ExtantzStuffs *stuffs)
   static float angle = 0.0f;
   static int   frame = 0;
   static int   inc   = 1;
-  Evas_3D_Mesh *m;
+  Eo *m;
 
   eina_accessor_data_get(stuffs->aMesh, 0, (void **) &m);
 
@@ -48,8 +48,8 @@ static void _animateCube(ExtantzStuffs *stuffs)
   else if (frame <= 0) inc = 1;
 
   eo_do(stuffs->mesh_node,
-    evas_3d_node_orientation_angle_axis_set(angle, 1.0, 1.0, 1.0),
-    evas_3d_node_mesh_frame_set(m, frame)
+    evas_canvas3d_node_orientation_angle_axis_set(angle, 1.0, 1.0, 1.0),
+    evas_canvas3d_node_mesh_frame_set(m, frame)
   );
 }
 
@@ -60,20 +60,20 @@ static void _animateSphere(ExtantzStuffs *stuffs)
   earthAngle += 0.3;
   if (earthAngle > 360.0)	earthAngle -= 360.0f;
   eo_do(stuffs->mesh_node,
-    evas_3d_node_orientation_angle_axis_set(earthAngle, 0.0, 1.0, 0.0)
+    evas_canvas3d_node_orientation_angle_axis_set(earthAngle, 0.0, 1.0, 0.0)
   );
 }
 
 static void _animateSonic(ExtantzStuffs *stuffs)
 {
   static int   sonicFrame = 0;
-  Evas_3D_Mesh *m;
+  Eo *m;
 
   eina_accessor_data_get(stuffs->aMesh, 0, (void **) &m);
   sonicFrame += 32;
   if (sonicFrame > 256 * 50)	sonicFrame = 0;
   eo_do(stuffs->mesh_node,
-    evas_3d_node_mesh_frame_set(m, sonicFrame)
+    evas_canvas3d_node_mesh_frame_set(m, sonicFrame)
   );
 }
 
@@ -98,8 +98,8 @@ static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
   int scene_w, scene_h;
   Evas_Real scene_x, scene_y;
   Evas_Real s, t;
-  Evas_3D_Node *n;
-  Evas_3D_Mesh *m;
+  Eo *n;
+  Eo *m;
   Eina_Bool pick;
   char *name = NULL;
 
@@ -108,12 +108,12 @@ static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
   obj_x = ev->cur.canvas.x - x;
   obj_y = ev->cur.canvas.y - y;
 
-  eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
+  eo_do(scene->scene, evas_canvas3d_scene_size_get(&scene_w, &scene_h));
 
   scene_x = obj_x * scene_w / (Evas_Real)w;
   scene_y = obj_y * scene_h / (Evas_Real)h;
 
-  eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
+  eo_do(scene->scene, pick = evas_canvas3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
   if (pick)
     name = evas_object_data_get(n, "Name");
   // This is a raw Evas callback, on the Elm image internal Evas_Object.
@@ -140,8 +140,8 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
   int scene_w, scene_h;
   Evas_Real scene_x, scene_y;
   Evas_Real s, t;
-  Evas_3D_Node *n;
-  Evas_3D_Mesh *m;
+  Eo *n;
+  Eo *m;
   Eina_Bool pick;
   char *name = NULL;
 
@@ -153,12 +153,12 @@ static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void
   obj_x = ev->canvas.x - x;
   obj_y = ev->canvas.y - y;
 
-  eo_do(scene->scene, evas_3d_scene_size_get(&scene_w, &scene_h));
+  eo_do(scene->scene, evas_canvas3d_scene_size_get(&scene_w, &scene_h));
 
   scene_x = obj_x * scene_w / (Evas_Real)w;
   scene_y = obj_y * scene_h / (Evas_Real)h;
 
-  eo_do(scene->scene, pick = evas_3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
+  eo_do(scene->scene, pick = evas_canvas3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
   if (pick)
   {
     name = evas_object_data_get(n, "Name");
@@ -361,12 +361,12 @@ Scene_Data *scenriAdd(Evas_Object *win)
   eina_clist_init(&(scene->stuffs));
   eina_clist_init(&(scene->loading));
 
-  scene->root_node = eo_add(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_NODE));
+  scene->root_node = eo_add(EVAS_CANVAS3D_NODE_CLASS, evas, evas_canvas3d_node_constructor(EVAS_CANVAS3D_NODE_TYPE_NODE));
 
-  scene->scene = eo_add(EVAS_3D_SCENE_CLASS, evas,
-    evas_3d_scene_root_node_set(scene->root_node),
-    evas_3d_scene_size_set(w, h),
-    evas_3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
+  scene->scene = eo_add(EVAS_CANVAS3D_SCENE_CLASS, evas,
+    evas_canvas3d_scene_root_node_set(scene->root_node),
+    evas_canvas3d_scene_size_set(w, h),
+    evas_canvas3d_scene_background_color_set(0.0, 0.0, 0.0, 0.0)
   );
 
   // Add an image object for 3D scene rendering.
@@ -383,18 +383,18 @@ Scene_Data *scenriAdd(Evas_Object *win)
   elm_object_tooltip_hide(scene->image);
   scene->camera_node = cameraAdd(evas, scene, scene->image);
 
-  scene->light = eo_add(EVAS_3D_LIGHT_CLASS, evas,
-    evas_3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
-    evas_3d_light_directional_set(EINA_TRUE)
+  scene->light = eo_add(EVAS_CANVAS3D_LIGHT_CLASS, evas,
+    evas_canvas3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
+    evas_canvas3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
+    evas_canvas3d_light_specular_set(1.0, 1.0, 1.0, 1.0),
+    evas_canvas3d_light_directional_set(EINA_TRUE)
   );
-  scene->light_node = eo_add(EVAS_3D_NODE_CLASS, evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_LIGHT),
-    evas_3d_node_light_set(scene->light),
-    evas_3d_node_position_set(1000.0, 0.0, 1000.0),
-    evas_3d_node_look_at_set(EVAS_3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_3D_SPACE_PARENT, 0.0, 1.0, 0.0)
+  scene->light_node = eo_add(EVAS_CANVAS3D_NODE_CLASS, evas, evas_canvas3d_node_constructor(EVAS_CANVAS3D_NODE_TYPE_LIGHT),
+    evas_canvas3d_node_light_set(scene->light),
+    evas_canvas3d_node_position_set(1000.0, 0.0, 1000.0),
+    evas_canvas3d_node_look_at_set(EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0)
   );
-  eo_do(scene->root_node, evas_3d_node_member_add(scene->light_node));
+  eo_do(scene->root_node, evas_canvas3d_node_member_add(scene->light_node));
 
   eo_do(temp, evas_obj_image_scene_set(scene->scene));
 
@@ -717,9 +717,9 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 {
   char buf[PATH_MAX];
   Material *m;
-  Evas_3D_Texture  *t, *t1, *ti;
-  Evas_3D_Material *mi, *mj;
-  Evas_3D_Mesh     *me;
+  Eo  *t, *t1, *ti;
+  Eo *mi, *mj;
+  Eo     *me;
 
   PI("REZZING %s", stuffs->stuffs.name);
 // TODO - These examples just don't fit neatly into anything I can whip up quickly as a data format.
@@ -728,13 +728,13 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   // Textures
   if (1 == fake)
   {
-    t = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
-      evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels0[0])
+    t = eo_add(EVAS_CANVAS3D_TEXTURE_CLASS, scene->evas,
+      evas_canvas3d_texture_data_set(EVAS_COLORSPACE_ARGB8888, 4, 4, &pixels0[0])
       );
     eina_array_push(stuffs->textures, t);
 
-    t1 = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
-      evas_3d_texture_data_set(EVAS_3D_COLOR_FORMAT_RGBA, EVAS_3D_PIXEL_FORMAT_8888, 4, 4, &pixels1[0])
+    t1 = eo_add(EVAS_CANVAS3D_TEXTURE_CLASS, scene->evas,
+      evas_canvas3d_texture_data_set(EVAS_COLORSPACE_ARGB8888, 4, 4, &pixels1[0])
       );
     eina_array_push(stuffs->textures, t1);
   }
@@ -742,11 +742,11 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   EINA_INARRAY_FOREACH(stuffs->stuffs.details.mesh->materials, m)
   {
     snprintf(buf, sizeof(buf), "%s/%s", prefix_data_get(), m->texture);
-    ti = eo_add(EVAS_3D_TEXTURE_CLASS, scene->evas,
-      evas_3d_texture_file_set(buf, NULL),
-      evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_LINEAR, EVAS_3D_TEXTURE_FILTER_LINEAR),		// Only for sphere originally.
-      evas_3d_texture_filter_set(EVAS_3D_TEXTURE_FILTER_NEAREST, EVAS_3D_TEXTURE_FILTER_NEAREST),	// Only for sonic  originally.
-      evas_3d_texture_wrap_set(EVAS_3D_WRAP_MODE_REPEAT, EVAS_3D_WRAP_MODE_REPEAT)
+    ti = eo_add(EVAS_CANVAS3D_TEXTURE_CLASS, scene->evas,
+      evas_canvas3d_texture_file_set(buf, NULL),
+      evas_canvas3d_texture_filter_set(EVAS_CANVAS3D_TEXTURE_FILTER_LINEAR, EVAS_CANVAS3D_TEXTURE_FILTER_LINEAR),		// Only for sphere originally.
+      evas_canvas3d_texture_filter_set(EVAS_CANVAS3D_TEXTURE_FILTER_NEAREST, EVAS_CANVAS3D_TEXTURE_FILTER_NEAREST),	// Only for sonic  originally.
+      evas_canvas3d_texture_wrap_set(EVAS_CANVAS3D_WRAP_MODE_REPEAT, EVAS_CANVAS3D_WRAP_MODE_REPEAT)
     );
     eina_array_push(stuffs->textures, ti);
   }
@@ -755,53 +755,53 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   if (1 == fake)
   {
     eina_accessor_data_get(stuffs->aTexture, 0, (void **) &t);
-    mi = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
+    mi = eo_add(EVAS_CANVAS3D_MATERIAL_CLASS, scene->evas,
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_NORMAL, EINA_TRUE),
 
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-      evas_3d_material_shininess_set(100.0),
-      evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, t)
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, 0.2, 0.2, 0.2, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+      evas_canvas3d_material_shininess_set(100.0),
+      evas_canvas3d_material_texture_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, t)
     );
     eina_array_push(stuffs->materials, mi);
 
     eina_accessor_data_get(stuffs->aTexture, 1, (void **) &t1);
     eina_accessor_data_get(stuffs->aTexture, 2, (void **) &ti);
-    mj = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),
+    mj = eo_add(EVAS_CANVAS3D_MATERIAL_CLASS, scene->evas,
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_NORMAL, EINA_TRUE),
 
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.2, 0.2, 0.2, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-      evas_3d_material_shininess_set(100.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, 0.2, 0.2, 0.2, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, 0.8, 0.8, 0.8, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+      evas_canvas3d_material_shininess_set(100.0),
 
-      evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, t1),
-      evas_3d_material_texture_set(EVAS_3D_MATERIAL_NORMAL, ti)
+      evas_canvas3d_material_texture_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, t1),
+      evas_canvas3d_material_texture_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_NORMAL, ti)
     );
     eina_array_push(stuffs->materials, mj);
   }
   else
   {
     eina_accessor_data_get(stuffs->aTexture, 0, (void **) &t);
-    mi = eo_add(EVAS_3D_MATERIAL_CLASS, scene->evas,
-      evas_3d_material_texture_set(EVAS_3D_MATERIAL_DIFFUSE, t),
+    mi = eo_add(EVAS_CANVAS3D_MATERIAL_CLASS, scene->evas,
+      evas_canvas3d_material_texture_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, t),
 
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_AMBIENT, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_DIFFUSE, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_SPECULAR, EINA_TRUE),
-      evas_3d_material_enable_set(EVAS_3D_MATERIAL_NORMAL, EINA_TRUE),		// Not for sphere originally.
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, EINA_TRUE),
+      evas_canvas3d_material_enable_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_NORMAL, EINA_TRUE),		// Not for sphere originally.
 
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_AMBIENT, 0.01, 0.01, 0.01, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_DIFFUSE, 1.0, 1.0, 1.0, 1.0),
-      evas_3d_material_color_set(EVAS_3D_MATERIAL_SPECULAR, 1.0, 1.0, 1.0, 1.0),
-      evas_3d_material_shininess_set(50.0)
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_AMBIENT, 0.01, 0.01, 0.01, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_DIFFUSE, 1.0, 1.0, 1.0, 1.0),
+      evas_canvas3d_material_color_set(EVAS_CANVAS3D_MATERIAL_ATTRIB_SPECULAR, 1.0, 1.0, 1.0, 1.0),
+      evas_canvas3d_material_shininess_set(50.0)
     );
     eina_array_push(stuffs->materials, mi);
   }
@@ -812,24 +812,24 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   {
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     eina_accessor_data_get(stuffs->aMaterial, 1, (void **) &mj);
-    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
-      evas_3d_mesh_vertex_count_set(24),
-      evas_3d_mesh_frame_add(0),
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
+      evas_canvas3d_mesh_vertex_count_set(24),
+      evas_canvas3d_mesh_frame_add(0),
 
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_POSITION, 12 * sizeof(float), &cube_vertices[ 0]),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_NORMAL,   12 * sizeof(float), &cube_vertices[ 3]),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_COLOR,    12 * sizeof(float), &cube_vertices[ 6]),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TEXCOORD, 12 * sizeof(float), &cube_vertices[10]),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, 12 * sizeof(float), &cube_vertices[ 0]),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_NORMAL,   12 * sizeof(float), &cube_vertices[ 3]),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_COLOR,    12 * sizeof(float), &cube_vertices[ 6]),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TEXCOORD, 12 * sizeof(float), &cube_vertices[10]),
 
-      evas_3d_mesh_index_data_set(EVAS_3D_INDEX_FORMAT_UNSIGNED_SHORT, 36, &cube_indices[0]),
-      evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES),
+      evas_canvas3d_mesh_index_data_set(EVAS_CANVAS3D_INDEX_FORMAT_UNSIGNED_SHORT, 36, &cube_indices[0]),
+      evas_canvas3d_mesh_vertex_assembly_set(EVAS_CANVAS3D_VERTEX_ASSEMBLY_TRIANGLES),
 
-      evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_NORMAL_MAP),
+      evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_NORMAL_MAP),
 
-      evas_3d_mesh_frame_material_set(0, mi),
+      evas_canvas3d_mesh_frame_material_set(0, mi),
 
-      evas_3d_mesh_frame_add(20),
-      evas_3d_mesh_frame_material_set(20, mj)
+      evas_canvas3d_mesh_frame_add(20),
+      evas_canvas3d_mesh_frame_material_set(20, mj)
     );
     eina_array_push(stuffs->mesh, me);
   }
@@ -838,20 +838,20 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     _sphere_init(100);
 
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
-    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
-      evas_3d_mesh_vertex_count_set(vertex_count),
-      evas_3d_mesh_frame_add(0),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_POSITION, sizeof(vertex), &sphere_vertices[0].position),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_NORMAL,   sizeof(vertex), &sphere_vertices[0].normal),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TANGENT,  sizeof(vertex), &sphere_vertices[0].tangent),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_COLOR,    sizeof(vertex), &sphere_vertices[0].color),
-      evas_3d_mesh_frame_vertex_data_set(0, EVAS_3D_VERTEX_TEXCOORD, sizeof(vertex), &sphere_vertices[0].texcoord),
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
+      evas_canvas3d_mesh_vertex_count_set(vertex_count),
+      evas_canvas3d_mesh_frame_add(0),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, sizeof(vertex), &sphere_vertices[0].position),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_NORMAL,   sizeof(vertex), &sphere_vertices[0].normal),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TANGENT,  sizeof(vertex), &sphere_vertices[0].tangent),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_COLOR,    sizeof(vertex), &sphere_vertices[0].color),
+      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TEXCOORD, sizeof(vertex), &sphere_vertices[0].texcoord),
 
-      evas_3d_mesh_index_data_set(EVAS_3D_INDEX_FORMAT_UNSIGNED_SHORT, index_count, &sphere_indices[0]),
-      evas_3d_mesh_vertex_assembly_set(EVAS_3D_VERTEX_ASSEMBLY_TRIANGLES),
-      evas_3d_mesh_frame_material_set(0, mi),
+      evas_canvas3d_mesh_index_data_set(EVAS_CANVAS3D_INDEX_FORMAT_UNSIGNED_SHORT, index_count, &sphere_indices[0]),
+      evas_canvas3d_mesh_vertex_assembly_set(EVAS_CANVAS3D_VERTEX_ASSEMBLY_TRIANGLES),
+      evas_canvas3d_mesh_frame_material_set(0, mi),
 
-      evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_DIFFUSE)
+      evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_DIFFUSE)
     );
     eina_array_push(stuffs->mesh, me);
   }
@@ -859,23 +859,23 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   {
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     snprintf(buf, sizeof(buf), "%s/%s", prefix_data_get(), stuffs->stuffs.details.mesh->fileName);
-    me = eo_add(EVAS_3D_MESH_CLASS, scene->evas,
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
       efl_file_set(buf, NULL),
-      evas_3d_mesh_frame_material_set(0, mi),
-      evas_3d_mesh_shade_mode_set(EVAS_3D_SHADE_MODE_PHONG)
+      evas_canvas3d_mesh_frame_material_set(0, mi),
+      evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_PHONG)
     );
     eina_array_push(stuffs->mesh, me);
   }
 
   eina_accessor_data_get(stuffs->aMesh, 0, (void **) &me);
-  stuffs->mesh_node = eo_add(EVAS_3D_NODE_CLASS, scene->evas, evas_3d_node_constructor(EVAS_3D_NODE_TYPE_MESH),
-    eo_key_data_set("Name", stuffs->stuffs.name, NULL),
-    evas_3d_node_position_set(stuffs->stuffs.details.mesh->pos.x, stuffs->stuffs.details.mesh->pos.y, stuffs->stuffs.details.mesh->pos.z),
-    evas_3d_node_orientation_set(stuffs->stuffs.details.mesh->rot.x, stuffs->stuffs.details.mesh->rot.y, stuffs->stuffs.details.mesh->rot.z, stuffs->stuffs.details.mesh->rot.w),
-    evas_3d_node_mesh_add(me)
+  stuffs->mesh_node = eo_add(EVAS_CANVAS3D_NODE_CLASS, scene->evas, evas_canvas3d_node_constructor(EVAS_CANVAS3D_NODE_TYPE_MESH),
+    eo_key_data_set("Name", stuffs->stuffs.name),
+    evas_canvas3d_node_position_set(stuffs->stuffs.details.mesh->pos.x, stuffs->stuffs.details.mesh->pos.y, stuffs->stuffs.details.mesh->pos.z),
+    evas_canvas3d_node_orientation_set(stuffs->stuffs.details.mesh->rot.x, stuffs->stuffs.details.mesh->rot.y, stuffs->stuffs.details.mesh->rot.z, stuffs->stuffs.details.mesh->rot.w),
+    evas_canvas3d_node_mesh_add(me)
     );
 
-  eo_do(scene->root_node, evas_3d_node_member_add(stuffs->mesh_node));
+  eo_do(scene->root_node, evas_canvas3d_node_member_add(stuffs->mesh_node));
   eina_clist_add_head(&(scene->stuffs), &(stuffs->node));
 
   if (1 == fake)

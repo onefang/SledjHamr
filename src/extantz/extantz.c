@@ -170,7 +170,7 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 #if USE_EVAS_3D
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {
-  Evas_3D_Node *n = data;
+  Eo *n = data;
 //  Evas_Event_Mouse_Down *ev = einfo;
 
   if (n)
@@ -629,6 +629,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   // One or more of these lets us use the 3D stuff.
   setenv("ELM_ENGINE", "opengl_x11", 1);
   setenv("ECORE_EVAS_ENGINE", "opengl_x11", 1);
+  elm_config_preferred_engine_set("opengl_x11");
   elm_config_accel_preference_set("3d");
   ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
 
