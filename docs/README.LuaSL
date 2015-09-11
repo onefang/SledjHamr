@@ -111,3 +111,11 @@ Performance testing will have to be done on 5000 scripts, to see how
 that compares against XEngine.
 
 The test harness became the love world server.
+
+
+TODO
+----
+
+Useful for limiting the amount of time scripts use -
+https://groups.google.com/forum/#!topic/lua-alchemy-dev/3bDPk2aQ8FE
+http://stackoverflow.com/questions/862256/how-can-i-end-a-lua-thread-cleanly
