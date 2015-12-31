@@ -53,7 +53,6 @@ typedef struct _Lscript
 
 int logDom = -1;	// Our logging domain.
 static Eina_Strbuf *LuaSLStream;
-static Eina_Strbuf *clientStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
 static struct timeval startTime;
@@ -507,6 +506,10 @@ static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
     sprintf(buf, "%s/LuaSL &", prefix_bin_get());
     system(buf);
     count = 0;
+    // TODO - There's also the question of what to do if the connection failed.
+    //        Did the server crash, or was it just the connection?
+    //        Probably gonna need some smarts, for now we just restart all the scripts.
+    //        Which I think gets done on server add.
   }
 
   // TODO - May want to renew even if it's not running the GUI, but then we still need some sort of "shut down" signal, which we don't need during testing.
@@ -523,7 +526,6 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
   gameGlobals *ourGlobals = data;
 
   ourGlobals->client = ev->client;
-  ecore_con_client_timeout_set(ev->client, 0);
 
   if (ourGlobals->client)
   {
@@ -534,91 +536,54 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
   return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _dataClient(void *data, int type, Ecore_Con_Event_Client_Data *ev)
+
+Eina_Bool clientParser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
     gameGlobals *ourGlobals = data;
-//    char buf[PATH_MAX];
-    char SID[PATH_MAX];
-    const char *command;
-    char *ext;
 
-    eina_strbuf_append_length(clientStream, ev->data, ev->size);
-    command = eina_strbuf_string_get(clientStream);
-    while ((ext = index(command, '\n')))
+    if (0 == strncmp(command, "events.touch_start", 18))
     {
-	int length = ext - command;
+        Eina_Iterator *scripts;
+	LoveScript *me;
 
-	strncpy(SID, command, length + 1);
-	SID[length] = '\0';
-	eina_strbuf_remove(clientStream, 0, length + 1);
-	ext = index(SID, '.');
-	if (ext)
+	// TODO - For now, just send it to everyone.
+	scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+	while(eina_iterator_next(scripts, (void **) &me))
 	{
-	    ext[0] = '\0';
-	    command = ext + 1;
-
-	    if (0 == strncmp(command, "events.touch_start(", 19))
-	    {
-	        Eina_Iterator *scripts;
-		LoveScript *me;
-
-		// TODO - For now, just send it to everyone.
-		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
-		while(eina_iterator_next(scripts, (void **) &me))
-		{
-		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
-		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
-		    sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
-		}
-		eina_iterator_free(scripts);
-	    }
-	    else if (0 == strncmp(command, "events.listen(", 14))
-	    {
-	        Eina_Iterator *scripts;
-		LoveScript *me;
-
-		// TODO - For now, just send it to everyone.
-		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
-		while(eina_iterator_next(scripts, (void **) &me))
-		{
-		    sendForth(ourGlobals->serverLuaSL, me->SID, command);
-		}
-		eina_iterator_free(scripts);
-	    }
-	    else
-	      PW("Unknown command from client - %s", command);
+	    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
+	    sendForth(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+	    sendForth(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
 	}
-
-	// Get the next blob to check it.
-	command = eina_strbuf_string_get(clientStream);
+	eina_iterator_free(scripts);
     }
+    else if (0 == strncmp(command, "events.listen", 13))
+    {
+        Eina_Iterator *scripts;
+	LoveScript *me;
+	char buf[PATH_MAX];
 
-   return ECORE_CALLBACK_RENEW;
+	// TODO - For now, just send it to everyone.
+	sprintf(buf, "%s(%s", command, arguments);
+	scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+	while(eina_iterator_next(scripts, (void **) &me))
+	{
+	    sendForth(ourGlobals->serverLuaSL, me->SID, buf);
+	}
+	eina_iterator_free(scripts);
+    }
+    else
+	PW("Unknown command from client - %s(%s", command, arguments);
+
+    return ECORE_CALLBACK_RENEW;
 }
 
 static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev)
 {
     gameGlobals *ourGlobals = data;
 
-    if (ev->client)
-    {
-	Eina_List const *clients;
+// TODO - I could coax this into something generic, maybe.
+    sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
 
-	// This is only really for testing, normally it just runs 24/7, or until told not to.
-	clients = ecore_con_server_clients_get(ourGlobals->server);
-        if (0 == eina_list_count(clients))
-        {
-	    PD("No more clients, exiting.");
-	    sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
-	    ecore_main_loop_quit();
-	}
-	else
-	{
-	    PD("Some %d more clients, exiting anyway.", eina_list_count(clients));
-	    sendForth(ourGlobals->serverLuaSL, ownerKey, "exit()");
-	    ecore_main_loop_quit();
-	}
-    }
     return ECORE_CALLBACK_RENEW;
 }
 
@@ -641,18 +606,10 @@ int main(int argc, char **argv)
 	if (ecore_con_init())
 	{
 	    LuaSLStream = eina_strbuf_new();
-	    clientStream = eina_strbuf_new();
 	    reachOut("127.0.0.1", 8211, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, (Ecore_Event_Handler_Cb) _dataLuaSL, (Ecore_Event_Handler_Cb) _delLuaSL);
 
-		if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port + 1, &ourGlobals)))
-		{
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _addClient,  &ourGlobals);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _dataClient, &ourGlobals);
-		    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _delClient,  &ourGlobals);
-		    ecore_con_server_timeout_set(ourGlobals.server, 0);
-		    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-
-
+	    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser))
+	    {
 		if (ecore_evas_init())
                 {
 		    if (edje_init())
