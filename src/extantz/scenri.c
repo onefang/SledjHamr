@@ -503,66 +503,6 @@ void scenriDel(Scene_Data *scene)
 }
 
 
-static const float cube_vertices[] =
-{
-   /* Front */
-   -1.0,  1.0,  1.0,     0.0,  0.0,  1.0,     1.0, 0.0, 0.0, 1.0,     0.0,  1.0,
-    1.0,  1.0,  1.0,     0.0,  0.0,  1.0,     1.0, 0.0, 0.0, 1.0,     1.0,  1.0,
-   -1.0, -1.0,  1.0,     0.0,  0.0,  1.0,     1.0, 0.0, 0.0, 1.0,     0.0,  0.0,
-    1.0, -1.0,  1.0,     0.0,  0.0,  1.0,     1.0, 0.0, 0.0, 1.0,     1.0,  0.0,
-
-   /* Back */
-    1.0,  1.0, -1.0,     0.0,  0.0, -1.0,     0.0, 0.0, 1.0, 1.0,     0.0,  1.0,
-   -1.0,  1.0, -1.0,     0.0,  0.0, -1.0,     0.0, 0.0, 1.0, 1.0,     1.0,  1.0,
-    1.0, -1.0, -1.0,     0.0,  0.0, -1.0,     0.0, 0.0, 1.0, 1.0,     0.0,  0.0,
-   -1.0, -1.0, -1.0,     0.0,  0.0, -1.0,     0.0, 0.0, 1.0, 1.0,     1.0,  0.0,
-
-   /* Left */
-   -1.0,  1.0, -1.0,    -1.0,  0.0,  0.0,     0.0, 1.0, 0.0, 1.0,     0.0,  1.0,
-   -1.0,  1.0,  1.0,    -1.0,  0.0,  0.0,     0.0, 1.0, 0.0, 1.0,     1.0,  1.0,
-   -1.0, -1.0, -1.0,    -1.0,  0.0,  0.0,     0.0, 1.0, 0.0, 1.0,     0.0,  0.0,
-   -1.0, -1.0,  1.0,    -1.0,  0.0,  0.0,     0.0, 1.0, 0.0, 1.0,     1.0,  0.0,
-
-   /* Right */
-    1.0,  1.0,  1.0,     1.0,  0.0,  0.0,     1.0, 1.0, 0.0, 1.0,     0.0,  1.0,
-    1.0,  1.0, -1.0,     1.0,  0.0,  0.0,     1.0, 1.0, 0.0, 1.0,     1.0,  1.0,
-    1.0, -1.0,  1.0,     1.0,  0.0,  0.0,     1.0, 1.0, 0.0, 1.0,     0.0,  0.0,
-    1.0, -1.0, -1.0,     1.0,  0.0,  0.0,     1.0, 1.0, 0.0, 1.0,     1.0,  0.0,
-
-   /* Top */
-   -1.0,  1.0, -1.0,     0.0,  1.0,  0.0,     1.0, 0.0, 1.0, 1.0,     0.0,  1.0,
-    1.0,  1.0, -1.0,     0.0,  1.0,  0.0,     1.0, 0.0, 1.0, 1.0,     1.0,  1.0,
-   -1.0,  1.0,  1.0,     0.0,  1.0,  0.0,     1.0, 0.0, 1.0, 1.0,     0.0,  0.0,
-    1.0,  1.0,  1.0,     0.0,  1.0,  0.0,     1.0, 0.0, 1.0, 1.0,     1.0,  0.0,
-
-   /* Bottom */
-    1.0, -1.0, -1.0,     0.0, -1.0,  0.0,     0.0, 1.0, 1.0, 1.0,     0.0,  1.0,
-   -1.0, -1.0, -1.0,     0.0, -1.0,  0.0,     0.0, 1.0, 1.0, 1.0,     1.0,  1.0,
-    1.0, -1.0,  1.0,     0.0, -1.0,  0.0,     0.0, 1.0, 1.0, 1.0,     0.0,  0.0,
-   -1.0, -1.0,  1.0,     0.0, -1.0,  0.0,     0.0, 1.0, 1.0, 1.0,     1.0,  0.0,
-};
-
-static const unsigned short cube_indices[] =
-{
-   /* Front */
-   0,   1,  2,  2,  1,  3,
-
-   /* Back */
-   4,   5,  6,  6,  5,  7,
-
-   /* Left */
-   8,   9, 10, 10,  9, 11,
-
-   /* Right */
-   12, 13, 14, 14, 13, 15,
-
-   /* Top */
-   16, 17, 18, 18, 17, 19,
-
-   /* Bottom */
-   20, 21, 22, 22, 21, 23
-};
-
 static const unsigned int pixels0[] =
 {
    0xff0000ff, 0xff0000ff, 0xffff0000, 0xffff0000,
@@ -579,158 +519,6 @@ static const unsigned int pixels1[] =
    0xff0000ff, 0xff0000ff, 0xffffffff, 0xffffffff,
 };
 
-
-static int		vertex_count = 0;
-static vertex	       *sphere_vertices = NULL;
-
-static int		index_count = 0;
-static unsigned short  *sphere_indices = NULL;
-
-
-static inline vec3 _normalize(const vec3 *v)
-{
-    double  l = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-    vec3    vec;
-
-    vec.x = v->x / l;
-    vec.y = v->y / l;
-    vec.z = v->z / l;
-
-    return vec;
-}
-
-static void _sphere_init(int precision)
-{
-    int		    i, j;
-    unsigned short *index;
-
-    vertex_count = (precision + 1) * (precision + 1);
-    index_count = precision * precision * 6;
-
-    /* Allocate buffer. */
-    sphere_vertices = malloc(sizeof(vertex) * vertex_count);
-    sphere_indices = malloc(sizeof(unsigned short) * index_count);
-
-    for (i = 0; i <= precision; i++)
-    {
-	double lati = (M_PI * (double)i) / (double)precision;
-	double y = cos(lati);
-	double r = fabs(sin(lati));
-
-	for (j = 0; j <= precision; j++)
-	{
-	    double longi = (M_PI * 2.0 * j) / precision;
-	    vertex *v = &sphere_vertices[i * (precision  + 1) + j];
-
-	    if (j == 0 || j == precision)
-		v->position.x = 0.0;
-	    else
-		v->position.x = r * sin(longi);
-
-	    v->position.y = y;
-
-	    if (j == 0 || j == precision)
-		v->position.z = r;
-	    else
-		v->position.z = r * cos(longi);
-
-	    v->normal = v->position;
-
-	    if (v->position.x > 0.0)
-	    {
-		v->tangent.x = -v->normal.y;
-		v->tangent.y =  v->normal.x;
-		v->tangent.z =  v->normal.z;
-	    }
-	    else
-	    {
-		v->tangent.x =  v->normal.y;
-		v->tangent.y = -v->normal.x;
-		v->tangent.z =  v->normal.z;
-	    }
-
-	    v->color.x = v->position.x;
-	    v->color.y = v->position.y;
-	    v->color.z = v->position.z;
-	    v->color.w = 1.0;
-
-	    if (j == precision)
-		v->texcoord.x = 1.0;
-	    else if (j == 0)
-		v->texcoord.x = 0.0;
-	    else
-		v->texcoord.x = (double)j / (double)precision;
-
-	    if (i == precision)
-		v->texcoord.y = 1.0;
-	    else if (i == 0)
-		v->texcoord.y = 0.0;
-	    else
-		v->texcoord.y = 1.0 - (double)i / (double)precision;
-	}
-    }
-
-    index = &sphere_indices[0];
-
-    for (i = 0; i < precision; i++)
-    {
-	for (j = 0; j < precision; j++)
-	{
-	    *index++ = i * (precision + 1) + j;
-	    *index++ = i * (precision + 1) + j + 1;
-	    *index++ = (i + 1) * (precision + 1) + j;
-
-	    *index++ = (i + 1) * (precision + 1) + j;
-	    *index++ = i * (precision + 1) + j + 1;
-	    *index++ = (i + 1) * (precision + 1) + j + 1;
-	}
-    }
-
-    for (i = 0; i < index_count; i += 3)
-    {
-	vertex *v0 = &sphere_vertices[sphere_indices[i + 0]];
-	vertex *v1 = &sphere_vertices[sphere_indices[i + 1]];
-	vertex *v2 = &sphere_vertices[sphere_indices[i + 2]];
-
-	vec3	e1, e2;
-	float	du1, du2, dv1, dv2, f;
-	vec3	tangent;
-
-	e1.x = v1->position.x - v0->position.x;
-	e1.y = v1->position.y - v0->position.y;
-	e1.z = v1->position.z - v0->position.z;
-
-	e2.x = v2->position.x - v0->position.x;
-	e2.y = v2->position.y - v0->position.y;
-	e2.z = v2->position.z - v0->position.z;
-
-	du1 = v1->texcoord.x - v0->texcoord.x;
-	dv1 = v1->texcoord.y - v0->texcoord.y;
-
-	du2 = v2->texcoord.x - v0->texcoord.x;
-	dv2 = v2->texcoord.y - v0->texcoord.y;
-
-	f = 1.0 / (du1 * dv2 - du2 * dv1);
-
-	tangent.x = f * (dv2 * e1.x - dv1 * e2.x);
-	tangent.y = f * (dv2 * e1.y - dv1 * e2.y);
-	tangent.z = f * (dv2 * e1.z - dv1 * e2.z);
-
-	v0->tangent = tangent;
-    }
-
-    for (i = 0; i <= precision; i++)
-    {
-	for (j = 0; j <= precision; j++)
-	{
-	    if (j == precision)
-	    {
-		vertex *v = &sphere_vertices[i * (precision  + 1) + j];
-		v->tangent = sphere_vertices[i * (precision + 1)].tangent;
-	    }
-	}
-    }
-}
 
 void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 {
@@ -829,19 +617,15 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   // TODO - Write real generic cube and sphere stuff later.
   if (MT_CUBE == stuffs->stuffs.details.mesh->type)
   {
+    Eo *cube;
+
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     eina_accessor_data_get(stuffs->aMaterial, 1, (void **) &mj);
+
+    cube = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
+    eo_do(cube, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_CUBE));
     me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
-      evas_canvas3d_mesh_vertex_count_set(24),
-      evas_canvas3d_mesh_frame_add(0),
-
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, 12 * sizeof(float), &cube_vertices[ 0]),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_NORMAL,   12 * sizeof(float), &cube_vertices[ 3]),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_COLOR,    12 * sizeof(float), &cube_vertices[ 6]),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TEXCOORD, 12 * sizeof(float), &cube_vertices[10]),
-
-      evas_canvas3d_mesh_index_data_set(EVAS_CANVAS3D_INDEX_FORMAT_UNSIGNED_SHORT, 36, &cube_indices[0]),
-      evas_canvas3d_mesh_vertex_assembly_set(EVAS_CANVAS3D_VERTEX_ASSEMBLY_TRIANGLES),
+      evas_canvas3d_mesh_from_primitive_set(0, cube),
 
       evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_NORMAL_MAP),
 
@@ -854,20 +638,15 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   }
   else if (MT_SPHERE == stuffs->stuffs.details.mesh->type)
   {
-    _sphere_init(100);
+    Eo *sphere;
 
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
-    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
-      evas_canvas3d_mesh_vertex_count_set(vertex_count),
-      evas_canvas3d_mesh_frame_add(0),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, sizeof(vertex), &sphere_vertices[0].position),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_NORMAL,   sizeof(vertex), &sphere_vertices[0].normal),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TANGENT,  sizeof(vertex), &sphere_vertices[0].tangent),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_COLOR,    sizeof(vertex), &sphere_vertices[0].color),
-      evas_canvas3d_mesh_frame_vertex_data_set(0, EVAS_CANVAS3D_VERTEX_ATTRIB_TEXCOORD, sizeof(vertex), &sphere_vertices[0].texcoord),
 
-      evas_canvas3d_mesh_index_data_set(EVAS_CANVAS3D_INDEX_FORMAT_UNSIGNED_SHORT, index_count, &sphere_indices[0]),
-      evas_canvas3d_mesh_vertex_assembly_set(EVAS_CANVAS3D_VERTEX_ASSEMBLY_TRIANGLES),
+    sphere = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
+    eo_do(sphere, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_SPHERE));
+
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
+         evas_canvas3d_mesh_from_primitive_set(0, sphere),
       evas_canvas3d_mesh_frame_material_set(0, mi),
 
       evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_DIFFUSE)
@@ -945,10 +724,4 @@ void addMaterial(ExtantzStuffs *e, int face, TextureType type, char *file)
   result->type = type;
   strcpy(result->texture, file);
   eina_inarray_push(e->stuffs.details.mesh->materials, result);
-}
-
-void Evas_3D_Demo_fini(globals *ourGlobals)
-{
-  free(sphere_vertices);
-  free(sphere_indices);
 }

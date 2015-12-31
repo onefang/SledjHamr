@@ -279,9 +279,7 @@ EAPI void finishIrr(globals *ourGlobals);
 
 void overlay_add(globals *ourGlobals);
 
-EAPI void Evas_3D_Demo_add(globals *ourGlobals, char *file);
 Eina_Bool animateScene(globals *ourGlobals);
-void Evas_3D_Demo_fini(globals *ourGlobals);
 
 Scene_Data *scenriAdd(Evas_Object *win);
 Eo *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *win);

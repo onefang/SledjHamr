@@ -745,7 +745,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   {
     ecore_animator_del(ourGlobals.animator);
 #if USE_EVAS_3D
-    Evas_3D_Demo_fini(&ourGlobals);
     scenriDel(ourGlobals.scene);
 #endif
 //    eo_unref(ourGlobals.tb);
