@@ -8,6 +8,7 @@ default
 	// Some more arithmetic -
 	llSay(0, 1+1);
 	llSay(0, 20.5 + 20 + 1.5);
+	llDialog(llGetOwner(), "This is an llDialog() window.", ["1", "2", "3", "4", "5", "6", "7", "8"], 0);
     }
 }
 
