@@ -454,90 +454,61 @@ static void init_evas_gl(globals *ourGlobals)
 
 //-------------------------//
 
-static void _on_menu_focus(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+
+static winFang *_makeMainMenu(globals *ourGlobals)
 {
-  evas_object_raise(obj);
-}
+  GLData *gld = &ourGlobals->gld;
+  winFang *me;
+  Evas_Object *menu, *tb;
+  Elm_Object_Item *it;
 
-static Evas_Object *_menuAdd(Evas_Object *win, Evas_Object *tb, char *label)
-{
-  Evas_Object *menu= NULL;
-  Elm_Object_Item *tb_it;
+  // GL focus gets lost when any menu is used.  sigh
 
-  // Evas_Object * obj, const char *icon, const char *label, Evas_Smart_Cb  func, const void *data
-  //   The function is called when the item is clicked.
-  tb_it = elm_toolbar_item_append(tb, NULL, label, NULL, NULL);
-  // Mark it as a menu.
-  elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
-  // This alledgedly marks it as a menu (not true), and gets an Evas_Object for us to play with.
-  menu = elm_toolbar_item_menu_get(tb_it);
-  // Alas this does not work.  B-(
-  evas_object_smart_callback_add(menu, "focused", _on_menu_focus, NULL);
+  // Try to work around the borkedness of EFL menus by creating our own window.
+  // I can't figure it out, but the main menu wont appear otherwise.  It worked before.
+  // TODO - rip out ELMs menu and create my own.  It sucks.
+  me = winFangAdd(ourGlobals->mainWindow, 0, -4, ourGlobals->win_w, 0, "main menu hack", "mainMenu", ourGlobals->world);
 
-  // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
-  elm_toolbar_item_priority_set(tb_it, 9999);
+  tb = makeMainMenu(me);
+  ourGlobals->tb = tb;
 
-  // The docs for this functien are meaningless, but it wont work right if you leave it out.
-  elm_toolbar_menu_parent_set(tb, win);
+  menu = menuAdd(ourGlobals->mainWindow, tb, "file");
+  // Evas_Object *obj, Elm_Object_Item *parent, const char *icon, const char *label, Evas_Smart_Cb func, const void *data
+  elm_menu_item_add(menu, NULL, NULL, "open", _on_open, ourGlobals);
+  elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
-  // Add a seperator after, so that there's some visual distinction between menu items.
-  // Coz using all lower case and with no underline on the first letter, it's hard to tell.
-  tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
-  elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
+  menu = menuAdd(ourGlobals->mainWindow, tb, "edit");
+  elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
 
-  return menu;
-}
+  menu = menuAdd(ourGlobals->mainWindow, tb, "view");
+  menu = menuAdd(ourGlobals->mainWindow, tb, "world");
+  menu = menuAdd(ourGlobals->mainWindow, tb, "tools");
 
-static void makeMainMenu(globals *ourGlobals)
-{
-    GLData *gld = &ourGlobals->gld;
-    Evas_Object *menu, *tb;
-    Elm_Object_Item *tb_it;
+  menu = menuAdd(ourGlobals->mainWindow, tb, "help");
+  elm_menu_item_add(menu, NULL, NULL, "grid help", NULL, NULL);
+  elm_menu_item_separator_add(menu, NULL);
+  elm_menu_item_add(menu, NULL, NULL, "extantz blogs", NULL, NULL);
+  elm_menu_item_add(menu, NULL, NULL, "extantz forum", NULL, NULL);
+  elm_menu_item_separator_add(menu, NULL);
+  elm_menu_item_add(menu, NULL, NULL, "about extantz", NULL, NULL);
 
-    // A toolbar thingy.
-    tb = eo_add(ELM_TOOLBAR_CLASS, ourGlobals->win,
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
-	efl_gfx_position_set(0, 0),
-	elm_obj_toolbar_align_set(0.0)
-	);
-    ourGlobals->tb = tb;
+  menu = menuAdd(ourGlobals->mainWindow, tb, "advanced");
+  elm_menu_item_add(menu, NULL, NULL, "debug settings", NULL, NULL);
 
-    // Menus.
-    menu = _menuAdd(ourGlobals->win, tb, "file");
-    // Evas_Object *obj, Elm_Object_Item *parent, const char *icon, const char *label, Evas_Smart_Cb func, const void *data
-    elm_menu_item_add(menu, NULL, NULL, "open", _on_open, ourGlobals);
-    elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
+  menu = menuAdd(ourGlobals->mainWindow, tb, "god");
 
-    menu = _menuAdd(ourGlobals->win, tb, "edit");
-    elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
+  makeMainMenuFinish(me, tb);
 
-    menu = _menuAdd(ourGlobals->win, tb, "view");
-    menu = _menuAdd(ourGlobals->win, tb, "world");
-    menu = _menuAdd(ourGlobals->win, tb, "tools");
+  // Other stuff in the toolbar.
+  it = elm_toolbar_item_append(tb, NULL, "restriction icons", NULL, NULL);
+  it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
+  it = elm_toolbar_item_append(tb, NULL, "hop://localhost/Anarchadia 152, 155, 51 - Lost plot (Adult)", NULL, NULL);
+  it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
+  it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
 
-    menu = _menuAdd(ourGlobals->win, tb, "help");
-    elm_menu_item_add(menu, NULL, NULL, "grid help", NULL, NULL);
-    elm_menu_item_separator_add(menu, NULL);
-    elm_menu_item_add(menu, NULL, NULL, "extantz blogs", NULL, NULL);
-    elm_menu_item_add(menu, NULL, NULL, "extantz forum", NULL, NULL);
-    elm_menu_item_separator_add(menu, NULL);
-    elm_menu_item_add(menu, NULL, NULL, "about extantz", NULL, NULL);
+  winFangCalcMinSize(me);
 
-    menu = _menuAdd(ourGlobals->win, tb, "advanced");
-    elm_menu_item_add(menu, NULL, NULL, "debug settings", NULL, NULL);
-
-    menu = _menuAdd(ourGlobals->win, tb, "god");
-
-    // Other stuff in the toolbar.
-    tb_it = elm_toolbar_item_append(tb, NULL, "restriction icons", NULL, NULL);
-    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
-    tb_it = elm_toolbar_item_append(tb, NULL, "hop://localhost/Anarchadia 152, 155, 51 - Lost plot (Adult)", NULL, NULL);
-    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
-    tb_it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
-
-    evas_object_show(tb);
+  return me;
 }
 
 // Elm inlined image windows needs this to change focus on mouse click.
@@ -633,6 +604,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   setenv("ECORE_EVAS_ENGINE", "opengl_x11", 1);
   elm_config_preferred_engine_set("opengl_x11");
   elm_config_accel_preference_set("3d");
+
   ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
 
   ourGlobals.win = ourGlobals.mainWindow->win;
@@ -648,12 +620,15 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   // Get the screen size.
   elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
   ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
+  // TODO - Now we have to take the frame height into consideration, didn't have to do that before.  Faked for now.
+  ourGlobals.win_y += 28;
   ourGlobals.win_w = ourGlobals.scr_w / 2;
   ourGlobals.win_h = ourGlobals.scr_h - 30;
   evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
   evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
 
   evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
+
 
   /*  Our "layers".  TODO - This is out of date, I should update it.
 
@@ -693,7 +668,7 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 #else
   snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   eo_do(ourGlobals.mainWindow->bg,
-    elm_obj_image_file_set(buf, NULL),
+    efl_file_set(buf, NULL),
     efl_gfx_color_set(255, 255, 255, 255)
   );
 #endif
@@ -710,11 +685,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.scene->clickCb = _onWorldClick;
 #endif
 
-  // Gotta do this after adding the windows, otherwise the menu renders under the window.
-  //   This sucks, gotta redefine this menu each time we create a new window?
-  // Also, GL focus gets lost when any menu is used.  sigh
-  makeMainMenu(&ourGlobals);
-
   ourGlobals.world = ephysicsAdd(&ourGlobals);
 
 //  overlay_add(&ourGlobals);
@@ -724,12 +694,13 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
   ourGlobals.files = filesAdd(&ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
+  // Gotta do this after adding the windows, otherwise the menu renders under the window.
+  //   This sucks, gotta redefine this menu each time we create a new window?
+  _makeMainMenu(&ourGlobals);
+
   // Try to connect to a local love server.
   serverStream = eina_strbuf_new();
   reachOut("127.0.0.1", 8211 + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
-
-   // Bump the top toolbar above the windows.
-  evas_object_raise(ourGlobals.tb);
 
   _on_resize(&ourGlobals, NULL, NULL, NULL);
 
@@ -747,7 +718,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 #if USE_EVAS_3D
     scenriDel(ourGlobals.scene);
 #endif
-//    eo_unref(ourGlobals.tb);
     winFangDel(ourGlobals.mainWindow);
   }
 

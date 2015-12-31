@@ -513,3 +513,60 @@ On the other hand, image is all I really need to fake it.
 elm_cnp.h seems to be the only docs, not actually linked to the rest of Elm docs.
 
 */
+
+
+Evas_Object *makeMainMenu(winFang *win)
+{
+  // A toolbar thingy.
+  return eo_add(ELM_TOOLBAR_CLASS, win->win,
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
+    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+    elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
+    efl_gfx_position_set(0, 0),
+    elm_obj_toolbar_align_set(0.0)
+    );
+}
+
+static void _on_menu_focus(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+{
+  evas_object_raise(obj);
+}
+
+Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label)
+{
+  Evas_Object *menu= NULL;
+  Elm_Object_Item *tb_it;
+
+  // Evas_Object * obj, const char *icon, const char *label, Evas_Smart_Cb  func, const void *data
+  //   The function is called when the item is clicked.
+  tb_it = elm_toolbar_item_append(tb, NULL, label, NULL, NULL);
+  // Mark it as a menu.
+  elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
+  // This alledgedly marks it as a menu (not true), and gets an Evas_Object for us to play with.
+  menu = elm_toolbar_item_menu_get(tb_it);
+  // Alas this does not work.  B-(
+  evas_object_smart_callback_add(menu, "focused", _on_menu_focus, NULL);
+
+  // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
+  elm_toolbar_item_priority_set(tb_it, 9999);
+
+  // The docs for this functien are meaningless, but it wont work right if you leave it out.
+  elm_toolbar_menu_parent_set(tb, win->win);
+
+  // Add a seperator after, so that there's some visual distinction between menu items.
+  // Coz using all lower case and with no underline on the first letter, it's hard to tell.
+  tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
+  elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
+
+  return menu;
+}
+
+void makeMainMenuFinish(winFang *win, Evas_Object *tb)
+{
+  // The toolbar needs to be packed into the box AFTER the menus are added.
+  elm_layout_box_append(win->win, WF_BOX, tb);
+  evas_object_show(tb);
+
+  // Bump the menu above the windows.
+  evas_object_raise(tb);
+}

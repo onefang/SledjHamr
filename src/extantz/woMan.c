@@ -155,26 +155,14 @@ winFang *woMan_add(globals *ourGlobals)
 {
     winFang *me;
     Evas_Object *bt, *nf, *tab, *tb, *gridList, *viewerList, *menu;
-    Elm_Object_Item *tb_it, *menu_it, *tab_it;
+    Elm_Object_Item *menu_it, *tab_it;
     char buf[PATH_MAX];
     int i;
 
     me = winFangAdd(ourGlobals->mainWindow, 600, 650, ourGlobals->win_w / 3, ourGlobals->win_h / 3, "virtual world manager", "woMan", ourGlobals->world);
 
-    // A tab thingy.
-    tb = elm_toolbar_add(me->win);
-    evas_object_size_hint_weight_set(tb, EVAS_HINT_EXPAND, 0.0);
-    evas_object_size_hint_align_set(tb, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    elm_toolbar_shrink_mode_set(tb, ELM_TOOLBAR_SHRINK_SCROLL);
-
-    // Menu.
-    tb_it = elm_toolbar_item_append(tb, NULL, "Menu", NULL, NULL);
-    elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
-    // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
-    elm_toolbar_item_priority_set(tb_it, 9999);
-    elm_toolbar_menu_parent_set(tb, me->win);
-    menu = elm_toolbar_item_menu_get(tb_it);
-
+    tb = makeMainMenu(me);
+    menu = menuAdd(me, tb, "Menu");
     menu_it = elm_menu_item_add(menu, NULL, NULL, "edit", NULL, NULL);
     elm_menu_item_add(menu, menu_it, NULL, "preferences", NULL, NULL);
     menu_it = elm_menu_item_add(menu, NULL, NULL, "help", NULL, NULL);
@@ -183,9 +171,7 @@ winFang *woMan_add(globals *ourGlobals)
     menu_it = elm_menu_item_add(menu, NULL, NULL, "advanced", NULL, NULL);
     elm_menu_item_add(menu, menu_it, NULL, "debug settings", NULL, NULL);
 
-    // The toolbar needs to be packed into the box AFTER the menus are added.
-    elm_layout_box_append(me->win, WF_BOX, tb);
-    evas_object_show(tb);
+    makeMainMenuFinish(me, tb);
 
     gridList = elm_genlist_add(me->win);
     grids = eina_hash_stringshared_new(free);
@@ -280,7 +266,6 @@ winFang *woMan_add(globals *ourGlobals)
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
     elm_layout_box_append(me->win, WF_BOX, bt);
-//    eo_unref(bt);
 
     winFangCalcMinSize(me);
 

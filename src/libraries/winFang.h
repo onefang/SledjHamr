@@ -88,4 +88,8 @@ void winFangDel(winFang *win);
 Widget *widgetAdd(winFang *win, char *type, char *title, int x, int y, int w, int h);
 void widgetDel(Widget *wid);
 
+Evas_Object *makeMainMenu(winFang *win);
+Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label);
+void makeMainMenuFinish(winFang *win, Evas_Object *tb);
+
 #endif
