@@ -815,7 +815,7 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
   va_list vl;
   char *f = strdup(params);
   char *p = f;
-  int n = 0, table = 0, i = -1, needTrace = 0, _T;
+  int n = 0, table = 0, i = -1, needTrace = 0, _T = 0;
 
   if (!f) return -1;
 
@@ -823,7 +823,7 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
   while (*p)
   {
     p++;
-    if ('0' == *p)
+    if (')' == *p)
     {
       lua_pushcfunction(L, traceBack);
       _T = lua_gettop(L);
@@ -911,9 +911,9 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
       }
       case ')':
       {
-        int err;
+        int err = lua_pcall(L, n - 1, va_arg(vl, int), _T);
 
-        if ((err = lua_pcall(L, n - 1, va_arg(vl, int), _T)))
+        if (err)
           printLuaError(err, params, L);
         n = 0;
         set = EINA_FALSE;

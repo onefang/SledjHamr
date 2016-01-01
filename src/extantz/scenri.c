@@ -242,7 +242,7 @@ static int _finishStuffs(lua_State *L)
   char *uuid, *name, *file, *description, *owner, *mesh;
   int type, fake;
 
-  pull_lua(L, 1, "$ $ $ $ $ $ % % ", &uuid, &name, &file, &description, &owner, &mesh, &type, &fake);
+  pull_lua(L, 1, "$ $ $ $ $ $ % %", &uuid, &name, &file, &description, &owner, &mesh, &type, &fake);
   lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
   scene = (Scene_Data *) lua_touserdata(L, -1);
 
