@@ -1,0 +1,2669 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<p>This is where we can track what LSL functions are implemented in LuaSL, and what the differences are from SL and OpenSim. Note that the goal is to be SL compatible. OpenSim compatibility comes second.</p>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>Colour</th><th>Status</th></tr>
+<tr>
+<td><span style="color: white;">White</span></td>
+<td>Nothing done.</td>
+</tr>
+<tr>
+<td><span style="color: red;">Red</span></td>
+<td>Just a stub.</td>
+</tr>
+<tr>
+<td><span style="color: orange;">Orange</span></td>
+<td>Stub prints debug stuff.</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">Magenta</span></td>
+<td>Stub that passes details to the server and waits for the response if one is needed.</td>
+</tr>
+<tr>
+<td><span style="color: magenta;"><span style="color: #999999;">Gray</span></span></td>
+<td>Stub that fakes enough for the current tests.</td>
+</tr>
+<tr>
+<td><span style="color: yellow;">Yellow</span></td>
+<td>Fleshed out a bit.</td>
+</tr>
+<tr>
+<td><span style="color: green;">Green</span></td>
+<td>Fully implemented, maybe.</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">Purple</span></td>
+<td>Tested and works at least.</td>
+</tr>
+<tr>
+<td><span style="color: cyan;">Cyan</span></td>
+<td>Completely compatible with SL.</td>
+</tr>
+</tbody>
+</table>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr>
+<td>L</td>
+<td>Function can be done locally, without dealing with the sim or grid.</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Function can be done through ROBUST.</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Function can be done through the local sims database.</td>
+</tr>
+<tr>
+<td>O</td>
+<td>Function needs to deal with the world server.</td>
+</tr>
+<tr>
+<td>DO?</td>
+<td>Can do it through the local sims database, but may need to let the world server know so it notices the change?</td>
+</tr>
+<tr>
+<td>g</td>
+<td>God mode function.</td>
+</tr>
+<tr>
+<td>d</td>
+<td>Obsolete function that has been depecated.</td>
+</tr>
+<tr>
+<td>b</td>
+<td>Function is marked as broken by LL, and may not work even in SL.</td>
+</tr>
+</tbody>
+</table>
+<h2><span class="mw-headline">&nbsp;</span></h2>
+<h2><span class="mw-headline"><span class="mw-headline">animation override</span></span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th><span style="color: #ffffff;">LSL function</span></th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAnimationOverride</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llResetAnimationOverride</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetAnimationOverride</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<h2><span class="mw-headline">&nbsp;</span></h2>
+<h2><span class="mw-headline"><span class="mw-headline">avatar </span></span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th><span style="color: #ffffff;">LSL function</span></th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llAttachToAvatar</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAvatarOnLinkSitTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llAvatarOnSitTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llClearCameraParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llDetachFromAvatar</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llForceMouselook</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAgentInfo</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAgentLanguage</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAgentSize</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAnimation</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llGetAnimationList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAttached</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetCameraPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetCameraRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetDisplayName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llGetPermissions</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetPermissionsKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetUsername</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGiveMoney</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llKey2Name</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPointAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llReleaseCamera</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dO</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llReleaseControls</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestAgentData</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestDisplayName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llRequestPermissions</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestUsername</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llSameGroup</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DR</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetCameraParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSitTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llStartAnimation</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llStopAnimation</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llStopPointAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dO</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTakeCamera</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dO</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTakeControls</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTeleportAgentHome</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTransferLindenDollars</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llUnSit</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> collision / detect / sensor </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llCastRay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCollisionFilter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCollisionSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCollisionSprite</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>b</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedGrab</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedGroup</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedLinkNumber</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedOwner</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedTouchBinormal</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedTouchFace</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedTouchPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedTouchST</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedTouchUV</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDetectedVel</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPassCollisions</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPassTouches</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSensor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSensorRemove</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSensorRepeat</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llVolumeDetect</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> communications </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #800080;">llDialog</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEmail</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetNextEmail</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llInstantMessage</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llListen</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llListenControl</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llListenRemove</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llMessageLinked</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llOwnerSay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llRegionSay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRegionSayTo</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llSay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llShout</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTextBox</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llWhisper</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> inventory </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llAllowInventoryDrop</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetInventoryCreator</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetInventoryKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetInventoryName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetInventoryNumber</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetInventoryPermMask</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetInventoryType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llGetNotecardLine</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DR</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetNumberOfNotecardLines</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DR</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGiveInventory</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGiveInventoryList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGodLikeRezObject</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>Og</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoveInventory</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestInventoryData</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D?</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llRezAtRoot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llRezObject</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetInventoryPermMask</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>gDO?</td>
+</tr>
+</tbody>
+</table>
+<h2><span class="mw-headline">&nbsp;</span></h2>
+<h2><span class="mw-headline"><span class="mw-headline">JSON<br /></span></span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th><span style="color: #ffffff;">LSL function</span></th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llJson2List</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llJsonGetValue</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llJsonSetValue</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llJsonValueType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llList2Json</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> land </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llAddToLandBanList </span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAddToLandPassList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEjectFromLand</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLandOwnerAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelDetails</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelFlags</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelMaxPrims</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelMusicURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelPrimCount</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelPrimOwners</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetSimStats</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGround</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGroundContour</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGroundNormal</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGroundSlope</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llManageEstateAccess</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llModifyLand</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llOverMyLand</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llParcelMediaCommandList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llParcelMediaQuery</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoveFromLandBanList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoveFromLandPassList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llResetLandBanList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llResetLandPassList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llReturnObjectsByID</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llReturnObjectsByOwner</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetParcelMusicURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> list </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #800080;">llCSV2List</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: green;">llDeleteSubList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llDumpList2String</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetListEntryType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llGetListLength</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llList2CSV</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llList2Float</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llList2Integer</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llList2Key</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ffff00;">llList2List</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llList2ListStrided</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llList2Rot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llList2String</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llList2Vector</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: red;">llListFindList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llListInsertList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llListReplaceList</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llListRandomize</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: yellow;">llListSort</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llListStatistics</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llParseString2List</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llParseStringKeepNulls </span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> math </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llAbs</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAcos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAngleBetween</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAsin</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAtan2</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAxes2Rot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llAxisAngle2Rot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCeil</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEuler2Rot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llFabs</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llFloor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llFrand</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLog</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLog10</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llModPow</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPow</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Angle</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Axis</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Euler</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Fwd</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Left</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRot2Up</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRotBetween</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSin</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSqrt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTan</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llVecDist</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llVecMag</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llVecNorm</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> media </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llAdjustSoundVolume</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llClearPrimMedia</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llClearLinkMedia</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLinkMedia</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetParcelMusicURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetPrimMediaParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLoopSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLoopSoundMaster</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLoopSoundSlave</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPlaySound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPlaySoundSlave</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPreloadSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRefreshPrimURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkMedia</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPrimMediaParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPrimURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetSoundQueueing</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetSoundRadius</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llStopSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSoundPreload</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTriggerSound</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTriggerSoundLimited</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<h2><span class="mw-headline">&nbsp;</span></h2>
+<h2><span class="mw-headline"><span class="mw-headline">path finding<br /></span></span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th><span style="color: #ffffff;">LSL function</span></th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llCreateCharacter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llDeleteCharacter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEvade</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llExecCharacterCmd</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llFleeFrom</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetClosestNavPoint</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetStaticPath</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llNavigateTo</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPatrolPoints</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPursue</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llUpdateCharacter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llWanderWithin</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<h2></h2>
+<h2><span class="mw-headline">&nbsp;</span></h2>
+<h2><span class="mw-headline">physics </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llApplyImpulse</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llApplyRotationalImpulse</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetAccel</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetEnergy</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetForce</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetMass</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetMassMKS</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetObjectMass</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetOmega</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTorque</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetVel</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMoveToTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llPushObject</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetAngularVelocity</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetBuoyancy</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetForce</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetForceAndTorque</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetHoverHeight</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetTorque</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVelocity</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llTargetOmega</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> object / prim / link </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llBreakAllLinks</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llBreakLink</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llCreateLink</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llDie</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetBoundingBox</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetGeometricCenter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLinkKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLinkPrimitiveParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLinkName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetLinkNumber</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;"></span><span style="color: #ff00ff;"><span style="color: #ff00ff;">llGetLinkNumberOfSides</span></span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetMaxScaleFactor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;"><span style="color: #ff00ff;"></span></span><span style="color: #ff00ff;">llGetMinScaleFactor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetNumberOfPrims</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetObjectDesc</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetObjectDetails</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llGetObjectName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetObjectPermMask</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetObjectPrimCount</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetOwner</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetOwnerKey</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetPhysicsMaterial</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetPrimitiveParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetStatus</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLinkParticleSystem</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLinkSitTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMakeExplosion</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dDO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMakeFire</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dDO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMakeFountain</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dDO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMakeSmoke</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>dDO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llParticleSystem</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llScaleByFactor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetCameraAtOffset</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetCameraEyeOffset</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetClickAction</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetDamage</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetKeyframedMotion</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkCamera</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkPrimitiveParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkPrimitiveParamsFast</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetObjectDesc</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetObjectName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetObjectPermMask</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>gDO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPayPrice</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPhysicsMaterial</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPrimitiveParams</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetSitText</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetStatus</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetText</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetTouchText</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llSitTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> rotation / scaling / translation </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLocalPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetLocalRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRootPosition</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRootRotation</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #999999;">llGetRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetScale</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLookAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRotLookAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRotTarget</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRotTargetRemove</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLocalRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetRegionPos</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetScale</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llStopLookAt</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> script </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #999999;">llGetFreeMemory</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetMemoryLimit</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: purple;">llGetScriptName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetScriptState</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetSPMaxMemory</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetStartParameter</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetUsedMemory</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoteLoadScript</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoteLoadScriptPin</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llResetOtherScript</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llResetScript</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llScriptDanger</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llScriptProfiler</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetMemoryLimit</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetRemoteScriptAccessPin</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L, but might have to tell the sim server.</td>
+</tr>
+<tr>
+<td><span style="color: purple;">llSetScriptState</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L, but might have to tell the sim server.</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> simulator </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llCloud</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEdgeOfWorld</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetEnv</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionAgentCount</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionCorner</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionFlags</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>RD?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionFPS</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionName</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetRegionTimeDilation</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetSimulatorHostname</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetSunDirection</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMapDestination</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>O</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestSimulatorData</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>R?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llWater</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llWind</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> string </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llBase64ToString</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llDeleteSubString</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llGetSubString</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llInsertString</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMD5String</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSHA1String</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llStringLength</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llStringToBase64</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #800080;">llStringTrim</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: purple;">llSubStringIndex</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llToLower</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llToUpper</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llXorBase64</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llXorBase64StringsCorrect</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llXorBase64Strings</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>Ld</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> texture </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #999999;">llGetAlpha</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetColor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetNumberOfSides</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTextureOffset</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTextureRot</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTextureScale</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>D</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llOffsetTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRotateTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llScaleTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llSetAlpha</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: magenta;">llSetColor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkAlpha</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkColor</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetLinkTextureAnim</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetTexture</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetTextureAnim</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>DO?</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> time </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #008000;">llGetAndResetTime</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetDate</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">lGetGMTclock</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llGetTime</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTimeOfDay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetTimestamp</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetUnixTime</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetWallclock</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llMinEventDelay</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llResetTime</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: #008000;">llSetTimerEvent</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+<tr>
+<td><span style="color: purple;">llSleep</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>L</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> vehicle </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoveVehicleFlags</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVehicleFlags</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVehicleFloatParam</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVehicleType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVehicleRotationParam</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetVehicleVectorParam</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2><span class="mw-headline"> XML-RPC and HTTP </span></h2>
+<table border="1"><caption>&nbsp;</caption>
+<tbody>
+<tr><th>LSL function</th><th>SL notes</th><th>OpenSim notes</th><th>Codes</th></tr>
+<tr>
+<td><span style="color: #ff00ff;">llCloseRemoteDataChannel</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llEscapeURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetFreeURLs</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llGetHTTPHeader</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llHTTPRequest</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llHTTPResponse</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llLoadURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llOpenRemoteDataChannel</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llReleaseURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoteDataReply</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRemoteDataSetRegion</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>d</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestSecureURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llRequestURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSendRemoteData</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llSetContentType</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span style="color: #ff00ff;">llUnescapeURL</span></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
