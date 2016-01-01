@@ -1,0 +1,54 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<p>The rationale</p>
+<p>Scripts, and sometimes objects, can invoke a file purely by its UUID. It had been suggested we might replace the existing UUID system with something where the file is invoked via some sort of machine address, pointing to the internet address of the grid or world -- actually, call it an OMG Node -- the file originated from. The problem with this sort of approach is that, a given VR world could go away, making that direct addressing fail, a given world could change its name and location, causing the direct addressing to break. What we need is a system where the UUID of a file is location-agnostic. That is to say, it shouldn't matter where the file originally came from, it should only matter that there is still a way to bring it in when you need it.</p>
+<p>At that, while it might be possible to go into a script and change the machine-address for the file if it breaks, that makes the assumption one would be able to edit the script, or know what the new pseudo-UUID for that file would be in order to replace it. For one thing, a lot of scripts are going to be no-mod, so even if you did know what that new pseudo-UUID to replace in there was, you wouldn't be able to fix it anyway.</p>
+<p>What needs to exist is some means of identifying what world a given set of files came from by some kind of UUID subset. That is, each file made on a particular, distinct part of the OMG needs a unique identifier that starts out all UUIDs made there, and that the rest of the UUID would be appended to that would uniquely identify a file that was created there. This unique identifier for an OMG Node also needs to exist in a form that doesn't change when the name or location of the OMG Node changes.</p>
+<p>OMG Node</p>
+<p>This would be a server or group of servers that function as a single entity. I.e. the gridrid and the sims that are specifically owned by a person. Another might be the server sim-providing service Waki and Torben are now setting up.</p>
+<p>WTF -- Where's The File</p>
+<p>This would be a list of UUID-identified files (pictures, sounds, notecards, scripts, etc) available from a given OMG Node that are currently known on your current machine, and would function as a sort of look up table if those UUIDs get invoked again. It identifies where a particular file came from originally, and/or what machines it traversed getting here. There would be one .WTF file for each OMG Node, and would list all the files that came from there which the local OMG Node has collected in its own interactions with other OMG Nodes, and that are reachable in a Six Degrees of Separation from Bacon sort of way. Basically, any UUID which starts with the code that identifies it as having come from that specific OMG Node would be stored here.</p>
+<p>BBQ -- Big, Broad Query</p>
+<p>Here is where the Six Degrees of Separation from Bacon mentioned under the WTF entry comes in. A .BBQ files keeps track of all the OMG Node identifier UUID-subset codes so that when an OMG Node changes its address or ceases to exist, every back address is stored, also, what other places maintain mirror copies of some or all of the files from there that could be called by a full UUID (from inside a script, say) so even when an OMG Node goes away, those files will continue to be available.</p>
+<p>Basically, if a UUID is invoked by a script, and the file that UUID is tied to isn't in the local OMG Node, a query will be sent out to the nearby OMG Nodes asking if they have this file, if they don't, they might query their nearby OMG Nodes to see if those have it, and so on. Ideally there should develop from that, ant-tracks-style, that identifies the shortest path between OMG Nodes to where files with a given OMG Node identifier UUID-subset's files can be obtained from, even if that OMG Node has been out of business for a decade.</p>
+<p>COW -- Copy On Write.</p>
+<p>What's a BBQ without some COW, er I mean beef? We can speed up the BBQ search a bit by pre caching things, but what to pre cache and how?</p>
+<p>Instead of using UUIDs, which are basically random numbers, we could use SHA1 hashes. This is the same system used by git at least. That means the objects can be content addressable. First benefit is that all these identical copies of any given object would end up with identical names, so that we have a broader field to search. Second benefit is that we don't end up having to store dozens of identical copies of the same object on the local OMG node, since they all end up with the same name. A UUID is 16 bytes, an SHA-1 is 20, but a UUID is usually shown in a format that includes 4 dashes, so they end up being the same length. Much experience with git has shown that you can get away with just the first few digits, depending on how many objects you need to distinguish between. So instead of completely ignoring the half a dozen copies of any given object you are searching for; coz different people uploaded it from different places; you might find it more easily by noticing that you already have it. The .WTF file can include pointers to known locations, and the various names it is known as, but the object itself has the SHA1 hash as it's file name, instead of the UUID. The SHA1 hash is it's internal name. It does not even have to be stored on the local OMG node, just the SHA1 internal name, and some pointers to likely locations.</p>
+<p>Where does the COW come in? If it's got horns, any where it wants to. Er...</p>
+<p>Quite often an object gets changed, that would naturally change the SHA1 hash. So now we have a different object, with a different name. But, the object might not be stored locally, just the pointer. The programming field has a name for what happens next, a copy is made when you try to write to it - Copy On Write. So the object is copied from the most convenient nearby OMG node, the changes made, then it is written (under a new SHA1 hash name) onto the local OMG node. This OMG node informs other interested nodes that it now has this new object, they can store pointers to the new object on this OMG node in their .WTF files.</p>
+<p>Which brings us back to the pre caching. The hungry little OMG node does not have to wait for the BBQ to fire up to get it's COW. It can start to download the object if it has some time on it's hands, just coz.</p>
+<p>To quote a famous local sporting hero "Where's the cheese?". Ah, that's another story...</p>
+<p>&nbsp;</p>
+<h2>Late night realization about multiple asset servers and Censorship and such</h2>
+<p>(04:33:43 AM) alice_crush: Oh!</p>
+<p>(04:36:29 AM) alice_crush: What if we let folks run more than one inventory asset server, and make some asset servers private/subscription. Which just means if a person takes no action they'll never see an asset from a private server. *Then* say folks in Japan can have a sim full of nasty lolicon, and folks from countries that make it illegal to see such pictures won't ever be accidentally exposed. *And* the grid will stay 'pure' never serving "bad" images. "Hey idiot, if you choose to download illegal content, don't complain to us!"</p>
+<p>(04:38:17 AM) alice_crush: so you could walk around in a t-shirt with a grossly illegal image on it, and unless someone is subscribed to the right asset server they just see gray.</p>
+<p>(04:39:07 AM) alice_crush: have to get to like phase 2 or whatever, not the stop gap quick fix proxying feature</p>
+<p>(04:40:26 AM) onefang: That goes to the whole "Hey it's just a web server, you can implement whatever access policy you want" thing.</p>
+<p>(04:40:53 AM) onefang: "You are not authorized to see this t-shirt.".</p>
+<p>(04:41:04 AM) alice_crush: though would need some special client side controls/subscriptions something like that.</p>
+<p>(04:41:26 AM) onefang: "Knomes stole this skirt, quick get hippos."</p>
+<p>(04:41:34 AM) alice_crush: "This texture above your security grade" lol</p>
+<p>(04:43:07 AM) onefang: "These are not the clothes you are searching for."</p>
+<p>(04:43:10 AM) alice_crush: minor issue of when uploading a texture specifying which asset server it goes to...</p>
+<p>(04:44:03 AM) alice_crush: you could give me your illegal images (drawing of the profit, peace be on him) I could put them out in my sim, and never see the blasphemy myself</p>
+<p>(04:44:33 AM) onefang: Well, no, that's the whole point of allowing multiple inventory stores. You get to manage them, decide what goes where. Sometimes using ordinary web CMS software, or a file browser for local ones..</p>
+<p>(04:45:37 AM) alice_crush: Hmmm maybe folks could sell say a pg skin and a X version, and folks could choose to avoid the X asset servers... and not see grey people.</p>
+<p>(04:46:20 AM) alice_crush: Lol, theres always a clever policy choice that makes the thought police un necessary.</p>
+<p>(04:46:47 AM) alice_crush: LL will hate it (Breaks the shared experience rule)</p>
+<p>(04:47:00 AM) alice_crush: OS will probably hate it too</p>
+<p>(04:48:08 AM) onefang: I'm not particularly worried about pissing off those two groups.</p>
+<p>(04:48:37 AM) alice_crush: I would rather make thought police optional, then market forces will eliminate them.</p>
+<p>(04:48:02 AM) alice_crush: some day could have certificates for asset servers, collect them in classes "PG servers", "IP Clean servers" lol</p>
+<p>&nbsp;</p>
+<h2>More linear description of above</h2>
+<p>Imagine that texture assets can come from multiple sources. When a sim tells your client about a texture it only tells you an ID, your client has to find out which server has the resource for you.</p>
+<p>Imagine your client has a list of servers to try, it can simply go through the list of servers stopping as soon as a server gives a response.</p>
+<p>Imagine that some of the servers in the list come from standard places such as the sim. Imagine that other of the servers come from a manually selected list of private subscription servers.</p>
+<p>Say I am in simulator 101, I get told about a resource named "409" from the simulator. I check all the asset servers I know. If I don't find it, I show a blank/gray texture.</p>
+<p>You might be in the same simulator, and you get told about the same resource named "409" by the simulator. In addition to the simulator though, you have a private server you can check, and there you find resource "409" so you client can draw it for you.</p>
+<p>In this way you and I looking at a third person might see something different. You see the third person wearing a shirt with the logo of a sports team. I see a very plain gray 'slider' shirt, not even with textures cuffs and hems.</p>
+</body>
+</html>

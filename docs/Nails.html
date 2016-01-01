@@ -1,0 +1,2514 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<h1> Putting it all together </h1>
+<p>This is where onefang starts to get his hands dirty, though I'll mostly be talking about the modules of the basic architecture that deals with the objects in the world. Most everything else could be dealt with as mostly stand alone pre existing software (jabber, mumble, etc), though some of those would still need to get their hands on some of the data.</p>
+<p>In this part I'll use the term "client" to refer to anything thing talking to a server, even if it's another server. "Viewer" means the users client that they use to interact with the virtual worlds. "Virtual world" is any group of sims linked together, the equivalent of a 3d web site in this web centric model of virtual worlds. "Sim" is the equivalent of a web page. "Engine" will be any server module that deals with a particular active function. "Object" could be link sets, prims, mesh objects, avatars, the sim itself, or perhaps other things that are tracked per sim. "Data" is any property of an object in the sim that can be sent in a single command, which might consist of several values. "Value" is a single basic property of an object, though it could be a vector, rotation, URL, or other complex data type. "Command" is a something sent from one module to another stating that some data has changed on some object. An example command might be something like "command=value,value,&lt;1.2.3&gt;,"string". "Assets" are any non object thingy that might be part of an object, like textures, scripts, etc. Not so sure if there should be that distinction between object and asset though. Though assets generally don't change, or have "data".</p>
+<p>The various modules could pretty much be written in any language, it's the protocols between them that is important. Even then, the form of the protocols should be somewhat flexible as well. I'll insist on the central form of the protocols to be tight binary, but lots of people have a co-dependent relationship with abusive things like XML. Slightly saner people might prefer JSON, perhaps BSON, or plain name=value pairs. And just coz everyone else gets to have their favourite bloated human readable text format, I'll add my own MTRX from years ago. I'll be writing my version of the modules in C, with threats of assembler. Others could write things in scheme, smalltalk, PHP, ruby, C#, javascript, or any other less efficient language.</p>
+<p>The basic modules would be the viewer, the script engine, the physics engine, the sim data store, the inventory data store, and the command pump. Since this is a web centric design, there are web servers involved to. There can be any number of each of these modules, perhaps even a changing number on any given sim, for load balancing or redundancy reasons.</p>
+<p>&nbsp;</p>
+<h2> command pump </h2>
+<p>Quite literally, this would be the heart of the system. It's job is to manage the exchange of changes to in world objects between everything else. These changes are always expressed as commands. More about this later.</p>
+<p>&nbsp;</p>
+<h2> inventory data store (we should call this "hammerspace") </h2>
+<p>Stores part of a users inventory, and serves it to sim data stores, or other users inventory data stores. This could probably be just a web server, it's protocol would be ordinary HTTP/S sending files around. Generally the files would be protected, only being sent to those that are authorised to get any individual file. The inventory's owner would have complete control. It's two main tasks are to send individual objects to sim data stores, and to send individual objects, or entire folders of objects, to other users inventory stores. All of this is initiated by the owner manually. Some method for the user to manage their inventory objects would be needed, but the world is already full of ways to manage web server contents, so don't need to mention them further. Though perhaps using WebDav as a standard method would be a great idea. It may even be possible for multiple users to manage any given inventory data store, say via a typical CMS system. Public inventory data stores could exist. Shops could just be an ecommerce front end to an inventory data store. It's a web server, any webby thing could be done with it. Objects should be sent as individual files for the purposes of HTTP, though they could be collected and compressed into some archive format when sending lots of them. Folders should be represented directly as paths in the URL.</p>
+<p>It's entirely up to the web server how it actually stores the objects. I would recommend just storing the commands that define an object, but there will be things like IARs with XML files, exports from other viewers, and such around. Storing just the commands means that they can just be dumped direct to the command pump. XML would have to be translated first. On the other hand, inventories store non object assets, like textures, sound samples, scripts, etc. These could be stored in their native formats.</p>
+<p>&nbsp;</p>
+<h2> sim data store </h2>
+<p>Stores objects and their data that are in the sim. Again, it's a web server, but completely public. Though just like ordinary web servers, parts could be private to members only. Most of what was said about inventory data stores applies. There is a change of emphasis though, these would be public in general, with privacy an option, where inventory is private in general, with public being an option. Note that objects and other assets that are contents of a sim object should not be public by default, perhaps they could be handled by inventory data stores. Inventory data stores could be very simple data stores, with authorization, so would be perfect to be used as data stores for objects contents. Lets us reuse code and protocols, and can share code on the same server.</p>
+<p>A sim data store could be a web proxy in front of any user in that sim. This is for any inventory data store an the users own computer, so that they can hide behind that sims proxy. Perhaps this could be another module? Not sure how to handle inventory transfers to offline users, especially those without some other web server to have an inventory data store on. Likely users will be a member of at least one web site somewhere that offers inventory data stores.</p>
+<p>&nbsp;</p>
+<h2> physics engine </h2>
+<p>Calculates physics interactions between objects in a sim. Does not have to handle all the objects on a sim, but the sim can be partitioned up, probably via some load balancing scheme. Physics is calculated on a frame per frame basis, though the "frame rate" might not have any bearing on the viewer graphics frame rate. It should however be close to human visual frame rate.</p>
+<p>&nbsp;</p>
+<h2> script engine </h2>
+<p>Runs scripts, either those in objects in a sim, or those in a users viewer. Does not have to handle all the scripts, but could be load balanced. Viewer scripts would be things like attachments or HUDs, and might run in the viewer. Scripts might set up sensor timers to scan nearby objects, or request specific data from random objects at random times. They also would be interested in specific events, perhaps physics or user interaction events, perhaps others. Scripts can also send arbitrary commands to do their work. Script engines can be identical, whether on servers or viewers.</p>
+<p>Since sims can have one or more script engines, script engines could service one or more sims, and viewer scripts could be run in the viewer or a specific script engine the user is allowed to use...we can do away with the need to save script state, and load it again on the next sim when avatars move from one sim to the next. That's one of the major time consuming parts of a TP on your average script heavy avatar.</p>
+<p>&nbsp;</p>
+<h2> viewer </h2>
+<p>Brings it all together as a rich virtual world for the user. It operates in graphics frames, having to pull everything together from the various sources, and generate all the pixels for the next frame at hopefully human visual rates. It also has to let the user do whatever it is that they want to do in the sim. Some things can happen at a more leisurely rate, like transferring files. People are used to large graphic files rezzing a bit at a time, even in the 2D web for instance.</p>
+<p>&nbsp;</p>
+<h1> <a name="command_pump">command pump</a> </h1>
+<p>A command pump has to accept object change commands from the other modules, and make sure that all modules get the data that they need in the form of commands. All the other modules are clients of the command pump. It really has to be as efficient as possible in both network usage and internal processing. It's debatable whether or not it should pre filter data to the other modules or just throw everything at them and let the modules ignore stuff they don't need. I'll err on the filtered data stream side, to keep bandwidth down. It could be a CPU+RAM versus bandwidth trade off. Certainly there should be nothing that prevents that trade off going either way. The other modules SHOULD ignore commands they don't understand. General rule of software engineering - be careful with what you send, be tolerant of what you receive. On the other hand, initial implementations are likely to start simple, just naive with no filters.</p>
+<p>Data in the form of commands to change object state for particular objects is thrown at the command pump at random by other modules. Some may be slow (human interaction speeds from viewers), some maybe fast (bullets and debris whizzing around from the physics engine). All relevant object state changes should be sent to all other modules, perhaps with a complete resync every once in a while as needed just to be sure. We are not really worried about any lost update problems, if two or more modules are trying to change the same object data, the last one wins.</p>
+<p>Timing is also a concern. Data changes sent to the viewer for instance should not include many changes to the same object data per frame, only the last one sent is important to the viewer. Same for the physics engine. Scripts generally set their own time for when they want to know about external changes, but likely want to know about changes to the object they are in when they happen, or when they ask.</p>
+<p>So, the command pump has to understand at least a little about what the command language is. For clients that run at some sort of frame rate, the pump should delete commands when a new one for the same data arrives, so that it sends only one change per data each "frame". It should also delete old commands from previous frames if it detects that the client has moved on without getting all the commands for those frames. Clients could request that they are only interested in specific commands. On the other hand, the pump does not need to know what the data represents, or even what the commands mean. It just stores and forwards, with some arbitrary filtering as requested by each client. So it needs to know which part of each command is the command verb, and which object the command refers to. The command pump also needs to understand which clients have a frame rate, but that could be handled by clients sending filter requests. Filtering entire objects should be possible to, based on what objects the client says it's interested in.</p>
+<p>So basically, it manages FIFO queues of commands, one per client. Filtering out any command type the client requests, filtering for objects of interest, or filtering object data on a frame rate basis per object. Every now and then, it has to sync the sim data store as well, so that the sim state is persistent across restarts, and clients can just download complete objects from the store when they first need them. Phew.</p>
+<p>A good optimisation would be for the sim data store and command pump to be the same module. The pump has to keep the current state of objects in memory anyway, and knows how to pump the command data out, all it needs is a persistent backing store to write to and read at start up.</p>
+<p>As an optional wrapper around the command pump, could be translators for those that want REST, JSON, XMLRPC, or other bloat. With commands to switch to and from these and the native binary protocol. Native binary protocol must always be supported, and always be the default until requested otherwise. 99.9999% of Internet traffic does not NEED to be human readable on the wire, human readable is not so easy for computers to read, they need to translate it. Why slow everyone down? I will insist that these protocol translators operate outside the command pump, don't want to slow that down to satisfy peoples longing for bloat. They should be separate processes, preferably operating on separate cores, or even entirely different computers. They will naturally talk the tight binary protocol to the command pump, just like every one else.</p>
+<p>There are three basic internet protocols we could use as the basis for the wire traffic. TCP, UDP, and SCTP. SCTP would be a great candidate, except for the lack of MacOS support. I think we should try SCTP, with TCP as backup, SCTP support might come to Mac sooner or later.</p>
+<p>&nbsp;</p>
+<h2> command channels and language </h2>
+<p>In other parts of this document, a command channel is mentioned. Most of the data flowing through this command channel would be for setting or changing prim parameters. I propose a binary format based on llSetLinkPrimitiveParams() <a href="http://lslwiki.net/lslwiki/wakka.php?wakka=llSetLinkPrimitiveParams&amp;show_comments=1#comments">http://lslwiki.net/lslwiki/wakka.php?wakka=llSetLinkPrimitiveParams&amp;show_comments=1#comments</a></p>
+<p>A command list would usually start with a command stating which link number of which linkset the following commands will change. This command can be sent at any time. The link number can be one of the special link numbers. Then a series of prim parameter commands, also in binary. Each prim parameter command starts with a 32 bit integer parameter type, and then follows the actual parameters. Since each parameter type has a fixed format for it's arguments, no need to specify types. All arguments except strings are fixed width, so strings should be moved to the end of the argument list, zero terminated, and UTF-8. In general, there is only a single string for any command that includes a string, but it could be possible to have any number of zero terminated strings in order. Everything should be sent in network order.</p>
+<p>There is naturally some room to define more commands. For instance, a delay before executing the next command, a command to stop this one and start a new one with a different link number, or one to set something other than a prim parameter (a land parameter for instance). We could add a command - "JSON" which means "I'm a fucking human, talk to me in something that looks vaguely like English" until the end of the session. Or a few such commands for a few different formats. BSON, BNRY to change back to the default binary mode, and EWWW to change to the XML mode used by OAR files, MTRX for something like my matrix-RAD wire protocol.</p>
+<p>The command language should be binary.The objects current state is stored as the currently active list of commands for each object. An object in this case would be a prim, mesh, linkset, the sim itself, terrain, or avatars.</p>
+<p>&nbsp;</p>
+<h3> propagating language changes </h3>
+<p>In order to support a changing language as things develop, we could use an initial handshake between clients, servers, and engines (acting as clients to the sim data server) that could exist in these several variations. In the following, the variations are numbered for later discussion. The first word on the line is who is sending the data, indented lines then go into the extra detail that is being sent. The client sends first, as it's always the one to start the connection. The word "checksum" means that a checksum of some standard representation of the language known by that computer is sent. The word "signed" means that the language representation is signed in some manner to show it came from some authority.</p>
+<ol>
+<li><dl><dd>client -&gt; I speak Version 1 checksum</dd><dd>server -&gt; I speak Version 1 checksum</dd><dd></dd></dl></li>
+<li><dl><dd>client -&gt; I speak Version 1 checksum</dd><dd>server -&gt; I speak Version 2 checksum signed<dl><dd>Version 2 is -<dl><dd>A=int,int,float</dd><dd>B=vector,string</dd></dl></dd></dl></dd><dd>client -&gt; I speak Version 2 checksum</dd><dd>server -&gt; I speak Version 2 checksum</dd><dd></dd></dl></li>
+<li><dl><dd>client I speak Version 1 checksum +<dl><dd>which adds -<dl><dd>C=rotation,int</dd><dd>D=string,float,vector</dd></dl></dd></dl></dd><dd>server I speak Version 1 checksum + (only to this client)</dd><dd></dd></dl></li>
+<li><dl><dd>client I speak Version 2 checksum</dd><dd>server I speak Version 2 checksum (which is different) signed<dl><dd>Version 2 really is -<dl><dd>A=int,int,float</dd><dd>B=vector,string</dd></dl></dd></dl></dd><dd>client I speak Version 2 checksum</dd><dd>server I speak Version 2 checksum</dd><dd></dd></dl></li>
+<li><dl><dd>client I speak Version 2 checksum</dd><dd>server I speak Version 1 checksum</dd><dd>client I speak Version 2 checksum signed<dl><dd>Version 2 is -<dl><dd>A=int,int,float</dd><dd>B=vector,string</dd></dl></dd></dl></dd><dd>server I speak Version 2 checksum</dd><dd></dd></dl></li>
+<li><dl><dd>client I speak Version 1 checksum</dd><dd>server I speak Version 1 checksum +<dl><dd>which adds -<dl><dd>C=rotation,int</dd><dd>D=string,float,vector</dd></dl></dd></dl></dd><dd>client I speak Version 1 checksum + (only to this server)</dd></dl></li>
+</ol>
+<p>1) all is good, hopefully the usual thing.</p>
+<p>2) and 4) are subject to evil servers screwing things up. 5) is subject to to evil clients. Should think of ways to protect from that. GPG signed from a trusted source? Web of trust needed.</p>
+<p>3) server only uses that version of the language for talking to that client.</p>
+<p>5) a way to push up an official new protocol version.</p>
+<p>6) is pathological, but might happen during development. On the other hand, the extra data might be useless, as the client does not know what to do with it.</p>
+<p>Sim data server to sim data server changes could happen between servers that have some sort of arrangement between them. Like neighbouring sims, or servers run by the same person. The first server is then client, and contacts the other server as normal. Otherwise, language updates are going to be slow getting around. Physics engines would likely only need to know the new languages when they know how to deal with the new data types. Script engines could benefit from command languages if their scripts know how to deal with the new data types.</p>
+<p>1) 2) 4) 5) both ends just use the same language.</p>
+<p>3) 6) Store the extra things as name/value pairs, send them back as name/value pairs. The "store" part could be a DOS attack to soak up storage space. However, there should be restrictions on who can change things on any given sim data server, so that will help. Should also send any name/value pairs to other clients/servers that register identical pair formats? Would be useful for development of the next version of the language. Note there could be name clashes, so include the data types for each name/value pair when deciding to send it.</p>
+<p>&nbsp;</p>
+<h1> Command language </h1>
+<p><a href="http://lslwiki.net/lslwiki/wakka.php?wakka=llSetPrimitiveParams">llSetPrimitiveParams()</a> is the model I want to follow.</p>
+<p>For the binary protocol, we will try to pack things up as much as possible. A lot of the integers don't need to be full 32 bit integers. Some of the vectors can be just small integers instead of floats. etc.</p>
+<p>Yes, I am trying to micro optimise this part before actual implementation. So I'll go over my assumptions, use cases, and other design decisions here for reference.</p>
+<p>I want the command language itself to use as little bandwidth as possible. I think the on disk storage should just be this tight little command language. I want the code that deals with this command language to be simple. If there has to be any trade offs, the code can be more complicated if it keeps the command language tight. The reasons for these things is scalability. While the distributed nature of this design means that we are generally only concerned with sim level scalability. We do want to support huge sims with large numbers of users. The command pump code could be used for both servers and clients. Flinging the basic data about, and storing it, is something I want to be efficient as possible from the very beginning. Folks, that means PACKED BINARY dammit. Cringe now and get it over with.</p>
+<p>Those people that want to use less efficient and more human readable data formats do get to eat their cake by the use of protocol translators. These should NOT be part of the same process as the inner pump, in order to not have them slow down this inner pump. I see these uses of other data formats as being the exception rather than the rule. That's one of my big assumptions. If you want to avoid bloat and lag, use this tight packed binary, but feel free to filter it through a protocol translator for debugging purposes. Just don't ever get in the way of those wanting things to be efficient.</p>
+<p>The command language will not deal with large binary blob assets directly, things like actual textures, sounds, animations. Instead it will simply deal with pointers to these assets. These pointers might be UUIDs, or names. I want to extend that to include URLs and SHA-1 sums as data pointers (content addressable blobs).</p>
+<p>The main use cases are those basic modules I have identified above - command pump, inventory and sim data stores, physics and script engines, and the viewer. Each of these modules will have an internal representation of each object of interest.</p>
+<p>The data stores want to know which object the commands are for so they can store each object separately. They also only want the latest data for each object. They store each object on disk somewhere, but possible have those objects memory mapped and update them as commands come in.</p>
+<p>The engines want to filter out only the data they need for their work. For the script engine, this filter might be different for each script. The script itself has internal state that would need to be persisted during sim shutdowns, or transfer to inventory.</p>
+<p>The viewer wants all the data, though probably would be happy to just drop old data if it's too late to render it and newer data is already here. It will have internal representations of objects of interest, but may cache them.</p>
+<p>The command language is mostly concerned with changing in world properties. In general these are split into prim (object), sim, avatar, animation, and environment (windlight/lightshare) properties.</p>
+<p>Prims (objects) are the basic building blocks of the world. Originally prims where general 3D primitives, where the idea is that you can build more complex shapes with simple primitives, and the data to describe those primitives is much less that defining each triangle. Since then sculpties have been added, where the triangles are defined as an array of points encoded into and RGB texture, and the triangles have a fixed mapping. Very recently, arbitrary meshes have been introduced, since sculpties had restrictions. Still, the data for the sculpty and mesh triangles and such are treated as blobs of opaque binary data, with pointers to them (and some flags) being the only data dealt with at the prim level. That still works for me. B-)</p>
+<p>Prim properties can change quickly, by the physics engine, scripts, or users editing them in world in real time.</p>
+<p>Sim properties in general don't change fast. No point updating the land music URL many times a second, or even many times a minute. Perhaps someone might want to update the terrain or terrain texture quickly, but current viewers are very slow to track those changes anyway. Perhaps in the future we might want to allow piping video into the terrain to simulate an earthquake, but that would still be represented as just attaching one video stream to the terrain heightfield. So in general I think we can treat sim property changes as slow moving.</p>
+<p>Avatars currently consume the most resources, which is why you can have thousands of prims in an existing SL style sim, but only dozens of avatars. They move around a lot, animate, change clothes, and wear prims. Prims are covered above, animations below, movement might be covered by treating avatars as a prim type. That leaves clothes. In the end, clothes is treated just like a texture change, and is not usually done quickly.</p>
+<p>Animations are currently really only applied to avatars. They are references to animation assets (BVH files), where the asset is downloaded as needed, perhaps cached, and usually triggered by scripts. These tend to be slow changes (updating which animation asset is in use right now), but scaled up by the number of avatars in the sim at any given time. AO animations may change quicker as people move about.</p>
+<p>On the other hand, we are extending animations to prim objects, and thinking about in world editing of them, plus allowing ad hoc "animations" via puppeteer style controls. So we need to keep these things in mind.</p>
+<p>The environment is not changed quickly.</p>
+<p>So, in the end, looks like prim property changes (including avatars as prims) are the heavy users. This is my next big assumption. There should be lots of commands for dealing with individual prim properties, as opposed to say sim commands where we can pack a bunch of properties into a single command. This is the reason why I'm starting with llSetPrimitiveParams() as my model for the command language. Perhaps a hamming code might work well?</p>
+<p>After looking at things from the perspective of the above thoughts, there are very few commands that do NOT have a fixed set of parameters. These are generally those with string parameters. Most of those strings are asset pointers, often UUIDs, though some are just arbitrarily long bits of text that are just displayed as is. So I want to leave command lengths out of the basic command language (though know about them internally), but we do have to deal with some variable length commands. We could have three different versions of those commands that deal with asset pointers, UUID and SHA-1 being fixed length commands, name and URL being variable length (name treated as a relative to current sim URL).</p>
+<p>So a first hack at this that keeps things nice and simple is 8 bit commands, with fixed length parameters for each command. Using a 256 entry table that includes that fixed length, and details of the types of parameters. Perhaps we can use a special value for the length in that table that means "variable length, you might have to actually scan and think about the command data to find it's end", but otherwise just use the fixed length for doing things like skipping to the next command, or copying this command somewhere. I assume that any single command will not be very long. Given that keeping the command data smaller is more important than keeping the code simple, I lean towards the C string style rather than the Pascal string style. In other words, a NULL end of string token instead of a couple of bytes of string length.</p>
+<p>The other issues to deal with are when and how to do the filtering; and how to handle "old" data.</p>
+<p>The first level of filtering would be per object. Physics engines are only interested in physics enabled objects (including avatars some of the time). Viewers are only interested in objects within draw distance. Script engines would initially only be interested in the objects with scripts in them, but maybe interested in other objects they are scanning or whatever.</p>
+<p>The physics and script engines really want to spend most of their resources actually calculating physics and executing scripts. So it might be worthwhile filtering the commands we send to them. Physics is easy, it wants only a few bits of prim data that is well known ahead of time.</p>
+<p>Scripts are harder, any given script at any given moment, might only be interested in a small subset of info about a prim, or the sim, etc. There are two categories - query a parameter right now, or trigger events based on parameter changes. Note that LSL at the moment treats some "ask for parameter" async, they send the request, then setup an event to get the results.</p>
+<p>I think all modules only want current data. The world exists only in real time. Some general method for just dropping commands that are too old needs to be included. "Too old" means that some new command arrived that replaces that old commands data, but before that old command has been dealt with. This might be made more complicated by the existence of command variations where some of the data is encoded in the command byte for the current proposed implementation.</p>
+<p>&nbsp;</p>
+<h2> Prim commands. </h2>
+<p>There are seven commands not allocated in the middle, and two near the end, no doubt we could use those for the missing commands. These are the commands not currently accounted for in the command language -</p>
+<p>llSetPrimMediaParams(face, list)</p>
+<p>Can probably combine most of these. Width and height SHOULD be combined per the LL specs.</p>
+<ul>
+<li>PRIM_MEDIA_ALT_IMAGE_ENABLE boolean</li>
+<li>PRIM_MEDIA_CONTROLS integer:1</li>
+<li>PRIM_MEDIA_CURRENT_URL string</li>
+<li>PRIM_MEDIA_HOME_URL string</li>
+<li>PRIM_MEDIA_AUTO_LOOP boolean</li>
+<li>PRIM_MEDIA_AUTO_PLAY boolean</li>
+<li>PRIM_MEDIA_AUTO_SCALE boolean</li>
+<li>PRIM_MEDIA_AUTO_ZOOM boolean</li>
+<li>PRIM_MEDIA_FIRST_CLICK_INTERACT boolean</li>
+<li>PRIM_MEDIA_WIDTH_PIXELS integer</li>
+<li>PRIM_MEDIA_HEIGHT_PIXELS integer</li>
+<li>PRIM_MEDIA_WHITELIST_ENABLE boolean</li>
+<li>PRIM_MEDIA_WHITELIST string/CSV</li>
+<li>PRIM_MEDIA_PERMS_INTERACT integer:2</li>
+<li>PRIM_MEDIA_PERMS_CONTROL integer:2</li>
+</ul>
+<p>llParticleSystem(list)</p>
+<p>These could be combined a bit, some of them should be.</p>
+<ul>
+<li>PSYS_PART_FLAGS integer (seems to use all 32 bits, but really only 9 bits, plus 6 legacy bits, only 3 of the later defined)</li>
+<li>PSYS_SRC_PATTERN integer:5 (specified as a bit mask, but it's really just one of 5 values)</li>
+<li>PSYS_SRC_BURST_RADIUS float</li>
+<li>PSYS_SRC_ANGLE_BEGIN float</li>
+<li>PSYS_SRC_ANGLE_END float</li>
+<li>PSYS_SRC_INNERANGLE float (deprecated)</li>
+<li>PSYS_SRC_OUTERANGLE float (deprecated)</li>
+<li>PSYS_SRC_TARGET_KEY key</li>
+<li>PSYS_PART_START_COLOR (vector)=colour</li>
+<li>PSYS_PART_END_COLOR (vector)=colour</li>
+<li>PSYS_PART_START_ALPHA float</li>
+<li>PSYS_PART_END_ALPHA float</li>
+<li>PSYS_PART_START_SCALE vector</li>
+<li>PSYS_PART_END_SCALE vector</li>
+<li>PSYS_SRC_TEXTURE string/key</li>
+<li>PSYS_SRC_MAX_AGE float</li>
+<li>PSYS_PART_MAX_AGE float</li>
+<li>PSYS_SRC_BURST_RATE float</li>
+<li>PSYS_SRC_BURST_PART_COUNT integer</li>
+<li>PSYS_SRC_ACCEL vector</li>
+<li>PSYS_SRC_OMEGA vector</li>
+<li>PSYS_SRC_BURST_SPEED_MIN float</li>
+<li>PSYS_SRC_BURST_SPEED_MAX float</li>
+</ul>
+<p><br /> llCreateLink(key boolean)</p>
+<p>llSetTextureAnim(integer:7 face integer integer float float float)</p>
+<p>Stuff to do with the playing of sound clips.</p>
+<p>&nbsp;</p>
+<h2> Parcel commands. </h2>
+<p>There is no need for parcels really, they are just a way of managing a fixed sized sim. We use arbitrary sized sims with little or no boundaries. So "parcels" can just be a bunch of smaller sims arranged in what ever way makes them more manageable by the sim owners. I would even suggest that sky boxes be just another sim, but with a high vertical offset from the land sims.</p>
+<p>&nbsp;</p>
+<h2> Sim commands. </h2>
+<p>Note that terrain and water could be dealt with by prim commands, treating them as heightfield meshes. This assumes that parcels are just specialised sims.</p>
+<p>A sim has the following properties, which will need commands to change them -</p>
+<p>Name, description, owner, group.</p>
+<p>Rating - LL introduced the concept of maturity ratings, but the web has various other ways of dealing with that, with no standard system across the board. We could just say "let the web server owner figure out their own system", though still have the option of supporting LL style maturity ratings.</p>
+<p>Land sales and deeding are possibly meaningless in this case, but we can always support the legacy LL method. Note that some of the legacy LL stuff makes no sense outside of LL type grids.</p>
+<p>Autoreturn setting. Edit terrain and fly permissions, as well as object create, entry, and script running permissions for the land group, and for others. That's a nice set of 8 bits. B-)</p>
+<p>Creating landmarks permission is similar to creating bookmarks. Not really something that is done on the web, and we are opening this up to web style access systems, so we don't really need that.</p>
+<p>No damage is irrelevant really, if they want combat on their sims, they can provide a proper combat system. No pushing is likely similar.</p>
+<p>Showing places in search is really now up to the search engines to cope with this new form of data.</p>
+<p>A snapshot is good. Teleport landing spot and routing should have more options, but we can start with just supporting the usual LL stuff.</p>
+<p>Audio and media are now handled differently anyway.</p>
+<p>Access is now controlled by the usual web methods.</p>
+<p>Allowing land resale and joining / sub dividing is no longer relevant. Telehubs are no longer relevant. Object bonus, and minimum agent age are not relevant. Agent limit might be relevant, but should be taken care of by usual web access systems.</p>
+<p>Will still need to send broadcast messages to people in sims.</p>
+<p>Restarting sims, disabling scripts, collisions, and physics.</p>
+<p>Four terrain textures, and the four pairs of elevation ranges (one per corner) should still be supported, but we should also support just setting a fixed texture, or even several.</p>
+<p>Water height, but also allow water heightfield. Terrain raise and lower limits not needed. Terrain heightfield and editing. Baking terrain. Don't really need stuff specific to backing up heightfields, they just become one more texture file on the web server.</p>
+<p>Sim sun stuff should be handled by the windlight commands.</p>
+<p>Allowing voice chat becomes a matter of whether the sim owner bothered to set that up.</p>
+<p>Allow direct teleport is now part of access controls.</p>
+<p>Covenant is just the sites ToS.</p>
+<p>Should be able to kick people, and return their stuff. Though that's more content management, which we can leave to CMS style systems. Most everything else is content management, or admin stuff best left to other tools.</p>
+<p>Create and delete an object. Moving and editing them is up to the prim commands. Though it should be pointed out, the position and rotation of root prims are a property of the sim rather than of the prim or linkset itself.</p>
+<p>&nbsp;</p>
+<h2> Windlight commands. </h2>
+<p>&nbsp;</p>
+<h2> Avatar commands. </h2>
+<p>Some of this could be dealt with by treating the avatar as a prim. In fact, Alices proposed animation system deals with animating avatars and prims the same way.</p>
+<p>&nbsp;</p>
+<h2> Animation commands. </h2>
+<p>Alice is working on that over at the <a href="BVJ.html">BVJ</a> page.</p>
+<p>&nbsp;</p>
+<h2> Meta commands. </h2>
+<p>0 SELECT_OBJECT key</p>
+<p>There will be a bunch of four byte commands, they all switch up to less efficient command representations, so they can afford to be more verbose. B-)</p>
+<p>They all are actually one byte commands, with the extra three bytes just being verbose padding for the humans. Let's hope there are no conflicts with other commands, otherwise the other command will just have to move.</p>
+<ul>
+<li>BSON - switch to BSON mode.</li>
+<li>EWWW - switch to XML mode (as used in IAR and OAR files from OpenSim).</li>
+<li>FUCK - for future proofing, in case I got my estimates all wrong and the protocol evolves beyond the built in limits. This command means switch up to a two byte command structure, and four byte object IDs. This two byte command structure should include a similar command to change up again, etc. all the way to four byte commands.</li>
+<li>JSON - switch to JSON mode.</li>
+<li>LUA - switch to Lua mode, sending valid Lua statements back and forth.&nbsp; This has been useful during very early development.</li>
+<li>MTRX - switch to matrix-RAD mode</li>
+<li>TITE - switch back to the tight binary, one byte command mode.</li>
+</ul>
+<p>Note that a key in SL is a 32 hex digit string (128 bits, or 16 bytes), with four dashes added to make it 36 characters long. We probably don't need that much uniqueness within a sim, or even within a host full of sims. Two bytes gives us 65,536 unique objects, three bytes 16,777,216, and four bytes 4,294,967,296 objects. The maximum number of prims on a 256x256 SL sim is 15,000, and the maximum number of avatars is 100. So two bytes seems like plenty.</p>
+<p>I would suggest using SHA-1 hashes of fixed blobs like textures and sounds, in the same way that git uses them for content addressable storage. SHA-1 is 160 bits (20 bytes), but as git has shown, if there are a small number of objects, you can get away with using just the first few digits. The advantage here is that multiple copies of the same texture end up with the same SHA-1, and thus we only store one copy.</p>
+<p>Since we are using the format used by LSL prim parameter setting as the guide, after looking at it, I think we can do something like this...</p>
+<p>A command is one byte, letting us have 256 commands. The very first command is 0 - select what object the next commands will work on.</p>
+<p>The prim parameters take up the next 32 commands, but that only needs 5 bits. Some of those prim parameters include an integer, or even boolean, that could only need 3 bits. PRIM_TYPE in particular could encode the type itself into those extra 3 bits, making a total of 8 commands, and making it easy to fit the different sets of parameters into a table. PRIM_TYPE_LEGACY becomes 6 commands; PRIM_MATERIAL 8; PRIM_PHYSICS, _TEMP_ON_REZ, _PHANTOM, _FULLBRIGHT, _FLEXIBLE, _POINT_LIGHT, _CAST_SHADOWS, _TEXGEN 2 each; PRIM_TYPE 8; PRIM_BUMP_SHINY could be 4 with the shiny part in the command number. The other 10 add to make a total of 52. 103 commands left for the other commands, I think that might work.</p>
+<p>&nbsp;</p>
+<h2> The big arsed command table </h2>
+<table style="border-width: 1px; border-color: #ffffff; border-style: solid;" border="1">
+<tbody>
+<tr><th>decimal</th><th>hex</th><th>binary</th><th>ASCII</th><th>command</th><th>arguments</th><th>comments</th></tr>
+<tr>
+<td>0</td>
+<td>00</td>
+<td>0000 0000</td>
+<td>NULL</td>
+<td>SELECT</td>
+<td>key</td>
+<td>Next commands refer to this object.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>01</td>
+<td>0000 0001</td>
+<td>SOH</td>
+<td>PRIM_TYPE_LEGACY BOX</td>
+<td>vector float float vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>2</td>
+<td>02</td>
+<td>0000 0010</td>
+<td>STX</td>
+<td>PRIM_MATERIAL (STONE)</td>
+<td>integer:3</td>
+<td>OK, the cleanest way to deal with this conflicting with the BSON commands is to have it as just one command. sigh</td>
+</tr>
+<tr>
+<td>3</td>
+<td>03</td>
+<td>0000 0011</td>
+<td>ETX</td>
+<td>PRIM_PHYSICS off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>4</td>
+<td>04</td>
+<td>0000 0100</td>
+<td>EOT</td>
+<td>PRIM_TEMP_ON_REZ off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>5</td>
+<td>05</td>
+<td>0000 0101</td>
+<td>ENQ</td>
+<td>PRIM_PHANTOM off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>6</td>
+<td>06</td>
+<td>0000 0110</td>
+<td>ACK</td>
+<td>PRIM_POSITION</td>
+<td>vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>7</td>
+<td>07</td>
+<td>0000 0111</td>
+<td>BEL</td>
+<td>PRIM_SIZE</td>
+<td>vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>8</td>
+<td>08</td>
+<td>0000 1000</td>
+<td>BS</td>
+<td>PRIM_ROTATION</td>
+<td>rotation</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>9</td>
+<td>09</td>
+<td>0000 1001</td>
+<td>TAB</td>
+<td>PRIM_TYPE BOX</td>
+<td>integer:2 vector float vector vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>10</td>
+<td>0A</td>
+<td>0000 1010</td>
+<td>LF</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0B</td>
+<td>0000 1011</td>
+<td>VT</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>12</td>
+<td>0C</td>
+<td>0000 1100</td>
+<td>FF</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>13</td>
+<td>0D</td>
+<td>0000 1101</td>
+<td>CR</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>14</td>
+<td>0E</td>
+<td>0000 1110</td>
+<td>SO</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>15</td>
+<td>0F</td>
+<td>0000 1111</td>
+<td>SI</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>16</td>
+<td>10</td>
+<td>0001 0000</td>
+<td>DLE</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>17</td>
+<td>11</td>
+<td>0001 0001</td>
+<td>DC1</td>
+<td>PRIM_TEXTURE</td>
+<td>face string/key vector vector float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>18</td>
+<td>12</td>
+<td>0001 0010</td>
+<td>DC2</td>
+<td>PRIM_COLOUR</td>
+<td>face (vector float)=colour</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>19</td>
+<td>13</td>
+<td>0001 0011</td>
+<td>DC3</td>
+<td>PRIM_BUMP_SHINY PRIM_SHINY_NONE</td>
+<td>face integer:5</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>20</td>
+<td>14</td>
+<td>0001 0100</td>
+<td>DC4</td>
+<td>PRIM_FULLBRIGHT off</td>
+<td>face</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>21</td>
+<td>15</td>
+<td>0001 0101</td>
+<td>NAK</td>
+<td>PRIM_FLEXIBLE off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>22</td>
+<td>16</td>
+<td>0001 0110</td>
+<td>SYN</td>
+<td>PRIM_TEXGEN PRIM_TEXGEN_DEFAULT</td>
+<td>face</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>23</td>
+<td>17</td>
+<td>0001 0111</td>
+<td>ETB</td>
+<td>PRIM_POINT_LIGHT off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>24</td>
+<td>18</td>
+<td>0001 1000</td>
+<td>CAN</td>
+<td>PRIM_CAST_SHADOWS off</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>25</td>
+<td>19</td>
+<td>0001 1001</td>
+<td>EM</td>
+<td>PRIM_GLOW</td>
+<td>face float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>26</td>
+<td>1A</td>
+<td>0001 1010</td>
+<td>SUB</td>
+<td>PRIM_TEXT</td>
+<td>string (vector float)=colour</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>27</td>
+<td>1B</td>
+<td>0001 1011</td>
+<td>ESC</td>
+<td>PRIM_NAME</td>
+<td>string</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>28</td>
+<td>1C</td>
+<td>0001 1100</td>
+<td>FS</td>
+<td>PRIM_DESC</td>
+<td>string</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>29</td>
+<td>1D</td>
+<td>0001 1101</td>
+<td>GS</td>
+<td>PRIM_ROT_LOCAL</td>
+<td>rotation</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>30</td>
+<td>1E</td>
+<td>0001 1110</td>
+<td>RS</td>
+<td>PRIM_POS_LOCAL</td>
+<td>vector</td>
+<td>This is just my guess about where LL will put it.</td>
+</tr>
+<tr>
+<td>31</td>
+<td>1F</td>
+<td>0001 1111</td>
+<td>US</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>32</td>
+<td>20</td>
+<td>0010 0000</td>
+<td>SPACE</td>
+<td>PRIM_OMEGA</td>
+<td>vector float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>33</td>
+<td>21</td>
+<td>0010 0001</td>
+<td>&nbsp;!</td>
+<td>PRIM_TYPE_LEGACY CYLINDER</td>
+<td>vector float float vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>34</td>
+<td>22</td>
+<td>0010 0010</td>
+<td>"</td>
+<td>(PRIM_MATERIAL METAL)</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>35</td>
+<td>23</td>
+<td>0010 0011</td>
+<td>#</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>36</td>
+<td>24</td>
+<td>0010 0100</td>
+<td>$</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>37</td>
+<td>25</td>
+<td>0010 0101</td>
+<td>&nbsp;%</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>38</td>
+<td>26</td>
+<td>0010 0110</td>
+<td>&amp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>39</td>
+<td>27</td>
+<td>0010 0111</td>
+<td>'</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>40</td>
+<td>28</td>
+<td>0010 1000</td>
+<td>(</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>41</td>
+<td>29</td>
+<td>0010 1001</td>
+<td>)</td>
+<td>PRIM_TYPE CYLINDER</td>
+<td>integer:2 vector float vector vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>42</td>
+<td>2A</td>
+<td>0010 1010</td>
+<td>*</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>43</td>
+<td>2B</td>
+<td>0010 1011</td>
+<td>+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>44</td>
+<td>2C</td>
+<td>0010 1100</td>
+<td>,</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>45</td>
+<td>2D</td>
+<td>0010 1101</td>
+<td>-</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>46</td>
+<td>2E</td>
+<td>0010 1110</td>
+<td>.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>47</td>
+<td>2F</td>
+<td>0010 1111</td>
+<td>/</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>48</td>
+<td>30</td>
+<td>0011 0000</td>
+<td>0</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>49</td>
+<td>31</td>
+<td>0011 0001</td>
+<td>1</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>50</td>
+<td>32</td>
+<td>0011 0010</td>
+<td>2</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>51</td>
+<td>33</td>
+<td>0011 0011</td>
+<td>3</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>52</td>
+<td>34</td>
+<td>0011 0100</td>
+<td>4</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>53</td>
+<td>35</td>
+<td>0011 0101</td>
+<td>5</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>54</td>
+<td>36</td>
+<td>0011 0110</td>
+<td>6</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>55</td>
+<td>37</td>
+<td>0011 0111</td>
+<td>7</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>56</td>
+<td>38</td>
+<td>0011 1000</td>
+<td>8</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>57</td>
+<td>39</td>
+<td>0011 1001</td>
+<td>9</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>58</td>
+<td>3A</td>
+<td>0011 1010</td>
+<td>&nbsp;:</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>59</td>
+<td>3B</td>
+<td>0011 1011</td>
+<td>&nbsp;;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>60</td>
+<td>3C</td>
+<td>0011 1100</td>
+<td>&lt;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>61</td>
+<td>3D</td>
+<td>0011 1101</td>
+<td>=</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>62</td>
+<td>3E</td>
+<td>0011 1110</td>
+<td>&gt;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>63</td>
+<td>3F</td>
+<td>0011 1111</td>
+<td>&nbsp;?</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>64</td>
+<td>40</td>
+<td>0100 0000</td>
+<td>@</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>65</td>
+<td>41</td>
+<td>0100 0001</td>
+<td>A</td>
+<td>PRIM_TYPE_LEGACY PRISM</td>
+<td>vector float float vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>66</td>
+<td>42</td>
+<td>0100 0010</td>
+<td>B</td>
+<td>BSON</td>
+<td>&nbsp;</td>
+<td>Switch to BSON mode. (Conflicts with PRIM_MATERIAL GLASS)</td>
+</tr>
+<tr>
+<td>67</td>
+<td>43</td>
+<td>0100 0011</td>
+<td>C</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>68</td>
+<td>44</td>
+<td>0100 0100</td>
+<td>D</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>69</td>
+<td>45</td>
+<td>0100 0101</td>
+<td>E</td>
+<td>EWWW</td>
+<td>&nbsp;</td>
+<td>Switch to XML mode, as used by OpenSim in IAR and OAR backup files.</td>
+</tr>
+<tr>
+<td>70</td>
+<td>46</td>
+<td>0100 0110</td>
+<td>F</td>
+<td>FUCK</td>
+<td>&nbsp;</td>
+<td>Switch to two, four byte command mode; with three, four bytes of object ID.</td>
+</tr>
+<tr>
+<td>71</td>
+<td>47</td>
+<td>0100 0111</td>
+<td>G</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>72</td>
+<td>48</td>
+<td>0100 1000</td>
+<td>H</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>73</td>
+<td>49</td>
+<td>0100 1001</td>
+<td>I</td>
+<td>PRIM_TYPE PRISM</td>
+<td>integer:2 vector float vector vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>74</td>
+<td>4A</td>
+<td>0100 1010</td>
+<td>J</td>
+<td>JSON</td>
+<td>&nbsp;</td>
+<td>Switch to JSON mode.</td>
+</tr>
+<tr>
+<td>75</td>
+<td>4B</td>
+<td>0100 1011</td>
+<td>K</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>76</td>
+<td>4C</td>
+<td>0100 1100</td>
+<td>L</td>
+<td>&nbsp;LUA</td>
+<td>&nbsp;</td>
+<td>&nbsp;Switch to Lua mode.</td>
+</tr>
+<tr>
+<td>77</td>
+<td>4D</td>
+<td>0100 1101</td>
+<td>M</td>
+<td>MRTX</td>
+<td>&nbsp;</td>
+<td>Switch to matrix-RAD mode.</td>
+</tr>
+<tr>
+<td>78</td>
+<td>4E</td>
+<td>0100 1110</td>
+<td>N</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>79</td>
+<td>4F</td>
+<td>0100 1111</td>
+<td>O</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>80</td>
+<td>50</td>
+<td>0101 0000</td>
+<td>P</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>81</td>
+<td>51</td>
+<td>0101 0001</td>
+<td>Q</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>82</td>
+<td>52</td>
+<td>0101 0010</td>
+<td>R</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>83</td>
+<td>53</td>
+<td>0101 0011</td>
+<td>S</td>
+<td>PRIM_BUMP_SHINY PRIM_SHINY_LOW</td>
+<td>face integer:5</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>84</td>
+<td>54</td>
+<td>0101 0100</td>
+<td>T</td>
+<td>TITE</td>
+<td>&nbsp;</td>
+<td>Switch back to the tight binary mode that is the sane default. B-)</td>
+</tr>
+<tr>
+<td>85</td>
+<td>55</td>
+<td>0101 0101</td>
+<td>U</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>86</td>
+<td>56</td>
+<td>0101 0110</td>
+<td>V</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>87</td>
+<td>57</td>
+<td>0101 0111</td>
+<td>W</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>88</td>
+<td>58</td>
+<td>0101 1000</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>89</td>
+<td>59</td>
+<td>0101 1001</td>
+<td>Y</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>90</td>
+<td>5A</td>
+<td>0101 1010</td>
+<td>Z</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>91</td>
+<td>5B</td>
+<td>0101 1011</td>
+<td>[</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>92</td>
+<td>5C</td>
+<td>0101 1100</td>
+<td>\</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>93</td>
+<td>5D</td>
+<td>0101 1101</td>
+<td>]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>94</td>
+<td>5E</td>
+<td>0101 1110</td>
+<td>^</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>95</td>
+<td>5F</td>
+<td>0101 1111</td>
+<td>_</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>96</td>
+<td>60</td>
+<td>0110 0000</td>
+<td>`</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>97</td>
+<td>61</td>
+<td>0110 0001</td>
+<td>a</td>
+<td>PRIM_TYPE_LEGACY SPHERE</td>
+<td>vector float vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>98</td>
+<td>62</td>
+<td>0110 0010</td>
+<td>b</td>
+<td>bson</td>
+<td>&nbsp;</td>
+<td>Switch to BSON mode. (Conflicts with PRIM_MATERIAL WOOD)</td>
+</tr>
+<tr>
+<td>99</td>
+<td>63</td>
+<td>0110 0011</td>
+<td>c</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>100</td>
+<td>64</td>
+<td>0110 0100</td>
+<td>d</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>101</td>
+<td>65</td>
+<td>0110 0101</td>
+<td>e</td>
+<td>ewww</td>
+<td>&nbsp;</td>
+<td>Switch to XML mode, as used by OpenSim in IAR and OAR backup files.</td>
+</tr>
+<tr>
+<td>102</td>
+<td>66</td>
+<td>0110 0110</td>
+<td>f</td>
+<td>fuck</td>
+<td>&nbsp;</td>
+<td>Switch to two, four byte command mode; with three, four bytes of object ID.</td>
+</tr>
+<tr>
+<td>103</td>
+<td>67</td>
+<td>0110 0111</td>
+<td>g</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>104</td>
+<td>68</td>
+<td>0110 1000</td>
+<td>h</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>105</td>
+<td>69</td>
+<td>0110 1001</td>
+<td>i</td>
+<td>PRIM_TYPE SPHERE</td>
+<td>integer:2 vector float vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>106</td>
+<td>6A</td>
+<td>0110 1010</td>
+<td>j</td>
+<td>json</td>
+<td>&nbsp;</td>
+<td>Switch to JSON mode.</td>
+</tr>
+<tr>
+<td>107</td>
+<td>6B</td>
+<td>0110 1011</td>
+<td>k</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>108</td>
+<td>6C</td>
+<td>0110 1100</td>
+<td>l</td>
+<td>&nbsp;lua</td>
+<td>&nbsp;</td>
+<td>&nbsp;Switch to Lua mode.</td>
+</tr>
+<tr>
+<td>109</td>
+<td>6D</td>
+<td>0110 1101</td>
+<td>m</td>
+<td>mrtx</td>
+<td>&nbsp;</td>
+<td>Switch to matrix-RAD mode.</td>
+</tr>
+<tr>
+<td>110</td>
+<td>6E</td>
+<td>0110 1110</td>
+<td>n</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>111</td>
+<td>6F</td>
+<td>0110 1111</td>
+<td>o</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>112</td>
+<td>70</td>
+<td>0111 0000</td>
+<td>p</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>113</td>
+<td>71</td>
+<td>0111 0001</td>
+<td>q</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>114</td>
+<td>72</td>
+<td>0111 0010</td>
+<td>r</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>115</td>
+<td>73</td>
+<td>0111 0011</td>
+<td>s</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>116</td>
+<td>74</td>
+<td>0111 0100</td>
+<td>t</td>
+<td>tite</td>
+<td>&nbsp;</td>
+<td>Switch back to the tight binary mode that is the sane default. B-)</td>
+</tr>
+<tr>
+<td>117</td>
+<td>75</td>
+<td>0111 0101</td>
+<td>u</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>118</td>
+<td>76</td>
+<td>0111 0110</td>
+<td>v</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>119</td>
+<td>77</td>
+<td>0111 0111</td>
+<td>w</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>120</td>
+<td>78</td>
+<td>0111 1000</td>
+<td>x</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>121</td>
+<td>79</td>
+<td>0111 1001</td>
+<td>y</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>122</td>
+<td>7A</td>
+<td>0111 1010</td>
+<td>z</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>123</td>
+<td>7B</td>
+<td>0111 1011</td>
+<td>{</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>124</td>
+<td>7C</td>
+<td>0111 1100</td>
+<td>|</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>125</td>
+<td>7D</td>
+<td>0111 1101</td>
+<td>}</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>126</td>
+<td>7E</td>
+<td>0111 1110</td>
+<td>~</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>127</td>
+<td>7F</td>
+<td>0111 1111</td>
+<td>DEL</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>128</td>
+<td>80</td>
+<td>1000 0000</td>
+<td>€</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>129</td>
+<td>81</td>
+<td>1000 0001</td>
+<td></td>
+<td>PRIM_TYPE_LEGACY TORUS</td>
+<td>vector float float float vector vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>130</td>
+<td>82</td>
+<td>1000 0010</td>
+<td>‚</td>
+<td>(PRIM_MATERIAL FLESH)</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>131</td>
+<td>83</td>
+<td>1000 0011</td>
+<td>ƒ</td>
+<td>PRIM_PHYSICS on</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>132</td>
+<td>84</td>
+<td>1000 0100</td>
+<td>„</td>
+<td>PRIM_TEMP_ON_REZ on</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>133</td>
+<td>85</td>
+<td>1000 0101</td>
+<td>…</td>
+<td>PRIM_PHANTOM on</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>134</td>
+<td>86</td>
+<td>1000 0110</td>
+<td>†</td>
+<td>PRIM_TEXGEN PRIM_TEXGEN_PLANAR</td>
+<td>face</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>135</td>
+<td>87</td>
+<td>1000 0111</td>
+<td>‡</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>136</td>
+<td>88</td>
+<td>1000 1000</td>
+<td>ˆ</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>137</td>
+<td>89</td>
+<td>1000 1001</td>
+<td>‰</td>
+<td>PRIM_TYPE TORUS</td>
+<td>integer:2 vector float vector vector vector vector vector float float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>138</td>
+<td>8A</td>
+<td>1000 1010</td>
+<td>Š</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>139</td>
+<td>8B</td>
+<td>1000 1011</td>
+<td>‹</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>140</td>
+<td>8C</td>
+<td>1000 1100</td>
+<td>Œ</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>141</td>
+<td>8D</td>
+<td>1000 1101</td>
+<td></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>142</td>
+<td>8E</td>
+<td>1000 1110</td>
+<td>Ž</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>143</td>
+<td>8F</td>
+<td>1000 1111</td>
+<td></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>144</td>
+<td>90</td>
+<td>1001 0000</td>
+<td></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>145</td>
+<td>91</td>
+<td>1001 0001</td>
+<td>‘</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>146</td>
+<td>92</td>
+<td>1001 0010</td>
+<td>’</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>147</td>
+<td>93</td>
+<td>1001 0011</td>
+<td>“</td>
+<td>PRIM_BUMP_SHINY PRIM_SHINY_MEDIUM</td>
+<td>face integer:5</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>148</td>
+<td>94</td>
+<td>1001 0100</td>
+<td>”</td>
+<td>PRIM_FULLBRIGHT on</td>
+<td>face</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>149</td>
+<td>95</td>
+<td>1001 0101</td>
+<td>•</td>
+<td>PRIM_FLEXIBLE on</td>
+<td>integer float float float float vector</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>150</td>
+<td>96</td>
+<td>1001 0110</td>
+<td>–</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>151</td>
+<td>97</td>
+<td>1001 0111</td>
+<td>&nbsp;</td>
+<td>PRIM_POINT_LIGHT on</td>
+<td>(vector)=colour float float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>152</td>
+<td>98</td>
+<td>1001 1000</td>
+<td>&nbsp;</td>
+<td>PRIM_CAST_SHADOWS on</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>153</td>
+<td>99</td>
+<td>1001 1001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>154</td>
+<td>9A</td>
+<td>1001 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>155</td>
+<td>9B</td>
+<td>1001 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>156</td>
+<td>9C</td>
+<td>1001 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>157</td>
+<td>9D</td>
+<td>1001 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>158</td>
+<td>9E</td>
+<td>1001 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>159</td>
+<td>9F</td>
+<td>1001 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>160</td>
+<td>A0</td>
+<td>1010 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>161</td>
+<td>A1</td>
+<td>1010 0001</td>
+<td>&nbsp;</td>
+<td>PRIM_TYPE_LEGACY TUBE</td>
+<td>vector float float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>162</td>
+<td>A2</td>
+<td>1010 0010</td>
+<td>&nbsp;</td>
+<td>(PRIM_MATERIAL PLASTIC)</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>163</td>
+<td>A3</td>
+<td>1010 0011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>164</td>
+<td>A4</td>
+<td>1010 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>165</td>
+<td>A5</td>
+<td>1010 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>166</td>
+<td>A6</td>
+<td>1010 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>167</td>
+<td>A7</td>
+<td>1010 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>168</td>
+<td>A8</td>
+<td>1010 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>169</td>
+<td>A9</td>
+<td>1010 1001</td>
+<td>&nbsp;</td>
+<td>PRIM_TYPE TUBE</td>
+<td>integer:2 vector float vector vector vector vector vector float float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>170</td>
+<td>AA</td>
+<td>1010 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>171</td>
+<td>AB</td>
+<td>1010 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>172</td>
+<td>AC</td>
+<td>1010 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>173</td>
+<td>AD</td>
+<td>1010 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>174</td>
+<td>AE</td>
+<td>1010 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>175</td>
+<td>AF</td>
+<td>1010 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>176</td>
+<td>B0</td>
+<td>1011 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>177</td>
+<td>B1</td>
+<td>1011 0001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>178</td>
+<td>B2</td>
+<td>1011 0010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>179</td>
+<td>B3</td>
+<td>1011 0011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>180</td>
+<td>B4</td>
+<td>1011 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>181</td>
+<td>B5</td>
+<td>1011 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>182</td>
+<td>B6</td>
+<td>1011 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>183</td>
+<td>B7</td>
+<td>1011 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>184</td>
+<td>B8</td>
+<td>1011 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>185</td>
+<td>B9</td>
+<td>1011 1001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>186</td>
+<td>BA</td>
+<td>1011 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>187</td>
+<td>BB</td>
+<td>1011 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>188</td>
+<td>BC</td>
+<td>1011 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>189</td>
+<td>BD</td>
+<td>1011 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>190</td>
+<td>BE</td>
+<td>1011 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>191</td>
+<td>BF</td>
+<td>1011 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>192</td>
+<td>C0</td>
+<td>1100 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>193</td>
+<td>C1</td>
+<td>1100 0001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>194</td>
+<td>C2</td>
+<td>1100 0010</td>
+<td>&nbsp;</td>
+<td>(PRIM_MATERIAL RUBBER)</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>195</td>
+<td>C3</td>
+<td>1100 0011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>196</td>
+<td>C4</td>
+<td>1100 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>197</td>
+<td>C5</td>
+<td>1100 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>198</td>
+<td>C6</td>
+<td>1100 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>199</td>
+<td>C7</td>
+<td>1100 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>200</td>
+<td>C8</td>
+<td>1100 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>201</td>
+<td>C9</td>
+<td>1100 1001</td>
+<td>&nbsp;</td>
+<td>PRIM_TYPE RING</td>
+<td>integer:2 vector float vector vector vector vector vector float float float</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>202</td>
+<td>CA</td>
+<td>1100 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>203</td>
+<td>CB</td>
+<td>1100 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>204</td>
+<td>CC</td>
+<td>1100 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>205</td>
+<td>CD</td>
+<td>1100 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>206</td>
+<td>CE</td>
+<td>1100 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>207</td>
+<td>CF</td>
+<td>1100 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>208</td>
+<td>D0</td>
+<td>1101 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>209</td>
+<td>D1</td>
+<td>1101 0001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>210</td>
+<td>D2</td>
+<td>1101 0010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>211</td>
+<td>D3</td>
+<td>1101 0011</td>
+<td>&nbsp;</td>
+<td>PRIM_BUMP_SHINY PRIM_SHINY_HIGH</td>
+<td>face integer:5</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>212</td>
+<td>D4</td>
+<td>1101 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>213</td>
+<td>D5</td>
+<td>1101 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>214</td>
+<td>D6</td>
+<td>1101 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>215</td>
+<td>D7</td>
+<td>1101 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>216</td>
+<td>D8</td>
+<td>1101 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>217</td>
+<td>D9</td>
+<td>1101 1001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>218</td>
+<td>DA</td>
+<td>1101 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>219</td>
+<td>DB</td>
+<td>1101 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>220</td>
+<td>DC</td>
+<td>1101 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>221</td>
+<td>DD</td>
+<td>1101 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>222</td>
+<td>DE</td>
+<td>1101 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>223</td>
+<td>DF</td>
+<td>1101 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>224</td>
+<td>E0</td>
+<td>1110 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>225</td>
+<td>E1</td>
+<td>1110 0001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>226</td>
+<td>E2</td>
+<td>1110 0010</td>
+<td>&nbsp;</td>
+<td>(PRIM_MATERIAL LIGHT)</td>
+<td>&nbsp;</td>
+<td>Deprecated: Looks the same as [ PRIM_FULLBRIGHT, ALL_SIDES, TRUE ]</td>
+</tr>
+<tr>
+<td>227</td>
+<td>E3</td>
+<td>1110 0011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>228</td>
+<td>E4</td>
+<td>1110 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>229</td>
+<td>E5</td>
+<td>1110 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>230</td>
+<td>E6</td>
+<td>1110 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>231</td>
+<td>E7</td>
+<td>1110 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>232</td>
+<td>E8</td>
+<td>1110 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>233</td>
+<td>E9</td>
+<td>1110 1001</td>
+<td>&nbsp;</td>
+<td>PRIM_TYPE SCULPT</td>
+<td>string/key integer:8</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>234</td>
+<td>EA</td>
+<td>1110 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>235</td>
+<td>EB</td>
+<td>1110 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>236</td>
+<td>EC</td>
+<td>1110 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>237</td>
+<td>ED</td>
+<td>1110 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>238</td>
+<td>EE</td>
+<td>1110 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>239</td>
+<td>EF</td>
+<td>1110 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>240</td>
+<td>F0</td>
+<td>1111 0000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>241</td>
+<td>F1</td>
+<td>1111 0001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>242</td>
+<td>F2</td>
+<td>1111 0010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>243</td>
+<td>F3</td>
+<td>1111 0011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>244</td>
+<td>F4</td>
+<td>1111 0100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>245</td>
+<td>F5</td>
+<td>1111 0101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>246</td>
+<td>F6</td>
+<td>1111 0110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>247</td>
+<td>F7</td>
+<td>1111 0111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>248</td>
+<td>F8</td>
+<td>1111 1000</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>249</td>
+<td>F9</td>
+<td>1111 1001</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>250</td>
+<td>FA</td>
+<td>1111 1010</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>251</td>
+<td>FB</td>
+<td>1111 1011</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>252</td>
+<td>FC</td>
+<td>1111 1100</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>253</td>
+<td>FD</td>
+<td>1111 1101</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>254</td>
+<td>FE</td>
+<td>1111 1110</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>255</td>
+<td>FF</td>
+<td>1111 1111</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p><br /> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</p>
+</body>
+</html>

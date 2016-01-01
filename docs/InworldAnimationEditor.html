@@ -1,0 +1,109 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<h2> Normal Editing </h2>
+<p>Step 1: right click avy &gt; edit pose &gt; a list of currently playing animations displays and you can choose one. Or right click avy &gt; new pose</p>
+<p>Step 2a: big edit style arrows sprout from the current joint (last edited, or hips by default). You can interact with it in all the standard ways users already know about with the build window. Move? Drag an arrow. Rotate? Drag a ring or the gray ball.</p>
+<p>Step 2b: The edit window opens to the animation tab, or perhaps a whole new GUI. As a first approximation, imagine grabbing all the stuff from qavimator, squishing it into one or two 'floaters' windows inside the client.</p>
+<ul>
+<li>It has a help button</li>
+</ul>
+<ul>
+<li>It has a first use dialog</li>
+</ul>
+<ul>
+<li>It includes a numbers area
+<ul>
+<li>channel values for the current joint</li>
+<li>you can type in numbers</li>
+<li>you can hit a spinner to increase/decrease</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>It has meta info edit boxes
+<ul>
+<li>animation name</li>
+<li>UUID (if it lives on a server)</li>
+<li>File path (if it lives on your hard drive)</li>
+<li>save to inventory/disk button(s)</li>
+<li>priority</li>
+<li>loop points as numbers</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>It has a time graph
+<ul>
+<li>showing which frames have animation information</li>
+<li>what the 'current time' of the animation is</li>
+<li>play button</li>
+<li>pause button</li>
+<li>step forward button</li>
+<li>step backward button</li>
+<li>set the current time</li>
+<li>loop points as marks on the time line</li>
+<li>click a frame mark, highlights joints with animation information</li>
+<li>can delete the keyframe</li>
+<li>can add/update a keyframe</li>
+<li>indication of unsaved changes near/on
+<ul>
+<li>the step/play/pause buttons and the close button</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>It has a skeleton editor
+<ul>
+<li>acts a lot like a hierarchy browser</li>
+<li>can move rename add and delete joints</li>
+<li>/me hand waves about selecting new things for new joints</li>
+<li>includes place to change meta data about a joint
+<ul>
+<li>name</li>
+<li>channels</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>It has a bunch of new keyboard short cuts when the GUI is focused
+<ul>
+<li>u/o rotate about X</li>
+<li>i/k rotate about Y</li>
+<li>j/l rotate about Z</li>
+<li>y move up the joint hierarchy</li>
+<li>h move to a sibling/cousin at the same level. I.e. flip from right foot to left foot.</li>
+<li>n move down the joint hierarchy</li>
+<li>p play/pause</li>
+<li>&lt;space&gt; step forward</li>
+</ul>
+</li>
+</ul>
+<p>&nbsp;</p>
+<h2> Inverse Kinematics </h2>
+<p>The GUI I imagine for IK, perhaps a tab on the animation editor?</p>
+<ul>
+<li>something to lock/unlock joints</li>
+<li>a standard edit control on the selected joint
+<ul>
+<li>dragging the joint makes IK do it's magic to compute angles</li>
+</ul>
+</li>
+</ul>
+<p>&nbsp;</p>
+<h2> Edit Multiple Animations </h2>
+<p>To take advantage of the 'absolute time' feature, you need to edit multiple animations at one time to make them interact well. Each animation could sprout a new line in the time line window. Would need some indicator which is the current animation and way to switch so the numbers boxes and meta info displays make sense. Time between the many animations is synchronized, so stepping a frame forward, steps all animations forward.</p>
+<p>Most importantly, if you are granted permission, you should be able to right click on another avy, and choose edit pose.</p>
+<p>&nbsp;</p>
+<h2> Animate other stuff </h2>
+<p>Now, I described all this as if <a href="BVJ.html">BVJ</a>'s only applied to avatars. They don't. But the commands and behaviors are the same when editing animations for a door, an avatar, or an attachment (to an attachment to...) to an avatar.</p>
+<p>&nbsp;</p>
+<h2> Possibilities </h2>
+<p>If you edit your pose, and the animations of 3 small balls, you could make a juggle animation with balls and hands synchronized. You can make "play catch" animations for two people and a ball. Be a multi-legged creature: add bones, attach prims, animate, enjoy.</p>
+</body>
+</html>

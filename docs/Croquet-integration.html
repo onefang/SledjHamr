@@ -1,0 +1,114 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<p>I just stumbled on this - <a href="http://forum.world.st/OpenCobalt-Croquet-client-for-Opensim-td622809.html">http://forum.world.st/OpenCobalt-Croquet-client-for-Opensim-td622809.html</a></p>
+<div>
+<p>&nbsp;</p>
+<p>I'll reproduce the relevant part here -</p>
+<pre>Rich White wrote:
+
+&gt; Thinking out loud regarding the feasible of a OpenCobalt /Croquet
+&gt; client/peer for Opensim ?
+&gt;
+&gt; * Connect to Opensim Server -  much like Cobalt connects to Jabber now
+&gt; * Portal window opens to server - much like opening a stored file or
+&gt; connecting to another peer
+&gt;
+&gt; Convergence of the technologies would seem to bring the best of both
+&gt; "worlds" (peer/server/content) into one ecosystem.
+&gt;
+&gt; A few dangling pointers:
+&gt; http://opensimulator.org/wiki/OpenSim_Archives
+&gt; http://opensimulator.org/wiki/User_Documentation
+&gt;
+&gt;
+&gt; Ideas? Is a convergence possible? ... This though may be WAY off but
+&gt; wanted to bring it up and see what others thought.
+&gt;
+&gt; Cheers,
+&gt; Rich
+&gt; ===
+&gt;
+&gt;
+... [show rest of quote]
+
+Actually, I've been looking at merging SL and Croquet off and on for
+several years, and there's far more interesting ways of merging the two
+that can serve as a pattern for using Croquet in many situations besides
+formal virtual worlds.
+
+The simplest is to simply use the SL media plugin or the equivalents
+that work with 3rd party viewers, and create a "telepresence" between
+worlds. I.E. a simple view-only portal or 2D equivalent using VNC, with
+or without interaction:
+
+ http://wiki.secondlife.com/wiki/User:Saijanai_Kuhn/Plugins_discussion#Media_Rendering_Plugin
+
+This particular use can be extended to provide a service that could be
+added to SL instant messaging, so that you could create a temporary
+world and invite a buncha people to join you in a private 3D chat
+island, for collaboration or simply to "hangout" without having the
+overhead of maintaining a genuine OpenSim or SL sim.
+
+Obviously, you can extend the concept to be an option for ANY kind of 2D
+collaboration system, from Jabber to IRC to Google Wave to whatever.
+Imagine having a "create Croquet island/invite people" option as
+standard in any IRC client.
+
+Getting back to typical virtual worlds usage, the idea of a viewer
+plugin that leverages all of Squeak/Croquet's functionality to enhance
+some other viewer shouldn't be sneered at. Right now, the SL viewer (for
+example) barely provides access to raw mouse coordinates for UV tracking
+on a texture (the current media plugin scenario), but there's no reason
+why any arbitrary event or internet packet couldn't be intercepted and
+shunted off to squeak for pre/post processing.
+
+http://wiki.secondlife.com/wiki/User:Saijanai_Kuhn/Plugins_discussion#Proposed_Extension_to_Media_Plugin
+
+
+I'm currently working on a proof of concept of this last by intercepting
+arbitrary packets to/from the SL server/viewer using the Gridproxy
+utility and/or injecting or pre/post processing such packets. When you
+combine that with the ability to intercept mouse UV coordinates on a
+texture in SL and render into said texture from Squeak/Croquet directly,
+you get all sorts of possibilities. Add localhost/seaside into mix and
+you've got a very powerful experimental system that can project control
+surfaces via html on a prim, or in the SL built-in browser, or via
+VNC-like interactions directly to a prim on the local SL viewer.  
+Combine that with broadcasting to streaming server, and you have a
+virtual worlds whiteboard that can project into SL ala the metanomics
+virtual lecture hall.
+
+http://www.metanomics.net/
+
+
+Start interacting with internal viewer events, and you can leverage
+physics/graphics creation/etc from the Squeak/Croquet side, and merge it
+directly into a local SL instance for custom puppeteering with the
+possiblilty of doing a P2P collaboration mechanima where individual
+avatars can be controlled by a single machine using a script and/or
+timeline control interface. The resulting avatar activity can be
+"filmed" for mechanima, or could be uploaded to a central server for
+rebroadcast to a virtual world audience (or both).
+
+http://wiki.secondlife.com/wiki/User:Saijanai_Kuhn/Plugins_discussion#Puppeteering_Plugin
+
+
+Instead of using 2D projections, you could also leverage the 3D portal
+system of Croquet to inject 3D cenes from Croquet into a given virtual
+world viewer, and either maintain a backk-end P2P connection between
+participants, or shoot the composite scene to a central server in some
+fashion using the existing virtual world protocols.
+
+The possibilities are endless for synergy between Croquet and other
+virtual worlds, IMHO.
+
+
+Lawson (Saijani Kuhn in Second Life)
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<h2> Existing, and possibly incorrect, wisdom </h2>
+<p>In this section I will mention the stuff that I think I know, and why it might be wrong. There have been major changes in how these things have been dealt with, particularly with the introduction of ROBUST. Personally I have experience with the closed source OpenSim fork that was in use at M7, and the open source OpenSim fork that is used at IG.</p>
+<p>There are two types of assets - things that have been rezzed in a sim, and users inventory. While poking around in the M7 system I figured out that both are somewhat similar.</p>
+<p>There is database stuff that has meta data at least, and there is file based stuff that seems to include the actual asset data, things like script source, script binaries, texture, sounds, animations. I was not able to completely understand it all before M7 closed.</p>
+<p>Received wisdom is that sim assets are stored on the sims server, and that inventory assets are stored on the central database. Recent experience has suggested that this is not correct. While I was testing the IGnoble scripts, I loaded an OAR of my home sim into the sim I was running on my local computer. Surprisingly, my sim server spent the next three hours uploading .. something .. to the grid server (my upload speed is not spectacular, and there was a decent amount of data). Only after it had completed that, did it rez the sim in world, which happened quickly for me, but I was sitting on the same computer as the sim server. A quick inspection showed that I had the expected file based assets on my server, though they where in the cache directory.</p>
+<p>My theory is that the sim assets are also stored on the central server, but cached on the sim server. The big upload was probably the entire contents of the OAR file.</p>
+<p>Now, lets figure out what's really going on.</p>
+<p>&nbsp;</p>
+<h2> ROBUST </h2>
+<p>ROBUST seems to be the centre of the OS data flow universe. "ROBUST is a flexible server shell ..." the OS web site says, not sure exactly what that means. We shall find out. It basically seems to be a way to connect to arbitrary processing and storage modules, and the storage modules part is where our interest lies on this page.</p>
+<p>Sim servers point to one or more ROBUST servers for their services, These pointers are a HTTP URLs that is usually the grid server, and a port number. You can have different ROBUST services on different port numbers, or on different servers. The ROBUST servers can handle one or more of the services. ROBUST servers can point to others, acting as a proxy. ROBUST hosted services can have others as dependencies, they can point to other instances of ROBUST on other URL/ports.</p>
+<p>Robust has the concept of IN and OUT connectors. The IN's seem to be the ports used by sim servers and others to connect to the services, they load the proper OUT or code modules. The OUTS seem to be the connectors to the database, or perhaps the code performing the service. Or maybe the OUTs are for sending data back, and the modules are for doing the work?</p>
+<p>Apparently ROBUST is designed to allow code reuse.</p>
+<p>Note that this will allow us to easily integrate <a href="index.html">OMG</a>, as we can do that in any language, implement the relevant parts of the ROBUST wire protocol, listen on a given HTTP port, then just tell the ROBUST clients to use that port. <a href="Nails.html#command_pump">Nails:command pump</a> in fact includes provisions to have wrappers for other protocols, which is a perfect match here. So glad we don't have to deal with direct interfacing to C# code. B-)</p>
+<p>The ROBUST wire protocol looks like it's HTTP POSTs to the URL and port number. The POST includes the service name, and a verbose (XML, ewww) text command to that service.</p>
+<p>&nbsp;</p>
+<h2> sim server view </h2>
+<p>Sim servers have these, which include connection strings to the local database server -</p>
+<ul>
+<li>AssetService - Also includes a URL to the grid server.</li>
+<li>AvatarService - Also includes a URL to the grid server.</li>
+<li>AuthenticationService - Also includes a URL to the grid server.</li>
+<li>DatabaseService -</li>
+<li>FriendsService - Also includes a URL to the grid server.</li>
+<li>GridUserService - Also includes a URL to the grid server.</li>
+<li>InventoryService - Also includes a URL to the grid server.</li>
+<li>UserAccountService - Also includes a URL to the grid server.</li>
+</ul>
+<p>These only include a URL to the grid server -</p>
+<ul>
+<li>GridService - Also includes the GatekeeperService URL, a different port.</li>
+<li>PresenceService</li>
+<li>ProfileServerURL - For HG profiles, same port as the Gatekeeper, but more on the end of the URL.</li>
+</ul>
+<p>There are three possible asset caches, only one should be on, but none of them can be on -</p>
+<ul>
+<li>CenomeMemoryAssetCache</li>
+<li>FlotsamAssetCache - file cache on the sim server. The config implies that the disk cache can be temporary.</li>
+<li>GlynnTuckerAssetCache</li>
+</ul>
+<p>&nbsp;</p>
+<h2> grid server view </h2>
+<p>A quick look shows the sims on the grid server seem to be setup the same way.</p>
+<p>ROBUST has this to say -</p>
+<ul>
+<li>AssetService - Has a default asset loader that looks like a file based system. Think there is a database component to.</li>
+<li>AuthenticationService - database.</li>
+<li>AvatarService - Avatar appearance?</li>
+<li>DatabaseService - connection string to grid database.</li>
+<li>FreeswitchService - voice stuff.</li>
+<li>FriendsService -</li>
+<li>GatekeeperService - controls incoming HG users, has dependencies, will list them later if important for the dataflow.</li>
+<li>GridInfoService - supplies info to viewer grid managers when they request it.</li>
+<li>GridService - depends on AssetService for map tiles.</li>
+<li>GridUserService - database.</li>
+<li>HGAsset and HGInventory services, ignore for now.
+<ul>
+<li>HGInventoryService - limited wrapper around InventoryService for HG.</li>
+</ul>
+</li>
+<li>InventoryService -</li>
+<li>LibraryService - The assets in the library, file based.</li>
+<li>LoginService - controls users logins.
+<ul>
+<li>Depends on UserAccountService, GridUserService, AuthenticationService, InventoryService, AvatarService, PresenceService, GridService, SimulationService, LibraryService, UserAgentService, FriendsService.</li>
+<li>Includes URLS to GateKeeper, Home, InventoryServer, AssetServer, ProfileServer.</li>
+</ul>
+</li>
+<li>OpenIdService - just depends on AuthenticationService and UserAccountService.</li>
+<li>PresenceService -</li>
+<li>UserAccountService - database. Depends on AuthenticationService, PresenceService, GridService, and InventoryService.</li>
+<li>UserAgentService - controls outgoing HG users.
+<ul>
+<li>depends on GridUserService, GridService, GatekeeperService. Optionally includes the IP of the LoginService server if it's on a different box.</li>
+</ul>
+</li>
+<li>WifiService - really badly named, it's a brand name for a web front end.</li>
+</ul>
+<p>&nbsp;</p>
+<h2> the big data holders </h2>
+<p>On sims -</p>
+<p>Asset and Inventory services include connection strings to the local database, and URLs to the ROBUST grid server. There is also the cache. Only flotsam cache will be looked at for now.</p>
+<p>On the grid server -</p>
+<p>Asset service includes a local file part, but may include a database part. Inventory service, dunno. Library service is file based, but not important right now.</p>
+<p>Soooo, what is stored where? Which are the real assets? Where's the data, database or file? Where's the cheese? B-)</p>
+<p>The source code is here -</p>
+<p>&nbsp;</p>
+<h3> InventoryService </h3>
+<ul>
+<li>The sim uses OpenSim//Services/Connectors/Inventory/XInventoryConnector.cs
+<ul>
+<li>Looks for it's ROBUST URL.</li>
+<li>Has a bunch of methods that just wrap ROBUST URL/xinventory POST requests.</li>
+</ul>
+</li>
+</ul>
+<p>Question - What does the sim use it's InventoryService database connection string for? Perhaps that's only needed for when the sim is not using ROBUST?</p>
+<ul>
+<li>ROBUST uses OpenSim/Server/Handlers/Inventory/XInventoryInConnector.cs (the IN connector)
+<ul>
+<li>Looks for config entry [InventoryService] LocalServiceModule, which in this case is OpenSim/Services/InventoryService/XInventoryService.cs.</li>
+<li>Loads that module, then registers a POST handler.</li>
+<li>The POST handler finds out which command was requested, and hands that off to the method that deals with that command.</li>
+<li>The method is a wrapper around suitable methods in the LocalServiceModule. The wrapper method encodes results for sending back as the POST reply as more XML.</li>
+</ul>
+</li>
+<li>OpenSim/Services/InventoryService/XInventoryService.cs
+<ul>
+<li>Looks for it's database connection string.</li>
+<li>Opens a database connection.</li>
+<li>Waits for the IN connector to invoke it's methods.</li>
+<li>Likely other things besides this IN connector can load this code and call it for other Inventory services.</li>
+</ul>
+</li>
+</ul>
+<p>Hmmm, according to OpenSim/Region/CoreModules/ServiceConnectorsOut/Inventory/InventoryCache.cs -&gt; CacheInventoryServiceURL() there may already be a mechanism in place to use other inventory servers PER USER. For HG I think. Makes sense. B-)</p>
+<p>&nbsp;</p>
+<h3> AssetService </h3>
+<ul>
+<li>The sim uses - OpenSim/Services/Connectors/Asset/AssetServiceConnector.cs
+<ul>
+<li>Looks for it's ROBUST URL.</li>
+<li>Registers the "dump asset" console command.</li>
+<li>Has a bunch of methods that just wrap ROBUST URL/asssets GET, DELETE, and POST requests.
+<ul>
+<li>They check the cache first, do the request, and keep the cache up to date.</li>
+<li>Some make a handler() call. Not sure what that is.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>OpenSim/Framework/AssetLoader/Filesystem/AssetLoaderFileSystem.cs
+<ul>
+<li>See the description for the ROBUST version of this.</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>flotsam cache - OpenSim/Region/CoreModules/Asset/FlotsamAssetCache.cs</li>
+</ul>
+<ul>
+<li>ROBUST uses OpenSim/Server/Handlers/Asset/AssetServerConnector.cs (the IN connector)
+<ul>
+<li>Looks for config entry [AssetService] LocalServiceModule, which in this case is OpenSim/Services/AssetService/AssetService.cs.</li>
+<li>Loads that module, then registers GET, DELETE, and POST handlers.</li>
+<li>Those handlers override Handle(), which just wraps calls to the LocalServiceModule in response to HTTP GET, DELETE, and POST requests.</li>
+</ul>
+</li>
+<li>OpenSim/Services/AssetService/AssetService.cs
+<ul>
+<li>Looks for it's database connection string.</li>
+<li>Opens a database connection.</li>
+<li>Registers the "show digest" and "delete asset" console commands.</li>
+<li>Looks for DefaultAssetLoader, which in this case is OpenSim/Framework/AssetLoader/Filesystem/AssetLoaderFileSystem.cs
+<ul>
+<li>Default assets are things like the stuff in the inventory Library folder, and basic things like the sounds that the viewer makes.</li>
+<li>These are on disk assets. The library has it's own pointers to this data.</li>
+<li>Note than these default assets have to be on the grid AND on each sim server. There is a note that OpenSim intends to fix this bug. This is not good for the idea of moving freebies to the library. B-(</li>
+</ul>
+</li>
+<li>Has a bunch of virtual methods that are thin wrappers around database calls.</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>OpenSim/Framework/AssetLoader/Filesystem/AssetLoaderFileSystem.cs</li>
+</ul>
+<p>&nbsp;</p>
+<h3> Users of these services </h3>
+<p>The above is what tracing things from the configuration files gets you. But this is C#, an object oriented programming language. Like most such languages, it's carefully designed to hide implementation details from the programmer. Which is fine, unless it's the details that you really want to know. Then it sucks, and you sometimes have to understand the deep magic, and do a lot of searching and head scratching to figure things out.</p>
+<p>So, that's the provided frame work, let's see if we can sort out how that frame work is used, and if anything steps outside of that frame work.</p>
+<p>There is still a large piece of the puzzle missing. The above services only seem to deal with the metadata for assets, not with the actual data.</p>
+<p>&nbsp;</p>
+<h3> database </h3>
+<p>prims is the prims in the sim. primshapes is their shapes. primitems is the content of the sim prims.</p>
+<p>prims.RegionID prims.UUID == primshapes.UUID But what about primitems? That has (takes a deep breath) itemID, primID, assetID, and parentfolderID. primID seems to be exactly the same as parentfolderID. And indeed prims.UUID == primitems.primID. itemID and primID are keys, itemID is the primary. primitems.assetID=assets.id</p>
+<ul>
+<li>delete from primshapes left join prims on prims.uuid = primshapes.uuid where prims.RegionUUID='75e91aa0-e9e4-406e-a85e-1bab7c55301c';</li>
+<li>delete from primitems left join prims on primitems.primID = prims.uuid where prims.RegionUUID='75e91aa0-e9e4-406e-a85e-1bab7c55301c';</li>
+<li>delete from prims where RegionUUID='75e91aa0-e9e4-406e-a85e-1bab7c55301c';</li>
+</ul>
+<p>Primitems is only metadata, where is the actual data? Is this what itemID and/or assetID are all about? Primshapes has a Texture blob, but is it all the face textures that go into a prim?</p>
+<p>inventoryitems has - inventoryID and assetID (also avatarID and groupID). Oddly enough it has a groupOwned flag to. I thought inventory would only be owned by the person who's inventory it is in, but I have seen things in my own inventory owned by others. Once more, it's only metadata. InventoryID is the primary key.</p>
+<p>It appears all roads lead to Rome .. er the assets database. One ginormous amorphous blob of all our stuffs. It has some metadata, an id, and a data blob, the contents of the data blobs on the ones I have seen look to be about the correct size for being the actual data for the asset. id is the primary key. There still might be a file system as well? As a cache only? The assets table on sim servers seems to just be the default assets. The grid server assets table is almost 2 million records, or perhaps only half a million, the system gave two very different counts. Could be where all the damn asset data is stored. B-(</p>
+<p>The grid prims table only has assets for the grid sims, plus a few others that are old sims, which got deleted from the regions table automatically I think.</p>
+<p>Prims table is all the prims in the grid sims. Prim shapes is data about those prims. Primitems is the contents of those prims. Assets stores stuff for primitems.</p>
+<p>Umm, things that used to be in the sim get into the OAR? The new sims I created to test OS 0.7.2 now have stuff in their prim* tables from people that have not logged on. I copied them from Sandbox using OARs. It seems to be true, but why only one or three objects? I don't think OARs populated prim* tables on 0.7.1.</p>
+<p>NOTE - it takes a loooong time to search the assets database for a name.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h4> Sim assets </h4>
+<p>Sim server opensim.prims.RegionUUID and UUID</p>
+<p>Sim server opensim.prims.UUID -&gt; Sim server opensim.primshapes.UUID (one to one) The actual prim shape.</p>
+<p>Sim server opensim.prims.UUID -&gt; Sim server opensim.primitems.primID (one to many) The meta data for the prims contents.</p>
+<p>Sim server opensim.primitems.assetID -&gt; Grid server opensim.assets.id (one to one) The actual data for the prims contents.</p>
+<p>prims.SceneGroupID seems to be what ties a linkset together.</p>
+<p>Primshapes has two binary blobs, one called Texture, the other called ExtraParams.</p>
+<p>primshapes.ExtraParams includes flexi (various flexi parameters), light (local light parameters), sculpt (type, sculptMapTextureUUID), and projection (projectionTextureUUID, FOV, focus, amb).</p>
+<p>primshapes.Texture is an OpenMetaverse library binary object that includes data for the textures and colours on each prims side. primshapes.Texture includes texture UUIDs, directly stored as 16 bytes, plus the other texture information, stared as binary, some of it stored as bit fields. For prims with more than one texture, more copies of this data is stored. OpenMetaverse library is included in OpenSim as a binary, no source, but I found the source, just not sure which version.</p>
+<p>I'm assuming for the moment that actual texture data is all in the grids assets table, probably cached on the sim server using flotsam. In theory textures have to go into inventory first before they are applied to prims. In practice, OARs can bypass that.</p>
+<p>&nbsp;</p>
+<h4> Inventory assets </h4>
+<p>All on the grid server.</p>
+<p>opensim.inventoryitems.inventoryID, avatarID, and parentFolderID</p>
+<p>opensim.inventoryitems.assetID -&gt; assets.id (one to one) The actual data for the inventory.</p>
+<p>opensim.inventoryfolders.folderID, agentID, and ParentFolderID</p>
+<p>This seems pretty straight forward.</p>
+<p>&nbsp;</p>
+
+<img src="Grid_data_flow.png" alt="Grid data flow"/>
+
+<p>&nbsp;</p>
+<h2> Experiments </h2>
+<p>&nbsp;</p>
+<h3> Using a new assetService on an existing sim server. </h3>
+<p>I tried configuring my home sim server to have it's own ROBUST server, and the sim running there to use it only for AssetService. The immediate result was horribly correct. It can't have been that easy. In the end, it was not that easy. It had the meta data about assets, but the assets data was still on the grid server. The sim shows up on the map as white. I was unable to rez things from inventory, but could create new stuff, and even move objects to the next sim running on someone else's server. Everything else seemed to be working fine, though one person (running on a very underpowered computer) had troubles rezzing herself, and switching back to the grid AssetService seemed to fix that. On the other hand, another person rezzed fine. Both these people where connecting to my home sim server from some other place on the planet than my home. The tests where not exhaustive, but the inability to rez from inventory was a show stopper. Something needs to be fixed for that to work. The fact that it still stored the assets data on the grid server means it was a failed experiment, as that's the primary goal.</p>
+<p>Refinements of that experiment would be to see what happens when a new sim is built up within that configuration from newly created prims. What happens during an OAR load? Will the new assets be stored locally, or sent to the grid server, or will it just not work?</p>
+<p>&nbsp;</p>
+<h3> Using a different InventoryService for an existing / new user </h3>
+<p>This is more likely to succeed, as it's a similar mechanism to that used by HG, a pointer to an external InventoryService is stored with the HG users record on the grid they HGed to.</p>
+<p>UserAccounts.ServiceURLs has "HomeURI= GatekeeperURI= InventoryServerURI= AssetServerURI=", or blank, or NULL. It either has to be empty, or properly filled out. They are normal service URLs as used by ROBUST. I think they are only involved in HG. Only one person in the IG database has those filled out, I think that was a test Rizzy was doing. Not sure what HomeURI is, but the others look like the usual ROBUST services. Though GateKeeper is for incoming users? Wonder what HGers get if they are stored in this database table?</p>
+<p>HomeURI is the URI to the UserAgent service on their home grid. It's used to authenticate them with their home grid, and to form the URL part that is added to their name in world.</p>
+<p>Hmmm, does not look like GatekeeperURI is actually used. shrugs</p>
+<p>&nbsp;</p>
+<h3> Trying to make a new sim using an old sims UUID on a different server </h3>
+<p>In theory this should not work, since the prim metadata is on the old sim server, and not accessible from the new server.</p>
+<p>&nbsp;</p>
+<h3> Load an OAR that includes a texture that is NOT in anyone's inventory, to see where it ends up. </h3>
+<p>I'll have to create a fake texture first, then see if I can fake an OAR with that texture.</p>
+<p>Should create a sim with just a test prim in it, with the default texture. Save the OAR. Then see if I can insert a faked texture onto that prim in the OAR.</p>
+<p>The terrain texture might be a good choice to experiment with to, they are easily changed in the OAR, and stored in the OAR. Their UUIDs are stored in the regionsettings table.</p>
+<p>&nbsp;</p>
+<h2> notes </h2>
+<p>Just hijacking my own page here for a moment - The console uses the&nbsp;? key to show help, no matter where you type it. So&nbsp;? can't be use as part of a name or other arbitrary text. The offending lines are in OpenSim/Framework/Console/LocalConsole.cs starting at line 398.</p>
+<p>I just woke up and had an idea, it might turn out to be crap once I have actually thought about it. lol</p>
+<p>One of the biggest problems is that sim asset data is spread between the sim server and the grid server, this makes things hard. We can abuse the cache mechanism. Write a cache module that stores sim asset data on the sim server, in a format that matches the rest of OMG. It's not really a cache though, it's the new sim asset database. Have the sim server tell the grid server that it's OK to delete stuff from the asset server, it has it now. On the grid server side, have a "last accessed" time stamp on the assets database. Archive stuff that's not been used for awhile. Actually delete stuff if there's no inventory pointers to it, AND sims using it have said it's OK to delete. Adding some reference counting to that database might help this process to.</p>
+<p><br /> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</p>
+</body>
+</html>

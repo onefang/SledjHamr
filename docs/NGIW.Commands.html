@@ -1,0 +1,45 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<p>In a virtual world there are many places where an actor (either an avatar directed by a human, an avatar directed by a program (bot), or a scripted object) wants to do something to an object. Something other than just directly change a property of the object. The LSL programming model is that scripts react to events. So I propose we unify commands, LSL events and REST by manipulating even queues.</p>
+<p>&nbsp;</p>
+<h2> Proposal </h2>
+<p>If <a href="http://sim.ulat.or/obj/">http://sim.ulat.or/obj/</a><strong>oid</strong> is the url to some object with id <strong>oid</strong>, and we have a http connection to <a href="http://sim.ulat.or">http://sim.ulat.or</a> then</p>
+<ul>
+<li>PUT /obj/<strong>oid</strong>/eq -- adds a new event to the queue (at the end)</li>
+<li>PUT /obj/<strong>oid</strong>/eq/0 -- adds a new event to the queue at the <strong>beginning</strong></li>
+<li>PUT /obj/<strong>oid</strong>/eq/9 -- same behavior as PUT /obj/<strong>oid</strong>/eq</li>
+<li>GET /obj/<strong>oid</strong>/eq -- returns the full event queue</li>
+<li>PUT /obj/<strong>oid</strong>/eq/<strong>eventid</strong> -- changes the event (or adds one) with id <strong>eventid</strong></li>
+<li>GET /obj/<strong>oid</strong>/eq/<strong>eventid</strong> -- returns the event with id <strong>eventid</strong> or an error</li>
+<li>GET /obj/<strong>oid</strong>/eq/0 -- returns the first event from the queue or an error</li>
+<li>GET /obj/<strong>oid</strong>/eq/9 -- returns the <strong>last</strong> event in the queue</li>
+<li>DELETE /obj/<strong>oid</strong>/eq/<strong>eventid</strong> -- removes an event from the queue and returns it</li>
+<li>DELETE /obj/<strong>oid</strong>/eq/0 -- removes the first event from the queue and returns it, or returns an error</li>
+</ul>
+<p>And maybe</p>
+<ul>
+<li>PUT /obj/<strong>oid</strong>/eq -- add a bunch of events to a queue</li>
+<li>PUT /eq -- add a bunch of events to a bunch of objects?</li>
+</ul>
+<p>&nbsp;</p>
+<h2> What a PUT really sends to the server </h2>
+<p>Supose we are telling the server about the avy touching an object. The actual text that gets sent might look like:</p>
+<pre>   PUT /obj/<strong>oid</strong>/eq HTTP/1.1
+   Host: sim.ulat.or
+   Content-Type: application/json
+   Content-Length: xxxx
+   
+   {"touch_start":{"force":13,"avy":"uuid","time":1311663233}}
+</pre>
+<p>So you can see it is fairly heavy weight compared to a tuned command language. I will investigate what subsequent requests look like when using the http 1.1 persistent connection features. At the worst the http overhead can be amortized across many commands by using the last two forms of request. The last would look like:</p>
+<pre>   PUT /eq HTTP/1.1
+   Host: sim.ulat.or
+   Content-Type: application/json
+   Content-Length: xxxx
+   
+   [{command1...},{command2...},...]
+</pre>
+</body>
+</html>

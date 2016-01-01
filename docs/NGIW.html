@@ -1,0 +1,49 @@
+<html>
+<head>
+</head>
+<body bgcolor="black" text="white" alink="red" link="blue" vlink="purple">
+<p>See also <a href="SledjHamr.html">SledjHamr</a></p>
+<p>Random thoughts about Next Generation Immersive Web, or whatever we call it.</p>
+<p>Here I want to indicate a possible design direction. The buzzword compliant summary is HTTP 1.1, REST and JSON.</p>
+<p>I don't want to descend into the actual messy details here, so I will make some simplifications. I will assume a simplified world where there are only two kinds of things, boxes and textures. Boxes have a position, a rotation, a size, and a single texture. The software architecture will be simplified to two elements of software, the simulator and the client.</p>
+<p>Suppose the simulator is at <a href="http://simulat.or/sim01">http://simulat.or/sim01</a> .</p>
+<p>Then, per usual REST design, to ask about box 104, the client would "GET /sim01/object/b104". Similar to opening <a href="http://simulat.or/sim01/object/b104">http://simulat.or/sim01/object/b104</a> in a web browser.</p>
+<p>The sample response might be</p>
+<pre>   {   "at":1000,
+       "id":"b104",
+       "p":[1,1,1],
+       "r":[0,0,0,0],
+       "s":[0.5,0.5,0.5],
+       "t":"/sim01/texture/t104" }
+</pre>
+<p>This is a really important data structure, it is the representation that forms part of the REST acronym. Since we are talking about a simulator, it isn't really complete to say an object has a certain position. In a simulator all properties of objects are dependant on time. The "at" field encodes some time representation. Probably something like Unix time * 1000, aka the number of miliseconds since 1970 UTC. The "id" field is the name of the object. The "p" field is the position encoded as a JSON array of 3 numbers, the "r" the rotation (quaternion) encoded as a JSON array of 4 numbers, the "s" the size encoded as a JSON array of 3 numbers, and "t" is the texture.</p>
+<p>Since we are talking to a web server, and since we want to sometimes reference textures from other places than the simulator, the value of the texture is a URL. In this case a relative URL that leaves out the server, thus meaning the full URL to the texture is "<a href="http://simulat.or/sim01/texture/t104">http://simulat.or/sim01/texture/t104</a>". If the client needs the texture it can do a GET of "<a href="http://simulat.or/sim01/texture/t104">http://simulat.or/sim01/texture/t104</a>". There are ways to further compress this information, but let's not fix what isn't broken.</p>
+<p>Supose the user moved the box up 1 meter by some manipulation of the client. The client would "PUT /sim01/object/b104" with the data</p>
+<pre>   {   "at":1001,
+       "id":"b104",
+       "p":[1,1,2],
+       "r":[0,0,0,0],
+       "s":[0.5,0.5,0.5],
+       "t":"/sim01/texture/t104" }
+</pre>
+<p>Always transfering the full representation of an object could be wastefull and error prone so I slightly bend REST. I will use POST to an object to transmit only the changed fields. So "POST /sim01/object/b104" with the data</p>
+<pre>   {   "at":1001,
+       "id":"b104",
+       "p":[1,1,2]  }
+</pre>
+<p>would cause the same change in the simulator state.</p>
+<p>To get the current state of the world "GET /sim01/object" would reply with all the objects. In this case it would be a JSON array of JSON objects similar to the first example above:</p>
+<pre>   [   {"at":999,"id":...}, {"at":999,...} ... ]
+</pre>
+<p>But, look what happens when we understand that the reply is using chunked encoding. The simulator might not actually ever finish sending the state of the world. The client might get</p>
+<pre>   [   {"at":999,"id":...}, {"at":999,...},
+</pre>
+<p>in the first chunk, and more</p>
+<pre>   {"at":1000,...}, {"at":1001,...}, ...
+</pre>
+<p>in the second chunk. And so forth. Again, sending all the fields of all the objects, even for just the changed objects is wastefull. I see a few ways to go.</p>
+<p>If the server knows it has sent a full description of an object to a client, then future updates would, like the POST, only include the changed parts of the object.</p>
+<p>Alternatively, lowering the load on the server, the client closes the "GET /sim01/object" connection at some point, and does "GET /sim01/object?delta". At that point only updates are ever sent. If the client sees a change to some object it doesn't recognize, is opens a second connection and requests "GET /sim01/object/b999" for example to get the full description.</p>
+<p>The third alternative is that all the server ever sends in response to "GET /sim01/object" is a stream of changes. If the client doesn't have enough information to render an object, it can query the individual object as in the first example.</p>
+</body>
+</html>
