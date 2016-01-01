@@ -1,4 +1,4 @@
-Refer to - http://www.infinitegrid.org/drupal/content/ClientHamr
+Refer to - docs/ClientHamr.html
 
 ClientHamr is the concept that we can apply the unix philosophy to the
 viewer.  Use individual tools that are good at their job to split off

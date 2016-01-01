@@ -1,4 +1,4 @@
-Refer to - http://www.infinitegrid.org/drupal/content/LuaSL_New_scripting_engine
+Refer to - LuaSL_New_scripting_engine.html
 
 LuaSL is a Lua based LSL scripting engine that will aim for LSL
 compatibility first, then adding Lua extensions.  It aims to replace the
