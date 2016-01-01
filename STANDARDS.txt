@@ -1,0 +1,128 @@
+In a non experimental project, this document would describe the coding
+standards used.  This is experimental code, we don't have any standards
+yet.  Not even any standard language.  For the previous Java version of
+matrix-RAD, I referenced a well known Java coding standard, and
+documented the differences.  There's still some value in that old
+standard, we can just ignore the Java specific bits.
+
+In the end, we want to be language agnostic.  By using sockets / pipes /
+stdin/out / etc, and the Unix philosophy of little tools you hook
+together that each do one job well.  So we really don't care how badly
+any given tool is written, so long as it works.  Some of them will be
+written be strangers across the Internet.  This does need strong
+communication standards though, which is what Nails is all about.
+
+We do want to be secure though.  So eventually the non experimental
+project this will grow into should have a core of well written code,
+written to a standard.  Lacking any standard for this experimental
+version, this document will just have some random notes about style and
+standards.
+
+
+Coding standards
+----------------
+
+I want to use C and Lua, with assembler for speed critical parts.  Speed
+is an important issue, and these three are the best in their class for
+speed.  When used correctly, all three can also keep the code size down,
+which is also important.  Obviously security will be important for the
+non experimental version, so keep that in mind.
+
+So far Lua as a prototyping language has been working well.  So I can
+see us roughing code out in Lua to start with, then rewriting it in C if
+needed, then assembler if more speed is needed.
+
+On the other hand, we do want full functionality to be available to high
+level scripting languages.  While Lua is the chosen language, there's
+been some success translating to and from Lua which may help us be more
+agnostic here.  There's others working on translating things to Lua,
+based on the theory that since it's the fastest scripting lagnuage, that
+might help speed up other scripting languages.
+
+In particular, translating LSL into Lua has so for been working well.  
+The parts that can be benchmarked soo far are very fast indeed, making
+SL and OS look like the crippled snails that they are.  Also, there's
+some evidence that we might be able to translate Lua into ECMAScript to
+run in web browsers, or run a Lua VM inside the ECMAScript VM.  
+Alledgedly, while the scripts run slower than LuaJIT can run them, they
+are still quite fast compared to ECMAScript.  We need this to support
+legacy web browsers, which decided long ago to standardise on
+ECMAScript.  Alice loves her some JavaScript and node.js.
+
+We should allow early experimental work to be written in any language as
+well.  With the proviso that if it becomes a core part later, it should
+get rewritten in a combination of Lua, C, and assembler.
+
+
+Documentation standards
+-----------------------
+
+This project started life as design documents on a MediaWiki based web
+site, using MediaWiki markup.  Those design documents where migrated to
+the Drupal system that replaced the site.  At this point every one
+wanted to use a different markup syntax.  lol
+
+I solved this by installing a few markup systems, but the majority of it
+got written as what Drupal refers to as "simple formatting", which
+basically allows the use of certain HTML tags, plus a few nicities.
+
+Eventually code started to get written by me, I put it on GitHub.  At
+around the same time, I was busy transferring the Team Purple website
+from individual web applications to SourceForge.  Team Purple are the
+developers of the Imprudence and Kokua viewers.  Later SourceForge
+turned evil, so I started looking for other project hosting options.  
+GitHub has a wiki part, but they squeeze you into a tiny column in the
+middle of the web page, and you can't do colours.  BitBucket (the other
+major project hosting site used by Team Purple) seems to want to sell
+you JIRA, so might also not be suitable.  In either case, they both
+might turn evil as well.  Can't find a decent project hoster, sigh.
+
+It looks like it helps to be generic, instead of constantly converting
+between each of these markup formats each time we change hosting system.  
+All of these markup systems get parsed by active code somewhere at
+viewing time, to get translated into HTML+CSS+JavaScript that is sent to
+your browser.  All of the documents are static.  Sure, matrix-RAD
+included a worlds first active manual, you could test out matrix-RAD
+commands right there in the docs, but we are going a different way this
+time.  We are no longer living in the web browser, but replacing it with
+a virtual world, that might happen to include web pages on prims, but
+that's not our main thrust for UI stuff.
+
+Sooooo, to avoid a lot of work, how about we just make the documentation
+static HTML web pages, and be done with it?  Markup systems are just a
+way to make HTML more palatable to ordinary users, but ordinary users
+are not writing the design documentiation and such.  They all get
+translated to HTML, so let's just write raw HTML ourselves.  Keep it
+simple, no fancy CSS or Javascript shit.  So we avoid markup, we avoid
+having to translate from markup to markup, and we avoid the rendering
+step of translating markup to HTML.  We avoid having to parse the
+documentation at all, just send it to any old web browser.
+
+In this way, we can just throw the basic documentation up on any old web
+server.  Enough for people to learn about it, get interested, and get it
+up and running.  People editing this stuff could just use any HTML
+editor if they like, including translating their favourite markup to HTML.
+
+Currently there's ordinary text files as well.  A few of those should
+stay as ordinary text, but some (or most) could get converted to HTML,
+then linked in to the rest.  Also, I should link up the existing pages
+now, some more internal navigation.
+
+
+On the other hand, once they have the system running, there's -
+
+Internal documentation standards
+--------------------------------
+
+matrix-RAD included plans for being able to edit down to the code level
+from within the web browser running matrix-RAD apps.  SL and OS include
+world building tools you use from inside the world, including editing of
+scripts.  So SledjHamr is no different, it will include tools you can
+use from inside the world, to edit everything about the world.  Which
+should include stuff like the matrix-RAD JavaDocs extensions to help
+self document code and other fancy things.  Obviously this will include
+coding standards, and tools to help with those standards.
+
+Once things start being less experimental, then we can decide how that
+all works, and the coding standards to suit.
+
