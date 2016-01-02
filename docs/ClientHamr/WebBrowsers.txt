@@ -1,0 +1,74 @@
+Web browsers are a fact of life, both in and outside of the virtual
+world.  Inside the world, SL people love to play youtube videos on their
+virtual big screen TVs to show their friends.  Business people want to
+gather around a web browser at meetings.  MOAP is a thing.  Other social
+media is a thing, most of it web based, and people might want to share a
+tweet by showing their virtual laptop to their virtual friends in the
+same virtual room.  Outside of the world, SL and OS based grids have
+always used a web page for their front screen in viewers.  Some of the
+tools are web based.
+
+So we need a web browser that can run on meshes and prims, as well as in
+windows (separate or internal windows).  The problems are (legion) ...
+
+
+Web rant
+--------
+
+Damn the web sucks.
+
+This bit will be filled in next time I feel like ranting about the web,
+but damn it sucks really badly.
+
+Bloated, slow, horrid, inconsistent, over complicated, ... , it sucks.
+
+
+Less of a web rant
+------------------
+
+OK, so in typical SL based viewers, the web browser component makes up
+about one third of the entire viewer package.  At first, when Java in
+the web browser was more of a thing, matrix-RAD tried to work with the
+web browser.  Now we are (hopefully) designing the next big thing to
+replace the web, so we get to do things differently.  So now we can
+(hopefully) treat the web as a second class citizen that we begrudgingly
+support as a legacy thing.  Note that we are proudly using HTTP as the
+bulk transport agent, it's the web content standards that suck.
+
+If matrix-RAD was any indication, I can replace everything that a fully
+bloated web browser can do, in something the size of a typical web page
+of today, and STILL be better!  lol
+
+
+Actual plans
+------------
+
+So I think we could use multi flavours of web browser.
+
+First of all, try to use and encourage the matrix-RAD style stuff as the
+UI of choice for in world stuff.  It should work across the network
+transparently as matrix-RAD does.  This was my HTML replacement that
+worked within web pages.  Now we can dispense with the web pages all
+together.  The original matrix-RAD included a plan for a translation
+layer, any web browser that didn't like Java could get a "legacy" simple
+web page version.  We could do something similar, or go up a step and
+translate Lua into ECMAScript.
+
+Include something small like Dillo or NetSurf as the built in web
+browser.  It should be able to spread itself across in world objects,
+meshes and prims, as well as run in internal or external windows.
+
+As the next step up, an optional module could replace Dillo / NetSurf
+with a bigger browser component, based on one of the main ones, uzbl for
+instance.  Hopefully it can be spread across an in world object somehow.
+
+Finally, the user can always decide to show any given URL, or already
+displayed web page, on an external web browser of their choice, with
+their default browser being the top choice.  Which naturally should be
+able to use the in world matrix-RAD type stuff via the translation layer
+(uzbl should be able to as well, NetSurf maybe, if I remember they where
+adding a ECMAScript engine, or had already?  Dillo I don't think does
+ECMAScript at all).
+
+
+
