@@ -544,7 +544,7 @@ static Eina_Bool _makeFiles(void *data)
   ecore_job_add((Ecore_Cb) _makePhysics,  ourGlobals);
 //  ecore_timer_add(0.1, _makePhysics, ourGlobals);
 
-//  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
+  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
   return ECORE_CALLBACK_CANCEL;
 }
