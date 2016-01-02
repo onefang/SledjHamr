@@ -126,3 +126,8 @@ coding standards, and tools to help with those standards.
 Once things start being less experimental, then we can decide how that
 all works, and the coding standards to suit.
 
+
+Communication standards
+-----------------------
+
+That's what Nails is all about, so see the docs for that.
