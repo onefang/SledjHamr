@@ -70,6 +70,9 @@ locale_d = baseDir .. '/locale'
 -- On the other hand, there's a more direct way to get to environment variables, it would fail to.
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
+-- Make sure any old servers are killed off.
+os.execute('./killem.sh')
+
 CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
