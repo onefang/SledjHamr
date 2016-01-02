@@ -34,7 +34,6 @@ servers.
 
 
 int logDom = -1;	// Our logging domain.
-static Eina_Strbuf *clientStream;
 
 
 static Eina_Bool _sleep_timer_cb(void *data)
@@ -174,12 +173,6 @@ void send2server(script *me, const char *message)
     }
 }
 
-static Eina_Bool _add(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Add *ev)
-{
-    ecore_con_client_timeout_set(ev->client, 0);
-    return ECORE_CALLBACK_RENEW;
-}
-
 static void _compileCb(LuaCompiler *compiler)
 {
   compileMessage *message = NULL, *safe = NULL;
@@ -196,6 +189,7 @@ static void _compileCb(LuaCompiler *compiler)
     free(message);
   }
 
+//PD("Compiled %s, bug count %d", compiler->file, compiler->bugCount);
   if (0 == compiler->bugCount)
     sendBack(compiler->client, compiler->SID, "compiled(true)");
   else
@@ -224,107 +218,69 @@ static void _compileCbSingle(LuaCompiler *compiler)
     printf("Compile of %s failed!\n", compiler->file);
 }
 
-static Eina_Bool _data(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Data *ev)
+static Eina_Bool parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
-    gameGlobals *ourGlobals = data;
-    char buf[PATH_MAX];
-    char SID[PATH_MAX];
-    const char *command;
-    char *ext;
+  gameGlobals *ourGlobals = data;
+  char buf[PATH_MAX];
 
-    eina_strbuf_append_length(clientStream, ev->data, ev->size);
-    command = eina_strbuf_string_get(clientStream);
-    while ((ext = index(command, '\n')))
+PW("COMMAND - %s", command);
+    if (0 == strncmp(command, "compile(", 8))
     {
-	int length = ext - command;
+	char *temp;
+	char *file;
+	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
 
-	strncpy(SID, command, length + 1);
-	SID[length] = '\0';
-	eina_strbuf_remove(clientStream, 0, length + 1);
-	ext = index(SID, '.');
-	if (ext)
-	{
-	    ext[0] = '\0';
-	    command = ext + 1;
-	    if (0 == strncmp(command, "compile(", 8))
-	    {
-		char *temp;
-		char *file;
-		LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+	strcpy(buf, &command[8]);
+	temp = buf;
+	file = temp;
+	while (')' != temp[0])
+	    temp++;
+	temp[0] = '\0';
 
-		strcpy(buf, &command[8]);
-		temp = buf;
-		file = temp;
-		while (')' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-
-		eina_clist_init(&(compiler->messages));
-		compiler->file = strdup(file);
-		compiler->SID = strdup(SID);
-		compiler->client = ev->client;
-		compiler->doConstants = FALSE;
-		compiler->parser = (compileCb) compileLSL;
-		compiler->cb = _compileCb;
-		compileScript(compiler, COMPILE_THREADED);
-	    }
-	    else if (0 == strncmp(command, "run(", 4))
-	    {
-		char *temp;
-		char *file;
-		script *me;
-
-		strcpy(buf, &command[4]);
-		temp = buf;
-		file = temp;
-		while (')' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		me = scriptAdd(file, SID, send2server, ourGlobals);
-
-		me->client = ev->client;
-		eina_hash_add(ourGlobals->names, me->fileName, me);
-		me = getScript(SID);
-		if (me)
-		{
-		    runScript(me);
-		    releaseScript(me);
-		}
-	    }
-	    else if (0 == strcmp(command, "exit()"))
-	    {
-		PD("Told to exit.");
-		ecore_main_loop_quit();
-	    }
-	    else
-		send2script(SID, command);
-	}
-
-	// Get the next blob to check it.
-	command = eina_strbuf_string_get(clientStream);
+	eina_clist_init(&(compiler->messages));
+	compiler->file = strdup(file);
+	compiler->SID = strdup(SID);
+	compiler->client = connection;
+	compiler->doConstants = FALSE;
+	compiler->parser = (compileCb) compileLSL;
+	compiler->cb = _compileCb;
+PI("Compiling script %s", file);
+	compileScript(compiler, COMPILE_THREADED);
     }
+    else if (0 == strncmp(command, "run(", 4))
+    {
+	char *temp;
+	char *file;
+	script *me;
+
+	strcpy(buf, &command[4]);
+	temp = buf;
+	file = temp;
+	while (')' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	me = scriptAdd(file, SID, send2server, ourGlobals);
+
+	me->client = connection;
+	eina_hash_add(ourGlobals->names, me->fileName, me);
+	me = getScript(SID);
+	if (me)
+	{
+PI("Running script %s", me->fileName);
+	    runScript(me);
+	    releaseScript(me);
+	}
+    }
+    else if (0 == strcmp(command, "exit()"))
+    {
+	PD("Told to exit.");
+	ecore_main_loop_quit();
+    }
+    else
+	send2script(SID, command);
 
    return ECORE_CALLBACK_RENEW;
 }
-
-static Eina_Bool _del(void *data, int type __UNUSED__, Ecore_Con_Event_Client_Del *ev)
-{
-//    gameGlobals *ourGlobals = data;
-
-    if (ev->client)
-    {
-	PD("No more clients, exiting.");
-	ecore_con_client_del(ev->client);
-	ecore_main_loop_quit();
-    }
-    return ECORE_CALLBACK_RENEW;
-}
-
-//static Eina_Bool _statusTimer(void *data)
-//{
-//  printScriptsStatus();
-//  return ECORE_CALLBACK_RENEW;
-//}
 
 int main(int argc, char **argv)
 {
@@ -363,20 +319,11 @@ int main(int argc, char **argv)
       }
       else if (ecore_con_init())
       {
-	if ((ourGlobals.server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, ourGlobals.address, ourGlobals.port, &ourGlobals)))
+        PD("LuaSL is about to try creating a LuaSL server.");
+	if (openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser))
 	{
-//	    int i;
 	    Eina_Iterator *scripts;
 	    script *me;
-
-	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) _add,  &ourGlobals);
-	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) _data, &ourGlobals);
-	    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) _del,  &ourGlobals);
-	    ecore_con_server_timeout_set(ourGlobals.server, 0);
-	    ecore_con_server_client_limit_set(ourGlobals.server, -1, 0);
-//	    ecore_con_server_timeout_set(ourGlobals.server, 10);
-//	    ecore_con_server_client_limit_set(ourGlobals.server, 3, 0);
-	    clientStream = eina_strbuf_new();
 
 	    result = 0;
 	    compilerSetup(&ourGlobals);
@@ -410,7 +357,6 @@ int main(int argc, char **argv)
   else
     fprintf(stderr, "Failed to init eina!");
 
-//  printf("Falling out of main()\n");
   return result;
 }
 
