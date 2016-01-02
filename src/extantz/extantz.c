@@ -525,6 +525,108 @@ void overlay_add(globals *ourGlobals)
 }
 
 
+// Use jobs to split the init load.  So that the window pops up quickly, with it's background clouds.
+// Then the rest appears a bit at a time.
+static Eina_Bool _makePhysics(void *data)
+{
+  globals *ourGlobals = data;
+
+  if (ephysics_init())
+    ourGlobals->world = ephysicsAdd(ourGlobals);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makeFiles(void *data)
+{
+  globals *ourGlobals = data;
+
+  ecore_job_add(_makePhysics,  ourGlobals);
+//  ecore_timer_add(0.1, _makePhysics, ourGlobals);
+
+//  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makeLove(void *data)
+{
+  globals *ourGlobals = data;
+
+  ecore_job_add(_makeFiles, ourGlobals);
+//  ecore_timer_add(0.1, _makeFiles, ourGlobals);
+
+  PD("About to try connecting to a love server.");
+  reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makeMess(void *data)
+{
+  globals *ourGlobals = data;
+
+  ecore_job_add(_makeLove,  ourGlobals);
+//  ecore_timer_add(0.1, _makeLove, ourGlobals);
+
+  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makeScenery(void *data)
+{
+#if USE_EVAS_3D
+  globals *ourGlobals = data;
+
+  ecore_job_add(_makeMess, ourGlobals);
+//  ecore_timer_add(0.1, _makeMess, ourGlobals);
+
+  // Setup our Evas_3D stuff.
+  ourGlobals->scene = scenriAdd(ourGlobals->win);
+  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+//  ourGlobals->gld->move = ourGlobals->scene->move;
+  evas_object_data_set(elm_image_object_get(ourGlobals->scene->image), "glob", ourGlobals);
+  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals->scene->image), on_pixels, ourGlobals);
+  ourGlobals->scene->clickCb = _onWorldClick;
+#endif
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makeMenus(void *data)
+{
+  globals *ourGlobals = data;
+
+//  ecore_job_add(_makeScenery,  ourGlobals);
+  ecore_timer_add(0.5, _makeScenery, ourGlobals);
+
+  // Gotta do this after adding the windows, otherwise the menu renders under the window.
+  //   This sucks, gotta redefine this menu each time we create a new window?
+  _makeMainMenu(ourGlobals);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool _makePurkle(void *data)
+{
+  globals *ourGlobals = data;
+
+//  ecore_job_add(_makeMenus,  ourGlobals);
+  ecore_timer_add(1.0, _makeMenus, ourGlobals);
+
+  woMan_add(ourGlobals);
+  ourGlobals->purkle     = GuiLuaLoad("purkle",     ourGlobals->mainWindow, ourGlobals->world);
+//  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
+//  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
+
+  // Gotta do this after adding the windows, otherwise the menu renders under the window.
+  //   This sucks, gotta redefine this menu each time we create a new window?
+//  _makeMainMenu(ourGlobals);
+
+  return ECORE_CALLBACK_CANCEL;
+}
+
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
   GLData *gld = NULL;
@@ -554,8 +656,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   elm_config_finger_size_set(0);
   elm_config_scale_set(1.0);
 
-  if (!ephysics_init())
-    return 1;
+// JOB?
+//  if (!ephysics_init())
+//    return 1;
 
   gld = &ourGlobals.gld;
   gldata_init(gld);
@@ -636,34 +739,46 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   init_evas_gl(&ourGlobals);
 
+// JOB?
 #if USE_EVAS_3D
   // Setup our Evas_3D stuff.
-  ourGlobals.scene = scenriAdd(ourGlobals.win);
+//  ourGlobals.scene = scenriAdd(ourGlobals.win);
   // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
-  ourGlobals.gld.move = ourGlobals.scene->move;
-  evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
-  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
-  ourGlobals.scene->clickCb = _onWorldClick;
+//  ourGlobals.gld.move = ourGlobals.scene->move;
+//  evas_object_data_set(elm_image_object_get(ourGlobals.scene->image), "glob", &ourGlobals);
+//  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals.scene->image), on_pixels, &ourGlobals);
+//  ourGlobals.scene->clickCb = _onWorldClick;
 #endif
 
-  ourGlobals.world = ephysicsAdd(&ourGlobals);
+// JOB?
+// JOB?
+//  if (!ephysics_init())
+//    return 1;
+//  ourGlobals.world = ephysicsAdd(&ourGlobals);
 
 //  overlay_add(&ourGlobals);
 //  GuiLuaLoad("test", ourGlobals.mainWindow, ourGlobals.world);
-  woMan_add(&ourGlobals);
-  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
-  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
-  ourGlobals.files = filesAdd(&ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
+
+// JOB?
+//  woMan_add(&ourGlobals);
+//  ourGlobals.purkle     = GuiLuaLoad("purkle",     ourGlobals.mainWindow, ourGlobals.world);
+//  ourGlobals.LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals.mainWindow, ourGlobals.world);
+//  ourGlobals.files = filesAdd(&ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
   // Gotta do this after adding the windows, otherwise the menu renders under the window.
   //   This sucks, gotta redefine this menu each time we create a new window?
-  _makeMainMenu(&ourGlobals);
+//  _makeMainMenu(&ourGlobals);
 
-  // Try to connect to a local love server.
-  serverStream = eina_strbuf_new();
-  reachOut("127.0.0.1", 8211 + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _add, (Ecore_Event_Handler_Cb) _data, (Ecore_Event_Handler_Cb) _del);
+// JOB?
+//  PD("About to try connecting to a love server.");
+//  reachOut("love", "./love", "127.0.0.1", 8211 + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
 
   _on_resize(&ourGlobals, NULL, NULL, NULL);
+//  evas_object_show(ourGlobals.win);
+
+  // TODO - It's still very random if we got clouds straight away or not.  B-(
+//  ecore_job_add(_makePurkle, &ourGlobals);
+  ecore_timer_add(0.5, _makePurkle, &ourGlobals);
 
   elm_run();
   ourGlobals.running = 0;
