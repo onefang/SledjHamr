@@ -16,7 +16,6 @@ typedef struct _gameGlobals gameGlobals;	// Define this here, so LuaSL_threads.h
 
 struct _gameGlobals
 {
-    Ecore_Con_Server	*server;
     Eina_Hash		*names;
     const char		*address;
     int			port;

@@ -33,9 +33,8 @@ typedef struct _gameGlobals
     Evas		*canvas;	// The canvas for drawing directly onto.
     Evas_Object		*bg;		// Our background edje, also the game specific stuff.
     Evas_Object		*edje;		// The edje of the background.
-    Ecore_Con_Server	*serverLuaSL;
-    Ecore_Con_Server	*server;
-    Ecore_Con_Client	*client;	// TODO - Really should be a bunch of these.
+    Connection		*serverLuaSL;
+    Connection		*client;	// TODO - Really should be a bunch of these.
     Eina_Hash		*scripts;
     const char		*address;
     int			port;
@@ -52,7 +51,6 @@ typedef struct _Lscript
 
 
 int logDom = -1;	// Our logging domain.
-static Eina_Strbuf *LuaSLStream;
 static int scriptCount = 0;
 static int compiledCount = 0;
 static struct timeval startTime;
@@ -149,12 +147,14 @@ static void dirList_compile(const char *name, const char *path, void *data)
     }
 }
 
+
 static Eina_Bool _addLuaSL(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
   gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
-  ourGlobals->serverLuaSL = ev->server;
+  PI("LuaSL server added, sending it scripts to compile and run.");
+  ourGlobals->serverLuaSL = ecore_con_server_data_get(ev->server);
 
   // Zero everything.
   eina_hash_free(ourGlobals->scripts);
@@ -191,299 +191,277 @@ char *get_rawline(int fd, long *plen, char end)
 }
 
 
-static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *ev)
+static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
 {
     gameGlobals *ourGlobals = data;
-
     char buf[PATH_MAX];
-    char SID[PATH_MAX];
-    const char *command;
-    char *ext;
+    LoveScript *me;
 
-    eina_strbuf_append_length(LuaSLStream, ev->data, ev->size);
-    command = eina_strbuf_string_get(LuaSLStream);
-    while ((ext = index(command, '\n')))
+PW("COMMAND - %s - %s", SID, command);
+    me = eina_hash_find(ourGlobals->scripts, SID);
+    if (0 == strncmp(command, "compilerWarning(", 16))
     {
-	int length = ext - command;
+	char *temp;
+	char *line;
+	char *column;
+	char *text;
 
-	strncpy(SID, command, length + 1);
-	SID[length] = '\0';
-	eina_strbuf_remove(LuaSLStream, 0, length + 1);
-	ext = index(SID, '.');
-	if (ext)
+	strcpy(buf, &command[16]);
+	temp = buf;
+	line = temp;
+	while (',' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	column = ++temp;
+	while (',' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	text = ++temp;
+	while (')' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	PW("%s @ line %s, column %s.", text, line, column);
+	if (me)
+	    me->warnings++;
+    }
+    else if (0 == strncmp(command, "compilerError(", 14))
+    {
+	char *temp;
+	char *line;
+	char *column;
+	char *text;
+
+	strcpy(buf, &command[14]);
+	temp = buf;
+	line = temp;
+	while (',' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	column = ++temp;
+	while (',' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	text = ++temp;
+	while (')' != temp[0])
+	    temp++;
+	temp[0] = '\0';
+	PE("%s @ line %s, column %s.", text, line, column);
+	if (me)
+	    me->bugs++;
+    }
+    else if (0 == strcmp(command, "compiled(false)"))
+    {
+//	PE("The compile of %s failed!", SID);
+	if (me)
 	{
-	    LoveScript *me;
+	    struct timeval now;
 
-	    ext[0] = '\0';
-	    command = ext + 1;
-	    me = eina_hash_find(ourGlobals->scripts, SID);
-	    if (0 == strncmp(command, "compilerWarning(", 16))
+	    compiledCount++;
+	    if (compiledCount == scriptCount)
 	    {
-		char *temp;
-		char *line;
-		char *column;
-		char *text;
-
-		strcpy(buf, &command[16]);
-		temp = buf;
-		line = temp;
-		while (',' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		column = ++temp;
-		while (',' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		text = ++temp;
-		while (')' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		PW("%s @ line %s, column %s.", text, line, column);
-		if (me)
-		    me->warnings++;
-	    }
-	    else if (0 == strncmp(command, "compilerError(", 14))
-	    {
-		char *temp;
-		char *line;
-		char *column;
-		char *text;
-
-		strcpy(buf, &command[14]);
-		temp = buf;
-		line = temp;
-		while (',' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		column = ++temp;
-		while (',' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		text = ++temp;
-		while (')' != temp[0])
-		    temp++;
-		temp[0] = '\0';
-		PE("%s @ line %s, column %s.", text, line, column);
-		if (me)
-		    me->bugs++;
-	    }
-	    else if (0 == strcmp(command, "compiled(false)"))
-	    {
-//		PE("The compile of %s failed!", SID);
-		if (me)
-		{
-		    struct timeval now;
-
-		    compiledCount++;
-		    if (compiledCount == scriptCount)
-		    {
-			float total = timeDiff(&now, &startTime);
-			PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
-		    }
-		}
-	    }
-	    else if (0 == strcmp(command, "compiled(true)"))
-	    {
-		if (me)
-		{
-		    struct timeval now;
-
-		    compiledCount++;
-		    if (compiledCount == scriptCount)
-		    {
-			float total = timeDiff(&now, &startTime);
-			PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
-		    }
-		}
-		sendForth(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
-	    }
-	    else
-	    {
-		// Send back some random or fixed values for testing.
-		if (0 == strcmp(command, "llGetKey()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
-		else if (0 == strcmp(command, "llGetOwner()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
-		else if (0 == strcmp(command, "llGetPermissionsKey()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
-		else if (0 == strncmp(command, "llRequestPermissions(", 21))
-		    PI("Faked %s", command);
-		else if (0 == strcmp(command, "llGetPos()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
-		else if (0 == strcmp(command, "llGetRot()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
-		else if (0 == strcmp(command, "llGetFreeMemory()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return 654321");
-		else if (0 == strcmp(command, "llGetObjectDesc()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \"\"");
-		else if (0 == strncmp(command, "llGetAlpha(", 11))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return 1.0");
-		else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return 3");
-		else if (0 == strcmp(command, "llGetLinkNumber()"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return 1");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \".readme\"");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
-		else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
-		else if (0 == strncmp(command, "llListen(", 9))
-		{
-		    PI("Faked %s", command);
-		    sendForth(ourGlobals->serverLuaSL, SID, "return %d", random());
-		}
-		else if (0 == strncmp(command, "llSameGroup(", 12))
-		    sendForth(ourGlobals->serverLuaSL, SID, "return true");
-		else if (0 == strncmp(command, "llKey2Name(", 11))
-		{
-		    char *temp;
-
-		    strcpy(buf, &command[12]);
-		    temp = buf;
-		    while (')' != temp[0])
-			temp++;
-		    temp[0] = '\0';
-		    if (0 == strcmp(buf, ownerKey))
-		      temp = ownerName;
-		    else
-		      temp = "Unknown User";
-		    // TODO - Sanitize the name, no telling what weird shit people put in their names.
-		    snprintf(buf, sizeof(buf), "return \"%s\"", temp);
-		    sendForth(ourGlobals->serverLuaSL, SID, buf);
-		}
-		// Send "back" stuff on to the one and only client.
-		// TODO - All of these output functions should just use one thing to append stuff to either local or an IM tab.
-		//        Love filtering out stuff that should not go there.
-		//        Extantz registering any channel it wants to listen to, mostly for client side scripts.
-		//        Extantz is then only responsible for the registered channels, it can do what it likes with them.
-		//        Dialogs, notifications, and other stuff goes through some other functions.
-		else if (0 == strncmp(command, "llOwnerSay(", 11))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		}
-		else if (0 == strncmp(command, "llWhisper(", 10))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		}
-		else if (0 == strncmp(command, "llRegionSay(", 12))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		}
-		else if (0 == strncmp(command, "llSay(", 6))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		}
-		else if (0 == strncmp(command, "llShout(", 8))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		    // TODO - Temporary so we have a place to log stuff from LSL.
-		    PD("SHOUTING %s", command);
-		}
-		else if (0 == strncmp(command, "llDialog(", 9))
-		{
-		    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
-		    else PW("No where to send %s", command);
-		}
-		else if (0 == strncmp(command, "llMessageLinked(", 16))
-		{
-		    Eina_Iterator *scripts;
-		    LoveScript *me;
-
-		    // TODO - For now, just send it to everyone.
-		    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
-		    while(eina_iterator_next(scripts, (void **) &me))
-		    {
-			sendForth(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
-		    }
-		    eina_iterator_free(scripts);
-		}
-		else if (0 == strncmp(command, "llGetNotecardLine(", 18))
-		{
-		    char *notecard, *temp, *line, key[PATH_MAX];
-		    int  lineNo, fd;
-
-		    strcpy(buf, &command[19]);
-		    notecard = buf;
-		    temp = notecard;
-		    while ('"' != temp[0])
-			temp++;
-		    temp[0] = '\0';
-		    while (',' != temp[0])
-			temp++;
-		    while (' ' != temp[0])
-			temp++;
-		    line = temp;
-		    while (')' != temp[0])
-			temp++;
-		    temp[0] = '\0';
-		    lineNo = atoi(line);
-		    snprintf(key, sizeof(key), "%s/Test%%20sim/onefang%%27s%%20test%%20bed/%s", prefix_data_get(), notecard);
-
-		    fd = open(key, O_RDONLY);
-		    if (-1 != fd)
-		    {
-			Eina_Iterator *scripts;
-			LoveScript *me;
-			long len;
-
-			temp = NULL;
-			do
-			{
-			    free(temp);
-			    temp = get_rawline(fd, &len, '\n');
-			    if (temp)
-			    {
-				if (temp[len - 1] == '\n')
-				    temp[--len] = '\0';
-			    }
-			} while (temp && (0 < lineNo--));
-
-			sprintf(key, FAKE_UUID);
-			sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", key);
-
-			// TODO - For now, just send it to everyone.
-			scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
-			while(eina_iterator_next(scripts, (void **) &me))
-			{
-			    if (temp)
-			    {
-			        char buf2[PATH_MAX];
-				int i, j, len = strlen(temp);
-
-				// Escape ' and \ characters.
-				for (i = 0, j = 0; i <= len; i++)
-				{
-				    if ('\'' == temp[i])
-					buf2[j++] = '\\';
-				    if ('\\' == temp[i])
-					buf2[j++] = '\\';
-				    buf2[j++] = temp[i];
-				}
-				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", '%s')", key, buf2);
-			    }
-			    else
-				sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"EndOfFuckingAround\")", key);
-			}
-			eina_iterator_free(scripts);
-			free(temp);
-
-			close(fd);
-		    }
-
-		}
-		else
-		    PI("Script %s sent command %s", SID, command);
+		float total = timeDiff(&now, &startTime);
+		PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
 	    }
 	}
+    }
+    else if (0 == strcmp(command, "compiled(true)"))
+    {
+	if (me)
+	{
+	    struct timeval now;
 
-	// Get the next blob to check it.
-	command = eina_strbuf_string_get(LuaSLStream);
+	    compiledCount++;
+	    if (compiledCount == scriptCount)
+	    {
+		float total = timeDiff(&now, &startTime);
+		PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
+	    }
+	}
+	PD("About to run %s", me->fileName);
+	sendForth(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
+    }
+    else
+    {
+	// Send back some random or fixed values for testing.
+	if (0 == strcmp(command, "llGetKey()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+	else if (0 == strcmp(command, "llGetOwner()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+	else if (0 == strcmp(command, "llGetPermissionsKey()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+	else if (0 == strncmp(command, "llRequestPermissions(", 21))
+	    PI("Faked %s", command);
+	else if (0 == strcmp(command, "llGetPos()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
+	else if (0 == strcmp(command, "llGetRot()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+	else if (0 == strcmp(command, "llGetFreeMemory()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return 654321");
+	else if (0 == strcmp(command, "llGetObjectDesc()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \"\"");
+	else if (0 == strncmp(command, "llGetAlpha(", 11))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return 1.0");
+	else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return 3");
+	else if (0 == strcmp(command, "llGetLinkNumber()"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return 1");
+	else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \".readme\"");
+	else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
+	else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
+	else if (0 == strncmp(command, "llListen(", 9))
+	{
+	    PI("Faked %s", command);
+	    sendForth(ourGlobals->serverLuaSL, SID, "return %d", random());
+	}
+	else if (0 == strncmp(command, "llSameGroup(", 12))
+	    sendForth(ourGlobals->serverLuaSL, SID, "return true");
+	else if (0 == strncmp(command, "llKey2Name(", 11))
+	{
+	    char *temp;
+
+	    strcpy(buf, &command[12]);
+	    temp = buf;
+	    while (')' != temp[0])
+		temp++;
+	    temp[0] = '\0';
+	    if (0 == strcmp(buf, ownerKey))
+		temp = ownerName;
+	    else
+		temp = "Unknown User";
+	    // TODO - Sanitize the name, no telling what weird shit people put in their names.
+	    snprintf(buf, sizeof(buf), "return \"%s\"", temp);
+	    sendForth(ourGlobals->serverLuaSL, SID, buf);
+	}
+	// Send "back" stuff on to the one and only client.
+	// TODO - All of these output functions should just use one thing to append stuff to either local or an IM tab.
+	//        Love filtering out stuff that should not go there.
+	//        Extantz registering any channel it wants to listen to, mostly for client side scripts.
+	//        Extantz is then only responsible for the registered channels, it can do what it likes with them.
+	//        Dialogs, notifications, and other stuff goes through some other functions.
+	else if (0 == strncmp(command, "llOwnerSay(", 11))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	}
+	else if (0 == strncmp(command, "llWhisper(", 10))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	}
+	else if (0 == strncmp(command, "llRegionSay(", 12))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	}
+	else if (0 == strncmp(command, "llSay(", 6))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	}
+	else if (0 == strncmp(command, "llShout(", 8))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	    // TODO - Temporary so we have a place to log stuff from LSL.
+	    PD("SHOUTING %s", command);
+	}
+	else if (0 == strncmp(command, "llDialog(", 9))
+	{
+	    if (ourGlobals->client)  sendBack(ourGlobals->client, SID, command);
+	    else PW("No where to send %s", command);
+	}
+	else if (0 == strncmp(command, "llMessageLinked(", 16))
+	{
+	    Eina_Iterator *scripts;
+	    LoveScript *me;
+
+	    // TODO - For now, just send it to everyone.
+	    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+	    while(eina_iterator_next(scripts, (void **) &me))
+	    {
+		sendForth(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
+	    }
+	    eina_iterator_free(scripts);
+	}
+	else if (0 == strncmp(command, "llGetNotecardLine(", 18))
+	{
+	    char *notecard, *temp, *line, key[PATH_MAX];
+	    int  lineNo, fd;
+
+	    strcpy(buf, &command[19]);
+	    notecard = buf;
+	    temp = notecard;
+	    while ('"' != temp[0])
+		temp++;
+	    temp[0] = '\0';
+	    while (',' != temp[0])
+		temp++;
+	    while (' ' != temp[0])
+		temp++;
+	    line = temp;
+	    while (')' != temp[0])
+		temp++;
+	    temp[0] = '\0';
+	    lineNo = atoi(line);
+	    snprintf(key, sizeof(key), "%s/Test%%20sim/onefang%%27s%%20test%%20bed/%s", prefix_data_get(), notecard);
+
+	    fd = open(key, O_RDONLY);
+	    if (-1 != fd)
+	    {
+		Eina_Iterator *scripts;
+		LoveScript *me;
+		long len;
+
+		temp = NULL;
+		do
+		{
+		    free(temp);
+		    temp = get_rawline(fd, &len, '\n');
+		    if (temp)
+		    {
+			if (temp[len - 1] == '\n')
+			    temp[--len] = '\0';
+		    }
+		} while (temp && (0 < lineNo--));
+
+		sprintf(key, FAKE_UUID);
+		sendForth(ourGlobals->serverLuaSL, SID, "return \"%s\"", key);
+
+		// TODO - For now, just send it to everyone.
+		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
+		while(eina_iterator_next(scripts, (void **) &me))
+		{
+		    if (temp)
+		    {
+		        char buf2[PATH_MAX];
+			int i, j, len = strlen(temp);
+
+			// Escape ' and \ characters.
+			for (i = 0, j = 0; i <= len; i++)
+			{
+			    if ('\'' == temp[i])
+				buf2[j++] = '\\';
+			    if ('\\' == temp[i])
+				buf2[j++] = '\\';
+			    buf2[j++] = temp[i];
+			}
+			sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", '%s')", key, buf2);
+		    }
+		    else
+			sendForth(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"EndOfFuckingAround\")", key);
+		}
+		eina_iterator_free(scripts);
+		free(temp);
+
+		close(fd);
+	    }
+
+	}
+	else
+	    PI("Script %s sent command %s", SID, command);
     }
 
     return ECORE_CALLBACK_RENEW;
@@ -492,25 +470,8 @@ static Eina_Bool _dataLuaSL(void *data, int type, Ecore_Con_Event_Server_Data *e
 static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   gameGlobals *ourGlobals = data;
-  static int count = 0;
 
   ourGlobals->serverLuaSL = NULL;
-
-  // Let it fail a couple of times during startup, then try to start our own script server.
-  count++;
-  if (1 < count)
-  {
-    char buf[PATH_MAX];
-
-    PW("Failed to connect to a script server, starting our own.");
-    sprintf(buf, "%s/LuaSL &", prefix_bin_get());
-    system(buf);
-    count = 0;
-    // TODO - There's also the question of what to do if the connection failed.
-    //        Did the server crash, or was it just the connection?
-    //        Probably gonna need some smarts, for now we just restart all the scripts.
-    //        Which I think gets done on server add.
-  }
 
   // TODO - May want to renew even if it's not running the GUI, but then we still need some sort of "shut down" signal, which we don't need during testing.
 //  if (ourGlobals->ui)
@@ -525,7 +486,7 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
 {
   gameGlobals *ourGlobals = data;
 
-  ourGlobals->client = ev->client;
+  ourGlobals->client = ecore_con_client_data_get(ev->client);
 
   if (ourGlobals->client)
   {
@@ -536,12 +497,11 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
   return ECORE_CALLBACK_RENEW;
 }
 
-
-Eina_Bool clientParser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+static Eina_Bool clientParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
 {
     gameGlobals *ourGlobals = data;
 
-    if (0 == strncmp(command, "events.touch_start", 18))
+    if (0 == strncmp(command, "events.touch_start(", 19))
     {
         Eina_Iterator *scripts;
 	LoveScript *me;
@@ -556,7 +516,7 @@ Eina_Bool clientParser(void *data, Connection *connection, char *SID, char *comm
 	}
 	eina_iterator_free(scripts);
     }
-    else if (0 == strncmp(command, "events.listen", 13))
+    else if (0 == strncmp(command, "events.listen(", 14))
     {
         Eina_Iterator *scripts;
 	LoveScript *me;
@@ -605,11 +565,6 @@ int main(int argc, char **argv)
 
 	if (ecore_con_init())
 	{
-	    LuaSLStream = eina_strbuf_new();
-	    reachOut("127.0.0.1", 8211, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, (Ecore_Event_Handler_Cb) _dataLuaSL, (Ecore_Event_Handler_Cb) _delLuaSL);
-
-	    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser))
-	    {
 		if (ecore_evas_init())
                 {
 		    if (edje_init())
@@ -721,20 +676,30 @@ int main(int argc, char **argv)
 				edje_object_signal_callback_add(ourGlobals.edje, "*", "game_*", _edje_signal_cb, &ourGlobals);
 			    }
 
-			    ecore_main_loop_begin();
-			    PD("Fell out of the main loop");
+			    PD("About to try connecting to a LuaSL server.");
+			    // Try to connect to a local LuaSL server.
+			    reachOut("LuaSL", "./LuaSL", "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser);
 
-			    if (ourGlobals.server)       ecore_con_server_del(ourGlobals.server);
-			    if (ourGlobals.serverLuaSL)  ecore_con_server_del(ourGlobals.serverLuaSL);
+			    PD("Love is about to try creating a love server.");
+			    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser))
+			    {
+				ecore_main_loop_begin();
+				PD("Fell out of the main loop");
+
+//				if (ourGlobals.server)       ecore_con_server_del(ourGlobals.server);
+//				if (ourGlobals.serverLuaSL)  ecore_con_server_del(ourGlobals.serverLuaSL);
+
+			    }
+			    else
+				PC("Failed to add server!");
 
 			    if (ourGlobals.ui)
 			    {
 				ecore_animator_del(ani);
 				ecore_evas_free(ourGlobals.ee);
 			    }
-			}
-
 			edje_shutdown();
+			}
 		    }
 		    else
 			PC("Failed to init edje!");
@@ -742,10 +707,6 @@ int main(int argc, char **argv)
 		}
 		else
 		    PC("Failed to init ecore_evas!");
-
-		}
-		else
-		    PC("Failed to add server!");
 
 	    ecore_con_shutdown();
 	}

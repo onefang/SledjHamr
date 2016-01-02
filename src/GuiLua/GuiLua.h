@@ -22,7 +22,7 @@ typedef struct _GuiLua
   winFang	*us;		// Our window, if it exists.
   winFang	*parent;	// Our parent window, if it exists.
   EPhysics_World *world;	// Our world, if it exists.
-  Ecore_Con_Server	*server;
+  Connection	*server;
   int		inDel;
 
   Eina_Clist	node;

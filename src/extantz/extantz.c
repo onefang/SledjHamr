@@ -12,7 +12,6 @@ static void on_pixels(void *data, Evas_Object *obj);
 
 int logDom = -1;	// Our logging domain.
 globals ourGlobals;
-static Eina_Strbuf *serverStream;
 //static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
 //static char *myName = "onefang rejected";
 
@@ -22,8 +21,8 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
   globals *ourGlobals = data;
 
-  PI("Connected to love server.");
-  ourGlobals->server = ev->server;
+  PI("Spread the love.");
+  ourGlobals->server = ecore_con_server_data_get(ev->server);
   if (ourGlobals->LSLGuiMess)  ourGlobals->LSLGuiMess->server = ourGlobals->server;
   if (ourGlobals->purkle)      ourGlobals->purkle->server     = ourGlobals->server;
 
@@ -33,110 +32,86 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
+static Eina_Bool clientParser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   globals *ourGlobals = data;
   char buf[PATH_MAX];
-  char SID[PATH_MAX];
-  const char *command;
-  char *ext;
 
-  eina_strbuf_append_length(serverStream, ev->data, ev->size);
-  command = eina_strbuf_string_get(serverStream);
-  while ((ext = index(command, '\n')))
+  if ((0 == strncmp(command, "llOwnerSay(", 11))
+    || (0 == strncmp(command, "llWhisper(", 10))
+    || (0 == strncmp(command, "llSay(", 6))
+    || (0 == strncmp(command, "llShout(", 8)))
   {
-    int length = ext - command;
 
-    strncpy(SID, command, length + 1);
-    SID[length] = '\0';
-    eina_strbuf_remove(serverStream, 0, length + 1);
-    ext = index(SID, '.');
-    if (ext)
+    sprintf(buf, "%s: %s", SID, command);
+    if (ourGlobals->purkle)
     {
-	ext[0] = '\0';
-	command = ext + 1;
-	if ((0 == strncmp(command, "llOwnerSay(", 11))
-	  || (0 == strncmp(command, "llWhisper(", 10))
-	  || (0 == strncmp(command, "llSay(", 6))
-	  || (0 == strncmp(command, "llShout(", 8)))
-	{
+      int _P;
 
-	  sprintf(buf, "%s: %s", SID, command);
-	  if (ourGlobals->purkle)
-	  {
-	    int _P;
-
-	    lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
-	    _P = lua_gettop(ourGlobals->purkle->L);
-	    push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
-	  }
-	  else
-	    PW("No purkle to put - %s", buf);
-	}
-	else if (0 == strncmp(command, "llDialog(", 9))
-	{
-	  if (ourGlobals->LSLGuiMess)
-	  {
-	    int _M;
-
-	    lua_getfield(ourGlobals->LSLGuiMess->L, LUA_REGISTRYINDEX, ourGlobals->LSLGuiMess->name);
-	    _M = lua_gettop(ourGlobals->LSLGuiMess->L);
-
-	    // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
-	    push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
-	  }
-	  else
-	    PE("No LSLGuiMess to send - %s", command);
-
-	}
-	else if (0 == strncmp(command, "loadSim(", 8))
-	{
-#if USE_EVAS_3D
-	  char *p, *t;
-	  int scenriLua;
-#endif
-
-          // Pretend we logged in.  Actually in the case of a local love server, we realy have logged in now.
-          strcpy(ourGlobals->uuid, SID);
-          PI("Your UUID is %s.", ourGlobals->uuid);
-#if USE_EVAS_3D
-	  strcpy(buf, &command[8]);
-	  p = buf;
-          while ('"' == p[0])
-	    p++;
-	  while ('\'' == p[0])
-	    p++;
-	  t = p;
-          while (('"' != p[0]) && ('\'' != p[0]))
-	    p++;
-	  p[0] = '\0';
-	  // TODO - For now, assume it's a file:// URL.
-	  t += 7;
-	  //strcat(t, "/index.omg");
-	  strcpy(ourGlobals->scene->sim, t);
-	  PI("Loading local sim from %s", t);
-
-	// TODO - Later do the same with eet files in C code, but keep both implementations.
-	  lua_getglobal(ourGlobals->scene->L, "package");
-	  lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "loaded");
-	  lua_remove(ourGlobals->scene->L, -2);				// Removes "package"
-	  lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "scenriLua");
-	  lua_remove(ourGlobals->scene->L, -2);				// Removes "loaded"
-	  scenriLua = lua_gettop(ourGlobals->scene->L);
-
-	  push_lua(ourGlobals->scene->L, "@ ( $ )", scenriLua, "loadSim", t, 0);
-	  PI("Loaded local sim from %s", t);
-#endif
-	}
-	else
-	{
-	  PI("Some random command %s", command);
-	}
+      lua_getfield(ourGlobals->purkle->L, LUA_REGISTRYINDEX, ourGlobals->purkle->name);
+      _P = lua_gettop(ourGlobals->purkle->L);
+      push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
     }
-
-    // Get the next blob to check it.
-    command = eina_strbuf_string_get(serverStream);
+    else
+      PW("No purkle to put - %s", buf);
   }
+  else if (0 == strncmp(command, "llDialog(", 9))
+  {
+    if (ourGlobals->LSLGuiMess)
+    {
+      int _M;
+
+      lua_getfield(ourGlobals->LSLGuiMess->L, LUA_REGISTRYINDEX, ourGlobals->LSLGuiMess->name);
+      _M = lua_gettop(ourGlobals->LSLGuiMess->L);
+
+      // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
+      push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
+    }
+    else
+      PE("No LSLGuiMess to send - %s", command);
+
+  }
+  else if (0 == strncmp(command, "loadSim(", 8))
+  {
+#if USE_EVAS_3D
+    char *p, *t;
+    int scenriLua;
+#endif
+
+    // Pretend we logged in.  Actually in the case of a local love server, we realy have logged in now.
+    strcpy(ourGlobals->uuid, SID);
+    PI("Your UUID is %s.", ourGlobals->uuid);
+#if USE_EVAS_3D
+    strcpy(buf, &command[8]);
+    p = buf;
+    while ('"' == p[0])
+      p++;
+    while ('\'' == p[0])
+      p++;
+    t = p;
+    while (('"' != p[0]) && ('\'' != p[0]))
+      p++;
+    p[0] = '\0';
+    // TODO - For now, assume it's a file:// URL.
+    t += 7;
+    //strcat(t, "/index.omg");
+    strcpy(ourGlobals->scene->sim, t);
+    PI("Loading local sim from %s", t);
+
+    // TODO - Later do the same with eet files in C code, but keep both implementations.
+    lua_getglobal(ourGlobals->scene->L, "package");
+    lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "loaded");
+    lua_remove(ourGlobals->scene->L, -2);				// Removes "package"
+    lua_getfield(ourGlobals->scene->L, lua_gettop(ourGlobals->scene->L), "scenriLua");
+    lua_remove(ourGlobals->scene->L, -2);				// Removes "loaded"
+    scenriLua = lua_gettop(ourGlobals->scene->L);
+
+    push_lua(ourGlobals->scene->L, "@ ( $ )", scenriLua, "loadSim", t, 0);
+    PI("Loaded local sim from %s", t);
+#endif
+  }
+  else
+    PI("Some random command %s", command);
 
   return ECORE_CALLBACK_RENEW;
 }
@@ -144,26 +119,12 @@ static Eina_Bool _data(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
   globals *ourGlobals = data;
-  static int count = 0;
 
   ourGlobals->server = NULL;
 
-  // Let it fail a couple of times during startup, then try to start our own love server.
-  count++;
-  if (1 < count)
-  {
-    char buf[PATH_MAX];
-
-    PW("Failed to connect to a world server, starting our own.");
-
-    // TODO - Should use Ecore_Exe for this sort of thing.
-    sprintf(buf, "%s/love &", prefix_bin_get());
-    system(buf);
-    count = 0;
-  }
-
   if (ourGlobals->running)
     return ECORE_CALLBACK_RENEW;
+
   return ECORE_CALLBACK_CANCEL;
 }
 
@@ -709,8 +670,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();
-
-  if (ourGlobals.server)  ecore_con_server_del(ourGlobals.server);
 
   if (ourGlobals.win)
   {

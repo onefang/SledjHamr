@@ -254,8 +254,8 @@ typedef struct _globals
   GuiLua	*purkle;
   GuiLua	*LSLGuiMess;
 
-  Ecore_Con_Server	*server;
-  char			uuid[42];
+  Connection	*server;
+  char		uuid[42];
 
 } globals;
 

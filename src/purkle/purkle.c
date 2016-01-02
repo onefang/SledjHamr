@@ -49,17 +49,14 @@ static int say(lua_State *L)
   if (id && text)
   {
     GuiLua *gl;
-    Ecore_Con_Server *server = NULL;
 
     snprintf(buf, sizeof(buf), "events.listen(%d, '%s', '%s', '%s')", channel, name, id, text);
     // We do this rather than caching it, coz the server might change out from under us.
     lua_getfield(L, LUA_REGISTRYINDEX, glName);
     gl = lua_touserdata(L, -1);
     lua_pop(L, 1);
-    if (gl)
-        server = gl->server;
-    if (server)
-      sendForth(server, id, buf);
+    if (gl && gl->server)
+      sendForth(gl->server, id, buf);
     else
       PW("PURKLE NOT SAY, no where to send %s", buf);
   }

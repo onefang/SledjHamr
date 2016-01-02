@@ -12,6 +12,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include "SledjHamr.h"
+
 // Stick with Plan C for now.
 // TODO - Should make this choosable at run time after more testing of Ecore_Thead.
 #define  THREADIT   0
@@ -41,7 +43,7 @@ typedef struct _LuaCompile
 {
   char			*file, *SID, *luaName;
   int			bugCount;
-  Ecore_Con_Client	*client;
+  Connection		*client;
   compileCb		parser;
   compileCb		cb;
   boolean		doConstants;
@@ -69,7 +71,7 @@ typedef struct _script
   runnrStatus		status;
   RunnrServerCb		send2server;
   Eina_Clist		messages;
-  Ecore_Con_Client	*client;
+  Connection		*client;
   Ecore_Timer		*timer;
 } script;
 

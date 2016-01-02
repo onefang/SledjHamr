@@ -5,63 +5,12 @@
 #include "SledjHamr.h"
 
 
-struct _conct
-{
-  char *address;
-  int port;
-  void *pointer;
-  Ecore_Event_Handler_Cb addCb, dataCb, delCb;
-  Ecore_Event_Handler *add, *data, *del;
-};
-
 struct _message
 {
   Eina_Clist	node;
   char		*message;
 };
 
-
-static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Del *ev)
-{
-  struct _conct *this = data;
-
-  if (this->addCb)
-    this->addCb(this->pointer, type, ev);
-  if (this->dataCb)
-    ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, this->dataCb, this->pointer);
-
-  return ECORE_CALLBACK_RENEW;
-}
-
-static Eina_Bool _delTimer(void *data)
-{
-  struct _conct *this = data;
-
-  reachOut(this->address, this->port, this->pointer, this->addCb, this->dataCb, this->delCb);
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
-{
-  struct _conct *this = data;
-
-  printf("FAILED connection to server %s:%d, trying again in a second!\n", this->address, this->port);
-  ecore_event_handler_del(this->add);
-  ecore_event_handler_del(this->del);
-
-  if (this->delCb)
-  {
-    if (ECORE_CALLBACK_RENEW == this->delCb(this->pointer, type, ev))
-      ecore_timer_add(1.0, _delTimer, this);
-  }
-
-  if (ev->server)  ecore_con_server_del(ev->server);
-  // TODO - Hmm, I think this is where this should be freed, but it causes a seggie in reachOut's while loop.
-  //        Which is odd, so leave it commented for now and investigate later.
-//  free(this);
-
-  return ECORE_CALLBACK_CANCEL;
-}
 
 void *addMessage(Eina_Clist *list, size_t size, const char *message, ...)
 {
@@ -82,10 +31,68 @@ void *addMessage(Eina_Clist *list, size_t size, const char *message, ...)
     return result;
 }
 
-void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ...)
+static boolean checkConnection(Connection *conn, char *func, connType wanted, boolean isLocal)
+{
+  boolean result = TRUE;
+
+  if ((conn->type != CT_CLIENT) && (conn->type != CT_SERVER))
+  {
+    result = FALSE;
+    printf("CONNECTION OBJECT in %s() is of unknown type %d\n", func, (int) conn->type);
+  }
+  else if (conn->type != wanted)
+  {
+    result = FALSE;
+    switch (wanted)
+    {
+      case CT_CLIENT :
+	if (conn->type == CT_SERVER)
+          printf("INVALID CONNECTION OBJECT in %s(), it might be a server object!\n", func);
+	else
+          printf("INVALID CONNECTION OBJECT in %s(), type is %d!\n", func, (int) conn->type);
+	if (conn->conn.client.myServer == NULL)
+	  printf("CONNECTION OBJECT in %s() is a local client, but should be a remote client mirror!\n", func);
+        break;
+
+      case CT_SERVER :
+	if (conn->type == CT_CLIENT)
+	  printf("INVALID CONNECTION OBJECT in %s(), it might be a client object!\n", func);
+	else
+	  printf("INVALID CONNECTION OBJECT in %s(), type is %d!\n", func, (int) conn->type);
+	if (isLocal)
+	{
+	  if (conn->conn.server.clients == NULL)
+	    printf("CONNECTION OBJECT in %s() is a remote server mirror, but should be a local server!\n", func);
+	}
+	else
+	{
+	  if (conn->conn.server.clients != NULL)
+	    printf("CONNECTION OBJECT in %s() is a local server, but should be a remote server mirror!\n", func);
+	}
+        break;
+
+      default :
+	printf("CONNECTION OBJECT in %s(), silly coder asked for an unknown type!""\n", func);
+	break;
+    }
+
+    if (NULL == conn->name)
+    {
+      result = FALSE;
+      printf("CONNECTION OBJECT in %s() has no name!\n", func);
+    }
+  }
+
+//if (result)  printf("%s(\"%s\")\n", func, conn->name);
+
+  return result;
+}
+
+void sendBack(Connection *conn, const char *SID, const char *message, ...)
 {
     va_list args;
-    char buf[PATH_MAX];
+//    Ecore_Con_Client *client = conn->conn.client.client;
+    char buf[PATH_MAX * 2];
     int length = strlen(SID);
 
     strncpy(buf, SID, length);
@@ -95,15 +102,18 @@ void sendBack(Ecore_Con_Client *client, const char *SID, const char *message, ..
     va_end(args);
     buf[length++] = '\n';
     buf[length] = '\0';
-//    printf("sendBack(%s)", buf);
-    ecore_con_client_send(client, buf, length);
-    ecore_con_client_flush(client);
+//    printf("sendBack(%s", buf);
+//    ecore_con_client_send(client, buf, length);
+//    ecore_con_client_flush(client);
+//Connection *conn = ecore_con_client_data_get(client);
+if (conn)  send2(conn, SID, buf);  else  printf("sendBack() can't find Connection!\n");
 }
 
-void sendForth(Ecore_Con_Server	*server, const char *SID, const char *message, ...)
+void sendForth(Connection *conn, const char *SID, const char *message, ...)
 {
     va_list args;
-    char buf[PATH_MAX];
+//    Ecore_Con_Server *server = conn->conn.server.server;
+    char buf[PATH_MAX * 2];
     int length = strlen(SID);
 
     strncpy(buf, SID, length);
@@ -113,123 +123,196 @@ void sendForth(Ecore_Con_Server	*server, const char *SID, const char *message, .
     va_end(args);
     buf[length++] = '\n';
     buf[length] = '\0';
-//    printf("sendForth(%s)", buf);
-    ecore_con_server_send(server, buf, length);
-    ecore_con_server_flush(server);
+//    printf("sendForth(%s", buf);
+//    ecore_con_server_send(server, buf, length);
+//    ecore_con_server_flush(server);
+//Connection *conn = ecore_con_server_data_get(server);
+if (conn)  send2(conn, SID, buf);  else  printf("sendForth() can't find Connection!\n");
 }
 
+void send2(Connection *conn, const char *SID, const char *message, ...)
+{
+    va_list args;
+    char buf[PATH_MAX * 2];
+    int length = strlen(SID);
 
+length = 0;
+//    strncpy(buf, SID, length);
+//    buf[length++] = '.';
+    va_start(args, message);
+//    length += vsprintf(&buf[length], message, args);
+    va_end(args);
+strcpy(buf, message);
+length = strlen(buf);
+//    buf[length++] = '\n';
+    buf[length] = '\0';
 
+// TODO - Should check if this is always gonna be local?  Likely not.
+    if (checkConnection(conn, "send2", conn->type, FALSE))
+    {
+	switch (conn->type)
+	{
+	    case CT_CLIENT :
+//		printf("vvv send2(%*s", length, buf);
+		ecore_con_client_send(conn->conn.client.client, strndup(buf, length), length);
+		ecore_con_client_flush(conn->conn.client.client);
+		break;
+
+	    case CT_SERVER :
+//		printf("^^^ send2(%*s", length, buf);
+		ecore_con_server_send(conn->conn.server.server, strndup(buf, length), length);
+		ecore_con_server_flush(conn->conn.server.server);
+		break;
+
+	    default :
+		printf("send2() unable to send to partially bogus Connection object!\n");
+		break;
+	}
+    }
+    else
+      printf("send2() unable to send to bogus Connection object!\n");
+}
 
 static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, void *ev)
 {
-    Connection *connection = data;
+    Connection *conn = data;
     char SID[PATH_MAX];
     const char *command;
     char *ext;
 
-    if (NULL == connection->stream)
-      connection->stream = eina_strbuf_new();
+//printf("parseStream(%s, \"%*s\")\n", conn->name, evSize, (char *) evData);
+    if (NULL == conn->stream)
+      conn->stream = eina_strbuf_new();
 
-    eina_strbuf_append_length(connection->stream, evData, evSize);
-    command = eina_strbuf_string_get(connection->stream);
+    eina_strbuf_append_length(conn->stream, evData, evSize);
+    command = eina_strbuf_string_get(conn->stream);
     while ((ext = index(command, '\n')))
     {
 	int length = ext - command;
 
 	strncpy(SID, command, length + 1);
 	SID[length] = '\0';
-	eina_strbuf_remove(connection->stream, 0, length + 1);
+	eina_strbuf_remove(conn->stream, 0, length + 1);
 	ext = index(SID, '.');
 	if (ext)
 	{
 	    ext[0] = '\0';
 	    command = ext + 1;
-	    ext = index(SID, '(');
+	    ext = index(command, '(');
 	    if (ext)
 	    {
-		streamParser func = eina_hash_find(connection->commands, command);
-//PW("COMMAND - %s", command);
+		streamParser func = eina_hash_find(conn->commands, command);
+//printf("parseStream(%s>> %s\"\n", conn->name, command);
 
-		ext[0] = '\0';
-
+//		ext[0] = '\0';
 		// Need a callback if we can't find the command.
 		if (NULL == func)
-		    func = connection->unknownCommand;
+		    func = conn->unknownCommand;
 		if (func)
-		    func(data, connection, SID, (char *) command, ext + 1);
+		    func(conn->pointer, conn, SID, (char *) command, ext + 1);
+		else
+		    printf("parseStream() No function found for command %s!\n", command);
             }
 	}
 
 	// Get the next blob to check it.
-	command = eina_strbuf_string_get(connection->stream);
+	command = eina_strbuf_string_get(conn->stream);
     }
 
-    if (connection->_data)
-      connection->_data(data, type, ev);
+    if (conn->_data)
+      conn->_data(conn->pointer, type, ev);
 
     return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool parseClientStream(void *data, int type, Ecore_Con_Event_Client_Data *ev)
+static Eina_Bool parseClientStream(void *data, int type, Ecore_Con_Event_Client_Data *ev)
 {
-  // data is the server connection, but we want the client one.
-  return parseStream(ecore_con_client_data_get(ev->client), type, ev->data, ev->size, ev);
+  Connection *conn = /*data*/  ecore_con_client_data_get(ev->client);
+
+  if (checkConnection(conn, "parseClientStream", CT_CLIENT, FALSE))
+    return parseStream(conn, type, ev->data, ev->size, ev);
+  return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool parseServerStream(void *data, int type, Ecore_Con_Event_Server_Data *ev)
+static Eina_Bool parseServerStream(void *data, int type, Ecore_Con_Event_Server_Data *ev)
 {
-    return parseStream(data, type, ev->data, ev->size, ev);
+  Connection *conn = /*data*/  ecore_con_server_data_get(ev->server);
+
+  if (checkConnection(conn, "parseServerStream", CT_SERVER, FALSE))
+    return parseStream(conn, type, ev->data, ev->size, ev);
+
+  return ECORE_CALLBACK_RENEW;
 }
 
-
-Eina_Bool clientAdd(void *data, int type, Ecore_Con_Event_Client_Add *ev)
+static Eina_Bool clientAdd(void *data, int type, Ecore_Con_Event_Client_Add *ev)
 {
-    Connection *conn, *connection = data;
+  Connection *conn, *connection = data;
 
+  if (checkConnection(connection, "clientAdd", CT_SERVER, TRUE))
+  {
     ecore_con_client_timeout_set(ev->client, 0);
     conn = calloc(1, sizeof(Connection));
     conn->type = CT_CLIENT;
     conn->conn.client.client = ev->client;
     conn->conn.client.myServer = connection;
+    conn->conn.client.server = malloc(sizeof(Eina_Clist));
+    eina_clist_element_init(conn->conn.client.server);
+    eina_clist_add_tail(connection->conn.server.clients, conn->conn.client.server);
     conn->name = strdup(connection->name);
     conn->address = strdup(connection->address);
     conn->port = connection->port;
     conn->pointer = connection->pointer;
+    conn->_add = connection->_add;
+    conn->_data = connection->_data;
+    conn->_del = connection->_del;
+    conn->unknownCommand = connection->unknownCommand;
     conn->commands = eina_hash_string_superfast_new(NULL);
     ecore_con_client_data_set(ev->client, conn);
 
     if (connection->_add)
       return connection->_add(connection->pointer, type, ev);
 
-    return ECORE_CALLBACK_RENEW;
+  }
+
+  return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool clientDel(void *data, int type, Ecore_Con_Event_Client_Del *ev)
+static Eina_Bool clientDel(void *data, int type, Ecore_Con_Event_Client_Del *ev)
 {
-    Connection *connection = data;
+    Connection *conn = data;
 
+  if (checkConnection(conn, "clientDel", CT_SERVER, TRUE))
+  {
     if (ev->client)
     {
 	Eina_List const *clients;
 
-	// This is only really for testing, normally it just runs 24/7, or until told not to.
-	clients = ecore_con_server_clients_get(connection->conn.server.server);
-        if (0 == eina_list_count(clients))
-	    printf("No more clients, exiting.");
-	else
-	    printf("Some %d more clients, exiting anyway.", eina_list_count(clients));
-
-// TODO - Probably should just keep running, both servers, and go away when all clients are gone for testing.
-
-	if (connection->_del)
-	    connection->_del(connection->pointer, type, ev);
+	if (conn->_del)
+	    conn->_del(conn->pointer, type, ev);
 
 	ecore_con_client_del(ev->client);
+
+
+	// This is only really for testing, normally it just runs 24/7, or until told not to.
+	// The "- 1" is coz this server is still counted.
+	clients = ecore_con_server_clients_get(conn->conn.server.server) - 1;
+        if (0 == eina_list_count(clients))
+	    printf("No more clients for %s, exiting.\n", conn->name);
+	else
+	    printf("Some (%d) more clients for %s, exiting anyway.\n", eina_list_count(clients), conn->name);
+
+	// TODO - the Connection free function should take care of all of this, and we should call it here.  ish.
+	eina_clist_remove(conn->conn.client.server);
+	free(conn->conn.client.server);
+	conn->conn.client.server = NULL;
+
+// TODO - Probably should just keep running, both servers, and go away when all clients are gone for testing.
 	ecore_main_loop_quit();
     }
+  }
 
-    return ECORE_CALLBACK_RENEW;
+  free(conn);
+  return ECORE_CALLBACK_RENEW;
 }
 
 Connection *openArms(char *name, const char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser)
@@ -238,11 +321,11 @@ Connection *openArms(char *name, const char *address, int port, void *data, Ecor
     Ecore_Con_Server *server;
 
     conn->type = CT_SERVER;
-//    conn->conn.server.serverCommand = ;
+    conn->conn.server.clients = malloc(sizeof(Eina_Clist));
+    eina_clist_init(conn->conn.server.clients);
     conn->name = strdup(name);
     conn->address = strdup(address);
     conn->port = port;
-
     conn->pointer = data;
     conn->_add = _add;
     conn->_data = _data;
@@ -250,21 +333,23 @@ Connection *openArms(char *name, const char *address, int port, void *data, Ecor
     conn->unknownCommand = _parser;
     conn->commands = eina_hash_string_superfast_new(NULL);
 
-    if ((server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, address, port, data)))
+    conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) clientAdd,   conn);
+    conn->data = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) parseClientStream, conn);
+    conn->del  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) clientDel,   conn);
+//  conn->died = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _serverDied, conn);
+
+    if ((server = ecore_con_server_add(ECORE_CON_REMOTE_TCP, address, port, conn)))
     {
       conn->conn.server.server = server;
-
-	conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) clientAdd,   conn);
-	conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, (Ecore_Event_Handler_Cb) parseClientStream, conn);
-	conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL,  (Ecore_Event_Handler_Cb) clientDel,   conn);
-	ecore_con_server_timeout_set(server, 0);
-	ecore_con_server_client_limit_set(server, -1, 0);
-	ecore_con_server_data_set(server, conn);
-//	ecore_con_server_timeout_set(server, 10);
-//	ecore_con_server_client_limit_set(server, 3, 0);
+      ecore_con_server_timeout_set(server, 0);
+      ecore_con_server_client_limit_set(server, -1, 0);
+//      ecore_con_server_timeout_set(server, 10);
+//      ecore_con_server_client_limit_set(server, 3, 0);
+        printf("ACTUALLY created the %s server %s:%d.\n", name, address, port);
     }
     else
     {
+      // TODO - Connection needs a generic free function.  Only reason we are getting away with this is during initial testing, the Connections last the entire run anyway.
       free(conn->address);
       free(conn);
       conn = NULL;
@@ -273,142 +358,154 @@ Connection *openArms(char *name, const char *address, int port, void *data, Ecor
     return conn;
 }
 
-Eina_Bool serverAdd(void *data, int type, Ecore_Con_Event_Server_Add *ev)
+static Eina_Bool serverAdd(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
-  Connection *connection = data;
+  Connection *conn = data;
 
-  connection->conn.server.hackyCount++;
-
-  // Alledgedly this checks for real conections, but given that the first time it's called, there's no real connection, this is failing somehow.
-  //if (ecore_con_server_connected_get(ev->server))
-  if (connection->conn.server.hackyCount <= 1)
-    printf("Bogus server ignored.");
-  else
+  if (checkConnection(conn, "serverAdd", CT_SERVER, FALSE))
   {
-    printf("Connected to %s server.", connection->name);
-    connection->conn.server.server = ev->server;
-    // In case the server crashed, clear out any waiting data.
-    if (connection->stream)
-      eina_strbuf_reset(connection->stream);
+    conn->conn.server.hackyCount++;
+    conn->stage++;
 
-    if (connection->_add)
-      connection->_add(data, type, ev);
+    if (conn->name)
+      printf("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to %s server.\n", conn->name);
+    else
+      printf("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to UNKNOWN server.\n");
+
+    // In case the server crashed, clear out any waiting data.
+    if (conn->stream)
+      eina_strbuf_reset(conn->stream);
+    if (conn->_add)
+      conn->_add(conn->pointer, type, ev);
   }
 
   return ECORE_CALLBACK_RENEW;
 }
 
-Eina_Bool serverDel(void *data, int type, Ecore_Con_Event_Server_Del *ev)
+static Eina_Bool serverDel(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 {
-  Connection *connection = data;
+  Eina_Bool result = ECORE_CALLBACK_RENEW;
+  Connection *conn = data;
 
-  connection->conn.server.server = NULL;
-
-//  connection->server.hackyCount--;
-  // Let it fail a couple of times during startup, then try to start our own script server.
-  connection->conn.server.count++;
-  if (1 < connection->conn.server.count)
+  if (checkConnection(conn, "serverDel", CT_SERVER, FALSE))
   {
-    char buf[PATH_MAX];
-
-    printf("Failed to connect to a %s server, starting our own.", connection->name);
-    // TODO - Should use Ecore_Exe for this sort of thing.
-    sprintf(buf, "%s/%s &", prefix_bin_get(), connection->conn.server.serverCommand);
-    system(buf);
-    connection->conn.server.count = 0;
-    // TODO - There's also the question of what to do if the connection failed.
-    //        Did the server crash, or was it just the connection?
-    //        Probably gonna need some smarts, for now we just restart all the scripts.
-    //        Which I think gets done on server add.
+    conn->conn.server.server = NULL;
+    conn->stage = -3;
+    if (conn->_del)
+      result = conn->_del(conn->pointer, type, ev);
   }
 
-  if (connection->_del)
-    connection->_del(data, type, ev);
-
-
-  // TODO - May want to renew even if it's not running the GUI, but then we still need some sort of "shut down" signal, which we don't need during testing.
-//  if (ourGlobals->ui)
-    return ECORE_CALLBACK_RENEW;
-
-//  ecore_main_loop_quit();
-
-//  return ECORE_CALLBACK_CANCEL;
-
-
-
-/* Extantz does this instead of the above returns -
-
-  if (ourGlobals->running)
-    return ECORE_CALLBACK_RENEW;
-  return ECORE_CALLBACK_CANCEL;
-*/
+  return result;
 }
 
-
-
-#if 1
-Ecore_Con_Server *reachOut(char *address, int port, void *data, Ecore_Event_Handler_Cb _addCb, Ecore_Event_Handler_Cb _dataCb, Ecore_Event_Handler_Cb _delCb)
+static Eina_Bool _serverDied(void *data EINA_UNUSED, int type EINA_UNUSED, void *event)
 {
+  Connection *conn = data;
+//  Ecore_Exe_Event_Data *dataFromProcess = (Ecore_Exe_Event_Data *)event;
+
+  conn->stage = -3;
+  conn->conn.server.serverHandle = NULL;
+  conn->conn.server.pid = 0;
+
+  return ECORE_CALLBACK_DONE;
+}
+
+// TODO - instead of a timer, try to make this event driven.  Use jobs, or idler, or something.
+static Eina_Bool _reachOutTimer(void *data)
+{
+  Eina_Bool result = ECORE_CALLBACK_RENEW;
+  Connection *conn = data;
   Ecore_Con_Server *server = NULL;
-  struct _conct *this = malloc(sizeof(struct _conct));
-  int count = 0;
 
-  this->address = address;
-  this->port = port;
-  this->pointer = data;
-  this->addCb = _addCb;
-  this->dataCb = _dataCb;
-  this->delCb = _delCb;
-  // This loop is overkill I think.
-  while ((!server) && (10 > count))
+  switch (conn->stage)
   {
-    if ((server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, address, port, this->pointer)))
-    {
-      this->add = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD, (Ecore_Event_Handler_Cb) _add, this);
-      this->del = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL, (Ecore_Event_Handler_Cb) _del, this);
-    }
-    count++;
+    // TODO - Seems Ecore_con now has trouble with my try first, then start method, so start first, then try.  Fix this, or do something else.
+    case -3 :
+      printf("Failed to connect to a %s server, starting our own.\n", conn->name);
+      conn->conn.server.serverHandle = ecore_exe_pipe_run(conn->conn.server.serverCommand, ECORE_EXE_NONE /*| ECORE_EXE_TERM_WITH_PARENT*/, conn);
+      if (conn->conn.server.serverHandle)
+      {
+        conn->conn.server.pid = ecore_exe_pid_get(conn->conn.server.serverHandle);
+        if (conn->conn.server.pid == -1)
+          fprintf(stderr, "Could not retrive the PID!\n");
+        else
+          fprintf(stdout, "The child process has PID:%u\n", (unsigned int)conn->conn.server.pid);
+      }
+      else
+        fprintf(stderr, "Could not create server process %s!\n", conn->conn.server.serverCommand);
+
+      // TODO - There's also the question of what to do if the connection failed.
+      //        Did the server crash, or was it just the connection?
+      //          Also, I'm assuming the connection failed here, rather than went away after running for some time.  Should differentiate.
+      //        Probably gonna need some smarts, for now we just restart all the scripts.
+      //        Which I think gets done on server add.
+      break;
+
+// TODO - Alternate strategy : Keep track of if we started a server, then keep pinging it's port until it answers,
+//          with a timeout until we kill the server and start again.
+
+    case -2 :  // Give the server some time to start up.
+    case -1 :  // Give the server some time to start up.
+      // Check if the server is still running here, if not, reset stage to previous -3 (taking into account the increment at the end).
+      if (conn->conn.server.pid)
+        printf("Waiting for %s server to start from command \"%s\"\n", conn->name, conn->conn.server.serverCommand);
+      else
+        conn->stage = -4;
+      break;
+
+    case 0 :
+      printf("Attempting to connect to the %s server %s:%d.\n", conn->name, conn->address, conn->port);
+      // This should only return NULL if something goes wrong with the setup, 
+      // you wont know if the connection worked until you get the add callback,
+      // or you get the del calback if it failed.
+      if ((server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, conn->address, conn->port, conn)))
+        printf("MAYBE connecting to the %s server %s:%d.\n", conn->name, conn->address, conn->port);
+      else
+        printf("FAILED to create the connection to the %s server %s:%d!\n", conn->name, conn->address, conn->port);
+      conn->conn.server.server = server;
+      break;
+
+    case 1 :  // This stage is the serverAdd callback.
+      break;
+
+    case 2 :  // Give the server a chance to die.
+      break;
+
+    default :
+	if (5 < conn->stage)
+	  conn->stage = 2;  // loop back to nothing.
+//      result = ECORE_CALLBACK_CANCEL;
+      break;
   }
+  conn->stage++;
 
-  if (!server)
-    printf("Failed to connect to server %s:%d!\n", this->address, this->port);
-
-  return server;
+  return result;
 }
-#else
-Connection *reachOut(char *name, char *command, char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del)
+
+Connection *reachOut(char *name, char *command, char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser)
 {
   Connection *conn = calloc(1, sizeof(Connection));
-  Ecore_Con_Server *server = NULL;
-  int count = 0;
 
   conn->type = CT_SERVER;
   conn->conn.server.serverCommand = strdup(command);
+  // Sure, this is essentially a NOP, but lets be explicit here, this is a remote server, so no list of clients, not just an empty list.
+  conn->conn.server.clients = NULL;
   conn->name = strdup(name);
   conn->address = strdup(address);
   conn->port = port;
   conn->pointer = data;
-  conn-> = _add;
-  conn-> = _data;
-  conn-> = _del;
+  conn->_add = _add;
+  conn->_data = _data;
+  conn->_del = _del;
+  conn->unknownCommand = _parser;
   conn->commands = eina_hash_string_superfast_new(NULL);
 
-  // This loop is overkill I think.
-  while ((!server) && (10 > count))
-  {
-    if ((server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, address, port, data)))
-    {
-      conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) serverAdd,   conn);
-      conn->data = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) parseServerStream, conn);
-      conn->del  = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) serverDel,   conn);
-      ecore_con_server_data_set(server, conn);
-    }
-    count++;
-  }
+  conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) serverAdd,   conn);
+  conn->data = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DATA, (Ecore_Event_Handler_Cb) parseServerStream, conn);
+  conn->del  = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_DEL,  (Ecore_Event_Handler_Cb) serverDel,   conn);
+  conn->died = ecore_event_handler_add(ECORE_EXE_EVENT_DEL, _serverDied, conn);
 
-  if (!server)
-    printf("Failed to connect to the %s server %s:%d!\n", name, address, port);
+  ecore_timer_add(1.0, _reachOutTimer, conn);
 
   return conn;
 }
-#endif
