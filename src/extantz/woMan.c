@@ -147,7 +147,7 @@ static void _grid_sel_cb(void *data, Evas_Object *obj, void *event_info)
     sprintf(buf, "uzbl -g '%dx%d+%d+%d' -u %s &", ourGlobals->win_w - (ourGlobals->win_w / 5), ourGlobals->win_h - 30, ourGlobals->win_w / 5, ourGlobals->win_y, thisGrid->splashPage);
     printf("%s   ### genlist obj [%p], item pointer [%p]\n", buf, obj, event_info);
 // comment this out for now, busy dealing with input stuff, don't want to trigger this multiple times.
-//    system(buf);
+    system(buf);
 }
 
 
