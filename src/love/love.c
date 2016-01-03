@@ -685,10 +685,6 @@ int main(int argc, char **argv)
 			    {
 				ecore_main_loop_begin();
 				PD("Fell out of the main loop");
-
-//				if (ourGlobals.server)       ecore_con_server_del(ourGlobals.server);
-//				if (ourGlobals.serverLuaSL)  ecore_con_server_del(ourGlobals.serverLuaSL);
-
 			    }
 			    else
 				PC("Failed to add server!");
