@@ -92,9 +92,9 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     else if (0 == strcmp(ev->key, "Home"))	move->x = -2.0;
     else if (0 == strcmp(ev->key, "End"))	move->x = 2.0;
     else if (0 == strcmp(ev->key, "space"))	move->jump = 1.0;
-    else printf("Unexpected down keystroke - %s\n", ev->key);
+    else PW("Unexpected down keystroke - %s", ev->key);
   }
-  else printf("Camera input not ready\n");
+  else PE("Camera input not ready");
 }
 
 /* SL / OS camera controls
@@ -184,9 +184,9 @@ static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *
     else if (0 == strcmp(ev->key, "Home"))	move->x = 0.0;
     else if (0 == strcmp(ev->key, "End"))	move->x = 0.0;
     else if (0 == strcmp(ev->key, "space"))	move->jump = 0.0;
-    else printf("Unexpected up keystroke - %s\n", ev->key);
+    else PW("Unexpected up keystroke - %s", ev->key);
   }
-  else printf("Camera input not ready\n");
+  else PE("Camera input not ready");
 }
 
 /* While it's true that image is an Elm image, seems this Elm input event callback doesn't work.
@@ -212,7 +212,7 @@ static Eina_Bool _cb_event_GL(void *data, Evas_Object *obj, Evas_Object *src, Ev
     }
 
     default :
-      printf("Unknown GL input event.\n");
+      PE("Unknown GL input event.");
   }
 
   return processed;

@@ -19,7 +19,7 @@ int HamrTime(char *argv0, void *main, int logDom)
 
   if (!eina_init())
   {
-    printf("Can't load eina library, nothing else will work!\n");
+    fprintf(stderr, "Can't load eina library, nothing else will work!\n");
     exit(0);
   }
 

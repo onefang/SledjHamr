@@ -42,7 +42,6 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
     || (0 == strncmp(command, "llSay(", 6))
     || (0 == strncmp(command, "llShout(", 8)))
   {
-
     sprintf(buf, "%s: %s", SID, command);
     if (ourGlobals->purkle)
     {
@@ -53,7 +52,7 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
       push_lua(ourGlobals->purkle->L, "@ ( $ )", _P, "append", buf, 0);
     }
     else
-      PW("No purkle to put - %s", buf);
+      PE("No purkle to put - %s", buf);
   }
   else if (0 == strncmp(command, "llDialog(", 9))
   {
@@ -69,7 +68,6 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
     }
     else
       PE("No LSLGuiMess to send - %s", command);
-
   }
   else if (0 == strncmp(command, "loadSim(", 8))
   {
@@ -556,7 +554,7 @@ static Eina_Bool _makeLove(void *data)
   ecore_job_add((Ecore_Cb) _makeFiles, ourGlobals);
 //  ecore_timer_add(0.1, _makeFiles, ourGlobals);
 
-  PD("About to try connecting to a love server.");
+//  PD("About to try connecting to a love server.");
   reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
 
   return ECORE_CALLBACK_CANCEL;

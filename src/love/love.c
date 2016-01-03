@@ -197,7 +197,7 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
     char buf[PATH_MAX];
     LoveScript *me;
 
-PW("COMMAND - %s - %s", SID, command);
+PD("COMMAND - %s - %s", SID, command);
     me = eina_hash_find(ourGlobals->scripts, SID);
     if (0 == strncmp(command, "compilerWarning(", 16))
     {
@@ -260,7 +260,7 @@ PW("COMMAND - %s - %s", SID, command);
 	    if (compiledCount == scriptCount)
 	    {
 		float total = timeDiff(&now, &startTime);
-		PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
+		PI("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
 	    }
 	}
     }
@@ -274,10 +274,10 @@ PW("COMMAND - %s - %s", SID, command);
 	    if (compiledCount == scriptCount)
 	    {
 		float total = timeDiff(&now, &startTime);
-		PD("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
+		PI("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
 	    }
 	}
-	PD("About to run %s", me->fileName);
+//PD("About to run %s", me->fileName);
 	sendForth(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
     }
     else
@@ -676,11 +676,11 @@ int main(int argc, char **argv)
 				edje_object_signal_callback_add(ourGlobals.edje, "*", "game_*", _edje_signal_cb, &ourGlobals);
 			    }
 
-			    PD("About to try connecting to a LuaSL server.");
+//			    PD("About to try connecting to a LuaSL server.");
 			    // Try to connect to a local LuaSL server.
 			    reachOut("LuaSL", "./LuaSL", "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser);
 
-			    PD("Love is about to try creating a love server.");
+//			    PD("Love is about to try creating a love server.");
 			    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser))
 			    {
 				ecore_main_loop_begin();

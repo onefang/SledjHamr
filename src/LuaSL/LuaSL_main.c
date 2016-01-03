@@ -73,7 +73,7 @@ void send2server(script *me, const char *message)
 {
     gameGlobals *ourGlobals = me->data;
 
-//printf("GOT MESSAGE from script %s - '%s'\n", me->name, message);
+//PD("GOT MESSAGE from script %s - '%s'", me->name, message);
 
     if (0 == strncmp(message, "llSleep(", 8))
 	ecore_timer_add(atof(&(message)[8]), _sleep_timer_cb, me);
@@ -223,7 +223,7 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
   gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
-PW("COMMAND - %s", command);
+//PD("COMMAND - %s", command);
     if (0 == strncmp(command, "compile(", 8))
     {
 	char *temp;
@@ -244,7 +244,7 @@ PW("COMMAND - %s", command);
 	compiler->doConstants = FALSE;
 	compiler->parser = (compileCb) compileLSL;
 	compiler->cb = _compileCb;
-PI("Compiling script %s", file);
+PD("Compiling script %s", file);
 	compileScript(compiler, COMPILE_THREADED);
     }
     else if (0 == strncmp(command, "run(", 4))
@@ -266,14 +266,16 @@ PI("Compiling script %s", file);
 	me = getScript(SID);
 	if (me)
 	{
-PI("Running script %s", me->fileName);
+PD("Running script %s", me->fileName);
 	    runScript(me);
 	    releaseScript(me);
 	}
+	else
+	    PE("Failed to run script %s", me->fileName);
     }
     else if (0 == strcmp(command, "exit()"))
     {
-	PD("Told to exit.");
+	PI("Told to exit.");
 	ecore_main_loop_quit();
     }
     else
@@ -319,7 +321,7 @@ int main(int argc, char **argv)
       }
       else if (ecore_con_init())
       {
-        PD("LuaSL is about to try creating a LuaSL server.");
+//        PD("LuaSL is about to try creating a LuaSL server.");
 	if (openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser))
 	{
 	    Eina_Iterator *scripts;

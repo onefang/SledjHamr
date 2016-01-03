@@ -38,7 +38,7 @@ static boolean checkConnection(Connection *conn, char *func, connType wanted, bo
   if ((conn->type != CT_CLIENT) && (conn->type != CT_SERVER))
   {
     result = FALSE;
-    printf("CONNECTION OBJECT in %s() is of unknown type %d\n", func, (int) conn->type);
+    PE("CONNECTION OBJECT in %s() is of unknown type %d", func, (int) conn->type);
   }
   else if (conn->type != wanted)
   {
@@ -47,43 +47,43 @@ static boolean checkConnection(Connection *conn, char *func, connType wanted, bo
     {
       case CT_CLIENT :
 	if (conn->type == CT_SERVER)
-          printf("INVALID CONNECTION OBJECT in %s(), it might be a server object!\n", func);
+          PE("INVALID CONNECTION OBJECT in %s(), it might be a server object!", func);
 	else
-          printf("INVALID CONNECTION OBJECT in %s(), type is %d!\n", func, (int) conn->type);
+          PE("INVALID CONNECTION OBJECT in %s(), type is %d!", func, (int) conn->type);
 	if (conn->conn.client.myServer == NULL)
-	  printf("CONNECTION OBJECT in %s() is a local client, but should be a remote client mirror!\n", func);
+	  PE("CONNECTION OBJECT in %s() is a local client, but should be a remote client mirror!", func);
         break;
 
       case CT_SERVER :
 	if (conn->type == CT_CLIENT)
-	  printf("INVALID CONNECTION OBJECT in %s(), it might be a client object!\n", func);
+	  PE("INVALID CONNECTION OBJECT in %s(), it might be a client object!", func);
 	else
-	  printf("INVALID CONNECTION OBJECT in %s(), type is %d!\n", func, (int) conn->type);
+	  PE("INVALID CONNECTION OBJECT in %s(), type is %d!", func, (int) conn->type);
 	if (isLocal)
 	{
 	  if (conn->conn.server.clients == NULL)
-	    printf("CONNECTION OBJECT in %s() is a remote server mirror, but should be a local server!\n", func);
+	    PE("CONNECTION OBJECT in %s() is a remote server mirror, but should be a local server!", func);
 	}
 	else
 	{
 	  if (conn->conn.server.clients != NULL)
-	    printf("CONNECTION OBJECT in %s() is a local server, but should be a remote server mirror!\n", func);
+	    PE("CONNECTION OBJECT in %s() is a local server, but should be a remote server mirror!", func);
 	}
         break;
 
       default :
-	printf("CONNECTION OBJECT in %s(), silly coder asked for an unknown type!""\n", func);
+	PE("CONNECTION OBJECT in %s(), silly coder asked for an unknown type!", func);
 	break;
     }
 
     if (NULL == conn->name)
     {
       result = FALSE;
-      printf("CONNECTION OBJECT in %s() has no name!\n", func);
+      PE("CONNECTION OBJECT in %s() has no name!", func);
     }
   }
 
-//if (result)  printf("%s(\"%s\")\n", func, conn->name);
+//if (result)  PD("%s(\"%s\")", func, conn->name);
 
   return result;
 }
@@ -102,11 +102,11 @@ void sendBack(Connection *conn, const char *SID, const char *message, ...)
     va_end(args);
     buf[length++] = '\n';
     buf[length] = '\0';
-//    printf("sendBack(%s", buf);
+//    PD("sendBack(%s", buf);
 //    ecore_con_client_send(client, buf, length);
 //    ecore_con_client_flush(client);
 //Connection *conn = ecore_con_client_data_get(client);
-if (conn)  send2(conn, SID, buf);  else  printf("sendBack() can't find Connection!\n");
+if (conn)  send2(conn, SID, buf);  else  PE("sendBack() can't find Connection!");
 }
 
 void sendForth(Connection *conn, const char *SID, const char *message, ...)
@@ -123,11 +123,11 @@ void sendForth(Connection *conn, const char *SID, const char *message, ...)
     va_end(args);
     buf[length++] = '\n';
     buf[length] = '\0';
-//    printf("sendForth(%s", buf);
+//    PD("sendForth(%s", buf);
 //    ecore_con_server_send(server, buf, length);
 //    ecore_con_server_flush(server);
 //Connection *conn = ecore_con_server_data_get(server);
-if (conn)  send2(conn, SID, buf);  else  printf("sendForth() can't find Connection!\n");
+if (conn)  send2(conn, SID, buf);  else  PE("sendForth() can't find Connection!");
 }
 
 void send2(Connection *conn, const char *SID, const char *message, ...)
@@ -153,24 +153,24 @@ length = strlen(buf);
 	switch (conn->type)
 	{
 	    case CT_CLIENT :
-//		printf("vvv send2(%*s", length, buf);
+//		PD("vvv send2(%*s", length, buf);
 		ecore_con_client_send(conn->conn.client.client, strndup(buf, length), length);
 		ecore_con_client_flush(conn->conn.client.client);
 		break;
 
 	    case CT_SERVER :
-//		printf("^^^ send2(%*s", length, buf);
+//		PD("^^^ send2(%*s", length, buf);
 		ecore_con_server_send(conn->conn.server.server, strndup(buf, length), length);
 		ecore_con_server_flush(conn->conn.server.server);
 		break;
 
 	    default :
-		printf("send2() unable to send to partially bogus Connection object!\n");
+		PE("send2() unable to send to partially bogus Connection object!");
 		break;
 	}
     }
     else
-      printf("send2() unable to send to bogus Connection object!\n");
+      PE("send2() unable to send to bogus Connection object!");
 }
 
 static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, void *ev)
@@ -180,7 +180,6 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
     const char *command;
     char *ext;
 
-//printf("parseStream(%s, \"%*s\")\n", conn->name, evSize, (char *) evData);
     if (NULL == conn->stream)
       conn->stream = eina_strbuf_new();
 
@@ -202,7 +201,6 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 	    if (ext)
 	    {
 		streamParser func = eina_hash_find(conn->commands, command);
-//printf("parseStream(%s>> %s\"\n", conn->name, command);
 
 //		ext[0] = '\0';
 		// Need a callback if we can't find the command.
@@ -211,7 +209,7 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 		if (func)
 		    func(conn->pointer, conn, SID, (char *) command, ext + 1);
 		else
-		    printf("parseStream() No function found for command %s!\n", command);
+		    PE("parseStream() No function found for command %s!", command);
             }
 	}
 
@@ -297,9 +295,9 @@ static Eina_Bool clientDel(void *data, int type, Ecore_Con_Event_Client_Del *ev)
 	// The "- 1" is coz this server is still counted.
 	clients = ecore_con_server_clients_get(conn->conn.server.server) - 1;
         if (0 == eina_list_count(clients))
-	    printf("No more clients for %s, exiting.\n", conn->name);
+	    PI("No more clients for %s, exiting.", conn->name);
 	else
-	    printf("Some (%d) more clients for %s, exiting anyway.\n", eina_list_count(clients), conn->name);
+	    PW("Some (%d) more clients for %s, exiting anyway.", eina_list_count(clients), conn->name);
 
 	// TODO - the Connection free function should take care of all of this, and we should call it here.  ish.
 	eina_clist_remove(conn->conn.client.server);
@@ -345,7 +343,7 @@ Connection *openArms(char *name, const char *address, int port, void *data, Ecor
       ecore_con_server_client_limit_set(server, -1, 0);
 //      ecore_con_server_timeout_set(server, 10);
 //      ecore_con_server_client_limit_set(server, 3, 0);
-        printf("ACTUALLY created the %s server %s:%d.\n", name, address, port);
+        PI("ACTUALLY created the %s server %s:%d.", name, address, port);
     }
     else
     {
@@ -368,9 +366,9 @@ static Eina_Bool serverAdd(void *data, int type, Ecore_Con_Event_Server_Add *ev)
     conn->stage++;
 
     if (conn->name)
-      printf("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to %s server.\n", conn->name);
+      PI("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to %s server.", conn->name);
     else
-      printf("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to UNKNOWN server.\n");
+      PW("serverAdd()^^^^^^^^^^^^^^^^^^^^^^^Connected to UNKNOWN server.");
 
     // In case the server crashed, clear out any waiting data.
     if (conn->stream)
@@ -421,18 +419,16 @@ static Eina_Bool _reachOutTimer(void *data)
   {
     // TODO - Seems Ecore_con now has trouble with my try first, then start method, so start first, then try.  Fix this, or do something else.
     case -3 :
-      printf("Failed to connect to a %s server, starting our own.\n", conn->name);
+      PW("Failed to connect to a %s server, starting our own.", conn->name);
       conn->conn.server.serverHandle = ecore_exe_pipe_run(conn->conn.server.serverCommand, ECORE_EXE_NONE /*| ECORE_EXE_TERM_WITH_PARENT*/, conn);
       if (conn->conn.server.serverHandle)
       {
         conn->conn.server.pid = ecore_exe_pid_get(conn->conn.server.serverHandle);
         if (conn->conn.server.pid == -1)
-          fprintf(stderr, "Could not retrive the PID!\n");
-        else
-          fprintf(stdout, "The child process has PID:%u\n", (unsigned int)conn->conn.server.pid);
+          PE("Could not retrive the PID!");
       }
       else
-        fprintf(stderr, "Could not create server process %s!\n", conn->conn.server.serverCommand);
+        PE("Could not create server process %s!", conn->conn.server.serverCommand);
 
       // TODO - There's also the question of what to do if the connection failed.
       //        Did the server crash, or was it just the connection?
@@ -448,20 +444,20 @@ static Eina_Bool _reachOutTimer(void *data)
     case -1 :  // Give the server some time to start up.
       // Check if the server is still running here, if not, reset stage to previous -3 (taking into account the increment at the end).
       if (conn->conn.server.pid)
-        printf("Waiting for %s server to start from command \"%s\"\n", conn->name, conn->conn.server.serverCommand);
+        PI("Waiting for %s server to start from command \"%s\"", conn->name, conn->conn.server.serverCommand);
       else
         conn->stage = -4;
       break;
 
     case 0 :
-      printf("Attempting to connect to the %s server %s:%d.\n", conn->name, conn->address, conn->port);
+      PI("Attempting to connect to the %s server %s:%d.", conn->name, conn->address, conn->port);
       // This should only return NULL if something goes wrong with the setup, 
       // you wont know if the connection worked until you get the add callback,
       // or you get the del calback if it failed.
       if ((server = ecore_con_server_connect(ECORE_CON_REMOTE_TCP, conn->address, conn->port, conn)))
-        printf("MAYBE connecting to the %s server %s:%d.\n", conn->name, conn->address, conn->port);
+        PD("MAYBE connecting to the %s server %s:%d.", conn->name, conn->address, conn->port);
       else
-        printf("FAILED to create the connection to the %s server %s:%d!\n", conn->name, conn->address, conn->port);
+        PE("FAILED to create the connection to the %s server %s:%d!", conn->name, conn->address, conn->port);
       conn->conn.server.server = server;
       break;
 

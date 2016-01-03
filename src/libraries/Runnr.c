@@ -60,12 +60,12 @@ static int traceBack(lua_State *L)
   lua_Debug ar;
   int i, top = lua_gettop(L), b = 1;
 
-//  printf("Stack is %d deep\n", top);
+//  PI("Stack is %d deep", top);
 //  for (i = 1; i <= top; i++)
 //    dumpStack(L, i);
 
   if (top)
-    printf("Lua error - %s\n", lua_tostring(L, 1));
+    PE("Lua error - %s", lua_tostring(L, 1));
 
   i = 0;
   while (lua_getstack(L, i++, &ar))
@@ -74,15 +74,15 @@ static int traceBack(lua_State *L)
     {
       if (NULL == ar.name)
 	ar.name = "DUNNO";
-      printf("  Lua backtrace %d - %s %s %s @ %s : %d\n", i, ar.what, ar.namewhat, ar.name, ar.short_src, ar.currentline);
+      PE("  Lua backtrace %d - %s %s %s @ %s : %d", i, ar.what, ar.namewhat, ar.name, ar.short_src, ar.currentline);
       b = 0;
     }
     else
-      printf("  Failed to get trace line!\n");
+      PE("  Failed to get trace line!");
   }
 
   if (b)
-    printf("  NO BACKTRACE!\n");
+    PE("  NO BACKTRACE!");
 
   return 0;
 }
@@ -99,7 +99,7 @@ static void printLuaError(int err, char *string, lua_State *L)
     case LUA_ERRERR:	err_type = "error handler";	break;
     default:		err_type = "unknown";		break;
   }
-  printf("Error running - %s, \n  %s - %s\n", string, err_type, lua_tostring(L, -1));
+  PW("Error running - %s, \n  %s - %s", string, err_type, lua_tostring(L, -1));
 }
 
 static int panics = 0;
@@ -109,9 +109,9 @@ static int _panic(lua_State *L)                   // Stack usage [-0, +0, m]
   // of memory in the following lua_tostring() call.
   panics++;
   if (panics)
-    printf("Lua PANICS!!!!!");
+    PE("Lua PANICS!!!!!");
   else
-    printf("Lua PANIC!!!!!: %s", lua_tostring(L, -1));  // Stack usage [-0, +0, m]
+    PE("Lua PANIC!!!!!: %s", lua_tostring(L, -1));  // Stack usage [-0, +0, m]
   // The docs say that this will cause an exit(EXIT_FAILURE) if we return,
   // and that we we should long jump some where to avoid that.  This is only
   // called for things not called from a protected environment.  We always
@@ -147,7 +147,7 @@ void doLuaString(lua_State *L, char *string, char *module)
   {
     const char *err = lua_tostring(L, 1);
 
-    printf("Error parsing - %s, ERROR %s", string, err);
+    PE("Error parsing - %s, ERROR %s", string, err);
   }
   else
   {
@@ -159,12 +159,12 @@ void doLuaString(lua_State *L, char *string, char *module)
       // Consistancy would be good, just sayin'.
       if (0 == lua_setfenv(L, _A))
       {
-        printf("Error setting environment for - %s", string);
+        PE("Error setting environment for - %s", string);
         return;
       }
     }
 
-//printf("doLuaString(%s)\n", string);
+//PD("doLuaString(%s)\", string);
     if ((err = lua_pcall(L, 0, LUA_MULTRET, _T)))
       printLuaError(err, string, L);
   }
@@ -174,7 +174,7 @@ static void _stopScript(script *s)
 {
   scriptMessage *sm0, *sm1;
 
-//printf("^^^^^^^^^^^^^^^^^^^_stop(, %s)\n", s->name);
+//PD("^^^^^^^^^^^^^^^^^^^_stop(, %s)", s->name);
   if (s->L)		lua_close(s->L);	s->L = NULL;
   if (s->timer)	ecore_timer_del(s->timer);	s->timer = NULL;
   EINA_CLIST_FOR_EACH_ENTRY_SAFE(sm0, sm1, &(s->messages), scriptMessage, node)
@@ -210,7 +210,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
 
   if (RUNNR_READY == s->status)
   {
-//printf("_workerFunction()  READY %s\n", s->name);
+//PD("_workerFunction()  READY %s", s->name);
     if ((msg = (scriptMessage *) eina_clist_head(&(s->messages))))
     {
       eina_clist_remove(&(msg->node));
@@ -226,7 +226,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   {
     int err;
 
-//printf("_workerFunction()  STARTING %s\n", s->name);
+//PD("_workerFunction()  STARTING %s", s->name);
     s->status = RUNNR_RUNNING;
     s->L = luaL_newstate();	// Sets a standard allocator and panic function.
 
@@ -243,7 +243,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
     if (err != 0)
     {
       s->status = RUNNR_FINISHED;
-      printf("Error loading compiled Lua %s.", s->binName);
+      PE("Error loading compiled Lua %s.", s->binName);
     }
     gettimeofday(&s->startTime, NULL);
   }
@@ -254,7 +254,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   {
     int stat;
 
-//printf("_workerFunction()  RUNNING %s %s\n", s->name, message);
+//PD("_workerFunction()  RUNNING %s %s", s->name, message);
     // Resume running the script.
     // lua_resume() needs a Lua thread, and the initial Lua state is a thread.
     // Other Lua threads have their own state, but share the environment with the initial state.
@@ -270,7 +270,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
       s->status = RUNNR_FINISHED;
     else if (stat != LUA_YIELD)
     {
-      printf("lua_resume error at %s\n", s->name);
+      PE("lua_resume error at %s", s->name);
       printLuaError(stat, s->name, s->L);
       s->status = RUNNR_FINISHED;
     }
@@ -288,7 +288,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   // Start again from the top when Ecore_Thread has a spare thread ready, unless the script finished.
   if (RUNNR_FINISHED == s->status)
   {
-//printf("_workerFunction()  FINISHED %s\n", s->name);
+//PD("_workerFunction()  FINISHED %s", s->name);
 #if THREADIT
     ecore_thread_cancel(thread);
 #else
@@ -297,7 +297,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   }
   else if (RUNNR_WAIT == s->status)
   {
-;//printf("_workerFunction()  WAIT    %s\n", s->name);
+;//PD("_workerFunction()  WAIT    %s", s->name);
   }
 #if THREADIT
   else if (RUNNR_READY == s->status)
@@ -323,7 +323,7 @@ static void _cancel(void *data, Ecore_Thread *thread)
   s->status = RUNNR_FINISHED;
   eina_clist_remove(&(s->node));
   if (s->SID[0])	ecore_thread_global_data_del(s->SID);	s->SID[0] = 0;
-//printf("^^^^^^^^^^^^^^^^^^^_del(, %s)\n", s->name);
+//PD("^^^^^^^^^^^^^^^^^^^_del(, %s)", s->name);
   // TODO - Perhaps have our own deletion callback to pass back?
   releaseScript(s);
 #if THREADIT
@@ -444,11 +444,11 @@ static void _compileThread(void *data, Ecore_Thread *thread)
         compiler->bugCount++;
 #if COMPILE_OUTPUT
 	if (LUA_ERRSYNTAX == err)
-	  printf("Lua syntax error in %s: %s\n", name, lua_tostring(L, -1));
+	  PI("Lua syntax error in %s: %s", name, lua_tostring(L, -1));
 	else if (LUA_ERRFILE == err)
-	  printf("Lua compile file error in %s: %s\n", name, lua_tostring(L, -1));
+	  PE("Lua compile file error in %s: %s", name, lua_tostring(L, -1));
 	else if (LUA_ERRMEM == err)
-	  printf("Lua compile memory allocation error in %s: %s\n", name, lua_tostring(L, -1));
+	  PC("Lua compile memory allocation error in %s: %s", name, lua_tostring(L, -1));
 #endif
       }
       else
@@ -462,28 +462,28 @@ static void _compileThread(void *data, Ecore_Thread *thread)
 	  if (err)
 	  {
 	    compiler->bugCount++;
-	    printf("Lua compile file error writing to %s\n", name);
+	    PE("Lua compile file error writing to %s", name);
 	  }
 	  fclose(out);
 	}
 	else
 	{
 	  compiler->bugCount++;
-	  printf("CRITICAL! Unable to open file %s for writing!\n", name);
+	  PE("CRITICAL! Unable to open file %s for writing!", name);
         }
       }
     }
     else if (!compiler->doConstants)
     {
       compiler->bugCount++;
-      printf("Can't create a new Lua state!\n");
+      PC("Can't create a new Lua state!");
     }
   }
   else
   {
     compiler->bugCount++;
 #if COMPILE_OUTPUT
-    printf("Nothing for Lua to compile!\n");
+    PW("Nothing for Lua to compile!");
 #endif
   }
 }
@@ -544,8 +544,8 @@ void takeScript(script *s)
 {
 #if THREADIT
   Eina_Lock_Result result = eina_lock_take(&s->mutex);
-  if (EINA_LOCK_DEADLOCK == result)  printf("Script %s IS DEADLOCKED!\n", s->name);
-  if (EINA_LOCK_FAIL     == result)  printf("Script %s LOCK FAILED!\n",   s->name);
+  if (EINA_LOCK_DEADLOCK == result)  PE("Script %s IS DEADLOCKED!", s->name);
+  if (EINA_LOCK_FAIL     == result)  PE("Script %s LOCK FAILED!",   s->name);
 #endif
 }
 
@@ -861,7 +861,7 @@ int push_lua(lua_State *L, char *params, ...)       // Stack usage [-0, +n, em]
       {
         if (table)  q = _push_name(L, q, &i);   // Stack usage [-0, +1, m]
         char *t = va_arg(vl, char *);
-//printf("push_lua %s string %s\n", p, t);
+//PD("push_lua %s string %s", p, t);
         lua_pushstring(L, t);  // Stack usage [-0, +1, m]
         break;
       }

@@ -279,8 +279,7 @@ static GLuint load_shader(GLData *gld, GLenum type, const char *shader_src)
              if (info)
                {
                   gl->glGetShaderInfoLog(shader, len, NULL, info);
-                  printf("Error compiling shader:\n"
-                         "%s\n", info);
+                  PE("Error compiling shader: %s", info);
                   free(info);
                }
           }
@@ -332,7 +331,7 @@ void gears_init(GLData *gld)
 	    if (info)
 	    {
 		gld->glApi->glGetProgramInfoLog(gld->program, len, NULL, info);
-		printf("Error linking program:\n%s\n", info);
+		PE("Error linking program: %s", info);
 		free(info);
 	    }
 	}
