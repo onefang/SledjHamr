@@ -206,7 +206,7 @@ function mt.callAndWait(name, ...)
   mt.callAndReturn(name, ...);
   -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
   -- Wait for the result, which should be a Lua value as a string.
-  return waitAndProcess(true)
+  return waitAndProcess(true, name, ...)
 end
 
 local function newConst(Type, name, value)
@@ -1982,25 +1982,36 @@ function LSL.mainLoop(sid, name, x)
   LSL.EOF = "EndOfFuckingAround"	-- Fix this up now.
 
   LSL.stateChange(x);
-  waitAndProcess(false)
+  waitAndProcess(false, "LSL.mainLoop")
 --  msg("LSL.Lua: Script quitting " .. scriptName)
 end
 
-function waitAndProcess(returnWanted)
+function waitAndProcess(returnWanted, name, ...)
   local Type = "event"
 
-  if returnWanted then Type = "result" end
+  if returnWanted then
+    Type = "result"
+    if running then
+--      print(">" .. SID .. "_" .. scriptName, " - REQUESTING " .. name)
+    else
+--      print("?" .. SID .. "_" .. scriptName, " - STOPPED???? ")
+    end
+  else
+--    print("." .. SID .. "_" .. scriptName, " waitAndProcess(false, " .. name .. ")")
+  end
+
   while running do
     local message = Runnr.receive()
     if message then
---print('GOT MESSAGE for  script ' .. scriptName .. ' - "' .. message .. '"')
+--print(" " .. SID .. "_" .. scriptName .. ' GOT MESSAGE - "' .. message .. '"')
       -- TODO - should we be discarding return values while paused?  I don't think so, so we need to process those,
       if paused then
-	if "start()" == message then paused = false  end
+	if "start()" == message then paused = false end
       else
 	local result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
 	  msg("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+--	  print("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 	else
 	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
 	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
@@ -2009,11 +2020,14 @@ function waitAndProcess(returnWanted)
 	  local status, result1 = pcall(result)
 	  if not status then
 	    msg("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1)
+	    print("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1)
 	  elseif result1 then
 	    -- Check if we are waiting for a return, and got it.
 	    if returnWanted and string.match(message, "^return ") then
---	      print("RETURNING " .. result1)
+--	      print("<" .. SID .. "_" .. scriptName, " - RETURNING " .. type(result1) .. " " .. message .. " TO " .. name)
 	      return result1
+	    else
+--	      print("." .. SID .. "_" .. scriptName, " - IGNORING " .. type(result1) .. " " .. message .. " TO " .. name)
             end
 	    -- Otherwise, just run it and keep looping.
 	    -- TODO - Not sure why I had this here.  "sid" is not set anywhere, and SID would just send it to ourselves.
@@ -2021,6 +2035,12 @@ function waitAndProcess(returnWanted)
 --	    if not status then
 --	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 --	    end
+	  else
+	    if string.match(message, "^return ") then
+	      print("!" .. SID .. "_" .. scriptName, " - IN AN ODD PLACE!!!!!" .. message)
+	    else
+--	      print("!" .. SID .. "_" .. scriptName, " - " .. message)
+	    end
 	  end
 	end
       end

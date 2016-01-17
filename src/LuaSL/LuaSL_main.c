@@ -223,7 +223,7 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
   gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
-//PD("COMMAND - %s", command);
+//PD("PARSE COMMAND - %s", command);
     if (0 == strncmp(command, "compile(", 8))
     {
 	char *temp;
@@ -279,7 +279,10 @@ PD("Running script %s", me->fileName);
 	ecore_main_loop_quit();
     }
     else
+    {
+//PD("Sending -> script %s :  %s", SID, command);
 	send2script(SID, command);
+    }
 
    return ECORE_CALLBACK_RENEW;
 }

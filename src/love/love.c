@@ -197,7 +197,7 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
     char buf[PATH_MAX];
     LoveScript *me;
 
-PD("COMMAND - %s - %s", SID, command);
+//PD("COMMAND - %s - %s", SID, command);
     me = eina_hash_find(ourGlobals->scripts, SID);
     if (0 == strncmp(command, "compilerWarning(", 16))
     {
@@ -282,6 +282,7 @@ PD("COMMAND - %s - %s", SID, command);
     }
     else
     {
+//PD("FAKING (maybe) %s", command);
 	// Send back some random or fixed values for testing.
 	if (0 == strcmp(command, "llGetKey()"))
 	    sendForth(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
