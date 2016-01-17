@@ -198,6 +198,8 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 	    ext[0] = '\0';
 	    command = ext + 1;
 	    ext = index(command, '(');
+	    if (NULL == ext)
+	      ext = index(command, ' ');
 	    if (ext)
 	    {
 		streamParser func = eina_hash_find(conn->commands, command);
