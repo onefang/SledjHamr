@@ -88,63 +88,18 @@ static boolean checkConnection(Connection *conn, char *func, connType wanted, bo
   return result;
 }
 
-void sendBack(Connection *conn, const char *SID, const char *message, ...)
-{
-    va_list args;
-//    Ecore_Con_Client *client = conn->conn.client.client;
-    char buf[PATH_MAX * 2];
-    int length = strlen(SID);
-
-    strncpy(buf, SID, length);
-    buf[length++] = '.';
-    va_start(args, message);
-    length += vsprintf(&buf[length], message, args);
-    va_end(args);
-    buf[length++] = '\n';
-    buf[length] = '\0';
-//    PD("sendBack(%s", buf);
-//    ecore_con_client_send(client, buf, length);
-//    ecore_con_client_flush(client);
-//Connection *conn = ecore_con_client_data_get(client);
-if (conn)  send2(conn, SID, buf);  else  PE("sendBack() can't find Connection!");
-}
-
-void sendForth(Connection *conn, const char *SID, const char *message, ...)
-{
-    va_list args;
-//    Ecore_Con_Server *server = conn->conn.server.server;
-    char buf[PATH_MAX * 2];
-    int length = strlen(SID);
-
-    strncpy(buf, SID, length);
-    buf[length++] = '.';
-    va_start(args, message);
-    length += vsprintf(&buf[length], message, args);
-    va_end(args);
-    buf[length++] = '\n';
-    buf[length] = '\0';
-//    PD("sendForth(%s", buf);
-//    ecore_con_server_send(server, buf, length);
-//    ecore_con_server_flush(server);
-//Connection *conn = ecore_con_server_data_get(server);
-if (conn)  send2(conn, SID, buf);  else  PE("sendForth() can't find Connection!");
-}
-
 void send2(Connection *conn, const char *SID, const char *message, ...)
 {
     va_list args;
     char buf[PATH_MAX * 2];
     int length = strlen(SID);
 
-length = 0;
-//    strncpy(buf, SID, length);
-//    buf[length++] = '.';
+    strncpy(buf, SID, length);
+    buf[length++] = '.';
     va_start(args, message);
-//    length += vsprintf(&buf[length], message, args);
+    length += vsprintf(&buf[length], message, args);
     va_end(args);
-strcpy(buf, message);
-length = strlen(buf);
-//    buf[length++] = '\n';
+    buf[length++] = '\n';
     buf[length] = '\0';
 
 // TODO - Should check if this is always gonna be local?  Likely not.

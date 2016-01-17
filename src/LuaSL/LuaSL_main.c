@@ -168,7 +168,7 @@ void send2server(script *me, const char *message)
     else
     {
 	takeScript(me);
-	sendBack(me->client, me->SID, message);
+	send2(me->client, me->SID, message);
 	releaseScript(me);
     }
 }
@@ -181,9 +181,9 @@ static void _compileCb(LuaCompiler *compiler)
   {
 #if COMPILE_OUTPUT
     if (message->type)
-      sendBack(compiler->client, compiler->SID, "compilerError(%d,%d,%s)",   message->line, message->column, message->message);
+      send2(compiler->client, compiler->SID, "compilerError(%d,%d,%s)",   message->line, message->column, message->message);
     else
-      sendBack(compiler->client, compiler->SID, "compilerWarning(%d,%d,%s)", message->line, message->column, message->message);
+      send2(compiler->client, compiler->SID, "compilerWarning(%d,%d,%s)", message->line, message->column, message->message);
 #endif
     eina_clist_remove(&(message->node));
     free(message);
@@ -191,9 +191,9 @@ static void _compileCb(LuaCompiler *compiler)
 
 //PD("Compiled %s, bug count %d", compiler->file, compiler->bugCount);
   if (0 == compiler->bugCount)
-    sendBack(compiler->client, compiler->SID, "compiled(true)");
+    send2(compiler->client, compiler->SID, "compiled(true)");
   else
-    sendBack(compiler->client, compiler->SID, "compiled(false)");
+    send2(compiler->client, compiler->SID, "compiled(false)");
 }
 
 static void _compileCbSingle(LuaCompiler *compiler)

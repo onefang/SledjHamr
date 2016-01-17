@@ -56,7 +56,7 @@ static int say(lua_State *L)
     gl = lua_touserdata(L, -1);
     lua_pop(L, 1);
     if (gl && gl->server)
-      sendForth(gl->server, id, buf);
+      send2(gl->server, id, buf);
     else
       PW("PURKLE NOT SAY, no where to send %s", buf);
   }

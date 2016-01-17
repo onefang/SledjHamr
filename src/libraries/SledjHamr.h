@@ -66,9 +66,6 @@ struct _Connection
 
 
 void *addMessage(Eina_Clist *list, size_t size, const char *message, ...);
-void sendBack(Connection *conn, const char *SID, const char *message, ...);
-void sendForth(Connection *conn, const char *SID, const char *message, ...);
-
 void send2(Connection *conn, const char *SID, const char *message, ...);
 Connection *openArms(char *name, const char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser);
 Connection *reachOut(char *name, char *command, char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser);

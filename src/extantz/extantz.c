@@ -143,7 +143,7 @@ static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void 
 
       // CUBE_UUID.events.touch_start(1), but we just make one up for now.
       snprintf(SID, sizeof(SID), FAKE_UUID);
-      sendForth(ourGlobals.server, SID, "events.touch_start(1)");
+      send2(ourGlobals.server, SID, "events.touch_start(1)");
     }
   }
 }
@@ -567,7 +567,7 @@ static Eina_Bool _makeMess(void *data)
   ecore_job_add((Ecore_Cb) _makeLove,  ourGlobals);
 //  ecore_timer_add(0.1, _makeLove, ourGlobals);
 
-  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
+//  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
 
   return ECORE_CALLBACK_CANCEL;
 }
@@ -615,7 +615,7 @@ static Eina_Bool _makePurkle(void *data)
 
   woMan_add(ourGlobals);
   ourGlobals->purkle     = GuiLuaLoad("purkle",     ourGlobals->mainWindow, ourGlobals->world);
-//  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
+  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
 //  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
 
   // Gotta do this after adding the windows, otherwise the menu renders under the window.
