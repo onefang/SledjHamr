@@ -322,6 +322,7 @@
 /libraries/lemon/lemon
 /lib/constants.lsl
 media/bad_scripts/
+media/really_bad_scripts/
 media/bulk_scripts_dump/
 media/Test%20sim/test/bulk_scripts_dump/
 /src/LuaSL/LuaSL_test
