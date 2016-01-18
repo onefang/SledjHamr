@@ -1,0 +1,108 @@
+I don't usually bother with even reading vision statements, and I'm a
+compulsive speed reader.  Before I know I should not be reading
+something, it's too late, already read it.  lol
+
+SledjHamr is my lifes passion though, I've been interested in this sort
+of thing since the '80s and '90s.  I've been thinking about how best to
+describe it, and it's turning into a sort of vision statement.  So here
+it is.  I'll try to avoid being too hand wavy and wanky.
+
+The main goal of the rest of my life is to help make 3D virtual worlds
+as easy to use and as useful as possible for everybody.  How's that for
+a wanky motherhood statement?
+
+I haz a dreamz.  B-)
+
+The entire system is designed to be easy, mashable, modular, and low on
+resource usage.  The default package ties it all together into a newbie
+friendly first experience, that can be ignored easily by non newbies. 
+All users should be able to easily learn how to at least re-arrange
+their furniture, change the wallpaper, and switch their outfits.  More
+advanced users will find easy tools for in world building and scripting. 
+Experts can easily peek under the hood, and squeal with glee at the
+virtual world construction set they find.  Coders like myself can delve
+further into the quantum, but still using the built in tools.  Sysadmins
+can easily integrate bits into their systems.  People that enjoy mashups
+can go nuts.
+
+
+
+Initial experience.
+-------------------
+
+You download SledjHamr from the Internet, and run it.
+
+You are in a 3D first person view, perhaps using a head mounted display.
+
+First things you see are a school desk, clothing rack, and wall full of
+landscapes.
+
+You are greeted by name, the name you used to log onto your desktop.
+
+You are informed that you have three choices, click on the desk to learn
+how to work this thing (though the basics, like clicking on the desk,
+should be obvious), the rack to sort out what you want to look like, or
+one of the landscapes to pick your first home.
+
+When you click on a landscape, it appears around you.  You can explore
+it, modify it, or tear it all down and build your own.
+
+Eventually you might want to wander further, or invite some friends to
+your new home.  You install a bus stop next to your home, wander over to
+it, look at the destination guide, and HyperGrid elsewhere as if you
+where on a normal OpenSim grid, using a normal OpenSim viewer.
+
+You unlock your home, and allow some of your friends to visit.  Or (if
+you feel your security is up to it) you can open your home to the
+public, and let any one in.
+
+
+
+More details.
+-------------
+
+3D monitors / TVs, caves, Google Cardboard (with things like TrinusVR),
+and other things should also work.  As should all manner of input
+devices, mapable by the user, but with sensible defaults.
+
+The basic look and feel will be similar to Second Life and OpenSim, at
+least to start with.  Though I guess I should add in some graphic
+example of "WOW, SL can't do this" in the beginning.  Which may happen
+by accident anyway.  B-)
+
+I assume you are running it under some sort of desktop, though phone
+support is expected as well.  The basic idea is that in most cases, the
+user has already authenticated themselves somewhere in order to get as
+far as actually being able to run SledgHamr.  The default for the major
+desktop OSes is for the user to have created an account at OS
+installation time, even if it's "user" and "password" setup by store
+techs building white boxen.  Corporate computers are usually locked down
+to staff accounts only.  Smart phones usually have you logged onto their
+mothership for spying purposes, er I mean to help the user with all
+sorts of useful services.  So no need for the user of SledjHamr to muck
+around with creating an account, you are already using it.  They should
+be able to change their name though.  I know, display names, yuck.
+
+I'm thinking you might be stuck in first person view until you pick out
+an avatar, or just pick something random.  Your default home could also
+be a random selection.  There could be theme packs to download, let you
+decide these things.  Experts could just load up any IARs / OARs they
+have and skip the newbie experience.
+
+The HyperGrid protocol of OpenSim checks with the grid you logged into
+to see if you have a legitimate account.  Well, you do, as I pointed out
+above.  So visiting any OpenSim grid that allows HyperGrid will let you
+teleport to them from your SledjHamr home.  When you open your home, the
+people can be coming from an OpenSim grid using the HyperGrid protocol,
+or another SledjHamr.  SledjHamr should default to NOT opening up to the
+outside.  The default status of your home will be "Locked up tight for
+the night."  You are not going out, no one else is coming in.  It will
+only open up when you decide to open up, and only as much as you ask
+for.  Your home is your castle, or your bosses if you are using a
+corporate computer.
+
+Other virtual world protocols will be supported, the SL / OS ones will be
+just a wrapper around the SledjHamr protocol.  For direct SledjHamr to
+SledjHamr things should be noticably faster and smoother.  Obviously any
+particular protocol will be limited by that protocols own limits.
+
