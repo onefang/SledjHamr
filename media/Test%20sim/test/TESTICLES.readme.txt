@@ -1,0 +1,13 @@
+The original test scripts came via a circatious route to me.  So I have
+no idea who wrote what.  Some of them are "created by Vektor Linden".  
+Which would be a Linden Labs staff member, and not their real name.  
+There does not seem to be any copyright notice.  They seem to be based
+on a protocol that is detailed here -
+
+http://wiki.secondlife.com/wiki/LSLTest
+
+The scripts I have are not linked from that page anywhere I could find.
+
+The actual protocol, server, client wrappers, etc is all way over
+engineered, we are only interested in the actual tests.  So these get
+morphed into much simpler, smaller, tests, little testicles.
