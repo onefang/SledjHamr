@@ -122,41 +122,41 @@ function events.detectsClear()
   detectedVels = {}
 end
 
-function events.at_rot_target(tnum, targetrot, ourrot)					if nil ~= currentState.at_rot_target		then currentState.at_rot_target(tnum, targetrot, ourrot)				end  events.detectsClear()  end
-function events.at_target(tnum, targetpos, ourpos)					if nil ~= currentState.at_target		then currentState.at_target(tnum, targetpos, ourpos)					end  events.detectsClear()  end
-function events.attach(id)								if nil ~= currentState.attach			then currentState.attach(id)								end  events.detectsClear()  end
-function events.changed(change)								if nil ~= currentState.changed			then currentState.changed(change)							end  events.detectsClear()  end
-function events.collision_start(num_detected)						if nil ~= currentState.collision_start		then currentState.collision_start(num_detected)						end  events.detectsClear()  end
-function events.collision(num_detected)							if nil ~= currentState.collision		then currentState.collision(num_detected)						end  events.detectsClear()  end
-function events.collision_end(num_detected)						if nil ~= currentState.collision_end		then currentState.collision_end(num_detected)						end  events.detectsClear()  end
-function events.control(id, held, changed)						if nil ~= currentState.control			then currentState.control(id, held, changed)						end  events.detectsClear()  end
-function events.dataserver(queryid, data)						if nil ~= currentState.dataserver		then currentState.dataserver(queryid, data)						end  events.detectsClear()  end
-function events.email(Time, address, subj, message, num_left)				if nil ~= currentState.email			then currentState.email(Time, address, subj, message, num_left)				end  events.detectsClear()  end
-function events.http_request(request_id, status, metadata, body)			if nil ~= currentState.http_request		then currentState.http_request(request_id, status, metadata, body)			end  events.detectsClear()  end
-function events.http_response(request_id, status, metadata, body)			if nil ~= currentState.http_response		then currentState.http_response(request_id, status, metadata, body)			end  events.detectsClear()  end
-function events.land_collision_start(pos)						if nil ~= currentState.land_collision_start	then currentState.land_collision_start(pos)						end  events.detectsClear()  end
-function events.land_collision(pos)							if nil ~= currentState.land_collision		then currentState.land_collision(pos)							end  events.detectsClear()  end
-function events.land_collision_end(pos)							if nil ~= currentState.land_collision_end	then currentState.land_collision_end(pos)						end  events.detectsClear()  end
-function events.link_message(sender_num, num, str, id)					if nil ~= currentState.link_message		then currentState.link_message(sender_num, num, str, id)				end  events.detectsClear()  end
-function events.listen(channel, name, id, message)					if nil ~= currentState.listen			then currentState.listen(channel, name, id, message)					end  events.detectsClear()  end
-function events.money(id, amount)							if nil ~= currentState.money			then currentState.money(id, amount)							end  events.detectsClear()  end
-function events.moving_start()								if nil ~= currentState.moving_start		then currentState.moving_start()							end  events.detectsClear()  end
-function events.moving_end()								if nil ~= currentState.moving_end		then currentState.moving_end()								end  events.detectsClear()  end
-function events.no_sensor()								if nil ~= currentState.no_sensor		then currentState.no_sensor()								end  events.detectsClear()  end
-function events.not_at_rot_target()							if nil ~= currentState.not_at_rot_target	then currentState.not_at_rot_target()							end  events.detectsClear()  end
-function events.not_at_target()								if nil ~= currentState.not_at_target		then currentState.not_at_target()							end  events.detectsClear()  end
-function events.object_rez(id)								if nil ~= currentState.object_rez		then currentState.object_rez()								end  events.detectsClear()  end
-function events.on_rez(start_param)							if nil ~= currentState.on_rezz			then currentState.on_rez(start_param)							end  events.detectsClear()  end
-function events.remote_data(event_type, channel, message_id, sender, idata, sdata)	if nil ~= currentState.remote_data		then currentState.remote_data(event_type, channel, message_id, sender, idata, sdata)	end  events.detectsClear()  end
-function events.run_time_permissions(perm)						if nil ~= currentState.run_time_permisions	then currentState.run_time_permissions(perm)						end  events.detectsClear()  end
-function events.sensor(num_detected)							if nil ~= currentState.sensor			then currentState.sensor(num_detected)							end  events.detectsClear()  end
-function events.state_entry()								if nil ~= currentState.state_entry		then currentState.state_entry()								end  events.detectsClear()  end
-function events.state_exit()								if nil ~= currentState.state_exit		then currentState.state_exit()								end  events.detectsClear()  end
-function events.timer()									if nil ~= currentState.timer			then currentState.timer()								end  events.detectsClear()  end
-function events.touch_start(num_detected)						if nil ~= currentState.touch_start		then currentState.touch_start(num_detected)						end  events.detectsClear()  end
-function events.touch(num_detected)							if nil ~= currentState.touch			then currentState.touch(num_detected)							end  events.detectsClear()  end
-function events.touch_end(num_detected)							if nil ~= currentState.touch_end		then currentState.touch_end(num_detected)						end  events.detectsClear()  end
-function events.transaction_result(id, success, data)					if nil ~= currentState.transaction_result	then currentState.transaction_result(id, success, data)					end  events.detectsClear()  end
+function events.at_rot_target(tnum, targetrot, ourrot)					if "function" == type(currentState.at_rot_target)		then currentState.at_rot_target(tnum, targetrot, ourrot)				end  events.detectsClear()  end
+function events.at_target(tnum, targetpos, ourpos)					if "function" == type(currentState.at_target)			then currentState.at_target(tnum, targetpos, ourpos)					end  events.detectsClear()  end
+function events.attach(id)								if "function" == type(currentState.attach)			then currentState.attach(id)								end  events.detectsClear()  end
+function events.changed(change)								if "function" == type(currentState.changed)			then currentState.changed(change)							end  events.detectsClear()  end
+function events.collision_start(num_detected)						if "function" == type(currentState.collision_start)		then currentState.collision_start(num_detected)						end  events.detectsClear()  end
+function events.collision(num_detected)							if "function" == type(currentState.collision)			then currentState.collision(num_detected)						end  events.detectsClear()  end
+function events.collision_end(num_detected)						if "function" == type(currentState.collision_end)		then currentState.collision_end(num_detected)						end  events.detectsClear()  end
+function events.control(id, held, changed)						if "function" == type(currentState.control)			then currentState.control(id, held, changed)						end  events.detectsClear()  end
+function events.dataserver(queryid, data)						if "function" == type(currentState.dataserver)			then currentState.dataserver(queryid, data)						end  events.detectsClear()  end
+function events.email(Time, address, subj, message, num_left)				if "function" == type(currentState.email)			then currentState.email(Time, address, subj, message, num_left)				end  events.detectsClear()  end
+function events.http_request(request_id, status, metadata, body)			if "function" == type(currentState.http_request)		then currentState.http_request(request_id, status, metadata, body)			end  events.detectsClear()  end
+function events.http_response(request_id, status, metadata, body)			if "function" == type(currentState.http_response)		then currentState.http_response(request_id, status, metadata, body)			end  events.detectsClear()  end
+function events.land_collision_start(pos)						if "function" == type(currentState.land_collision_start)	then currentState.land_collision_start(pos)						end  events.detectsClear()  end
+function events.land_collision(pos)							if "function" == type(currentState.land_collision)		then currentState.land_collision(pos)							end  events.detectsClear()  end
+function events.land_collision_end(pos)							if "function" == type(currentState.land_collision_end)		then currentState.land_collision_end(pos)						end  events.detectsClear()  end
+function events.link_message(sender_num, num, str, id)					if "function" == type(currentState.link_message)		then currentState.link_message(sender_num, num, str, id)				end  events.detectsClear()  end
+function events.listen(channel, name, id, message)					if "function" == type(currentState.listen)			then currentState.listen(channel, name, id, message)					end  events.detectsClear()  end
+function events.money(id, amount)							if "function" == type(currentState.money)			then currentState.money(id, amount)							end  events.detectsClear()  end
+function events.moving_start()								if "function" == type(currentState.moving_start)		then currentState.moving_start()							end  events.detectsClear()  end
+function events.moving_end()								if "function" == type(currentState.moving_end)			then currentState.moving_end()								end  events.detectsClear()  end
+function events.no_sensor()								if "function" == type(currentState.no_sensor)			then currentState.no_sensor()								end  events.detectsClear()  end
+function events.not_at_rot_target()							if "function" == type(currentState.not_at_rot_target)		then currentState.not_at_rot_target()							end  events.detectsClear()  end
+function events.not_at_target()								if "function" == type(currentState.not_at_target)		then currentState.not_at_target()							end  events.detectsClear()  end
+function events.object_rez(id)								if "function" == type(currentState.object_rez)			then currentState.object_rez()								end  events.detectsClear()  end
+function events.on_rez(start_param)							if "function" == type(currentState.on_rezz)			then currentState.on_rez(start_param)							end  events.detectsClear()  end
+function events.remote_data(event_type, channel, message_id, sender, idata, sdata)	if "function" == type(currentState.remote_data)			then currentState.remote_data(event_type, channel, message_id, sender, idata, sdata)	end  events.detectsClear()  end
+function events.run_time_permissions(perm)						if "function" == type(currentState.run_time_permisions)		then currentState.run_time_permissions(perm)						end  events.detectsClear()  end
+function events.sensor(num_detected)							if "function" == type(currentState.sensor)			then currentState.sensor(num_detected)							end  events.detectsClear()  end
+function events.state_entry()								if "function" == type(currentState.state_entry)			then currentState.state_entry()								end  events.detectsClear()  end
+function events.state_exit()								if "function" == type(currentState.state_exit)			then currentState.state_exit()								end  events.detectsClear()  end
+function events.timer()									if "function" == type(currentState.timer)			then currentState.timer()								end  events.detectsClear()  end
+function events.touch_start(num_detected)						if "function" == type(currentState.touch_start)			then currentState.touch_start(num_detected)						end  events.detectsClear()  end
+function events.touch(num_detected)							if "function" == type(currentState.touch)			then currentState.touch(num_detected)							end  events.detectsClear()  end
+function events.touch_end(num_detected)							if "function" == type(currentState.touch_end)			then currentState.touch_end(num_detected)						end  events.detectsClear()  end
+function events.transaction_result(id, success, data)					if "function" == type(currentState.transaction_result)		then currentState.transaction_result(id, success, data)					end  events.detectsClear()  end
 
 
 -- LSL function and constant creation stuff.
@@ -2010,17 +2010,21 @@ function waitAndProcess(returnWanted, name, ...)
       else
 	local result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
-	  msg("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
---	  print("Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
+	  local text = "Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg
+	  msg(text)
+	  print(text)
 	else
-	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment instead.
-	  -- TODO - On the other hand, we will need the global environment when we call event handlers.  So we should probably stash it around here somewhere.
-	  --        Meh, seems to be working fine as it is.  Or not.
-	  setfenv(result, getfenv(1))
+	  -- Set the functions environment to ours, for the protection of the script, coz loadstring sets it to the global environment.
+	  -- On the other hand, we will need the global environment when we call event handlers.
+	  if "event" ~= Type then
+	    setfenv(result, getfenv(1))
+	  end
+
 	  local status, result1 = pcall(result)
 	  if not status then
-	    msg("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1)
-	    print("Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1)
+	    local text = "Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1
+	    msg(text)
+	    print(text)
 	  elseif result1 then
 	    -- Check if we are waiting for a return, and got it.
 	    if returnWanted and string.match(message, "^return ") then
