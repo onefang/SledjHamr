@@ -18,6 +18,9 @@
 // TODO - Should make this choosable at run time after more testing of Ecore_Thead.
 #define  THREADIT   0
 
+#define COMPILE_THREADED	0
+#define COMPILE_OUTPUT		1
+
 typedef enum
 {
   RUNNR_COMPILING,
@@ -56,7 +59,7 @@ typedef void (* RunnrServerCb)(script *me, const char *message);
 typedef struct _script
 {
   Eina_Clist		node;
-#if THREADIT
+#if COMPILE_THREADED
   Eina_Lock		mutex;
   Ecore_Thread		*me;
 #endif
@@ -83,7 +86,9 @@ typedef struct
 } scriptMessage;
 
 
+void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line);
 script *scriptAdd(char *file, char *SID, RunnrServerCb send2server, void *data);
+LuaCompiler *createCompiler(char *SID, char *file, compileCb parser, compileCb cb);
 void compileScript(LuaCompiler *compiler, int threadIt);
 void runScript(script *me);
 void resetScript(script *me);

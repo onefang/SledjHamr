@@ -3,8 +3,6 @@
 #define __LUASL_TREE_H__
 
 #define LUASL_DEBUG		0
-#define COMPILE_THREADED	1
-#define COMPILE_OUTPUT		0
 #define LUASL_DIFF_CHECK	0
 #define LUASL_BAD_CHECK		0
 
@@ -407,8 +405,6 @@ typedef struct
     #include "LuaSL_lexer.h"
 #endif
 
-
-void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line);
 
 boolean compilerSetup(gameGlobals *ourGlobals);
 void compileLSL(LuaCompiler *compiler);

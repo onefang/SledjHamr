@@ -21,6 +21,14 @@ static const struct luaL_reg runnrFunctions[] =
   { NULL, NULL }
 };
 
+void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line)
+{
+    message->type   = type;
+    message->column = column;
+    message->line   = line;
+    if (type)
+	compiler->bugCount++;
+}
 
 void dumpStack(lua_State *L, int i)
 {
@@ -201,7 +209,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   // The documentation is not clear on which thread is which inside and out,
   // but states that at least for some they are different.
   // So store the internal one as well.
-#if THREADIT
+#if COMPILE_THREADED
   s->me = thread;
 #endif
 
@@ -289,7 +297,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   if (RUNNR_FINISHED == s->status)
   {
 //PD("_workerFunction()  FINISHED %s", s->name);
-#if THREADIT
+#if COMPILE_THREADED
     ecore_thread_cancel(thread);
 #else
     _cancel(s, NULL);
@@ -299,7 +307,7 @@ static void _workerFunction(void *data, Ecore_Thread *thread)
   {
 ;//PD("_workerFunction()  WAIT    %s", s->name);
   }
-#if THREADIT
+#if COMPILE_THREADED
   else if (RUNNR_READY == s->status)
     ecore_thread_reschedule(thread);
 #endif
@@ -326,13 +334,13 @@ static void _cancel(void *data, Ecore_Thread *thread)
 //PD("^^^^^^^^^^^^^^^^^^^_del(, %s)", s->name);
   // TODO - Perhaps have our own deletion callback to pass back?
   releaseScript(s);
-#if THREADIT
+#if COMPILE_THREADED
   eina_lock_free(&s->mutex);
 #endif
   free(s);
 }
 
-#if THREADIT
+#if COMPILE_THREADED
 static void _end(void *data, Ecore_Thread *thread)
 {
 }
@@ -348,7 +356,7 @@ static Eina_Bool _enterer(void *data)
     if ((RUNNR_WAIT == s->status) && (eina_clist_count(&s->messages)))
     {
       s->status = RUNNR_READY;
-#if THREADIT
+#if COMPILE_THREADED
       ecore_thread_feedback_run(_workerFunction, _notify, _end, _cancel, s, EINA_FALSE);
 #else
       _workerFunction(s, NULL);
@@ -356,7 +364,7 @@ static Eina_Bool _enterer(void *data)
     }
     if ((RUNNR_RESET == s->status) || (RUNNR_READY == s->status) || (RUNNR_RUNNING == s->status) || (RUNNR_NOT_STARTED == s->status))
     {
-#if THREADIT
+#if COMPILE_THREADED
       ecore_thread_feedback_run(_workerFunction, _notify, _end, _cancel, s, EINA_FALSE);
 #else
       _workerFunction(s, NULL);
@@ -389,7 +397,7 @@ script *scriptAdd(char *file, char *SID, RunnrServerCb send2server, void *data)
   result->name = &result->fileName[strlen(prefix_data_get())];
   sprintf(result->binName, "%s.lua.out", result->fileName);
 
-#if THREADIT
+#if COMPILE_THREADED
   eina_lock_new(&result->mutex);
 #endif
   eina_clist_init(&(result->messages));
@@ -398,6 +406,20 @@ script *scriptAdd(char *file, char *SID, RunnrServerCb send2server, void *data)
   eina_clist_add_tail(&(scripts), &(result->node));
 
   return result;
+}
+
+LuaCompiler *createCompiler(char *SID, char *file, compileCb parser, compileCb cb)
+{
+    LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+
+    eina_clist_init(&(compiler->messages));
+    compiler->file = strdup(file);
+    compiler->SID = strdup(SID);
+    compiler->doConstants = FALSE;
+    compiler->parser = parser;
+    compiler->cb = cb;
+
+    return compiler;
 }
 
 static int luaWriter(lua_State *L, const void* p, size_t sz, void* ud)
@@ -441,15 +463,21 @@ static void _compileThread(void *data, Ecore_Thread *thread)
       err = luaL_loadfile(L, name);
       if (err)
       {
-        compiler->bugCount++;
-#if COMPILE_OUTPUT
+	  compileMessage *message;
+
 	if (LUA_ERRSYNTAX == err)
-	  PI("Lua syntax error in %s: %s", name, lua_tostring(L, -1));
+	  message = addMessage(&(compiler->messages), sizeof(compileMessage),
+	    "Lua syntax error in %s: %s", name, lua_tostring(L, -1));
 	else if (LUA_ERRFILE == err)
-	  PE("Lua compile file error in %s: %s", name, lua_tostring(L, -1));
+	  message = addMessage(&(compiler->messages), sizeof(compileMessage),
+	    "Lua compile file error in %s: %s", name, lua_tostring(L, -1));
 	else if (LUA_ERRMEM == err)
-	  PC("Lua compile memory allocation error in %s: %s", name, lua_tostring(L, -1));
-#endif
+	  message = addMessage(&(compiler->messages), sizeof(compileMessage),
+	    "Lua compile memory allocation error in %s: %s", name, lua_tostring(L, -1));
+	else
+	  message = addMessage(&(compiler->messages), sizeof(compileMessage),
+	    "Lua unknown error %d in %s.", err, name);
+	finishMessage(compiler, message, 1, 0, 0);
       }
       else
       {
@@ -461,29 +489,33 @@ static void _compileThread(void *data, Ecore_Thread *thread)
 	  err = lua_dump(L, luaWriter, out);
 	  if (err)
 	  {
-	    compiler->bugCount++;
-	    PE("Lua compile file error writing to %s", name);
+	    finishMessage(compiler, addMessage(&(compiler->messages), sizeof(compileMessage),
+	      "Lua compile file error writing to %s", name),
+	      1, 0, 0);
 	  }
 	  fclose(out);
 	}
 	else
 	{
-	  compiler->bugCount++;
-	  PE("CRITICAL! Unable to open file %s for writing!", name);
+	  finishMessage(compiler, addMessage(&(compiler->messages), sizeof(compileMessage),
+	    "CRITICAL! Unable to open file %s for writing!", name),
+	    1, 0, 0);
         }
       }
     }
     else if (!compiler->doConstants)
     {
-      compiler->bugCount++;
-      PC("Can't create a new Lua state!");
+      finishMessage(compiler, addMessage(&(compiler->messages), sizeof(compileMessage),
+        "Can't create a new Lua state!"),
+        1, 0, 0);
     }
   }
   else
   {
-    compiler->bugCount++;
 #if COMPILE_OUTPUT
-    PW("Nothing for Lua to compile!");
+    finishMessage(compiler, addMessage(&(compiler->messages), sizeof(compileMessage),
+      "Nothing for Lua to compile!"),
+      1, 0, 0);
 #endif
   }
 }
@@ -493,9 +525,11 @@ static void _compileThread(void *data, Ecore_Thread *thread)
 // But with outputting to the console -	450 - 700	750 - 800
 void compileScript(LuaCompiler *compiler, int threadIt)
 {
+#if COMPILE_THREADED
   if (threadIt)
     ecore_thread_run(_compileThread, _compileEnd, _compileEnd, compiler);
   else
+#endif
   {
     _compileThread(compiler, NULL);
     _compileEnd(compiler, NULL);
@@ -505,11 +539,11 @@ void compileScript(LuaCompiler *compiler, int threadIt)
 // Assumes the scripts mutex is taken already.
 void runScript(script *s)
 {
-#if THREADIT
+#if COMPILE_THREADED
   if ((RUNNR_NOT_STARTED == s->status) || (RUNNR_FINISHED == s->status))
 #endif
   {
-#if THREADIT
+#if COMPILE_THREADED
     ecore_thread_feedback_run(_workerFunction, _notify, _end, _cancel, s, EINA_FALSE);
 #else
     _workerFunction(s, NULL);
@@ -542,7 +576,7 @@ script *getScript(char *SID)
 
 void takeScript(script *s)
 {
-#if THREADIT
+#if COMPILE_THREADED
   Eina_Lock_Result result = eina_lock_take(&s->mutex);
   if (EINA_LOCK_DEADLOCK == result)  PE("Script %s IS DEADLOCKED!", s->name);
   if (EINA_LOCK_FAIL     == result)  PE("Script %s LOCK FAILED!",   s->name);
@@ -551,7 +585,7 @@ void takeScript(script *s)
 
 void releaseScript(script *s)
 {
-#if THREADIT
+#if COMPILE_THREADED
   eina_lock_release(&s->mutex);
 #endif
 }
@@ -580,7 +614,7 @@ void send2script(const char *SID, const char *message)
 	  stat = s->status;
 	  s->status = RUNNR_READY;
 	  if (RUNNR_WAIT == stat)
-#if THREADIT
+#if COMPILE_THREADED
             ecore_thread_feedback_run(_workerFunction, _notify, _end, _cancel, s, EINA_FALSE);
 #else
 	    _workerFunction(s, NULL);
@@ -616,7 +650,7 @@ static int _send(lua_State *L)
   else
   {
     takeScript(self);
-#if THREADIT
+#if COMPILE_THREADED
     ecore_thread_feedback(self->me, strdup(message));
 #else
     _notify(self, NULL, strdup(message));

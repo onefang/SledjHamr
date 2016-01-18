@@ -228,7 +228,7 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
     {
 	char *temp;
 	char *file;
-	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+	LuaCompiler *compiler;
 
 	strcpy(buf, &command[8]);
 	temp = buf;
@@ -237,15 +237,10 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
 	    temp++;
 	temp[0] = '\0';
 
-	eina_clist_init(&(compiler->messages));
-	compiler->file = strdup(file);
-	compiler->SID = strdup(SID);
+	compiler = createCompiler(SID, file, (compileCb) compileLSL, _compileCb);
 	compiler->client = connection;
-	compiler->doConstants = FALSE;
-	compiler->parser = (compileCb) compileLSL;
-	compiler->cb = _compileCb;
-PD("Compiling script %s", file);
-	compileScript(compiler, COMPILE_THREADED);
+	PI("Compiling script %s", file);
+	compileScript(compiler, TRUE);
     }
     else if (0 == strncmp(command, "run(", 4))
     {
@@ -266,7 +261,7 @@ PD("Compiling script %s", file);
 	me = getScript(SID);
 	if (me)
 	{
-PD("Running script %s", me->fileName);
+	    PI("Running script %s", me->fileName);
 	    runScript(me);
 	    releaseScript(me);
 	}
@@ -311,13 +306,9 @@ int main(int argc, char **argv)
         // get the arguments passed in
         while (--argc > 0 && *++argv != '\0')
         {
-	  LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+	  LuaCompiler *compiler;
 
-	  eina_clist_init(&(compiler->messages));
-	  compiler->file = strdup(*argv);
-	  compiler->SID = strdup("0");
-	  compiler->doConstants = FALSE;
-	  compiler->parser = (compileCb) compileLSL;
+	  compiler = createCompiler("0", *argv, (compileCb) compileLSL, _compileCbSingle);
 	  compiler->cb = _compileCbSingle;
 	  compileScript(compiler, FALSE);
         }

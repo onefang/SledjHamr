@@ -220,15 +220,6 @@ LSL_Script constants;
 int lowestToken = 999999;
 
 
-void finishMessage(LuaCompile *compiler, compileMessage *message, int type, int column, int line)
-{
-    message->type   = type;
-    message->column = column;
-    message->line   = line;
-    if (type)
-	compiler->bugCount++;
-}
-
 static LSL_Leaf *newLeaf(LSL_Type type, LSL_Leaf *left, LSL_Leaf *right)
 {
     LSL_Leaf *leaf = calloc(1, sizeof(LSL_Leaf));
@@ -596,7 +587,7 @@ else if (right)
     printf("NOLEFT %s %s\n", lval->toKen->toKen, right->toKen->toKen);
 else
     printf("NOLEFT %s NORIGHT\n", lval->toKen->toKen);
-		printf("############################################################################## left\n");
+		printf("############################################################################## left - column %i,  line %i  %s\n", lval->column, lval->line, compiler->compiler->file);
 #endif
 		left->flags |= MF_WRAPFUNC;
 		if (LSL_PARENTHESIS_OPEN == left->toKen->type)
@@ -2222,7 +2213,7 @@ boolean compilerSetup(gameGlobals *ourGlobals)
     if (tokens)
     {
 	char buf[PATH_MAX];
-	LuaCompiler *compiler = calloc(1, sizeof(LuaCompiler));
+	LuaCompiler *compiler;
 
 	// Sort the token table.
 	for (i = 0; LSL_Tokens[i].toKen != NULL; i++)
@@ -2236,10 +2227,8 @@ boolean compilerSetup(gameGlobals *ourGlobals)
 	snprintf(buf, sizeof(buf), "luajit -e 'require(\"LSL\").gimmeLSL()' > %s/constants.lsl", prefix_lib_get());
 	system(buf);
 	snprintf(buf, sizeof(buf), "%s/constants.lsl", prefix_lib_get());
-	compiler->file = strdup(buf);
-	compiler->SID = strdup("FAKE_SID");
+	compiler = createCompiler("FAKE_SID", buf, (compileCb) compileLSL, NULL);
 	compiler->doConstants = TRUE;
-	compiler->parser = (compileCb) compileLSL;
 	compileScript(compiler, FALSE);
 
 	return TRUE;
