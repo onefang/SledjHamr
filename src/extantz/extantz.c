@@ -37,12 +37,12 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
   globals *ourGlobals = data;
   char buf[PATH_MAX];
 
-  if ((0 == strncmp(command, "llOwnerSay(", 11))
-    || (0 == strncmp(command, "llWhisper(", 10))
-    || (0 == strncmp(command, "llSay(", 6))
-    || (0 == strncmp(command, "llShout(", 8)))
+  if ((0 == strcmp(command, "llOwnerSay"))
+    || (0 == strcmp(command, "llWhisper"))
+    || (0 == strcmp(command, "llSay"))
+    || (0 == strcmp(command, "llShout")))
   {
-    sprintf(buf, "%s: %s", SID, command);
+    sprintf(buf, "%s: %s(%s", SID, command, arguments);
     if (ourGlobals->purkle)
     {
       int _P;
@@ -54,7 +54,7 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
     else
       PE("No purkle to put - %s", buf);
   }
-  else if (0 == strncmp(command, "llDialog(", 9))
+  else if (0 == strcmp(command, "llDialog"))
   {
     if (ourGlobals->LSLGuiMess)
     {
@@ -64,12 +64,13 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
       _M = lua_gettop(ourGlobals->LSLGuiMess->L);
 
       // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
-      push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", command, 0);
+      sprintf(buf, "%s(%s", command, arguments);
+      push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", buf, 0);
     }
     else
-      PE("No LSLGuiMess to send - %s", command);
+      PE("No LSLGuiMess to send - %s(%s", command, arguments);
   }
-  else if (0 == strncmp(command, "loadSim(", 8))
+  else if (0 == strcmp(command, "loadSim"))
   {
 #if USE_EVAS_3D
     char *p, *t;
@@ -80,7 +81,7 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
     strcpy(ourGlobals->uuid, SID);
     PI("Your UUID is %s.", ourGlobals->uuid);
 #if USE_EVAS_3D
-    strcpy(buf, &command[8]);
+    strcpy(buf, arguments);
     p = buf;
     while ('"' == p[0])
       p++;
@@ -109,7 +110,7 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
 #endif
   }
   else
-    PI("Some random command %s", command);
+    PI("Some random command %s(%s", command, arguments);
 
   return ECORE_CALLBACK_RENEW;
 }

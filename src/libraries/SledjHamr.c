@@ -159,7 +159,7 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 	    {
 		streamParser func = eina_hash_find(conn->commands, command);
 
-//		ext[0] = '\0';
+		ext[0] = '\0';
 		// Need a callback if we can't find the command.
 		if (NULL == func)
 		    func = conn->unknownCommand;

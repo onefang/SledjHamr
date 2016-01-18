@@ -69,7 +69,7 @@ static script *findThem(gameGlobals *ourGlobals, const char *base, const char *t
     return eina_hash_find(ourGlobals->names, name);
 }
 
-void send2server(script *me, const char *message)
+static void send2server(script *me, const char *message)
 {
     gameGlobals *ourGlobals = me->data;
 
@@ -224,13 +224,13 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
   char buf[PATH_MAX];
 
 //PD("PARSE COMMAND - %s", command);
-    if (0 == strncmp(command, "compile(", 8))
+    if (0 == strcmp(command, "compile"))
     {
 	char *temp;
 	char *file;
 	LuaCompiler *compiler;
 
-	strcpy(buf, &command[8]);
+	strcpy(buf, arguments);
 	temp = buf;
 	file = temp;
 	while (')' != temp[0])
@@ -242,13 +242,13 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
 	PI("Compiling script %s", file);
 	compileScript(compiler, TRUE);
     }
-    else if (0 == strncmp(command, "run(", 4))
+    else if (0 == strcmp(command, "run"))
     {
 	char *temp;
 	char *file;
 	script *me;
 
-	strcpy(buf, &command[4]);
+	strcpy(buf, arguments);
 	temp = buf;
 	file = temp;
 	while (')' != temp[0])
@@ -268,15 +268,19 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
 	else
 	    PE("Failed to run script %s", me->fileName);
     }
-    else if (0 == strcmp(command, "exit()"))
+    else if (0 == strcmp(command, "exit"))
     {
 	PI("Told to exit.");
 	ecore_main_loop_quit();
     }
     else
     {
-//PD("Sending -> script %s :  %s", SID, command);
-	send2script(SID, command);
+	if (0 == strcmp("return", command))
+	    snprintf(buf, sizeof(buf), "%s %s", command, arguments);
+	else
+	    snprintf(buf, sizeof(buf), "%s(%s", command, arguments);
+//PD("Sending -> script %s :  %s", SID, buf);
+	send2script(SID, buf);
     }
 
    return ECORE_CALLBACK_RENEW;

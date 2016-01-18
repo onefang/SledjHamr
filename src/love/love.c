@@ -199,14 +199,14 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 
 //PD("COMMAND - %s - %s", SID, command);
     me = eina_hash_find(ourGlobals->scripts, SID);
-    if (0 == strncmp(command, "compilerWarning(", 16))
+    if (0 == strcmp(command, "compilerWarning"))
     {
 	char *temp;
 	char *line;
 	char *column;
 	char *text;
 
-	strcpy(buf, &command[16]);
+	strcpy(buf, arguments);
 	temp = buf;
 	line = temp;
 	while (',' != temp[0])
@@ -224,14 +224,14 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 	if (me)
 	    me->warnings++;
     }
-    else if (0 == strncmp(command, "compilerError(", 14))
+    else if (0 == strcmp(command, "compilerError"))
     {
 	char *temp;
 	char *line;
 	char *column;
 	char *text;
 
-	strcpy(buf, &command[14]);
+	strcpy(buf, arguments);
 	temp = buf;
 	line = temp;
 	while (',' != temp[0])
@@ -249,22 +249,7 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 	if (me)
 	    me->bugs++;
     }
-    else if (0 == strcmp(command, "compiled(false)"))
-    {
-//	PE("The compile of %s failed!", SID);
-	if (me)
-	{
-	    struct timeval now;
-
-	    compiledCount++;
-	    if (compiledCount == scriptCount)
-	    {
-		float total = timeDiff(&now, &startTime);
-		PI("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
-	    }
-	}
-    }
-    else if (0 == strcmp(command, "compiled(true)"))
+    else if (0 == strcmp(command, "compiled"))
     {
 	if (me)
 	{
@@ -277,53 +262,61 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 		PI("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
 	    }
 	}
+
+	if ('t' == arguments[0])
+	{
 //PD("About to run %s", me->fileName);
-	send2(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
+	  send2(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
+	}
+	else
+	{
+//	PE("The compile of %s failed!", SID);
+	}
     }
     else
     {
 //PD("FAKING (maybe) %s", command);
 	// Send back some random or fixed values for testing.
-	if (0 == strcmp(command, "llGetKey()"))
+	if (0 == strcmp(command, "llGetKey"))
 	    send2(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
-	else if (0 == strcmp(command, "llGetOwner()"))
+	else if (0 == strcmp(command, "llGetOwner"))
 	    send2(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
-	else if (0 == strcmp(command, "llGetPermissionsKey()"))
+	else if (0 == strcmp(command, "llGetPermissionsKey"))
 	    send2(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
-	else if (0 == strncmp(command, "llRequestPermissions(", 21))
-	    PI("Faked %s", command);
-	else if (0 == strcmp(command, "llGetPos()"))
+	else if (0 == strcmp(command, "llRequestPermissions"))
+	    PI("Faked %s(%s", command, arguments);
+	else if (0 == strcmp(command, "llGetPos"))
 	    send2(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
-	else if (0 == strcmp(command, "llGetRot()"))
+	else if (0 == strcmp(command, "llGetRot"))
 	    send2(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
-	else if (0 == strcmp(command, "llGetFreeMemory()"))
+	else if (0 == strcmp(command, "llGetFreeMemory"))
 	    send2(ourGlobals->serverLuaSL, SID, "return 654321");
-	else if (0 == strcmp(command, "llGetObjectDesc()"))
+	else if (0 == strcmp(command, "llGetObjectDesc"))
 	    send2(ourGlobals->serverLuaSL, SID, "return \"\"");
-	else if (0 == strncmp(command, "llGetAlpha(", 11))
+	else if (0 == strcmp(command, "llGetAlpha"))
 	    send2(ourGlobals->serverLuaSL, SID, "return 1.0");
-	else if (0 == strcmp(command, "llGetInventoryNumber(7)"))
+	else if (0 == strcmp(command, "llGetInventoryNumber") && (0 == strcmp(arguments, "7)")))
 	    send2(ourGlobals->serverLuaSL, SID, "return 3");
-	else if (0 == strcmp(command, "llGetLinkNumber()"))
+	else if (0 == strcmp(command, "llGetLinkNumber"))
 	    send2(ourGlobals->serverLuaSL, SID, "return 1");
-	else if (0 == strcmp(command, "llGetInventoryName(7, 2)"))
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 2)")))
 	    send2(ourGlobals->serverLuaSL, SID, "return \".readme\"");
-	else if (0 == strcmp(command, "llGetInventoryName(7, 1)"))
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 1)")))
 	    send2(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
-	else if (0 == strcmp(command, "llGetInventoryName(7, 0)"))
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 0)")))
 	    send2(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
-	else if (0 == strncmp(command, "llListen(", 9))
+	else if (0 == strcmp(command, "llListen"))
 	{
-	    PI("Faked %s", command);
+	    PI("Faked %s(%s", command, arguments);
 	    send2(ourGlobals->serverLuaSL, SID, "return %d", random());
 	}
-	else if (0 == strncmp(command, "llSameGroup(", 12))
+	else if (0 == strcmp(command, "llSameGroup"))
 	    send2(ourGlobals->serverLuaSL, SID, "return true");
-	else if (0 == strncmp(command, "llKey2Name(", 11))
+	else if (0 == strcmp(command, "llKey2Name"))
 	{
 	    char *temp;
 
-	    strcpy(buf, &command[12]);
+	    strcpy(buf, arguments);
 	    temp = buf;
 	    while (')' != temp[0])
 		temp++;
@@ -342,57 +335,55 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 	//        Extantz registering any channel it wants to listen to, mostly for client side scripts.
 	//        Extantz is then only responsible for the registered channels, it can do what it likes with them.
 	//        Dialogs, notifications, and other stuff goes through some other functions.
-	else if (0 == strncmp(command, "llOwnerSay(", 11))
+	else if (0 == strcmp(command, "llOwnerSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    else PW("No where to send %s(%s", command, arguments);
 	}
-	else if (0 == strncmp(command, "llWhisper(", 10))
+	else if (0 == strcmp(command, "llWhisper"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    else PW("No where to send %s(%s", command, arguments);
 	}
-	else if (0 == strncmp(command, "llRegionSay(", 12))
+	else if (0 == strcmp(command, "llRegionSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    else PW("No where to send %s(%s", command, arguments);
 	}
-	else if (0 == strncmp(command, "llSay(", 6))
+	else if (0 == strcmp(command, "llSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    else PW("No where to send %s(%s", command, arguments);
 	}
-	else if (0 == strncmp(command, "llShout(", 8))
+	else if (0 == strcmp(command, "llShout"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    else PW("No where to send %s(%s", command, arguments);
 	    // TODO - Temporary so we have a place to log stuff from LSL.
 	    PD("SHOUTING %s", command);
 	}
-	else if (0 == strncmp(command, "llDialog(", 9))
+	else if (0 == strcmp(command, "llDialog"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, command);
-	    else PW("No where to send %s", command);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
 	}
-	else if (0 == strncmp(command, "llMessageLinked(", 16))
+	else if (0 == strcmp(command, "llMessageLinked"))
 	{
 	    Eina_Iterator *scripts;
 	    LoveScript *me;
-
 	    // TODO - For now, just send it to everyone.
 	    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
 	    while(eina_iterator_next(scripts, (void **) &me))
 	    {
-		send2(ourGlobals->serverLuaSL, me->SID, "events.link_message%s", &command[15]);
+		send2(ourGlobals->serverLuaSL, me->SID, "events.link_message(%s", arguments);
 	    }
 	    eina_iterator_free(scripts);
 	}
-	else if (0 == strncmp(command, "llGetNotecardLine(", 18))
+	else if (0 == strcmp(command, "llGetNotecardLine"))
 	{
 	    char *notecard, *temp, *line, key[PATH_MAX];
 	    int  lineNo, fd;
 
-	    strcpy(buf, &command[19]);
+	    strcpy(buf, &arguments[1]);
 	    notecard = buf;
 	    temp = notecard;
 	    while ('"' != temp[0])
@@ -462,7 +453,7 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 
 	}
 	else
-	    PI("Script %s sent command %s", SID, command);
+	    PI("Script %s sent command %s(%s", SID, command, arguments);
     }
 
     return ECORE_CALLBACK_RENEW;
@@ -502,7 +493,7 @@ static Eina_Bool clientParser(void *data, Connection *conn, char *SID, char *com
 {
     gameGlobals *ourGlobals = data;
 
-    if (0 == strncmp(command, "events.touch_start(", 19))
+    if (0 == strcmp(command, "events.touch_start"))
     {
         Eina_Iterator *scripts;
 	LoveScript *me;
@@ -517,7 +508,7 @@ static Eina_Bool clientParser(void *data, Connection *conn, char *SID, char *com
 	}
 	eina_iterator_free(scripts);
     }
-    else if (0 == strncmp(command, "events.listen(", 14))
+    else if (0 == strcmp(command, "events.listen"))
     {
         Eina_Iterator *scripts;
 	LoveScript *me;
