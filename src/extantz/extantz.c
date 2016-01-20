@@ -17,6 +17,7 @@ globals ourGlobals;
 
 
 
+#if USE_LOVE
 static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
 {
   globals *ourGlobals = data;
@@ -126,6 +127,7 @@ static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
 
   return ECORE_CALLBACK_CANCEL;
 }
+#endif
 
 #if USE_EVAS_3D
 static void _onWorldClick(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
@@ -234,8 +236,10 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
     );
   // Stop internal windows going under the toolbar.
   evas_object_resize(ourGlobals->mainWindow->layout, ourGlobals->win_w, h);
+#if USE_EPHYSICS
   if (ourGlobals->world)
     ephysics_world_render_geometry_set(ourGlobals->world, 0, 0, -50, ourGlobals->win_w, ourGlobals->win_h, 100);
+#endif
   _resize(gld);
 }
 
@@ -424,27 +428,24 @@ static winFang *_makeMainMenu(globals *ourGlobals)
 
   // GL focus gets lost when any menu is used.  sigh
 
-  // Try to work around the borkedness of EFL menus by creating our own window.
-  // I can't figure it out, but the main menu wont appear otherwise.  It worked before.
   // TODO - rip out ELMs menu and create my own.  It sucks.
-  me = winFangAdd(ourGlobals->mainWindow, 0, -4, ourGlobals->win_w, 0, "main menu hack", "mainMenu", ourGlobals->world);
-
+  me = ourGlobals->mainWindow;
   tb = makeMainMenu(me);
   ourGlobals->tb = tb;
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "file");
+  menu = menuAdd(me, tb, "file");
   // Evas_Object *obj, Elm_Object_Item *parent, const char *icon, const char *label, Evas_Smart_Cb func, const void *data
   elm_menu_item_add(menu, NULL, NULL, "open", _on_open, ourGlobals);
   elm_menu_item_add(menu, NULL, NULL, "quit", _on_done, gld);
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "edit");
+  menu = menuAdd(me, tb, "edit");
   elm_menu_item_add(menu, NULL, NULL, "preferences", NULL, NULL);
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "view");
-  menu = menuAdd(ourGlobals->mainWindow, tb, "world");
-  menu = menuAdd(ourGlobals->mainWindow, tb, "tools");
+  menu = menuAdd(me, tb, "view");
+  menu = menuAdd(me, tb, "world");
+  menu = menuAdd(me, tb, "tools");
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "help");
+  menu = menuAdd(me, tb, "help");
   elm_menu_item_add(menu, NULL, NULL, "grid help", NULL, NULL);
   elm_menu_item_separator_add(menu, NULL);
   elm_menu_item_add(menu, NULL, NULL, "extantz blogs", NULL, NULL);
@@ -452,10 +453,10 @@ static winFang *_makeMainMenu(globals *ourGlobals)
   elm_menu_item_separator_add(menu, NULL);
   elm_menu_item_add(menu, NULL, NULL, "about extantz", NULL, NULL);
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "advanced");
+  menu = menuAdd(me, tb, "advanced");
   elm_menu_item_add(menu, NULL, NULL, "debug settings", NULL, NULL);
 
-  menu = menuAdd(ourGlobals->mainWindow, tb, "god");
+  menu = menuAdd(me, tb, "god");
 
   makeMainMenuFinish(me, tb);
 
@@ -466,7 +467,7 @@ static winFang *_makeMainMenu(globals *ourGlobals)
   it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
   it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
 
-  winFangCalcMinSize(me);
+  elm_layout_box_prepend(me->layout, WF_BOX, tb);
 
   return me;
 }
@@ -524,106 +525,62 @@ void overlay_add(globals *ourGlobals)
 }
 
 
-// Use jobs to split the init load.  So that the window pops up quickly, with it's background clouds.
+// Use jobs or timers to split the init load.  So that the window pops up quickly, with it's background clouds.
 // Then the rest appears a bit at a time.
-static Eina_Bool _makePhysics(void *data)
+int skangStep = 0;
+static Eina_Bool _makeSkang(void *data)
 {
   globals *ourGlobals = data;
 
-  if (ephysics_init())
-    ourGlobals->world = ephysicsAdd(ourGlobals);
-
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _makeFiles(void *data)
-{
-  globals *ourGlobals = data;
-
-  ecore_job_add((Ecore_Cb) _makePhysics,  ourGlobals);
-//  ecore_timer_add(0.1, _makePhysics, ourGlobals);
-
-  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
-
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _makeLove(void *data)
-{
-  globals *ourGlobals = data;
-
-  ecore_job_add((Ecore_Cb) _makeFiles, ourGlobals);
-//  ecore_timer_add(0.1, _makeFiles, ourGlobals);
-
-//  PD("About to try connecting to a love server.");
-  reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
-
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _makeMess(void *data)
-{
-  globals *ourGlobals = data;
-
-  ecore_job_add((Ecore_Cb) _makeLove,  ourGlobals);
-//  ecore_timer_add(0.1, _makeLove, ourGlobals);
-
-//  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
-
-  return ECORE_CALLBACK_CANCEL;
-}
-
-static Eina_Bool _makeScenery(void *data)
-{
-#if USE_EVAS_3D
-  globals *ourGlobals = data;
-
-  ecore_job_add((Ecore_Cb) _makeMess, ourGlobals);
-//  ecore_timer_add(0.1, _makeMess, ourGlobals);
-
-  // Setup our Evas_3D stuff.
-  ourGlobals->scene = scenriAdd(ourGlobals->win);
-  // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
-//  ourGlobals->gld->move = ourGlobals->scene->move;
-  evas_object_data_set(elm_image_object_get(ourGlobals->scene->image), "glob", ourGlobals);
-  evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals->scene->image), on_pixels, ourGlobals);
-  ourGlobals->scene->clickCb = _onWorldClick;
+  switch (skangStep++)
+  {
+#if USE_SKANG
+    case 0 :  ourGlobals->purkle     = GuiLuaLoad("purkle",     ourGlobals->mainWindow, ourGlobals->world);  break;
+    case 1 :  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);  break;
+    case 2 :  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);   break;
 #endif
 
-  return ECORE_CALLBACK_CANCEL;
-}
+#if USE_EVAS_3D
+    case 3 :
+      // Setup our Evas_3D stuff.
+      ourGlobals->scene = scenriAdd(ourGlobals->win);
+      // TODO - Just a temporary hack so Irrlicht and Evas_3D can share the camera move.
+//      ourGlobals->gld->move = ourGlobals->scene->move;
+      evas_object_data_set(elm_image_object_get(ourGlobals->scene->image), "glob", ourGlobals);
+      evas_object_image_pixels_get_callback_set(elm_image_object_get(ourGlobals->scene->image), on_pixels, ourGlobals);
+      ourGlobals->scene->clickCb = _onWorldClick;
+      break;
+#endif
 
-static Eina_Bool _makeMenus(void *data)
-{
-  globals *ourGlobals = data;
+    // TODO - When the menus get fixed, we can bunch these all up with the rest of skang above.
+#if USE_SKANG
+    case 4 :  woMan_add(ourGlobals);  break;
+#endif
 
-//  ecore_job_add((Ecore_Cb) _makeScenery,  ourGlobals);
-  ecore_timer_add(0.5, _makeScenery, ourGlobals);
+#if USE_LOVE
+    case 5 :
+//      PD("About to try connecting to a love server.");
+      reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
+      break;
+#endif
 
-  // Gotta do this after adding the windows, otherwise the menu renders under the window.
-  //   This sucks, gotta redefine this menu each time we create a new window?
-  _makeMainMenu(ourGlobals);
+    case 6 :
+      // Gotta do this after adding the windows, otherwise the menu renders under the window.
+      //   This sucks, gotta redefine this menu each time we create a new window?
+      _makeMainMenu(ourGlobals);
+      break;
 
-  return ECORE_CALLBACK_CANCEL;
-}
+    default :
+      // Menus and toolbars suck, so gotta kick it again here.  Which is still not reliable.
+      elm_layout_sizing_eval(ourGlobals->mainWindow->layout);
+      _on_resize(ourGlobals, NULL, NULL, NULL);
+//      ecore_job_add((Ecore_Cb) _makeScenery,  ourGlobals);
+//      ecore_timer_add(0.5, _makeScenery, ourGlobals);
+      return ECORE_CALLBACK_CANCEL;
+      break;
+  }
 
-static Eina_Bool _makePurkle(void *data)
-{
-  globals *ourGlobals = data;
-
-//  ecore_job_add((Ecore_Cb) _makeMenus,  ourGlobals);
-  ecore_timer_add(1.0, _makeMenus, ourGlobals);
-
-  woMan_add(ourGlobals);
-  ourGlobals->purkle     = GuiLuaLoad("purkle",     ourGlobals->mainWindow, ourGlobals->world);
-  ourGlobals->LSLGuiMess = GuiLuaLoad("LSLGuiMess", ourGlobals->mainWindow, ourGlobals->world);
-//  ourGlobals->files = filesAdd(ourGlobals, (char *) prefix_data_get(), EINA_TRUE, EINA_FALSE);
-
-  // Gotta do this after adding the windows, otherwise the menu renders under the window.
-  //   This sucks, gotta redefine this menu each time we create a new window?
-//  _makeMainMenu(ourGlobals);
-
-  return ECORE_CALLBACK_CANCEL;
+  return ECORE_CALLBACK_RENEW;
 }
 
 EAPI_MAIN int elm_main(int argc, char **argv)
@@ -664,8 +621,19 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   elm_config_preferred_engine_set("opengl_x11");
   elm_config_accel_preference_set("3d");
 
-  ourGlobals.mainWindow = winFangAdd(NULL, 0, 0, 50, 20, "extantz virtual world viewer", "extantz", NULL);
+  // Get the screen size.
+  // Found a use for a splash screen, though it's never visible, and even if it was, you would never see it.  lol
+  ourGlobals.win = elm_win_add(NULL, "extantz", ELM_WIN_SPLASH);
+  elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
+  ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
+  // TODO - Now we have to take the frame height into consideration, didn't have to do that before.  Faked for now.
+  ourGlobals.win_y += 25;
+  ourGlobals.win_w = ourGlobals.scr_w / 2;
+  ourGlobals.win_h = ourGlobals.scr_h - 25;
+  evas_object_del(ourGlobals.win);
 
+  // Create the main window.
+  ourGlobals.mainWindow = winFangAdd(NULL, ourGlobals.win_x, ourGlobals.win_y, ourGlobals.win_w, ourGlobals.win_h, "extantz virtual world viewer", "extantz", NULL);
   ourGlobals.win = ourGlobals.mainWindow->win;
   // TODO, or not TODO - I keep getting rid of these, but keep bringing them back.
   // Get the Evas / canvas from the elm window (that the Evas_Object "lives on"), which is itself an Evas_Object created by Elm, so not sure if it was created internally with Ecore_Evas.
@@ -675,16 +643,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 #if USE_IRR
   ourGlobals.ee = ecore_evas_ecore_evas_get(ourGlobals.evas);	// Only use this on Evas that was created with Ecore_Evas.
 #endif
-
-  // Get the screen size.
-  elm_win_screen_size_get(ourGlobals.win, &ourGlobals.win_x, &ourGlobals.win_y, &ourGlobals.scr_w, &ourGlobals.scr_h);
-  ourGlobals.win_x = ourGlobals.win_x + (ourGlobals.scr_w / 3);
-  // TODO - Now we have to take the frame height into consideration, didn't have to do that before.  Faked for now.
-  ourGlobals.win_y += 28;
-  ourGlobals.win_w = ourGlobals.scr_w / 2;
-  ourGlobals.win_h = ourGlobals.scr_h - 30;
-  evas_object_move(ourGlobals.win, ourGlobals.win_x, ourGlobals.win_y);
-  evas_object_resize(ourGlobals.win, ourGlobals.win_w, ourGlobals.win_h);
 
   evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
 
@@ -714,10 +672,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
       Ephysics objects
   */
 
-  // Override the background image
+  // Create the background image
 #if 1
   snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
-  ourGlobals.mainWindow->bg = eo_add(ELM_IMAGE_CLASS, ourGlobals.mainWindow->win,
+  ourGlobals.mainWindow->bg = eo_add(ELM_BG_CLASS, ourGlobals.mainWindow->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     elm_obj_image_fill_outside_set(EINA_TRUE),
     efl_file_set(buf, NULL),
@@ -734,17 +692,24 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 
   init_evas_gl(&ourGlobals);
 
+#if USE_EPHYSICS
+  if (ephysics_init())
+    ourGlobals.world = ephysicsAdd(&ourGlobals);
+#endif
 
   _on_resize(&ourGlobals, NULL, NULL, NULL);
 
-  // TODO - It's still very random if we got clouds straight away or not.  B-(
-  ecore_timer_add(0.5, _makePurkle, &ourGlobals);
+  // Leave the rest of the init for later.
+  ecore_timer_add(0.1, _makeSkang, &ourGlobals);
 
   elm_run();
+
   ourGlobals.running = 0;
 
+#if USE_EPHYSICS
   ephysics_world_del(ourGlobals.world);
   ephysics_shutdown();
+#endif
 
   if (ourGlobals.win)
   {

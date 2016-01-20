@@ -1,11 +1,14 @@
 #ifndef _EXTANTZ_H_
 #define _EXTANTZ_H_
 
-#define USE_EVAS_3D 1
-#define USE_IRR     0
-#define USE_DEMO    1
-#define DO_GEARS    0
-#define USE_ELM_IMG 1
+#define USE_EVAS_3D  1
+#define USE_IRR      0
+#define USE_DEMO     0
+#define DO_GEARS     0
+#define USE_ELM_IMG  1
+#define USE_EPHYSICS 1
+#define USE_LOVE     1
+#define USE_SKANG    1
 
 
 #include "LumbrJack.h"

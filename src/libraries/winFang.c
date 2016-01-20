@@ -192,6 +192,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   result->w = w;
   result->h = h;
 
+  // NOTE: parent = NULL is a special case, it's our main window.  Not sure yet what to do if there's more than one.
   if (result->parent)
   {
     eina_clist_add_head(&parent->winFangs, &result->node);
@@ -202,9 +203,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   else
   {
     result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
-    evas_object_move(result->win, result->x, result->y);
     evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
+    evas_object_resize(result->win, result->w, result->h);
+    evas_object_move(result->win, result->x, result->y);
     elm_win_title_set(result->win, title);
+    evas_object_show(result->win);
 
     obj = result->win;
     x = 0;  y = 0;
@@ -302,8 +305,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   }
 
-  evas_object_resize(result->win, result->w, result->h);
-  evas_object_show(result->win);
+  if (result->parent)
+  {
+    evas_object_resize(result->win, result->w, result->h);
+    evas_object_show(result->win);
+  }
   winFangCalcMinSize(result);
 
   return result;
@@ -430,7 +436,7 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
     }
 
     if (x < 0)
-      elm_layout_box_append(win->win, WF_BOX, result->obj);
+      elm_layout_box_append(win->layout, WF_BOX, result->obj);
     else
       elm_grid_pack(win->grid, result->obj, x, y, w, h);
 
@@ -527,10 +533,10 @@ Evas_Object *makeMainMenu(winFang *win)
     );
 }
 
-static void _on_menu_focus(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
-{
-  evas_object_raise(obj);
-}
+//static void _on_menu_focus(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)
+//{
+//  evas_object_raise(obj);
+//}
 
 Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label)
 {
@@ -545,13 +551,15 @@ Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label)
   // This alledgedly marks it as a menu (not true), and gets an Evas_Object for us to play with.
   menu = elm_toolbar_item_menu_get(tb_it);
   // Alas this does not work.  B-(
-  evas_object_smart_callback_add(menu, "focused", _on_menu_focus, NULL);
+//  evas_object_smart_callback_add(menu, "focused", _on_menu_focus, NULL);
 
   // Priority is for when toolbar items are set to hide or menu when there are too many of them.  They get hidden or put on the menu based on priority.
   elm_toolbar_item_priority_set(tb_it, 9999);
 
   // The docs for this functien are meaningless, but it wont work right if you leave it out.
   elm_toolbar_menu_parent_set(tb, win->win);
+
+  elm_toolbar_homogeneous_set(tb, EINA_FALSE);
 
   // Add a seperator after, so that there's some visual distinction between menu items.
   // Coz using all lower case and with no underline on the first letter, it's hard to tell.
