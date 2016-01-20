@@ -472,6 +472,8 @@ static winFang *_makeMainMenu(globals *ourGlobals)
   return me;
 }
 
+// No longer need it, but keeping it around for reference.  For now.
+#if 0
 // Elm inlined image windows needs this to change focus on mouse click.
 // Evas style event callback.
 static void _cb_mouse_down_elm(void *data, Evas *evas, Evas_Object *obj, void *event_info)
@@ -523,7 +525,7 @@ void overlay_add(globals *ourGlobals)
   evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), ourGlobals->win_w, ourGlobals->win_h);
   evas_object_show(gld->winwin);
 }
-
+#endif
 
 // Use jobs or timers to split the init load.  So that the window pops up quickly, with it's background clouds.
 // Then the rest appears a bit at a time.

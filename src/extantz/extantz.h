@@ -280,7 +280,7 @@ EAPI void drawIrr_end(globals *ourGlobals);
 EAPI void finishIrr(globals *ourGlobals);
 #endif
 
-void overlay_add(globals *ourGlobals);
+//void overlay_add(globals *ourGlobals);
 
 Eina_Bool animateScene(globals *ourGlobals);
 
