@@ -687,7 +687,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	    Eventually uses WF_GRID for widget layout, though could in future use WF_BOX for some of them.
     files.c
 	winFang				A normally hidden window with a file requestor, and other Elm widgets.
-?					    elm_layout_box_append(me->win, WF_BOX, vbox);
     scenriAdd()
 	3D scene and node stuff
 	ELM_IMAGE_CLASS			Evas_3D render target.
@@ -703,18 +702,17 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	winFang				World manager internal window, with it's own menu and toolbar stuff.
 					    Uses the same menu code as the main menus below.
 						But with added pager stuff.
-					    elm_layout_box_append(me->win, WF_BOX, nf);		Elm naviframe for the tab pages.
-					    elm_layout_box_append(me->win, WF_BOX, bt);		Elm Login button.
     love
     main menus
 	makeMainMenu()
 	    ELM_TOOLBAR_CLASS		Holder toolbar.
+					Swallowed by WF_TOOLBAR
 	menuAdd()
 ?	    various calls to various object creation functions, TODO - which maybe I can replace with EO stuff?
 		elm_toolbar_item_append()
 	elm_menu_item_add()
 	makeMainMenuFinish()
-	    elm_object_part_content_set(win->layout, WF_TOOLBAR, tb);
+	    The swallow.
 	    isToolbar signal sent to layout.
 	elm_toolbar_item_append()
 
@@ -739,9 +737,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     widgetAdd				Will either append it to WF_BOX, or pack it into WF_GRID using supplied coords and size.
 					Used by skang for creating widgets.
 					Used by purkle for it's main widgets (in C), in WF_BOX.
-?					Used by files for WT_FILES, but not the rest, this ends up inside WF_BOX, though it has it's own vbox.
-??					    This vbox is an ELM_BOX_CLASS, er but -
-???						elm_obj_box_horizontal_set(EINA_TRUE)
+					Used by woMan for it's main widgets (in C), in WF_BOX.
+					Used by files for WT_FILES, but not the rest, this ends up inside WF_BOX, along with a hbox at the end.
+					Used by LSLGuiMess for the widgets (in Lua) in WF_GRID.
 	TODO - what happens when we mix BOX and GRID widgets?  Perhaps GRID should live inside BOX?
 
   */

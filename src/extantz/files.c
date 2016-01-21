@@ -144,7 +144,7 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 {
   winFang *me = NULL;
   Widget  *wid;
-  Evas_Object *vbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
+  Evas_Object *hbox, *fs, *bt, *rd = NULL, *rdg = NULL, *hoversel;
 
   me = winFangAdd(ourGlobals->mainWindow, 10, 500, 300, 500, "file selector", "files", ourGlobals->world);
 
@@ -176,13 +176,13 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   // Call back for double click or Enter pressed on file.
   evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
 
-  vbox = eo_add(ELM_BOX_CLASS, me->win,
+  hbox = eo_add(ELM_BOX_CLASS, me->win,
     elm_obj_box_homogeneous_set(EINA_FALSE),
     elm_obj_box_horizontal_set(EINA_TRUE),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
 
-  hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
+  hoversel = eo_add(ELM_HOVERSEL_CLASS, hbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs),
     elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
@@ -196,9 +196,9 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(hoversel, "sorting");
-  elm_box_pack_end(vbox, hoversel);
+  elm_box_pack_end(hbox, hoversel);
 
-  hoversel = eo_add(ELM_HOVERSEL_CLASS, vbox,
+  hoversel = eo_add(ELM_HOVERSEL_CLASS, hbox,
     elm_obj_hoversel_hover_parent_set(me->win),
     eo_key_data_set("fileselector", fs),
     elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
@@ -208,36 +208,36 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
     efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(hoversel, "size");
-  elm_box_pack_end(vbox, hoversel);
+  elm_box_pack_end(hbox, hoversel);
   // Make sure it starts off as small, works around "hitting grid mode before hitting size not showing anything" bug.
   _small_icon_clicked(fs, hoversel, NULL);
 
 
-  bt = eo_add(ELM_CHECK_CLASS, vbox,
+  bt = eo_add(ELM_CHECK_CLASS, hbox,
     elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
     efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(bt, "hidden");
   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
-  elm_box_pack_end(vbox, bt);
+  elm_box_pack_end(hbox, bt);
 
-  rdg = rd = eo_add(ELM_RADIO_CLASS, vbox,
+  rdg = rd = eo_add(ELM_RADIO_CLASS, hbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
     efl_gfx_visible_set(EINA_TRUE)
     );
   elm_object_text_set(rd, "grid");
-  elm_box_pack_end(vbox, rd);
+  elm_box_pack_end(hbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
   // Make it start in grid mode.  It defaults to list mode, so this swaps it over.
   _mode_changed_cb(fs, rd, NULL);
 
-  rd = eo_add(ELM_RADIO_CLASS, vbox,
+  rd = eo_add(ELM_RADIO_CLASS, hbox,
     elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
     efl_gfx_visible_set(EINA_TRUE)
     );
   elm_radio_group_add(rd, rdg);
   elm_object_text_set(rd, "list");
-  elm_box_pack_end(vbox, rd);
+  elm_box_pack_end(hbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
@@ -245,17 +245,17 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   );
   elm_object_text_set(bt, "OK");
   evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
-  elm_box_pack_end(vbox, bt);
+  elm_box_pack_end(hbox, bt);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
     efl_gfx_visible_set(EINA_TRUE)
   );
   elm_object_text_set(bt, "CANCEL");
   evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);
-  elm_box_pack_end(vbox, bt);
+  elm_box_pack_end(hbox, bt);
 
-  elm_box_pack_end(me->box, vbox);
-  evas_object_show(vbox);
+  elm_box_pack_end(me->box, hbox);
+  evas_object_show(hbox);
   winFangCalcMinSize(me);
 
   winFangHide(me);

@@ -20,12 +20,12 @@ collections
       part
       { name: "winFang/background";
 	type: SWALLOW;
-	mouse_events: 1;
+	mouse_events: 0;
 
 	description
 	{ state: "default" 0.0;
 	}
-      } // winFang/background
+      }
 
       part
       { name: "winFang/underlay";
@@ -35,7 +35,7 @@ collections
 	description
 	{ state: "default" 0.0;
 	}
-      } // winFang/underlay
+      }
 
       part
       { name: "winFang/title";
@@ -168,4 +168,3 @@ collections
     }
   }
 }
-
