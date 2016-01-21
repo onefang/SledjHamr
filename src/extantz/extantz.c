@@ -467,8 +467,6 @@ static winFang *_makeMainMenu(globals *ourGlobals)
   it = elm_toolbar_item_append(tb, NoIcon, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
   it = elm_toolbar_item_append(tb, NoIcon, "date time:o'clock", NULL, NULL);
 
-  elm_layout_box_prepend(me->layout, WF_BOX, tb);
-
   return me;
 }
 
@@ -588,7 +586,6 @@ static Eina_Bool _makeSkang(void *data)
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
   GLData *gld = NULL;
-  char buf[PATH_MAX * 2];
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
   logDom = HamrTime(argv[0], elm_main, logDom);
@@ -658,16 +655,19 @@ EAPI_MAIN int elm_main(int argc, char **argv)
     ELM_WIN_BASIC
 	ELM_LAYOUT_CLASS		WF_LAYOUT
 	    winFang.edc
-		IMAGE			background - semi transparent dark purple image.
-?		SWALLOW			underlay
-		SWALLOW			title
-					    Details change if it's internal.
-		BOX			box
-					    Details change if it's internal.
-?		SWALLOW			content
-?	    ELM_GRID_CLASS		WF_SWALLOW
-
-?  ELM_BG_CLASS				Sky background image.
+		SWALLOW			WF_BACKGROUND
+		SWALLOW			WF_UNDERLAY
+		SWALLOW			WF_TITLE
+					    Only visible if it's internal.
+		SWALLOW			WF_TOOLBAR
+					    Only visible if it's got a menu.
+		SWALLOW			WF_BOX
+					    Vertical box.
+		SWALLOW			WF_GRID
+	ELM_BG_CLASS			Evas_3D specific background, attached directly to window, not swallowed.
+	    ELM_BOX_CLASS		Swallowed by WF_BOX
+	    isMain signal sent to layout.
+	    ELM_GRID_CLASS		Swallowed by WF_GRID
 
   Extra stuff added here by init_evas_gl() if we are doing gears or Irrlicht.
 ?    Elm glview				Irrlicht / gears target GLView.
@@ -684,8 +684,10 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	    require skang by default
 	    require skang
 ?	    require purkle
+	    Eventually uses WF_GRID for widget layout, though could in future use WF_BOX for some of them.
     files.c
 	winFang				A normally hidden window with a file requestor, and other Elm widgets.
+?					    elm_layout_box_append(me->win, WF_BOX, vbox);
     scenriAdd()
 	3D scene and node stuff
 	ELM_IMAGE_CLASS			Evas_3D render target.
@@ -701,6 +703,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	winFang				World manager internal window, with it's own menu and toolbar stuff.
 					    Uses the same menu code as the main menus below.
 						But with added pager stuff.
+					    elm_layout_box_append(me->win, WF_BOX, nf);		Elm naviframe for the tab pages.
+					    elm_layout_box_append(me->win, WF_BOX, bt);		Elm Login button.
     love
     main menus
 	makeMainMenu()
@@ -710,8 +714,9 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 		elm_toolbar_item_append()
 	elm_menu_item_add()
 	makeMainMenuFinish()
-?	    elm_layout_box_append(win->win, WF_BOX, tb);
-
+	    elm_object_part_content_set(win->layout, WF_TOOLBAR, tb);
+	    isToolbar signal sent to layout.
+	elm_toolbar_item_append()
 
 
   Internal windows are -
@@ -721,39 +726,25 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 	ELM_LAYOUT_CLASS		WF_LAYOUT
 	    This layout becomes our window object.
 	    winFang.edc
-		IMAGE			background - semi transparent dark purple image.
-		SWALLOW			underlay
-		SWALLOW			title
-					    Details change if it's internal.
-		BOX			box
-					    Details change if it's internal.
-		SWALLOW			content
-		"isInternal" signal sent.
+	ELM_BG_CLASS			Internal window background, swallowed by WF_BACKGROUND.
+					    Semi transparent dark purple image.
+	    ELM_BOX_CLASS		Swallowed by WF_BOX
 	    EVAS_RECTANGLE_CLASS	Invisible click catcher, for moving windows.
-					WF_UNDERLAY
+					Swallowed by WF_UNDERLAY
 	    EVAS_IMAGE_CLASS		Corner "handles" x 4.
 	    ELM_LABEL_CLASS		Window title.
-	    ELM_GRID_CLASS		WF_SWALLOW
+					Swallowed by WF_TITLE
+	    ELM_GRID_CLASS		Swallowed by WF_GRID
+
+    widgetAdd				Will either append it to WF_BOX, or pack it into WF_GRID using supplied coords and size.
+					Used by skang for creating widgets.
+					Used by purkle for it's main widgets (in C), in WF_BOX.
+?					Used by files for WT_FILES, but not the rest, this ends up inside WF_BOX, though it has it's own vbox.
+??					    This vbox is an ELM_BOX_CLASS, er but -
+???						elm_obj_box_horizontal_set(EINA_TRUE)
+	TODO - what happens when we mix BOX and GRID widgets?  Perhaps GRID should live inside BOX?
 
   */
-
-
-  // Create the background image
-#if 1
-  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
-  ourGlobals.mainWindow->bg = eo_add(ELM_BG_CLASS, ourGlobals.mainWindow->win,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    efl_file_set(buf, NULL),
-    efl_gfx_visible_set(EINA_TRUE)
-  );
-  elm_win_resize_object_add(ourGlobals.mainWindow->win, ourGlobals.mainWindow->bg);
-#else
-  snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
-  eo_do(ourGlobals.mainWindow->bg,
-    efl_file_set(buf, NULL),
-    efl_gfx_color_set(255, 255, 255, 255)
-  );
-#endif
 
   init_evas_gl(&ourGlobals);
 

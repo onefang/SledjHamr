@@ -202,6 +202,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   }
   else
   {
+    // This is our main window, so create it.
     result->win = elm_win_add(NULL, name, ELM_WIN_BASIC);
     evas_object_smart_callback_add(result->win, "delete,request", _on_done, NULL);
     evas_object_resize(result->win, result->w, result->h);
@@ -213,6 +214,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     x = 0;  y = 0;
   }
 
+  // Create the layout, and add the Edje to it.
   snprintf(buf, sizeof(buf), "%s/winFang.edj", prefix_data_get());
   result->layout = eo_add(ELM_LAYOUT_CLASS, obj,
     efl_gfx_size_set(w, h),
@@ -223,8 +225,30 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   );
   result->e = evas_object_evas_get(result->layout);
 
-//  result->bg = edje_object_part_object_get(elm_layout_edje_get(result->layout), WF_BACKGROUND);
+  // Sort out the background.
+  if (result->parent)
+    snprintf(buf, sizeof(buf), "%s/sky_04.jpg", prefix_data_get());
+  else
+    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
+  result->bg = eo_add(ELM_BG_CLASS, obj,
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    efl_file_set(buf, NULL),
+    efl_gfx_visible_set(EINA_TRUE)
+  );
+  elm_win_resize_object_add(result->win, result->bg);
 
+  if (result->parent)
+  {
+//	  // RGBA, so this is purple, and semi transparent.
+//	  color: 50   0  100   100;  // pre multiplied  R = (r * a) / 255
+//	  color: 126  0  255   100;  //                 r = (R * 255) / a
+    eo_do(result->bg, efl_gfx_color_set(50, 0, 100, 100));
+    // This is how fragile things are, internal windows wont show background unless swallowed into the layout,
+    // but Evas_3D is fussy about it's background image, and wont work with a layout swallowed one.
+    elm_object_part_content_set(result->layout, WF_BACKGROUND, result->bg);
+  }
+
+  // Evil hacks for no icons, until toolbars get fixed.
   if (0 == NoIcon[0])
     snprintf(NoIcon, sizeof(NoIcon), "%s/spacer.png", prefix_data_get());
 /*  This aint doing shit.  B-(
@@ -234,10 +258,18 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   elm_image_file_set(obj, NoIcon, NULL);
 */
 
+  // Create our box, the default for where content goes.
+  result->box = eo_add(ELM_BOX_CLASS, result->layout,
+    elm_obj_box_homogeneous_set(EINA_FALSE),
+    elm_obj_box_horizontal_set(EINA_FALSE),
+    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
+    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND)
+  );
+  elm_object_part_content_set(result->layout, WF_BOX, result->box);
+
   if (result->parent)
   {
     result->win = result->layout;
-    elm_layout_signal_emit(result->layout, "isInternal", "isInternal");
 
     // Something to catch clicks on the background, for moving the window.
     // Coz Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
@@ -250,7 +282,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       );
     elm_object_part_content_set(result->layout, WF_UNDERLAY, obj);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
-//    eo_unref(obj);
 
     // Create corner handles.
     snprintf(buf, sizeof(buf), "%s/pt.png", prefix_data_get());
@@ -269,29 +300,37 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 	efl_gfx_visible_set(EINA_TRUE)
       );
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
-//      eo_unref(result->hand[i]);
     }
 
+    // Create our window title.
     result->title = eo_add(ELM_LABEL_CLASS, result->layout,
 	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
 	efl_gfx_visible_set(EINA_TRUE)
       );
     elm_object_style_set(result->title, "marker");
     elm_object_text_set(result->title, title);
     elm_object_part_content_set(result->layout, WF_TITLE, result->title);
-//    eo_unref(result->title);
+  }
+  else
+  {
+    // Hide the window title.
+    elm_layout_signal_emit(result->layout, "isMain", "isMain");
   }
 
+  // Create our grid, where things go if you supply coords.
   result->grid = eo_add(ELM_GRID_CLASS, result->layout,
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_name_set(WF_SWALLOW),
-    // TODO - Actually, this should be minus the size of the title stuff.
+    evas_obj_name_set(WF_GRID),
     elm_obj_grid_size_set(result->w, result->h),
     efl_gfx_visible_set(EINA_TRUE)
   );
-  elm_object_part_content_set(result->layout, WF_SWALLOW, result->grid);
+
+  // This could live inside the box, but then we have to keep track of the size of it's contents.
+  // For now we simply track the position and size of the box.
+//  elm_layout_box_append(result->layout, WF_BOX, result->grid);
+  elm_object_part_content_set(result->layout, WF_GRID, result->grid);
 
   elm_layout_sizing_eval(result->layout);
 
@@ -332,7 +371,7 @@ void winFangCalcMinSize(winFang *win)
   if (w > win->mw)  win->mw = w;
   if (h > win->mh)  win->mh = h;
   // SWALLOW just returns 0.
-  evas_object_size_hint_min_get(edje_object_part_object_get(edje, WF_SWALLOW), &w, &h);
+  evas_object_size_hint_min_get(edje_object_part_object_get(edje, WF_GRID), &w, &h);
   if (w > win->mw)  win->mw = w;
   if (h > win->mh)  win->mh = h;
   if (win->title)
@@ -342,6 +381,7 @@ void winFangCalcMinSize(winFang *win)
     if (w > win->mw)  win->mw = w;
     win->mh += h;
   }
+  // TODO - should peek and poke at the Edje sizes as well.
 }
 
 void winFangDel(winFang *win)
@@ -441,9 +481,9 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
     }
 
     if (x < 0)
-      elm_layout_box_append(win->layout, WF_BOX, result->obj);
+      elm_box_pack_end(win->box, result->obj);			// WF_BOX
     else
-      elm_grid_pack(win->grid, result->obj, x, y, w, h);
+      elm_grid_pack(win->grid, result->obj, x, y, w, h);	// WF_GRID
 
     if (title)
     {
@@ -529,7 +569,7 @@ elm_cnp.h seems to be the only docs, not actually linked to the rest of Elm docs
 Evas_Object *makeMainMenu(winFang *win)
 {
   // A toolbar thingy.
-  return eo_add(ELM_TOOLBAR_CLASS, win->win,
+  return eo_add(ELM_TOOLBAR_CLASS, win->layout,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
     evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
     elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
@@ -577,7 +617,8 @@ Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label)
 void makeMainMenuFinish(winFang *win, Evas_Object *tb)
 {
   // The toolbar needs to be packed into the box AFTER the menus are added.
-  elm_layout_box_append(win->win, WF_BOX, tb);
+  elm_object_part_content_set(win->layout, WF_TOOLBAR, tb);
+  elm_layout_signal_emit(win->layout, "isToolbar", "isToolbar");
   evas_object_show(tb);
 
   // Bump the menu above the windows.

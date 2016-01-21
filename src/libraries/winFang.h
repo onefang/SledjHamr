@@ -6,12 +6,13 @@
 #include <EPhysics.h>
 
 
-#define WF_BACKGROUND	"winFang/background"
 #define WF_LAYOUT	"winFang/layout"
+#define WF_BACKGROUND	"winFang/background"
 #define WF_UNDERLAY	"winFang/underlay"
 #define WF_TITLE	"winFang/title"
+#define WF_TOOLBAR	"winFang/toolbar"
 #define WF_BOX		"winFang/box"
-#define WF_SWALLOW	"winFang/content"
+#define WF_GRID		"winFang/grid"
 
 // Evil hack around ELM's problem with lack of toolbar item icons.
 char NoIcon[PATH_MAX];
@@ -44,9 +45,10 @@ typedef struct _winFang
   Evas		*e;
   struct _winFang *parent;
   Evas_Object	*win;
+  Evas_Object	*bg;
   Evas_Object	*layout;
   Evas_Object	*title;
-  Evas_Object	*bg;
+  Evas_Object	*box;
   Evas_Object	*grid;
   EPhysics_Body *body;
   Eina_Clist	widgets;

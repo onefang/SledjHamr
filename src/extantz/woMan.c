@@ -254,7 +254,7 @@ winFang *woMan_add(globals *ourGlobals)
     // TODO - This strdup leaks, but this is just temporary test code anyway, it will go away.
     tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NoIcon, "Landmarks", _promote, tab_it);
     tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NoIcon, "Grids", _promote, tab_it);
-    elm_layout_box_append(me->win, WF_BOX, nf);
+    elm_box_pack_end(me->box, nf);
 
     bt = eo_add(ELM_BUTTON_CLASS, me->win,
 //		evas_obj_text_set("Login"),
@@ -264,7 +264,7 @@ winFang *woMan_add(globals *ourGlobals)
 	);
     elm_object_text_set(bt, "Login");		// No eo interface for this that I can find.
 //    evas_object_smart_callback_add(bt, "clicked", NULL, NULL);
-    elm_layout_box_append(me->win, WF_BOX, bt);
+    elm_box_pack_end(me->box, bt);
 
     winFangCalcMinSize(me);
 

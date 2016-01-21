@@ -12,7 +12,7 @@ static winFang *purkleAdd(winFang *parent, int w, int h, EPhysics_World *world)
 {
   winFang *me;
 
-  me = winFangAdd(parent, 300, 26, w, h, "chatter box", "purkle", world);
+  me = winFangAdd(parent, 300, 52, w, h, "chatter box", "purkle", world);
 
   history = widgetAdd(me, WT_TEXTBOX, "", -1, -1, -1, -1);
   entry   = widgetAdd(me, WT_ENTRY,   "", -1, -1, -1, -1);

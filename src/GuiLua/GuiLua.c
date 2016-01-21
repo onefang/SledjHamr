@@ -300,7 +300,7 @@ static int window(lua_State *L)
     world = gl->world;
   }
 
-  win = winFangAdd(parent, 5, 26, w, h, title, name, world);
+  win = winFangAdd(parent, 5, 52, w, h, title, name, world);
   win->module = strdup(module);
   if (gl)
   {
