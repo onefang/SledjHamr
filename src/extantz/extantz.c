@@ -649,30 +649,94 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   evas_object_event_callback_add(ourGlobals.win, EVAS_CALLBACK_RESIZE, _on_resize, &ourGlobals);
 
 
-  /*  Our "layers".  TODO - This is out of date, I should update it.
+  /* Our various layers and such.
 
-      Elm win		- our real main window
-        These have some sort of inlined image if they are internal.
-        Elm image	- purple shaded sky image
-        Elm box		- so everyone gets a freebie
+  ELM_WIN_SPLASH			Only opened very quickly at the start, to see what the screen size is.
+					    Should never actually see this.
 
-      Elm glview	- added by init_evas_gl() if this is Irrlicht
+  winFang				main window
+    ELM_WIN_BASIC
+	ELM_LAYOUT_CLASS		WF_LAYOUT
+	    winFang.edc
+		IMAGE			background - semi transparent dark purple image.
+?		SWALLOW			underlay
+		SWALLOW			title
+					    Details change if it's internal.
+		BOX			box
+					    Details change if it's internal.
+?		SWALLOW			content
+?	    ELM_GRID_CLASS		WF_SWALLOW
 
-      Elm image		- added by Evas_3D_Demo_add() -> scenriAdd()
-        Evas image is extracted to pass to Evas_3d functions,
-          to catch hovers and clicks
-          and to catch input for the camera
+?  ELM_BG_CLASS				Sky background image.
 
-//      Elm win		- added by overlay_add()
-//        Evas rectangle added, a fully transparent one to catch clicks
-//          added to  evas_object_evas_get(gld->winwin)
+  Extra stuff added here by init_evas_gl() if we are doing gears or Irrlicht.
+?    Elm glview				Irrlicht / gears target GLView.
+    Also, doFrame animator added here.
 
-      The various internal windows.
+  Ephysics objects
 
-      Elm toolbar
+  GUI timer added, Elm loop run.
+    Purkle
+	Lua started up.
+	    require skang by default
+    LSLGuiMess
+	Lua started up.
+	    require skang by default
+	    require skang
+?	    require purkle
+    files.c
+	winFang				A normally hidden window with a file requestor, and other Elm widgets.
+    scenriAdd()
+	3D scene and node stuff
+	ELM_IMAGE_CLASS			Evas_3D render target.
+					    Attached to the main window, not it's layout.
+					    Also used to catch mouse moves and clicks.
+?						Actually, it's internal EVAS_IMAGE_CLASS is used for that.
+	Lua started up.
+	    require skang by default
+	    require scenriLua
+		require skang
+	Ecore idler added to handle scene loading.
+    woMan
+	winFang				World manager internal window, with it's own menu and toolbar stuff.
+					    Uses the same menu code as the main menus below.
+						But with added pager stuff.
+    love
+    main menus
+	makeMainMenu()
+	    ELM_TOOLBAR_CLASS		Holder toolbar.
+	menuAdd()
+?	    various calls to various object creation functions, TODO - which maybe I can replace with EO stuff?
+		elm_toolbar_item_append()
+	elm_menu_item_add()
+	makeMainMenuFinish()
+?	    elm_layout_box_append(win->win, WF_BOX, tb);
 
-      Ephysics objects
+
+
+  Internal windows are -
+
+  winFang				internal window
+    Built on the parent window.
+	ELM_LAYOUT_CLASS		WF_LAYOUT
+	    This layout becomes our window object.
+	    winFang.edc
+		IMAGE			background - semi transparent dark purple image.
+		SWALLOW			underlay
+		SWALLOW			title
+					    Details change if it's internal.
+		BOX			box
+					    Details change if it's internal.
+		SWALLOW			content
+		"isInternal" signal sent.
+	    EVAS_RECTANGLE_CLASS	Invisible click catcher, for moving windows.
+					WF_UNDERLAY
+	    EVAS_IMAGE_CLASS		Corner "handles" x 4.
+	    ELM_LABEL_CLASS		Window title.
+	    ELM_GRID_CLASS		WF_SWALLOW
+
   */
+
 
   // Create the background image
 #if 1
