@@ -679,7 +679,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   ourGlobals.mainWindow->bg = eo_add(ELM_BG_CLASS, ourGlobals.mainWindow->win,
     evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    elm_obj_image_fill_outside_set(EINA_TRUE),
     efl_file_set(buf, NULL),
     efl_gfx_visible_set(EINA_TRUE)
   );
