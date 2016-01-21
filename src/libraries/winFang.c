@@ -312,10 +312,6 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     }
 #endif
 
-  }
-
-  if (result->parent)
-  {
     evas_object_resize(result->win, result->w, result->h);
     evas_object_show(result->win);
   }
