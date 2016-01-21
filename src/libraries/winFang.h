@@ -13,6 +13,8 @@
 #define WF_BOX		"winFang/box"
 #define WF_SWALLOW	"winFang/content"
 
+// Evil hack around ELM's problem with lack of toolbar item icons.
+char NoIcon[PATH_MAX];
 
 typedef struct _widgetSpec
 {

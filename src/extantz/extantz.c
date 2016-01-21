@@ -461,11 +461,11 @@ static winFang *_makeMainMenu(globals *ourGlobals)
   makeMainMenuFinish(me, tb);
 
   // Other stuff in the toolbar.
-  it = elm_toolbar_item_append(tb, NULL, "restriction icons", NULL, NULL);
-  it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
-  it = elm_toolbar_item_append(tb, NULL, "hop://localhost/Anarchadia 152, 155, 51 - Lost plot (Adult)", NULL, NULL);
-  it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
-  it = elm_toolbar_item_append(tb, NULL, "date time:o'clock", NULL, NULL);
+  it = elm_toolbar_item_append(tb, NoIcon, "restriction icons", NULL, NULL);
+  it = elm_toolbar_item_append(tb, NoIcon, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
+  it = elm_toolbar_item_append(tb, NoIcon, "hop://localhost/Anarchadia 152, 155, 51 - Lost plot (Adult)", NULL, NULL);
+  it = elm_toolbar_item_append(tb, NoIcon, NULL, NULL, NULL);  elm_toolbar_item_separator_set(it, EINA_TRUE);
+  it = elm_toolbar_item_append(tb, NoIcon, "date time:o'clock", NULL, NULL);
 
   elm_layout_box_prepend(me->layout, WF_BOX, tb);
 

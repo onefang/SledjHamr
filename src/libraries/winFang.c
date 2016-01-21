@@ -225,6 +225,15 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
 //  result->bg = edje_object_part_object_get(elm_layout_edje_get(result->layout), WF_BACKGROUND);
 
+  if (0 == NoIcon[0])
+    snprintf(NoIcon, sizeof(NoIcon), "%s/spacer.png", prefix_data_get());
+/*  This aint doing shit.  B-(
+  obj = elm_icon_add(obj);
+  elm_icon_order_lookup_set(obj, ELM_ICON_LOOKUP_THEME_FDO);
+  elm_icon_standard_set(obj, NoIcon);
+  elm_image_file_set(obj, NoIcon, NULL);
+*/
+
   if (result->parent)
   {
     result->win = result->layout;
@@ -545,7 +554,7 @@ Evas_Object *menuAdd(winFang *win, Evas_Object *tb, char *label)
 
   // Evas_Object * obj, const char *icon, const char *label, Evas_Smart_Cb  func, const void *data
   //   The function is called when the item is clicked.
-  tb_it = elm_toolbar_item_append(tb, NULL, label, NULL, NULL);
+  tb_it = elm_toolbar_item_append(tb, NoIcon, label, NULL, NULL);
   // Mark it as a menu.
   elm_toolbar_item_menu_set(tb_it, EINA_TRUE);
   // This alledgedly marks it as a menu (not true), and gets an Evas_Object for us to play with.

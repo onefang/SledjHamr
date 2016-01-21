@@ -250,10 +250,10 @@ winFang *woMan_add(globals *ourGlobals)
     evas_object_show(nf);
 
     sprintf(buf, "%s/%s", prefix_data_get(), img3);
-    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Viewers", _promote, tab_it);
+    tab = viewerList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NoIcon, "Viewers", _promote, tab_it);
     // TODO - This strdup leaks, but this is just temporary test code anyway, it will go away.
-    tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Landmarks", _promote, tab_it);
-    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NULL, "Grids", _promote, tab_it);
+    tab = _content_image_new(me->win, strdup(buf));	tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NoIcon, "Landmarks", _promote, tab_it);
+    tab = gridList;				tab_it = elm_naviframe_item_push(nf, NULL, NULL, NULL, tab, NULL);	elm_naviframe_item_title_enabled_set(tab_it, EINA_FALSE, EINA_TRUE);	elm_toolbar_item_append(tb, NoIcon, "Grids", _promote, tab_it);
     elm_layout_box_append(me->win, WF_BOX, nf);
 
     bt = eo_add(ELM_BUTTON_CLASS, me->win,
