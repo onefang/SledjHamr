@@ -167,6 +167,48 @@ Communication
   Link messages include the number of the link (to or from, depending on which end you are at), a number, a string, and a key.
     These are entirely internal to LuaSL though.
 
+purkle registers a listener, with no filter.
+llDialog's client side sends a say() to love.
+  Normally, that wont be bounced back to extantz.
+  SL and OS however, bounce all channels across the viewer, which is why some of them can peek at other channels.
+  Which is why purkle registers with no filter, gotta gettem all.
+  Later we should default to just channel 0.
+
+Soooo, every one sends their say() commands to love.  Love decides who to send listen() events to, which may include sending back to the source.
+
+May need to start name spacing Lua stuff.
+  scripts.compile(), scripts.run(), scripts.reset() scripts.listen() which would include avatar's clients registering via purkle pretending to be a Lua script,
+  world.say()
+
+The only place where there is any ambiguity is LuaSL.
+Purkle accepts event.say() from love, LSLGuiMess sends world.say() to love.
+Love routes world.say()'s around, even back to the source if needed, sending them as event.say().
+LuaSL sends world.say() to love.  LuaSL accepts event.say() from love for scripts.
+  When a say() comes in, it's executed, which triggers the say() that sends to love.  OOPS!!!!
+  world.say() -> events.say()
+
+More generic event system?
+  There are other events flying around.
+    BASIC event		Just send it to LuaSL, it loops through all scripts, sending the event to them all if they have an event function in their current state.
+    REGISTER event	Script has to register for these events with love.  Can have filter.  love loops through all regisitered "scripts", applies filters, sends events.
+    REQUEST event	Script has to request an event from love.  Can have a filter.  Love sends event straight back to the script.  Once.
+			  This covers the "wait for return value" case as well.  events.return()?
+  touch_start goes from extantz to LuaSL, via love.  Most of the rest go from love to LuaSL I think.  link_message, state_entry, state_exit are internal to LuaSL, timer should be.
+  All manner of arguments sent to events.
+    Some of them include the llDetected*() functions for getting more info.
+    So we need some way of sending arbitrary data, as well as a bunch of fixed data, over the network when we send events.
+  Listen events are common?
+    collision, land_collision, not_at_*_target , and touch might be ongoing?
+      llCollisionFilter(string name, id, integer accept)
+      llTarget(vector position, float range)
+      llTargetRemove(integer number)
+      llVolumeDetect(integer detect)
+    Sensor and no_sensor might be common, but you request those, your silly fault, they have filters though.
+      llSensor(string name, string id, integer type, float range, float arc)
+      llSensorRepeat(string name, string id, integer type, float range, float arc, float rate)
+  Event types can have filters?  Events can be types?  In otherwords, generic filter system, attach say filters to say events, etc.
+    Figure this all out as we go along.
+
     LuaSL crashes
 -----------------
 
