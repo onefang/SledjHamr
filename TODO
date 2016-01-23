@@ -1,12 +1,178 @@
 FIXES -
 
+    Use Lua consistently
+------------------------
+
+I noticed that the internal messages seem to be mostly LSL, but really
+should be Lua at this early stage.  LSL should be kept strictly inside
+the LSL scripts.  This might get tricky.  Also, massage these notes into
+docs later.
+
+LuaSL				Script server in C.
+  Opens a socket for script commands.
+    Accepts "compile(...)", "run(...)", and "exit()",
+      "run(...)"
+        Creates a script via scriptAdd(), with send2server included.
+        Either runs it directly, or stuffs it into the worker thread queue.
+    otherwise send2script(SID, command)
+	NOTE: treats "return ..." different to "function(...)".
+
+  send2script			C function that adds the message to the scripts messages, then runs the script worker thread.
+    Runnr.c
+  send2server()			C function that either directly runs certain LSL functions, or -
+    LuaSL_main.c
+	takeScript(me);
+	send2(me->client, me->SID, message);
+	releaseScript(me);
+
+Runnr.c
+  worker thread
+    Starts or resumes the script running.  If there's a message, push it as an argument.
+    Expects the script to eventually call Runnr.receive().
+  Runnr.receive()
+    Does a Lua yeild, which will return once there is a message for this script.
+  Runnr.send()
+    Either send2script(SID, message), or send2server(message)
+
+lib/LSL.lua			Lua script that supplies all the LSL functions, and the basic LSL script support.
+  LSL.Lua runs the main loop of each LSL script.
+    waitAndProcess(false, "LSL.mainLoop")
+      LSL.lua assumes that it gets Lua messages from Runnr.receive(), and tries to run them via loadstring() and pcall().
+      "start()" while paused is handled special, and likely should stay that way.
+      Sets the environment to that of LSL.lua, unless it's an event, before calling pcall.
+      Says it runs the return, but also sends the return via Runnr.send(nil, result1), which is commented out.
+      Sooo, doesn't do anything with the result, unless returnWanted.
+      Returns whatever the pcall returns, if returWanted, which we don't during the main loop.
+  Some of the ll functions are defined as a wrapper around waitAndProcess, that first Runnr.send(nil, ...) the function call details.
+    Which is currently the LSL version of the name, with LSL arguments.
+    NOTE: the wrappers don't currently deal with casting arguments, but should, and it has enough info to do so.
+
+love.c				World server in C.
+  Runs / connects to LuaSL server.
+    Sends "compile(...)" commands for each script it finds.
+    Accepts "compilerError/Warning(...)", "compiled(...)"
+      Once "compiled(...)", sends "run(...)" commands for them.
+    otherwise, a whole bunch of LSL functions, mostly faked, some simply sent to the client.
+    otherwise just log it as INFO.
+  Opens a socket for client stuff.
+    For each new client -
+      send2(client, "loadSim(...)"
+      Accepts "events.touch_start()", and "events.listen()"
+        passing them onto LuaSL, though with some extra info if it's a touch -
+	    send2(ourGlobals->serverLuaSL, me->SID, "events.detectedKeys({\"%s\"})", ownerKey);
+	    send2(ourGlobals->serverLuaSL, me->SID, "events.detectedNames({\"%s\"})", ownerName);
+	    send2(ourGlobals->serverLuaSL, me->SID, "events.touch_start(1)");
+      otherwise complains with a WARNING.
+  At some point -
+    send2(LuaSL, SID, "return ...")
+    send2(LuaSL, SID, "events.*(...)")
+    send2(LuaSL, ownerKey, "exit()")
+
+extantz.c			Client in C and lua.
+  Runs / connects to love server.
+    Accepts a bunch of LSL functions, "loadSim(...)",
+      llSay() and friends, llDialog()
+    otherwise log as INFO.
+  At some point -
+    send2(love, SID, "events.touch_start(1)")
+    send2(love, SID, "events.listen(...)")
+
+
+What should happen (though leaving the Nailer step for much later, so use Lua instead of Nails ) -
+  LuaSL
+    converts LSL into Lua
+    runs everything in the Lua domain
+    sends Lua to the LuaNailer
+      deal with LSL -> Lua argument casting
+    accepts Lua from the LuaNailer
+      deal with Lua -> LSL return value casting
+  LuaNailer
+    converts Lua <-> Nails
+  love
+    accepts Nails commands from LuaNailer
+      sends some of them onto extantz
+      sends some back in response
+    relays / modifies Nails commands from extantz to LuaSL
+  extantz
+    accepts Nails commands from love
+    sends Nails commands to love
+
+What does this internal Lua look like?
+  The internal Lua should be more SledjHamr flavour than LSL flavour, so we get a chance to design it right.
+  What's right though?
+
+  Handled by extantz -
+    For all of these, we need to know who / what sent it, and when,
+      also where the sender was at the time for some of these.
+    llSay(integer channel, string text)+
+      also
+        llOwnerSay(string text)
+        llRegionSayTo(key target, integer channelID, string text)
+          Actually, if this sends messages to objects, then love should handle it,
+          only handled here if it's for a person.
+        llInstantMessage(string user, string message)
+    llDialog(key avatar, string caption, list arseBackwardsMenu, integer channel)
+    llListen(integer channel, string name, key id, string msg)
+  Sent from extantz -
+    events.listen(integer channel, string name, key id, string message)
+    events.touch_start(integer num_detected)
+  Handled by love -
+    object information get
+    avatar info get
+    llRequestPermissions()
+    position and rotation get
+    alpha get
+    inventory and link details get
+    free memory get
+    "notecard" get
+  Sent from love -
+    events.detected*({"",})
+    events.*(...)
+    return ...
+  Handled by the script server -
+    time stuff get / set
+    script state get / set
+
+Communication
+  say(key source, vector location, integer timestamp, text message, string filter, ...)
+    Source is the key of the avatar / object / script saying things.
+    Location is the location of that source in world at the time of the timestamp.
+      Though in the case of IMs, avatar might not be in world at the time.
+    filter is a comma separated string -
+      "<Xm>,<key>,<channel>"
+      llSay()+ include <channel>, and a distance restriction <Xm> in meters.
+        The distance restriction is one of a fixed four in LL - whisper, say, shout, region.
+        What these mean depends on how an OpenSim region is configured, or the default SL values.
+        So stuff in the SL values in LuaSL, convert to OS values in love, calculate objects / avatars within that radius in love, then pass it onto the objects scripts, or the avatar's client.
+        "Region" is the default, in other words, no distance restriction.
+      <key> would be a persons ID for llOwnerSay() and llInstantMessage(), but object/person ID for llRegionSayTo()
+      <channel> would be a channel name / number.  LSL only has numbers, with two being fixed function.  We can relax that and add strings.
+      NOTE: llRegionSayTo() includes both <key> and <channel>.
+      llDialog() includes a string and a list, er I mean table, Lua table.
+
+  Objects that are interested in things said register listeners with love, and get events.listen()'s sent to them.
+    Some sort of filter is needed for this as well.
+    listen(string filter, string text, integer flags)
+      filter - <Xm>,<key>,<channel>
+        In this case, <Xm> isn't actually needed by any LSL function, but I include it for completeness sake.
+      text   - a string to match, might be a regex
+      flags  - include the regex flags from the OS version
+      The last two arguments are optional.  Flags is itself optional if text is there, defaulting to "not a regex".
+      returns a <handle>
+        can be in/actived, or removed.
+    This includes llDialog() and llTextBox().
+      Note that these two are LL specific things, we use skang for the more general case.  Though both need client side support, which means love has to pass these things around.
+
+  Link messages include the number of the link (to or from, depending on which end you are at), a number, a string, and a key.
+    These are entirely internal to LuaSL though.
+
     LuaSL crashes
-    -------------
+-----------------
 
 Hmmm, empty functions get no end, that's NOT legal in Lua.
 
     Project paths
-    -------------
+-----------------
 
 The executables currently live in ...../SledjHamr.
   Test executables stay in the src directory.
