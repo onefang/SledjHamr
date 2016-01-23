@@ -134,7 +134,7 @@ What does this internal Lua look like?
     script state get / set
 
 Communication
-  say(key source, vector location, integer timestamp, text message, string filter, ...)
+  world.say(key source, vector location, integer timestamp, text message, string filter, ...)
     Source is the key of the avatar / object / script saying things.
     Location is the location of that source in world at the time of the timestamp.
       Though in the case of IMs, avatar might not be in world at the time.
@@ -155,7 +155,7 @@ Communication
     listen(string filter, string text, integer flags)
       filter - <Xm>,<key>,<channel>,<self>
         In this case, <Xm> isn't actually needed by any LSL function, but I include it for completeness sake.
-        <self> means don't listen to yourself, which is usually what you get in LSL, but I'm leaving that option open.
+        <self> means do listen to yourself, which is usually not what you get in LSL, but I'm leaving that option open.
       text   - a string to match, might be a regex
       flags  - include the regex flags from the OS version
       The last two arguments are optional.  Flags is itself optional if text is there, defaulting to "not a regex".
@@ -163,6 +163,8 @@ Communication
         can be in/actived, or removed.
     This includes llDialog() and llTextBox().
       Note that these two are LL specific things, we use skang for the more general case.  Though both need client side support, which means love has to pass these things around.
+
+  events.say(key source, vector location, integer timestamp, text message, string filter, ...)
 
   Link messages include the number of the link (to or from, depending on which end you are at), a number, a string, and a key.
     These are entirely internal to LuaSL though.
@@ -178,12 +180,12 @@ Soooo, every one sends their say() commands to love.  Love decides who to send l
 
 May need to start name spacing Lua stuff.
   scripts.compile(), scripts.run(), scripts.reset() scripts.listen() which would include avatar's clients registering via purkle pretending to be a Lua script,
-  world.say()
+  world.say(), events.say()
 
 The only place where there is any ambiguity is LuaSL.
-Purkle accepts event.say() from love, LSLGuiMess sends world.say() to love.
-Love routes world.say()'s around, even back to the source if needed, sending them as event.say().
-LuaSL sends world.say() to love.  LuaSL accepts event.say() from love for scripts.
+Purkle accepts events.say() from love, LSLGuiMess sends world.say() to love.
+Love routes world.say()'s around, even back to the source if needed, sending them as events.say().
+LuaSL sends world.say() to love.  LuaSL accepts events.say() from love for scripts.
   When a say() comes in, it's executed, which triggers the say() that sends to love.  OOPS!!!!
   world.say() -> events.say()
 
@@ -206,8 +208,20 @@ More generic event system?
     Sensor and no_sensor might be common, but you request those, your silly fault, they have filters though.
       llSensor(string name, string id, integer type, float range, float arc)
       llSensorRepeat(string name, string id, integer type, float range, float arc, float rate)
-  Event types can have filters?  Events can be types?  In otherwords, generic filter system, attach say filters to say events, etc.
+  Event types can have filters?  Events can be types?  In otherwords, generic filter system, attach say filters to say type events, etc.
     Figure this all out as we go along.
+
+  LuaSL
+    events.*	each scripts state has a bunch of these, incoming events from love, get sent to the currentstates event functions.
+    world.*	used to send commands to love.
+  love
+    events.*	used to send events to scripts, and viewers.
+    world.*	the real world object.
+  extantz
+    events.*	used to get events from scripts and other viewers, via love.
+    world.*	used to send commands to love.
+
+
 
     LuaSL crashes
 -----------------
