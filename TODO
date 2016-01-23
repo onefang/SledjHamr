@@ -153,8 +153,9 @@ Communication
   Objects that are interested in things said register listeners with love, and get events.listen()'s sent to them.
     Some sort of filter is needed for this as well.
     listen(string filter, string text, integer flags)
-      filter - <Xm>,<key>,<channel>
+      filter - <Xm>,<key>,<channel>,<self>
         In this case, <Xm> isn't actually needed by any LSL function, but I include it for completeness sake.
+        <self> means don't listen to yourself, which is usually what you get in LSL, but I'm leaving that option open.
       text   - a string to match, might be a regex
       flags  - include the regex flags from the OS version
       The last two arguments are optional.  Flags is itself optional if text is there, defaulting to "not a regex".
