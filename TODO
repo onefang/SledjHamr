@@ -419,3 +419,58 @@ OTR
 
 Since I would be adding OTR to the IM system anyway, here's a cool idea. 
 Wrap all the data transfers in OTR.
+
+
+The big merge
+-------------
+
+At some point, some parts of this system will become useful enough to
+start merging it into Imprudence and OpenSim.  Actually, merge it into
+meta-impy, that's my experimental Impy fork now, then Imprudence later. 
+This discussion may not cover stuff that has not been written yet.
+
+There's a bunch of stuff that could just run on the end of a pipe /
+socket that wont need GTK / EFL integration, so I'll list those first. 
+Might even be good to merge these sorts of things into meta-impy first,
+it uses less of the EFL libraries, and could live on the end of a pipe,
+so no need for GTK / EFL integration.
+
+I could combine running a love server, with the libg3d work, to load
+SledjHamr style sims into meta-impy.  Then morph the login screen into a
+local sim in world screen.  Later could use this to allow people you
+meet in OS/SL to come to your world, so long as they also have a
+SledjHamr viewer (or use HG when that bit gets written).
+
+The script library might merge into the viewer oddly enough.  I want the
+viewer to be user scriptable, and LSL is a language users might be
+familiar with.  Once the hybrid Lua / LSL thing is working, that's going
+to be great.  Just like now, where LuaSL relies on it's client (the love
+world server) to perform in world stuff, it can rely on the viewer to
+perform in world stuff.  Obviously there will be some things that a
+viewer can't do that an in world LSL script can, we will just have to
+live with that.  Then use it as a feature of SledjHamr, which will have
+no such limitation.  B-)
+
+My AO script might work perfectly with this script engine, so I get to
+include it in SledjHamr.  The love server integration mentioned above
+gives this to us for free, but we can do both.
+
+woMan is designed to be stand alone, or called out from the meta-impy
+login screen.
+
+meta-impy uses GTK2+ I think for it's library, and EFL has some sort of
+GTK integration.  If I can get that to work, then the skang based stuff
+can merge.  I'll list those next.
+
+I can use the llDialog() or purkle widgets, especially when you can rip
+them out of the main window to be their own windows.
+
+Once the files widget morphs into a proper inventory widget, I can use
+it in meta-impy for inventory AND an asyncronous file requestor.
+
+Finally (I think) I could rip the meta-impy graphics pipeline a new one.
+
+Also, try to merge the script engine into OpenSim, though that might get
+a lot less of a work out.  Adding server side skang to LuaSL could be
+interesting.
+
