@@ -529,12 +529,12 @@ There is no longer any parts of that code left I think.
 --------------------------------------------------------------------------------
 
 There used to be flex and bison source files for a LSL parser, taken
-from from the SL viewer under GPL 2 and copyright at some unknown date
-(due to missing copyright notice in those specific files) by Linden
-Research, Inc.  Those files have gone away, as I wrote my own, and most
-of it was useless to me anyway.  Never actually used them, so GPL terms
-do not apply.  The flex source file actually used is written by me,
-bison is not used at all.
+from the SL viewer under GPL 2 and copyright at some unknown date (due
+to missing copyright notice in those specific files) by Linden Research,
+Inc.  Those files have gone away, as I wrote my own, and most of it was
+useless to me anyway.  Never actually used them, so GPL terms do not
+apply.  The flex source file actually used is written by me, bison is
+not used at all.
 
 --------------------------------------------------------------------------------
 
