@@ -777,8 +777,6 @@ EAPI_MAIN int elm_main(int argc, char **argv)
   pantsOff(logDom);
   logDom = -1;
 
-  elm_shutdown();
-
   return 0;
 }
 ELM_MAIN()
