@@ -103,6 +103,9 @@ void send2(Connection *conn, const char *SID, const char *message, ...)
     buf[length] = '\0';
 
 // TODO - Should check if this is always gonna be local?  Likely not.
+// TODO - Figure out what the above line meant.  Then ...
+//        Check a hashtable somewhere for a command extracted from the message.
+//          conn->commands[command](message ...)
     if (checkConnection(conn, "send2", conn->type, FALSE))
     {
 	switch (conn->type)
@@ -157,6 +160,17 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 	      ext = index(command, ' ');
 	    if (ext)
 	    {
+	// TODO - Currently SID.command(arguments), should change that to nameSpace.command(arguments)
+	//        Not sure what to do with SID, but there maybe some common parameters we can shift around differently.
+	//      - First check if the connection has a hashtable of conn->commands.
+	//*       Next check if "nameSpace.command(arguments)" runs as Lua.
+	//          or even the return values from returnWanted calls like -
+	//            SID, "return 1"
+	//            SID, "result + 5"
+	//            SID, "script.SID.return(1)"
+	//        Finally pass it to conn->unknownCommand()
+	//          * The Lua check can live in unknownCommand().
+	//        else bitch.
 		streamParser func = eina_hash_find(conn->commands, command);
 
 		ext[0] = '\0';

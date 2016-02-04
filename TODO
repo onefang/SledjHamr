@@ -41,6 +41,8 @@ lib/LSL.lua			Lua script that supplies all the LSL functions, and the basic LSL 
       "start()" while paused is handled special, and likely should stay that way.
       Sets the environment to that of LSL.lua, unless it's an event, before calling pcall.
       Says it runs the return, but also sends the return via Runnr.send(nil, result1), which is commented out.
+        What should happen is that instead of "return somevalue", it's just "someValue", but that could be "someValue + thingy".
+        So, execute it, return the result if returnWanted.
       Sooo, doesn't do anything with the result, unless returnWanted.
       Returns whatever the pcall returns, if returWanted, which we don't during the main loop.
   Some of the ll functions are defined as a wrapper around waitAndProcess, that first Runnr.send(nil, ...) the function call details.
@@ -190,6 +192,11 @@ LuaSL sends world.say() to love.  LuaSL accepts events.say() from love for scrip
   world.say() -> events.say()
 
 More generic event system?
+  Events are different from state changes.  The Nails web page mostly
+  talks about the state of objects, and changing them.  Events are for a
+  variety of things, not all of which can be represented by a state
+  change message.
+
   There are other events flying around.
     BASIC event		Just send it to LuaSL, it loops through all scripts, sending the event to them all if they have an event function in their current state.
     REGISTER event	Script has to register for these events with love.  Can have filter.  love loops through all regisitered "scripts", applies filters, sends events.
@@ -211,15 +218,58 @@ More generic event system?
   Event types can have filters?  Events can be types?  In otherwords, generic filter system, attach say filters to say type events, etc.
     Figure this all out as we go along.
 
-  LuaSL
-    events.*	each scripts state has a bunch of these, incoming events from love, get sent to the currentstates event functions.
-    world.*	used to send commands to love.
-  love
-    events.*	used to send events to scripts, and viewers.
-    world.*	the real world object.
-  extantz
-    events.*	used to get events from scripts and other viewers, via love.
-    world.*	used to send commands to love.
+parseStream() / send2() both -
+  lookup command in conn->commands
+    if found, use that found function pointer
+  else
+    try conn->unknownCommand for the function pointer
+  call the function pointer
+  or bitch / send to love
+
+LuaSL
+  open a server stream
+    incoming -> parseStream()
+      commands	scripts.compile(), scripts.run(), scripts.return(), etc.
+      unknown	events.eventName() -> loop through each script looking for "function" = type(currentState.[eventName])
+		otherwise send2script()
+      bitch
+    outgoing -> send2()
+      commands	scripts.state(), scripts.reset(), scripts.link_message(), and timer.*() commands currently in LuaSL_main.c->send2server()
+      unknown	NULL
+      actually send it
+
+love
+  open a stream to LuaSL
+    incoming -> parseStream()
+      commands	various compiling results, world functions, and event registrations / requests
+      unknown	NULL
+      bitch
+    outgoing -> send2()
+      commands	NULL
+      unknown	NULL
+      filter	as needed
+      actually send it
+  open a server stream
+    incoming -> parseStream()
+      commands	various world functions, and event registrations
+      unknown	NULL
+      bitch
+    outgoing -> send2()
+      commands	NULL
+      unknown	NULL
+      filter	as needed
+      actually send it
+
+extantz
+  open a stream to love
+    incoming -> parseStream()
+      commands	events.say(), events.dialog(), events.textBox(), events.loadSim()
+      unknown	check for valid Lua
+      bitch
+    outgoing -> send2()
+      commands	NULL
+      unknown	NULL
+      actually send it
 
 
 
