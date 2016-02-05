@@ -91,81 +91,122 @@ static boolean checkConnection(Connection *conn, char *func, connType wanted, bo
 
 typedef boolean (* notFoundCb)(Connection *conn, char *command, int len);
 
-/* TODO -
-  It should loop through all lines, looking for the closing ) before dealing with it.
-  If we get to the end, and there's left over open ( or something, then return the length.
-  Bitch and move on if it's not well formed.
-*/
 static int _checkForCommand(Connection *conn, char *commands, notFoundCb notFound, boolean in)
 {
   int result = 0;
   boolean handled = FALSE;
-  char *ext, *ext2;
+  char *ext = NULL, *ext1 = NULL, *ext2 = NULL, *ext3 = NULL;
 
-  while ((ext = index(commands, '\n')))
+
+  char *p = commands, name[64], command[32], arguments[PATH_MAX * 3];
+
+  name[0] = 0;
+  command[0] = 0;
+  arguments[0] = 0;
+  ext = p;
+
+  while (*p)
   {
-    char SID[PATH_MAX * 3];
-    int length = ext - commands;
-
-    strncpy(SID, commands, length + 1);
-
-    SID[length] = '\0';
-
-    ext = index(SID, '.');
-    if (ext)
+    switch (*p)
     {
-      char *command = ext + 1;
+      case '.' :
+        if (NULL == ext1)
+        {
+          *p = 0;
+          strncpy(name, ext, sizeof(name));
+          name[sizeof(name) - 1] = 0;
+          *p = '.';
+          ext1 = p + 1;
+        }
+        break;
 
-      ext[0] = '\0';
-      ext2 = index(command, '(');
-      if (NULL == ext2)
-        ext2 = index(command, ' ');
-      if (ext2)
-      {
-	ext2[0] = '\0';
-	// TODO - Currently SID.command(arguments), should change that to nameSpace.command(arguments)
-	//        Not sure what to do with SID, but there maybe some common parameters we can shift around differently.
-	//      - First check if the connection has a hashtable of conn->commands.
-	//*       Next check if "nameSpace.command(arguments)" runs as Lua.
-	//          or even the return values from returnWanted calls like -
-	//            SID, "return 1"
-	//            SID, "result + 5"
-	//            SID, "script.SID.return(1)"
-	//        Finally pass it to conn->unknownCommand()
-	//          * The Lua check can live in unknownCommand().
-	//        else bitch.
+      case '(' :
+        if ((NULL != ext1) && (NULL == ext2))
+        {
+          *p = 0;
+          strncpy(command, ext1, sizeof(command));
+          command[sizeof(command) - 1] = 0;
+          *p = '(';
+          ext2 = p + 1;
+        }
+        break;
 
-	// Check if it's in the connections hash table.
-	streamParser func = eina_hash_find(conn->commands, command);
+      case ')' :
+        if (NULL != ext2)	// Keep scanning until we get the last one.
+        {
+          *p = 0;
+          strncpy(arguments, ext2, sizeof(arguments));
+          arguments[sizeof(arguments) - 1] = 0;
+          *p = ')';
+          ext3 = p + 1;
+        }
+        break;
 
-	if (NULL == func)
-	{
-	  // Check if the connection has a function for handling it.
-	  if (in)
-	    func = conn->unknownInCommand;
-	  else
-	    func = conn->unknownOutCommand;
-	}
+      case '\n' :
+        if ((NULL != ext3) && (0 != name[0]) && (0 != command[0]))
+        {
+	  int length = p - ext + 1;
+//PD("name: %s  command: %s  arguments %s|", name, command, arguments);
+	  // TODO - Currently SID.command(arguments), should change that to nameSpace.command(arguments)
+	  //        Not sure what to do with SID, but there maybe some common parameters we can shift around differently.
+	  //      - First check if the connection has a hashtable of conn->commands.
+	  //*       Next check if "nameSpace.command(arguments)" runs as Lua.
+	  //          or even the return values from returnWanted calls like -
+	  //            SID, "return(1)"
+	  //            SID, "result + 5"
+	  //            SID, "script.SID.return(1)"
+	  //        Finally pass it to conn->unknownCommand()
+	  //          * The Lua check can live in unknownCommand().
+	  //        else bitch.
 
-	// Try it out if we have a function.
-	if (func)
-	{
-	  handled = func(conn->pointer, conn, SID, command, ext2 + 1);
-	  if (handled)
-	    notFound = NULL;
-	}
+	  // Check if it's in the connections hash table.
+	  streamParser func = eina_hash_find(conn->commands, command);
 
-	// Last resort, let the caller deal with it.
-	if (notFound)
-	  handled = notFound(conn, commands, length + 1);
-	if (!handled)
-	  PE("No function found for command %s(%s!", command, ext2 + 1);
+	  if (NULL == func)
+	  {
+	    // Check if the connection has a function for handling it.
+	    if (in)
+	      func = conn->unknownInCommand;
+	    else
+	      func = conn->unknownOutCommand;
+	  }
 
-        result += length;
-      }
+	  // Try it out if we have a function.
+	  if (func)
+	  {
+	    handled = func(conn->pointer, conn, name, command, arguments);
+	    if (handled)
+	      notFound = NULL;
+	  }
+
+	  // Last resort, let the caller deal with it.
+	  if (notFound)
+	    handled = notFound(conn, commands, length);
+	  if (!handled)
+	    PE("No function found for command %s.%s(%s)!", name, command, arguments);
+
+          result += length;
+
+	  name[0] = 0;
+	  command[0] = 0;
+	  arguments[0] = 0;
+	  ext = p + 1;
+	  ext1 = NULL;
+	  ext2 = NULL;
+	  ext3 = NULL;
+        }
+        else if ((p != ext))
+        {
+          *p = 0;
+          PE("ERROR scanning |%s|", ext);
+          *p = '\n';
+        }
+        break;
+
+      default :
+        break;
     }
-
-    commands = &commands[length + 1];
+    p++;
   }
 
   return result;
@@ -178,13 +219,13 @@ static boolean _actuallySendIt(Connection *conn, char *command, int len)
       switch (conn->type)
       {
 	case CT_CLIENT :
-//	  PD("vvv send2(%*s", len, command);
+//PD("vvv send2(%*s", len, command);
 	  ecore_con_client_send(conn->conn.client.client, strndup(command, len), len);
 	  ecore_con_client_flush(conn->conn.client.client);
 	  return TRUE;
 
 	case CT_SERVER :
-//	  PD("^^^ send2(%*s", len, command);
+//PD("^^^ send2(%*s", len, command);
 	  ecore_con_server_send(conn->conn.server.server, strndup(command, len), len);
 	  ecore_con_server_flush(conn->conn.server.server);
 	  return TRUE;
@@ -227,7 +268,7 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
       conn->stream = eina_strbuf_new();
 
     eina_strbuf_append_length(conn->stream, evData, evSize);
-//PD("%s", (char *) eina_strbuf_string_get(conn->stream));
+//PD("****** %s", (char *) eina_strbuf_string_get(conn->stream));
     eina_strbuf_remove(conn->stream, 0, _checkForCommand(conn, (char *) eina_strbuf_string_get(conn->stream), NULL, TRUE));
 
     if (conn->_data)

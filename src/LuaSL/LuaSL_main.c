@@ -41,7 +41,7 @@ static Eina_Bool _sleep_timer_cb(void *data)
     script *script = data;
 
 //    PD("Waking up %s", script->name);
-    send2script(script->SID, "return 0.0");
+    send2script(script->SID, "return(0.0)");
     return ECORE_CALLBACK_CANCEL;
 }
 
@@ -89,28 +89,28 @@ static boolean send2parser(void *data, Connection *connection, char *SID, char *
     return FALSE;
   }
 
-  sprintf(buf, "%s(%s", command, arguments);
+  sprintf(buf, "%s(%s)", command, arguments);
 
 //PD("GOT MESSAGE from script %s - '%s'", me->name, buf);
 
-    if (0 == strncmp(buf, "llSleep(", 8))
-	ecore_timer_add(atof(&(buf)[8]), _sleep_timer_cb, me);
-    else if (0 == strncmp(buf, "llResetTime(", 12))
+    if (0 == strcmp(command, "llSleep"))
+	ecore_timer_add(atof(arguments), _sleep_timer_cb, me);
+    else if (0 == strcmp(command, "llResetTime"))
     {
 	takeScript(me);
 	gettimeofday(&me->startTime, NULL);
 	releaseScript(me);
     }
-    else if (0 == strncmp(buf, "llGetTime(", 10))
+    else if (0 == strcmp(command, "llGetTime"))
     {
 	struct timeval now;
 	float time = timeDiff(&now, &me->startTime);
 	char result[128];
 
-	snprintf(result, sizeof(result), "return %f", time);
+	snprintf(result, sizeof(result), "return(%f)", time);
 	send2script(me->SID, result);
     }
-    else if (0 == strncmp(buf, "llGetAndResetTime(", 18))
+    else if (0 == strcmp(command, "llGetAndResetTime"))
     {
 	struct timeval now;
 	float time = timeDiff(&now, &me->startTime);
@@ -120,13 +120,13 @@ static boolean send2parser(void *data, Connection *connection, char *SID, char *
 	// Reset it before doing anything else once the result is known.
 	gettimeofday(&me->startTime, NULL);
 	releaseScript(me);
-	snprintf(result, sizeof(result), "return %f", time);
+	snprintf(result, sizeof(result), "return(%f)", time);
 	send2script(me->SID, result);
     }
-    else if (0 == strncmp(buf, "llSetTimerEvent(", 16))
+    else if (0 == strcmp(command, "llSetTimerEvent"))
     {
 	takeScript(me);
-	me->timerTime = atof(&(buf)[16]);
+	me->timerTime = atof(arguments);
 	if (0.0 == me->timerTime)
 	{
 	    if (me->timer)
@@ -137,14 +137,24 @@ static boolean send2parser(void *data, Connection *connection, char *SID, char *
 	    me->timer = ecore_timer_add(me->timerTime, _timer_timer_cb, me);
 	releaseScript(me);
     }
-    else if (0 == strncmp(buf, "llSetScriptState(", 17))
+    else if (0 == strcmp(command, "llSetScriptState"))
     {
 	script *them;
+	char *temp = rindex(arguments, '"'), *ext = NULL;
 
-	if ((them = findThem(ourGlobals, me->fileName, &(buf[18]))))
+	if (temp)
 	{
-	    char *temp = rindex(&(buf[18]), ',');
+	    *temp = '\0';
+	    ext = temp + 1;
+	}
 
+	temp = arguments;
+	if ('"' == temp[0])
+	  temp = &temp[1];
+
+	if ((them = findThem(ourGlobals, me->fileName, temp)))
+	{
+	    temp = rindex(ext, ',');
 	    if (temp)
 	    {
 		temp++;
@@ -154,31 +164,39 @@ static boolean send2parser(void *data, Connection *connection, char *SID, char *
 		    send2script(them->SID, "start()");
 		else
 		    send2script(them->SID, "stop()");
-//		PD("Stopped %s", them->name);
+//		PD("Started / stopped %s", them->name);
 	    }
 	    else
 		PE("Missing script state in llSetScriptState(%s, )", them->name);
 	}
 	else
-	{
-	    char *temp = rindex(&(buf[18]), '"');
-
-	    if (temp)
-		*temp = '\0';
-	    PE("Can't stop script, can't find %s", &(buf[18]));
-	}
+	    PE("Can't start / stop script, can't find %s", temp);
     }
-    else if (0 == strncmp(buf, "llResetOtherScript(", 19))
+    else if (0 == strcmp(command, "llResetOtherScript"))
     {
 	script *them;
+	char *temp = rindex(arguments, '"') ;//, *ext = NULL;
 
-	if ((them = findThem(ourGlobals, me->fileName, &(buf[20]))))
+	if (temp)
+	{
+	    *temp = '\0';
+//	    ext = temp + 1;
+	}
+
+	temp = arguments;
+	if ('"' == temp[0])
+	  temp = &temp[1];
+
+
+	if ((them = findThem(ourGlobals, me->fileName, temp)))
 	{
 	    PD("RESETTING OTHER %s", them->name);
 	    resetScript(them);
 	}
+	else
+	    PE("Can't reset script, can't find %s", temp);
     }
-    else if (0 == strncmp(buf, "llResetScript(", 14))
+    else if (0 == strcmp(command, "llResetScript"))
     {
 	PD("RESETTING %s", me->name);
 	resetScript(me);
@@ -239,38 +257,19 @@ static boolean parser(void *data, Connection *connection, char *SID, char *comma
   gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
-//PD("PARSE COMMAND %s - '%s' (%s", SID, command, arguments);
+//PD("PARSE COMMAND %s - %s (%s)", SID, command, arguments);
     if (0 == strcmp(command, "compile"))
     {
-	char *temp;
-	char *file;
 	LuaCompiler *compiler;
 
-	strcpy(buf, arguments);
-	temp = buf;
-	file = temp;
-	while (')' != temp[0])
-	    temp++;
-	temp[0] = '\0';
-
-	compiler = createCompiler(SID, file, (compileCb) compileLSL, _compileCb);
+	compiler = createCompiler(SID, arguments, (compileCb) compileLSL, _compileCb);
 	compiler->client = connection;
-	PI("Compiling script %s", file);
+	PI("Compiling script %s", arguments);
 	compileScript(compiler, TRUE);
     }
     else if (0 == strcmp(command, "run"))
     {
-	char *temp;
-	char *file;
-	script *me;
-
-	strcpy(buf, arguments);
-	temp = buf;
-	file = temp;
-	while (')' != temp[0])
-	    temp++;
-	temp[0] = '\0';
-	me = scriptAdd(file, SID, send2server, ourGlobals);
+	script *me = scriptAdd(arguments, SID, send2server, ourGlobals);
 
 	me->client = connection;
 	eina_hash_add(ourGlobals->names, me->fileName, me);
@@ -293,10 +292,10 @@ static boolean parser(void *data, Connection *connection, char *SID, char *comma
     {
 	// TODO - Even after moving the above into the command hash, this bit might still remain, unless script.return() can make it go away.
 	//         Though perhaps the "else" part stays?
-	if (0 == strcmp("return", command))
-	    snprintf(buf, sizeof(buf), "%s %s", command, arguments);
-	else
-	    snprintf(buf, sizeof(buf), "%s(%s", command, arguments);
+//	if (0 == strcmp("return", command))
+//	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
+//	else
+	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
 //PD("Sending -> script %s :  %s", SID, buf);
 	send2script(SID, buf);
     }

@@ -1957,7 +1957,7 @@ function LSL.stateChange(x)
 	  Notably, it's not actually legal to do a state change from a function, only from handlers.
 	  There is a hack though, but it's unsupported, so I don't have to worry about it so much.
 
-	  Write out "state new;" as "return _LSL.stateChange(newState);", with stateChange() returning new.state_entry()) which will force two tail calls.
+	  Write out "state new;" as "return(_LSL.stateChange(newState));", with stateChange() returning new.state_entry()) which will force two tail calls.
 
 	  The caller of stateChange() might be a function rather than an event handler.
 	  Which will return to the event handler (possibly via other nested function calls) as if the state never changed.
@@ -2003,7 +2003,7 @@ function waitAndProcess(returnWanted, name, ...)
   while running do
     local message = Runnr.receive()
     if message then
---print(" " .. SID .. "_" .. scriptName .. ' GOT MESSAGE - "' .. message .. '"')
+-- print("  " .. SID .. "_" .. scriptName .. ' GOT MESSAGE - "' .. message .. '"')
       -- TODO - should we be discarding return values while paused?  I don't think so, so we need to process those,
       if paused then
 	if "start()" == message then paused = false end
@@ -2027,7 +2027,7 @@ function waitAndProcess(returnWanted, name, ...)
 	    print(text)
 	  elseif result1 then
 	    -- Check if we are waiting for a return, and got it.
-	    if returnWanted and string.match(message, "^return ") then
+	    if returnWanted and string.match(message, "^return%(") then
 --	      print("<" .. SID .. "_" .. scriptName, " - RETURNING " .. type(result1) .. " " .. message .. " TO " .. name)
 	      return result1
 	    else
@@ -2040,7 +2040,7 @@ function waitAndProcess(returnWanted, name, ...)
 --	      msg("Error sending results from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg)
 --	    end
 	  else
-	    if string.match(message, "^return ") then
+	    if string.match(message, "^return%(") then
 	      print("!" .. SID .. "_" .. scriptName, " - IN AN ODD PLACE!!!!!" .. message)
 	    else
 --	      print("!" .. SID .. "_" .. scriptName, " - " .. message)

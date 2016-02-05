@@ -217,9 +217,6 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	    temp++;
 	temp[0] = '\0';
 	text = ++temp;
-	while (')' != temp[0])
-	    temp++;
-	temp[0] = '\0';
 	PW("%s @ line %s, column %s.", text, line, column);
 	if (me)
 	    me->warnings++;
@@ -242,9 +239,6 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	    temp++;
 	temp[0] = '\0';
 	text = ++temp;
-	while (')' != temp[0])
-	    temp++;
-	temp[0] = '\0';
 	PE("%s @ line %s, column %s.", text, line, column);
 	if (me)
 	    me->bugs++;
@@ -276,55 +270,52 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 //PD("FAKING (maybe) %s", command);
 	// Send back some random or fixed values for testing.
 	if (0 == strcmp(command, "llGetKey"))
-	    send2(ourGlobals->serverLuaSL, SID, "return \"%08lx-%04lx-%04lx-%04lx-%012lx\"", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
+	    send2(ourGlobals->serverLuaSL, SID, "return(\"%08lx-%04lx-%04lx-%04lx-%012lx\")", random(), random() % 0xFFFF, random() % 0xFFFF, random() % 0xFFFF, random());
 	else if (0 == strcmp(command, "llGetOwner"))
-	    send2(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+	    send2(ourGlobals->serverLuaSL, SID, "return(\"%s\")", ownerKey);
 	else if (0 == strcmp(command, "llGetPermissionsKey"))
-	    send2(ourGlobals->serverLuaSL, SID, "return \"%s\"", ownerKey);
+	    send2(ourGlobals->serverLuaSL, SID, "return(\"%s\")", ownerKey);
 	else if (0 == strcmp(command, "llRequestPermissions"))
-	    PI("Faked %s(%s", command, arguments);
+	    PI("Faked %s(%s)", command, arguments);
 	else if (0 == strcmp(command, "llGetPos"))
-	    send2(ourGlobals->serverLuaSL, SID, "return {x=128.0, y=128.0, z=128.0}");
+	    send2(ourGlobals->serverLuaSL, SID, "return({x=128.0, y=128.0, z=128.0})");
 	else if (0 == strcmp(command, "llGetRot"))
-	    send2(ourGlobals->serverLuaSL, SID, "return {x=0.0, y=0.0, z=0.0, s=1.0}");
+	    send2(ourGlobals->serverLuaSL, SID, "return({x=0.0, y=0.0, z=0.0, s=1.0})");
 	else if (0 == strcmp(command, "llGetFreeMemory"))
-	    send2(ourGlobals->serverLuaSL, SID, "return 654321");
+	    send2(ourGlobals->serverLuaSL, SID, "return(654321)");
 	else if (0 == strcmp(command, "llGetObjectDesc"))
-	    send2(ourGlobals->serverLuaSL, SID, "return \"\"");
+	    send2(ourGlobals->serverLuaSL, SID, "return(\"\")");
 	else if (0 == strcmp(command, "llGetAlpha"))
-	    send2(ourGlobals->serverLuaSL, SID, "return 1.0");
-	else if (0 == strcmp(command, "llGetInventoryNumber") && (0 == strcmp(arguments, "7)")))
-	    send2(ourGlobals->serverLuaSL, SID, "return 3");
+	    send2(ourGlobals->serverLuaSL, SID, "return(1.0)");
+	else if (0 == strcmp(command, "llGetInventoryNumber") && (0 == strcmp(arguments, "7")))
+	    send2(ourGlobals->serverLuaSL, SID, "return(3)");
 	else if (0 == strcmp(command, "llGetLinkNumber"))
-	    send2(ourGlobals->serverLuaSL, SID, "return 1");
-	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 2)")))
-	    send2(ourGlobals->serverLuaSL, SID, "return \".readme\"");
-	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 1)")))
-	    send2(ourGlobals->serverLuaSL, SID, "return \".POSITIONS\"");
-	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 0)")))
-	    send2(ourGlobals->serverLuaSL, SID, "return \".MENUITEMS\"");
+	    send2(ourGlobals->serverLuaSL, SID, "return(1)");
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 2")))
+	    send2(ourGlobals->serverLuaSL, SID, "return(\".readme\")");
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 1")))
+	    send2(ourGlobals->serverLuaSL, SID, "return(\".POSITIONS\")");
+	else if (0 == strcmp(command, "llGetInventoryName") && (0 == strcmp(arguments, "7, 0")))
+	    send2(ourGlobals->serverLuaSL, SID, "return(\".MENUITEMS\")");
 	else if (0 == strcmp(command, "llListen"))
 	{
-	    PI("Faked %s(%s", command, arguments);
-	    send2(ourGlobals->serverLuaSL, SID, "return %d", random());
+	    PI("Faked %s(%s)", command, arguments);
+	    send2(ourGlobals->serverLuaSL, SID, "return(%d)", random());
 	}
 	else if (0 == strcmp(command, "llSameGroup"))
-	    send2(ourGlobals->serverLuaSL, SID, "return true");
+	    send2(ourGlobals->serverLuaSL, SID, "return(true)");
 	else if (0 == strcmp(command, "llKey2Name"))
 	{
 	    char *temp;
 
 	    strcpy(buf, arguments);
 	    temp = buf;
-	    while (')' != temp[0])
-		temp++;
-	    temp[0] = '\0';
 	    if (0 == strcmp(buf, ownerKey))
 		temp = ownerName;
 	    else
 		temp = "Unknown User";
 	    // TODO - Sanitize the name, no telling what weird shit people put in their names.
-	    snprintf(buf, sizeof(buf), "return \"%s\"", temp);
+	    snprintf(buf, sizeof(buf), "return(\"%s\")", temp);
 	    send2(ourGlobals->serverLuaSL, SID, buf);
 	}
 	// Send "back" stuff on to the one and only client.
@@ -335,34 +326,34 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	//        Dialogs, notifications, and other stuff goes through some other functions.
 	else if (0 == strcmp(command, "llOwnerSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
-	    else PW("No where to send %s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
+	    else PW("No where to send %s(%s)", command, arguments);
 	}
 	else if (0 == strcmp(command, "llWhisper"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
-	    else PW("No where to send %s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
+	    else PW("No where to send %s(%s)", command, arguments);
 	}
 	else if (0 == strcmp(command, "llRegionSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
-	    else PW("No where to send %s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
+	    else PW("No where to send %s(%s)", command, arguments);
 	}
 	else if (0 == strcmp(command, "llSay"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
-	    else PW("No where to send %s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
+	    else PW("No where to send %s(%s)", command, arguments);
 	}
 	else if (0 == strcmp(command, "llShout"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
-	    else PW("No where to send %s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
+	    else PW("No where to send %s(%s)", command, arguments);
 	    // TODO - Temporary so we have a place to log stuff from LSL.
 	    PD("SHOUTING %s", command);
 	}
 	else if (0 == strcmp(command, "llDialog"))
 	{
-	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s", command, arguments);
+	    if (ourGlobals->client)  send2(ourGlobals->client, SID, "%s(%s)", command, arguments);
 	}
 	else if (0 == strcmp(command, "llMessageLinked"))
 	{
@@ -372,7 +363,7 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
 	    while(eina_iterator_next(scripts, (void **) &me))
 	    {
-		send2(ourGlobals->serverLuaSL, me->SID, "events.link_message(%s", arguments);
+		send2(ourGlobals->serverLuaSL, me->SID, "events.link_message(%s)", arguments);
 	    }
 	    eina_iterator_free(scripts);
 	}
@@ -392,11 +383,9 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	    while (' ' != temp[0])
 		temp++;
 	    line = temp;
-	    while (')' != temp[0])
-		temp++;
-	    temp[0] = '\0';
 	    lineNo = atoi(line);
 	    snprintf(key, sizeof(key), "%s/Test%%20sim/onefang%%27s%%20test%%20bed/%s", prefix_data_get(), notecard);
+//PD("%s -> %s == %d,  %s", notecard, line, lineNo, key);
 
 	    fd = open(key, O_RDONLY);
 	    if (-1 != fd)
@@ -418,7 +407,7 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 		} while (temp && (0 < lineNo--));
 
 		sprintf(key, FAKE_UUID);
-		send2(ourGlobals->serverLuaSL, SID, "return \"%s\"", key);
+		send2(ourGlobals->serverLuaSL, SID, "return(\"%s\")", key);
 
 		// TODO - For now, just send it to everyone.
 		scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
@@ -438,7 +427,8 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 				buf2[j++] = '\\';
 			    buf2[j++] = temp[i];
 			}
-			send2(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", '%s')", key, buf2);
+//PE("events.dataserver(\"%s\", \'%s\')", key, buf2);
+			send2(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \'%s\')", key, buf2);
 		    }
 		    else
 			send2(ourGlobals->serverLuaSL, me->SID, "events.dataserver(\"%s\", \"EndOfFuckingAround\")", key);
@@ -513,7 +503,7 @@ static boolean clientParser(void *data, Connection *conn, char *SID, char *comma
 	char buf[PATH_MAX];
 
 	// TODO - For now, just send it to everyone.
-	sprintf(buf, "%s(%s", command, arguments);
+	sprintf(buf, "%s(%s)", command, arguments);
 	scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
 	while(eina_iterator_next(scripts, (void **) &me))
 	{

@@ -43,7 +43,7 @@ static boolean clientParser(void *data, Connection *connection, char *SID, char 
     || (0 == strcmp(command, "llSay"))
     || (0 == strcmp(command, "llShout")))
   {
-    sprintf(buf, "%s: %s(%s", SID, command, arguments);
+    sprintf(buf, "%s: %s(%s)", SID, command, arguments);
     if (ourGlobals->purkle)
     {
       int _P;
@@ -65,11 +65,11 @@ static boolean clientParser(void *data, Connection *connection, char *SID, char 
       _M = lua_gettop(ourGlobals->LSLGuiMess->L);
 
       // TODO - Somewhere in the chain the new lines that MLP likes to put into llDialog's message munge things.  Fix that.
-      sprintf(buf, "%s(%s", command, arguments);
+      sprintf(buf, "%s(%s)", command, arguments);
       push_lua(ourGlobals->LSLGuiMess->L, "@ ( $ )", _M, "doLua", buf, 0);
     }
     else
-      PE("No LSLGuiMess to send - %s(%s", command, arguments);
+      PE("No LSLGuiMess to send - %s(%s)", command, arguments);
   }
   else if (0 == strcmp(command, "loadSim"))
   {
