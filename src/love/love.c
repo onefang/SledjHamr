@@ -360,6 +360,7 @@ static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *comman
 	    Eina_Iterator *scripts;
 	    LoveScript *me;
 	    // TODO - For now, just send it to everyone.
+	    //          Later, figure out which prims in the linkset can get this message, and only send it to scripts in those prims.
 	    scripts = eina_hash_iterator_data_new(ourGlobals->scripts);
 	    while(eina_iterator_next(scripts, (void **) &me))
 	    {

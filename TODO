@@ -171,7 +171,7 @@ Communication
   events.say(key source, vector location, integer timestamp, text message, string filter, ...)
 
   Link messages include the number of the link (to or from, depending on which end you are at), a number, a string, and a key.
-    These are entirely internal to LuaSL though.
+    These are entirely internal to LuaSL though, except they bounce up to love to get to other prims in the link set?
 
 purkle registers a listener, with no filter.
 llDialog's client side sends a say() to love.
@@ -204,7 +204,7 @@ More generic event system?
     REGISTER event	Script has to register for these events with love.  Can have filter.  love loops through all regisitered "scripts", applies filters, sends events.
     REQUEST event	Script has to request an event from love.  Can have a filter.  Love sends event straight back to the script.  Once.
 			  This covers the "wait for return value" case as well.  events.return()?
-  touch_start goes from extantz to LuaSL, via love.  Most of the rest go from love to LuaSL I think.  link_message, state_entry, state_exit are internal to LuaSL, timer should be.
+  touch_start goes from extantz to LuaSL, via love.  Most of the rest go from love to LuaSL I think.  state_entry, state_exit are internal to LuaSL, timer should be.
   All manner of arguments sent to events.
     Some of them include the llDetected*() functions for getting more info.
     So we need some way of sending arbitrary data, as well as a bunch of fixed data, over the network when we send events.
