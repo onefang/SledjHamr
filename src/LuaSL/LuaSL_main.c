@@ -284,6 +284,18 @@ static boolean _commandRun(void *data, Connection *connection, char *SID, char *
   return TRUE;
 }
 
+static boolean _commandReturn(void *data, Connection *connection, char *SID, char *command, char *arguments)
+{
+  char buf[PATH_MAX];
+
+  snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
+//PD("Sending -> script %s :  %s", SID, buf);
+  send2script(SID, buf);
+
+  return TRUE;
+}
+
+
 static boolean _commandExit(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   PI("Told to exit.");
@@ -292,19 +304,15 @@ static boolean _commandExit(void *data, Connection *connection, char *SID, char 
   return TRUE;
 }
 
+// TODO - Still needed for event stuff.  Fix that later.
 static boolean parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   char buf[PATH_MAX];
 
 //PD("PARSE COMMAND %s - %s (%s)", SID, command, arguments);
-	// TODO - This bit might still remain, unless script.return() can make it go away?
-	//         Though perhaps the "else" part stays?
-//	if (0 == strcmp("return", command))
-//	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
-//	else
-	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
+  snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
 //PD("Sending -> script %s :  %s", SID, buf);
-	send2script(SID, buf);
+  send2script(SID, buf);
 
    return TRUE;
 }
@@ -352,6 +360,7 @@ int main(int argc, char **argv)
 
 	    eina_hash_add(conn->commands, "compile",	_commandCompile);
 	    eina_hash_add(conn->commands, "run",	_commandRun);
+	    eina_hash_add(conn->commands, "return",	_commandReturn);
 	    eina_hash_add(conn->commands, "exit",	_commandExit);
 
 	    result = 0;
