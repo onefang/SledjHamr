@@ -170,7 +170,7 @@ local function value2string(doLua, value, Type)
 
 -- TODO - Might be better to convert FROM both in each branch?
   if doLua then
-    -- "nil", "number", "string", "boolean", "table", "function", "thread", and "userdata". 
+    -- "nil", "function", "thread", and "userdata".
     if     "number"	== Type then  temp = temp .. value
     elseif "string"	== Type then  temp = "\"" .. value .. "\""
     elseif "boolean"	== Type then  if value then temp = '"true"' else temp = '"false"' end
@@ -210,14 +210,12 @@ function args2string(doLua, doType, ...)
 end
 
 function mt.callAndReturn(name, ...)
-  -- This converts LSL to Lua.
+  -- This converts LSL to Lua, then sends it to the LuaSL client (the nil at the start, otherwise it's sending to an SID).
   Runnr.send(nil, name .. "(" .. args2string(true, true, ...) .. ")")
 end
 
 function mt.callAndWait(name, ...)
   mt.callAndReturn(name, ...);
-  -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
-  --   Except I've changed all those names now.  lol
   -- Wait for the result, which should be a Lua value as a string.
   return waitAndProcess(true, name, ...)
 end
@@ -2021,9 +2019,12 @@ function waitAndProcess(returnWanted, name, ...)
       if paused then
 	if "start()" == message then paused = false end
       else
-	local result, errorMsg = loadstring(message)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
+        local temp = message
+        local value = ""
+	if returnWanted and string.match(message, "^return%(") then  temp = "return " .. string.sub(message, 8, -2)  end
+	local result, errorMsg = loadstring(temp)  -- "The environment of the returned function is the global environment."  Though normally, a function inherits it's environment from the function creating it.  Which is what we want.  lol
 	if nil == result then
-	  local text = "Not a valid " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. errorMsg
+	  local text = "Not a valid " .. Type .. ": " .. temp .. "  ERROR MESSAGE: " .. errorMsg
 	  msg(text)
 	  print(text)
 	else
@@ -2035,7 +2036,7 @@ function waitAndProcess(returnWanted, name, ...)
 
 	  local status, result1 = pcall(result)
 	  if not status then
-	    local text = "Error from " .. Type .. ": " .. message .. "  ERROR MESSAGE: " .. result1
+	    local text = "Error from " .. Type .. ": " .. temp .. "  ERROR MESSAGE: " .. result1
 	    msg(text)
 	    print(text)
 	  elseif result1 then
@@ -2054,7 +2055,9 @@ function waitAndProcess(returnWanted, name, ...)
 --	    end
 	  else
 	    if string.match(message, "^return%(") then
-	      print("!" .. SID .. "_" .. scriptName, " - IN AN ODD PLACE!!!!!" .. message)
+	      print("!" .. SID .. "_" .. scriptName, " - IN AN ODD PLACE!!!!!  " .. message)
+	      print(type(value))
+	      print(value)
 	    else
 --	      print("!" .. SID .. "_" .. scriptName, " - " .. message)
 	    end
