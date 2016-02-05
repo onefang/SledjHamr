@@ -252,45 +252,52 @@ static void _compileCbSingle(LuaCompiler *compiler)
     printf("Compile of %s failed!\n", compiler->file);
 }
 
-static boolean parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+static boolean _commandCompile(void *data, Connection *connection, char *SID, char *command, char *arguments)
+{
+  LuaCompiler *compiler;
+
+  compiler = createCompiler(SID, arguments, (compileCb) compileLSL, _compileCb);
+  compiler->client = connection;
+  PI("Compiling script %s", arguments);
+  compileScript(compiler, TRUE);
+
+  return TRUE;
+}
+
+static boolean _commandRun(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   gameGlobals *ourGlobals = data;
+  script *me = scriptAdd(arguments, SID, send2server, ourGlobals);
+
+  me->client = connection;
+  eina_hash_add(ourGlobals->names, me->fileName, me);
+  me = getScript(SID);
+  if (me)
+  {
+    PI("Running script %s", me->fileName);
+    runScript(me);
+    releaseScript(me);
+  }
+  else
+    PE("Failed to run script %s", me->fileName);
+
+  return TRUE;
+}
+
+static boolean _commandExit(void *data, Connection *connection, char *SID, char *command, char *arguments)
+{
+  PI("Told to exit.");
+  ecore_main_loop_quit();
+
+  return TRUE;
+}
+
+static boolean parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+{
   char buf[PATH_MAX];
 
 //PD("PARSE COMMAND %s - %s (%s)", SID, command, arguments);
-    if (0 == strcmp(command, "compile"))
-    {
-	LuaCompiler *compiler;
-
-	compiler = createCompiler(SID, arguments, (compileCb) compileLSL, _compileCb);
-	compiler->client = connection;
-	PI("Compiling script %s", arguments);
-	compileScript(compiler, TRUE);
-    }
-    else if (0 == strcmp(command, "run"))
-    {
-	script *me = scriptAdd(arguments, SID, send2server, ourGlobals);
-
-	me->client = connection;
-	eina_hash_add(ourGlobals->names, me->fileName, me);
-	me = getScript(SID);
-	if (me)
-	{
-	    PI("Running script %s", me->fileName);
-	    runScript(me);
-	    releaseScript(me);
-	}
-	else
-	    PE("Failed to run script %s", me->fileName);
-    }
-    else if (0 == strcmp(command, "exit"))
-    {
-	PI("Told to exit.");
-	ecore_main_loop_quit();
-    }
-    else
-    {
-	// TODO - Even after moving the above into the command hash, this bit might still remain, unless script.return() can make it go away.
+	// TODO - This bit might still remain, unless script.return() can make it go away?
 	//         Though perhaps the "else" part stays?
 //	if (0 == strcmp("return", command))
 //	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
@@ -298,7 +305,6 @@ static boolean parser(void *data, Connection *connection, char *SID, char *comma
 	    snprintf(buf, sizeof(buf), "%s(%s)", command, arguments);
 //PD("Sending -> script %s :  %s", SID, buf);
 	send2script(SID, buf);
-    }
 
    return TRUE;
 }
@@ -336,11 +342,17 @@ int main(int argc, char **argv)
       }
       else if (ecore_con_init())
       {
+        Connection *conn = NULL;
+
 //        PD("LuaSL is about to try creating a LuaSL server.");
-	if (openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser, send2parser))
+	if ((conn = openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser, send2parser)))
 	{
 	    Eina_Iterator *scripts;
 	    script *me;
+
+	    eina_hash_add(conn->commands, "compile",	_commandCompile);
+	    eina_hash_add(conn->commands, "run",	_commandRun);
+	    eina_hash_add(conn->commands, "exit",	_commandExit);
 
 	    result = 0;
 	    compilerSetup(&ourGlobals);

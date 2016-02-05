@@ -319,7 +319,7 @@ static Eina_Bool clientAdd(void *data, int type, Ecore_Con_Event_Client_Add *ev)
     conn->_del = connection->_del;
     conn->unknownInCommand = connection->unknownInCommand;
     conn->unknownOutCommand = connection->unknownOutCommand;
-    conn->commands = eina_hash_string_superfast_new(NULL);
+    conn->commands = connection->commands;
     ecore_con_client_data_set(ev->client, conn);
 
     if (connection->_add)
