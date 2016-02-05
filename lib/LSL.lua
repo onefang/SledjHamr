@@ -165,32 +165,43 @@ local args2string	-- Pre declare this.
 local functions = {}
 local mt = {}
 
-local function value2string(value, Type)
+local function value2string(doLua, value, Type)
   local temp = ""
 
-  if  	 "float"	== Type then temp = temp .. value
---  elseif "boolean"	== Type then if value then temp = '"true"' else temp = '"false"' end
-  elseif "integer"	== Type then temp = temp .. value
-  elseif "key"		== Type then temp = "\"" .. value .. "\""
-  elseif "list"		== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
-  elseif "table"	== Type then temp = "[" .. args2string(true, unpack(value)) .. "]"
-  elseif "string"	== Type then temp = "\"" .. value .. "\""
-  elseif "rotation"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ", " .. value.s .. ">"
-  elseif "vector"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ">"
+-- TODO - Might be better to convert FROM both in each branch?
+  if doLua then
+    -- "nil", "number", "string", "boolean", "table", "function", "thread", and "userdata". 
+    if     "number"	== Type then  temp = temp .. value
+    elseif "string"	== Type then  temp = "\"" .. value .. "\""
+    elseif "boolean"	== Type then  if value then temp = '"true"' else temp = '"false"' end
+    elseif "table"	== Type then  temp = "{" .. args2string(doLua, true, unpack(value)) .. "}"
+    else
+      temp = temp .. value
+    end
   else
-    temp = temp .. value
+    if     "float"	== Type then temp = temp .. value
+    elseif "integer"	== Type then temp = temp .. value
+    elseif "key"	== Type then temp = "\"" .. value .. "\""
+    elseif "list"	== Type then temp = "[" .. args2string(doLua, true, unpack(value)) .. "]"
+    elseif "string"	== Type then temp = "\"" .. value .. "\""
+    elseif "rotation"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ", " .. value.s .. ">"
+    elseif "vector"	== Type then temp = "<" .. value.x .. ", " .. value.y .. ", " .. value.z .. ">"
+    else
+      temp = temp .. value
+    end
   end
+
   return temp
 end
 
-function args2string(doType, ...)
+function args2string(doLua, doType, ...)
   local temp = ""
   local first = true
 
   for j,w in ipairs( {...} ) do
     if first then first = false else temp = temp .. ", " end
     if doType then
-      temp = temp .. value2string(w, type(w))
+      temp = temp .. value2string(doLua, w, type(w))
     else
       temp = temp .. w
     end
@@ -199,12 +210,14 @@ function args2string(doType, ...)
 end
 
 function mt.callAndReturn(name, ...)
-  Runnr.send(nil, name .. "(" .. args2string(true, ...) .. ")")
+  -- This converts LSL to Lua.
+  Runnr.send(nil, name .. "(" .. args2string(true, true, ...) .. ")")
 end
 
 function mt.callAndWait(name, ...)
   mt.callAndReturn(name, ...);
   -- Eventually a sendForth() is called, which should end up passing through SendToChannel().
+  --   Except I've changed all those names now.  lol
   -- Wait for the result, which should be a Lua value as a string.
   return waitAndProcess(true, name, ...)
 end
@@ -2092,7 +2105,8 @@ function LSL.gimmeLSL()
   for i, v in ipairs(constants) do
     local value = LSL[v.name]
 
-    print(v.Type .. " " .. v.name .. " = " .. value2string(value, v.Type) .. ";")
+      -- This converts Lua to LSL.
+    print(v.Type .. " " .. v.name .. " = " .. value2string(false, value, v.Type) .. ";")
   end
 
   for k in pairs(functions) do
@@ -2100,7 +2114,8 @@ function LSL.gimmeLSL()
     if nil == v.args then
       print(v.Type .. " " .. k .. "(){}")
     else
-      print(v.Type .. " " .. k .. "(" .. args2string(false, unpack(v.args)) .. "){}")
+      -- This converts Lua to LSL.
+      print(v.Type .. " " .. k .. "(" .. args2string(false, false, unpack(v.args)) .. "){}")
     end
   end
 end
