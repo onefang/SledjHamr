@@ -191,7 +191,7 @@ char *get_rawline(int fd, long *plen, char end)
 }
 
 
-static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
+static boolean LuaSLParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
 {
     gameGlobals *ourGlobals = data;
     char buf[PATH_MAX];
@@ -256,22 +256,20 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 	    struct timeval now;
 
 	    compiledCount++;
+	    if ('t' == arguments[0])
+		send2(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
+	    else
+		PE("The compile of %s.%s failed!", SID, me->fileName);
+	
 	    if (compiledCount == scriptCount)
 	    {
 		float total = timeDiff(&now, &startTime);
+
 		PI("Compile speed scripts: %d time: %fs total: %f scripts per second", compiledCount, total, compiledCount / total);
 	    }
 	}
-
-	if ('t' == arguments[0])
-	{
-//PD("About to run %s", me->fileName);
-	  send2(ourGlobals->serverLuaSL, SID, "run(%s)", me->fileName);
-	}
 	else
-	{
-//	PE("The compile of %s failed!", SID);
-	}
+	  PE("We got a compiled() on non existing script - %s?", SID);
     }
     else
     {
@@ -453,10 +451,10 @@ static Eina_Bool LuaSLParser(void *data, Connection *conn, char *SID, char *comm
 
 	}
 	else
-	    PI("Script %s sent command %s(%s", SID, command, arguments);
+	    return FALSE;
     }
 
-    return ECORE_CALLBACK_RENEW;
+    return TRUE;
 }
 
 static Eina_Bool _delLuaSL(void *data, int type, Ecore_Con_Event_Server_Del *ev)
@@ -489,7 +487,7 @@ static Eina_Bool _addClient(void *data, int type, Ecore_Con_Event_Client_Add *ev
   return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool clientParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
+static boolean clientParser(void *data, Connection *conn, char *SID, char *command, char *arguments)
 {
     gameGlobals *ourGlobals = data;
 
@@ -524,9 +522,9 @@ static Eina_Bool clientParser(void *data, Connection *conn, char *SID, char *com
 	eina_iterator_free(scripts);
     }
     else
-	PW("Unknown command from client - %s(%s", command, arguments);
+	return FALSE;
 
-    return ECORE_CALLBACK_RENEW;
+    return TRUE;
 }
 
 static Eina_Bool _delClient(void *data, int type, Ecore_Con_Event_Client_Del *ev)
@@ -670,10 +668,10 @@ int main(int argc, char **argv)
 
 //			    PD("About to try connecting to a LuaSL server.");
 			    // Try to connect to a local LuaSL server.
-			    reachOut("LuaSL", "./LuaSL", "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser);
+			    reachOut("LuaSL", "./LuaSL", "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser, NULL);
 
 //			    PD("Love is about to try creating a love server.");
-			    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser))
+			    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser, NULL))
 			    {
 				ecore_main_loop_begin();
 				PD("Fell out of the main loop");

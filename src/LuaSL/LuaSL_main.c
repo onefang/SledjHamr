@@ -71,19 +71,37 @@ static script *findThem(gameGlobals *ourGlobals, const char *base, const char *t
 
 static void send2server(script *me, const char *message)
 {
-    gameGlobals *ourGlobals = me->data;
+  takeScript(me);
+  // NOTE - This gets intercepted by send2parser() below, before possibly being sent away.
+  send2(me->client, me->SID, message);
+  releaseScript(me);
+}
 
-//PD("GOT MESSAGE from script %s - '%s'", me->name, message);
+static boolean send2parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+{
+  gameGlobals *ourGlobals = data;
+  char buf[PATH_MAX];
+  script *me = getScript(SID);
 
-    if (0 == strncmp(message, "llSleep(", 8))
-	ecore_timer_add(atof(&(message)[8]), _sleep_timer_cb, me);
-    else if (0 == strncmp(message, "llResetTime(", 12))
+  if (NULL == me)
+  {
+//    PE("GOT MESSAGE from UNKNOWN script %s - '%s' (%s", SID, command, arguments);
+    return FALSE;
+  }
+
+  sprintf(buf, "%s(%s", command, arguments);
+
+//PD("GOT MESSAGE from script %s - '%s'", me->name, buf);
+
+    if (0 == strncmp(buf, "llSleep(", 8))
+	ecore_timer_add(atof(&(buf)[8]), _sleep_timer_cb, me);
+    else if (0 == strncmp(buf, "llResetTime(", 12))
     {
 	takeScript(me);
 	gettimeofday(&me->startTime, NULL);
 	releaseScript(me);
     }
-    else if (0 == strncmp(message, "llGetTime(", 10))
+    else if (0 == strncmp(buf, "llGetTime(", 10))
     {
 	struct timeval now;
 	float time = timeDiff(&now, &me->startTime);
@@ -92,7 +110,7 @@ static void send2server(script *me, const char *message)
 	snprintf(result, sizeof(result), "return %f", time);
 	send2script(me->SID, result);
     }
-    else if (0 == strncmp(message, "llGetAndResetTime(", 18))
+    else if (0 == strncmp(buf, "llGetAndResetTime(", 18))
     {
 	struct timeval now;
 	float time = timeDiff(&now, &me->startTime);
@@ -105,10 +123,10 @@ static void send2server(script *me, const char *message)
 	snprintf(result, sizeof(result), "return %f", time);
 	send2script(me->SID, result);
     }
-    else if (0 == strncmp(message, "llSetTimerEvent(", 16))
+    else if (0 == strncmp(buf, "llSetTimerEvent(", 16))
     {
 	takeScript(me);
-	me->timerTime = atof(&(message)[16]);
+	me->timerTime = atof(&(buf)[16]);
 	if (0.0 == me->timerTime)
 	{
 	    if (me->timer)
@@ -119,13 +137,13 @@ static void send2server(script *me, const char *message)
 	    me->timer = ecore_timer_add(me->timerTime, _timer_timer_cb, me);
 	releaseScript(me);
     }
-    else if (0 == strncmp(message, "llSetScriptState(", 17))
+    else if (0 == strncmp(buf, "llSetScriptState(", 17))
     {
 	script *them;
 
-	if ((them = findThem(ourGlobals, me->fileName, &(message[18]))))
+	if ((them = findThem(ourGlobals, me->fileName, &(buf[18]))))
 	{
-	    char *temp = rindex(&(message[18]), ',');
+	    char *temp = rindex(&(buf[18]), ',');
 
 	    if (temp)
 	    {
@@ -143,34 +161,32 @@ static void send2server(script *me, const char *message)
 	}
 	else
 	{
-	    char *temp = rindex(&(message[18]), '"');
+	    char *temp = rindex(&(buf[18]), '"');
 
 	    if (temp)
 		*temp = '\0';
-	    PE("Can't stop script, can't find %s", &(message[18]));
+	    PE("Can't stop script, can't find %s", &(buf[18]));
 	}
     }
-    else if (0 == strncmp(message, "llResetOtherScript(", 19))
+    else if (0 == strncmp(buf, "llResetOtherScript(", 19))
     {
 	script *them;
 
-	if ((them = findThem(ourGlobals, me->fileName, &(message[20]))))
+	if ((them = findThem(ourGlobals, me->fileName, &(buf[20]))))
 	{
 	    PD("RESETTING OTHER %s", them->name);
 	    resetScript(them);
 	}
     }
-    else if (0 == strncmp(message, "llResetScript(", 14))
+    else if (0 == strncmp(buf, "llResetScript(", 14))
     {
 	PD("RESETTING %s", me->name);
 	resetScript(me);
     }
     else
-    {
-	takeScript(me);
-	send2(me->client, me->SID, message);
-	releaseScript(me);
-    }
+      return FALSE;
+
+  return TRUE;
 }
 
 static void _compileCb(LuaCompiler *compiler)
@@ -218,12 +234,12 @@ static void _compileCbSingle(LuaCompiler *compiler)
     printf("Compile of %s failed!\n", compiler->file);
 }
 
-static Eina_Bool parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+static boolean parser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   gameGlobals *ourGlobals = data;
   char buf[PATH_MAX];
 
-//PD("PARSE COMMAND - %s", command);
+//PD("PARSE COMMAND %s - '%s' (%s", SID, command, arguments);
     if (0 == strcmp(command, "compile"))
     {
 	char *temp;
@@ -275,6 +291,8 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
     }
     else
     {
+	// TODO - Even after moving the above into the command hash, this bit might still remain, unless script.return() can make it go away.
+	//         Though perhaps the "else" part stays?
 	if (0 == strcmp("return", command))
 	    snprintf(buf, sizeof(buf), "%s %s", command, arguments);
 	else
@@ -283,7 +301,7 @@ static Eina_Bool parser(void *data, Connection *connection, char *SID, char *com
 	send2script(SID, buf);
     }
 
-   return ECORE_CALLBACK_RENEW;
+   return TRUE;
 }
 
 int main(int argc, char **argv)
@@ -320,7 +338,7 @@ int main(int argc, char **argv)
       else if (ecore_con_init())
       {
 //        PD("LuaSL is about to try creating a LuaSL server.");
-	if (openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser))
+	if (openArms("LuaSL", ourGlobals.address, ourGlobals.port, &ourGlobals, NULL, NULL, NULL, parser, send2parser))
 	{
 	    Eina_Iterator *scripts;
 	    script *me;

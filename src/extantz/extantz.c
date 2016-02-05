@@ -33,7 +33,7 @@ static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool clientParser(void *data, Connection *connection, char *SID, char *command, char *arguments)
+static boolean clientParser(void *data, Connection *connection, char *SID, char *command, char *arguments)
 {
   globals *ourGlobals = data;
   char buf[PATH_MAX];
@@ -111,9 +111,9 @@ static Eina_Bool clientParser(void *data, Connection *connection, char *SID, cha
 #endif
   }
   else
-    PI("Some random command %s(%s", command, arguments);
+    return FALSE;
 
-  return ECORE_CALLBACK_RENEW;
+  return TRUE;
 }
 
 static Eina_Bool _del(void *data, int type, Ecore_Con_Event_Server_Del *ev)
@@ -560,7 +560,7 @@ static Eina_Bool _makeSkang(void *data)
 #if USE_LOVE
     case 5 :
 //      PD("About to try connecting to a love server.");
-      reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser);
+      reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser, NULL);
       break;
 #endif
 

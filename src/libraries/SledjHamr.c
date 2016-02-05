@@ -88,78 +88,41 @@ static boolean checkConnection(Connection *conn, char *func, connType wanted, bo
   return result;
 }
 
-void send2(Connection *conn, const char *SID, const char *message, ...)
+
+typedef boolean (* notFoundCb)(Connection *conn, char *command, int len);
+
+/* TODO -
+  It should loop through all lines, looking for the closing ) before dealing with it.
+  If we get to the end, and there's left over open ( or something, then return the length.
+  Bitch and move on if it's not well formed.
+*/
+static int _checkForCommand(Connection *conn, char *commands, notFoundCb notFound, boolean in)
 {
-    va_list args;
-    char buf[PATH_MAX * 2];
-    int length = strlen(SID);
+  int result = 0;
+  boolean handled = FALSE;
+  char *ext, *ext2;
 
-    strncpy(buf, SID, length);
-    buf[length++] = '.';
-    va_start(args, message);
-    length += vsprintf(&buf[length], message, args);
-    va_end(args);
-    buf[length++] = '\n';
-    buf[length] = '\0';
+  while ((ext = index(commands, '\n')))
+  {
+    char SID[PATH_MAX * 3];
+    int length = ext - commands;
 
-// TODO - Should check if this is always gonna be local?  Likely not.
-// TODO - Figure out what the above line meant.  Then ...
-//        Check a hashtable somewhere for a command extracted from the message.
-//          conn->commands[command](message ...)
-    if (checkConnection(conn, "send2", conn->type, FALSE))
+    strncpy(SID, commands, length + 1);
+
+    SID[length] = '\0';
+
+    ext = index(SID, '.');
+    if (ext)
     {
-	switch (conn->type)
-	{
-	    case CT_CLIENT :
-//		PD("vvv send2(%*s", length, buf);
-		ecore_con_client_send(conn->conn.client.client, strndup(buf, length), length);
-		ecore_con_client_flush(conn->conn.client.client);
-		break;
+      char *command = ext + 1;
 
-	    case CT_SERVER :
-//		PD("^^^ send2(%*s", length, buf);
-		ecore_con_server_send(conn->conn.server.server, strndup(buf, length), length);
-		ecore_con_server_flush(conn->conn.server.server);
-		break;
-
-	    default :
-		PE("send2() unable to send to partially bogus Connection object!");
-		break;
-	}
-    }
-    else
-      PE("send2() unable to send to bogus Connection object!");
-}
-
-static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, void *ev)
-{
-    Connection *conn = data;
-    char SID[PATH_MAX];
-    const char *command;
-    char *ext;
-
-    if (NULL == conn->stream)
-      conn->stream = eina_strbuf_new();
-
-    eina_strbuf_append_length(conn->stream, evData, evSize);
-    command = eina_strbuf_string_get(conn->stream);
-    while ((ext = index(command, '\n')))
-    {
-	int length = ext - command;
-
-	strncpy(SID, command, length + 1);
-	SID[length] = '\0';
-	eina_strbuf_remove(conn->stream, 0, length + 1);
-	ext = index(SID, '.');
-	if (ext)
-	{
-	    ext[0] = '\0';
-	    command = ext + 1;
-	    ext = index(command, '(');
-	    if (NULL == ext)
-	      ext = index(command, ' ');
-	    if (ext)
-	    {
+      ext[0] = '\0';
+      ext2 = index(command, '(');
+      if (NULL == ext2)
+        ext2 = index(command, ' ');
+      if (ext2)
+      {
+	ext2[0] = '\0';
 	// TODO - Currently SID.command(arguments), should change that to nameSpace.command(arguments)
 	//        Not sure what to do with SID, but there maybe some common parameters we can shift around differently.
 	//      - First check if the connection has a hashtable of conn->commands.
@@ -171,22 +134,101 @@ static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, voi
 	//        Finally pass it to conn->unknownCommand()
 	//          * The Lua check can live in unknownCommand().
 	//        else bitch.
-		streamParser func = eina_hash_find(conn->commands, command);
 
-		ext[0] = '\0';
-		// Need a callback if we can't find the command.
-		if (NULL == func)
-		    func = conn->unknownCommand;
-		if (func)
-		    func(conn->pointer, conn, SID, (char *) command, ext + 1);
-		else
-		    PE("parseStream() No function found for command %s!", command);
-            }
+	// Check if it's in the connections hash table.
+	streamParser func = eina_hash_find(conn->commands, command);
+
+	if (NULL == func)
+	{
+	  // Check if the connection has a function for handling it.
+	  if (in)
+	    func = conn->unknownInCommand;
+	  else
+	    func = conn->unknownOutCommand;
 	}
 
-	// Get the next blob to check it.
-	command = eina_strbuf_string_get(conn->stream);
+	// Try it out if we have a function.
+	if (func)
+	{
+	  handled = func(conn->pointer, conn, SID, command, ext2 + 1);
+	  if (handled)
+	    notFound = NULL;
+	}
+
+	// Last resort, let the caller deal with it.
+	if (notFound)
+	  handled = notFound(conn, commands, length + 1);
+	if (!handled)
+	  PE("No function found for command %s(%s!", command, ext2 + 1);
+
+        result += length;
+      }
     }
+
+    commands = &commands[length + 1];
+  }
+
+  return result;
+}
+
+static boolean _actuallySendIt(Connection *conn, char *command, int len)
+{
+    if (checkConnection(conn, "send2", conn->type, FALSE))
+    {
+      switch (conn->type)
+      {
+	case CT_CLIENT :
+//	  PD("vvv send2(%*s", len, command);
+	  ecore_con_client_send(conn->conn.client.client, strndup(command, len), len);
+	  ecore_con_client_flush(conn->conn.client.client);
+	  return TRUE;
+
+	case CT_SERVER :
+//	  PD("^^^ send2(%*s", len, command);
+	  ecore_con_server_send(conn->conn.server.server, strndup(command, len), len);
+	  ecore_con_server_flush(conn->conn.server.server);
+	  return TRUE;
+
+	default :
+	  PE("send2() unable to send to partially bogus Connection object!");
+	  break;
+      }
+    }
+    else
+      PE("send2() unable to send to bogus Connection object!");
+
+    return FALSE;
+}
+
+void send2(Connection *conn, const char *SID, const char *message, ...)
+{
+  va_list args;
+  char buf[PATH_MAX * 3];
+  int length = strlen(SID);
+
+  strncpy(buf, SID, length);
+  buf[length++] = '.';
+  va_start(args, message);
+  length += vsprintf(&buf[length], message, args);
+  va_end(args);
+  buf[length++] = '\n';
+  buf[length] = '\0';
+
+//PD("%s", (char *) buf);
+// TODO - Do we care about the returned length?  Either the caller sent us proper commands, or they didn't.
+  _checkForCommand(conn, buf, _actuallySendIt, FALSE);
+}
+
+static Eina_Bool parseStream(void *data, int type, void *evData, int evSize, void *ev)
+{
+    Connection *conn = data;
+
+    if (NULL == conn->stream)
+      conn->stream = eina_strbuf_new();
+
+    eina_strbuf_append_length(conn->stream, evData, evSize);
+//PD("%s", (char *) eina_strbuf_string_get(conn->stream));
+    eina_strbuf_remove(conn->stream, 0, _checkForCommand(conn, (char *) eina_strbuf_string_get(conn->stream), NULL, TRUE));
 
     if (conn->_data)
       conn->_data(conn->pointer, type, ev);
@@ -234,7 +276,8 @@ static Eina_Bool clientAdd(void *data, int type, Ecore_Con_Event_Client_Add *ev)
     conn->_add = connection->_add;
     conn->_data = connection->_data;
     conn->_del = connection->_del;
-    conn->unknownCommand = connection->unknownCommand;
+    conn->unknownInCommand = connection->unknownInCommand;
+    conn->unknownOutCommand = connection->unknownOutCommand;
     conn->commands = eina_hash_string_superfast_new(NULL);
     ecore_con_client_data_set(ev->client, conn);
 
@@ -284,7 +327,7 @@ static Eina_Bool clientDel(void *data, int type, Ecore_Con_Event_Client_Del *ev)
   return ECORE_CALLBACK_RENEW;
 }
 
-Connection *openArms(char *name, const char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser)
+Connection *openArms(char *name, const char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _inParser, streamParser _outParser)
 {
     Connection *conn = calloc(1, sizeof(Connection));
     Ecore_Con_Server *server;
@@ -299,7 +342,8 @@ Connection *openArms(char *name, const char *address, int port, void *data, Ecor
     conn->_add = _add;
     conn->_data = _data;
     conn->_del = _del;
-    conn->unknownCommand = _parser;
+    conn->unknownInCommand = _inParser;
+    conn->unknownOutCommand = _outParser;
     conn->commands = eina_hash_string_superfast_new(NULL);
 
     conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD,  (Ecore_Event_Handler_Cb) clientAdd,   conn);
@@ -449,7 +493,7 @@ static Eina_Bool _reachOutTimer(void *data)
   return result;
 }
 
-Connection *reachOut(char *name, char *command, char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _parser)
+Connection *reachOut(char *name, char *command, char *address, int port, void *data, Ecore_Event_Handler_Cb _add, Ecore_Event_Handler_Cb _data, Ecore_Event_Handler_Cb _del, streamParser _inParser, streamParser _outParser)
 {
   Connection *conn = calloc(1, sizeof(Connection));
 
@@ -464,7 +508,8 @@ Connection *reachOut(char *name, char *command, char *address, int port, void *d
   conn->_add = _add;
   conn->_data = _data;
   conn->_del = _del;
-  conn->unknownCommand = _parser;
+  conn->unknownInCommand = _inParser;
+  conn->unknownOutCommand = _outParser;
   conn->commands = eina_hash_string_superfast_new(NULL);
 
   conn->add  = ecore_event_handler_add(ECORE_CON_EVENT_SERVER_ADD,  (Ecore_Event_Handler_Cb) serverAdd,   conn);
