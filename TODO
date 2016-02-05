@@ -17,13 +17,15 @@ LuaSL				Script server in C.
     otherwise send2script(SID, command)
 	NOTE: treats "return ..." different to "function(...)".
 
-  send2script			C function that adds the message to the scripts messages, then runs the script worker thread.
+  send2script()			C function that adds the message to the scripts messages, then runs the script worker thread.
     Runnr.c
-  send2server()			C function that either directly runs certain LSL functions, or -
+
+  send2server()			C function that sends the message to the love server.  send2parser() will intercept the send2() call.
     LuaSL_main.c
 	takeScript(me);
 	send2(me->client, me->SID, message);
 	releaseScript(me);
+  send2parser()			C function that intercepts send2(), and deals with time, script states, and resetting scripts.
 
 Runnr.c
   worker thread
@@ -234,7 +236,7 @@ LuaSL
 		otherwise send2script()
       bitch
     outgoing -> send2()
-      commands	scripts.state(), scripts.reset(), scripts.link_message(), and timer.*() commands currently in LuaSL_main.c->send2server()
+      commands	scripts.state(), scripts.reset(), scripts.link_message(), and timer.*() commands currently in LuaSL_main.c->send2parser()
       unknown	NULL
       actually send it
 
