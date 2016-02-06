@@ -13,7 +13,6 @@ if 'nil' == type(dir) then
   dir = workingDir
 end
 
-
 removeFiles(dir, {'*.output', '*.backup', 'LuaSL_lexer.h', 'LuaSL_lexer.c', 'LuaSL_lemon_yaccer.h', 'LuaSL_lemon_yaccer.c', 'LuaSL_lemon_yaccer.out'})
 
 -- Build and run lemon first, flex depends on it to define the symbol values.

@@ -317,6 +317,18 @@ SOOOO ...
         For now, we don't care, there's no actual installing going on.
     SledjHamr/locale	-> prefix .. '/share/SledjHamr/locale'
 
+    ~/.SledjHamr/
+      Contains an index.omg, and / or a bunch of sim directories / OAR files / etc..
+    ~/.SledjHamr/.downloaded/
+      Contains downloaded sims in their original format, like OAR files.
+    ~/.SledjHamr/.cache/ unpacked/ converted/ sha1/ types/ compiled/
+      Contains various cached stuff that can be deleted at any time.
+        unpacked/	is for anything that's in an archive file, unpack it all in there.
+        converted/	is for anything that is converted to SledjHamr formats, from legacy formats.
+        sha1/		is for the sha1 sums of asset files, and other details?
+        types/		is for storing the types of asset files?
+        compiled/	is for translated and compiled scripts.
+
 
 Irrlicht is flickering like crazy.  Hmm, might be Irrlicht's fault,
 mostly it flickers to black, but I've seen it flicker to the first frame

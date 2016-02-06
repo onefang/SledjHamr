@@ -10,7 +10,6 @@
 static char dateTime[DATE_TIME_LEN];
 static Eina_Prefix *prefix = NULL;
 
-
 int HamrTime(char *argv0, void *main, int logDom)
 {
   Eina_Array *path;
@@ -47,6 +46,10 @@ int HamrTime(char *argv0, void *main, int logDom)
 //  PD("The data files are in %s", eina_prefix_data_get(prefix));
 //  PD("The libraries are in %s", eina_prefix_lib_get(prefix));
 //  PD("The locale files are in %s", eina_prefix_locale_get(prefix));
+// TODO - ecore_file_escape_name(const char *filename) might also be useful.
+//        EFL doesn't seem to support links under Windows.  Though apparently Windows itself has something similar.
+//  PD("The HOME directory is %s", eina_environment_home_get());
+//  PD("The TMP directory is %s", eina_environment_tmp_get());
 
   getcwd(cwd, PATH_MAX);
   env = getenv("LUA_CPATH");

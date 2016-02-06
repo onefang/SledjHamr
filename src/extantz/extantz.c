@@ -15,6 +15,18 @@ globals ourGlobals;
 //static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
 //static char *myName = "onefang rejected";
 
+static const char *dirs[] = 
+{
+  ".cache",
+  ".cache/compiled",
+  ".cache/converted",
+  ".cache/sha1",
+  ".cache/types",
+  ".cache/unpacked",
+  ".download",
+  "inventory",
+  NULL
+};
 
 
 #if USE_LOVE
@@ -586,9 +598,14 @@ static Eina_Bool _makeSkang(void *data)
 EAPI_MAIN int elm_main(int argc, char **argv)
 {
   GLData *gld = NULL;
+  char temp[PATH_MAX];
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
   logDom = HamrTime(argv[0], elm_main, logDom);
+
+  // Create our home directories, if not already created.
+  sprintf(temp, "%s/.SledjHamr", eina_environment_home_get());
+  ecore_file_mksubdirs(temp, dirs);
 
   /* Set the locale according to the system pref.
    * If you don't do so the file selector will order the files list in
