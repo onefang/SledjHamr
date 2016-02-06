@@ -6,6 +6,18 @@
 #include <unistd.h>
 #include "LumbrJack.h"
 
+const char *dirs[] = 
+{
+  ".cache",
+  ".cache/compiled",
+  ".cache/converted",
+  ".cache/sha1",
+  ".cache/types",
+  ".cache/unpacked",
+  ".download",
+  "inventory",
+  NULL
+};
 
 static char dateTime[DATE_TIME_LEN];
 static Eina_Prefix *prefix = NULL;

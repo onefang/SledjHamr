@@ -15,19 +15,6 @@ globals ourGlobals;
 //static char *myKey = "12345678-1234-4321-abcd-0123456789ab";
 //static char *myName = "onefang rejected";
 
-static const char *dirs[] = 
-{
-  ".cache",
-  ".cache/compiled",
-  ".cache/converted",
-  ".cache/sha1",
-  ".cache/types",
-  ".cache/unpacked",
-  ".download",
-  "inventory",
-  NULL
-};
-
 
 #if USE_LOVE
 static Eina_Bool _add(void *data, int type, Ecore_Con_Event_Server_Add *ev)
@@ -602,8 +589,8 @@ EAPI_MAIN int elm_main(int argc, char **argv)
 //  Eina_Bool gotWebKit = elm_need_web();	// Initialise ewebkit if it exists, or return EINA_FALSE if it don't.
 
   logDom = HamrTime(argv[0], elm_main, logDom);
-
   // Create our home directories, if not already created.
+  // This should be in HamrTime, bit I had a HardTime getting LumbrJack to link to ecore-file.
   sprintf(temp, "%s/.SledjHamr", eina_environment_home_get());
   ecore_file_mksubdirs(temp, dirs);
 

@@ -39,7 +39,7 @@ typedef enum
 } boolean;
 #endif
 
-
+extern const char *dirs[];
 extern int logDom;
 
 int HamrTime(char *argv0, void *main, int logDom);

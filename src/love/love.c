@@ -541,7 +541,14 @@ int main(int argc, char **argv)
 
     if (eina_init())
     {
+	char temp[PATH_MAX];
+
 	logDom = HamrTime(argv[0], main, logDom);
+	// Create our home directories, if not already created.
+	// This should be in HamrTime, bit I had a HardTime getting LumbrJack to link to ecore-file.
+	sprintf(temp, "%s/.SledjHamr", eina_environment_home_get());
+	ecore_file_mksubdirs(temp, dirs);
+
 	ourGlobals.scripts = eina_hash_string_superfast_new(NULL);
 
 	if (ecore_con_init())
