@@ -390,10 +390,8 @@ Scene_Data *scenriAdd(Evas_Object *win)
   evas_object_resize(scene->image, WIDTH, HEIGHT);
   evas_object_show(scene->image);
 #endif
-  elm_object_tooltip_text_set(scene->image, "");
-  elm_object_tooltip_hide(scene->image);
-  scene->camera_node = cameraAdd(evas, scene, scene->image);
 
+  // Lights!
   scene->light = eo_add(EVAS_CANVAS3D_LIGHT_CLASS, evas,
     evas_canvas3d_light_ambient_set(1.0, 1.0, 1.0, 1.0),
     evas_canvas3d_light_diffuse_set(1.0, 1.0, 1.0, 1.0),
@@ -406,6 +404,13 @@ Scene_Data *scenriAdd(Evas_Object *win)
     evas_canvas3d_node_look_at_set(EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 0.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0)
   );
   eo_do(scene->root_node, evas_canvas3d_node_member_add(scene->light_node));
+
+  // Cameras!
+  scene->camera_node = cameraAdd(evas, scene, scene->image);
+
+  // Action?
+  elm_object_tooltip_text_set(scene->image, "");
+  elm_object_tooltip_hide(scene->image);
 
 #if USE_ELM_IMG
   eo_do(temp, evas_obj_image_scene_set(scene->scene));
