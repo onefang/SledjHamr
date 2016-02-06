@@ -79,7 +79,6 @@ love needs
 */
 
 #include "evas_macros.h"
-#include "evas_3d_utils.h"	// TODO - Hopefully I can convince the authors to make this public.
 
 #include "Runnr.h"
 

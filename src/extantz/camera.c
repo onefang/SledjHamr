@@ -1,15 +1,19 @@
 #include "extantz.h"
 
 
-static inline void evas_euler_to_quaternion(Evas_Vec4 *out, Evas_Vec3 *in)
+
+#define  DEGREE_TO_RADIAN(x)     (((x) * M_PI) / 180.0)
+
+
+static inline void euler_to_quaternion(Eina_Quaternion *out, Evas_Real x, Evas_Real y, Evas_Real z)
 {
   // Assuming the angles are in radians.
-  Evas_Real c1 = cos(in->y / 2.0);  // heading  (yaw/spin)  ..  y
-  Evas_Real s1 = sin(in->y / 2.0);
-  Evas_Real c2 = cos(in->z / 2.0);  // attitude (pitch)     ..  x
-  Evas_Real s2 = sin(in->z / 2.0);
-  Evas_Real c3 = cos(in->x / 2.0);  // bank     (roll)      ..  z
-  Evas_Real s3 = sin(in->x / 2.0);
+  Evas_Real c1 = cos(y / 2.0);  // heading  (yaw/spin)  ..  y
+  Evas_Real s1 = sin(y / 2.0);
+  Evas_Real c2 = cos(z / 2.0);  // attitude (pitch)     ..  x
+  Evas_Real s2 = sin(z / 2.0);
+  Evas_Real c3 = cos(x / 2.0);  // bank     (roll)      ..  z
+  Evas_Real s3 = sin(x / 2.0);
   Evas_Real c1c2 = c1 * c2;
   Evas_Real s1s2 = s1 * s2;
 
@@ -19,52 +23,27 @@ static inline void evas_euler_to_quaternion(Evas_Vec4 *out, Evas_Vec3 *in)
   out->z =c1 * s2 * c3 - s1 * c2 * s3;
 }
 
-static inline void evas_quaternion_normalise(Evas_Vec4 *in)
-{
-  Evas_Real n = sqrt(in->x * in->x + in->y * in->y + in->z * in->z + in->w * in->w);
-  in->x /= n;
-  in->y /= n;
-  in->z /= n;
-  in->w /= n;
-}
-
-static inline void evas_quaternion_multiply(Evas_Vec4 *out, const Evas_Vec4 *q1, const Evas_Vec4 *q2)
-{
-  out->x =  q1->x * q2->w + q1->y * q2->z - q1->z * q2->y + q1->w * q2->x;
-  out->y = -q1->x * q2->z + q1->y * q2->w + q1->z * q2->x + q1->w * q2->y;
-  out->z =  q1->x * q2->y - q1->y * q2->x + q1->z * q2->w + q1->w * q2->z;
-  out->w = -q1->x * q2->x - q1->y * q2->y - q1->z * q2->z + q1->w * q2->w;
-}
-
-static inline void evas_quaternion_conjugate(Evas_Vec4 *in)
-{
-  in->x = -in->x;
-  in->y = -in->y;
-  in->z = -in->z;
-  in->w = in->w;
-}
 
 Eina_Bool animateCamera(Scene_Data *scene)
 {
-  Evas_Vec3 pos, rotate;
-  Evas_Vec4 orient, rotateQ, result, move;
+  Eina_Quaternion rotate, orient, result, move;
+  Evas_Real x, y, z;
 
-  evas_vec3_set(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
   eo_do(scene->camera_node, evas_canvas3d_node_orientation_get(EVAS_CANVAS3D_SPACE_PARENT, &orient.x, &orient.y, &orient.z, &orient.w));
-  evas_euler_to_quaternion(&rotateQ, &rotate);
-  evas_quaternion_multiply(&result, &orient, &rotateQ);
-  evas_quaternion_normalise(&result);
+  euler_to_quaternion(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
+  eina_quaternion_mul(&result, &orient, &rotate);
+  eina_quaternion_normalized(&result, &result);
   eo_do(scene->camera_node, evas_canvas3d_node_orientation_set(result.x, result.y, result.z, result.w));
 
-  evas_vec4_set(&move,   scene->move->x, scene->move->y, scene->move->z, 0);
-  eo_do(scene->camera_node, evas_canvas3d_node_position_get(EVAS_CANVAS3D_SPACE_PARENT, &pos.x, &pos.y, &pos.z));
-  evas_quaternion_multiply(&rotateQ, &result, &move);
-  evas_quaternion_conjugate(&result);
-  evas_quaternion_multiply(&move, &rotateQ, &result);
-  pos.x += move.x;
-  pos.y += move.y;
-  pos.z += move.z;
-  eo_do(scene->camera_node, evas_canvas3d_node_position_set(pos.x, pos.y, pos.z));
+  eina_quaternion_set(&move, scene->move->x, scene->move->y, scene->move->z, 0);
+  eo_do(scene->camera_node, evas_canvas3d_node_position_get(EVAS_CANVAS3D_SPACE_PARENT, &x, &y, &z));
+  eina_quaternion_mul(&rotate, &result, &move);
+  eina_quaternion_conjugate(&result, &result);
+  eina_quaternion_mul(&move, &rotate, &result);
+  x += move.x;
+  y += move.y;
+  z += move.z;
+  eo_do(scene->camera_node, evas_canvas3d_node_position_set(x, y, z));
 
   return EINA_TRUE;
 }
