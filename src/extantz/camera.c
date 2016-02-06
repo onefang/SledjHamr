@@ -209,7 +209,7 @@ Eo *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
 
   result = eo_add(EVAS_CANVAS3D_NODE_CLASS, evas, evas_canvas3d_node_constructor(EVAS_CANVAS3D_NODE_TYPE_CAMERA),
     evas_canvas3d_node_camera_set(camera),
-    evas_canvas3d_node_position_set(0.0, 20.0, 30.0),
+    evas_canvas3d_node_position_set(0.0, 4.0, 8.0),
 //    evas_canvas3d_node_look_at_set(EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0),
     evas_canvas3d_node_orientation_set(0.0, 0.0, 0.0, 1.0)
     );
