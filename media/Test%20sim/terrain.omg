@@ -1,0 +1,20 @@
+Stuffs =
+{
+  name = "onefang's terrain",
+  description = 'Just a pretend terrain for testing SledjHamr.',
+  fake = 4,
+  uuid  = '12345678-1234-4321-abcd-01234terrain',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      kind = 'terrain',
+-- insert prim parameters here
+      materials =
+      {
+        [0] = {kind = 'face', texture = 'EarthDiffuse.png'},
+      },
+    },
+  },
+}

@@ -421,7 +421,6 @@ Scene_Data *scenriAdd(Evas_Object *win)
   evas_object_event_callback_add(scene->image, EVAS_CALLBACK_MOUSE_DOWN, _on_mouse_down, scene);
 #endif
 
-
   elm_win_resize_object_add(win, scene->image);
 
   scene->L = luaL_newstate();
@@ -472,7 +471,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
       "userdata,number", 0);
 
     // Pass the enums to scenriLua.
-    sprintf(buf, "MeshType = {cube = %d, mesh = %d, sphere = %d}", MT_CUBE, MT_MESH, MT_SPHERE);
+    sprintf(buf, "MeshType = {cube = %d, mesh = %d, sphere = %d, terrain = %d}", MT_CUBE, MT_MESH, MT_SPHERE, MT_TERRAIN);
     doLuaString(scene->L, buf, "scenriLua");
     sprintf(buf, "TextureType = {face = %d, normal = %d}", TT_FACE, TT_NORMAL);
     doLuaString(scene->L, buf, "scenriLua");
@@ -616,6 +615,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 
   // Meshes
   // TODO - Write real generic cube and sphere stuff later.
+  //        This could be a switch.
   if (MT_CUBE == stuffs->stuffs.details.mesh->type)
   {
     Eo *cube;
@@ -654,6 +654,23 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     );
     eina_array_push(stuffs->mesh, me);
   }
+  else if (MT_TERRAIN == stuffs->stuffs.details.mesh->type)
+  {
+    Eo *terrain;
+
+    eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
+
+    terrain = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
+    eo_do(terrain, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_TERRAIN));
+
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
+         evas_canvas3d_mesh_from_primitive_set(0, terrain),
+      evas_canvas3d_mesh_frame_material_set(0, mi),
+
+      evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_DIFFUSE)
+    );
+    eina_array_push(stuffs->mesh, me);
+  }
   else
   {
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
@@ -684,6 +701,8 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     stuffs->animateStuffs = (aniStuffs) _animateSphere;
   else if (3 == fake)
     stuffs->animateStuffs = (aniStuffs) _animateSonic;
+//  else if (4 == fake)
+//    stuffs->animateStuffs = (aniStuffs) _animateSphere;
 
 }
 

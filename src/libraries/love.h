@@ -116,7 +116,8 @@ typedef enum
 {
   MT_CUBE,
   MT_MESH,
-  MT_SPHERE
+  MT_SPHERE,
+  MT_TERRAIN
 } MeshType;
 
 
