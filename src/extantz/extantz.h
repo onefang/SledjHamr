@@ -291,7 +291,7 @@ Eina_Bool animateScene(globals *ourGlobals);
 void scenriDel(Scene_Data *scene);
 void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake);
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
-  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw);
+  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw, double sx, double sy, double sz);
 void addMaterial(ExtantzStuffs *e, int face, TextureType type, char *file);
 
 winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool save);

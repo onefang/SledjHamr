@@ -212,9 +212,9 @@ static int _partFillStuffs(lua_State *L)
   ExtantzStuffs *result = NULL;
   Scene_Data *scene = NULL;
   char *name, *file;
-  double px, py, pz, rx, ry, rz, rw;
+  double px, py, pz, rx, ry, rz, rw, sx, sy, sz;
 
-  pull_lua(L, 1, "$ $ # # # # # # #", &name, &file, &px, &py, &pz, &rx, &ry, &rz, &rw);
+  pull_lua(L, 1, "$ $ # # # # # # # # # #", &name, &file, &px, &py, &pz, &rx, &ry, &rz, &rw, &sx, &sy, &sz);
   lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
   scene = (Scene_Data *) lua_touserdata(L, -1);
 
@@ -227,6 +227,7 @@ static int _partFillStuffs(lua_State *L)
       strcpy(result->stuffs.file, file);
       result->stuffs.details.mesh->pos.x = px;  result->stuffs.details.mesh->pos.y = py;  result->stuffs.details.mesh->pos.z = pz;
       result->stuffs.details.mesh->rot.x = rx;  result->stuffs.details.mesh->rot.y = ry;  result->stuffs.details.mesh->rot.z = rz;  result->stuffs.details.mesh->rot.w = rw;
+      result->stuffs.details.mesh->size.x = sx; result->stuffs.details.mesh->size.y = sy;  result->stuffs.details.mesh->size.z = sz;
       result->stage = ES_PART;
       break;
     }
@@ -275,10 +276,10 @@ static int _addStuffsL(lua_State *L)
   ExtantzStuffs *result = NULL;
   char *uuid, *name, *description, *owner, *file;
   int type;
-  double px, py, pz, rx, ry, rz, rw;
+  double px, py, pz, rx, ry, rz, rw,  sx, sy, sz;
 
-  pull_lua(L, 1, "$ $ $ $ $ % # # # # # # #", &uuid, &name, &description, &owner, &file, &type, &px, &py, &pz, &rx, &ry, &rz, &rw);
-  result = addStuffs(uuid, name, description, owner, file, type, px, py, pz, rx, ry, rz, rw);
+  pull_lua(L, 1, "$ $ $ $ $ % # # # # # # # # # #", &uuid, &name, &description, &owner, &file, &type, &px, &py, &pz, &rx, &ry, &rz, &rw, &sx, &sy, &sz);
+  result = addStuffs(uuid, name, description, owner, file, type, px, py, pz, rx, ry, rz, rw, sx, sy, sz);
   if (result)
   {
     lua_getfield(L, LUA_REGISTRYINDEX, "sceneData");
@@ -670,6 +671,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     eo_key_data_set("Name", stuffs->stuffs.name),
     evas_canvas3d_node_position_set(stuffs->stuffs.details.mesh->pos.x, stuffs->stuffs.details.mesh->pos.y, stuffs->stuffs.details.mesh->pos.z),
     evas_canvas3d_node_orientation_set(stuffs->stuffs.details.mesh->rot.x, stuffs->stuffs.details.mesh->rot.y, stuffs->stuffs.details.mesh->rot.z, stuffs->stuffs.details.mesh->rot.w),
+    evas_canvas3d_node_scale_set(stuffs->stuffs.details.mesh->size.x, stuffs->stuffs.details.mesh->size.y, stuffs->stuffs.details.mesh->size.z),
     evas_canvas3d_node_mesh_add(me)
     );
 
@@ -686,7 +688,7 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 }
 
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
-  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw)
+  char *file, MeshType type, double px, double py, double pz, double rx, double ry, double rz, double rw, double sx, double sy, double sz)
 {
   ExtantzStuffs *result = calloc(1, sizeof(ExtantzStuffs));
 
@@ -710,6 +712,7 @@ ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
   result->stuffs.details.mesh->type = type;
   result->stuffs.details.mesh->pos.x = px;  result->stuffs.details.mesh->pos.y = py;  result->stuffs.details.mesh->pos.z = pz;
   result->stuffs.details.mesh->rot.x = rx;  result->stuffs.details.mesh->rot.y = ry;  result->stuffs.details.mesh->rot.z = rz;  result->stuffs.details.mesh->rot.w = rw;
+  result->stuffs.details.mesh->size.x = sx; result->stuffs.details.mesh->size.y = sy; result->stuffs.details.mesh->size.z = sz;
   result->stage = ES_NORMAL;
 
   return result;

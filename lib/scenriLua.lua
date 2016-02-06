@@ -37,7 +37,7 @@ do
         end
         preallocateStuffs(count)
         for k, v in pairs(Stuffs.details.stuffs) do
-          partFillStuffs(k, v.fileName, v.pos[1], v.pos[2], v.pos[3], v.rot[1], v.rot[2], v.rot[3], v.rot[4])
+          partFillStuffs(k, v.fileName, v.pos[1], v.pos[2], v.pos[3], v.rot[1], v.rot[2], v.rot[3], v.rot[4], v.size[1], v.size[2], v.size[3])
         end
       end
     elseif 'cannot open ' ~= string.sub(err, 1, 12) then
@@ -78,7 +78,7 @@ do
         local meshFile = Stuffs.details.Mesh.fileName or v.fileName
         local eStuffs = addStuffs(Stuffs.uuid, Stuffs.name, Stuffs.description,
           Stuffs.owner, v.fileName, MeshType[Stuffs.details.Mesh.kind],
-          v.pos[1], v.pos[2], v.pos[3], v.rot[1], v.rot[2], v.rot[3], v.rot[4])
+          v.pos[1], v.pos[2], v.pos[3], v.rot[1], v.rot[2], v.rot[3], v.rot[4], v.size[1], v.size[2], v.size[3])
         if eStuffs then
           addMaterial(eStuffs, -1, TextureType[Stuffs.details.Mesh.materials[0].kind ], Stuffs.details.Mesh.materials[0].texture)
           stuffsSetup(eStuffs, Stuffs.fake)

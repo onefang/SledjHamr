@@ -136,6 +136,7 @@ typedef struct _mesh
   MeshType	type;
   vec3		pos;
   vec4		rot;
+  vec3		size;
   Eina_Inarray	*materials;	// Material
   Eina_Inarray	*parts;		// Mesh
 } Mesh;
