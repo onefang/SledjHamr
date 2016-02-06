@@ -44,6 +44,18 @@ unpackers =
   zip		= function (src, dst)  return('unzip '    .. src .. ' -d ' .. dst)  end,
 }
 
+--[[ TODO
+Make it accept arguments - file dir
+  file = archive file, or directory to scan
+  dir  = output directory
+
+If it's an OAR, or other sim defining format, or a model format, then create .omg files, stuff into .cache/converted/ or inventory/converted.
+  Or should conversion be a separate tool?
+    The problem is that we need to link back to the original archive, or carry other info like the archive type with us from here.
+    So might as well start the process by creating basic .omg files, with the info we have here, before we lose that info.
+
+]]
+
 print('Searching for archives in ' .. home_d .. '/.SledjHamr', ' -> ', ' unpack into ' .. home_d .. '/.SledjHamr/.cache/unpacked/')
 
 for k, v in pairs(scanDir(home_d .. '/.SledjHamr')) do
