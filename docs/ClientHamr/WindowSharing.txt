@@ -1,5 +1,7 @@
 EnLichtIrrnment.  B-)
 
+(Note, this is obsolete, as I moved away from Irrlicht when EFL grew 3D support.)
+
 Elementary and Irrlicht don't like to share windows.
 
 Irrlicht can be told to create a device from a pre existing window, but this is Windows only.
