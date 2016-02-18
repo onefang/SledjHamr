@@ -1,2 +1,0 @@
-REST is probably good to apply to the web server part.  Alice wants JSON
-to, but see nails.

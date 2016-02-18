@@ -1,5 +1,5 @@
 The Naminator eliminates human readable names, to make way for computer
-names for SkyNet.  Or something.
+names from SkyNet.  Or something.
 
 In world names can be anything, but they map more or less to file names
 and URLs, so the names have to be munged accordingly.  A further issue
