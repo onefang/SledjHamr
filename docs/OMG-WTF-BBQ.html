@@ -21,35 +21,5 @@
 <p>Quite often an object gets changed, that would naturally change the SHA1 hash. So now we have a different object, with a different name. But, the object might not be stored locally, just the pointer. The programming field has a name for what happens next, a copy is made when you try to write to it - Copy On Write. So the object is copied from the most convenient nearby OMG node, the changes made, then it is written (under a new SHA1 hash name) onto the local OMG node. This OMG node informs other interested nodes that it now has this new object, they can store pointers to the new object on this OMG node in their .WTF files.</p>
 <p>Which brings us back to the pre caching. The hungry little OMG node does not have to wait for the BBQ to fire up to get it's COW. It can start to download the object if it has some time on it's hands, just coz.</p>
 <p>To quote a famous local sporting hero "Where's the cheese?". Ah, that's another story...</p>
-<p>&nbsp;</p>
-<h2>Late night realization about multiple asset servers and Censorship and such</h2>
-<p>(04:33:43 AM) alice_crush: Oh!</p>
-<p>(04:36:29 AM) alice_crush: What if we let folks run more than one inventory asset server, and make some asset servers private/subscription. Which just means if a person takes no action they'll never see an asset from a private server. *Then* say folks in Japan can have a sim full of nasty lolicon, and folks from countries that make it illegal to see such pictures won't ever be accidentally exposed. *And* the grid will stay 'pure' never serving "bad" images. "Hey idiot, if you choose to download illegal content, don't complain to us!"</p>
-<p>(04:38:17 AM) alice_crush: so you could walk around in a t-shirt with a grossly illegal image on it, and unless someone is subscribed to the right asset server they just see gray.</p>
-<p>(04:39:07 AM) alice_crush: have to get to like phase 2 or whatever, not the stop gap quick fix proxying feature</p>
-<p>(04:40:26 AM) onefang: That goes to the whole "Hey it's just a web server, you can implement whatever access policy you want" thing.</p>
-<p>(04:40:53 AM) onefang: "You are not authorized to see this t-shirt.".</p>
-<p>(04:41:04 AM) alice_crush: though would need some special client side controls/subscriptions something like that.</p>
-<p>(04:41:26 AM) onefang: "Knomes stole this skirt, quick get hippos."</p>
-<p>(04:41:34 AM) alice_crush: "This texture above your security grade" lol</p>
-<p>(04:43:07 AM) onefang: "These are not the clothes you are searching for."</p>
-<p>(04:43:10 AM) alice_crush: minor issue of when uploading a texture specifying which asset server it goes to...</p>
-<p>(04:44:03 AM) alice_crush: you could give me your illegal images (drawing of the profit, peace be on him) I could put them out in my sim, and never see the blasphemy myself</p>
-<p>(04:44:33 AM) onefang: Well, no, that's the whole point of allowing multiple inventory stores. You get to manage them, decide what goes where. Sometimes using ordinary web CMS software, or a file browser for local ones..</p>
-<p>(04:45:37 AM) alice_crush: Hmmm maybe folks could sell say a pg skin and a X version, and folks could choose to avoid the X asset servers... and not see grey people.</p>
-<p>(04:46:20 AM) alice_crush: Lol, theres always a clever policy choice that makes the thought police un necessary.</p>
-<p>(04:46:47 AM) alice_crush: LL will hate it (Breaks the shared experience rule)</p>
-<p>(04:47:00 AM) alice_crush: OS will probably hate it too</p>
-<p>(04:48:08 AM) onefang: I'm not particularly worried about pissing off those two groups.</p>
-<p>(04:48:37 AM) alice_crush: I would rather make thought police optional, then market forces will eliminate them.</p>
-<p>(04:48:02 AM) alice_crush: some day could have certificates for asset servers, collect them in classes "PG servers", "IP Clean servers" lol</p>
-<p>&nbsp;</p>
-<h2>More linear description of above</h2>
-<p>Imagine that texture assets can come from multiple sources. When a sim tells your client about a texture it only tells you an ID, your client has to find out which server has the resource for you.</p>
-<p>Imagine your client has a list of servers to try, it can simply go through the list of servers stopping as soon as a server gives a response.</p>
-<p>Imagine that some of the servers in the list come from standard places such as the sim. Imagine that other of the servers come from a manually selected list of private subscription servers.</p>
-<p>Say I am in simulator 101, I get told about a resource named "409" from the simulator. I check all the asset servers I know. If I don't find it, I show a blank/gray texture.</p>
-<p>You might be in the same simulator, and you get told about the same resource named "409" by the simulator. In addition to the simulator though, you have a private server you can check, and there you find resource "409" so you client can draw it for you.</p>
-<p>In this way you and I looking at a third person might see something different. You see the third person wearing a shirt with the logo of a sports team. I see a very plain gray 'slider' shirt, not even with textures cuffs and hems.</p>
 </body>
 </html>
