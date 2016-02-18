@@ -52,7 +52,10 @@ worked within web pages.  Now we can dispense with the web pages all
 together.  The original matrix-RAD included a plan for a translation
 layer, any web browser that didn't like Java could get a "legacy" simple
 web page version.  We could do something similar, or go up a step and
-translate Lua into ECMAScript.
+translate Lua into ECMAScript, or wasm.  There's a project that has done
+so already -
+
+https://kripken.github.io/lua.vm.js/lua.vm.js.html
 
 Include something small like Dillo or NetSurf as the built in web
 browser.  It should be able to spread itself across in world objects,
