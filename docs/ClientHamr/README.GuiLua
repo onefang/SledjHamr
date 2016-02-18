@@ -42,6 +42,8 @@ Initially GuiLua can wrap elementary / evas, with the goal of wrapping
 NAWS, just like matrix-RAD was originally planned.  Then I can put off
 writing NAWS for another decade.  lol
 
+GuiLua could also wrap HTML+ECMEScript.
+
 Might be nice to have a wrapper that is a web server that generates
 standard HTML forms.  No JavaScript, no HTML5, just plain old,
 compatible with everything, HTML forms.
@@ -322,6 +324,15 @@ was kinda prototyped, especially UberMatrix stuff.  I think this time
 around, NAWS should be written in C, based on pure Evas + Edje.  Perhaps
 with direct support for introspection?  After EO settles down, I might
 use that to.
+
+The C code could also wrap HTML+ECMAScript via wasm, or even Lua.vm.js,
+which uses asm.js, a precursor to wasm I think.  Though I'm thinking
+that EFL might be a bit too heavy for this.  lol
+
+So that means Lua running in the web browser, which I have seen happen. 
+Using CSS, ECMAScript, and HTML via the DOM for the widget backend. 
+With a C shim that does the actual translation.  Lua then just needs to
+know NAWS.
 
 
 Edje_Lua notes
