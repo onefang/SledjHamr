@@ -24,7 +24,7 @@ http://git.enlightenment.org/core/
 
 It should all work under X window managers other than Enlightenment,
 though this has not been tested.  The same applies to Linux distros
-other than Ubuntu 12.04, that's the only one that hes been tested by me. 
+other than Ubuntu 12.04, that's the only one that has been tested by me. 
 This is all still experimental, but I intend to get it to work under Mac
 OS X and Windows as well.
 

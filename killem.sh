@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO - Deal with the valgrind left overs, by scanning the output of the following lines, pciking out the PIDs, then "kill -KILL pid"
+# TODO - Deal with the valgrind left overs, by scanning the output of the following lines, picking out the PIDs, then "kill -KILL pid"
 ps aux | grep love
 ps aux | grep LuaSL
 

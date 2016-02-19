@@ -36,15 +36,15 @@ On the other hand, we do want full functionality to be available to high
 level scripting languages.  While Lua is the chosen language, there's
 been some success translating to and from Lua which may help us be more
 agnostic here.  There's others working on translating things to Lua,
-based on the theory that since it's the fastest scripting lagnuage, that
+based on the theory that since it's the fastest scripting language, that
 might help speed up other scripting languages.
 
 In particular, translating LSL into Lua has so for been working well.  
-The parts that can be benchmarked soo far are very fast indeed, making
+The parts that can be benchmarked so far are very fast indeed, making
 SL and OS look like the crippled snails that they are.  Also, there's
 some evidence that we might be able to translate Lua into ECMAScript to
 run in web browsers, or run a Lua VM inside the ECMAScript VM.  
-Alledgedly, while the scripts run slower than LuaJIT can run them, they
+Allegedly, while the scripts run slower than LuaJIT can run them, they
 are still quite fast compared to ECMAScript.  We need this to support
 legacy web browsers, which decided long ago to standardise on
 ECMAScript.  Alice loves her some JavaScript and node.js.
@@ -64,7 +64,7 @@ wanted to use a different markup syntax.  lol
 
 I solved this by installing a few markup systems, but the majority of it
 got written as what Drupal refers to as "simple formatting", which
-basically allows the use of certain HTML tags, plus a few nicities.
+basically allows the use of certain HTML tags, plus a few niceties.
 
 Eventually code started to get written by me, I put it on GitHub.  At
 around the same time, I was busy transferring the Team Purple website
@@ -91,7 +91,7 @@ that's not our main thrust for UI stuff.
 Sooooo, to avoid a lot of work, how about we just make the documentation
 static HTML web pages, and be done with it?  Markup systems are just a
 way to make HTML more palatable to ordinary users, but ordinary users
-are not writing the design documentiation and such.  They all get
+are not writing the design documentation and such.  They all get
 translated to HTML, so let's just write raw HTML ourselves.  Keep it
 simple, no fancy CSS or Javascript shit.  So we avoid markup, we avoid
 having to translate from markup to markup, and we avoid the rendering

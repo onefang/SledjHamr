@@ -32,7 +32,7 @@ Runnr.c
     Starts or resumes the script running.  If there's a message, push it as an argument.
     Expects the script to eventually call Runnr.receive().
   Runnr.receive()
-    Does a Lua yeild, which will return once there is a message for this script.
+    Does a Lua yield, which will return once there is a message for this script.
   Runnr.send()
     Either send2script(SID, message), or send2server(message)
 
@@ -201,7 +201,7 @@ More generic event system?
 
   There are other events flying around.
     BASIC event		Just send it to LuaSL, it loops through all scripts, sending the event to them all if they have an event function in their current state.
-    REGISTER event	Script has to register for these events with love.  Can have filter.  love loops through all regisitered "scripts", applies filters, sends events.
+    REGISTER event	Script has to register for these events with love.  Can have filter.  love loops through all registered "scripts", applies filters, sends events.
     REQUEST event	Script has to request an event from love.  Can have a filter.  Love sends event straight back to the script.  Once.
 			  This covers the "wait for return value" case as well.  events.return()?
   touch_start goes from extantz to LuaSL, via love.  Most of the rest go from love to LuaSL I think.  state_entry, state_exit are internal to LuaSL, timer should be.
@@ -217,7 +217,7 @@ More generic event system?
     Sensor and no_sensor might be common, but you request those, your silly fault, they have filters though.
       llSensor(string name, string id, integer type, float range, float arc)
       llSensorRepeat(string name, string id, integer type, float range, float arc, float rate)
-  Event types can have filters?  Events can be types?  In otherwords, generic filter system, attach say filters to say type events, etc.
+  Event types can have filters?  Events can be types?  In other words, generic filter system, attach say filters to say type events, etc.
     Figure this all out as we go along.
 
 parseStream() / send2() both -
@@ -530,7 +530,7 @@ I can use the llDialog() or purkle widgets, especially when you can rip
 them out of the main window to be their own windows.
 
 Once the files widget morphs into a proper inventory widget, I can use
-it in meta-impy for inventory AND an asyncronous file requestor.
+it in meta-impy for inventory AND an asynchronous file requester.
 
 Finally (I think) I could rip the meta-impy graphics pipeline a new one.
 

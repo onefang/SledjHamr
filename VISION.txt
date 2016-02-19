@@ -2,7 +2,7 @@ I don't usually bother with even reading vision statements, and I'm a
 compulsive speed reader.  Before I know I should not be reading
 something, it's too late, already read it.  lol
 
-SledjHamr is my lifes passion though, I've been interested in this sort
+SledjHamr is my life's passion though, I've been interested in this sort
 of thing since the '80s and '90s.  I've been thinking about how best to
 describe it, and it's turning into a sort of vision statement.  So here
 it is.  I'll try to avoid being too hand wavy and wanky.
@@ -103,6 +103,6 @@ corporate computer.
 
 Other virtual world protocols will be supported, the SL / OS ones will be
 just a wrapper around the SledjHamr protocol.  For direct SledjHamr to
-SledjHamr things should be noticably faster and smoother.  Obviously any
+SledjHamr things should be noticeably faster and smoother.  Obviously any
 particular protocol will be limited by that protocols own limits.
 

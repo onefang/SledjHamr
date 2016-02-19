@@ -443,9 +443,9 @@ object = eo_add(EVAS_OBJ_LINE_CLASS, canvas);
     Eo.h		-> EO_DEFINE_CLASS is a macro that basically wraps eo_class_new(), and returns it's result.
 
 So Eo_Class is the type of a class, but it's A) opaque, B) deprecated! 
-It includes a pointor to the Eo_Class_Description, which includes the
+It includes a pointer to the Eo_Class_Description, which includes the
 actual name.  I'm not seeing anywhere the names of the get/set
-paramaters being passed into the system, or any way to look up a class
+parameters being passed into the system, or any way to look up a class
 based on name.  Not even a way to get to the public Eo_Class_Description
 from the opaque Eo_Class.
 

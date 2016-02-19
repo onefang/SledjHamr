@@ -102,7 +102,7 @@ the C# side.  sigh</p>
 <p>A watchdog thread should be used to make sure no LuaSL script spends
 forever processing any event.</p>
 
-<p>Some form of serialization will need to be created for saving script
+<p>Some form of serialisation will need to be created for saving script
 state during shutdowns, passing script state to other threads /
 processes / computers.  Apparently Lua is good at this.</p>
 
@@ -124,7 +124,7 @@ our own OpenSim compatible cache module.</p>
 -------------</p>
 
 <p>I'll build a test harness.  It will be based on EFL Edje Lua, with
-buttons for triggering LSL events, SL style dialogs, and other goodies.</p>
+buttons for triggering LSL events, SL style dialogues, and other goodies.</p>
 
 <p>The initial goal will be to run standard MLP scripts.  They have minimal
 interface to the world, and exercise quite a bit of the rest of LSL. 
@@ -132,7 +132,7 @@ They are also quite common, and sometimes responsible for a lot of the
 script running load.</p>
 
 <p>Later I should add stock standard OpenCollar scripts from SL.  They are
-a bitch to get working under OpenSim, so would be good compatability
+a bitch to get working under OpenSim, so would be good compatibility
 tests.</p>
 
 <p>Various eina logging domains might be used to handle whisper, say, shout,
@@ -163,7 +163,7 @@ that compares against XEngine.</p>
 <h2> Making Lua look like LSL </h2>
 <p>There are syntactic differences between LSL and Lua. Although Lua is good as a metalanguage, those syntax differences wont go away by themselves. I think some sort of preprocessor would be needed to massage LSL into Lua as a first step in compiling.</p>
 <p>The preprocessor would have to start by parsing the LSL code into some sort of useful structure. Since the whole point of this exercise as that the OpenSim Xengine sucks, and it's written in C# anyway, don't want to use that. The Aurora script engine likely sucks less, but is still C#. The standard viewer source code includes an LSL parser written using flex and bison. It looks like C code, with C++ wrappers to wedge it nicely into the rest of the viewer code, but it generates C++ code full of LL classes.</p>
-<p>A test harness could be constructed using EFL Edje Lua to provide some push buttons that can trigger LSL events, provide dialogs, and display various state info. I think a good start is to put the MLP scripts and their notecards / animations into a directory, call that directory an Object, perhaps even implement some of the rest of SledjHamr with some object meta data (MLP will need access to the objects description). MLP is a good test subject, it tends to soak up a lot of sim resources, it's interface to the world is minimal, and it would exercise a lot of the non world interfacing stuff.</p>
+<p>A test harness could be constructed using EFL Edje Lua to provide some push buttons that can trigger LSL events, provide dialogues, and display various state info. I think a good start is to put the MLP scripts and their notecards / animations into a directory, call that directory an Object, perhaps even implement some of the rest of SledjHamr with some object meta data (MLP will need access to the objects description). MLP is a good test subject, it tends to soak up a lot of sim resources, it's interface to the world is minimal, and it would exercise a lot of the non world interfacing stuff.</p>
 <p>For reference, here is <a href="http://www.lua.org/manual">Lua reference manual</a>, <a href="http://www.lua.org/pil/">Lua PIL (for Lua 5.0)</a>, <a href="http://luajit.org/index.html">LuaJIT</a>, <a href="http://lslwiki.net/lslwiki/wakka.php?wakka=HomePage">LSL Wiki</a>, and <a href="http://wiki.secondlife.com/wiki/LSL_Portal">SL LSL portal</a>.</p>
 <p>&nbsp;</p>
 <h3> comments and line endings </h3>
@@ -190,7 +190,7 @@ that compares against XEngine.</p>
 </tr>
 <tr>
 <td>vector</td>
-<td>Three floats in the form &lt; x , y , z &gt;. Usually a position, color, or Euler rotation.</td>
+<td>Three floats in the form &lt; x , y , z &gt;. Usually a position, colour, or Euler rotation.</td>
 <td>&nbsp;</td>
 <td>Use a table and metatable, or a userdata.</td>
 </tr>
@@ -202,7 +202,7 @@ that compares against XEngine.</p>
 </tr>
 <tr>
 <td>key</td>
-<td>A UUID, specialized string in the same format as UUIDs everywhere.</td>
+<td>A UUID, specialised string in the same format as UUIDs everywhere.</td>
 <td>&nbsp;</td>
 <td>Can use a string, though perhaps a metatable or userdata would help? While it is true that it's just a string representation of a 32 bit integer, Lua has no way of faithfully representing 32 bit integers.</td>
 </tr>
@@ -237,7 +237,7 @@ that compares against XEngine.</p>
 <tbody>
 <tr>
 <td>()</td>
-<td>Expression re-odering.</td>
+<td>Expression re-ordering.</td>
 <td>()</td>
 <td>Exact match.</td>
 </tr>
@@ -301,7 +301,7 @@ until condition
 <tbody>
 <tr>
 <td>
-<pre>for (initialization; condition; update)
+<pre>for (initialisation; condition; update)
 {
   statements;
 }
@@ -333,7 +333,7 @@ end
 </pre>
 <p>Neither is a good match against LSL. To make things worse, the for variables in Lua are all local to the for loop, and it's not safe to change them in the loop. So we can't use Lua for loops to implement LSL for loops.</p>
 <p>A LSL for loop could be rewritten as -</p>
-<pre>initialization
+<pre>initialisation
 while (condition)
 {
 	statements;
@@ -435,9 +435,9 @@ end
 <p>&nbsp;</p>
 <h2> Efficiently running thousands of scripts </h2>
 <p>(As a data point, Anarchadia has 3315 scripts running.)</p>
-<p>LSL scripts seem to be a good match for Lua states. Each script/state is independent, with no global data shared between them except for what is explicitly sent via communications calls, or calls to the system it's embedded in (the world interfacing). Lua scripts can be run in separate OS threads, which lets us make use of multi core CPUs. It's theoretically not too hard to serialize Lua, so running Lua states can be stopped, sent to some other computer, then restarted (good for attachment scripts when TPing).</p>
-<p>"luaproc is a concurrent programming library for Lua. It implements an approach, geared torwards massive concurrency support, which uses multiple indepedent lua_States as lightweight user threads ("Lua processes") and kernel threads as workers." Sounds like a good match, except it seems to be more an experiment for an academic paper than something useful. It is on github, with recent changes, well, recently added. <a href="https://github.com/askyrme/luaproc">https://github.com/askyrme/luaproc</a></p>
-<p>Lua has cooperative multitasking, but not preemptive. LSL is event driven, and no event processing should take forever. However, we would still need to deal with badly written scripts with infinite loops in them.</p>
+<p>LSL scripts seem to be a good match for Lua states. Each script/state is independent, with no global data shared between them except for what is explicitly sent via communications calls, or calls to the system it's embedded in (the world interfacing). Lua scripts can be run in separate OS threads, which lets us make use of multi core CPUs. It's theoretically not too hard to serialise Lua, so running Lua states can be stopped, sent to some other computer, then restarted (good for attachment scripts when TPing).</p>
+<p>"luaproc is a concurrent programming library for Lua. It implements an approach, geared towards massive concurrency support, which uses multiple independent lua_States as lightweight user threads ("Lua processes") and kernel threads as workers." Sounds like a good match, except it seems to be more an experiment for an academic paper than something useful. It is on github, with recent changes, well, recently added. <a href="https://github.com/askyrme/luaproc">https://github.com/askyrme/luaproc</a></p>
+<p>Lua has cooperative multitasking, but not pre-emptive. LSL is event driven, and no event processing should take forever. However, we would still need to deal with badly written scripts with infinite loops in them.</p>
 <ul>
 <li>Just let them run, continuing to keep that thread busy.</li>
 <li>Use a watchdog thread.
@@ -454,7 +454,7 @@ end
 </ul>
 </li>
 </ul>
-<p>I just had a thought. It might be worthwhile doing some typical compiler optimizations. Should see if doing that to the LSL helps. The Lua compiler might do that for us anyway, but certainly worth investigating. On the other hand, LuaJIT probably does most of that for us anyway. Might not be worthwhile.</p>
+<p>I just had a thought. It might be worthwhile doing some typical compiler optimisations. Should see if doing that to the LSL helps. The Lua compiler might do that for us anyway, but certainly worth investigating. On the other hand, LuaJIT probably does most of that for us anyway. Might not be worthwhile.</p>
 <p>&nbsp;</p>
 <h2> hacking up Lua source </h2>
 <p>I was hoping to avoid it, but I think we may have to hack up Lua source and not use any system supplied Lua library. The main reason is integers. LSL scripters expect integers to behave like 32 bit signed integers, not like 32 bit floats. So that's gonna cause no end of problems unless we have a a native 32 bit signed integer type in Lua. We can't just compile Lua to use 32 bit signed integers for it's number type, as then LSL floats get broken.</p>
@@ -495,7 +495,7 @@ end
 <p>Looks like LuaJIT gets us part of the way there, and it's supposed to be the fastest scripting language around, not much slower than C. Some of the above hacking wont be needed. It's a drop in replacement for Lua 5.1, but it has extras as well, some from 5.2, some already mentioned above in the hacks we night need to do. It has FFI, which also speeds up linking to C code, but that's very dangerous low level code. Should see if we can use it, THEN sandbox it away. See this link about sandboxing - <a href="http://osdir.com/ml/general/2011-02/msg23395.html">http://osdir.com/ml/general/2011-02/msg23395.html</a></p>
 <p>&nbsp;</p>
 <h2> Hooking it up to OpenSim </h2>
-<p>OpenSim has a mechanism for each script to choose the script engine it will run under, and even the language used. The first line of the script is interpreted by OpenSim if it's a comment. If it's not proper, OpenSim bitches about not being able to load a non existant script engine. Some examples of existing supported first lines -</p>
+<p>OpenSim has a mechanism for each script to choose the script engine it will run under, and even the language used. The first line of the script is interpreted by OpenSim if it's a comment. If it's not proper, OpenSim bitches about not being able to load a non existent script engine. Some examples of existing supported first lines -</p>
 <ul>
 <li>//XEngine:</li>
 <li>//XEngine:lsl</li>
@@ -709,7 +709,7 @@ SID.events.touch_start(2)
 <tr>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>Pauses (yeilds) the script</td>
+<td>Pauses (yields) the script</td>
 </tr>
 </tbody>
 <caption>&nbsp;</caption>
@@ -738,7 +738,7 @@ SID.events.touch_start(2)
 <p>This script engine is only gonna be source code compatible, as we are not using Mono like every one else, so no such thing as binary compatibility can be provided. Source code is how scripts travel between grids anyway.</p>
 <p>There are many scripts from the millions of SL users, going back almost a decade of SL life. This means there are lots of scripts that originated from SL floating around the OpenSim community. Some are open source, some people brought scripts with them from SL that they wrote themselves, some are being used outside of SL with the permission of the scripts authors. It's theoretically impossible to steal script source code from SL, but it can probably be done through social engineering or some such. So I expect there are some illegal copies of SL scripts out there to. The point is, there's LOTS of scripts from SL. This is why SL compatibility is important. There is a huge pool of available scripts from SL.</p>
 <p>OpenSim added some extensions to LSL, and they are available on all the OpenSim grids, though some might be disabled. There is a smaller pool of scripts available from OpenSim. Scripters in OpenSim expect the those extensions to exist. Being compatible with those extensions would be important, and would help other OpenSim grids adopt this script engine if it turns out to be any good.</p>
-<p>Meta 7 was much smaller, not around for so long, and most scripts there either came from the SL pool of available scripts, the OpenSim pool of available scripts, or where written in Meta 7 by LSL scripters. I don't think the Meta 7 specific pool of scripts is anything other than small, the pool of scripts that need XMRE extensions is probably miniscule. OpenSim scripters don't expect those extensions to be available. So I don't think that being strictly compatible with XMRE is needed. Those small number of scripts written to use XMRE extensions can probably be converted to what I'm about to propose.</p>
+<p>Meta 7 was much smaller, not around for so long, and most scripts there either came from the SL pool of available scripts, the OpenSim pool of available scripts, or where written in Meta 7 by LSL scripters. I don't think the Meta 7 specific pool of scripts is anything other than small, the pool of scripts that need XMRE extensions is probably minuscule. OpenSim scripters don't expect those extensions to be available. So I don't think that being strictly compatible with XMRE is needed. Those small number of scripts written to use XMRE extensions can probably be converted to what I'm about to propose.</p>
 <p>I was lucky that kelly managed to save the reference pages from Meta 7 that covered their extensions in detail. I was able to go over them and figure out what to do. The summary is this - we should be able to provide similar functionality as XMRE, but not an exact clone. Lua already has powerful table stuff that is better than the XMRE array stuff, with a similar syntax for those parts that they share. No need to reinvent that wheel. Switch, continue, and exception handling could be treated as just adding things from other C like languages to the LSL C like language. On the other hand, it's gonna be simpler to just let people use Lua style stuff for these things. Writing an LSL scripting engine is already a huge job, the functionality is there in Lua, we could skip implementing the exact C like syntax and get more important things done. We can add in the C style syntax later if there is much call for it. The event stuff I would already be one third of the way there based on my current design. The other two thirds we could get just by designing the rest of that subsystem to suit. After all, not much difference if we store those structures in C or Lua, since it all has to go to Lua anyway. Might as well do it in Lua, and give the scripters access.</p>
 <p>This XMRE type stuff would be using the //LuaSL:LuaSL engine. Pure //LuaSL:LSL would not have it, and pure //LuaSL:Lua would not need it. So by writing the LuaSL variation first, we get some parts of XMRE like extensions for free, mostly the Lua table stuff that is similar to XMRE arrays, only better.</p>
 <p>&nbsp;</p>
@@ -766,12 +766,12 @@ myOtherList.myFunc(x, y);  // Same as the last one.
 
 </pre>
 <p>That last one uses a Lua syntactic sugar short cut. It works for table indexes that are strings with no spaces in them. This sort of thing essentially comes for free, since my script engine converts to Lua before compiling that. People that know Lua already know all those fun things you can do with Lua tables, they are quite powerful.</p>
-<p>Lua table initialization is a little different, but the LSL parser can handle that -</p>
+<p>Lua table initialisation is a little different, but the LSL parser can handle that -</p>
 <pre>a = {[f(1)] = g; "x", "y"; x = 1, f(x), [30] = 23; 45}
 
 </pre>
 <p>I'll leave it as an exercise for the reader to look up the Lua manual (which that example is taken from) to see what that line does. lol</p>
-<p>OK, commas and semi colons in that line are interchangeable, they just separate array elements. [30] = 23 means that the table element with the index of 30 is assigned the value 23. x = 1 is shorthand for ["x"] = 1, the table element with the string index of "x" is assigned the value 1. [f(1)] = g means that what ever value that the function call f(1) returns is used as an index, it's value is assigned the value of the variable g (no matter what type it is). The rest don't include any index, so are assigned to sequentially numbered indexes starting from 1. Apart from being more powerful, the only real difference with LSL is the use of {} instead of [] to contain the list initializers.</p>
+<p>OK, commas and semi colons in that line are interchangeable, they just separate array elements. [30] = 23 means that the table element with the index of 30 is assigned the value 23. x = 1 is shorthand for ["x"] = 1, the table element with the string index of "x" is assigned the value 1. [f(1)] = g means that what ever value that the function call f(1) returns is used as an index, it's value is assigned the value of the variable g (no matter what type it is). The rest don't include any index, so are assigned to sequentially numbered indexes starting from 1. Apart from being more powerful, the only real difference with LSL is the use of {} instead of [] to contain the list initialisers.</p>
 <p>&nbsp;</p>
 <h3> exception handling </h3>
 <p>The XMRE exception handling I could not do a clone of anyway, the system exceptions are not specified, except for the divide by zero, and even then I'm not so sure.</p>

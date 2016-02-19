@@ -259,7 +259,7 @@ audits, and less places for things to go wrong, or escape attention.
 Commonly used security and privacy protocols also tend to be built in
 modular ways, so we can make use of these things ourselves.
 
-Pretty and skinable.
+Pretty and skinnable.
 --------------------
 
 The Enlightenment Foundation Libraries (EFL) where written to support
@@ -553,7 +553,7 @@ IM client
 web browser
     We may have to deal with external web proggies, which may in the end be the best way.
     Except for MOAP.  lol
-    Maybe later we can have a HTML to GuiLua translater module?  Muahahaha
+    Maybe later we can have a HTML to GuiLua translator module?  Muahahaha
 
 IAR & OAR file reader / writer
     loads up the file, sending it as nails commands

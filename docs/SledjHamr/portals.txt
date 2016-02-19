@@ -9,7 +9,7 @@ deliberate policy decisions by LL.  LL knows their content is the key to
 their business, even though almost all of it was created by the users,
 LL locks it up tight.  So people visiting OpenSim grids from SL have to
 create a new avatar from scratch, which is such a major pain that most
-people balk at that and don't bother.  And they can't bring their
+people baulk at that and don't bother.  And they can't bring their
 inventory with them, inventory they paid for and spent years collecting.
 
 In SledjHamr, as well as allowing completely unrestricted and easy
@@ -50,7 +50,7 @@ gate" of your home world.
 
 Any one on your home worlds access list can step through this portal to
 get to your home world.  Simple to use, no figuring out HyperGate URLs
-and copy pasting them, no manual messing with hard to use acces systems. 
+and copy pasting them, no manual messing with hard to use access systems. 
 Though it would still be possible to create URLs to in world places, to
 store as landmarks, to email to someone, or to copy'n'paste into
 farcebook.
