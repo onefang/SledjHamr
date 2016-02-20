@@ -1,11 +1,12 @@
 David "onefang" Seikel wrote most of this, with the following exceptions
 in the docs directory -
 
-The avatar known as "Nathan Adored" wrote the first half of OMG-WTF-BBQ.
+The avatar known as "Nathan Adored" wrote the first part of OMG-WTF-BBQ,
+with onefang supplying the COW stuff.
 
-The avatar known as "Alice Crush" wrote the second half of OMG-WTF-BBQ
-in conversation with onefang.  Alice also wrote BVJ, ClientHamr,
-InworldAnimationEditor, NGIW, and NGIW.Commands.  Alice is likely
-responsible for some little bits here and there.  Alice kinda wrote
-BlackListAssetServersTracker, but that's currently the second half of
-OMG-WTF-BBQ, and I need to move that.
+The avatar known as "Alice Crush" wrote BlackListAssetServersTracker in
+conversation with onefang, with onefang untangrling it at the end. 
+Alice also wrote BVJ, the first half of ClientHamr,
+InworldAnimationEditor, NGIW, and NGIW.Commands (onefang wrote the first
+paragraph).  Alice is likely responsible for some little bits here and
+there.

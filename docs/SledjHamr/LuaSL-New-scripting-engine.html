@@ -12,14 +12,14 @@ installed in either /opt/e17 or /usr.  These are typical places it get's
 installed in.  You will also need flex.  The rest of the dependencies
 are in the ../libraries directory.</p>
 <h1> write our own </h1>
-<p>I had considered in the <a href="SledjHamr.html">SledjHamr</a> document writing a new script engine from scratch in Lua. This is what I wrote -</p>
+<p>I had considered in the <a href="../SledjHamr.html">SledjHamr</a> document writing a new script engine from scratch in Lua. This is what I wrote -</p>
 <p>"I'd love to write a Lua implementation of LSL, I'm sure Alice would want to write a Scheme one."</p>
 <p>"I've been thinking of trying out Lua as a backend for LSL, and trying some micro threading style experiments."</p>
 <p>That's about the sum total of my plans and thoughts though. lol</p>
 <p>Here are some more random thoughts.</p>
 <p>Writing an entire scripting engine in a new language is a big job.</p>
 <p>Lua is meant to be embedded into other things as an internal scripting language. It has great features that let it be a meta language, you can make it look like other languages, or add other language concepts. Plus it's tiny. Being used by online games like WoW means it's probably got what it takes. These are reasons I chose it for both server side and client side scripting.</p>
-<p>My own personal plan was to cut my teeth on Lua by using <a href="http://www.enlightenment.org/">EFL</a> for a RL contract I'm working on, then add Lua scripting to the meta-impy viewer. It turns out that the EFL Lua support was not complete, but I managed to use it in that project anyway. My next Lua plans are to implement in EFL those things that project needed. I did not plan on working on a Lua based server side scripting engine until after I had implemented some of the <a href="index.html">OMG</a> plans. In particular, I want to do that stuff in C, and C is the natural partner for Lua. Adding Lua to .NET / mono is a whole can of worms I personally don't want to get stuck in.</p>
+<p>My own personal plan was to cut my teeth on Lua by using <a href="http://www.enlightenment.org/">EFL</a> for a RL contract I'm working on, then add Lua scripting to the meta-impy viewer. It turns out that the EFL Lua support was not complete, but I managed to use it in that project anyway. My next Lua plans are to implement in EFL those things that project needed. I did not plan on working on a Lua based server side scripting engine until after I had implemented some of the <a href="../index.html">OMG</a> plans. In particular, I want to do that stuff in C, and C is the natural partner for Lua. Adding Lua to .NET / mono is a whole can of worms I personally don't want to get stuck in.</p>
 <p>I have successfully completed my plans to implement EFL Lua things that my RL contract needed. That's in the current release of the EFL libraries, so I can move onto my next plans now.</p>
 <p>On the other hand, perhaps it's worthwhile starting on our own scripting engine now? It's a big job, so lets break it down.</p>
 <p>&nbsp;</p>
@@ -525,7 +525,7 @@ end
 <p>&nbsp;</p>
 <h3> changing the world </h3>
 <p>When our scripts want to change the world, we will have to convince OpenSim to do that for us. If we are really lucky, we can talk directly to the asset server. Might be able to just talk to the sims local database, but that gets tricky if the script engine is NOT running on the sim server, which is a possibility we want to keep open.</p>
-<p>For the functions that get and set prim properties, we should use wrappers around llSetPrimitiveParams() and friends. The <a href="Nails.html">Nails</a> protocol is partly based on those functions, so this will work out well for the future, when we move to a Nails command pump.</p>
+<p>For the functions that get and set prim properties, we should use wrappers around llSetPrimitiveParams() and friends. The <a href="../common/Nails.html">Nails</a> protocol is partly based on those functions, so this will work out well for the future, when we move to a Nails command pump.</p>
 <p>&nbsp;</p>
 <h3> Lifestyles of the rich and infamous... er I mean life cycle of a script, and communications with the engine. </h3>
 <p>Scripts start life currently in OpenSim, will get sent to the script engine to be compiled, than started or stopped, eventually might get deleted. While they are running, the script engine requests in world services, and responds to events. Each of these things needs OpenSim and the script engine to refer to specific scripts, can use script UUIDs for that. My basic idea is to run the script engine as a separate process, communicating over a socket to the OpenSim processes. Initially, just for ease of implementation, I'm thinking of sending function calls and parameters as Lua function calls, and getting the results back as Lua values. We can use Lua table syntax to provide the script UUID, which will be called "SID" in the following discussion.</p>
