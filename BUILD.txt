@@ -1,11 +1,12 @@
 You will need the Enlightenment Foundation Libraries (EFL) and
 Elementary, plus development files, installed before you can build this. 
-Since I started experimenting with the new Evas_3D stuff, that means you
-will need the 1.10 versions.  This experimental branch uses bleeding
-edge stuff from EFL, so might be best to stick with the latest release
-from git repo.  I generally only update my own EFL from git after each
-actual release.  Things always break due to the bleeding edge nature, I
-try to fix the breakage and move on.
+
+I started experimenting with this experimental branch using bleeding
+edge stuff from EFL, like the new Evas_3D stuff, and EO.  I generally
+only update my own EFL from git after each actual release.  Things
+often break due to the bleeding edge nature, I try to fix the breakage
+and move on.  That means you will need the latest released versions, so
+might be best to stick with the latest release from git repo.
 
 Source tarballs, and pointers to some pre packaged binary releases are
 here -
