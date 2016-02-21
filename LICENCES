@@ -1,4 +1,5 @@
-"Me" in this document usually refers to David Walter Seikel, the main author.
+"Me" in this document usually refers to David Walter Seikel' AKA
+"onefang", the main author.
 
 Unless otherwise stated, all of this is covered by the following BSD
 style license.  Most of the rest is either BSD, MIT, or public domain. 
@@ -37,32 +38,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-
-[Note, EFL is no longer included, but it's source is still in the git history.]
-
-The Enlightenment Foundation Libraries are mostly BSD, and copyright by
-the various people mentioned in their respective AUTHORS files, except -
-
-Edje's epp - GPL 2.
-Eina - LGPL 2.1.
-Embryo - partly BSD, partly something similar to BSD.
-
-See the various COPYING and AUTHORS files for details.
-
-Epp is a separate tool used to process .edc source files, but otherwise
-not a part of the SledjHamr system.  The only .edc file is the LuaSL
-test harness.  So the viral nature of GPL does not apply.
-
-Note that eina is the only GPL thing that is linked, and it's LGPL, so
-linking to non GPL stuff is fine.
-
-
---------------------------------------------------------------------------------
-
-Note, for early development, example code from Irrlicht has been pulled
-into extantz and modified.
-
-Irrlicht includes this -
+[ Irrlicht includes this license statement: ]
+[ Note, for early development, example code from Irrlicht has been pulled
+into extantz and modified. ]
 
 The license of the Irrlicht Engine is based on the zlib/libpng license.
 Even though this license does not require you to mention that you are
@@ -173,9 +151,168 @@ Julian Seward, jseward@bzip.org
 bzip2/libbzip2 version 1.0.6 of 6 September 2010
 
 ===============================================================================
+[ Irrlicht includes code from lzma, which has these statements: ]
 
-[Note, Irrlicht's version of jpeglib is no longer included, but it's source is still in the git history.]
+2009-02-07 : Igor Pavlov : Public domain
+2009-09-20 : Igor Pavlov : Public domain
+2010-10-09 : Igor Pavlov : Public domain
 
+
+--------------------------------------------------------------------------------
+
+[ Lemon parser includes this statement: ]
+
+The author of this program disclaims copyright.
+
+--------------------------------------------------------------------------------
+
+All things below this line are temporary things, some of them already
+removed.  They are listed coz they are still in the source repo, even
+though not in the current latest version.  Thus they are being
+distributed, even if not by default.  None of them are counted as
+"linked" for licensing purposes, as they are no longer used.  Those
+things that actually care about linking in their licenses where never
+linked, merely used as examples for research.
+
+--------------------------------------------------------------------------------
+
+The MLP scripts used for testing are BSD, Copyright (c) 2006, by Miffy Fluffy.
+
+--------------------------------------------------------------------------------
+
+The flex and btyacc source files, plus the C source files that wrap them
+in LuaSL, where originally based on flex and bison examples provided on
+the Wikipedia page -
+
+http://en.wikipedia.org/wiki/GNU_bison
+
+This is covered by "Creative Commons Attribution-ShareAlike 3.0 Unported
+License".  The attribution portion is covered by the URL above, as per
+the Wikipedia Terms of Use.
+
+There is no longer any parts of that code left I think.
+
+--------------------------------------------------------------------------------
+
+There used to be flex and bison source files for a LSL parser, taken
+from the SL viewer under GPL 2 and copyright at some unknown date (due
+to missing copyright notice in those specific files) by Linden Research,
+Inc.  Those files have gone away, as I wrote my own, and most of it was
+useless to me anyway.  Never actually used them, so GPL terms do not
+apply.  The flex source file actually used is written by me, bison is
+not used at all.
+
+--------------------------------------------------------------------------------
+[ Luaproc includes this license statement: ]
+[ Note that luaproc had been extensively rewritten by me, but large parts
+of it still exist in the original form, and the rewritten bits tended to
+stick with the original design.  And now, the entire thing was rewritten
+from scratch as part of Runnr.c ]
+
+Copyright 2008 Alexandre Skyrme, Noemi Rodriguez, Roberto Ierusalimschy
+ 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+ 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+[ LuaJIT includes this license statement: ]
+
+===============================================================================
+LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
+
+Copyright (C) 2005-2011 Mike Pall. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+[ MIT license: http://www.opensource.org/licenses/mit-license.php ]
+
+===============================================================================
+[ LuaJIT includes code from Lua 5.1/5.2, which has this license statement: ]
+
+Copyright (C) 1994-2011 Lua.org, PUC-Rio.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+===============================================================================
+[ LuaJIT includes code from dlmalloc, which has this statement: ]
+
+This is a version (aka dlmalloc) of malloc/free/realloc written by
+Doug Lea and released to the public domain, as explained at
+http://creativecommons.org/licenses/publicdomain
+
+===============================================================================
+
+--------------------------------------------------------------------------------
+[Note, EFL is no longer included, but it's source is still in the git history.]
+
+The Enlightenment Foundation Libraries are mostly BSD, and copyright by
+the various people mentioned in their respective AUTHORS files, except -
+
+Edje's epp - GPL 2.
+Eina - LGPL 2.1.
+Embryo - partly BSD, partly something similar to BSD.
+
+See the various COPYING and AUTHORS files for details.
+
+Epp is a separate tool used to process .edc source files, but otherwise
+not a part of the SledjHamr system.  The only .edc file is the LuaSL
+test harness.  So the viral nature of GPL does not apply.
+
+Note that eina is the only GPL thing that is linked, and it's LGPL, so
+linking to non GPL stuff is fine.
+
+--------------------------------------------------------------------------------
+[Note, Irrlicht's version of a few common libraries is no longer
+included, but it's source is still in the git history.  So I moved them here.]
+
+===============================================================================
 [ Irrlicht includes code from jpeglib, which has this license statement: ]
 
 LEGAL ISSUES
@@ -256,9 +393,6 @@ We are required to state that
     CompuServe Incorporated."
 
 ===============================================================================
-
-[Note, Irrlicht's version of libpng is no longer included, but it's source is still in the git history.]
-
 [ Irrlicht includes code from libpng, which has this license statement: ]
 
 /*
@@ -355,16 +489,6 @@ We are required to state that
  */
 
 ===============================================================================
-[ Irrlicht includes code from lzma, which has these statements: ]
-
-2009-02-07 : Igor Pavlov : Public domain
-2009-09-20 : Igor Pavlov : Public domain
-2010-10-09 : Igor Pavlov : Public domain
-
-===============================================================================
-
-[Note, Irrlicht's version of zlib is no longer included, but it's source is still in the git history.]
-
 [ Irrlicht includes code from zlib, which has this license statement: ]
 
 Copyright notice:
@@ -398,143 +522,3 @@ Gailly and Mark Adler; it does not include third-party code.
 If you redistribute modified sources, we would appreciate that you include in
 the file ChangeLog history information documenting your changes.  Please read
 the FAQ for more information on the distribution of modified source versions.
-
---------------------------------------------------------------------------------
-
-The lemon parser includes this -
-
-The author of this program disclaims copyright.
-
---------------------------------------------------------------------------------
-
-[Note, LuaJIT is no longer included, but it's source is still in the git history.]
-
-LuaJIT includes this -
-
-===============================================================================
-LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
-
-Copyright (C) 2005-2011 Mike Pall. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-[ MIT license: http://www.opensource.org/licenses/mit-license.php ]
-
-===============================================================================
-[ LuaJIT includes code from Lua 5.1/5.2, which has this license statement: ]
-
-Copyright (C) 1994-2011 Lua.org, PUC-Rio.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-===============================================================================
-[ LuaJIT includes code from dlmalloc, which has this license statement: ]
-
-This is a version (aka dlmalloc) of malloc/free/realloc written by
-Doug Lea and released to the public domain, as explained at
-http://creativecommons.org/licenses/publicdomain
-
-===============================================================================
-
---------------------------------------------------------------------------------
-[Note, luaproc is no longer included, but it's source is still in the git history.]
-
-Note that luaproc had been extensively rewritten by me, but large parts
-of it still exist in the original form, and the rewritten bits tended to
-stick with the original design.  And now, the entire thing was rewritten
-from scratch as part of Runnr.c
-
-Luaproc is covered by this copyright notice and license -
-
-Copyright 2008 Alexandre Skyrme, Noemi Rodriguez, Roberto Ierusalimschy
- 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
- 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
- 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
---------------------------------------------------------------------------------
-
-All things below this line are temporary things, some of them already
-removed.  They are listed coz they are still in the source repo, even
-though not in the current latest version.  Thus they are being
-distributed, even if not by default.  None of them are counted as
-"linked" for licensing purposes, as they are no longer used.  Those
-things that actually care about linking in their licenses where never
-linked, merely used as examples for research.
-
---------------------------------------------------------------------------------
-
-The MLP scripts used for testing are BSD, Copyright (c) 2006, by Miffy Fluffy.
-
---------------------------------------------------------------------------------
-
-The flex and btyacc source files, plus the C source files that wrap them
-in LuaSL, where originally based on flex and bison examples provided on
-the Wikipedia page -
-
-http://en.wikipedia.org/wiki/GNU_bison
-
-This is covered by "Creative Commons Attribution-ShareAlike 3.0 Unported
-License".  The attribution portion is covered by the URL above, as per
-the Wikipedia Terms of Use.
-
-There is no longer any parts of that code left I think.
-
---------------------------------------------------------------------------------
-
-There used to be flex and bison source files for a LSL parser, taken
-from the SL viewer under GPL 2 and copyright at some unknown date (due
-to missing copyright notice in those specific files) by Linden Research,
-Inc.  Those files have gone away, as I wrote my own, and most of it was
-useless to me anyway.  Never actually used them, so GPL terms do not
-apply.  The flex source file actually used is written by me, bison is
-not used at all.
-
---------------------------------------------------------------------------------
-
