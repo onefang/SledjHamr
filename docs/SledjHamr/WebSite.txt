@@ -1,0 +1,121 @@
+Now that we have a web site, I should turn this into a real web site, huh?
+
+What is a real web site though?  Well, the ideal would be to have it
+driven by C and Lua as part of SledjHamr.  A default web site for the
+small default home, that supports the basics.  It should look something
+like the IG site, but with user selectable colour, and a hell of a lot
+simpler to drive at the back end.  That's gonna take a long time to
+write though, and likely depends on wasm becoming popular.
+
+An alternative is to take the IG web site, based on Drupal (Apache +
+PHP), cut it down to the basics, and present that as a working example. 
+Then the user needs a LAMP or WAMP stack, plus it's slow.
+
+Middle ground might be to have a basic HTML backend for GuiLua in the C
+part, plus a simple web server.  Matrix-RAD had that.
+
+
+
+What is a real web site though?  Same question, but this time focused on
+the content.  What content / functionality should the web site contain? 
+There's several goals here.
+
+An important goal is that eventually it's all just part of the system,
+can be used in world via the usual GuiLua stuff, from a normal bloated
+web browser via wasm, or from a cut down web browser using plain HTML.
+
+Users control of their own world servers.
+
+Communications without starting up a proper extantz client.  IM, forum,
+wiki, email (gulp), and the like.
+
+Actual SledjHamr.org site, for users and developers.  So add source
+code, bug / feature trackers, support, etc.
+
+
+
+The rest is currently random thoughts while I get organised.
+
+The IG site redesign aimed to boil out some common stuff and simplify
+stuff.  Mostly coz I noticed that it doesn't matter how easy to use your
+support system is, users will ask for support anywhere and everywhere
+that they can, with the possible exception of your actual support system. 
+So, people spray stuff everywhere, why not just have a single place,
+then organise it later?  So no forums or anything, it's all just one
+thing, call them convos.  Then tag them later to sort things out.  A tag
+cloud, and user creatable tags should round things out.  So that takes
+care of forums, wiki, bug / feature trackers, and support.
+
+The only difference between an IM and a convo is that IM is real time, a
+convo is logged, though IMs can be logged as well, and convos can be
+almost real time.  So bugger all really.
+
+Should be able to group the convos, to limit them to one or more groups,
+which takes care of the normal OS/SL group IM stuff.
+
+Convos and mailing lists should be two views of the same thing.  Email
+is tricky to get right though, even for experts.  An alternative to
+email is to pass email type messages between SledjHamr servers.  So the
+convos become more mobile.
+
+Sooo, the users small builtin web server includes the world control, and
+convos stuff.  This will work via plain ordinary HTML to start with, as
+well as Lua in the viewer, then Lua in the browser eventually.  No
+email, that's too hard, but maybe later.  Any account system should
+default to world owner created accounts only, no need to deal with
+spammers.
+
+The actual SledjHamr.org web site adds email integration, proper spam
+protection, random stranger created accounts, and source code.
+
+
+
+Soooo, what's it look like under the hood?
+
+
+The basic thing is the convo.  Any user can start one, either public, or
+private to one or more individuals, and/or private to one or more
+groups.  They can add whatever tags they want, if not it automatically
+gets "off topic" or something.  They can allow others to edit the first
+post, thus it becomes a wiki with the "Talk" page simply comments
+following the initial post.
+
+Maybe an option to switch between "IM style" and "forum style"?
+
+The default view of these convos is a list of tags, sorted by
+popularity, looking like a more traditional forum.  Should also be a
+"unread convos", also sorted by tags.
+
+All the usual style, colour, image, list, table, etc support should be
+allowed.  Sigs are allowed, but only shown on the first post of that
+person on each convo.
+
+The world owner gets to bypass all privacy, just like everywhere else. 
+Convo creators get to control privacy for their convos.  Group owned
+convos should be possible, they would get one "chat room" convo for free
+according to OS/SL convention.  Group owners get to control privacy of
+group owned convos.
+
+This should all run under Jabber / XMMP style protocols, as well as the
+web front end, in world front end, and probably RSS streams and such. 
+Email, as mentioned, is left as optional, coz too hard.
+
+world server - Lua and C running server side, running plain HTML widgets, pumping them out a built in simple web server - simple web browser - plain HTML widgets.
+
+world server - ECMAScript web browser (no wams) - Lua.VM.js running DOM (or plain HTML?) widgets.
+
+world server - wams web browser - Lua and C running DOM widgets.
+		Probably don't want to be pushing the entire EFL down peoples networks for each web page.  lol
+		On the other hand, likely this will be a single download to get GuiLua onto the browser, then it's all internal skang traffic.
+
+world server - extantz client - Lua and C running native EFL widgets.
+
+I think this is what the NAWS layer should morph into, it's NAWS at the
+top, but under the hood, gets converted to EFL, DOM, plain HTML, what
+ever.
+
+------------------------------------------------------------------------
+
+So, lots of work either way.  How about we start with github stuff,
+since the source is there anyway, and work our way through the above at
+our leisure?  Second step might be to port and simplify the IG webiste.
