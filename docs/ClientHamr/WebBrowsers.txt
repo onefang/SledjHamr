@@ -6,10 +6,12 @@ media is a thing, most of it web based, and people might want to share a
 tweet by showing their virtual laptop to their virtual friends in the
 same virtual room.  Outside of the world, SL and OS based grids have
 always used a web page for their front screen in viewers.  Some of the
-tools are web based.
+tools are web based.  People even want to run their virtual worlds
+inside a browser.
 
 So we need a web browser that can run on meshes and prims, as well as in
-windows (separate or internal windows).  The problems are (legion) ...
+windows (separate or internal windows).  As well as being able to handle
+our protocols.  The problems are (legion) ...
 
 
 Web rant
@@ -43,8 +45,6 @@ of today, and STILL be better!  lol
 Actual plans
 ------------
 
-So I think we could use multi flavours of web browser.
-
 First of all, try to use and encourage the matrix-RAD style stuff as the
 UI of choice for in world stuff.  It should work across the network
 transparently as matrix-RAD does.  This was my HTML replacement that
@@ -57,21 +57,28 @@ so already -
 
 https://kripken.github.io/lua.vm.js/lua.vm.js.html
 
+LB started writing a web based world viewer, and is interested in adding
+it to SledjHamr.  She would only have to write the 3D viewer part (which
+she is doing), and the wire protocol Nails.  Nails being designed for
+being wrapped in popular protocols, she could pick one.  The client side
+UI layer would also need to be written, but that's part of the
+matrix-RAD type stuff, so my job.
+
+So I think we could use multi flavours of web browser.
+
 Include something small like Dillo or NetSurf as the built in web
 browser.  It should be able to spread itself across in world objects,
 meshes and prims, as well as run in internal or external windows.
 
 As the next step up, an optional module could replace Dillo / NetSurf
-with a bigger browser component, based on one of the main ones, uzbl for
-instance.  Hopefully it can be spread across an in world object somehow.
+with a bigger browser component, based on one of the main ones, CEF or
+uzbl for instance.  Hopefully it can be spread across an in world object
+somehow.
 
 Finally, the user can always decide to show any given URL, or already
 displayed web page, on an external web browser of their choice, with
 their default browser being the top choice.  Which naturally should be
 able to use the in world matrix-RAD type stuff via the translation layer
-(uzbl should be able to as well, NetSurf maybe, if I remember they where
-adding a ECMAScript engine, or had already?  Dillo I don't think does
-ECMAScript at all).
-
-
-
+(CEF can, uzbl should be able to as well, NetSurf maybe, if I remember
+they where adding an ECMAScript engine, or had already?  Dillo I don't
+think does ECMAScript at all).
