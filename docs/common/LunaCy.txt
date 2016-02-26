@@ -1,0 +1,28 @@
+Another crazy idea I just had.  lol
+
+Write a Lua like language as a thin wrapper around C.  Try to keep it
+out of C++ territory, or call it C++ done right.  B-)
+
+It's basically a hybrid of Lua and C syntax, so could be called LuaC,
+though I quite like LunaCy, since Lua and Luna both mean "The Moon". 
+Plus, as mentioned above, it's a crazy idea.  lol
+
+The first rule of LunaCy is -
+    The voices in my head don't talk about LunaCy.  B-)
+
+The idea is to have our cake and eat it to.  A high level language that
+mostly looks like Lua, but is actually a lower level, coz it's mostly
+pure C with little overhead.  Though I also like the idea of sticking
+with C semantics, but with Lua features.  Dealing with the Pascal like
+semantics of Lua might not work so well, especially "end".
+
+So start with Lua tables, and implement that in C.  EFL might be
+interested in this bit, since Raster has always wanted the ability to
+pass Lua tables as parts of EFL messages.  Should also have a
+translation function, so we can pass these tables between C and Lua.
+
+"..." might be hard to deal with.  Though maybe varargs with callbacks?
+
+Things like ".." would have to be some sort of syntax parser to turn
+that into C.
+
