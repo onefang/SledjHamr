@@ -1,0 +1,556 @@
+Some very rough notes on what sorts of in world objects SL and OS have,
+and how to get there.
+
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+Various forms of in world objects, mostly coz SL, but with extensions -
+    (+ marks an extension)
+
+terrains
+    height map, raw texture file
+	"onefangWorld 1.r32" is 262144 bytes in size.  13 channels * 256x256x256 levels.  Except 262144 bytes is 4 channels of 256x256 bytes.
+	    height * (multiplier / 128)
+		the above is quoted from a web page, but I would do the mutiply first
+	    channel 1	height in meters
+	    channel 2	height multiplier
+	    channel 3	water height, only one height in SL per sim, so the first one is taken
+	    channel 4	land map?
+	    top is north, right is east
+	    "interleaved" might be a problem, how is it interleaved?
+    4 x (texture, low and high elevation)
+	+ optional seed for randomly generating the same texture
+    + 1 x texture, a pre baked high res texture
+	+ allow in world painting that baked texture, using layers from the four textures
+    front door (landing point)
+	+ security system / door bell
+    + each world has one or more of these, all the other objects are attached to a terrain
+    + will have to deal with there being only a tiny one, squashed down to get rid of it
+
+sea, sky
+    sea level, colour / shader, refraction, reflection
+    sky colour / shader, sun, moon, clouds, fog, stars, etc.
+    sun light (directional and ambient light)
+    + moon and star light
+    + sun / moon / star light obscured by clouds
+    shadows
+    wind, wind sound
+    + rain, snow, weather, climate
+    day cycle, time of day
+    LightShare/WindLight  (LS/WL)
+	+ and the various ways of encoding this in various places as hacks
+	+ more generic shader handling?
+    + water as height map, handle the same as terrain
+    + smart water, splashes, waves, foam, flows, smart bubbles, mist, smart water sounds
+
+LL grass / trees
+    a texture and a very small xml file
+    + let users edit these
+
+avatars
+    shape, skin, eyes, hair (non prim), alpha / clothes / make up / tattoo layers
+    skeleton
+	+ editable skeleton
+    baked avatar, client side AND server side
+    attachments
+	bald / shoe base
+    mesh avatars
+    avatar's camera as separate steerable object
+	coz look at and point at need in world objects
+    NPCs are just avatars
+
+BVH animations
+    simple sits
+    AO, swimmer, MLP
+    + BVJ + IAE
+
+primitives
+    box, cylinder, prism, sphere, torus, tube, ring
+	EFL - none, square, cube, cylinder, cone, sphere, torus, surface, terrain
+	    none    - an empty space
+	    surface - pass in a function to set 3D points from 2D coords
+	    terrain - perlin noise heightfield, uses surface
+		so could use surface to produce SL terrain and sculpties
+		    we pass a functioon to surface, it scans through x,y; we return x, y, z
+		    (terrain only changes z)
+	g3d - box, cylinder, sphere, tube, (box_strip_2d, mesh), heightfield from image, mesh files, in zips
+	position, size, rotation
+	path cut, hollow, skew, hole size, taper, top shear, slice, radius, revolutions
+	material - in this case relates to physics material, not texture material
+    + no prim turture needed, just don't implement limits
+	+ extend LL prims, allow effects to be per axis, with direction
+    + subtract a prim / sculptie / mesh, or add a negative one
+	reminds me - "invisible" texture, the one that makes stuff vanish
+    flexies
+    faces - colours and textures
+	repeats, rotations, offsets
+	animated, shiny, transparent, various bump types
+	two (+ or more) types of mapping
+    full bright, glow, as light sources
+	+ (sorta) cast and create shadows
+
++ better light controls
+    each object can be lit by only a select few light sources
+	"	has it's own set of shaders that override globals
+		    facelights, pffft
+	"	has it's own set of shaders that it uses to cast light on other objects
+    generalise LS/WL more
+
+editing controls
+    those bits and pieces that pop up in world around objects or terrain as you edit them
+
+HUD objects
+    include things like llDialog() here
+
+physics
+    basic avatar physics
+	locked, phantom, physical
+    complex physics, vehicles
+
+hovertext
+    actual hovertext, a billboard with text on it
+    avatar names
+    object / land / UI tooltips
+
+LL particle systems
+    legacy LL particle types
+    clouds, legacy clouds
+
+3D sound sources
+    land stream (ambient, not located in 3D space)
+    sound bytes
+    + prim stream
+	voice
+
+things on faces
+    + GuiLua / skang on faces
+    + notecard on a face
+	+ then the ability to rez, or wear a notecard in world
+	+ then the ability to rez, or wear a texture in world
+	    + both cases create a flat rectangular prim to put the notecard / texture onto
+    movies on faces
+    web pages on faces, with working controls
+    + VNC style thingy on a face
+
+sculpties
+    texture, mirror, inside out, stitching type
+    + animated
+    + flexy
+
+LL meshes
+    static meshes, avatar meshes, clothes meshes
+
++ proper mesh files
+    animated
+    flexy
+
+pathfinding stuff?
+    remembering that half of it is better done with NPCs and BVJ
+    though might be good for importing such things from typical game level assets
+
+new LL materials?
+    + should just be a matter of making the texture stuff more generic
+
++ portals
+    a view into some other place
+    optionally you can step through them
+    a "fully open portal" just means that other place is next door
+    could also have portals through NPC's eyes
+    no reason why either end of portal has to be stationary
+    uni / bi directional, for audio / visual / traffic
+    obviously should be security aware
+    ability to create a temporary private portal to .. exactly where you are
+	basically creates a copy, runs it, puts you in both places
+	your view can be switched between them
+	each can be changed separately, COW
+	you can invite others "come see what I can see, look into my eyes, then click them"
+	save your changes, multiple times
+	better make it obvious that you are in -
+	    Alice's copy of, onefang's copy of - "some_place", that - "Sum Wan" made, on - "SomeWhere" world.
+    a mirror would be a portal that just shows what's in front of it, but reversed
+
+
+--------------------------------------------------------------
+
+Not sure about these -
+
+In prim email and http servers, as allowed by LSL.
+
+    Basically scripts themselves, and all the bits that go along with
+that.  Essentially all scripts must be inside objects to run.  You could
+count your avatar as an object, that's running client side scripts. 
+Only you, your close personal friends, and your script doctor, should be
+allowed to edit your avatars internal scripts.
+
+
+Gestures?
+
+    Are basically a simple scripting system for putting together
+animations, sounds, and local chat text.  Can be triggered a variety of
+ways, including a text command it can replace.  Console commands are a
+separate system, but we could replace the lot with client side Lua.
+
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+What each engine has -
+
+
+SL		EFL		g3d
+
+		none
+		square
+box		cube		box
+cylinder	cylinder	cylinder
+prism
+pyramid
+tetrahydron
+hemicylinder
+cone		cone
+hemicone
+sphere		sphere		sphere
+hemisphere
+torus		torus
+tube				tube
+ring
+		surface
+		terrain
+		heightfield
+SL mesh		few mesh files	lots of mesh files
+avatar
+
+
+--------------------------------------------------------------
+
+EFL is put together like this -
+
+scenes have one root node, and one camera node
+
+each node is of a type - camera, light, or mesh, and can only hold items of that type
+    can also be of type node, meaning contains nothing, other than other nodes I assume
+nodes have position, rotation, and scale; all of which can be inherited from the parent
+nodes are an n-ary tree structure, each one can contain several other member nodes, but can only have one parent
+a node can hold only one camera or light
+a node can hold multiple meshes
+a camera can be in multiple nodes
+a mesh   can be in multiple nodes
+a light  ????????????????????????
+
+key frame based animation
+  a mesh can have multiple frames
+  each frame has it's own material and geometric data
+  only one material per mesh frame
+  frame number saved in the node
+    so each node can have the same mesh, but using a different frame / material / geometry
+  not so good for skeleton, tree, or flexy animation?
+    better off using nodes for this, but then we have to deal with flexible joints and skin weghting
+    flexies also a problem
+    not to mention cloth flapping in the breeze
+    key frames might still be useful to optimise these things
+
+a material can have five textures, attached to "attributes", which can be dis/enabled
+    ambient, diffuse, specular, emission, and normal textures
+
+
+--------------------------------------------------------------
+
+Basic description of what each of those SL / EFL object bits do -
+
+none
+    EFL - no prim
+
+square
+    EFL - square
+
+surface
+    EFL - square that is morphed via a function
+
+terrain
+    EFL - surface with perlin noise function
+
+heightfield
+    surface with image supplied height
+
+sculpty
+    surface with image supplied coords
+
+box / cube
+    Typical cube / box
+
+prism
+    cube sliced diagonally in half
+    box -> top shear.x -> -0.50
+	-> taper.x     ->  1.0
+
+pyramid
+    box -> taper.x,y     ->  1.0,1.0
+
+tetrahedron
+    prism -> taper.x,y   ->  1.0,1.0
+
+cylinder
+    solid cylinder
+
+hemicylinder
+    cylinder -> path cut b,e -> 0.250, 0.750
+
+tube
+    cylinder with a circular hole
+
+torus
+    rounded tube / donut
+
+ring
+    tube, with the top end sheared all the way in
+
+cone
+    cylinder -> taper.x,y     ->  1.0,1.0
+
+hemicone
+    cylinder -> taper.x,y     ->  1.0,1.0
+                path cut b,e -> 0.250, 0.750
+
+sphere
+    ball / sphere
+
+hemisphere
+    sphere -> path cut.e -> 0.500
+
+
+
+path cut	B, E
+    pie slice taken out of one side
+    Direction and start point depends on basic shape.
+
+hollow		H, shape
+    square, circle, or triangle hole of H size (5.0 -> 95.0)
+    default shape depends on shape of prim
+    For some the hole is completely internal, unless something else opens it
+
+twist		B, E
+    twists bottom and top respectively, +/- 180 degrees
+    sphere / tube based objects go wierd, and +/- 360 degrees
+
+taper		X, Y	not sphere
+    taper top (or bottom if negative) of the X or Y direction
+
+top shear	X, Y	not sphere
+    shear the top in X or Y directions, positive or negative
+
+slice		B, E	not sphere, ring, torus, or tube
+    cut bottom, top off shape
+
+hole size	X, Y	ring, torus, and tube only
+    size of the internal hole, different from the hollow hole
+    in the X, Y directions
+    X drags the rest of the prim along, basically shortening / flattening
+
+skew		S	ring, torus, and tube only
+    these shapes are split, skew twists the split apart in the X direction
+
+radius		R	ring, torus, and tube only
+    these shapes are split, skew twists the split apart in the Y direction
+
+revolutions	R	ring, torus, and tube only
+    interacts with skew, default is a single revolution
+    can go up to 4 turns if skewed
+
+dimple		B, E	sphere only
+    a cone taken out of the top / bottom
+
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+New object design.
+
+  Goals -
+    Do things quicker and better than EFL SURFACE.
+	Direct access to the resulting arrays, rather than passing pointers through functions for each damn point.
+	Pass a damn void pointer to the surface function.
+    Make sure things are pickable, think it might involve evas_*_aabb_add_to_frame().
+    more generic prims
+    prepare for g3d porting
+    SL "faces", and mesh files with multiple textures, can be handled by splitting them up into multiple meshes, all in the same node
+
+
+https://en.wikipedia.org/wiki/Polygonal_modeling
+
+
+CREATIONS -
+square / surface / terrain / heightfield / sculpty / billboard
+    all start with a 2D square in 3D space
+    some are mangled to suit function / image mapping coords
+    billboards are 2D sprites that always face the camera
+    imposters are billboards that replace 3D objects, when it can be hard to tell the difference, an optimization hack
+
+basic 2D shapes
+    triangle, square, polygons, circle
+
+basic paths
+    line, circle
+
+extrusion
+    a 2D shape extruded, swept along a line
+    box         is an extruded square
+    prism       is an extruded triangle
+    cylinder    is an extruded circle
+    pyramid     is an extruded square   that's got taper
+    tetrahedron is an extruded triangle that's got taper
+    cone        is an extruded circle   that's got taper
+
+box / cube / prism / pyramid / tetrahedron
+    all variations on a box
+
+cylinder / hemicylinder / cone / hemicone
+    all variations on a cylinder
+
+sphere / hemisphere
+    all variations on a sphere
+
+tube / torus / ring
+    all an extrusion         bent in a circle
+    which makes it officially a "revolve" - "generate a mesh by revolving (rotating) a shape around an axis"
+	tube  is a box       bent in a circle
+	torus is a cylinder  bent in a circle
+	ring  is a prism     bent in a circle
+	could bend things in other shapes, or even follow a path
+
+loft / path
+    a 2D shape swept along a path
+
+marching cubes?
+
+
+BINARY CREATIONS -
+boolean operations (union / intersection / difference)
+    hollow	difference between prim and a box, cylinder, or prism
+    dimple	difference between sphere and cone
+    apparently there's also add, attach, and chamfer
+      add / attach / union what's the difference?
+    chamfer is basically a procedural rounded fill in between two things
+
+
+DEFORMATIONS -
+path cut +/- X, Y, Z direction
+
+slice +/- X, Y, Z direction, top or bottom
+
+taper +/- X, Y, Z direction
+    radius is basically taper applied to a "bent in a circle"
+
+shear +/- X, Y, Z direction, top or bottom
+    skew is basically shear applied to a "bent in a circle"
+
+twist +/- X, Y, Z direction, top or bottom, number of turns
+
+revolutions +/- how many times it is bent around in a circle
+    basically a product of the length of the extrusion compared to it's width
+    the longer it is, the more revolutions it goes around
+
+bend?
+deform and weighted deform?
+    needed for animating avatars I think
+morph?
+
+
+MANIPULATIONS -
+Displace	introduce additional geometry based on a "displacement map" from the surface
+Simplify	systematically remove and average vertices
+Subdivide	smooth a course mesh by subdividing the mesh (Catmull-Clark, etc.)
+Convex Hull	generate another mesh which minimally encloses a given mesh (think shrink-wrap)
+Cut		create a hole in a mesh surface
+Stitch		close a hole in a mesh surface
+
+
+MISC. -
+splines?
+NURBS are basically splines applied to a 3D surface?
+metaballs are spheres that glomp together (positive), or force apart (negative), smoothing out the juncture?
+
+
+TEXTURES -
+    heightfields
+    sculpties
+
+    ambient	normal texture, but with what ever "ambient light" is falling on it
+    diffuse	normal texture, as it appears under white light
+    specular	shiny, reflection of the light source
+		    includes a shininess EFL value
+    emission	emits that colour, though not lighting up other things, glow map
+    normal	bump map
+		    at least one page differentiates between bump and normal maps
+
+
+    bump maps change the normal, so that the surface looks bumpy
+	SL has a bunch of fixed bump maps, though the new materials thingy might add generic bump map
+    displacement mapping is similar to bump map, only it changes the actual vertices
+
+    avoid lightmaps, pre calculated lighting is just wrong in a dynamic user created world, yet every one does it
+	might be the ambient texture above
+
+    mapping - 
+	uv		"Default" in SL.
+	planar		
+	triplanar	
+	sphere map	
+	repeats, rotations, offsets
+
+    coloured
+    animated
+    transparent
+    fullbright, glow
+
+
+LIGHTS -
+    directional, the sun
+    ambient light, global flat illumination
+    point light, cast light in all directions from a point
+    spot light, cast a cone of light from a point
+
+    has a bunch of parameters
+
+
+SHADING -
+    flat
+    Gouraud
+    Phong
+    Cel / toon
+    etc.
+    custom per face shading
+
+
+--------------------------------------------------------------
+
+How EFL builds things -
+
+    evas_canvas3d_mesh_from_primitive_set()
+      evas_common_set_model_from_primitive()
+        evas_model_set_from_*_primitive()
+          ALLOCATE_VERTEX_DATA
+          _generate_indices()
+          SET_VERTEX_DATA
+          or
+          SET_VERTEX_DATA_FROM_ARRAY()
+            evas_canvas3d_mesh_frame_add()
+              evas_canvas3d_object_change()
+            evas_canvas3d_mesh_index_data_copy_set()
+            _set_vec3_vertex_data()
+            or
+            _set_vertex_data_from_array()
+
+-->             evas_canvas3d_mesh_frame_vertex_data_copy_set()		Not private, yay!
+                evas_canvas3d_mesh_aabb_add_to_frame()			The model loaders call this as well, or evas_model_load_aabb_add_to_frame(), which wraps that.
+                							    Both private.
+                evas_canvas3d_object_change()
+
+So we should use one of these, to make sure we get the aabb added, so
+picking things works (I think that's how pick works) -
+
+evas_canvas3d_mesh_frame_vertex_data_copy_set()  calls  evas_canvas3d_mesh_aabb_add_to_frame().
+    copies the data buffer passed in
+evas_canvas3d_mesh_frame_vertex_data_set()       doesn't, but does the same thing manually.
+    uses the buffer passed in, with no copy
+
