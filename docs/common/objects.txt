@@ -554,3 +554,10 @@ evas_canvas3d_mesh_frame_vertex_data_copy_set()  calls  evas_canvas3d_mesh_aabb_
 evas_canvas3d_mesh_frame_vertex_data_set()       doesn't, but does the same thing manually.
     uses the buffer passed in, with no copy
 
+While picking DOES use the aabb, getting things to actually HAVE an aabb is hard.
+    coz the _data_set() variation doesn't work, though that's the one we want.
+	Ah, it only works if you pass in EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, instead of _NORMAL, _TANGENT, _COLOR, or _TEXCOORD
+	    Except it still doesn't!
+
+    So stick with the copy variation for now.
+

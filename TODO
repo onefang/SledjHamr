@@ -10,6 +10,14 @@ The textures are replaced by blackness, a shiny blackness sometimes.
 Only seems to happen in Elementary.
 
 
+    Evas_3D pick bug
+--------------------
+
+evas_canvas3d_mesh_frame_vertex_data_copy_set() sets the meshes aabb,
+but evas_canvas3d_mesh_frame_vertex_data_set( , EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION, )
+doesn't, though it tries to.
+
+
     Use Lua consistently
 ------------------------
 
