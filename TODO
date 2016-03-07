@@ -1,5 +1,15 @@
 FIXES -
 
+    Black bug
+-------------
+
+Evas3D and Elementary don't get along well with more than one mesh that
+has textures.  After hiding the window, by iconifying it, or moving to a
+different virtual desktop for a bit, or after waiting a few minutes. 
+The textures are replaced by blackness, a shiny blackness sometimes. 
+Only seems to happen in Elementary.
+
+
     Use Lua consistently
 ------------------------
 
