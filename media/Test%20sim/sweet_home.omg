@@ -1,0 +1,20 @@
+Stuffs =
+{
+  name = "My home sweet home.",
+  description = 'Just a pretend home for testing SledjHamr.',
+  fake = 4,
+  uuid  = '12345678-1234-4321-abcd-01234567home',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      fileName = 'sweet_home.obj',
+      kind = 'mesh',
+      materials =
+      {
+        [0] = {kind = 'face', texture = 'sweet_home_reversed.png'},
+      },
+    },
+  },
+}

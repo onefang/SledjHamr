@@ -21,6 +21,13 @@ Stuffs =
         size = {2.0, 2.0, 2.0},
         rot = {0.0, 0.0, 0.0, 0.0},
       },
+      ['sweet_home'] = 
+      {
+        fileName = 'sweet_home.omg',
+        pos = {0.0, 0.0, -12.0},
+        size = {6.0, 6.0, 3.0},
+        rot = {-0.7071067811865475, 0.0, 0.0, 0.7071067811865475},
+      },
       ['onefang%27s%20test%20bed'] = 
       {
         fileName = 'onefang%27s%20test%20bed.omg',
