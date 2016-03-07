@@ -31,6 +31,59 @@
 static Ecore_Idle_Enterer	*idler;
 
 
+// Copied from EFL, coz code hiding sucks.
+const float cube_vertices[] =
+{
+   /* positions        normals            vertex_color          tex_coords  tangents    */
+   /* Front */
+    0.5, -0.5,  0.5,   0.0, -1.0,  0.0,   0.0, 1.0, 1.0, 1.0,   0.0, 0.0,  -1.0, 0.0, 0.0,
+   -0.5, -0.5,  0.5,   0.0, -1.0,  0.0,   0.0, 1.0, 1.0, 1.0,   1.0, 0.0,  -1.0, 0.0, 0.0,
+   -0.5, -0.5, -0.5,   0.0, -1.0,  0.0,   0.0, 1.0, 1.0, 1.0,   1.0, 1.0,  -1.0, 0.0, 0.0,
+    0.5, -0.5, -0.5,   0.0, -1.0,  0.0,   0.0, 1.0, 1.0, 1.0,   0.0, 1.0,  -1.0, 0.0, 0.0,
+
+   /* Left */
+   -0.5, -0.5,  0.5,  -1.0,  0.0,  0.0,   0.0, 1.0, 0.0, 1.0,   1.0, 0.0,   0.0, 0.0, 1.0,
+   -0.5,  0.5,  0.5,  -1.0,  0.0,  0.0,   0.0, 1.0, 0.0, 1.0,   1.0, 1.0,   0.0, 0.0, 1.0,
+   -0.5,  0.5, -0.5,  -1.0,  0.0,  0.0,   0.0, 1.0, 0.0, 1.0,   0.0, 1.0,   0.0, 0.0, 1.0,
+   -0.5, -0.5, -0.5,  -1.0,  0.0,  0.0,   0.0, 1.0, 0.0, 1.0,   0.0, 0.0,   0.0, 0.0, 1.0,
+
+   /* Back */
+   -0.5,  0.5,  0.5,   0.0,  1.0,  0.0,   1.0, 0.0, 1.0, 1.0,   0.0, 0.0,   1.0, 0.0, 0.0,
+    0.5,  0.5,  0.5,   0.0,  1.0,  0.0,   1.0, 0.0, 1.0, 1.0,   1.0, 0.0,   1.0, 0.0, 0.0,
+    0.5,  0.5, -0.5,   0.0,  1.0,  0.0,   1.0, 0.0, 1.0, 1.0,   1.0, 1.0,   1.0, 0.0, 0.0,
+   -0.5,  0.5, -0.5,   0.0,  1.0,  0.0,   1.0, 0.0, 1.0, 1.0,   0.0, 1.0,   1.0, 0.0, 0.0,
+
+   /* Right */
+    0.5,  0.5,  0.5,   1.0,  0.0,  0.0,   1.0, 1.0, 0.0, 1.0,   0.0, 1.0,   0.0, 0.0, -1.0,
+    0.5, -0.5,  0.5,   1.0,  0.0,  0.0,   1.0, 1.0, 0.0, 1.0,   0.0, 0.0,   0.0, 0.0, -1.0,
+    0.5, -0.5, -0.5,   1.0,  0.0,  0.0,   1.0, 1.0, 0.0, 1.0,   1.0, 0.0,   0.0, 0.0, -1.0,
+    0.5,  0.5, -0.5,   1.0,  0.0,  0.0,   1.0, 1.0, 0.0, 1.0,   1.0, 1.0,   0.0, 0.0, -1.0,
+
+   /* Top */
+   -0.5, -0.5,  0.5,   0.0,  0.0,  1.0,   1.0, 0.0, 0.0, 1.0,   0.0, 0.0,   1.0, 0.0, 0.0,
+   -0.5,  0.5,  0.5,   0.0,  0.0,  1.0,   1.0, 0.0, 0.0, 1.0,   0.0, 1.0,   1.0, 0.0, 0.0,
+    0.5,  0.5,  0.5,   0.0,  0.0,  1.0,   1.0, 0.0, 0.0, 1.0,   1.0, 1.0,   1.0, 0.0, 0.0,
+    0.5, -0.5,  0.5,   0.0,  0.0,  1.0,   1.0, 0.0, 0.0, 1.0,   1.0, 0.0,   1.0, 0.0, 0.0,
+
+   /* Bottom */
+   -0.5, -0.5, -0.5,   0.0,  0.0, -1.0,   0.0, 0.0, 1.0, 1.0,   1.0, 0.0,  -1.0, 0.0, 0.0,
+   -0.5,  0.5, -0.5,   0.0,  0.0, -1.0,   0.0, 0.0, 1.0, 1.0,   1.0, 1.0,  -1.0, 0.0, 0.0,
+    0.5,  0.5, -0.5,   0.0,  0.0, -1.0,   0.0, 0.0, 1.0, 1.0,   0.0, 1.0,  -1.0, 0.0, 0.0,
+    0.5, -0.5, -0.5,   0.0,  0.0, -1.0,   0.0, 0.0, 1.0, 1.0,   0.0, 0.0,  -1.0, 0.0, 0.0,
+};
+
+// Copied from EFL, coz code hiding sucks.
+const unsigned short cube_indices[] =
+{
+   0,   1,  2,  6,  7,  4,
+   4,   5,  6, 10, 11,  8,
+   8,   9, 10, 14, 15, 12,
+   12, 13, 14,  2,  3,  0,
+   19, 16, 17, 17, 18, 19,
+   23, 20, 21, 21, 22, 23
+};
+
+
 static void _animateCube(ExtantzStuffs *stuffs)
 {
   static float angle = 0.0f;
@@ -525,6 +578,40 @@ static const unsigned int pixels1[] =
 };
 
 
+// This sucks, can't pass in a void pointer!
+static void _SL_RAW_terrain(Evas_Real *out_x, Evas_Real *out_y, Evas_Real *out_z, Evas_Real x, Evas_Real y)
+{
+//printf("%f,%f  ", x, y);
+   *out_x = x;
+   *out_y = y;
+   *out_z = x + y;
+}
+
+// Copied from EFL, coz code hiding sucks.
+static void _set_vertex_data_from_array(Evas_Canvas3D_Mesh *mesh, int frame, const float *data, Evas_Canvas3D_Vertex_Attrib attr,
+    int start, int attr_count, int line, int vcount)
+{
+   float *address, *out;
+   int stride, i, j;
+
+   eo_do(mesh,
+         evas_canvas3d_mesh_frame_vertex_data_copy_set(frame, attr, 0, NULL),
+         address = (float *)evas_canvas3d_mesh_frame_vertex_data_map(frame, attr),
+         stride = evas_canvas3d_mesh_frame_vertex_stride_get(frame, attr)
+   );
+
+   if (stride == 0) stride = sizeof(float) * attr_count;
+
+   for (i = 0; i < vcount; i++)
+     {
+        out = (float *)((char *)address + stride * i);
+        for (j = 0; j < attr_count; j++)
+           out[j] = data[start + (line * i) + j];
+     }
+
+   eo_do(mesh, evas_canvas3d_mesh_frame_vertex_data_unmap(frame, attr));
+}
+
 void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 {
   char buf[PATH_MAX];
@@ -623,23 +710,39 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
   //        This could be a switch.
   if (MT_CUBE == stuffs->stuffs.details.mesh->type)
   {
-    Eo *cube;
-
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
     eina_accessor_data_get(stuffs->aMaterial, 1, (void **) &mj);
 
-    cube = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
+#if 0
+    Eo *cube = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
     eo_do(cube, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_CUBE));
     me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
       evas_canvas3d_mesh_from_primitive_set(0, cube),
+    );
+#else
+    // More or less copied from EFL, so I can create my own primitives.
+    me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
+      evas_canvas3d_mesh_frame_add(0),
+      evas_canvas3d_mesh_vertex_count_set(24),
+      evas_canvas3d_mesh_index_data_set(EVAS_CANVAS3D_INDEX_FORMAT_UNSIGNED_SHORT, 36, &cube_indices[0])
+    );
 
+    _set_vertex_data_from_array(me, 0, cube_vertices, EVAS_CANVAS3D_VERTEX_ATTRIB_POSITION,  0, 3, 15, 24);
+    _set_vertex_data_from_array(me, 0, cube_vertices, EVAS_CANVAS3D_VERTEX_ATTRIB_NORMAL,    3, 3, 15, 24);
+    _set_vertex_data_from_array(me, 0, cube_vertices, EVAS_CANVAS3D_VERTEX_ATTRIB_COLOR,     6, 4, 15, 24);
+    _set_vertex_data_from_array(me, 0, cube_vertices, EVAS_CANVAS3D_VERTEX_ATTRIB_TEXCOORD, 10, 2, 15, 24);
+    _set_vertex_data_from_array(me, 0, cube_vertices, EVAS_CANVAS3D_VERTEX_ATTRIB_TANGENT,  12, 3, 15, 24);
+
+#endif
+
+    eo_do(me,
+      evas_canvas3d_mesh_vertex_assembly_set(EVAS_CANVAS3D_VERTEX_ASSEMBLY_TRIANGLES),
       evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_NORMAL_MAP),
-
       evas_canvas3d_mesh_frame_material_set(0, mi),
-
       evas_canvas3d_mesh_frame_add(20),
       evas_canvas3d_mesh_frame_material_set(20, mj)
     );
+
     eina_array_push(stuffs->mesh, me);
   }
   else if (MT_SPHERE == stuffs->stuffs.details.mesh->type)
@@ -665,13 +768,16 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
 
     eina_accessor_data_get(stuffs->aMaterial, 0, (void **) &mi);
 
+    // Attempt to create a heightfield.
     terrain = eo_add(EVAS_CANVAS3D_PRIMITIVE_CLASS, scene->evas);
-    eo_do(terrain, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_TERRAIN));
-
+    eo_do(terrain, evas_canvas3d_primitive_form_set(EVAS_CANVAS3D_MESH_PRIMITIVE_SURFACE),
+       evas_canvas3d_primitive_precision_set(256),
+       evas_canvas3d_primitive_tex_scale_set(1.0, 1.0),
+       evas_canvas3d_primitive_surface_set(_SL_RAW_terrain)
+    );
     me = eo_add(EVAS_CANVAS3D_MESH_CLASS, scene->evas,
-         evas_canvas3d_mesh_from_primitive_set(0, terrain),
+      evas_canvas3d_mesh_from_primitive_set(0, terrain),
       evas_canvas3d_mesh_frame_material_set(0, mi),
-
       evas_canvas3d_mesh_shade_mode_set(EVAS_CANVAS3D_SHADE_MODE_DIFFUSE)
     );
     eina_array_push(stuffs->mesh, me);
@@ -708,7 +814,6 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     stuffs->animateStuffs = (aniStuffs) _animateSonic;
 //  else if (4 == fake)
 //    stuffs->animateStuffs = (aniStuffs) _animateSphere;
-
 }
 
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
