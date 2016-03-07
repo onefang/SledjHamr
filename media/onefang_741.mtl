@@ -1,0 +1,71 @@
+# MakeHuman exported MTL
+# www.makehuman.org
+
+
+newmtl DefaultSkin
+Kd 0.843 0.639 0.517
+Ks 0.3 0.3 0.3
+d 1
+
+newmtl materialMaterial
+Kd 1 1 1
+Ks 0.0002166 0.0002166 0.0002166
+d 0
+map_Kd textures/Moustache_black_diff.png
+map_D textures/Moustache_black_diff.png
+
+newmtl Eye_brown
+Kd 1 1 1
+Ks 1 1 1
+d 0
+map_Kd textures/brown_eye.png
+map_D textures/brown_eye.png
+
+newmtl eyebrow008
+Kd 1 1 1
+Ks 0 0 0
+d 0
+map_Kd textures/eyebrow008.png
+map_D textures/eyebrow008.png
+
+newmtl bodyMaterial
+Kd 1 1 1
+Ks 0 0 0
+d 0
+map_Kd textures/eyelashes01.png
+map_D textures/eyelashes01.png
+
+newmtl tongue01Material
+Kd 1 1 1
+Ks 0.03137 0.03137 0.03137
+d 0
+map_Kd textures/tongue01_diffuse.png
+map_D textures/tongue01_diffuse.png
+
+newmtl fingernails_female_naturalMaterial
+Kd 0.64 0.64 0.64
+Ks 0.2 0.2 0.2
+d 0
+map_Kd textures/toenail_natural_diff.png
+map_D textures/toenail_natural_diff.png
+
+newmtl worksuit
+Kd 1 1 1
+Ks 0.03137 0.03137 0.03137
+d 0
+map_Kd textures/worksuit_diffuse.png
+map_D textures/worksuit_diffuse.png
+
+newmtl full_beardMaterial
+Kd 0.8 0.8 0.8
+Ks 0.001376 0.001376 0.001376
+d 0
+map_Kd textures/Full_beard_black_diff.png
+map_D textures/Full_beard_black_diff.png
+
+newmtl lambert8sg_23Material
+Kd 0 0 0
+Ks 0.4602 0.4602 0.4602
+d 0
+map_Kd textures/Glasses2.png
+map_D textures/Glasses2.png

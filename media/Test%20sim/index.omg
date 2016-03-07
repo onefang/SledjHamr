@@ -7,6 +7,20 @@ Stuffs =
   {
     stuffs = 
     {
+      ['onefang'] = 
+      {
+        fileName = 'onefang.omg',
+        pos = {-1.5, 0.0, 3.0},
+        size = {2.0, 2.0, 2.0},
+        rot = {0.0, 0.0, 0.0, 0.0},
+      },
+      ['FemaleTeen'] = 
+      {
+        fileName = 'FemaleTeen.omg',
+        pos = {1.5, 0.0, 3.0},
+        size = {2.0, 2.0, 2.0},
+        rot = {0.0, 0.0, 0.0, 0.0},
+      },
       ['onefang%27s%20test%20bed'] = 
       {
         fileName = 'onefang%27s%20test%20bed.omg',

@@ -1,0 +1,32 @@
+Stuffs =
+{
+  name = "Female teen.",
+  description = 'Just a pretend avatar from MakeHuman for testing SledjHamr.',
+  fake = 4,
+  uuid  = '12345678-1234-4321-abcd-0123456fteen',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      fileName = 'FemaleTeen_741.obj',
+      kind = 'mesh',
+      materials =
+      {
+        [0]  = {kind = 'face',   texture = 'textures/blue_eye.png'},
+        [1]  = {kind = 'face',   texture = 'textures/diffuse_blonde.png'},
+        [2]  = {kind = 'face',   texture = 'textures/eyebrow001.png'},
+        [3]  = {kind = 'face',   texture = 'textures/eyelashes03.png'},
+        [4]  = {kind = 'normal', texture = 'textures/normals.png'},
+        [5]  = {kind = 'face',   texture = 'textures/short01_black_diffuse.png'},
+        [6]  = {kind = 'normal', texture = 'textures/short01_normals.png'},
+        [7]  = {kind = 'face',   texture = 'textures/teeth.png'},
+        [8]  = {kind = 'face',   texture = 'textures/tongue01_diffuse.png'},
+        [9]  = {kind = 'face',   texture = 'textures/tshirt_displacement.png'},
+        [10] = {kind = 'normal', texture = 'textures/tshirt_normal.png'},
+        [11] = {kind = 'face',   texture = 'textures/tshirt_texture_white.png'},
+        [12] = {kind = 'face',   texture = 'textures/young_lightskinned_female_diffuse.png'},
+      },
+    },
+  },
+}
