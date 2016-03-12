@@ -1,0 +1,20 @@
+Stuffs =
+{
+  name = "Rough Hir",
+  description = 'Initial avatar, from MakeHuman.',
+  fake = 4,
+  uuid  = '12345678-1234-4321-abcd-0123456rough',
+  owner = '12345678-1234-4321-abcd-0123456789ab',
+  details = 
+  {
+    Mesh = 
+    {
+      fileName = 'Rough_Hir_smooth.obj',
+      kind = 'mesh',
+      materials =
+      {
+        [0] = {kind = 'face',   texture = 'textures/normals.png'},
+      },
+    },
+  },
+}

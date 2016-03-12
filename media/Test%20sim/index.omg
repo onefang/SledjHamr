@@ -7,6 +7,13 @@ Stuffs =
   {
     stuffs = 
     {
+      ['Rough_Hir'] = 
+      {
+        fileName = 'Rough_Hir.omg',
+        pos = {0.0, 0.0, 4.0},
+        size = {1.0, 1.0, 1.0},
+        rot = {0.0, 1.0, 0.0, 0.0},
+      },
       ['onefang'] = 
       {
         fileName = 'onefang.omg',
