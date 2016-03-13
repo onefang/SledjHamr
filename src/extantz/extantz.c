@@ -168,22 +168,19 @@ static void gldata_init(GLData *gld)
 }
 
 
-static void _resize_winwin(GLData *gld)
+// Called from on_pixels (), or the resize callbacks.
+static void _resize(GLData *gld)
 {
+  Evas_GL_API *gl = gld->glApi;
+
+  if (gld->elmGl)
+  {
     Evas_Coord x, y, w, h;
 
     evas_object_geometry_get(gld->elmGl, &x, &y, &w, &h);
     evas_object_move(elm_win_inlined_image_object_get (gld->winwin), x, y);
     evas_object_resize(elm_win_inlined_image_object_get(gld->winwin), w, h);
-}
-
-// Called from on_pixels (), or the Elm_gliew resize callback.
-static void _resize(GLData *gld)
-{
-   Evas_GL_API *gl = gld->glApi;
-
-   if (gld->elmGl)
-      _resize_winwin(gld);
+  }
 
 #if DO_GEARS
    GLfloat ar, m[16] = {
@@ -209,6 +206,7 @@ static void _resize(GLData *gld)
       gl->glViewport(0, 0, (GLint) gld->img_w, (GLint) gld->img_h);
 }
 
+// Only used  if (USE_IRR || DO_GEARS)
 static void _resize_gl(Evas_Object *obj)
 {
   globals *ourGlobals = evas_object_data_get(obj, "glob");
