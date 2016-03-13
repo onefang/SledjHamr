@@ -226,6 +226,7 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
 {
   globals *ourGlobals = data;
   GLData *gld = &ourGlobals->gld;
+  Scene_Data *scene = ourGlobals->scene;
   Evas_Coord h;
 
   efl_gfx_size_get(ourGlobals->win, &ourGlobals->win_w, &ourGlobals->win_h);
@@ -237,6 +238,13 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
   efl_gfx_size_set(ourGlobals->win, ourGlobals->win_w, h);
   // Stop internal windows going under the toolbar.
   evas_object_resize(ourGlobals->mainWindow->layout, ourGlobals->win_w, h);
+
+  if (scene)
+  {
+    evas_object_geometry_get(scene->image_e, &scene->x, &scene->y, &scene->w, &scene->h);
+    evas_canvas3d_scene_size_get(scene->scene, &scene->scene_w, &scene->scene_h);
+  }
+
 #if USE_EPHYSICS
   if (ourGlobals->world)
     ephysics_world_render_geometry_set(ourGlobals->world, 0, 0, -50, ourGlobals->win_w, ourGlobals->win_h, 100);

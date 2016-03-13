@@ -139,6 +139,13 @@ typedef struct _Scene_Data
 {
   Evas             *evas;
   Evas_Object      *image, *image_e;		// Our Elm image, and it's Evas image.
+
+  Evas_Coord       x, y, w, h;			// Position and size of our render image.
+  int              scene_w, scene_h;		// Size of the scene.
+
+  int              tick;			// For tracking mouse movements for tooltips.
+  Evas_Coord       mouse_x, mouse_y;
+
   Eo    *scene;
   Eo     *root_node;
   Eo     *camera_node;

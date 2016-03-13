@@ -136,46 +136,69 @@ Eina_Bool animateScene(globals *ourGlobals)
   return EINA_TRUE;
 }
 
+static Eina_Bool _tourGuide(void *data)
+{
+  Scene_Data *scene = data;
+
+  if (0 < scene->tick)		// Mouse has moved since last time we checked.
+    scene->tick = 0;
+  else if (0 == scene->tick)	// Mouse has not moved since last time we checked.
+  {
+    Evas_Coord obj_x, obj_y;
+    Evas_Real scene_x, scene_y;
+    Evas_Real s, t;
+    Eo *n;
+    Eo *m;
+    Eina_Bool pick;
+    char *name = NULL;
+
+    scene->tick--;		// Only do this once.
+
+    // Subtract image position from mouse coords.  Cancel any offset.
+    obj_x = scene->mouse_x - scene->x;
+    obj_y = scene->mouse_y - scene->y;
+
+    // Multiply the adjusted mouse coords by the ratio of widths.
+    scene_x = obj_x * scene->scene_w / (Evas_Real)scene->w;
+    scene_y = obj_y * scene->scene_h / (Evas_Real)scene->h;
+
+    // Figure out what that points to.
+    pick = evas_canvas3d_scene_pick(scene->scene, scene_x, scene_y, &n, &m, &s, &t);
+    if (pick)
+      name = evas_object_data_get(n, "Name");
+    // This is a raw Evas callback, on the Elm image internal Evas_Object.
+    // So we need to get the Elm Image back from the raw Evas_Object.
+    // Which is why we stuffed it in the scene structure.
+    if (name)
+    {
+      elm_object_tooltip_text_set(scene->image, name);
+      elm_object_tooltip_show(scene->image);
+    }
+    else
+    {
+      elm_object_tooltip_text_set(scene->image, "");
+      elm_object_tooltip_hide(scene->image);
+    }
+  }
+
+  return ECORE_CALLBACK_RENEW;
+}
+
 static void _on_mouse_move(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
 {
   Scene_Data *scene = data;
   Evas_Event_Mouse_Move *ev = einfo;
-  Evas_Coord x, y, w, h;
-  Evas_Coord obj_x, obj_y;
-  int scene_w, scene_h;
-  Evas_Real scene_x, scene_y;
-  Evas_Real s, t;
-  Eo *n;
-  Eo *m;
-  Eina_Bool pick;
-  char *name = NULL;
 
-  evas_object_geometry_get(o, &x, &y, &w, &h);
+  scene->mouse_x = ev->cur.canvas.x;
+  scene->mouse_y = ev->cur.canvas.y;
 
-  obj_x = ev->cur.canvas.x - x;
-  obj_y = ev->cur.canvas.y - y;
-
-  eo_do(scene->scene, evas_canvas3d_scene_size_get(&scene_w, &scene_h));
-
-  scene_x = obj_x * scene_w / (Evas_Real)w;
-  scene_y = obj_y * scene_h / (Evas_Real)h;
-
-  eo_do(scene->scene, pick = evas_canvas3d_scene_pick(scene_x, scene_y, &n, &m, &s, &t));
-  if (pick)
-    name = evas_object_data_get(n, "Name");
-  // This is a raw Evas callback, on the Elm image internal Evas_Object.
-  // So we need to get the Elm Image back from the raw Evas_Object.
-  // Which is why we stuffed it in the scene structure.
-  if (name)
-  {
-    elm_object_tooltip_text_set(scene->image, name);
-    elm_object_tooltip_show(scene->image);
-  }
-  else
+  if (0 == scene->tick)	// First move.
   {
     elm_object_tooltip_text_set(scene->image, "");
     elm_object_tooltip_hide(scene->image);
   }
+  // Mark mouse as having moved.
+  scene->tick++;
 }
 
 static void _on_mouse_down(void *data, Evas *e EINA_UNUSED, Evas_Object *o, void *einfo)
@@ -456,6 +479,7 @@ Scene_Data *scenriAdd(Evas_Object *win)
   // Action?
   elm_object_tooltip_text_set(scene->image, "");
   elm_object_tooltip_hide(scene->image);
+  ecore_timer_add(0.2, _tourGuide, scene);
 
 #if USE_ELM_IMG
   evas_obj_image_scene_set(scene->image_e, scene->scene);
