@@ -228,11 +228,13 @@ static void _on_resize(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA
   GLData *gld = &ourGlobals->gld;
   Evas_Coord h;
 
-  eo_do(ourGlobals->win, efl_gfx_size_get(&ourGlobals->win_w, &ourGlobals->win_h));
-  eo_do(ourGlobals->tb,
-    evas_obj_size_hint_min_get(NULL, &h),
-    efl_gfx_size_set(ourGlobals->win_w, h)
-    );
+  efl_gfx_size_get(ourGlobals->win, &ourGlobals->win_w, &ourGlobals->win_h);
+  evas_obj_size_hint_min_get(ourGlobals->win, NULL, &h);
+
+  if (10 > h)
+    h = ourGlobals->win_h;
+
+  efl_gfx_size_set(ourGlobals->win, ourGlobals->win_w, h);
   // Stop internal windows going under the toolbar.
   evas_object_resize(ourGlobals->mainWindow->layout, ourGlobals->win_w, h);
 #if USE_EPHYSICS

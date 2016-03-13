@@ -28,13 +28,11 @@ static int append(lua_State *L)
   pull_lua(L, 1, "$", &text);
   if (text)
   {
-    eo_do(history->obj,
-      elm_obj_entry_append("<br/>"),
-      // TODO - Add a time stamp, and log to a file.
-      elm_obj_entry_append(text),
-      // TODO - really need a "scroll to the bottom" here, this cursor down wont work if lines get wrapped onto multiple lines.
-      elm_obj_entry_cursor_down()
-    );
+    elm_obj_entry_append(history->obj, "<br/>");
+    // TODO - Add a time stamp, and log to a file.
+    elm_obj_entry_append(history->obj, text);
+    // TODO - really need a "scroll to the bottom" here, this cursor down wont work if lines get wrapped onto multiple lines.
+    elm_obj_entry_cursor_down(history->obj);
   }
   return 0;
 }

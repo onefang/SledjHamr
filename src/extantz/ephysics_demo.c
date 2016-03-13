@@ -33,10 +33,10 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
 
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box1 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
-    efl_file_set(buf, "blue-cube"),
-    efl_gfx_size_set(70, 70),
-    efl_gfx_position_set(ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
-    efl_gfx_visible_set(EINA_TRUE)
+    efl_file_set(eoid, buf, "blue-cube"),
+    efl_gfx_size_set(eoid, 70, 70),
+    efl_gfx_position_set(eoid, ourGlobals->win_w / 2 - 80, ourGlobals->win_h - 200),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
 
   box_body1 = ephysics_body_box_add(world);
@@ -50,10 +50,10 @@ EPhysics_World *ephysicsAdd(globals *ourGlobals)
 
   sprintf(buf, "%s/%s.edj", prefix_data_get(), EPHYSICS_TEST_THEME);
   box2 = eo_add(ELM_IMAGE_CLASS, ourGlobals->win,
-    efl_file_set(buf, "purple-cube"),
-    efl_gfx_size_set(70, 70),
-    efl_gfx_position_set(ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
-    efl_gfx_visible_set(EINA_TRUE)
+    efl_file_set(eoid, buf, "purple-cube"),
+    efl_gfx_size_set(eoid, 70, 70),
+    efl_gfx_position_set(eoid, ourGlobals->win_w / 2 + 10, ourGlobals->win_h - 200),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
 
   box_body2 = ephysics_body_box_add(world);

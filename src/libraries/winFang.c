@@ -28,7 +28,8 @@ static void _checkWindowBounds(winFang *win, Evas_Coord x, Evas_Coord y, Evas_Co
   }
   if (2 <= i)
   {
-    return;
+// TODO - Something in the last EFL update broke this check.
+//    return;
   }
 
   // Check if we are outside the parent window.
@@ -115,6 +116,7 @@ static void _onBgMove(void *data, Evas *evas, Evas_Object *obj, void *event_info
   // Looks like ePhysics wont cooperate about coords and other things, so plan B.
 
   evas_object_geometry_get(win->layout, &x, &y, &w, &h);
+//printf("_onBgMove()  MOVED %f %f %f %f\n", x, y, w, h);
   _checkWindowBounds(win, x + ev->cur.canvas.x - ev->prev.output.x, y + ev->cur.canvas.y - ev->prev.output.y, w, h);
 }
 
@@ -217,11 +219,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   // Create the layout, and add the Edje to it.
   snprintf(buf, sizeof(buf), "%s/winFang.edj", prefix_data_get());
   result->layout = eo_add(ELM_LAYOUT_CLASS, obj,
-    efl_gfx_size_set(w, h),
-    efl_gfx_position_set(x, y),
-    evas_obj_name_set(WF_LAYOUT),
-    efl_file_set(buf, WF_LAYOUT),
-    efl_gfx_visible_set(EINA_TRUE)
+    efl_gfx_size_set(eoid, w, h),
+    efl_gfx_position_set(eoid, x, y),
+    evas_obj_name_set(eoid, WF_LAYOUT),
+    efl_file_set(eoid, buf, WF_LAYOUT),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
   result->e = evas_object_evas_get(result->layout);
 
@@ -231,9 +233,9 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
   else
     snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
   result->bg = eo_add(ELM_BG_CLASS, obj,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    efl_file_set(buf, NULL),
-    efl_gfx_visible_set(EINA_TRUE)
+    evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    efl_file_set(eoid, buf, NULL),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
   elm_win_resize_object_add(result->win, result->bg);
 
@@ -242,7 +244,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 //	  // RGBA, so this is purple, and semi transparent.
 //	  color: 50   0  100   100;  // pre multiplied  R = (r * a) / 255
 //	  color: 126  0  255   100;  //                 r = (R * 255) / a
-    eo_do(result->bg, efl_gfx_color_set(50, 0, 100, 100));
+    efl_gfx_color_set(result->bg, 50, 0, 100, 100);
     // This is how fragile things are, internal windows wont show background unless swallowed into the layout,
     // but Evas_3D is fussy about it's background image, and wont work with a layout swallowed one.
     elm_object_part_content_set(result->layout, WF_BACKGROUND, result->bg);
@@ -260,10 +262,10 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   // Create our box, the default for where content goes.
   result->box = eo_add(ELM_BOX_CLASS, result->layout,
-    elm_obj_box_homogeneous_set(EINA_FALSE),
-    elm_obj_box_horizontal_set(EINA_FALSE),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND)
+    elm_obj_box_homogeneous_set(eoid, EINA_FALSE),
+    elm_obj_box_horizontal_set(eoid, EINA_FALSE),
+    evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+    evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND)
   );
   elm_object_part_content_set(result->layout, WF_BOX, result->box);
 
@@ -274,12 +276,12 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     // Something to catch clicks on the background, for moving the window.
     // Coz Elm is uncooperative with this sort of thing, so we need to stick in a rectangle.
     obj = eo_add(EVAS_RECTANGLE_CLASS, result->layout,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-	evas_obj_name_set(WF_UNDERLAY),
-        efl_gfx_color_set(0, 0, 0, 0),
-	efl_gfx_visible_set(EINA_TRUE)
-      );
+      evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+      evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+      evas_obj_name_set(eoid, WF_UNDERLAY),
+      efl_gfx_color_set(eoid, 0, 0, 0, 0),
+      efl_gfx_visible_set(eoid, EINA_TRUE)
+    );
     elm_object_part_content_set(result->layout, WF_UNDERLAY, obj);
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
 
@@ -293,21 +295,21 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
       else if (i == 2)  {cx += result->w;  cy += result->h;}
       else if (i == 3)   cy += result->h;
       result->hand[i] = eo_add(EVAS_IMAGE_CLASS, result->e,
-	evas_obj_image_filled_set(EINA_TRUE),
-	efl_file_set(buf, NULL),
-	efl_gfx_size_set(31, 31),
-	efl_gfx_position_set(cx - 15, cy - 15),
-	efl_gfx_visible_set(EINA_TRUE)
+        evas_obj_image_filled_set(eoid, EINA_TRUE),
+        efl_file_set(eoid, buf, NULL),
+        efl_gfx_size_set(eoid, 31, 31),
+        efl_gfx_position_set(eoid, cx - 15, cy - 15),
+        efl_gfx_visible_set(eoid, EINA_TRUE)
       );
       evas_object_event_callback_add(result->hand[i], EVAS_CALLBACK_MOUSE_MOVE, _onHandleMove, result);
     }
 
     // Create our window title.
     result->title = eo_add(ELM_LABEL_CLASS, result->layout,
-	evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-	evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-	efl_gfx_visible_set(EINA_TRUE)
-      );
+      evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+      evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, 0.0),
+      efl_gfx_visible_set(eoid, EINA_TRUE)
+    );
     elm_object_style_set(result->title, "marker");
     elm_object_text_set(result->title, title);
     elm_object_part_content_set(result->layout, WF_TITLE, result->title);
@@ -320,11 +322,11 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   // Create our grid, where things go if you supply coords.
   result->grid = eo_add(ELM_GRID_CLASS, result->layout,
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-    evas_obj_name_set(WF_GRID),
-    elm_obj_grid_size_set(result->w, result->h),
-    efl_gfx_visible_set(EINA_TRUE)
+    evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+    evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+    evas_obj_name_set(eoid, WF_GRID),
+    elm_obj_grid_size_set(eoid, result->w, result->h),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
 
   // This could live inside the box, but then we have to keep track of the size of it's contents.
@@ -459,25 +461,21 @@ Widget *widgetAdd(winFang *win, char *type , char *title, int x, int y, int w, i
     result->win = win;
 
     result->obj = eo_add(klass, win->win,
-      evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
-      evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-      efl_gfx_visible_set(EINA_TRUE),
-      eo_key_data_set("Widget", result)
+      evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
+      evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+      efl_gfx_visible_set(eoid, EINA_TRUE),
+      eo_key_data_set(eoid, "Widget", result)
     );
 
     if (strcmp(WT_ENTRY, type) == 0)
     {
-      eo_do(result->obj,
-        elm_obj_entry_scrollable_set(EINA_TRUE),
-        elm_obj_entry_editable_set(EINA_TRUE)
-      );
+      elm_obj_entry_scrollable_set(result->obj, EINA_TRUE);
+      elm_obj_entry_editable_set(result->obj, EINA_TRUE);
     }
     else if (strcmp(WT_TEXTBOX, type) == 0)
     {
-      eo_do(result->obj,
-        elm_obj_entry_scrollable_set(EINA_TRUE),
-        elm_obj_entry_editable_set(EINA_FALSE)
-      );
+      elm_obj_entry_scrollable_set(result->obj, EINA_TRUE);
+      elm_obj_entry_editable_set(result->obj, EINA_FALSE);
     }
 
     if (x < 0)
@@ -570,12 +568,12 @@ Evas_Object *makeMainMenu(winFang *win)
 {
   // A toolbar thingy.
   return eo_add(ELM_TOOLBAR_CLASS, win->layout,
-    evas_obj_size_hint_weight_set(EVAS_HINT_EXPAND, 0.0),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL),
-    elm_obj_toolbar_shrink_mode_set(ELM_TOOLBAR_SHRINK_MENU),
-    efl_gfx_position_set(0, 0),
-    elm_obj_toolbar_align_set(0.0)
-    );
+    evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, 0.0),
+    evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL),
+    elm_obj_toolbar_shrink_mode_set(eoid, ELM_TOOLBAR_SHRINK_MENU),
+    efl_gfx_position_set(eoid, 0, 0),
+    elm_obj_toolbar_align_set(eoid, 0.0)
+  );
 }
 
 //static void _on_menu_focus(void *data EINA_UNUSED, Evas_Object *obj, void *event_info EINA_UNUSED)

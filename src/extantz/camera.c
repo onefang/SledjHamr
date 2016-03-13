@@ -28,22 +28,26 @@ Eina_Bool animateCamera(Scene_Data *scene)
 {
   Eina_Quaternion rotate, orient, result, move;
   Evas_Real x, y, z;
+  Eo *n = scene->avatar_node;
 
-  eo_do(scene->camera_node, evas_canvas3d_node_orientation_get(EVAS_CANVAS3D_SPACE_PARENT, &orient.x, &orient.y, &orient.z, &orient.w));
   euler_to_quaternion(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
   eina_quaternion_mul(&result, &orient, &rotate);
   eina_quaternion_normalized(&result, &result);
-  eo_do(scene->camera_node, evas_canvas3d_node_orientation_set(result.x, result.y, result.z, result.w));
+  if (n)
+  {
+    evas_canvas3d_node_orientation_get(n, EVAS_CANVAS3D_SPACE_PARENT, &orient.x, &orient.y, &orient.z, &orient.w);
+    evas_canvas3d_node_orientation_set(n, result.x, result.y, result.z, result.w);
 
   eina_quaternion_set(&move, scene->move->x, scene->move->y, scene->move->z, 0);
-  eo_do(scene->camera_node, evas_canvas3d_node_position_get(EVAS_CANVAS3D_SPACE_PARENT, &x, &y, &z));
   eina_quaternion_mul(&rotate, &result, &move);
   eina_quaternion_conjugate(&result, &result);
   eina_quaternion_mul(&move, &rotate, &result);
   x += move.x;
   y += move.y;
   z += move.z;
-  eo_do(scene->camera_node, evas_canvas3d_node_position_set(x, y, z));
+    evas_canvas3d_node_position_get(n, EVAS_CANVAS3D_SPACE_PARENT, &x, &y, &z);
+    evas_canvas3d_node_position_set(n, x, y, z);
+  }
 
   return EINA_TRUE;
 }
@@ -204,19 +208,20 @@ Eo *cameraAdd(Evas *evas, Scene_Data *scene, Evas_Object *image)
   Eo *camera;
 
   camera = eo_add(EVAS_CANVAS3D_CAMERA_CLASS, evas,
-    evas_canvas3d_camera_projection_perspective_set(90.0, 1.0, 1.0, 1024.0)
-    );
+    evas_canvas3d_camera_projection_perspective_set(eoid, 90.0, 1.0, 1.0, 1024.0)
+  );
 
-  result = eo_add(EVAS_CANVAS3D_NODE_CLASS, evas, evas_canvas3d_node_constructor(EVAS_CANVAS3D_NODE_TYPE_CAMERA),
-    evas_canvas3d_node_camera_set(camera),
-    evas_canvas3d_node_position_set(0.0, 4.0, 8.0),
-//    evas_canvas3d_node_look_at_set(EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0),
-    evas_canvas3d_node_orientation_set(0.0, 0.0, 0.0, 1.0)
-    );
+  result = eo_add(EVAS_CANVAS3D_NODE_CLASS, evas,
+    evas_canvas3d_node_constructor(eoid, EVAS_CANVAS3D_NODE_TYPE_CAMERA),
+    evas_canvas3d_node_camera_set(eoid, camera),
+    evas_canvas3d_node_position_set(eoid, 0.0, 4.0, 8.0),
+//    evas_canvas3d_node_look_at_set(eoid, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 20.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0),
+    evas_canvas3d_node_orientation_set(eoid, 0.0, 0.0, 0.0, 1.0)
+  );
 //  eo_unref(camera);
 
-  eo_do(scene->root_node, evas_canvas3d_node_member_add(result));
-  eo_do(scene->scene, evas_canvas3d_scene_camera_node_set(result));
+  evas_canvas3d_node_member_add(scene->root_node, result);
+  evas_canvas3d_scene_camera_node_set(scene->scene, result);
 
   scene->move = calloc(1, sizeof(cameraMove));
   // In this code, we are making our own camera, so grab it's input when we are focused.

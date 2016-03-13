@@ -153,11 +153,9 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   wid->data = ourGlobals;
   wid->on_del = _on_fs_del;
   me->data = fs;
-  eo_do(fs,
-    elm_obj_fileselector_buttons_ok_cancel_set(EINA_FALSE),
-    elm_interface_fileselector_expandable_set(EINA_TRUE),
-    elm_interface_fileselector_folder_only_set(EINA_FALSE)
-       );
+  elm_obj_fileselector_buttons_ok_cancel_set(fs, EINA_FALSE);
+  elm_interface_fileselector_expandable_set(fs, EINA_TRUE);
+  elm_interface_fileselector_folder_only_set(fs, EINA_FALSE);
 
   elm_fileselector_path_set(fs, path);
   elm_fileselector_is_save_set(fs, save);
@@ -177,36 +175,36 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   evas_object_smart_callback_add(fs, "activated", my_fileselector_activated, me);
 
   hbox = eo_add(ELM_BOX_CLASS, me->win,
-    elm_obj_box_homogeneous_set(EINA_FALSE),
-    elm_obj_box_horizontal_set(EINA_TRUE),
-    evas_obj_size_hint_align_set(EVAS_HINT_FILL, EVAS_HINT_FILL)
+    elm_obj_box_homogeneous_set(eoid, EINA_FALSE),
+    elm_obj_box_horizontal_set(eoid, EINA_TRUE),
+    evas_obj_size_hint_align_set(eoid, EVAS_HINT_FILL, EVAS_HINT_FILL)
   );
 
   hoversel = eo_add(ELM_HOVERSEL_CLASS, hbox,
-    elm_obj_hoversel_hover_parent_set(me->win),
-    eo_key_data_set("fileselector", fs),
-    elm_obj_hoversel_item_add("name(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
-    elm_obj_hoversel_item_add("name(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_DESC),
-    elm_obj_hoversel_item_add("type(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_ASC),
-    elm_obj_hoversel_item_add("type(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_DESC),
-    elm_obj_hoversel_item_add("size(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_ASC),
-    elm_obj_hoversel_item_add("size(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_DESC),
-    elm_obj_hoversel_item_add("time(asc)",  NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_ASC),
-    elm_obj_hoversel_item_add("time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC),
-    efl_gfx_visible_set(EINA_TRUE)
-    );
+    elm_obj_hoversel_hover_parent_set(eoid, me->win),
+    eo_key_data_set(eoid, "fileselector", fs),
+    elm_obj_hoversel_item_add(eoid, "name(asc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_ASC),
+    elm_obj_hoversel_item_add(eoid, "name(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_FILENAME_DESC),
+    elm_obj_hoversel_item_add(eoid, "type(asc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_ASC),
+    elm_obj_hoversel_item_add(eoid, "type(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_TYPE_DESC),
+    elm_obj_hoversel_item_add(eoid, "size(asc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_ASC),
+    elm_obj_hoversel_item_add(eoid, "size(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_SIZE_DESC),
+    elm_obj_hoversel_item_add(eoid, "time(asc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_ASC),
+    elm_obj_hoversel_item_add(eoid, "time(desc)", NULL, ELM_ICON_NONE, _sort_selected_cb, (const void *) ELM_FILESELECTOR_SORT_BY_MODIFIED_DESC),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
+  );
   elm_object_text_set(hoversel, "sorting");
   elm_box_pack_end(hbox, hoversel);
 
   hoversel = eo_add(ELM_HOVERSEL_CLASS, hbox,
-    elm_obj_hoversel_hover_parent_set(me->win),
-    eo_key_data_set("fileselector", fs),
-    elm_obj_hoversel_item_add("tiny",   NULL, ELM_ICON_NONE, _tiny_icon_clicked,   fs),
-    elm_obj_hoversel_item_add("small",  NULL, ELM_ICON_NONE, _small_icon_clicked,  fs),
-    elm_obj_hoversel_item_add("medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs),
-    elm_obj_hoversel_item_add("big",    NULL, ELM_ICON_NONE, _big_icon_clicked,    fs),
-    efl_gfx_visible_set(EINA_TRUE)
-    );
+    elm_obj_hoversel_hover_parent_set(eoid, me->win),
+    eo_key_data_set(eoid, "fileselector", fs),
+    elm_obj_hoversel_item_add(eoid, "tiny", NULL, ELM_ICON_NONE, _tiny_icon_clicked, fs),
+    elm_obj_hoversel_item_add(eoid, "small", NULL, ELM_ICON_NONE, _small_icon_clicked, fs),
+    elm_obj_hoversel_item_add(eoid, "medium", NULL, ELM_ICON_NONE, _middle_icon_clicked, fs),
+    elm_obj_hoversel_item_add(eoid, "big", NULL, ELM_ICON_NONE, _big_icon_clicked, fs),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
+  );
   elm_object_text_set(hoversel, "size");
   elm_box_pack_end(hbox, hoversel);
   // Make sure it starts off as small, works around "hitting grid mode before hitting size not showing anything" bug.
@@ -214,17 +212,17 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
 
 
   bt = eo_add(ELM_CHECK_CLASS, hbox,
-    elm_obj_check_state_set(elm_fileselector_hidden_visible_get(fs)),
-    efl_gfx_visible_set(EINA_TRUE)
-    );
+    elm_obj_check_state_set(eoid, elm_fileselector_hidden_visible_get(fs)),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
+  );
   elm_object_text_set(bt, "hidden");
   evas_object_smart_callback_add(bt, "changed", _hidden_clicked, fs);
   elm_box_pack_end(hbox, bt);
 
   rdg = rd = eo_add(ELM_RADIO_CLASS, hbox,
-    elm_obj_radio_state_value_set(ELM_FILESELECTOR_GRID),
-    efl_gfx_visible_set(EINA_TRUE)
-    );
+    elm_obj_radio_state_value_set(eoid, ELM_FILESELECTOR_GRID),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
+  );
   elm_object_text_set(rd, "grid");
   elm_box_pack_end(hbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
@@ -232,23 +230,23 @@ winFang *filesAdd(globals *ourGlobals, char *path, Eina_Bool multi, Eina_Bool sa
   _mode_changed_cb(fs, rd, NULL);
 
   rd = eo_add(ELM_RADIO_CLASS, hbox,
-    elm_obj_radio_state_value_set(ELM_FILESELECTOR_LIST),
-    efl_gfx_visible_set(EINA_TRUE)
-    );
+    elm_obj_radio_state_value_set(eoid, ELM_FILESELECTOR_LIST),
+    efl_gfx_visible_set(eoid, EINA_TRUE)
+  );
   elm_radio_group_add(rd, rdg);
   elm_object_text_set(rd, "list");
   elm_box_pack_end(hbox, rd);
   evas_object_smart_callback_add(rd, "changed", _mode_changed_cb, fs);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
-    efl_gfx_visible_set(EINA_TRUE)
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
   elm_object_text_set(bt, "OK");
   evas_object_smart_callback_add(bt, "clicked", _OK_clicked, me);
   elm_box_pack_end(hbox, bt);
 
   bt = eo_add(ELM_BUTTON_CLASS, me->win,
-    efl_gfx_visible_set(EINA_TRUE)
+    efl_gfx_visible_set(eoid, EINA_TRUE)
   );
   elm_object_text_set(bt, "CANCEL");
   evas_object_smart_callback_add(bt, "clicked", _CANCEL_clicked, me);

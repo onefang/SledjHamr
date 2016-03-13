@@ -138,11 +138,12 @@ typedef struct
 typedef struct _Scene_Data
 {
   Evas             *evas;
-  Evas_Object      *image;		// Our Elm image.
+  Evas_Object      *image, *image_e;		// Our Elm image, and it's Evas image.
   Eo    *scene;
   Eo     *root_node;
   Eo     *camera_node;
   Eo     *light_node;
+  Eo     *avatar_node;
 
   Eo    *light;
 
