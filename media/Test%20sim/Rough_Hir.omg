@@ -2,7 +2,7 @@ Stuffs =
 {
   name = "Rough Hir",
   description = 'Initial avatar, from MakeHuman.',
-  fake = 4,
+  fake = 5,
   uuid  = '12345678-1234-4321-abcd-0123456rough',
   owner = '12345678-1234-4321-abcd-0123456789ab',
   details = 

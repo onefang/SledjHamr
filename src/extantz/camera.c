@@ -30,22 +30,22 @@ Eina_Bool animateCamera(Scene_Data *scene)
   Evas_Real x, y, z;
   Eo *n = scene->avatar_node;
 
-  euler_to_quaternion(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
-  eina_quaternion_mul(&result, &orient, &rotate);
-  eina_quaternion_normalized(&result, &result);
   if (n)
   {
     evas_canvas3d_node_orientation_get(n, EVAS_CANVAS3D_SPACE_PARENT, &orient.x, &orient.y, &orient.z, &orient.w);
+    euler_to_quaternion(&rotate, DEGREE_TO_RADIAN(scene->move->r), DEGREE_TO_RADIAN(scene->move->s), DEGREE_TO_RADIAN(scene->move->p));
+    eina_quaternion_mul(&result, &orient, &rotate);
+    eina_quaternion_normalized(&result, &result);
     evas_canvas3d_node_orientation_set(n, result.x, result.y, result.z, result.w);
 
-  eina_quaternion_set(&move, scene->move->x, scene->move->y, scene->move->z, 0);
-  eina_quaternion_mul(&rotate, &result, &move);
-  eina_quaternion_conjugate(&result, &result);
-  eina_quaternion_mul(&move, &rotate, &result);
-  x += move.x;
-  y += move.y;
-  z += move.z;
+    eina_quaternion_set(&move, -scene->move->x, scene->move->y, -scene->move->z, 0);
     evas_canvas3d_node_position_get(n, EVAS_CANVAS3D_SPACE_PARENT, &x, &y, &z);
+    eina_quaternion_mul(&rotate, &result, &move);
+    eina_quaternion_conjugate(&result, &result);
+    eina_quaternion_mul(&move, &rotate, &result);
+    x += move.x;
+    y += move.y;
+    z += move.z;
     evas_canvas3d_node_position_set(n, x, y, z);
   }
 
@@ -66,14 +66,14 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
     if (0 == strcmp(ev->key, "Escape"))
     {
     }
-    else if (0 == strcmp(ev->key, "Left"))	move->s = 2.0;
-    else if (0 == strcmp(ev->key, "Right"))	move->s = -2.0;
-    else if (0 == strcmp(ev->key, "Up"))	move->z = -2.0;
-    else if (0 == strcmp(ev->key, "Down"))	move->z = 2.0;
-    else if (0 == strcmp(ev->key, "Prior"))	move->y = 2.0;	// Pg Up for humans.
-    else if (0 == strcmp(ev->key, "Next"))	move->y = -2.0;	// Pg Dn for humans.
-    else if (0 == strcmp(ev->key, "Home"))	move->x = -2.0;
-    else if (0 == strcmp(ev->key, "End"))	move->x = 2.0;
+    else if (0 == strcmp(ev->key, "Left"))	move->s = 4.0;
+    else if (0 == strcmp(ev->key, "Right"))	move->s = -4.0;
+    else if (0 == strcmp(ev->key, "Up"))	move->z = -0.1;
+    else if (0 == strcmp(ev->key, "Down"))	move->z = 0.1;
+    else if (0 == strcmp(ev->key, "Prior"))	move->y = 0.1;	// Pg Up for humans.
+    else if (0 == strcmp(ev->key, "Next"))	move->y = -0.1;	// Pg Dn for humans.
+    else if (0 == strcmp(ev->key, "Home"))	move->x = -0.1;
+    else if (0 == strcmp(ev->key, "End"))	move->x = 0.1;
     else if (0 == strcmp(ev->key, "space"))	move->jump = 1.0;
     else PW("Unexpected down keystroke - %s", ev->key);
   }
@@ -142,6 +142,7 @@ static void _on_camera_input_down(void *data, Evas *evas, Evas_Object *obj, void
  *   Setting the x or y to be the DIFFERENCE in window position of the mouse (-1.0 to 1.0) since the last frame.
  *
  * TODO - In the Elm_glview version, 2.0 seems to be correct speed for walking, but I thought 1.0 was in Evas_GL.
+ *          And now in Evas_3D, it's different again.
  */
 
 static void _on_camera_input_up(void *data, Evas *evas, Evas_Object *obj, void *event_info)

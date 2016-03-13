@@ -821,6 +821,21 @@ void stuffsSetup(ExtantzStuffs *stuffs, Scene_Data *scene, int fake)
     stuffs->animateStuffs = (aniStuffs) _animateSonic;
 //  else if (4 == fake)
 //    stuffs->animateStuffs = (aniStuffs) _animateSphere;
+  else if (5 == fake)
+  {
+    scene->avatar_node = stuffs->mesh_node;
+
+    // Grab the camera for the avatar.
+    evas_canvas3d_node_member_del(evas_canvas3d_node_parent_get(scene->camera_node), scene->camera_node);
+    evas_canvas3d_node_member_add(scene->avatar_node, scene->camera_node);
+
+    evas_canvas3d_node_position_inherit_set(scene->camera_node, TRUE);
+    evas_canvas3d_node_position_set(scene->camera_node, 0.0, 2.5, -1.7);
+
+    evas_canvas3d_node_orientation_inherit_set(scene->camera_node, TRUE);
+    evas_canvas3d_node_orientation_set(scene->camera_node, 0.0, 0.0, 0.0, 1.0);
+    evas_canvas3d_node_look_at_set(scene->camera_node, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 0.0, 10.0, EVAS_CANVAS3D_SPACE_PARENT, 0.0, 1.0, 0.0);
+  }
 }
 
 ExtantzStuffs *addStuffs(char *uuid, char *name, char *description, char *owner,
