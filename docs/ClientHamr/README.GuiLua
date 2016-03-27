@@ -42,7 +42,7 @@ Initially GuiLua can wrap elementary / evas, with the goal of wrapping
 NAWS, just like matrix-RAD was originally planned.  Then I can put off
 writing NAWS for another decade.  lol
 
-GuiLua could also wrap HTML+ECMEScript.
+GuiLua could also wrap HTML+ECMAScript.
 
 Might be nice to have a wrapper that is a web server that generates
 standard HTML forms.  No JavaScript, no HTML5, just plain old,
