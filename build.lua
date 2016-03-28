@@ -76,7 +76,7 @@ locale_d = baseDir .. '/locale'
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
 -- Make sure any old servers are killed off.
-os.execute('./killem.sh')
+os.execute(baseDir .. '/bin//killem.sh')
 
 CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
