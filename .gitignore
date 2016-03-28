@@ -319,7 +319,6 @@
 *.diff
 *.lsl.lua
 *.lsl2
-/libraries/lemon/lemon
 /lib/constants.lsl
 media/bad_scripts/
 media/really_bad_scripts/
@@ -334,4 +333,7 @@ media/Test%20sim/test/bulk_scripts_dump/
 /src/LuaSL/LuaSL_lexer.h
 /src/LuaSL/LuaSL_LSL_lexer.c
 /src/LuaSL/LuaSL_LSL_lexer.h
+/src/others/lemon/lemon
+/src/others/netsurf/
+/src/others/polipo/
 valgrind_*.log
