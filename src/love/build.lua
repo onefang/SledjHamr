@@ -14,7 +14,7 @@ if 'nil' == type(dir) then
 end
 
 
-removeFiles(dir, {'../../media/love.edj'})
+removeFiles(dir, {data_d .. '/love.edj'})
 
-runCommand('edje_cc', dir, 'edje_cc ' .. EDJE_FLAGS .. ' love.edc ../../media/love.edj')
-compileFiles('../../love', dir, {'love'}, '')
+runCommand('edje_cc', dir, 'edje_cc ' .. EDJE_FLAGS .. ' love.edc ' .. data_d .. '/love.edj')
+compileFiles(bin_d .. '/love', dir, {'love'}, '')

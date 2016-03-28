@@ -21,7 +21,7 @@ CFLAGS = CFLAGS .. ' -DPACKAGE_LOCALE_DIR=\\"' .. locale_d .. '\\"'
 
 LDFLAGS = '-L ' .. dir .. ' ' .. LDFLAGS
 
-removeFiles(dir, {'LumbrJack.o', lib_d .. '/libLumbrJack.so', 'Runnr.o', lib_d .. '/libRunnr.so', 'SledjHamr.o', lib_d .. '/libSledjHamr.so', '../../media/winFang.edj', 'winFang.o', lib_d .. '/libwinFang.so'})
+removeFiles(dir, {'LumbrJack.o', lib_d .. '/libLumbrJack.so', 'Runnr.o', lib_d .. '/libRunnr.so', 'SledjHamr.o', lib_d .. '/libSledjHamr.so', data_d .. '/winFang.edj', 'winFang.o', lib_d .. '/libwinFang.so'})
 
 runCommand('C libraries',	dir, 'gcc ' .. CFLAGS .. ' -fPIC -c LumbrJack.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libLumbrJack.so -o ' .. lib_d .. '/libLumbrJack.so LumbrJack.o')
@@ -33,6 +33,6 @@ runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libRunnr.so -o 
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -fPIC -c SledjHamr.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libSledjHamr.so -o ' .. lib_d .. '/libSledjHamr.so SledjHamr.o')
 
-runCommand(nil,			dir, 'edje_cc ' .. EDJE_FLAGS .. ' winFang.edc ../../media/winFang.edj')
+runCommand(nil,			dir, 'edje_cc ' .. EDJE_FLAGS .. ' winFang.edc ' .. data_d .. '/winFang.edj')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -fPIC -c winFang.c')
 runCommand(nil,			dir, 'gcc ' .. CFLAGS .. ' -shared -Wl,-soname,libwinFang.so -o ' .. lib_d .. '/libwinFang.so winFang.o')

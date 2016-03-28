@@ -66,7 +66,7 @@ if 'number' == type(args) then
   end
 end
 
-bin_d    = baseDir
+bin_d    = baseDir .. '/bin'
 lib_d    = baseDir .. '/lib'
 data_d   = baseDir .. '/media'
 locale_d = baseDir .. '/locale'
@@ -94,7 +94,7 @@ if 'nil' == type(args) then
 
 --  print('_______________ BUILDING Irrlicht _______________')
   -- Irrlicht is an external project that comes with make files anyway, and doesn't otherwise pass the test.
---  runCommand('Irrlicht','libraries/irrlicht-1.8.1/source/Irrlicht', 'make')
+--  runCommand('Irrlicht','src/others/irrlicht-1.8.1/source/Irrlicht', 'make')
   buildSub('libraries',	'src/libraries')
   buildSub('LuaSL',	'src/LuaSL')
   buildSub('love',	'src/love')

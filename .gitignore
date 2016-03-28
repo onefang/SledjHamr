@@ -1,8 +1,8 @@
 /docs/SledjHamr/XMRE.txt
-/extantz
-/love
-/LuaSL
-/skang
+/bin/extantz
+/bin/love
+/bin/LuaSL
+/bin/skang
 /src/others/irrlicht-1.8.1/bin/Linux/01.HelloWorld
 /src/others/irrlicht-1.8.1/lib/Linux/libIrrlicht.a
 /src/others/irrlicht-1.8.1/source/Irrlicht/C3DSMeshFileLoader.d

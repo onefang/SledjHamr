@@ -538,6 +538,7 @@ int skangStep = 0;
 static Eina_Bool _makeSkang(void *data)
 {
   globals *ourGlobals = data;
+  char buf[PATH_MAX];
 
   switch (skangStep++)
   {
@@ -567,7 +568,8 @@ static Eina_Bool _makeSkang(void *data)
 #if USE_LOVE
     case 5 :
 //      PD("About to try connecting to a love server.");
-      reachOut("love", "./love", "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser, NULL);
+      snprintf(buf, sizeof(buf), "%s/love", prefix_bin_get());
+      reachOut("love", buf, "127.0.0.1", 8211 + 1, ourGlobals, (Ecore_Event_Handler_Cb) _add, /*(Ecore_Event_Handler_Cb) _data*/ NULL, (Ecore_Event_Handler_Cb) _del, clientParser, NULL);
       break;
 #endif
 

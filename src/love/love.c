@@ -666,7 +666,8 @@ int main(int argc, char **argv)
 
 //			    PD("About to try connecting to a LuaSL server.");
 			    // Try to connect to a local LuaSL server.
-			    reachOut("LuaSL", "./LuaSL", "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser, NULL);
+			    snprintf(buf, sizeof(buf), "%s/LuaSL", prefix_bin_get());
+			    reachOut("LuaSL", buf, "127.0.0.1", ourGlobals.port, &ourGlobals, (Ecore_Event_Handler_Cb) _addLuaSL, /*(Ecore_Event_Handler_Cb) _dataLuaSL*/ NULL, (Ecore_Event_Handler_Cb) _delLuaSL, LuaSLParser, NULL);
 
 //			    PD("Love is about to try creating a love server.");
 			    if (openArms("love", ourGlobals.address, ourGlobals.port + 1, &ourGlobals, (Ecore_Event_Handler_Cb) _addClient, NULL, (Ecore_Event_Handler_Cb) _delClient, clientParser, NULL))

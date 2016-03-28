@@ -26,7 +26,7 @@ end
 --baseDir = workingDir
 --baseDir = string.gsub(baseDir, '(.*)/.-$', '%1')
 
---bin_d    = baseDir .. ''
+--bin_d    = baseDir .. '/bin'
 --lib_d    = baseDir .. '/lib'
 --data_d   = baseDir .. '/media'
 --locale_d = baseDir .. '/locale'
