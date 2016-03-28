@@ -336,4 +336,5 @@ media/Test%20sim/test/bulk_scripts_dump/
 /src/others/lemon/lemon
 /src/others/netsurf/
 /src/others/polipo/
+/src/others/prosody/
 valgrind_*.log

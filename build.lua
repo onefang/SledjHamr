@@ -31,6 +31,11 @@ cloneGit = function (name, dir, repo, branch)
   runCommand(nil, dir, 'git clone git://' .. repo .. '/' .. name)
 end
 
+cloneHG = function (name, dir, repo, branch)
+  runCommand(nil, dir, 'rm -rf ' .. name)
+  runCommand(nil, dir, 'hg clone http://' .. repo .. ' ' .. name)
+end
+
 compileFiles = function (name, dir, files, extras)
   local objects = ''
   print('\n' .. name)
