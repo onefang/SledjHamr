@@ -9,11 +9,11 @@ Stuffs =
   {
     Mesh = 
     {
-      fileName = 'sweet_home.obj',
+      fileName = 'models/sweet_home.obj',
       kind = 'mesh',
       materials =
       {
-        [0] = {kind = 'face', texture = 'sweet_home_reversed.png'},
+        [0] = {kind = 'face', texture = 'images/sweet_home_reversed.png'},
       },
     },
   },

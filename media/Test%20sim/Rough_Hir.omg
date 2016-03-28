@@ -9,11 +9,11 @@ Stuffs =
   {
     Mesh = 
     {
-      fileName = 'Rough_Hir_smooth.obj',
+      fileName = 'models/Rough_Hir_smooth.obj',
       kind = 'mesh',
       materials =
       {
-        [0] = {kind = 'face',   texture = 'textures/normals.png'},
+        [0] = {kind = 'face',   texture = 'images/normals.png'},
       },
     },
   },

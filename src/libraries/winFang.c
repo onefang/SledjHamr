@@ -229,9 +229,9 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   // Sort out the background.
   if (result->parent)
-    snprintf(buf, sizeof(buf), "%s/sky_04.jpg", prefix_data_get());
+    snprintf(buf, sizeof(buf), "%s/images/sky_04.jpg", prefix_data_get());
   else
-    snprintf(buf, sizeof(buf), "%s/sky_03.jpg", prefix_data_get());
+    snprintf(buf, sizeof(buf), "%s/images/sky_03.jpg", prefix_data_get());
   result->bg = eo_add(ELM_BG_CLASS, obj,
     evas_obj_size_hint_weight_set(eoid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND),
     efl_file_set(eoid, buf, NULL),
@@ -252,7 +252,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
 
   // Evil hacks for no icons, until toolbars get fixed.
   if (0 == NoIcon[0])
-    snprintf(NoIcon, sizeof(NoIcon), "%s/spacer.png", prefix_data_get());
+    snprintf(NoIcon, sizeof(NoIcon), "%s/images/spacer.png", prefix_data_get());
 /*  This aint doing shit.  B-(
   obj = elm_icon_add(obj);
   elm_icon_order_lookup_set(obj, ELM_ICON_LOOKUP_THEME_FDO);
@@ -286,7 +286,7 @@ winFang *winFangAdd(winFang *parent, int x, int y, int w, int h, char *title, ch
     evas_object_event_callback_add(obj, EVAS_CALLBACK_MOUSE_DOWN, _onBgClick, result);
 
     // Create corner handles.
-    snprintf(buf, sizeof(buf), "%s/pt.png", prefix_data_get());
+    snprintf(buf, sizeof(buf), "%s/images/pt.png", prefix_data_get());
     for (i = 0; i < 4; i++)
     {
       int cx = result->x, cy = result->y;

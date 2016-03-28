@@ -13,7 +13,7 @@ Stuffs =
 -- insert prim parameters here
       materials =
       {
-        [0] = {kind = 'face', texture = 'EarthDiffuse.png'},
+        [0] = {kind = 'face', texture = 'images/EarthDiffuse.png'},
       },
     },
   },

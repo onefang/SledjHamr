@@ -9,11 +9,11 @@ Stuffs =
   {
     Mesh = 
     {
-      fileName = 'sonic.md2',
+      fileName = 'models/sonic.md2',
       kind = 'mesh',
       materials =
       {
-        [0] = {kind = 'face', texture = 'sonic.png'},
+        [0] = {kind = 'face', texture = 'images/sonic.png'},
       },
     },
   },

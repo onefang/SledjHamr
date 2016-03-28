@@ -1,4 +1,0 @@
-Shape =
-{
-  kind = 'sphere'
-}

@@ -9,19 +9,19 @@ Stuffs =
   {
     Mesh = 
     {
-      fileName = 'onefang_741.obj',
+      fileName = 'models/onefang_741.obj',
       kind = 'mesh',
       materials =
       {
-        [0]  = {kind = 'face',   texture = 'map_D textures/Moustache_black_diff.png'},
-        [1]  = {kind = 'face',   texture = 'map_D textures/brown_eye.png'},
-        [2]  = {kind = 'face',   texture = 'map_D textures/eyebrow008.png'},
-        [3]  = {kind = 'face',   texture = 'map_D textures/eyelashes01.png'},
-        [4]  = {kind = 'face',   texture = 'map_D textures/tongue01_diffuse.png'},
-        [5]  = {kind = 'face',   texture = 'map_D textures/toenail_natural_diff.png'},
-        [6]  = {kind = 'face',   texture = 'map_D textures/worksuit_diffuse.png'},
-        [7]  = {kind = 'face',   texture = 'map_D textures/Full_beard_black_diff.png'},
-        [8]  = {kind = 'face',   texture = 'map_D textures/Glasses2.png'},
+        [0]  = {kind = 'face',   texture = 'map_D images/Moustache_black_diff.png'},
+        [1]  = {kind = 'face',   texture = 'map_D images/brown_eye.png'},
+        [2]  = {kind = 'face',   texture = 'map_D images/eyebrow008.png'},
+        [3]  = {kind = 'face',   texture = 'map_D images/eyelashes01.png'},
+        [4]  = {kind = 'face',   texture = 'map_D images/tongue01_diffuse.png'},
+        [5]  = {kind = 'face',   texture = 'map_D images/toenail_natural_diff.png'},
+        [6]  = {kind = 'face',   texture = 'map_D images/worksuit_diffuse.png'},
+        [7]  = {kind = 'face',   texture = 'map_D images/Full_beard_black_diff.png'},
+        [8]  = {kind = 'face',   texture = 'map_D images/Glasses2.png'},
       },
     },
   },

@@ -12,7 +12,7 @@ Stuffs =
       kind = 'cube',
       materials =
       {
-        [0] = {kind = 'normal', texture = 'normal_lego.png'},
+        [0] = {kind = 'normal', texture = 'images/normal_lego.png'},
       },
 --[[
       parts = 
@@ -24,7 +24,7 @@ Stuffs =
           rot = { , , , ,},
           materials =
           {
-            [0] = {kind = 'face', texture = 'sonic.png'},
+            [0] = {kind = 'face', texture = 'images/sonic.png'},
           },
         },
         ['earth'] = 
@@ -34,7 +34,7 @@ Stuffs =
           rot = { , , , ,},
           materials =
           {
-            [0] = {kind = 'face', texture = 'EarthDiffuse.png'},
+            [0] = {kind = 'face', texture = 'images/EarthDiffuse.png'},
           },
         },
       },
