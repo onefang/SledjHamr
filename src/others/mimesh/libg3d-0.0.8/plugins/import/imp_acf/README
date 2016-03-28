@@ -1,0 +1,15 @@
+Airfoils:
+=========
+
+* get airfoil data in .dat format, e.g. from:
+  http://www.ae.uiuc.edu/m-selig/ads/archives/coord_seligFmt.tar.gz
+  (search for "UIUC Airfoil Coordinates Database" if this link is broken).
+  This data can be used according to the GNU General Public License.
+* set the environment variable AIRFOIL_DIR to the path containing the
+  dat files.
+* without airfoil data .acf models are still loadable, but wings and stuff
+  are missing.
+* to minimize libg3d loading times (the airfoil data is loaded when this
+  plugin is initialized, you don't have to try to load an .acf file) you
+  could only install a selected subset of airfoil data files.
+  Libg3d will complain about missing airfoil data files.

@@ -1,0 +1,87 @@
+LIBG3D:
+
+This library loads 3D models from various file formats. Its aim is to support
+basic import functionality for as much formats as possible. More complete
+support is better, of course, and the long time goal.
+
+To help developing plugins and for general use, too, there are a lot of
+basic 3d manipulation function, including vector and matrix math, common
+file reading stuff, transformations and 3d primitive support.
+
+SUPPORTED FILETYPES:
++-------+---+---+---+---+---------------------------------------------+
+|\ feat.| i | c | t | n | s                                           |
+| \     | m | o | e | o | u +-----------------------------------------+
+|  \    | p | l | x | r | b |                                         |
+|   \   | o | o | t | m | o |                                         |
+|    \  | r | r | u | a | b |                                         |
+|     \ | t | s | r | l | j |                                         |
+| type \|   |   | e | s | s | Program                                 |
++-------+---+---+---+---+---+-----------------------------------------+
+| .3mf  | x | x |   |   |   | 3D Metafile                             |
+| .3ds  | x | x | p |   |   | 3D Studio                               |
+| .ac   | x | x | x |   | x | AC3D                                    |
+| .acc  | x | x | x |   | x | AC3D with triangle strips (TORCS)       |
+| .ar   | x |   |   |   | x | Racer container files                   |
+| .ase  | x |   | p | x |   | ASCII Scene Exporter (3D Studio)        |
+| .b3d  | x | x |   |   |   | ?? (3D MetaFile format)                 |
+| .car  | x |   |   |   | x | VDrift car description                  |
+| .cob  | x | x |   |   |   | Caligari TrueSpace                      |
+| .dof  | x | x | p | x |   | Racer model files                       |
+| .dxf  | x |   |   |   |   | AutoCAD                                 |
+| .flt  | p |   |   |   |   | OpenFlight (in Progress, experimental)  |
+| .glb  | x | x | x | x |   | UltimateStunts models                   |
+| .iob  | x | x |   |   |   | Impulse Turbo Silver / Imagine          |
+| .iv   | p |   |   |   |   | SGI Inventor (ascii only)               |
+| .joe  | x |   | x | x |   | VDrift v3 .joe car models               |
+| .lcd  | x | x |   |   |   | LeoCAD                                  |
+| .lw   | x | x |   |   |   | LightWave                               |
+| .lwb  | x | x |   |   |   | LightWave                               |
+| .lwo  | x | x |   |   |   | LightWave                               |
+| .mb   | p |   |   |   | x | Maya (binary)                           |
+| .md2  | x |   |   |   |   | id Software Quake II                    |
+| .md3  | x | x | x | ? |   | id Software Quake III                   |
+| .mon  | p |   |   |   |   | Monzoom (Reflections) (experimental)    |
+| .nff  | x | x |   | x |   | Neutral File Format                     |
+| .obj  | x | x |   |   |   | Alias Wavefront Maya                    |
+| .prj  | x | ? |   |   |   | 3D Studio                               |
+| .q3o  | x | x | x |   |   | Quick3D Object                          |
+| .q3s  | x | x | x |   |   | Quick3D Scene                           |
+| .r3   | p |   |   |   |   | Reflections 3 (experimental)            |
+| .r4   | p |   |   |   |   | Reflections 4 (experimental)            |
+| .stl  | p |   |   |   |   | Standard Tessellation Language          |
+| .stla | p |   |   |   |   | Standard Tessellation Language (ASCII)  |
+| .stlb | p |   |   |   |   | Standard Tessellation Language (binary) |
+| .wrl  | x | x |   |   |   | VRML World (VRML 1 only and incomplete) |
++-------+---+---+---+---+---------------------------------------------+
+
+x: implemented
+p: partly done (strange results)
+
+Wishlist:
+
+also see http://homepage.gna.org/libg3d/references.html
+
+type                  docs  ex.avail. status
+-----------------------------------------------------------------------------
+.wrl (VRML 2.0)       yes   yes       not started yet
+.x3d (X3D)            yes   yes       not started yet
+.max (3D Studio MAX)  no    yes       probably not (no docs, no clue)
+.blend (Blender)      (yes) yes       difficult format, low priority
+.w3d (Shockwave 3D)   no    yes       not started yet
+.c4d (Cinema 4D)      no    yes       not started yet
+.br4 (Brice 4)        no    yes       not started yet
+.x (DirectX)          ?     yes       not started yet
+.3dm (Rhino 2)        ?     yes       not started yet
+
+other model plugins:
+* heightfield: generates a landscape from an image
+* test: some tests (primitives, transformation...)
+* rbh: experimental, maybe Discworld Noir models (or no 3D at all ;))
+
+IMAGE PLUGINS:
+
+* bmp: Windows Bitmap, uncompressed, only 8-bit tested
+* sgi: SGI RGB files, uncompressed & RLE, 8, 24, 32 bit
+* GdkPixbuf: everything GdkPixbuf can load, GTK 2.x required
+

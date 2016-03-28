@@ -1,0 +1,727 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>plugins</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="ch02.html" title="Plugin interface">
+<link rel="next" href="libg3d-stream.html" title="stream">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="ch02.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-stream.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-plugins.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-plugins.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-plugins"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-plugins.top_of_page"></a>plugins</span></h2>
+<p>plugins — G3DPlugin interface</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-plugins.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/plugins.h&gt;
+
+enum                <a class="link" href="libg3d-plugins.html#G3DPluginType" title="enum G3DPluginType">G3DPluginType</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            (<a class="link" href="libg3d-plugins.html#G3DPluginInitFunc" title="G3DPluginInitFunc ()">*G3DPluginInitFunc</a>)                (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+void                (<a class="link" href="libg3d-plugins.html#G3DPluginCleanupFunc" title="G3DPluginCleanupFunc ()">*G3DPluginCleanupFunc</a>)             (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-plugins.html#G3DPluginLoadModelFunc" title="G3DPluginLoadModelFunc ()">*G3DPluginLoadModelFunc</a>)           (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-plugins.html#G3DPluginLoadModelFromStreamFunc" title="G3DPluginLoadModelFromStreamFunc ()">*G3DPluginLoadModelFromStreamFunc</a>) (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-plugins.html#G3DPluginLoadImageFunc" title="G3DPluginLoadImageFunc ()">*G3DPluginLoadImageFunc</a>)           (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-plugins.html#G3DPluginLoadImageStreamFunc" title="G3DPluginLoadImageStreamFunc ()">*G3DPluginLoadImageStreamFunc</a>)     (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              (<a class="link" href="libg3d-plugins.html#G3DPluginGetDescFunc" title="G3DPluginGetDescFunc ()">*G3DPluginGetDescFunc</a>)             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>**             (<a class="link" href="libg3d-plugins.html#G3DPluginGetExtFunc" title="G3DPluginGetExtFunc ()">*G3DPluginGetExtFunc</a>)              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+                    <a class="link" href="libg3d-plugins.html#G3DPlugin" title="G3DPlugin">G3DPlugin</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-plugins.html#g3d-plugins-init" title="g3d_plugins_init ()">g3d_plugins_init</a>                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+void                <a class="link" href="libg3d-plugins.html#g3d-plugins-cleanup" title="g3d_plugins_cleanup ()">g3d_plugins_cleanup</a>                 (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-plugins.html#g3d-plugins-load-model" title="g3d_plugins_load_model ()">g3d_plugins_load_model</a>              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-plugins.html#g3d-plugins-load-model-from-stream" title="g3d_plugins_load_model_from_stream ()">g3d_plugins_load_model_from_stream</a>  (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-plugins.html#g3d-plugins-load-image" title="g3d_plugins_load_image ()">g3d_plugins_load_image</a>              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-plugins.html#g3d-plugins-load-image-from-stream" title="g3d_plugins_load_image_from_stream ()">g3d_plugins_load_image_from_stream</a>  (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>**             <a class="link" href="libg3d-plugins.html#g3d-plugins-get-image-extensions" title="g3d_plugins_get_image_extensions ()">g3d_plugins_get_image_extensions</a>    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-plugins.description"></a><h2>Description</h2>
+<p>
+Direct interaction with the plugin system is normally not needed when using
+libg3d. It may be required when writing a plugin which should load a
+<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage"><span class="type">G3DImage</span></a> or a <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel"><span class="type">G3DModel</span></a> with another plugin.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-plugins.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DPluginType"></a><h3>enum G3DPluginType</h3>
+<pre class="programlisting">typedef enum {
+	G3D_PLUGIN_UNKNOWN = 0x00,
+	G3D_PLUGIN_IMPORT,
+	G3D_PLUGIN_IMAGE
+} G3DPluginType;
+</pre>
+<p>
+Type of plugin.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="G3D-PLUGIN-UNKNOWN:CAPS"></a><span class="term"><code class="literal">G3D_PLUGIN_UNKNOWN</code></span></p></td>
+<td> unknown plugin type
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-PLUGIN-IMPORT:CAPS"></a><span class="term"><code class="literal">G3D_PLUGIN_IMPORT</code></span></p></td>
+<td> model import plugin
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-PLUGIN-IMAGE:CAPS"></a><span class="term"><code class="literal">G3D_PLUGIN_IMAGE</code></span></p></td>
+<td> image loading plugin
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginInitFunc"></a><h3>G3DPluginInitFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            (*G3DPluginInitFunc)                (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Prototype for <code class="function">plugin_init()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> opaque plugin data.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginCleanupFunc"></a><h3>G3DPluginCleanupFunc ()</h3>
+<pre class="programlisting">void                (*G3DPluginCleanupFunc)             (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Prototype for <code class="function">plugin_cleanup()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque plugin data
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginLoadModelFunc"></a><h3>G3DPluginLoadModelFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DPluginLoadModelFunc)           (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Prototype for <code class="function">plugin_load_model()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> file name of model
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque plugin data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginLoadModelFromStreamFunc"></a><h3>G3DPluginLoadModelFromStreamFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DPluginLoadModelFromStreamFunc) (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Prototype for <code class="function">plugin_load_model_from_stream()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to load from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque plugin data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginLoadImageFunc"></a><h3>G3DPluginLoadImageFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DPluginLoadImageFunc)           (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Prototype for <code class="function">plugin_load_image()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> file name of image
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>image</code></em> :</span></p></td>
+<td> image structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque plugin data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginLoadImageStreamFunc"></a><h3>G3DPluginLoadImageStreamFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DPluginLoadImageStreamFunc)     (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Prototype for <code class="function">plugin_load_image_from_stream()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to load from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>image</code></em> :</span></p></td>
+<td> image structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque plugin data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginGetDescFunc"></a><h3>G3DPluginGetDescFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              (*G3DPluginGetDescFunc)             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Prototype for <code class="function">plugin_description()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly-allocated string containing the description of the plugin.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPluginGetExtFunc"></a><h3>G3DPluginGetExtFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>**             (*G3DPluginGetExtFunc)              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Prototype for <code class="function">plugin_extensions()</code>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> NULL-terminated list of file extensions supported by this plugin.
+Free with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strfreev"
+><code class="function">g_strfreev()</code></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DPlugin"></a><h3>G3DPlugin</h3>
+<pre class="programlisting">typedef struct {
+} G3DPlugin;
+</pre>
+<p>
+A libg3d plugin.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-init"></a><h3>g3d_plugins_init ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_plugins_init                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Initializes the plugin system. This is implicitly done when using
+<a class="link" href="libg3d-context.html#g3d-context-new" title="g3d_context_new ()"><code class="function">g3d_context_new()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid <a class="link" href="libg3d-context.html#G3DContext" title="G3DContext"><span class="type">G3DContext</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-cleanup"></a><h3>g3d_plugins_cleanup ()</h3>
+<pre class="programlisting">void                g3d_plugins_cleanup                 (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Clean up the plugin system. Usually done by <a class="link" href="libg3d-context.html#g3d-context-free" title="g3d_context_free ()"><code class="function">g3d_context_free()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-load-model"></a><h3>g3d_plugins_load_model ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_plugins_load_model              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Try to load a model from file using import plugins.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> file name of model to load
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> model structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-load-model-from-stream"></a><h3>g3d_plugins_load_model_from_stream ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_plugins_load_model_from_stream  (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Try to load a model from stream using import plugins.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to load model from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> model structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-load-image"></a><h3>g3d_plugins_load_image ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_plugins_load_image              (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image);</pre>
+<p>
+Try to load an image from file using import plugins.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> file name of image to load
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>image</code></em> :</span></p></td>
+<td> image structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-load-image-from-stream"></a><h3>g3d_plugins_load_image_from_stream ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_plugins_load_image_from_stream  (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image);</pre>
+<p>
+Try to load an image from stream using import plugins.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to load image from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>image</code></em> :</span></p></td>
+<td> image structure to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-plugins-get-image-extensions"></a><h3>g3d_plugins_get_image_extensions ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>**             g3d_plugins_get_image_extensions    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Get the supported image type extensions.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> NULL-terminated list of image file extensions supported by this
+plugin. Free with <a
+href="/usr/share/gtk-doc/html/glib/glib-String-Utility-Functions.html#g-strfreev"
+><code class="function">g_strfreev()</code></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-plugins.see-also"></a><h2>See Also</h2>
+<a class="link" href="libg3d-plugins.html#G3DPlugin" title="G3DPlugin"><span class="type">G3DPlugin</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

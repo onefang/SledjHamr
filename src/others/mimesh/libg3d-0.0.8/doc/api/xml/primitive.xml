@@ -1,0 +1,302 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-primitive">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-primitive.top_of_page">primitive</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>primitive</refname>
+<refpurpose>3D primitive generation functions</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-primitive.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/primitive.h&gt;
+
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-cube">g3d_primitive_cube</link>                  (<link linkend="G3DFloat">G3DFloat</link> width,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="G3DFloat">G3DFloat</link> depth,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-box">g3d_primitive_box</link>                   (<link linkend="G3DFloat">G3DFloat</link> width,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="G3DFloat">G3DFloat</link> depth,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-box-strip-2d">g3d_primitive_box_strip_2d</link>          (<link linkend="guint32">guint32</link> vcnt,
+                                                         <link linkend="gdouble">gdouble</link> *vdata,
+                                                         <link linkend="gdouble">gdouble</link> height,
+                                                         <link linkend="gdouble">gdouble</link> width,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-mesh">g3d_primitive_mesh</link>                  (<link linkend="guint32">guint32</link> m,
+                                                         <link linkend="guint32">guint32</link> n,
+                                                         <link linkend="gboolean">gboolean</link> wrap_m,
+                                                         <link linkend="gboolean">gboolean</link> wrap_n,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-cylinder">g3d_primitive_cylinder</link>              (<link linkend="G3DFloat">G3DFloat</link> radius,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="guint32">guint32</link> sides,
+                                                         <link linkend="gboolean">gboolean</link> top,
+                                                         <link linkend="gboolean">gboolean</link> bottom,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-tube">g3d_primitive_tube</link>                  (<link linkend="G3DFloat">G3DFloat</link> r_in,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r_out,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="guint32">guint32</link> sides,
+                                                         <link linkend="gboolean">gboolean</link> top,
+                                                         <link linkend="gboolean">gboolean</link> bottom,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-primitive-sphere">g3d_primitive_sphere</link>                (<link linkend="G3DFloat">G3DFloat</link> radius,
+                                                         <link linkend="guint32">guint32</link> vseg,
+                                                         <link linkend="guint32">guint32</link> hseg,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-primitive.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Primitives are objects containing basic 3D geometrical structures. A
+variety of them can be created using these functions.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-primitive.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="g3d-primitive-cube" role="function">
+<title>g3d_primitive_cube ()</title>
+<indexterm zone="g3d-primitive-cube"><primary>g3d_primitive_cube</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_cube                  (<link linkend="G3DFloat">G3DFloat</link> width,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="G3DFloat">G3DFloat</link> depth,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates an object containing a box. It is deprecated and now a wrapper for
+<link linkend="g3d-primitive-box"><function>g3d_primitive_box()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>width</parameter>&nbsp;:</term>
+<listitem><simpara> the width of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>height</parameter>&nbsp;:</term>
+<listitem><simpara> the height of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>depth</parameter>&nbsp;:</term>
+<listitem><simpara> the depth of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> the material to use for all faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the box object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-box" role="function">
+<title>g3d_primitive_box ()</title>
+<indexterm zone="g3d-primitive-box"><primary>g3d_primitive_box</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_box                   (<link linkend="G3DFloat">G3DFloat</link> width,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="G3DFloat">G3DFloat</link> depth,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates an object containing a box.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>width</parameter>&nbsp;:</term>
+<listitem><simpara> the width of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>height</parameter>&nbsp;:</term>
+<listitem><simpara> the height of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>depth</parameter>&nbsp;:</term>
+<listitem><simpara> the depth of the box
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> the material to use for all faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the box object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-box-strip-2d" role="function">
+<title>g3d_primitive_box_strip_2d ()</title>
+<indexterm zone="g3d-primitive-box-strip-2d"><primary>g3d_primitive_box_strip_2d</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_box_strip_2d          (<link linkend="guint32">guint32</link> vcnt,
+                                                         <link linkend="gdouble">gdouble</link> *vdata,
+                                                         <link linkend="gdouble">gdouble</link> height,
+                                                         <link linkend="gdouble">gdouble</link> width,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates a strip of box segments defined by corner center points
+using two-dimensional data (x/z plane).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>vcnt</parameter>&nbsp;:</term>
+<listitem><simpara> number of control points
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>vdata</parameter>&nbsp;:</term>
+<listitem><simpara> 2-dimensional control point data (2 * vcnt * gdouble)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>height</parameter>&nbsp;:</term>
+<listitem><simpara> height of resulting strip (y component)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>width</parameter>&nbsp;:</term>
+<listitem><simpara> width of strip (corner diameter)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> material to use for faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> strip object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-mesh" role="function">
+<title>g3d_primitive_mesh ()</title>
+<indexterm zone="g3d-primitive-mesh"><primary>g3d_primitive_mesh</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_mesh                  (<link linkend="guint32">guint32</link> m,
+                                                         <link linkend="guint32">guint32</link> n,
+                                                         <link linkend="gboolean">gboolean</link> wrap_m,
+                                                         <link linkend="gboolean">gboolean</link> wrap_n,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generate a mesh consisting of m * n vertices. The vertex data is
+initialized with (0.0, 0.0, 0.0) and has to be set to something
+useful.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>m</parameter>&nbsp;:</term>
+<listitem><simpara> number of vertices in m direction
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>n</parameter>&nbsp;:</term>
+<listitem><simpara> number of vertices in n direction
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>wrap_m</parameter>&nbsp;:</term>
+<listitem><simpara> wrap around in m direction
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>wrap_n</parameter>&nbsp;:</term>
+<listitem><simpara> wrap around in n direction
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> material to use for faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> mesh object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-cylinder" role="function">
+<title>g3d_primitive_cylinder ()</title>
+<indexterm zone="g3d-primitive-cylinder"><primary>g3d_primitive_cylinder</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_cylinder              (<link linkend="G3DFloat">G3DFloat</link> radius,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="guint32">guint32</link> sides,
+                                                         <link linkend="gboolean">gboolean</link> top,
+                                                         <link linkend="gboolean">gboolean</link> bottom,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates an object containing a cylinder.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>radius</parameter>&nbsp;:</term>
+<listitem><simpara> the radius of the cylinder
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>height</parameter>&nbsp;:</term>
+<listitem><simpara> the height of the side faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>sides</parameter>&nbsp;:</term>
+<listitem><simpara> number of side faces (number of circle segments)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>top</parameter>&nbsp;:</term>
+<listitem><simpara> add top faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bottom</parameter>&nbsp;:</term>
+<listitem><simpara> add bottom faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> material to use for faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> cylinder object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-tube" role="function">
+<title>g3d_primitive_tube ()</title>
+<indexterm zone="g3d-primitive-tube"><primary>g3d_primitive_tube</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_tube                  (<link linkend="G3DFloat">G3DFloat</link> r_in,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r_out,
+                                                         <link linkend="G3DFloat">G3DFloat</link> height,
+                                                         <link linkend="guint32">guint32</link> sides,
+                                                         <link linkend="gboolean">gboolean</link> top,
+                                                         <link linkend="gboolean">gboolean</link> bottom,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates an object containing a tube (a cylinder with a hole).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>r_in</parameter>&nbsp;:</term>
+<listitem><simpara> inner radius
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>r_out</parameter>&nbsp;:</term>
+<listitem><simpara> outer radius
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>height</parameter>&nbsp;:</term>
+<listitem><simpara> the height of the side faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>sides</parameter>&nbsp;:</term>
+<listitem><simpara> number of side faces (number of circle segments)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>top</parameter>&nbsp;:</term>
+<listitem><simpara> add top faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bottom</parameter>&nbsp;:</term>
+<listitem><simpara> add bottom faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> material to use for faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> tube object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-primitive-sphere" role="function">
+<title>g3d_primitive_sphere ()</title>
+<indexterm zone="g3d-primitive-sphere"><primary>g3d_primitive_sphere</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_primitive_sphere                (<link linkend="G3DFloat">G3DFloat</link> radius,
+                                                         <link linkend="guint32">guint32</link> vseg,
+                                                         <link linkend="guint32">guint32</link> hseg,
+                                                         <link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Generates an object containing a sphere.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>radius</parameter>&nbsp;:</term>
+<listitem><simpara> radius
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>vseg</parameter>&nbsp;:</term>
+<listitem><simpara> number of vertical segments
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>hseg</parameter>&nbsp;:</term>
+<listitem><simpara> number of horizontal segments
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> material to use for faces
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> sphere object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

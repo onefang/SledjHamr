@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>model</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch01.html" title="Application interface">
+<link rel="prev" href="libg3d-context.html" title="context">
+<link rel="next" href="libg3d-object.html" title="object">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-context.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-object.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-model.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-model.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-model"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-model.top_of_page"></a>model</span></h2>
+<p>model — Model manipulation functions</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-model.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/g3d.h&gt;
+
+#define             <a class="link" href="libg3d-model.html#G3D-MODEL-CENTER:CAPS" title="G3D_MODEL_CENTER">G3D_MODEL_CENTER</a>
+#define             <a class="link" href="libg3d-model.html#G3D-MODEL-NOCHECK:CAPS" title="G3D_MODEL_NOCHECK">G3D_MODEL_NOCHECK</a>
+#define             <a class="link" href="libg3d-model.html#G3D-MODEL-OPTIMIZE:CAPS" title="G3D_MODEL_OPTIMIZE">G3D_MODEL_OPTIMIZE</a>
+#define             <a class="link" href="libg3d-model.html#G3D-MODEL-SCALE:CAPS" title="G3D_MODEL_SCALE">G3D_MODEL_SCALE</a>
+                    <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>;
+<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           <a class="link" href="libg3d-model.html#g3d-model-new" title="g3d_model_new ()">g3d_model_new</a>                       (void);
+<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           <a class="link" href="libg3d-model.html#g3d-model-load" title="g3d_model_load ()">g3d_model_load</a>                      (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);
+<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           <a class="link" href="libg3d-model.html#g3d-model-load-full" title="g3d_model_load_full ()">g3d_model_load_full</a>                 (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-model.html#g3d-model-check" title="g3d_model_check ()">g3d_model_check</a>                     (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-model.html#g3d-model-center" title="g3d_model_center ()">g3d_model_center</a>                    (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-model.html#g3d-model-transform" title="g3d_model_transform ()">g3d_model_transform</a>                 (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+void                <a class="link" href="libg3d-model.html#g3d-model-clear" title="g3d_model_clear ()">g3d_model_clear</a>                     (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+void                <a class="link" href="libg3d-model.html#g3d-model-free" title="g3d_model_free ()">g3d_model_free</a>                      (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-model.html#g3d-model-get-object-by-name" title="g3d_model_get_object_by_name ()">g3d_model_get_object_by_name</a>        (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-model.description"></a><h2>Description</h2>
+<p>
+A model is a group of objects. All information loaded from a file by libg3d
+is found in this model.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-model.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3D-MODEL-CENTER:CAPS"></a><h3>G3D_MODEL_CENTER</h3>
+<pre class="programlisting">#define G3D_MODEL_CENTER          (1 &lt;&lt; 1)
+</pre>
+<p>
+The model should be centered around the (0,0,0).</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-MODEL-NOCHECK:CAPS"></a><h3>G3D_MODEL_NOCHECK</h3>
+<pre class="programlisting">#define G3D_MODEL_NOCHECK         (1 &lt;&lt; 3)
+</pre>
+<p>
+The common checks should be disabled. The checks include:
+</p>
+<div class="itemizedlist"><ul type="disc">
+<li>faces have at least 3 indices</li>
+<li>face indices are &lt;= number of vertices</li>
+<li>material of faces is not NULL</li>
+</ul></div>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-MODEL-OPTIMIZE:CAPS"></a><h3>G3D_MODEL_OPTIMIZE</h3>
+<pre class="programlisting">#define G3D_MODEL_OPTIMIZE        (1 &lt;&lt; 2)
+</pre>
+<p>
+The model material/object/face lists should be serialized to some private
+arrays (deprecated).</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-MODEL-SCALE:CAPS"></a><h3>G3D_MODEL_SCALE</h3>
+<pre class="programlisting">#define G3D_MODEL_SCALE           (1 &lt;&lt; 0)
+</pre>
+<p>
+The model should be scaled to a maximum extension of +/- 10.0.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DModel"></a><h3>G3DModel</h3>
+<pre class="programlisting">typedef struct {
+	gchar *filename;
+	GSList *materials;
+	GSList *objects;
+} G3DModel;
+</pre>
+<p>
+A 3D model.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *<em class="structfield"><code>filename</code></em>;</span></p></td>
+<td> file name or URI of loaded model, may be set by application
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *<em class="structfield"><code>materials</code></em>;</span></p></td>
+<td> list of materials (<a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial"><span class="type">G3DMaterial</span></a>)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *<em class="structfield"><code>objects</code></em>;</span></p></td>
+<td> list of objects (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject"><span class="type">G3DObject</span></a>)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-new"></a><h3>g3d_model_new ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           g3d_model_new                       (void);</pre>
+<p>
+This functions allocates and initializes a new G3DModel.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated G3DModel
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-load"></a><h3>g3d_model_load ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           g3d_model_load                      (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);</pre>
+<p>
+Loads a model from a file. The model is checked, centered, resized,
+optimized.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> the file name of the model to load
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the loaded model or NULL in case of an error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-load-full"></a><h3>g3d_model_load_full ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a>*           g3d_model_load_full                 (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);</pre>
+<p>
+Loads a model from a file. Depending on <em class="parameter"><code>flags</code></em> the model is checked,
+centered, resized, optimized.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> the file name of the model to load
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> object manipulation flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the loaded model or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-check"></a><h3>g3d_model_check ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_model_check                     (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Checks whether a model returned by plugin is valid.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model to check
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-center"></a><h3>g3d_model_center ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_model_center                    (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Translates all object coordinates that the object center is at (0, 0, 0)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model to center
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-transform"></a><h3>g3d_model_transform ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_model_transform                 (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Transform all toplevel objects in model with matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> transformation matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-clear"></a><h3>g3d_model_clear ()</h3>
+<pre class="programlisting">void                g3d_model_clear                     (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Removes all objects from a model.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model to clear
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-free"></a><h3>g3d_model_free ()</h3>
+<pre class="programlisting">void                g3d_model_free                      (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model);</pre>
+<p>
+Frees all memory allocated for the model including all objects, materials
+and textures.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model to free
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-model-get-object-by-name"></a><h3>g3d_model_get_object_by_name ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_model_get_object_by_name        (<a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);</pre>
+<p>
+Searches the object tree for an object with the given name.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> the model containing all objects
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> the name of the requested object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the requested object or NULL if non was found
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

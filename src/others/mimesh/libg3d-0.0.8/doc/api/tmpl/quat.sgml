@@ -1,0 +1,92 @@
+<!-- ##### SECTION Title ##### -->
+quat
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### TYPEDEF G3DQuat ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION g3d_quat_add ##### -->
+<para>
+
+</para>
+
+@qr: 
+@q1: 
+@q2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_quat_normalize ##### -->
+<para>
+
+</para>
+
+@q: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_quat_rotate ##### -->
+<para>
+
+</para>
+
+@q: 
+@axis: 
+@angle: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_quat_to_matrix ##### -->
+<para>
+
+</para>
+
+@q: 
+@matrix: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_quat_to_rotation_xyz ##### -->
+<para>
+
+</para>
+
+@q: 
+@rx: 
+@ry: 
+@rz: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_quat_trackball ##### -->
+<para>
+
+</para>
+
+@q: 
+@x1: 
+@y1: 
+@x2: 
+@y2: 
+@r: 
+@Returns: 
+
+

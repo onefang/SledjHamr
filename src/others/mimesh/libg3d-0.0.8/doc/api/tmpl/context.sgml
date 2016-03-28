@@ -1,0 +1,137 @@
+<!-- ##### SECTION Title ##### -->
+context
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT G3DContext ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION g3d_context_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_context_free ##### -->
+<para>
+
+</para>
+
+@context: 
+
+
+<!-- ##### USER_FUNCTION G3DSetBgColorFunc ##### -->
+<para>
+
+</para>
+
+@r: 
+@g: 
+@b: 
+@a: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DUpdateInterfaceFunc ##### -->
+<para>
+
+</para>
+
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DUpdateProgressBarFunc ##### -->
+<para>
+
+</para>
+
+@percentage: 
+@show: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_context_update_interface ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_context_set_update_interface_func ##### -->
+<para>
+
+</para>
+
+@context: 
+@func: 
+@user_data: 
+
+
+<!-- ##### FUNCTION g3d_context_update_progress_bar ##### -->
+<para>
+
+</para>
+
+@context: 
+@percentage: 
+@visibility: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_context_set_update_progress_bar_func ##### -->
+<para>
+
+</para>
+
+@context: 
+@func: 
+@user_data: 
+
+
+<!-- ##### FUNCTION g3d_context_set_bgcolor ##### -->
+<para>
+
+</para>
+
+@context: 
+@r: 
+@g: 
+@b: 
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_context_set_set_bgcolor_func ##### -->
+<para>
+
+</para>
+
+@context: 
+@func: 
+@user_data: 
+
+

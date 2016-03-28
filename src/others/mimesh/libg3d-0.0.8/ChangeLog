@@ -1,0 +1,59 @@
+Changes since version 0.0.7:
+	* imp_dae: build fix for !HAVE_LIBGSF case
+	* general: LGPL boilerplates and copyright years updated
+	* doc: API documentation updated
+
+Changes since version 0.0.6:
+	* doc: API documentation updated
+	* plugins: converted to G3DStream interface
+	* plugins: the models loaded by some plugins are rotated to fit
+		a common coordinate system (y axis pointing up)
+	* img_bmp: fixed wrong colors
+	* imp_flt: some improvements
+	* imp_ldraw: LDraw plugin, usable
+	* imp_dae: COLLADA plugin, mostly usable
+	* imp_dxf: mostly rewritten, now supports POLYLINE entries
+	* imp_kmz: G**gle Earth plugin, mostly usable
+	* imp_acf: experimental X-Plane 6/7 plugin, usable to some degree
+	* imp_blend: experimental Blender plugin, not really usable
+	* imp_3dm: experimental OpenNURBS plugin, not really usable
+	* imp_c4d: experimental Cinema 4D plugin, not usable
+	* imp_skp: experimental SketchUp plugin, not usable
+	* imp_vrml2: experimental VRML 97 plugin w/o using flex, not usable
+	* general: the usual bug fixes and minor improvements
+	* general: endianess fixes, tested on 64-bit big endian target
+	* build: no more weak linking, now works on Cygwin
+
+Changes since version 0.0.5:
+	* plugins: try to detect file type with libmagic if available
+	* general: there are some minor API changes which require the
+		reconfiguration and recompilation of programs using libg3d
+	* imp_flt: very basic model support for OpenFlight
+	* imp_r4: basic support for Reflections/Monzoom models
+	* imp_glb: texture support
+	* doc: a little bit more API documentation
+
+(Version 0.0.4 was not released)
+
+Changes since version 0.0.3:
+	* imp_3ds: reorganization
+	* imp_3ds: better texture support
+	* imp_iob: better material support
+	* general: more cleanup on exit
+	* general: usual bugfixes
+	* imp_ar: new Racer (ar, dof) plugin
+	* imp_joe: new VDrift (joe, car) plugin
+	* imp_glb: new UltimateStunts (glb) plugin
+	* API: extended G3DImage structure:
+		- introduced tex_env parameter to let texture image request
+		  a special handling
+		- recompilation of existing applications is required
+	* plugins: some plugins now only compile if --enable-experimental
+	  is added to ./configure
+
+Changes since version 0.0.2:
+	* plugins: support (partly) for object trees
+	* imp_ac3d: hierarchical object support
+	* bugfixes
+
+Changes before 0.0.1: see G3DViewer ChangeLog

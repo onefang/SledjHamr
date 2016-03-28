@@ -1,0 +1,85 @@
+# $Id$
+
+# 3D Studio
+0             leshort      0x4d4d                  3ds
+
+# 3D Metafiles
+0             string       3DMF                    3dmf
+
+# AC3D
+0             string       AC3D                    ac
+
+# ASE
+0             string       *3DSMAX_ASCIIEXPORT     ase
+
+# Blender
+0             string       BLENDER                 blend
+
+# Caligari Truespace
+0             string       Caligari                cob
+
+# Cinema 4D
+0             string       C4D                     c4d
+1             string       C50                     c4d
+
+# DXF (FIXME: some files are not detected)
+0             search/20    0\nSECTION              dxf
+0             search/20    0\r\nSECTION            dxf
+
+# IFF (Interchange File Format)
+0             string       FORM
+>8            string       TDDD                    iob
+>8            string       LWOB                    lwo
+>8            string       LWO2                    lwo
+>8            string       REFL                    r4
+
+0             string       FOR4
+>8            string       Maya                    maya
+
+# LDraw
+0             string       0\ FILE\                ldraw
+0             string       0\ Name\                ldraw
+
+# LeoCAD
+0             string       LeoCAD                  leocad
+
+# MD2 / VDrift
+0             string       IDP2
+>4            lelong       0x03                    joe
+>4            lelong       0x08                    md2
+
+# MD3
+0             string       IDP3                    md3
+
+# Neutral File Format (FIXME: text based without a real magic...)
+
+# OpenFlight
+0             beshort      0x0001
+>16           belong       <15                     flt
+>16           belong       >1419                   flt
+
+# Quick3D
+0             string       quick3D                 q3o
+
+# Racer
+0             string       AR01                    racer
+0             string       DOF1                    racer
+
+# Ultimate Stunts
+0             string       \000GLB                 glb
+
+# VRML
+0             string/b     #VRML\ V1.0\ ascii      vrml
+0             string/b     #VRML\ V2.0\ utf8       vrml2
+
+# XML
+0             string          \<?xml\ version="
+>20           search/1000/cb  \<osm                osm
+>20           search/1000/cb  \<kml                kmz
+>20           search/1000/cb  \<COLLADA            dae
+
+# Zip
+0             string          PK
+>16           search/100      doc.kml              kmz
+
+# Wavefront Object (FIXME: text based without a real magic...)

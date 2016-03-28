@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-vector">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-vector.top_of_page">vector</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>vector</refname>
+<refpurpose>Vector manipulation and calculation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-vector.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/vector.h&gt;
+
+typedef             <link linkend="G3DVector">G3DVector</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-vector-normal">g3d_vector_normal</link>                   (<link linkend="G3DFloat">G3DFloat</link> ax,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ay,
+                                                         <link linkend="G3DFloat">G3DFloat</link> az,
+                                                         <link linkend="G3DFloat">G3DFloat</link> bx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> by,
+                                                         <link linkend="G3DFloat">G3DFloat</link> bz,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-vector-unify">g3d_vector_unify</link>                    (<link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-vector-transform">g3d_vector_transform</link>                (<link linkend="G3DFloat">G3DFloat</link> *x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-vector.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+A vector is a one-dimensional array of floating point data.
+</para>
+<para>
+Declare it as statically as:
+</para>
+<para>
+G3DVector vector[3];
+</para>
+<para>
+or allocate it dynamically with:
+</para>
+<para>
+G3DVector *vector = g3d_vector_new(3, 1);</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-vector.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DVector" role="typedef">
+<title>G3DVector</title>
+<indexterm zone="G3DVector"><primary>G3DVector</primary></indexterm><programlisting>typedef G3DFloat G3DVector;
+</programlisting>
+<para>
+Vector element type.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="g3d-vector-normal" role="function">
+<title>g3d_vector_normal ()</title>
+<indexterm zone="g3d-vector-normal"><primary>g3d_vector_normal</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_vector_normal                   (<link linkend="G3DFloat">G3DFloat</link> ax,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ay,
+                                                         <link linkend="G3DFloat">G3DFloat</link> az,
+                                                         <link linkend="G3DFloat">G3DFloat</link> bx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> by,
+                                                         <link linkend="G3DFloat">G3DFloat</link> bz,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);</programlisting>
+<para>
+calculate the normal from a plane defined by two vectors</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>ax</parameter>&nbsp;:</term>
+<listitem><simpara> x component first vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ay</parameter>&nbsp;:</term>
+<listitem><simpara> y component first vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>az</parameter>&nbsp;:</term>
+<listitem><simpara> z component first vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bx</parameter>&nbsp;:</term>
+<listitem><simpara> x component second vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>by</parameter>&nbsp;:</term>
+<listitem><simpara> y component second vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bz</parameter>&nbsp;:</term>
+<listitem><simpara> z component second vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>nx</parameter>&nbsp;:</term>
+<listitem><simpara> x component resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ny</parameter>&nbsp;:</term>
+<listitem><simpara> y component resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>nz</parameter>&nbsp;:</term>
+<listitem><simpara> z component resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-vector-unify" role="function">
+<title>g3d_vector_unify ()</title>
+<indexterm zone="g3d-vector-unify"><primary>g3d_vector_unify</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_vector_unify                    (<link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);</programlisting>
+<para>
+Transforms the given vector to the unit vector.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>nx</parameter>&nbsp;:</term>
+<listitem><simpara> x component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ny</parameter>&nbsp;:</term>
+<listitem><simpara> y component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>nz</parameter>&nbsp;:</term>
+<listitem><simpara> z component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-vector-transform" role="function">
+<title>g3d_vector_transform ()</title>
+<indexterm zone="g3d-vector-transform"><primary>g3d_vector_transform</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_vector_transform                (<link linkend="G3DFloat">G3DFloat</link> *x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Transforms the given vector corresponding to the given matrix</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>x</parameter>&nbsp;:</term>
+<listitem><simpara> x component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>y</parameter>&nbsp;:</term>
+<listitem><simpara> y component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>z</parameter>&nbsp;:</term>
+<listitem><simpara> z component of vector
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> transformation matrix (4x4)
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

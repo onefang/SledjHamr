@@ -1,0 +1,6 @@
+libg3d 0.0.8 "there is always one bug left"
+===========================================
+
+As it turns out the libg3d release did not build without libgsf support
+enabled. This release mainly fixes the problem but also adds a small API
+documentation update.

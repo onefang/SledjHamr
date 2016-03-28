@@ -1,0 +1,187 @@
+<!-- ##### SECTION Title ##### -->
+plugins
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### ENUM G3DPluginType ##### -->
+<para>
+
+</para>
+
+@G3D_PLUGIN_UNKNOWN: 
+@G3D_PLUGIN_IMPORT: 
+@G3D_PLUGIN_IMAGE: 
+
+<!-- ##### USER_FUNCTION G3DPluginInitFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginCleanupFunc ##### -->
+<para>
+
+</para>
+
+@user_data: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginLoadModelFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@model: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginLoadModelFromStreamFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@stream: 
+@model: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginLoadImageFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@image: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginLoadImageStreamFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@stream: 
+@image: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginGetDescFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DPluginGetExtFunc ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+
+<!-- ##### STRUCT G3DPlugin ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION g3d_plugins_init ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_plugins_cleanup ##### -->
+<para>
+
+</para>
+
+@context: 
+
+
+<!-- ##### FUNCTION g3d_plugins_load_model ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@model: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_plugins_load_model_from_stream ##### -->
+<para>
+
+</para>
+
+@context: 
+@stream: 
+@model: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_plugins_load_image ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@image: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_plugins_load_image_from_stream ##### -->
+<para>
+
+</para>
+
+@context: 
+@stream: 
+@image: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_plugins_get_image_extensions ##### -->
+<para>
+
+</para>
+
+@context: 
+@Returns: 
+
+

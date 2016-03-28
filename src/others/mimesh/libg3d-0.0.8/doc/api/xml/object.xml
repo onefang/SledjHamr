@@ -1,0 +1,301 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-object">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-object.top_of_page">object</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>object</refname>
+<refpurpose>Object manipulation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-object.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/object.h&gt;
+
+                    <link linkend="G3DObject">G3DObject</link>;
+                    <link linkend="G3DTransformation">G3DTransformation</link>;
+<link linkend="void">void</link>                <link linkend="g3d-object-free">g3d_object_free</link>                     (<link linkend="G3DObject">G3DObject</link> *object);
+<link linkend="gdouble">gdouble</link>             <link linkend="g3d-object-radius">g3d_object_radius</link>                   (<link linkend="G3DObject">G3DObject</link> *object);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-scale">g3d_object_scale</link>                    (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DFloat">G3DFloat</link> scale);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-transform">g3d_object_transform</link>                (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-transform-normals">g3d_object_transform_normals</link>        (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-object-duplicate">g3d_object_duplicate</link>                (<link linkend="G3DObject">G3DObject</link> *object);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-optimize">g3d_object_optimize</link>                 (<link linkend="G3DObject">G3DObject</link> *object);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-smooth">g3d_object_smooth</link>                   (<link linkend="G3DObject">G3DObject</link> *object);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-object-merge">g3d_object_merge</link>                    (<link linkend="G3DObject">G3DObject</link> *o1,
+                                                         <link linkend="G3DObject">G3DObject</link> *o2);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-object.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Objects are parts of a model. In most file formats vertices and faces are
+grouped in some way into objects. Objects can be hierarchical, so what a
+model contains is basically an object tree.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-object.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DObject" role="struct">
+<title>G3DObject</title>
+<indexterm zone="G3DObject"><primary>G3DObject</primary></indexterm><programlisting>typedef struct {
+	gchar *name;
+
+	GSList *materials;
+	GSList *faces;
+	GSList *objects;
+
+	/* transformation, may be NULL */
+	G3DTransformation *transformation;
+
+	/* don't render this object */
+	gboolean hide;
+
+	/* vertices */
+	guint32 vertex_count;
+	G3DVector *vertex_data;
+} G3DObject;
+</programlisting>
+<para>
+A three-dimensional object.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> name of object
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GSList">GSList</link>&nbsp;*<structfield>materials</structfield>;</term>
+<listitem><simpara> list of materials
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GSList">GSList</link>&nbsp;*<structfield>faces</structfield>;</term>
+<listitem><simpara> list of faces
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GSList">GSList</link>&nbsp;*<structfield>objects</structfield>;</term>
+<listitem><simpara> list of sub-objects
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DTransformation">G3DTransformation</link>&nbsp;*<structfield>transformation</structfield>;</term>
+<listitem><simpara> optional transformation
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gboolean">gboolean</link>&nbsp;<structfield>hide</structfield>;</term>
+<listitem><simpara> flag to disable object rendering
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>vertex_count</structfield>;</term>
+<listitem><simpara> number of vertices
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DVector">G3DVector</link>&nbsp;*<structfield>vertex_data</structfield>;</term>
+<listitem><simpara> vertex vector data
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DTransformation" role="struct">
+<title>G3DTransformation</title>
+<indexterm zone="G3DTransformation"><primary>G3DTransformation</primary></indexterm><programlisting>typedef struct {
+	G3DMatrix matrix[16];
+	guint32 flags;
+} G3DTransformation;
+</programlisting>
+<para>
+A three-dimensional matrix transformation object.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="G3DMatrix">G3DMatrix</link>&nbsp;<structfield>matrix</structfield>[16];</term>
+<listitem><simpara> the transformation matrix
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> flags
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-free" role="function">
+<title>g3d_object_free ()</title>
+<indexterm zone="g3d-object-free"><primary>g3d_object_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_object_free                     (<link linkend="G3DObject">G3DObject</link> *object);</programlisting>
+<para>
+Frees all memory allocated for that object.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-radius" role="function">
+<title>g3d_object_radius ()</title>
+<indexterm zone="g3d-object-radius"><primary>g3d_object_radius</primary></indexterm><programlisting><link linkend="gdouble">gdouble</link>             g3d_object_radius                   (<link linkend="G3DObject">G3DObject</link> *object);</programlisting>
+<para>
+Calculates the radius of the object. This is the maximum from the
+center to a vertex.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to measure
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the radius of the given object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-scale" role="function">
+<title>g3d_object_scale ()</title>
+<indexterm zone="g3d-object-scale"><primary>g3d_object_scale</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_scale                    (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DFloat">G3DFloat</link> scale);</programlisting>
+<para>
+Resizes the object by the factor <parameter>scale</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to scale
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>scale</parameter>&nbsp;:</term>
+<listitem><simpara> scale factor
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-transform" role="function">
+<title>g3d_object_transform ()</title>
+<indexterm zone="g3d-object-transform"><primary>g3d_object_transform</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_transform                (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Multiplies all vertices of the object with the transformation matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to transform
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> the transformation matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-transform-normals" role="function">
+<title>g3d_object_transform_normals ()</title>
+<indexterm zone="g3d-object-transform-normals"><primary>g3d_object_transform_normals</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_transform_normals        (<link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Multiplies all normals of the object with the transformation matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to transform
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> the transformation matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-duplicate" role="function">
+<title>g3d_object_duplicate ()</title>
+<indexterm zone="g3d-object-duplicate"><primary>g3d_object_duplicate</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_object_duplicate                (<link linkend="G3DObject">G3DObject</link> *object);</programlisting>
+<para>
+Duplicates an object with all vertices, faces and materials.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to duplicate
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the new clone object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-optimize" role="function">
+<title>g3d_object_optimize ()</title>
+<indexterm zone="g3d-object-optimize"><primary>g3d_object_optimize</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_optimize                 (<link linkend="G3DObject">G3DObject</link> *object);</programlisting>
+<para>
+Puts all vertex and face information into special arrays for faster
+rendering. It is deprecated and should not be used.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to optimize
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-smooth" role="function">
+<title>g3d_object_smooth ()</title>
+<indexterm zone="g3d-object-smooth"><primary>g3d_object_smooth</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_smooth                   (<link linkend="G3DObject">G3DObject</link> *object);</programlisting>
+<para>
+FIXME: unimplemented.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> the object to smooth
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-object-merge" role="function">
+<title>g3d_object_merge ()</title>
+<indexterm zone="g3d-object-merge"><primary>g3d_object_merge</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_object_merge                    (<link linkend="G3DObject">G3DObject</link> *o1,
+                                                         <link linkend="G3DObject">G3DObject</link> *o2);</programlisting>
+<para>
+Merges both objects into <parameter>o1</parameter>.
+FIXME: needs cleanup</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>o1</parameter>&nbsp;:</term>
+<listitem><simpara> first and target object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>o2</parameter>&nbsp;:</term>
+<listitem><simpara> second object
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

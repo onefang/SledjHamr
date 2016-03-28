@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-texture">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-texture.top_of_page">texture</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>texture</refname>
+<refpurpose>Texture loading and manipulation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-texture.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/texture.h&gt;
+
+#define             <link linkend="G3D-FLAG-IMG-GREYSCALE:CAPS">G3D_FLAG_IMG_GREYSCALE</link>
+enum                <link linkend="G3DTexEnv">G3DTexEnv</link>;
+                    <link linkend="G3DImage">G3DImage</link>;
+<link linkend="G3DImage">G3DImage</link>*           <link linkend="g3d-texture-load-cached">g3d_texture_load_cached</link>             (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         const <link linkend="gchar">gchar</link> *filename);
+<link linkend="G3DImage">G3DImage</link>*           <link linkend="g3d-texture-load-from-stream">g3d_texture_load_from_stream</link>        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream);
+<link linkend="G3DImage">G3DImage</link>*           <link linkend="g3d-texture-load">g3d_texture_load</link>                    (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename);
+<link linkend="void">void</link>                <link linkend="g3d-texture-free">g3d_texture_free</link>                    (<link linkend="G3DImage">G3DImage</link> *texture);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-texture-prepare">g3d_texture_prepare</link>                 (<link linkend="G3DImage">G3DImage</link> *texture);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-texture-flip-y">g3d_texture_flip_y</link>                  (<link linkend="G3DImage">G3DImage</link> *texture);
+<link linkend="G3DImage">G3DImage</link>*           <link linkend="g3d-texture-merge-alpha">g3d_texture_merge_alpha</link>             (<link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="G3DImage">G3DImage</link> *aimage);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-texture.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+A texture is an image used in materials. Here are some helper functions,
+mostly for cached loading of a <link linkend="G3DImage"><type>G3DImage</type></link>.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-texture.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3D-FLAG-IMG-GREYSCALE:CAPS" role="macro">
+<title>G3D_FLAG_IMG_GREYSCALE</title>
+<indexterm zone="G3D-FLAG-IMG-GREYSCALE:CAPS"><primary>G3D_FLAG_IMG_GREYSCALE</primary></indexterm><programlisting>#define G3D_FLAG_IMG_GREYSCALE       (1L &lt;&lt; 1)
+</programlisting>
+<para>
+The image just uses the red channel for grey value</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DTexEnv" role="enum">
+<title>enum G3DTexEnv</title>
+<indexterm zone="G3DTexEnv"><primary>G3DTexEnv</primary></indexterm><programlisting>typedef enum {
+	G3D_TEXENV_UNSPECIFIED = 0,
+	G3D_TEXENV_BLEND,
+	G3D_TEXENV_DECAL,
+	G3D_TEXENV_MODULATE,
+	G3D_TEXENV_REPLACE
+} G3DTexEnv;
+</programlisting>
+<para>
+Specify how the texture should interact with other material properties.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="G3D-TEXENV-UNSPECIFIED:CAPS" role="constant">
+<term><literal>G3D_TEXENV_UNSPECIFIED</literal></term>
+<listitem><simpara> unspecified, application decides
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-TEXENV-BLEND:CAPS" role="constant">
+<term><literal>G3D_TEXENV_BLEND</literal></term>
+<listitem><simpara> use blending
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-TEXENV-DECAL:CAPS" role="constant">
+<term><literal>G3D_TEXENV_DECAL</literal></term>
+<listitem><simpara> use as decal
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-TEXENV-MODULATE:CAPS" role="constant">
+<term><literal>G3D_TEXENV_MODULATE</literal></term>
+<listitem><simpara> use modulate
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-TEXENV-REPLACE:CAPS" role="constant">
+<term><literal>G3D_TEXENV_REPLACE</literal></term>
+<listitem><simpara> replace color
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DImage" role="struct">
+<title>G3DImage</title>
+<indexterm zone="G3DImage"><primary>G3DImage</primary></indexterm><programlisting>typedef struct {
+	gchar *name;
+	guint32 width;
+	guint32 height;
+	guint8 depth;
+	guint32 flags;
+	guint8 *pixeldata;
+
+	guint32 tex_id;
+	G3DTexEnv tex_env;
+	G3DFloat tex_scale_u;
+	G3DFloat tex_scale_v;
+} G3DImage;
+</programlisting>
+<para>
+Object containing a two-dimensional pixel image.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> name of image
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>width</structfield>;</term>
+<listitem><simpara> width of image in pixels
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>height</structfield>;</term>
+<listitem><simpara> height of image in pixels
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint8">guint8</link>&nbsp;<structfield>depth</structfield>;</term>
+<listitem><simpara> depth of image in bits
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> flags
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint8">guint8</link>&nbsp;*<structfield>pixeldata</structfield>;</term>
+<listitem><simpara> the binary image data
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>tex_id</structfield>;</term>
+<listitem><simpara> the OpenGL texture id, should be unique model-wide
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DTexEnv">G3DTexEnv</link>&nbsp;<structfield>tex_env</structfield>;</term>
+<listitem><simpara> texture environment flags
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>tex_scale_u</structfield>;</term>
+<listitem><simpara> factor scaling texture width, should be 1.0 for most cases
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>tex_scale_v</structfield>;</term>
+<listitem><simpara> factor scaling texture height, should be 1.0 for most cases
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-load-cached" role="function">
+<title>g3d_texture_load_cached ()</title>
+<indexterm zone="g3d-texture-load-cached"><primary>g3d_texture_load_cached</primary></indexterm><programlisting><link linkend="G3DImage">G3DImage</link>*           g3d_texture_load_cached             (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         const <link linkend="gchar">gchar</link> *filename);</programlisting>
+<para>
+Loads a texture image from file and attaches it to a hash table in the
+model. On a second try to load this texture it is returned from cache.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> a valid model
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> the file name of the texture to load
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the texture image
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-load-from-stream" role="function">
+<title>g3d_texture_load_from_stream ()</title>
+<indexterm zone="g3d-texture-load-from-stream"><primary>g3d_texture_load_from_stream</primary></indexterm><programlisting><link linkend="G3DImage">G3DImage</link>*           g3d_texture_load_from_stream        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream);</programlisting>
+<para>
+Load a texture image from a stream. The file type is determined by the
+extension of the stream URI, so it should be valid. If <parameter>model</parameter> is not NULL
+the texture image is cached (or retrieved from cache if available).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> a valid model or NULL
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> an open stream
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the texture image or NULL in case of an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-load" role="function">
+<title>g3d_texture_load ()</title>
+<indexterm zone="g3d-texture-load"><primary>g3d_texture_load</primary></indexterm><programlisting><link linkend="G3DImage">G3DImage</link>*           g3d_texture_load                    (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename);</programlisting>
+<para>
+Load a texture from a file. The type of file is determined by the file
+extension.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> the file name of the texture
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the texture image or NULL in case of an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-free" role="function">
+<title>g3d_texture_free ()</title>
+<indexterm zone="g3d-texture-free"><primary>g3d_texture_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_texture_free                    (<link linkend="G3DImage">G3DImage</link> *texture);</programlisting>
+<para>
+Frees all memory used by this texture image.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>texture</parameter>&nbsp;:</term>
+<listitem><simpara> a texture image
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-prepare" role="function">
+<title>g3d_texture_prepare ()</title>
+<indexterm zone="g3d-texture-prepare"><primary>g3d_texture_prepare</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_texture_prepare                 (<link linkend="G3DImage">G3DImage</link> *texture);</programlisting>
+<para>
+Resizes the image to dimensions which are a power of 2 to be
+usable as an OpenGL texture.
+(FIXME: unimplemented)</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>texture</parameter>&nbsp;:</term>
+<listitem><simpara> a texture image
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-flip-y" role="function">
+<title>g3d_texture_flip_y ()</title>
+<indexterm zone="g3d-texture-flip-y"><primary>g3d_texture_flip_y</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_texture_flip_y                  (<link linkend="G3DImage">G3DImage</link> *texture);</programlisting>
+<para>
+Mirror the image along the x axis - all y coordinates are inverted.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>texture</parameter>&nbsp;:</term>
+<listitem><simpara> a texture image
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE on error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-texture-merge-alpha" role="function">
+<title>g3d_texture_merge_alpha ()</title>
+<indexterm zone="g3d-texture-merge-alpha"><primary>g3d_texture_merge_alpha</primary></indexterm><programlisting><link linkend="G3DImage">G3DImage</link>*           g3d_texture_merge_alpha             (<link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="G3DImage">G3DImage</link> *aimage);</programlisting>
+<para>
+Merges alpha information from <parameter>aimage</parameter> into output image. If <parameter>image</parameter> is NULL a
+new image is created, else <parameter>image</parameter> is returned with alpha from <parameter>aimage</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>image</parameter>&nbsp;:</term>
+<listitem><simpara> a texture image or NULL
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>aimage</parameter>&nbsp;:</term>
+<listitem><simpara> an image with alpha information
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a texture image or NULL in case of an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

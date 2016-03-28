@@ -1,0 +1,111 @@
+<!-- ##### SECTION Title ##### -->
+read
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### FUNCTION g3d_read_int8 ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_int16_be ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_int16_le ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_int32_be ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_int32_le ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_float_be ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_float_le ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_double_be ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_double_le ##### -->
+<para>
+
+</para>
+
+@f: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_read_cstr ##### -->
+<para>
+
+</para>
+
+@f: 
+@buffer: 
+@max_len: 
+@Returns: 
+
+

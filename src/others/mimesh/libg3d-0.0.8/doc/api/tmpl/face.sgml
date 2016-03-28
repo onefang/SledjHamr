@@ -1,0 +1,75 @@
+<!-- ##### SECTION Title ##### -->
+face
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO G3D_FLAG_MAT_TWOSIDE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_FLAG_FAC_NORMALS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_FLAG_FAC_TEXMAP ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT G3DFace ##### -->
+<para>
+
+</para>
+
+@vertex_count: 
+@vertex_indices: 
+@material: 
+@flags: 
+@normals: 
+@tex_image: 
+@tex_vertex_count: 
+@tex_vertex_data: 
+
+<!-- ##### FUNCTION g3d_face_get_normal ##### -->
+<para>
+
+</para>
+
+@face: 
+@object: 
+@nx: 
+@ny: 
+@nz: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_face_free ##### -->
+<para>
+
+</para>
+
+@face: 
+
+

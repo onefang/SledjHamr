@@ -1,0 +1,4 @@
+to be done for version 0.1.0 (and g3dviewer 0.3.0)
+* more or less complete API documentation
+* all plugins have to support G3DStream
+* libg3d has to build/work with G3D_DISABLE_DEPRECATED enabled

@@ -1,0 +1,321 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-context">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-context.top_of_page">context</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>context</refname>
+<refpurpose>Libg3d initialization and configuration</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-context.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/g3d.h&gt;
+
+                    <link linkend="G3DContext">G3DContext</link>;
+<link linkend="G3DContext">G3DContext</link>*         <link linkend="g3d-context-new">g3d_context_new</link>                     (void);
+<link linkend="void">void</link>                <link linkend="g3d-context-free">g3d_context_free</link>                    (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DSetBgColorFunc">*G3DSetBgColorFunc</link>)                (<link linkend="G3DFloat">G3DFloat</link> r,
+                                                         <link linkend="G3DFloat">G3DFloat</link> g,
+                                                         <link linkend="G3DFloat">G3DFloat</link> b,
+                                                         <link linkend="G3DFloat">G3DFloat</link> a,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DUpdateInterfaceFunc">*G3DUpdateInterfaceFunc</link>)           (<link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DUpdateProgressBarFunc">*G3DUpdateProgressBarFunc</link>)         (<link linkend="G3DFloat">G3DFloat</link> percentage,
+                                                         <link linkend="gboolean">gboolean</link> show,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-context-update-interface">g3d_context_update_interface</link>        (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="void">void</link>                <link linkend="g3d-context-set-update-interface-func">g3d_context_set_update_interface_func</link>
+                                                        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DUpdateInterfaceFunc">G3DUpdateInterfaceFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-context-update-progress-bar">g3d_context_update_progress_bar</link>     (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DFloat">G3DFloat</link> percentage,
+                                                         <link linkend="gboolean">gboolean</link> visibility);
+<link linkend="void">void</link>                <link linkend="g3d-context-set-update-progress-bar-func">g3d_context_set_update_progress_bar_func</link>
+                                                        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DUpdateProgressBarFunc">G3DUpdateProgressBarFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-context-set-bgcolor">g3d_context_set_bgcolor</link>             (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r,
+                                                         <link linkend="G3DFloat">G3DFloat</link> g,
+                                                         <link linkend="G3DFloat">G3DFloat</link> b,
+                                                         <link linkend="G3DFloat">G3DFloat</link> a);
+<link linkend="void">void</link>                <link linkend="g3d-context-set-set-bgcolor-func">g3d_context_set_set_bgcolor_func</link>    (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DSetBgColorFunc">G3DSetBgColorFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-context.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+All state information is saved in the context. It also serves as an
+interface to the application.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-context.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DContext" role="struct">
+<title>G3DContext</title>
+<indexterm zone="G3DContext"><primary>G3DContext</primary></indexterm><programlisting>typedef struct {
+} G3DContext;
+</programlisting>
+<para>
+Internal stuff for libg3d.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="g3d-context-new" role="function">
+<title>g3d_context_new ()</title>
+<indexterm zone="g3d-context-new"><primary>g3d_context_new</primary></indexterm><programlisting><link linkend="G3DContext">G3DContext</link>*         g3d_context_new                     (void);</programlisting>
+<para>
+Create a new context. This initializes the library (and also the
+plugin system so this has not to be done seperately).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a valid context, or NULL on failure.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-free" role="function">
+<title>g3d_context_free ()</title>
+<indexterm zone="g3d-context-free"><primary>g3d_context_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_context_free                    (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Cleans up the context and the plugin system and frees all reserved
+memory.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DSetBgColorFunc" role="function">
+<title>G3DSetBgColorFunc ()</title>
+<indexterm zone="G3DSetBgColorFunc"><primary>G3DSetBgColorFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DSetBgColorFunc)                (<link linkend="G3DFloat">G3DFloat</link> r,
+                                                         <link linkend="G3DFloat">G3DFloat</link> g,
+                                                         <link linkend="G3DFloat">G3DFloat</link> b,
+                                                         <link linkend="G3DFloat">G3DFloat</link> a,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Background color setting callback.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>r</parameter>&nbsp;:</term>
+<listitem><simpara> red component
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>g</parameter>&nbsp;:</term>
+<listitem><simpara> green component
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>b</parameter>&nbsp;:</term>
+<listitem><simpara> blue component
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>a</parameter>&nbsp;:</term>
+<listitem><simpara> alpha component
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque data as given to <link linkend="g3d-context-set-set-bgcolor-func"><function>g3d_context_set_set_bgcolor_func()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DUpdateInterfaceFunc" role="function">
+<title>G3DUpdateInterfaceFunc ()</title>
+<indexterm zone="G3DUpdateInterfaceFunc"><primary>G3DUpdateInterfaceFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DUpdateInterfaceFunc)           (<link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Interface updating callback.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque data as given to <link linkend="g3d-context-set-update-interface-func"><function>g3d_context_set_update_interface_func()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DUpdateProgressBarFunc" role="function">
+<title>G3DUpdateProgressBarFunc ()</title>
+<indexterm zone="G3DUpdateProgressBarFunc"><primary>G3DUpdateProgressBarFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DUpdateProgressBarFunc)         (<link linkend="G3DFloat">G3DFloat</link> percentage,
+                                                         <link linkend="gboolean">gboolean</link> show,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Progress updating callback.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>percentage</parameter>&nbsp;:</term>
+<listitem><simpara> progress of plugin operation
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>show</parameter>&nbsp;:</term>
+<listitem><simpara> <link linkend="TRUE:CAPS"><type>TRUE</type></link> if the progress bar should be visible, <link linkend="FALSE:CAPS"><type>FALSE</type></link> else
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque data as given to
+<link linkend="g3d-context-set-update-progress-bar-func"><function>g3d_context_set_update_progress_bar_func()</function></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-update-interface" role="function">
+<title>g3d_context_update_interface ()</title>
+<indexterm zone="g3d-context-update-interface"><primary>g3d_context_update_interface</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_context_update_interface        (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Try to update the interface. This will call a function registered with
+<parameter>g3d_context_set_update_interface_func</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-set-update-interface-func" role="function">
+<title>g3d_context_set_update_interface_func ()</title>
+<indexterm zone="g3d-context-set-update-interface-func"><primary>g3d_context_set_update_interface_func</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_context_set_update_interface_func
+                                                        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DUpdateInterfaceFunc">G3DUpdateInterfaceFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Registers a callback function for updating the interface.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>func</parameter>&nbsp;:</term>
+<listitem><simpara> the callback function
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-defined opaque pointer
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-update-progress-bar" role="function">
+<title>g3d_context_update_progress_bar ()</title>
+<indexterm zone="g3d-context-update-progress-bar"><primary>g3d_context_update_progress_bar</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_context_update_progress_bar     (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DFloat">G3DFloat</link> percentage,
+                                                         <link linkend="gboolean">gboolean</link> visibility);</programlisting>
+<para>
+Try to update the progress bar.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>percentage</parameter>&nbsp;:</term>
+<listitem><simpara> the percentage to set on the progress bar
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>visibility</parameter>&nbsp;:</term>
+<listitem><simpara> show or hide the progress bar
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-set-update-progress-bar-func" role="function">
+<title>g3d_context_set_update_progress_bar_func ()</title>
+<indexterm zone="g3d-context-set-update-progress-bar-func"><primary>g3d_context_set_update_progress_bar_func</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_context_set_update_progress_bar_func
+                                                        (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DUpdateProgressBarFunc">G3DUpdateProgressBarFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Registers a callback function for updating the progress bar.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>func</parameter>&nbsp;:</term>
+<listitem><simpara> the callback function
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-defined opaque pointer
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-set-bgcolor" role="function">
+<title>g3d_context_set_bgcolor ()</title>
+<indexterm zone="g3d-context-set-bgcolor"><primary>g3d_context_set_bgcolor</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_context_set_bgcolor             (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r,
+                                                         <link linkend="G3DFloat">G3DFloat</link> g,
+                                                         <link linkend="G3DFloat">G3DFloat</link> b,
+                                                         <link linkend="G3DFloat">G3DFloat</link> a);</programlisting>
+<para>
+Try to set the background color. This will call a function registered
+with <link><parameter>g3d_context_set_set_bgcolor_func</parameter></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>r</parameter>&nbsp;:</term>
+<listitem><simpara> red component (range: 0.0 .. 1.0)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>g</parameter>&nbsp;:</term>
+<listitem><simpara> green component (range: 0.0 .. 1.0)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>b</parameter>&nbsp;:</term>
+<listitem><simpara> green component (range: 0.0 .. 1.0)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>a</parameter>&nbsp;:</term>
+<listitem><simpara> alpha component
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-context-set-set-bgcolor-func" role="function">
+<title>g3d_context_set_set_bgcolor_func ()</title>
+<indexterm zone="g3d-context-set-set-bgcolor-func"><primary>g3d_context_set_set_bgcolor_func</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_context_set_set_bgcolor_func    (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DSetBgColorFunc">G3DSetBgColorFunc</link> func,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Registers a callback function for setting the background color.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>func</parameter>&nbsp;:</term>
+<listitem><simpara> the callback function
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> user-defined opaque pointer
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1 id="libg3d-context.see-also">
+<title>See Also</title>
+<link linkend="G3DContext"><type>G3DContext</type></link>
+</refsect1>
+
+</refentry>

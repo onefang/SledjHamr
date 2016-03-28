@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>face</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch01.html" title="Application interface">
+<link rel="prev" href="libg3d-object.html" title="object">
+<link rel="next" href="libg3d-material.html" title="material">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-object.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-material.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-face.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-face.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-face"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-face.top_of_page"></a>face</span></h2>
+<p>face — Face manipulation</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-face.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/face.h&gt;
+
+#define             <a class="link" href="libg3d-face.html#G3D-FLAG-MAT-TWOSIDE:CAPS" title="G3D_FLAG_MAT_TWOSIDE">G3D_FLAG_MAT_TWOSIDE</a>
+#define             <a class="link" href="libg3d-face.html#G3D-FLAG-FAC-NORMALS:CAPS" title="G3D_FLAG_FAC_NORMALS">G3D_FLAG_FAC_NORMALS</a>
+#define             <a class="link" href="libg3d-face.html#G3D-FLAG-FAC-TEXMAP:CAPS" title="G3D_FLAG_FAC_TEXMAP">G3D_FLAG_FAC_TEXMAP</a>
+                    <a class="link" href="libg3d-face.html#G3DFace" title="G3DFace">G3DFace</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-face.html#g3d-face-get-normal" title="g3d_face_get_normal ()">g3d_face_get_normal</a>                 (<a class="link" href="libg3d-face.html#G3DFace" title="G3DFace">G3DFace</a> *face,
+                                                         <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);
+void                <a class="link" href="libg3d-face.html#g3d-face-free" title="g3d_face_free ()">g3d_face_free</a>                       (<a class="link" href="libg3d-face.html#G3DFace" title="G3DFace">G3DFace</a> *face);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-face.description"></a><h2>Description</h2>
+<p>
+A face is plane bordered by at least 3 vertices.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-face.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3D-FLAG-MAT-TWOSIDE:CAPS"></a><h3>G3D_FLAG_MAT_TWOSIDE</h3>
+<pre class="programlisting">#define G3D_FLAG_MAT_TWOSIDE    (1L &lt;&lt; 0)
+</pre>
+<p>
+Faces using this material should be rendered two-sided as the direction
+is unknown.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-FLAG-FAC-NORMALS:CAPS"></a><h3>G3D_FLAG_FAC_NORMALS</h3>
+<pre class="programlisting">#define G3D_FLAG_FAC_NORMALS    (1L &lt;&lt; 0)
+</pre>
+<p>
+The face has custom normals.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-FLAG-FAC-TEXMAP:CAPS"></a><h3>G3D_FLAG_FAC_TEXMAP</h3>
+<pre class="programlisting">#define G3D_FLAG_FAC_TEXMAP     (1L &lt;&lt; 1)
+</pre>
+<p>
+The face has a texture map and texture coordinates.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DFace"></a><h3>G3DFace</h3>
+<pre class="programlisting">typedef struct {
+	guint32 vertex_count;
+	guint32 *vertex_indices;
+
+	G3DMaterial *material;
+
+	guint32 flags;
+
+	G3DVector *normals;
+
+	G3DImage *tex_image;
+	guint32 tex_vertex_count;
+	G3DVector *tex_vertex_data;
+} G3DFace;
+</pre>
+<p>
+An object representing a surface.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>vertex_count</code></em>;</span></p></td>
+<td> number of vertices
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *<em class="structfield"><code>vertex_indices</code></em>;</span></p></td>
+<td> indices of vertices in <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject"><span class="type">G3DObject</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *<em class="structfield"><code>material</code></em>;</span></p></td>
+<td> material to use for surface
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>flags</code></em>;</span></p></td>
+<td> flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a> *<em class="structfield"><code>normals</code></em>;</span></p></td>
+<td> optional normal array (one vector - 3 <a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector"><span class="type">G3DVector</span></a> values - for each
+  vertex)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *<em class="structfield"><code>tex_image</code></em>;</span></p></td>
+<td> optional texture image
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>tex_vertex_count</code></em>;</span></p></td>
+<td> number of texture vertices, should be 0 or match
+  vertex_count
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a> *<em class="structfield"><code>tex_vertex_data</code></em>;</span></p></td>
+<td> array of texture vertices
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-face-get-normal"></a><h3>g3d_face_get_normal ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_face_get_normal                 (<a class="link" href="libg3d-face.html#G3DFace" title="G3DFace">G3DFace</a> *face,
+                                                         <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);</pre>
+<p>
+calculates the normal of a face.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>face</code></em> :</span></p></td>
+<td> face to calculate normal of
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> object containing vertices of face
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nx</code></em> :</span></p></td>
+<td> x component of resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ny</code></em> :</span></p></td>
+<td> y component of resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nz</code></em> :</span></p></td>
+<td> z component of resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-face-free"></a><h3>g3d_face_free ()</h3>
+<pre class="programlisting">void                g3d_face_free                       (<a class="link" href="libg3d-face.html#G3DFace" title="G3DFace">G3DFace</a> *face);</pre>
+<p>
+Frees all memory allocated for this face.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>face</code></em> :</span></p></td>
+<td> the face to free
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

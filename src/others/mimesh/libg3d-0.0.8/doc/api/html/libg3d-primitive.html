@@ -1,0 +1,508 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>primitive</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-read.html" title="read">
+<link rel="next" href="libg3d-matrix.html" title="matrix">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-read.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-matrix.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-primitive.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-primitive.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-primitive"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-primitive.top_of_page"></a>primitive</span></h2>
+<p>primitive — 3D primitive generation functions</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-primitive.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/primitive.h&gt;
+
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-cube" title="g3d_primitive_cube ()">g3d_primitive_cube</a>                  (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> width,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> depth,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-box" title="g3d_primitive_box ()">g3d_primitive_box</a>                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> width,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> depth,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-box-strip-2d" title="g3d_primitive_box_strip_2d ()">g3d_primitive_box_strip_2d</a>          (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> vcnt,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> *vdata,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> width,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-mesh" title="g3d_primitive_mesh ()">g3d_primitive_mesh</a>                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> m,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> n,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> wrap_m,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> wrap_n,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-cylinder" title="g3d_primitive_cylinder ()">g3d_primitive_cylinder</a>              (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> radius,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> sides,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> top,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> bottom,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-tube" title="g3d_primitive_tube ()">g3d_primitive_tube</a>                  (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r_in,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r_out,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> sides,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> top,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> bottom,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-primitive.html#g3d-primitive-sphere" title="g3d_primitive_sphere ()">g3d_primitive_sphere</a>                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> radius,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> vseg,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> hseg,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-primitive.description"></a><h2>Description</h2>
+<p>
+Primitives are objects containing basic 3D geometrical structures. A
+variety of them can be created using these functions.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-primitive.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-cube"></a><h3>g3d_primitive_cube ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_cube                  (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> width,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> depth,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates an object containing a box. It is deprecated and now a wrapper for
+<a class="link" href="libg3d-primitive.html#g3d-primitive-box" title="g3d_primitive_box ()"><code class="function">g3d_primitive_box()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>width</code></em> :</span></p></td>
+<td> the width of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>height</code></em> :</span></p></td>
+<td> the height of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>depth</code></em> :</span></p></td>
+<td> the depth of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> the material to use for all faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the box object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-box"></a><h3>g3d_primitive_box ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_box                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> width,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> depth,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates an object containing a box.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>width</code></em> :</span></p></td>
+<td> the width of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>height</code></em> :</span></p></td>
+<td> the height of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>depth</code></em> :</span></p></td>
+<td> the depth of the box
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> the material to use for all faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the box object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-box-strip-2d"></a><h3>g3d_primitive_box_strip_2d ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_box_strip_2d          (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> vcnt,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> *vdata,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a> width,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates a strip of box segments defined by corner center points
+using two-dimensional data (x/z plane).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>vcnt</code></em> :</span></p></td>
+<td> number of control points
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>vdata</code></em> :</span></p></td>
+<td> 2-dimensional control point data (2 * vcnt * gdouble)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>height</code></em> :</span></p></td>
+<td> height of resulting strip (y component)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>width</code></em> :</span></p></td>
+<td> width of strip (corner diameter)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> material to use for faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> strip object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-mesh"></a><h3>g3d_primitive_mesh ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_mesh                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> m,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> n,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> wrap_m,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> wrap_n,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generate a mesh consisting of m * n vertices. The vertex data is
+initialized with (0.0, 0.0, 0.0) and has to be set to something
+useful.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>m</code></em> :</span></p></td>
+<td> number of vertices in m direction
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>n</code></em> :</span></p></td>
+<td> number of vertices in n direction
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>wrap_m</code></em> :</span></p></td>
+<td> wrap around in m direction
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>wrap_n</code></em> :</span></p></td>
+<td> wrap around in n direction
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> material to use for faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> mesh object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-cylinder"></a><h3>g3d_primitive_cylinder ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_cylinder              (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> radius,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> sides,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> top,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> bottom,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates an object containing a cylinder.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>radius</code></em> :</span></p></td>
+<td> the radius of the cylinder
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>height</code></em> :</span></p></td>
+<td> the height of the side faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>sides</code></em> :</span></p></td>
+<td> number of side faces (number of circle segments)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>top</code></em> :</span></p></td>
+<td> add top faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bottom</code></em> :</span></p></td>
+<td> add bottom faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> material to use for faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> cylinder object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-tube"></a><h3>g3d_primitive_tube ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_tube                  (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r_in,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r_out,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> height,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> sides,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> top,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> bottom,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates an object containing a tube (a cylinder with a hole).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>r_in</code></em> :</span></p></td>
+<td> inner radius
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>r_out</code></em> :</span></p></td>
+<td> outer radius
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>height</code></em> :</span></p></td>
+<td> the height of the side faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>sides</code></em> :</span></p></td>
+<td> number of side faces (number of circle segments)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>top</code></em> :</span></p></td>
+<td> add top faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bottom</code></em> :</span></p></td>
+<td> add bottom faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> material to use for faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> tube object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-primitive-sphere"></a><h3>g3d_primitive_sphere ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_primitive_sphere                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> radius,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> vseg,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> hseg,
+                                                         <a class="link" href="libg3d-material.html#G3DMaterial" title="G3DMaterial">G3DMaterial</a> *material);</pre>
+<p>
+Generates an object containing a sphere.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>radius</code></em> :</span></p></td>
+<td> radius
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>vseg</code></em> :</span></p></td>
+<td> number of vertical segments
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>hseg</code></em> :</span></p></td>
+<td> number of horizontal segments
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>material</code></em> :</span></p></td>
+<td> material to use for faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> sphere object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

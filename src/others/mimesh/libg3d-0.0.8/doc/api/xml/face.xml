@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-face">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-face.top_of_page">face</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>face</refname>
+<refpurpose>Face manipulation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-face.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/face.h&gt;
+
+#define             <link linkend="G3D-FLAG-MAT-TWOSIDE:CAPS">G3D_FLAG_MAT_TWOSIDE</link>
+#define             <link linkend="G3D-FLAG-FAC-NORMALS:CAPS">G3D_FLAG_FAC_NORMALS</link>
+#define             <link linkend="G3D-FLAG-FAC-TEXMAP:CAPS">G3D_FLAG_FAC_TEXMAP</link>
+                    <link linkend="G3DFace">G3DFace</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-face-get-normal">g3d_face_get_normal</link>                 (<link linkend="G3DFace">G3DFace</link> *face,
+                                                         <link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);
+<link linkend="void">void</link>                <link linkend="g3d-face-free">g3d_face_free</link>                       (<link linkend="G3DFace">G3DFace</link> *face);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-face.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+A face is plane bordered by at least 3 vertices.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-face.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3D-FLAG-MAT-TWOSIDE:CAPS" role="macro">
+<title>G3D_FLAG_MAT_TWOSIDE</title>
+<indexterm zone="G3D-FLAG-MAT-TWOSIDE:CAPS"><primary>G3D_FLAG_MAT_TWOSIDE</primary></indexterm><programlisting>#define G3D_FLAG_MAT_TWOSIDE    (1L &lt;&lt; 0)
+</programlisting>
+<para>
+Faces using this material should be rendered two-sided as the direction
+is unknown.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-FLAG-FAC-NORMALS:CAPS" role="macro">
+<title>G3D_FLAG_FAC_NORMALS</title>
+<indexterm zone="G3D-FLAG-FAC-NORMALS:CAPS"><primary>G3D_FLAG_FAC_NORMALS</primary></indexterm><programlisting>#define G3D_FLAG_FAC_NORMALS    (1L &lt;&lt; 0)
+</programlisting>
+<para>
+The face has custom normals.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-FLAG-FAC-TEXMAP:CAPS" role="macro">
+<title>G3D_FLAG_FAC_TEXMAP</title>
+<indexterm zone="G3D-FLAG-FAC-TEXMAP:CAPS"><primary>G3D_FLAG_FAC_TEXMAP</primary></indexterm><programlisting>#define G3D_FLAG_FAC_TEXMAP     (1L &lt;&lt; 1)
+</programlisting>
+<para>
+The face has a texture map and texture coordinates.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DFace" role="struct">
+<title>G3DFace</title>
+<indexterm zone="G3DFace"><primary>G3DFace</primary></indexterm><programlisting>typedef struct {
+	guint32 vertex_count;
+	guint32 *vertex_indices;
+
+	G3DMaterial *material;
+
+	guint32 flags;
+
+	G3DVector *normals;
+
+	G3DImage *tex_image;
+	guint32 tex_vertex_count;
+	G3DVector *tex_vertex_data;
+} G3DFace;
+</programlisting>
+<para>
+An object representing a surface.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>vertex_count</structfield>;</term>
+<listitem><simpara> number of vertices
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;*<structfield>vertex_indices</structfield>;</term>
+<listitem><simpara> indices of vertices in <link linkend="G3DObject"><type>G3DObject</type></link>
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DMaterial">G3DMaterial</link>&nbsp;*<structfield>material</structfield>;</term>
+<listitem><simpara> material to use for surface
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> flags
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DVector">G3DVector</link>&nbsp;*<structfield>normals</structfield>;</term>
+<listitem><simpara> optional normal array (one vector - 3 <link linkend="G3DVector"><type>G3DVector</type></link> values - for each
+  vertex)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DImage">G3DImage</link>&nbsp;*<structfield>tex_image</structfield>;</term>
+<listitem><simpara> optional texture image
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>tex_vertex_count</structfield>;</term>
+<listitem><simpara> number of texture vertices, should be 0 or match
+  vertex_count
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DVector">G3DVector</link>&nbsp;*<structfield>tex_vertex_data</structfield>;</term>
+<listitem><simpara> array of texture vertices
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-face-get-normal" role="function">
+<title>g3d_face_get_normal ()</title>
+<indexterm zone="g3d-face-get-normal"><primary>g3d_face_get_normal</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_face_get_normal                 (<link linkend="G3DFace">G3DFace</link> *face,
+                                                         <link linkend="G3DObject">G3DObject</link> *object,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ny,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *nz);</programlisting>
+<para>
+calculates the normal of a face.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>face</parameter>&nbsp;:</term>
+<listitem><simpara> face to calculate normal of
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>object</parameter>&nbsp;:</term>
+<listitem><simpara> object containing vertices of face
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>nx</parameter>&nbsp;:</term>
+<listitem><simpara> x component of resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ny</parameter>&nbsp;:</term>
+<listitem><simpara> y component of resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>nz</parameter>&nbsp;:</term>
+<listitem><simpara> z component of resulting normal
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-face-free" role="function">
+<title>g3d_face_free ()</title>
+<indexterm zone="g3d-face-free"><primary>g3d_face_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_face_free                       (<link linkend="G3DFace">G3DFace</link> *face);</programlisting>
+<para>
+Frees all memory allocated for this face.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>face</parameter>&nbsp;:</term>
+<listitem><simpara> the face to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

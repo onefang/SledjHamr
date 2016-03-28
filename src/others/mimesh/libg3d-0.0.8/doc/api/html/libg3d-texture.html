@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>texture</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch01.html" title="Application interface">
+<link rel="prev" href="libg3d-material.html" title="material">
+<link rel="next" href="ch02.html" title="Plugin interface">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-material.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="ch02.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-texture.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-texture.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-texture"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-texture.top_of_page"></a>texture</span></h2>
+<p>texture — Texture loading and manipulation</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-texture.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/texture.h&gt;
+
+#define             <a class="link" href="libg3d-texture.html#G3D-FLAG-IMG-GREYSCALE:CAPS" title="G3D_FLAG_IMG_GREYSCALE">G3D_FLAG_IMG_GREYSCALE</a>
+enum                <a class="link" href="libg3d-texture.html#G3DTexEnv" title="enum G3DTexEnv">G3DTexEnv</a>;
+                    <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>;
+<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           <a class="link" href="libg3d-texture.html#g3d-texture-load-cached" title="g3d_texture_load_cached ()">g3d_texture_load_cached</a>             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);
+<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           <a class="link" href="libg3d-texture.html#g3d-texture-load-from-stream" title="g3d_texture_load_from_stream ()">g3d_texture_load_from_stream</a>        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           <a class="link" href="libg3d-texture.html#g3d-texture-load" title="g3d_texture_load ()">g3d_texture_load</a>                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);
+void                <a class="link" href="libg3d-texture.html#g3d-texture-free" title="g3d_texture_free ()">g3d_texture_free</a>                    (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-texture.html#g3d-texture-prepare" title="g3d_texture_prepare ()">g3d_texture_prepare</a>                 (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-texture.html#g3d-texture-flip-y" title="g3d_texture_flip_y ()">g3d_texture_flip_y</a>                  (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);
+<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           <a class="link" href="libg3d-texture.html#g3d-texture-merge-alpha" title="g3d_texture_merge_alpha ()">g3d_texture_merge_alpha</a>             (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *aimage);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-texture.description"></a><h2>Description</h2>
+<p>
+A texture is an image used in materials. Here are some helper functions,
+mostly for cached loading of a <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage"><span class="type">G3DImage</span></a>.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-texture.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3D-FLAG-IMG-GREYSCALE:CAPS"></a><h3>G3D_FLAG_IMG_GREYSCALE</h3>
+<pre class="programlisting">#define G3D_FLAG_IMG_GREYSCALE       (1L &lt;&lt; 1)
+</pre>
+<p>
+The image just uses the red channel for grey value</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DTexEnv"></a><h3>enum G3DTexEnv</h3>
+<pre class="programlisting">typedef enum {
+	G3D_TEXENV_UNSPECIFIED = 0,
+	G3D_TEXENV_BLEND,
+	G3D_TEXENV_DECAL,
+	G3D_TEXENV_MODULATE,
+	G3D_TEXENV_REPLACE
+} G3DTexEnv;
+</pre>
+<p>
+Specify how the texture should interact with other material properties.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="G3D-TEXENV-UNSPECIFIED:CAPS"></a><span class="term"><code class="literal">G3D_TEXENV_UNSPECIFIED</code></span></p></td>
+<td> unspecified, application decides
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-TEXENV-BLEND:CAPS"></a><span class="term"><code class="literal">G3D_TEXENV_BLEND</code></span></p></td>
+<td> use blending
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-TEXENV-DECAL:CAPS"></a><span class="term"><code class="literal">G3D_TEXENV_DECAL</code></span></p></td>
+<td> use as decal
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-TEXENV-MODULATE:CAPS"></a><span class="term"><code class="literal">G3D_TEXENV_MODULATE</code></span></p></td>
+<td> use modulate
+</td>
+</tr>
+<tr>
+<td><p><a name="G3D-TEXENV-REPLACE:CAPS"></a><span class="term"><code class="literal">G3D_TEXENV_REPLACE</code></span></p></td>
+<td> replace color
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DImage"></a><h3>G3DImage</h3>
+<pre class="programlisting">typedef struct {
+	gchar *name;
+	guint32 width;
+	guint32 height;
+	guint8 depth;
+	guint32 flags;
+	guint8 *pixeldata;
+
+	guint32 tex_id;
+	G3DTexEnv tex_env;
+	G3DFloat tex_scale_u;
+	G3DFloat tex_scale_v;
+} G3DImage;
+</pre>
+<p>
+Object containing a two-dimensional pixel image.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *<em class="structfield"><code>name</code></em>;</span></p></td>
+<td> name of image
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>width</code></em>;</span></p></td>
+<td> width of image in pixels
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>height</code></em>;</span></p></td>
+<td> height of image in pixels
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint8"
+>guint8</a> <em class="structfield"><code>depth</code></em>;</span></p></td>
+<td> depth of image in bits
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>flags</code></em>;</span></p></td>
+<td> flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint8"
+>guint8</a> *<em class="structfield"><code>pixeldata</code></em>;</span></p></td>
+<td> the binary image data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>tex_id</code></em>;</span></p></td>
+<td> the OpenGL texture id, should be unique model-wide
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-texture.html#G3DTexEnv" title="enum G3DTexEnv">G3DTexEnv</a> <em class="structfield"><code>tex_env</code></em>;</span></p></td>
+<td> texture environment flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> <em class="structfield"><code>tex_scale_u</code></em>;</span></p></td>
+<td> factor scaling texture width, should be 1.0 for most cases
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> <em class="structfield"><code>tex_scale_v</code></em>;</span></p></td>
+<td> factor scaling texture height, should be 1.0 for most cases
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-load-cached"></a><h3>g3d_texture_load_cached ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           g3d_texture_load_cached             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);</pre>
+<p>
+Loads a texture image from file and attaches it to a hash table in the
+model. On a second try to load this texture it is returned from cache.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> a valid model
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> the file name of the texture to load
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the texture image
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-load-from-stream"></a><h3>g3d_texture_load_from_stream ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           g3d_texture_load_from_stream        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *model,
+                                                         <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Load a texture image from a stream. The file type is determined by the
+extension of the stream URI, so it should be valid. If <em class="parameter"><code>model</code></em> is not NULL
+the texture image is cached (or retrieved from cache if available).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>model</code></em> :</span></p></td>
+<td> a valid model or NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> an open stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the texture image or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-load"></a><h3>g3d_texture_load ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           g3d_texture_load                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename);</pre>
+<p>
+Load a texture from a file. The type of file is determined by the file
+extension.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> the file name of the texture
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the texture image or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-free"></a><h3>g3d_texture_free ()</h3>
+<pre class="programlisting">void                g3d_texture_free                    (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);</pre>
+<p>
+Frees all memory used by this texture image.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>texture</code></em> :</span></p></td>
+<td> a texture image
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-prepare"></a><h3>g3d_texture_prepare ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_texture_prepare                 (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);</pre>
+<p>
+Resizes the image to dimensions which are a power of 2 to be
+usable as an OpenGL texture.
+(FIXME: unimplemented)</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>texture</code></em> :</span></p></td>
+<td> a texture image
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-flip-y"></a><h3>g3d_texture_flip_y ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_texture_flip_y                  (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *texture);</pre>
+<p>
+Mirror the image along the x axis - all y coordinates are inverted.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>texture</code></em> :</span></p></td>
+<td> a texture image
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE on error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-texture-merge-alpha"></a><h3>g3d_texture_merge_alpha ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a>*           g3d_texture_merge_alpha             (<a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *image,
+                                                         <a class="link" href="libg3d-texture.html#G3DImage" title="G3DImage">G3DImage</a> *aimage);</pre>
+<p>
+Merges alpha information from <em class="parameter"><code>aimage</code></em> into output image. If <em class="parameter"><code>image</code></em> is NULL a
+new image is created, else <em class="parameter"><code>image</code></em> is returned with alpha from <em class="parameter"><code>aimage</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>image</code></em> :</span></p></td>
+<td> a texture image or NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>aimage</code></em> :</span></p></td>
+<td> an image with alpha information
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a texture image or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

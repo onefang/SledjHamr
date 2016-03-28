@@ -1,0 +1,423 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-plugins">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-plugins.top_of_page">plugins</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>plugins</refname>
+<refpurpose>G3DPlugin interface</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-plugins.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/plugins.h&gt;
+
+enum                <link linkend="G3DPluginType">G3DPluginType</link>;
+<link linkend="gpointer">gpointer</link>            (<link linkend="G3DPluginInitFunc">*G3DPluginInitFunc</link>)                (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="void">void</link>                (<link linkend="G3DPluginCleanupFunc">*G3DPluginCleanupFunc</link>)             (<link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DPluginLoadModelFunc">*G3DPluginLoadModelFunc</link>)           (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DPluginLoadModelFromStreamFunc">*G3DPluginLoadModelFromStreamFunc</link>) (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DPluginLoadImageFunc">*G3DPluginLoadImageFunc</link>)           (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DPluginLoadImageStreamFunc">*G3DPluginLoadImageStreamFunc</link>)     (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="gpointer">gpointer</link> user_data);
+<link linkend="gchar">gchar</link>*              (<link linkend="G3DPluginGetDescFunc">*G3DPluginGetDescFunc</link>)             (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="gchar">gchar</link>**             (<link linkend="G3DPluginGetExtFunc">*G3DPluginGetExtFunc</link>)              (<link linkend="G3DContext">G3DContext</link> *context);
+                    <link linkend="G3DPlugin">G3DPlugin</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-plugins-init">g3d_plugins_init</link>                    (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="void">void</link>                <link linkend="g3d-plugins-cleanup">g3d_plugins_cleanup</link>                 (<link linkend="G3DContext">G3DContext</link> *context);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-plugins-load-model">g3d_plugins_load_model</link>              (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-plugins-load-model-from-stream">g3d_plugins_load_model_from_stream</link>  (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-plugins-load-image">g3d_plugins_load_image</link>              (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DImage">G3DImage</link> *image);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-plugins-load-image-from-stream">g3d_plugins_load_image_from_stream</link>  (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DImage">G3DImage</link> *image);
+<link linkend="gchar">gchar</link>**             <link linkend="g3d-plugins-get-image-extensions">g3d_plugins_get_image_extensions</link>    (<link linkend="G3DContext">G3DContext</link> *context);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-plugins.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Direct interaction with the plugin system is normally not needed when using
+libg3d. It may be required when writing a plugin which should load a
+<link linkend="G3DImage"><type>G3DImage</type></link> or a <link linkend="G3DModel"><type>G3DModel</type></link> with another plugin.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-plugins.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DPluginType" role="enum">
+<title>enum G3DPluginType</title>
+<indexterm zone="G3DPluginType"><primary>G3DPluginType</primary></indexterm><programlisting>typedef enum {
+	G3D_PLUGIN_UNKNOWN = 0x00,
+	G3D_PLUGIN_IMPORT,
+	G3D_PLUGIN_IMAGE
+} G3DPluginType;
+</programlisting>
+<para>
+Type of plugin.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="G3D-PLUGIN-UNKNOWN:CAPS" role="constant">
+<term><literal>G3D_PLUGIN_UNKNOWN</literal></term>
+<listitem><simpara> unknown plugin type
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-PLUGIN-IMPORT:CAPS" role="constant">
+<term><literal>G3D_PLUGIN_IMPORT</literal></term>
+<listitem><simpara> model import plugin
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="G3D-PLUGIN-IMAGE:CAPS" role="constant">
+<term><literal>G3D_PLUGIN_IMAGE</literal></term>
+<listitem><simpara> image loading plugin
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginInitFunc" role="function">
+<title>G3DPluginInitFunc ()</title>
+<indexterm zone="G3DPluginInitFunc"><primary>G3DPluginInitFunc</primary></indexterm><programlisting><link linkend="gpointer">gpointer</link>            (*G3DPluginInitFunc)                (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Prototype for <link linkend="plugin-init"><function>plugin_init()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> opaque plugin data.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginCleanupFunc" role="function">
+<title>G3DPluginCleanupFunc ()</title>
+<indexterm zone="G3DPluginCleanupFunc"><primary>G3DPluginCleanupFunc</primary></indexterm><programlisting><link linkend="void">void</link>                (*G3DPluginCleanupFunc)             (<link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Prototype for <link linkend="plugin-cleanup"><function>plugin_cleanup()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque plugin data
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginLoadModelFunc" role="function">
+<title>G3DPluginLoadModelFunc ()</title>
+<indexterm zone="G3DPluginLoadModelFunc"><primary>G3DPluginLoadModelFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DPluginLoadModelFunc)           (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Prototype for <link linkend="plugin-load-model"><function>plugin_load_model()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> file name of model
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque plugin data
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginLoadModelFromStreamFunc" role="function">
+<title>G3DPluginLoadModelFromStreamFunc ()</title>
+<indexterm zone="G3DPluginLoadModelFromStreamFunc"><primary>G3DPluginLoadModelFromStreamFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DPluginLoadModelFromStreamFunc) (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Prototype for <link linkend="plugin-load-model-from-stream"><function>plugin_load_model_from_stream()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> the stream to load from
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque plugin data
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginLoadImageFunc" role="function">
+<title>G3DPluginLoadImageFunc ()</title>
+<indexterm zone="G3DPluginLoadImageFunc"><primary>G3DPluginLoadImageFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DPluginLoadImageFunc)           (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Prototype for <link linkend="plugin-load-image"><function>plugin_load_image()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> file name of image
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>image</parameter>&nbsp;:</term>
+<listitem><simpara> image structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque plugin data
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginLoadImageStreamFunc" role="function">
+<title>G3DPluginLoadImageStreamFunc ()</title>
+<indexterm zone="G3DPluginLoadImageStreamFunc"><primary>G3DPluginLoadImageStreamFunc</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DPluginLoadImageStreamFunc)     (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DImage">G3DImage</link> *image,
+                                                         <link linkend="gpointer">gpointer</link> user_data);</programlisting>
+<para>
+Prototype for <link linkend="plugin-load-image-from-stream"><function>plugin_load_image_from_stream()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> the stream to load from
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>image</parameter>&nbsp;:</term>
+<listitem><simpara> image structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara> opaque plugin data
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginGetDescFunc" role="function">
+<title>G3DPluginGetDescFunc ()</title>
+<indexterm zone="G3DPluginGetDescFunc"><primary>G3DPluginGetDescFunc</primary></indexterm><programlisting><link linkend="gchar">gchar</link>*              (*G3DPluginGetDescFunc)             (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Prototype for <link linkend="plugin-description"><function>plugin_description()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a newly-allocated string containing the description of the plugin.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPluginGetExtFunc" role="function">
+<title>G3DPluginGetExtFunc ()</title>
+<indexterm zone="G3DPluginGetExtFunc"><primary>G3DPluginGetExtFunc</primary></indexterm><programlisting><link linkend="gchar">gchar</link>**             (*G3DPluginGetExtFunc)              (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Prototype for <link linkend="plugin-extensions"><function>plugin_extensions()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> the context
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> NULL-terminated list of file extensions supported by this plugin.
+Free with <link linkend="g-strfreev"><function>g_strfreev()</function></link>.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DPlugin" role="struct">
+<title>G3DPlugin</title>
+<indexterm zone="G3DPlugin"><primary>G3DPlugin</primary></indexterm><programlisting>typedef struct {
+} G3DPlugin;
+</programlisting>
+<para>
+A libg3d plugin.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="g3d-plugins-init" role="function">
+<title>g3d_plugins_init ()</title>
+<indexterm zone="g3d-plugins-init"><primary>g3d_plugins_init</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_plugins_init                    (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Initializes the plugin system. This is implicitly done when using
+<link linkend="g3d-context-new"><function>g3d_context_new()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid <link linkend="G3DContext"><type>G3DContext</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-cleanup" role="function">
+<title>g3d_plugins_cleanup ()</title>
+<indexterm zone="g3d-plugins-cleanup"><primary>g3d_plugins_cleanup</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_plugins_cleanup                 (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Clean up the plugin system. Usually done by <link linkend="g3d-context-free"><function>g3d_context_free()</function></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-load-model" role="function">
+<title>g3d_plugins_load_model ()</title>
+<indexterm zone="g3d-plugins-load-model"><primary>g3d_plugins_load_model</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_plugins_load_model              (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Try to load a model from file using import plugins.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> file name of model to load
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> model structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-load-model-from-stream" role="function">
+<title>g3d_plugins_load_model_from_stream ()</title>
+<indexterm zone="g3d-plugins-load-model-from-stream"><primary>g3d_plugins_load_model_from_stream</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_plugins_load_model_from_stream  (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Try to load a model from stream using import plugins.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> stream to load model from
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> model structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-load-image" role="function">
+<title>g3d_plugins_load_image ()</title>
+<indexterm zone="g3d-plugins-load-image"><primary>g3d_plugins_load_image</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_plugins_load_image              (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="G3DImage">G3DImage</link> *image);</programlisting>
+<para>
+Try to load an image from file using import plugins.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> file name of image to load
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>image</parameter>&nbsp;:</term>
+<listitem><simpara> image structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-load-image-from-stream" role="function">
+<title>g3d_plugins_load_image_from_stream ()</title>
+<indexterm zone="g3d-plugins-load-image-from-stream"><primary>g3d_plugins_load_image_from_stream</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_plugins_load_image_from_stream  (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         <link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="G3DImage">G3DImage</link> *image);</programlisting>
+<para>
+Try to load an image from stream using import plugins.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> stream to load image from
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>image</parameter>&nbsp;:</term>
+<listitem><simpara> image structure to fill
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-plugins-get-image-extensions" role="function">
+<title>g3d_plugins_get_image_extensions ()</title>
+<indexterm zone="g3d-plugins-get-image-extensions"><primary>g3d_plugins_get_image_extensions</primary></indexterm><programlisting><link linkend="gchar">gchar</link>**             g3d_plugins_get_image_extensions    (<link linkend="G3DContext">G3DContext</link> *context);</programlisting>
+<para>
+Get the supported image type extensions.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> NULL-terminated list of image file extensions supported by this
+plugin. Free with <link linkend="g-strfreev"><function>g_strfreev()</function></link>.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1 id="libg3d-plugins.see-also">
+<title>See Also</title>
+<link linkend="G3DPlugin"><type>G3DPlugin</type></link>
+</refsect1>
+
+</refentry>

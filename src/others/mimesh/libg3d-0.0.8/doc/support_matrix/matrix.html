@@ -1,0 +1,825 @@
+<html>
+	<head>
+		<title>libg3d support matrix</title>
+		<style>
+		<!--
+body { background-color: #FADC46; }
+table { border: 1px solid black; width: 100%; border-collapse: collapse; }
+tr.topline { border-top: 2px solid black; }
+tr.default { }
+td    { border: 1px solid gray; margin: 2px; background-color: white;
+		font-size: small; vertical-align: top; }
+span.content { }
+th    { text-align: right; background-color: #BBB; font-weight: normal;
+		font-size: small; vertical-align: top; }
+		//-->
+		</style>
+		<script>
+		<!--
+var hidden=false;
+
+function hide_content() {
+	var spans = document.getElementsByTagName("span");
+	for(i = 0; i < spans.length; i ++) {
+		spans[i].style.display = "none";
+	}
+	hidden = true;
+}
+
+function show_content() {
+	var spans = document.getElementsByTagName("span");
+	for(i = 0; i < spans.length; i ++) {
+		spans[i].style.display = "block";
+	}
+	hidden = false;
+}
+		//-->
+		</script>
+	</head>
+	<body>
+		<a href="javascript:hide_content();">hide content</a> |
+		<a href="javascript:show_content();">show content</a>
+		<table>
+			<tr><td>&nbsp;</td>
+<td>3mf<br /> 3dmf<br /> b3d</td>
+<td>3ds<br /> prj</td>
+<td>ac<br /> acc</td>
+<td>acf</td>
+<td>ar<br /> dof</td>
+<td>ase</td>
+<td>blend</td>
+<td>c4d</td>
+<td>cob</td>
+<td>dae</td>
+<td>dpm</td>
+<td>dxf</td>
+<td>flt</td>
+<td>glb</td>
+<td>bmp<br /> sgi<br /> dds<br /> (gdk-pixbuf supported types)</td>
+<td>iob</td>
+<td>joe<br /> car</td>
+<td>kmz</td>
+<td>dat<br /> mpd<br /> ldr</td>
+<td>lcd</td>
+<td>lw<br /> lwb<br /> lwo</td>
+<td>max</td>
+<td>mb</td>
+<td>md2</td>
+<td>md3</td>
+<td>nff</td>
+<td>obj</td>
+<td>osm</td>
+<td>q3o<br /> q3s</td>
+<td>r4</td>
+<td>rbh</td>
+<td>skp</td>
+<td>stl</td>
+<td>3do</td>
+<td>test</td>
+<td>vrml<br /> iv</td>
+<td>wrl</td>
+</tr>
+<tr class="topline"><th id="th-">description</th>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">COLLADA</span></td>
+<td style=""><span class="content">DarkPlacesModel</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">OpenFlight</span></td>
+<td style=""><span class="content">UltimateStunts</span></td>
+<td style=""><span class="content">Height field</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">VDrift</span></td>
+<td style=""><span class="content">Google Earth container, models handled by COLLADA plugin (imp_dae)</span></td>
+<td style=""><span class="content">LDraw</span></td>
+<td style=""><span class="content">LeoCAD</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">3D Studio MAX</span></td>
+<td style=""><span class="content">Maya</span></td>
+<td style=""><span class="content">Quake 2 models</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">Neutral file format</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">OpenStreetMap</span></td>
+<td style=""><span class="content">Quick3D</span></td>
+<td style=""><span class="content">Reflections 4</span></td>
+<td style=""><span class="content">Discworld Noir, VERY experimental</span></td>
+<td style=""><span class="content">SketchUp</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">Total Annihilation</span></td>
+<td style=""><span class="content">plugin to test some concepts and routines in libg3d, not loading any files</span></td>
+<td style=""><span class="content">VRMLv1, Inventor</span></td>
+<td style=""><span class="content">VRML97</span></td>
+</tr>
+<tr class="default"><th id="th-">built without EXPERIMENTAL</th>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">depends on libraries except glib</th>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> libxml2</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content"> gdk-pixbuf for more image types</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> libxml2, libgsf</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> libgsf</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> libxml2</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> flex</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">depends on external data files at runtime</th>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> airfoil data in $AIRFOIL_DIR</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> LDraw parts library in $LDRAWDIR</span></td>
+<td style="background-color: #884;"><span class="content"> LeoCAD parts library in $LEOCAD_LIB</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="topline"><th id="th-">libmagic detector</th>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> binary with no magic</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> no static list possible</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> only for .joe files</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> partly, .dat has no real magic</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> text format w/o magic</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> </span></td>
+<td style="background-color: #4B4;"><span class="content"> VRML, not Inventor</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">G3DStream support</th>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> ar is decomressed to local files</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #B44;"><span class="content"> has to be real file</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Works without seeking</th>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #D24;"><span class="content"> seeking may be removed</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> not yet, should be possible</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> some data at end of file has to be read first</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> may be possible</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content"> not file-based</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Progress bar updates</th>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> bigger jumps</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Container format</th>
+<td style="background-color: #884;"><span class="content"> ASCII files not supported</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> just struct serialization, different for every version</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #D24;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> basic support for v5, v6</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content"> handled by image plugins</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content"> some versions may be unsupported</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> only binary, no ASCII</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #B44;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> .3do works, .ufo not</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Object grouping</th>
+<td style="background-color: #884;"><span class="content"> no hierarchy yet</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> just one mesh</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #D24;"><span class="content"> optional, but not working yet</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Object transformation</th>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="topline"><th id="th-">Vertex data</th>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Normal data</th>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> not yet implemented</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Face data</th>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content"> fails: f15compl.lw</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Face colors</th>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> no external color information possible yet</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content"> some fail: wrong color indices</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> self-defined</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Face transparency</th>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="topline"><th id="th-">Texture images</th>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> partly</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content"> some guessing</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Texture coordinates (UV)</th>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #4B4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content"> not yet implemented</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #0F4;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+<tr class="default"><th id="th-">Texture mapping parameters</th>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style="background-color: #884;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style="background-color: #F04;"><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+<td style=""><span class="content">&nbsp;</span></td>
+</tr>
+</table>
+	</body>
+</html>

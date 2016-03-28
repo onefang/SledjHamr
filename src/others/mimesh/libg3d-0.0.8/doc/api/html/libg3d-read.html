@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>read</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-iff.html" title="iff">
+<link rel="next" href="libg3d-primitive.html" title="primitive">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-iff.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-primitive.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-read.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-read.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-read"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-read.top_of_page"></a>read</span></h2>
+<p>read — file reading abstraction (deprecated)</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-read.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/read.h&gt;
+
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-int8" title="g3d_read_int8 ()">g3d_read_int8</a>                       (FILE *f);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-int16-be" title="g3d_read_int16_be ()">g3d_read_int16_be</a>                   (FILE *f);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-int16-le" title="g3d_read_int16_le ()">g3d_read_int16_le</a>                   (FILE *f);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-int32-be" title="g3d_read_int32_be ()">g3d_read_int32_be</a>                   (FILE *f);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-int32-le" title="g3d_read_int32_le ()">g3d_read_int32_le</a>                   (FILE *f);
+<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            <a class="link" href="libg3d-read.html#g3d-read-float-be" title="g3d_read_float_be ()">g3d_read_float_be</a>                   (FILE *f);
+<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            <a class="link" href="libg3d-read.html#g3d-read-float-le" title="g3d_read_float_le ()">g3d_read_float_le</a>                   (FILE *f);
+<a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           <a class="link" href="libg3d-read.html#g3d-read-double-be" title="g3d_read_double_be ()">g3d_read_double_be</a>                  (FILE *f);
+<a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           <a class="link" href="libg3d-read.html#g3d-read-double-le" title="g3d_read_double_le ()">g3d_read_double_le</a>                  (FILE *f);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-read.html#g3d-read-cstr" title="g3d_read_cstr ()">g3d_read_cstr</a>                       (FILE *f,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> max_len);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-read.description"></a><h2>Description</h2>
+<p>
+The g3d_read_* family of functions is deprecated in favour of the <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a>
+interface.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-read.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="g3d-read-int8"></a><h3>g3d_read_int8 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_int8                       (FILE *f);</pre>
+<p>
+Read a 1 byte signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-int16-be"></a><h3>g3d_read_int16_be ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_int16_be                   (FILE *f);</pre>
+<p>
+Read a 2 byte big-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-int16-le"></a><h3>g3d_read_int16_le ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_int16_le                   (FILE *f);</pre>
+<p>
+Read a 2 byte little-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-int32-be"></a><h3>g3d_read_int32_be ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_int32_be                   (FILE *f);</pre>
+<p>
+Read a 4 byte big-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-int32-le"></a><h3>g3d_read_int32_le ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_int32_le                   (FILE *f);</pre>
+<p>
+Read a 4 byte little-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-float-be"></a><h3>g3d_read_float_be ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            g3d_read_float_be                   (FILE *f);</pre>
+<p>
+Read a 4 byte big-endian floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-float-le"></a><h3>g3d_read_float_le ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            g3d_read_float_le                   (FILE *f);</pre>
+<p>
+Read a 4 byte little-endian floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-double-be"></a><h3>g3d_read_double_be ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           g3d_read_double_be                  (FILE *f);</pre>
+<p>
+Read a 8 byte big-endian double-precision floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-double-le"></a><h3>g3d_read_double_le ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           g3d_read_double_le                  (FILE *f);</pre>
+<p>
+Read a 8 byte little-endian double-precision floating point number from
+file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-read-cstr"></a><h3>g3d_read_cstr ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_read_cstr                       (FILE *f,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> max_len);</pre>
+<p>
+Read a zero-terminated string from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the file to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>buffer</code></em> :</span></p></td>
+<td> the buffer to store line in
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>max_len</code></em> :</span></p></td>
+<td> maximum length of string including termination character
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> number of bytes read from file.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-read.see-also"></a><h2>See Also</h2>
+g3d_stream_open_file
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

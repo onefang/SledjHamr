@@ -1,0 +1,110 @@
+<!-- ##### SECTION Title ##### -->
+primitive
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### FUNCTION g3d_primitive_cube ##### -->
+<para>
+
+</para>
+
+@width: 
+@height: 
+@depth: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_box ##### -->
+<para>
+
+</para>
+
+@width: 
+@height: 
+@depth: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_box_strip_2d ##### -->
+<para>
+
+</para>
+
+@vcnt: 
+@vdata: 
+@height: 
+@width: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_mesh ##### -->
+<para>
+
+</para>
+
+@m: 
+@n: 
+@wrap_m: 
+@wrap_n: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_cylinder ##### -->
+<para>
+
+</para>
+
+@radius: 
+@height: 
+@sides: 
+@top: 
+@bottom: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_tube ##### -->
+<para>
+
+</para>
+
+@r_in: 
+@r_out: 
+@height: 
+@sides: 
+@top: 
+@bottom: 
+@material: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_primitive_sphere ##### -->
+<para>
+
+</para>
+
+@radius: 
+@vseg: 
+@hseg: 
+@material: 
+@Returns: 
+
+

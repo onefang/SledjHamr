@@ -1,0 +1,65 @@
+<!-- ##### SECTION Title ##### -->
+vector
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### TYPEDEF G3DVector ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION g3d_vector_normal ##### -->
+<para>
+
+</para>
+
+@ax: 
+@ay: 
+@az: 
+@bx: 
+@by: 
+@bz: 
+@nx: 
+@ny: 
+@nz: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_vector_unify ##### -->
+<para>
+
+</para>
+
+@nx: 
+@ny: 
+@nz: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_vector_transform ##### -->
+<para>
+
+</para>
+
+@x: 
+@y: 
+@z: 
+@matrix: 
+@Returns: 
+
+

@@ -1,0 +1,121 @@
+<!-- ##### SECTION Title ##### -->
+texture
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO G3D_FLAG_IMG_GREYSCALE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM G3DTexEnv ##### -->
+<para>
+
+</para>
+
+@G3D_TEXENV_UNSPECIFIED: 
+@G3D_TEXENV_BLEND: 
+@G3D_TEXENV_DECAL: 
+@G3D_TEXENV_MODULATE: 
+@G3D_TEXENV_REPLACE: 
+
+<!-- ##### STRUCT G3DImage ##### -->
+<para>
+
+</para>
+
+@name: 
+@width: 
+@height: 
+@depth: 
+@flags: 
+@pixeldata: 
+@tex_id: 
+@tex_env: 
+@tex_scale_u: 
+@tex_scale_v: 
+
+<!-- ##### FUNCTION g3d_texture_load_cached ##### -->
+<para>
+
+</para>
+
+@context: 
+@model: 
+@filename: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_texture_load_from_stream ##### -->
+<para>
+
+</para>
+
+@context: 
+@model: 
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_texture_load ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_texture_free ##### -->
+<para>
+
+</para>
+
+@texture: 
+
+
+<!-- ##### FUNCTION g3d_texture_prepare ##### -->
+<para>
+
+</para>
+
+@texture: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_texture_flip_y ##### -->
+<para>
+
+</para>
+
+@texture: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_texture_merge_alpha ##### -->
+<para>
+
+</para>
+
+@image: 
+@aimage: 
+@Returns: 
+
+

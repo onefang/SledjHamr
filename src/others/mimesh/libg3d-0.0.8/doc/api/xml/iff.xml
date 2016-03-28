@@ -1,0 +1,558 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-iff">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-iff.top_of_page">iff</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>iff</refname>
+<refpurpose>IFF file helper functions</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-iff.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/iff.h&gt;
+
+#define             <link linkend="G3D-IFF-PAD1:CAPS">G3D_IFF_PAD1</link>
+#define             <link linkend="G3D-IFF-PAD2:CAPS">G3D_IFF_PAD2</link>
+#define             <link linkend="G3D-IFF-PAD4:CAPS">G3D_IFF_PAD4</link>
+#define             <link linkend="G3D-IFF-PAD8:CAPS">G3D_IFF_PAD8</link>
+#define             <link linkend="G3D-IFF-LE:CAPS">G3D_IFF_LE</link>
+#define             <link linkend="G3D-IFF-LEN16:CAPS">G3D_IFF_LEN16</link>
+#define             <link linkend="G3D-IFF-SUBCHUNK-LEN16:CAPS">G3D_IFF_SUBCHUNK_LEN16</link>
+#define             <link linkend="G3D-IFF-MKID:CAPS">G3D_IFF_MKID</link>                        (a,b,c,d)
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-iff-check">g3d_iff_check</link>                       (<link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="gsize">gsize</link> *len);
+<link linkend="gsize">gsize</link>               <link linkend="g3d-iff-read-chunk">g3d_iff_read_chunk</link>                  (<link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="gsize">gsize</link> *len,
+                                                         <link linkend="guint32">guint32</link> flags);
+<link linkend="gpointer">gpointer</link>            <link linkend="g3d-iff-handle-chunk">g3d_iff_handle_chunk</link>                (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *plocal,
+                                                         <link linkend="G3DIffChunkInfo">G3DIffChunkInfo</link> *chunks,
+                                                         <link linkend="guint32">guint32</link> flags);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-iff-chunk-matches">g3d_iff_chunk_matches</link>               (<link linkend="guint32">guint32</link> id,
+                                                         <link linkend="gchar">gchar</link> *tid);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-iff-read-ctnr">g3d_iff_read_ctnr</link>                   (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *local,
+                                                         <link linkend="G3DIffChunkInfo">G3DIffChunkInfo</link> *chunks,
+                                                         <link linkend="guint32">guint32</link> flags);
+<link linkend="gchar">gchar</link>*              <link linkend="g3d-iff-id-to-text">g3d_iff_id_to_text</link>                  (<link linkend="guint32">guint32</link> id);
+<link linkend="FILE:CAPS">FILE</link>*               <link linkend="g3d-iff-open">g3d_iff_open</link>                        (const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="guint32">guint32</link> *len);
+<link linkend="int">int</link>                 <link linkend="g3d-iff-readchunk">g3d_iff_readchunk</link>                   (<link linkend="FILE:CAPS">FILE</link> *f,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="guint32">guint32</link> *len,
+                                                         <link linkend="guint32">guint32</link> flags);
+<link linkend="gboolean">gboolean</link>            (<link linkend="G3DIffChunkCallback">*G3DIffChunkCallback</link>)              (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *local);
+#define             <link linkend="g3d-iff-chunk-callback">g3d_iff_chunk_callback</link>
+                    <link linkend="G3DIffChunkInfo">G3DIffChunkInfo</link>;
+#define             <link linkend="g3d-iff-chunk-info">g3d_iff_chunk_info</link>
+                    <link linkend="G3DIffGlobal">G3DIffGlobal</link>;
+#define             <link linkend="g3d-iff-gdata">g3d_iff_gdata</link>
+                    <link linkend="G3DIffLocal">G3DIffLocal</link>;
+#define             <link linkend="g3d-iff-ldata">g3d_iff_ldata</link>
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-iff.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+These are helper functions to read data from the Interchange File Format
+(IFF).</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-iff.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3D-IFF-PAD1:CAPS" role="macro">
+<title>G3D_IFF_PAD1</title>
+<indexterm zone="G3D-IFF-PAD1:CAPS"><primary>G3D_IFF_PAD1</primary></indexterm><programlisting>#define G3D_IFF_PAD1   0x01
+</programlisting>
+<para>
+No padding is done after chunks.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-PAD2:CAPS" role="macro">
+<title>G3D_IFF_PAD2</title>
+<indexterm zone="G3D-IFF-PAD2:CAPS"><primary>G3D_IFF_PAD2</primary></indexterm><programlisting>#define G3D_IFF_PAD2   0x02
+</programlisting>
+<para>
+Chunks are 2-byte aligned</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-PAD4:CAPS" role="macro">
+<title>G3D_IFF_PAD4</title>
+<indexterm zone="G3D-IFF-PAD4:CAPS"><primary>G3D_IFF_PAD4</primary></indexterm><programlisting>#define G3D_IFF_PAD4   0x04
+</programlisting>
+<para>
+Chunks are 4-byte aligned</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-PAD8:CAPS" role="macro">
+<title>G3D_IFF_PAD8</title>
+<indexterm zone="G3D-IFF-PAD8:CAPS"><primary>G3D_IFF_PAD8</primary></indexterm><programlisting>#define G3D_IFF_PAD8   0x08
+</programlisting>
+<para>
+Chunks are 8-byte aligned</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-LE:CAPS" role="macro">
+<title>G3D_IFF_LE</title>
+<indexterm zone="G3D-IFF-LE:CAPS"><primary>G3D_IFF_LE</primary></indexterm><programlisting>#define G3D_IFF_LE               0x40 /* little endian */
+</programlisting>
+<para>
+The file has little-endian data.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-LEN16:CAPS" role="macro">
+<title>G3D_IFF_LEN16</title>
+<indexterm zone="G3D-IFF-LEN16:CAPS"><primary>G3D_IFF_LEN16</primary></indexterm><programlisting>#define G3D_IFF_LEN16            0x20
+</programlisting>
+<para>
+All chunks have 16-bit sizes.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-SUBCHUNK-LEN16:CAPS" role="macro">
+<title>G3D_IFF_SUBCHUNK_LEN16</title>
+<indexterm zone="G3D-IFF-SUBCHUNK-LEN16:CAPS"><primary>G3D_IFF_SUBCHUNK_LEN16</primary></indexterm><programlisting>#define G3D_IFF_SUBCHUNK_LEN16   0x10
+</programlisting>
+<para>
+All chunks except the toplevel ones have 16-bit sizes.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-IFF-MKID:CAPS" role="macro">
+<title>G3D_IFF_MKID()</title>
+<indexterm zone="G3D-IFF-MKID:CAPS"><primary>G3D_IFF_MKID</primary></indexterm><programlisting>#define             G3D_IFF_MKID(a,b,c,d)</programlisting>
+<para>
+Generate an IFF chunk identifier from character representation, e.g.
+G3D_IFF_MKID('F','O','R','M').</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>a</parameter>&nbsp;:</term>
+<listitem><simpara> first byte
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>b</parameter>&nbsp;:</term>
+<listitem><simpara> second byte
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>c</parameter>&nbsp;:</term>
+<listitem><simpara> third byte
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>d</parameter>&nbsp;:</term>
+<listitem><simpara> fourth byte
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-check" role="function">
+<title>g3d_iff_check ()</title>
+<indexterm zone="g3d-iff-check"><primary>g3d_iff_check</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_iff_check                       (<link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="gsize">gsize</link> *len);</programlisting>
+<para>
+Checks a stream for a valid IFF signature and reads the top level container.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> stream containing IFF file to check
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> top level ID (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>len</parameter>&nbsp;:</term>
+<listitem><simpara> length of top level container (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success (valid IFF), FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-read-chunk" role="function">
+<title>g3d_iff_read_chunk ()</title>
+<indexterm zone="g3d-iff-read-chunk"><primary>g3d_iff_read_chunk</primary></indexterm><programlisting><link linkend="gsize">gsize</link>               g3d_iff_read_chunk                  (<link linkend="G3DStream">G3DStream</link> *stream,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="gsize">gsize</link> *len,
+                                                         <link linkend="guint32">guint32</link> flags);</programlisting>
+<para>
+Reads one chunk header from an IFF file.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>stream</parameter>&nbsp;:</term>
+<listitem><simpara> stream to read from
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> ID of chunk (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>len</parameter>&nbsp;:</term>
+<listitem><simpara> length of chunk (excluding header) (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> real length of chunk including header and possible padding byte
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-handle-chunk" role="function">
+<title>g3d_iff_handle_chunk ()</title>
+<indexterm zone="g3d-iff-handle-chunk"><primary>g3d_iff_handle_chunk</primary></indexterm><programlisting><link linkend="gpointer">gpointer</link>            g3d_iff_handle_chunk                (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *plocal,
+                                                         <link linkend="G3DIffChunkInfo">G3DIffChunkInfo</link> *chunks,
+                                                         <link linkend="guint32">guint32</link> flags);</programlisting>
+<para>
+Handle an IFF chunk based on chunk description.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>global</parameter>&nbsp;:</term>
+<listitem><simpara> global data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>plocal</parameter>&nbsp;:</term>
+<listitem><simpara> local data of parent chunk, must not be NULL
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>chunks</parameter>&nbsp;:</term>
+<listitem><simpara> chunk description list
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> IFF flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> level object for siblings, may be NULL.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-chunk-matches" role="function">
+<title>g3d_iff_chunk_matches ()</title>
+<indexterm zone="g3d-iff-chunk-matches"><primary>g3d_iff_chunk_matches</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_iff_chunk_matches               (<link linkend="guint32">guint32</link> id,
+                                                         <link linkend="gchar">gchar</link> *tid);</programlisting>
+<para>
+Check whether <parameter>id</parameter> and <parameter>tid</parameter> match.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> IFF identifier
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>tid</parameter>&nbsp;:</term>
+<listitem><simpara> textual representation of identifier
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on match, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-read-ctnr" role="function">
+<title>g3d_iff_read_ctnr ()</title>
+<indexterm zone="g3d-iff-read-ctnr"><primary>g3d_iff_read_ctnr</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_iff_read_ctnr                   (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *local,
+                                                         <link linkend="G3DIffChunkInfo">G3DIffChunkInfo</link> *chunks,
+                                                         <link linkend="guint32">guint32</link> flags);</programlisting>
+<para>
+Read subchunks in current chunk and handle them appropriately.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>global</parameter>&nbsp;:</term>
+<listitem><simpara> global data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>local</parameter>&nbsp;:</term>
+<listitem><simpara> local data of current chunk, must not be NULL
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>chunks</parameter>&nbsp;:</term>
+<listitem><simpara> chunk description list
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> IFF flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-id-to-text" role="function">
+<title>g3d_iff_id_to_text ()</title>
+<indexterm zone="g3d-iff-id-to-text"><primary>g3d_iff_id_to_text</primary></indexterm><programlisting><link linkend="gchar">gchar</link>*              g3d_iff_id_to_text                  (<link linkend="guint32">guint32</link> id);</programlisting>
+<para>
+Get the text representation of an IFF chunk identifier.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> an IFF identifier
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a newly allocated string containing the text identifier.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-open" role="function">
+<title>g3d_iff_open ()</title>
+<indexterm zone="g3d-iff-open"><primary>g3d_iff_open</primary></indexterm><programlisting><link linkend="FILE:CAPS">FILE</link>*               g3d_iff_open                        (const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="guint32">guint32</link> *len);</programlisting>
+<para>
+Opens an IFF file, checks it and reads its top level container.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> file name of IFF file
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> top level ID (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>len</parameter>&nbsp;:</term>
+<listitem><simpara> length of top level container (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the file pointer of open file or NULL in case of an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-readchunk" role="function">
+<title>g3d_iff_readchunk ()</title>
+<indexterm zone="g3d-iff-readchunk"><primary>g3d_iff_readchunk</primary></indexterm><programlisting><link linkend="int">int</link>                 g3d_iff_readchunk                   (<link linkend="FILE:CAPS">FILE</link> *f,
+                                                         <link linkend="guint32">guint32</link> *id,
+                                                         <link linkend="guint32">guint32</link> *len,
+                                                         <link linkend="guint32">guint32</link> flags);</programlisting>
+<para>
+Reads one chunk header from an IFF file.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>f</parameter>&nbsp;:</term>
+<listitem><simpara> the open IFF file pointer
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>id</parameter>&nbsp;:</term>
+<listitem><simpara> ID of chunk (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>len</parameter>&nbsp;:</term>
+<listitem><simpara> length of chunk (excluding header) (out)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> real length of chunk including header and possible padding byte
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="G3DIffChunkCallback" role="function">
+<title>G3DIffChunkCallback ()</title>
+<indexterm zone="G3DIffChunkCallback"><primary>G3DIffChunkCallback</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            (*G3DIffChunkCallback)              (<link linkend="G3DIffGlobal">G3DIffGlobal</link> *global,
+                                                         <link linkend="G3DIffLocal">G3DIffLocal</link> *local);</programlisting>
+<para>
+IFF callback function prototype.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>global</parameter>&nbsp;:</term>
+<listitem><simpara> the global data
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>local</parameter>&nbsp;:</term>
+<listitem><simpara> the local data
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-chunk-callback" role="macro">
+<title>g3d_iff_chunk_callback</title>
+<indexterm zone="g3d-iff-chunk-callback"><primary>g3d_iff_chunk_callback</primary></indexterm><programlisting>#define g3d_iff_chunk_callback G3DIffChunkCallback
+</programlisting>
+<para>
+IFF chunk callback (deprecated).</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DIffChunkInfo" role="struct">
+<title>G3DIffChunkInfo</title>
+<indexterm zone="G3DIffChunkInfo"><primary>G3DIffChunkInfo</primary></indexterm><programlisting>typedef struct {
+	gchar *id;
+	gchar *description;
+	gboolean container;
+	G3DIffChunkCallback callback;
+} G3DIffChunkInfo;
+</programlisting>
+<para>
+A chunk type description.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>id</structfield>;</term>
+<listitem><simpara> identifier of chunk
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>description</structfield>;</term>
+<listitem><simpara> human-readable description of chunk type
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gboolean">gboolean</link>&nbsp;<structfield>container</structfield>;</term>
+<listitem><simpara> TRUE if this chunk contains sub-chunks
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DIffChunkCallback">G3DIffChunkCallback</link>&nbsp;<structfield>callback</structfield>;</term>
+<listitem><simpara> function to be called if such a chunk is found
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-chunk-info" role="macro">
+<title>g3d_iff_chunk_info</title>
+<indexterm zone="g3d-iff-chunk-info"><primary>g3d_iff_chunk_info</primary></indexterm><programlisting>#define g3d_iff_chunk_info G3DIffChunkInfo
+</programlisting>
+<para>
+IFF chunk description (deprecated).</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DIffGlobal" role="struct">
+<title>G3DIffGlobal</title>
+<indexterm zone="G3DIffGlobal"><primary>G3DIffGlobal</primary></indexterm><programlisting>typedef struct {
+	G3DContext *context;
+	G3DModel *model;
+	G3DStream *stream;
+	guint32 flags;
+	gpointer user_data;
+	FILE *f;
+	long int max_fpos;
+} G3DIffGlobal;
+</programlisting>
+<para>
+The plugin-global data to be given to IFF callback functions.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="G3DContext">G3DContext</link>&nbsp;*<structfield>context</structfield>;</term>
+<listitem><simpara> a valid context
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DModel">G3DModel</link>&nbsp;*<structfield>model</structfield>;</term>
+<listitem><simpara> a model
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DStream">G3DStream</link>&nbsp;*<structfield>stream</structfield>;</term>
+<listitem><simpara> the stream to read model from
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> IFF flags
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>user_data</structfield>;</term>
+<listitem><simpara> to be used by plugin
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="FILE:CAPS">FILE</link>&nbsp;*<structfield>f</structfield>;</term>
+<listitem><simpara> file to read model from (DEPRECATED)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term>long&nbsp;<link linkend="int">int</link>&nbsp;<structfield>max_fpos</structfield>;</term>
+<listitem><simpara> maximum file position (DEPRECATED)
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-gdata" role="macro">
+<title>g3d_iff_gdata</title>
+<indexterm zone="g3d-iff-gdata"><primary>g3d_iff_gdata</primary></indexterm><programlisting>#define g3d_iff_gdata G3DIffGlobal
+</programlisting>
+<para>
+IFF global data (deprecated).</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DIffLocal" role="struct">
+<title>G3DIffLocal</title>
+<indexterm zone="G3DIffLocal"><primary>G3DIffLocal</primary></indexterm><programlisting>typedef struct {
+	guint32 id;
+	guint32 parent_id;
+	gpointer object;
+	gint32 level;
+	gpointer level_object;
+	gint32 nb;
+	gboolean finalize;
+} G3DIffLocal;
+</programlisting>
+<para>
+The function-local data for IFF callback functions.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>id</structfield>;</term>
+<listitem><simpara> chunk identifier
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>parent_id</structfield>;</term>
+<listitem><simpara> parent chunk identifier
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>object</structfield>;</term>
+<listitem><simpara> an object set by parent callbacks, may be NULL
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gint32">gint32</link>&nbsp;<structfield>level</structfield>;</term>
+<listitem><simpara> level of chunk
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gpointer">gpointer</link>&nbsp;<structfield>level_object</structfield>;</term>
+<listitem><simpara> object shared by callbacks on the same level, may be NULL
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gint32">gint32</link>&nbsp;<structfield>nb</structfield>;</term>
+<listitem><simpara> number of bytes remaining in chunk, has to be decremented after
+correctly after reading from stream
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="gboolean">gboolean</link>&nbsp;<structfield>finalize</structfield>;</term>
+<listitem><simpara> for container chunks the callback function is called before
+and after processing possible sub-chunks, the second time <parameter>finalize</parameter> is set
+to TRUE
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-iff-ldata" role="macro">
+<title>g3d_iff_ldata</title>
+<indexterm zone="g3d-iff-ldata"><primary>g3d_iff_ldata</primary></indexterm><programlisting>#define g3d_iff_ldata G3DIffLocal
+</programlisting>
+<para>
+IFF local data (deprecated).</para>
+<para>
+
+</para></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

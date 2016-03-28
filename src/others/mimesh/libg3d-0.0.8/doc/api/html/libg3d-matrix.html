@@ -1,0 +1,450 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>matrix</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-primitive.html" title="primitive">
+<link rel="next" href="libg3d-vector.html" title="vector">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-primitive.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-vector.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-matrix.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-matrix.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-matrix"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-matrix.top_of_page"></a>matrix</span></h2>
+<p>matrix — Matrix manipulation and calculation</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-matrix.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/matrix.h&gt;
+
+typedef             <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-identity" title="g3d_matrix_identity ()">g3d_matrix_identity</a>                 (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-multiply" title="g3d_matrix_multiply ()">g3d_matrix_multiply</a>                 (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *m1,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *m2,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-translate" title="g3d_matrix_translate ()">g3d_matrix_translate</a>                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-rotate" title="g3d_matrix_rotate ()">g3d_matrix_rotate</a>                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> angle,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ax,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ay,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> az,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-rotate-xyz" title="g3d_matrix_rotate_xyz ()">g3d_matrix_rotate_xyz</a>               (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> rx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ry,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> rz,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-scale" title="g3d_matrix_scale ()">g3d_matrix_scale</a>                    (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-transpose" title="g3d_matrix_transpose ()">g3d_matrix_transpose</a>                (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-determinant" title="g3d_matrix_determinant ()">g3d_matrix_determinant</a>              (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-matrix.html#g3d-matrix-dump" title="g3d_matrix_dump ()">g3d_matrix_dump</a>                     (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-matrix.description"></a><h2>Description</h2>
+<p>
+Matrices in libg3d have the following layout:
+</p>
+<p>
+G3DMatrix matrix[16]:
+</p>
+<p>
+matrix[col * 4 + row] = f;</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-matrix.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DMatrix"></a><h3>G3DMatrix</h3>
+<pre class="programlisting">typedef G3DFloat G3DMatrix;
+</pre>
+<p>
+Matrix element type.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-identity"></a><h3>g3d_matrix_identity ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_identity                 (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Sets the given matrix to the identity matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> 4x4 matrix (float[16])
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-multiply"></a><h3>g3d_matrix_multiply ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_multiply                 (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *m1,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *m2,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);</pre>
+<p>
+Multiplies the matrixes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>m1</code></em> :</span></p></td>
+<td> first matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>m2</code></em> :</span></p></td>
+<td> second matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rm</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-translate"></a><h3>g3d_matrix_translate ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_translate                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);</pre>
+<p>
+Adds a translation to the the matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>x</code></em> :</span></p></td>
+<td> x translation
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>y</code></em> :</span></p></td>
+<td> y translation
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>z</code></em> :</span></p></td>
+<td> z translation
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rm</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-rotate"></a><h3>g3d_matrix_rotate ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_rotate                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> angle,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ax,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ay,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> az,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);</pre>
+<p>
+Adds a rotation to the matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>angle</code></em> :</span></p></td>
+<td> rotation angle
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ax</code></em> :</span></p></td>
+<td> x component of rotation axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ay</code></em> :</span></p></td>
+<td> y component of rotation axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>az</code></em> :</span></p></td>
+<td> z component of rotation axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rm</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-rotate-xyz"></a><h3>g3d_matrix_rotate_xyz ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_rotate_xyz               (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> rx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ry,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> rz,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);</pre>
+<p>
+Adds a rotation around the 3 coordinate system axes to the matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rx</code></em> :</span></p></td>
+<td> rotation around x axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ry</code></em> :</span></p></td>
+<td> rotation around y axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rz</code></em> :</span></p></td>
+<td> rotation around z axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rm</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-scale"></a><h3>g3d_matrix_scale ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_scale                    (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *rm);</pre>
+<p>
+Adds a scaling to the matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>x</code></em> :</span></p></td>
+<td> x factor
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>y</code></em> :</span></p></td>
+<td> y factor
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>z</code></em> :</span></p></td>
+<td> z factor
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rm</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-transpose"></a><h3>g3d_matrix_transpose ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_transpose                (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Transposes the matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> the matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-determinant"></a><h3>g3d_matrix_determinant ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            g3d_matrix_determinant              (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Calculate the determinant of the matrix (FIXME: not verified).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> the matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the determinant.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-matrix-dump"></a><h3>g3d_matrix_dump ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_matrix_dump                     (<a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+If debugging is enabled, this function dump the matrix to stderr.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> the matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE if matrix is dumped, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

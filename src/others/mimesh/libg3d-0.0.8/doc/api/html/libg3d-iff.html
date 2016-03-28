@@ -1,0 +1,872 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>iff</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-stream.html" title="stream">
+<link rel="next" href="libg3d-read.html" title="read">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-stream.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-read.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-iff.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-iff.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-iff"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-iff.top_of_page"></a>iff</span></h2>
+<p>iff — IFF file helper functions</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-iff.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/iff.h&gt;
+
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-PAD1:CAPS" title="G3D_IFF_PAD1">G3D_IFF_PAD1</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-PAD2:CAPS" title="G3D_IFF_PAD2">G3D_IFF_PAD2</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-PAD4:CAPS" title="G3D_IFF_PAD4">G3D_IFF_PAD4</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-PAD8:CAPS" title="G3D_IFF_PAD8">G3D_IFF_PAD8</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-LE:CAPS" title="G3D_IFF_LE">G3D_IFF_LE</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-LEN16:CAPS" title="G3D_IFF_LEN16">G3D_IFF_LEN16</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-SUBCHUNK-LEN16:CAPS" title="G3D_IFF_SUBCHUNK_LEN16">G3D_IFF_SUBCHUNK_LEN16</a>
+#define             <a class="link" href="libg3d-iff.html#G3D-IFF-MKID:CAPS" title="G3D_IFF_MKID()">G3D_IFF_MKID</a>                        (a,b,c,d)
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-iff.html#g3d-iff-check" title="g3d_iff_check ()">g3d_iff_check</a>                       (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> *len);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               <a class="link" href="libg3d-iff.html#g3d-iff-read-chunk" title="g3d_iff_read_chunk ()">g3d_iff_read_chunk</a>                  (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> *len,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            <a class="link" href="libg3d-iff.html#g3d-iff-handle-chunk" title="g3d_iff_handle_chunk ()">g3d_iff_handle_chunk</a>                (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *plocal,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffChunkInfo" title="G3DIffChunkInfo">G3DIffChunkInfo</a> *chunks,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-iff.html#g3d-iff-chunk-matches" title="g3d_iff_chunk_matches ()">g3d_iff_chunk_matches</a>               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *tid);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-iff.html#g3d-iff-read-ctnr" title="g3d_iff_read_ctnr ()">g3d_iff_read_ctnr</a>                   (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *local,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffChunkInfo" title="G3DIffChunkInfo">G3DIffChunkInfo</a> *chunks,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              <a class="link" href="libg3d-iff.html#g3d-iff-id-to-text" title="g3d_iff_id_to_text ()">g3d_iff_id_to_text</a>                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> id);
+FILE*               <a class="link" href="libg3d-iff.html#g3d-iff-open" title="g3d_iff_open ()">g3d_iff_open</a>                        (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *len);
+int                 <a class="link" href="libg3d-iff.html#g3d-iff-readchunk" title="g3d_iff_readchunk ()">g3d_iff_readchunk</a>                   (FILE *f,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *len,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-iff.html#G3DIffChunkCallback" title="G3DIffChunkCallback ()">*G3DIffChunkCallback</a>)              (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *local);
+#define             <a class="link" href="libg3d-iff.html#g3d-iff-chunk-callback" title="g3d_iff_chunk_callback">g3d_iff_chunk_callback</a>
+                    <a class="link" href="libg3d-iff.html#G3DIffChunkInfo" title="G3DIffChunkInfo">G3DIffChunkInfo</a>;
+#define             <a class="link" href="libg3d-iff.html#g3d-iff-chunk-info" title="g3d_iff_chunk_info">g3d_iff_chunk_info</a>
+                    <a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a>;
+#define             <a class="link" href="libg3d-iff.html#g3d-iff-gdata" title="g3d_iff_gdata">g3d_iff_gdata</a>
+                    <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a>;
+#define             <a class="link" href="libg3d-iff.html#g3d-iff-ldata" title="g3d_iff_ldata">g3d_iff_ldata</a>
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-iff.description"></a><h2>Description</h2>
+<p>
+These are helper functions to read data from the Interchange File Format
+(IFF).</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-iff.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-PAD1:CAPS"></a><h3>G3D_IFF_PAD1</h3>
+<pre class="programlisting">#define G3D_IFF_PAD1   0x01
+</pre>
+<p>
+No padding is done after chunks.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-PAD2:CAPS"></a><h3>G3D_IFF_PAD2</h3>
+<pre class="programlisting">#define G3D_IFF_PAD2   0x02
+</pre>
+<p>
+Chunks are 2-byte aligned</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-PAD4:CAPS"></a><h3>G3D_IFF_PAD4</h3>
+<pre class="programlisting">#define G3D_IFF_PAD4   0x04
+</pre>
+<p>
+Chunks are 4-byte aligned</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-PAD8:CAPS"></a><h3>G3D_IFF_PAD8</h3>
+<pre class="programlisting">#define G3D_IFF_PAD8   0x08
+</pre>
+<p>
+Chunks are 8-byte aligned</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-LE:CAPS"></a><h3>G3D_IFF_LE</h3>
+<pre class="programlisting">#define G3D_IFF_LE               0x40 /* little endian */
+</pre>
+<p>
+The file has little-endian data.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-LEN16:CAPS"></a><h3>G3D_IFF_LEN16</h3>
+<pre class="programlisting">#define G3D_IFF_LEN16            0x20
+</pre>
+<p>
+All chunks have 16-bit sizes.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-SUBCHUNK-LEN16:CAPS"></a><h3>G3D_IFF_SUBCHUNK_LEN16</h3>
+<pre class="programlisting">#define G3D_IFF_SUBCHUNK_LEN16   0x10
+</pre>
+<p>
+All chunks except the toplevel ones have 16-bit sizes.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3D-IFF-MKID:CAPS"></a><h3>G3D_IFF_MKID()</h3>
+<pre class="programlisting">#define             G3D_IFF_MKID(a,b,c,d)</pre>
+<p>
+Generate an IFF chunk identifier from character representation, e.g.
+G3D_IFF_MKID('F','O','R','M').</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>a</code></em> :</span></p></td>
+<td> first byte
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>b</code></em> :</span></p></td>
+<td> second byte
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>c</code></em> :</span></p></td>
+<td> third byte
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>d</code></em> :</span></p></td>
+<td> fourth byte
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-check"></a><h3>g3d_iff_check ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_iff_check                       (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> *len);</pre>
+<p>
+Checks a stream for a valid IFF signature and reads the top level container.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream containing IFF file to check
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> top level ID (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td> length of top level container (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success (valid IFF), FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-read-chunk"></a><h3>g3d_iff_read_chunk ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               g3d_iff_read_chunk                  (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> *len,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);</pre>
+<p>
+Reads one chunk header from an IFF file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> ID of chunk (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td> length of chunk (excluding header) (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> real length of chunk including header and possible padding byte
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-handle-chunk"></a><h3>g3d_iff_handle_chunk ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>            g3d_iff_handle_chunk                (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *plocal,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffChunkInfo" title="G3DIffChunkInfo">G3DIffChunkInfo</a> *chunks,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);</pre>
+<p>
+Handle an IFF chunk based on chunk description.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>global</code></em> :</span></p></td>
+<td> global data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>plocal</code></em> :</span></p></td>
+<td> local data of parent chunk, must not be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>chunks</code></em> :</span></p></td>
+<td> chunk description list
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> IFF flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> level object for siblings, may be NULL.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-chunk-matches"></a><h3>g3d_iff_chunk_matches ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_iff_chunk_matches               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *tid);</pre>
+<p>
+Check whether <em class="parameter"><code>id</code></em> and <em class="parameter"><code>tid</code></em> match.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> IFF identifier
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tid</code></em> :</span></p></td>
+<td> textual representation of identifier
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on match, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-read-ctnr"></a><h3>g3d_iff_read_ctnr ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_iff_read_ctnr                   (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *local,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffChunkInfo" title="G3DIffChunkInfo">G3DIffChunkInfo</a> *chunks,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);</pre>
+<p>
+Read subchunks in current chunk and handle them appropriately.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>global</code></em> :</span></p></td>
+<td> global data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>local</code></em> :</span></p></td>
+<td> local data of current chunk, must not be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>chunks</code></em> :</span></p></td>
+<td> chunk description list
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> IFF flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-id-to-text"></a><h3>g3d_iff_id_to_text ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              g3d_iff_id_to_text                  (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> id);</pre>
+<p>
+Get the text representation of an IFF chunk identifier.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> an IFF identifier
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated string containing the text identifier.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-open"></a><h3>g3d_iff_open ()</h3>
+<pre class="programlisting">FILE*               g3d_iff_open                        (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *len);</pre>
+<p>
+Opens an IFF file, checks it and reads its top level container.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> file name of IFF file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> top level ID (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td> length of top level container (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the file pointer of open file or NULL in case of an error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-readchunk"></a><h3>g3d_iff_readchunk ()</h3>
+<pre class="programlisting">int                 g3d_iff_readchunk                   (FILE *f,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *id,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> *len,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags);</pre>
+<p>
+Reads one chunk header from an IFF file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>f</code></em> :</span></p></td>
+<td> the open IFF file pointer
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>id</code></em> :</span></p></td>
+<td> ID of chunk (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td> length of chunk (excluding header) (out)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> real length of chunk including header and possible padding byte
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DIffChunkCallback"></a><h3>G3DIffChunkCallback ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DIffChunkCallback)              (<a class="link" href="libg3d-iff.html#G3DIffGlobal" title="G3DIffGlobal">G3DIffGlobal</a> *global,
+                                                         <a class="link" href="libg3d-iff.html#G3DIffLocal" title="G3DIffLocal">G3DIffLocal</a> *local);</pre>
+<p>
+IFF callback function prototype.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>global</code></em> :</span></p></td>
+<td> the global data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>local</code></em> :</span></p></td>
+<td> the local data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-chunk-callback"></a><h3>g3d_iff_chunk_callback</h3>
+<pre class="programlisting">#define g3d_iff_chunk_callback G3DIffChunkCallback
+</pre>
+<p>
+IFF chunk callback (deprecated).</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DIffChunkInfo"></a><h3>G3DIffChunkInfo</h3>
+<pre class="programlisting">typedef struct {
+	gchar *id;
+	gchar *description;
+	gboolean container;
+	G3DIffChunkCallback callback;
+} G3DIffChunkInfo;
+</pre>
+<p>
+A chunk type description.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *<em class="structfield"><code>id</code></em>;</span></p></td>
+<td> identifier of chunk
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *<em class="structfield"><code>description</code></em>;</span></p></td>
+<td> human-readable description of chunk type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> <em class="structfield"><code>container</code></em>;</span></p></td>
+<td> TRUE if this chunk contains sub-chunks
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-iff.html#G3DIffChunkCallback" title="G3DIffChunkCallback ()">G3DIffChunkCallback</a> <em class="structfield"><code>callback</code></em>;</span></p></td>
+<td> function to be called if such a chunk is found
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-chunk-info"></a><h3>g3d_iff_chunk_info</h3>
+<pre class="programlisting">#define g3d_iff_chunk_info G3DIffChunkInfo
+</pre>
+<p>
+IFF chunk description (deprecated).</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DIffGlobal"></a><h3>G3DIffGlobal</h3>
+<pre class="programlisting">typedef struct {
+	G3DContext *context;
+	G3DModel *model;
+	G3DStream *stream;
+	guint32 flags;
+	gpointer user_data;
+	FILE *f;
+	long int max_fpos;
+} G3DIffGlobal;
+</pre>
+<p>
+The plugin-global data to be given to IFF callback functions.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *<em class="structfield"><code>context</code></em>;</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-model.html#G3DModel" title="G3DModel">G3DModel</a> *<em class="structfield"><code>model</code></em>;</span></p></td>
+<td> a model
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *<em class="structfield"><code>stream</code></em>;</span></p></td>
+<td> the stream to read model from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>flags</code></em>;</span></p></td>
+<td> IFF flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> <em class="structfield"><code>user_data</code></em>;</span></p></td>
+<td> to be used by plugin
+</td>
+</tr>
+<tr>
+<td><p><span class="term">FILE *<em class="structfield"><code>f</code></em>;</span></p></td>
+<td> file to read model from (DEPRECATED)
+</td>
+</tr>
+<tr>
+<td><p><span class="term">long int <em class="structfield"><code>max_fpos</code></em>;</span></p></td>
+<td> maximum file position (DEPRECATED)
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-gdata"></a><h3>g3d_iff_gdata</h3>
+<pre class="programlisting">#define g3d_iff_gdata G3DIffGlobal
+</pre>
+<p>
+IFF global data (deprecated).</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DIffLocal"></a><h3>G3DIffLocal</h3>
+<pre class="programlisting">typedef struct {
+	guint32 id;
+	guint32 parent_id;
+	gpointer object;
+	gint32 level;
+	gpointer level_object;
+	gint32 nb;
+	gboolean finalize;
+} G3DIffLocal;
+</pre>
+<p>
+The function-local data for IFF callback functions.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>id</code></em>;</span></p></td>
+<td> chunk identifier
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>parent_id</code></em>;</span></p></td>
+<td> parent chunk identifier
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> <em class="structfield"><code>object</code></em>;</span></p></td>
+<td> an object set by parent callbacks, may be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> <em class="structfield"><code>level</code></em>;</span></p></td>
+<td> level of chunk
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> <em class="structfield"><code>level_object</code></em>;</span></p></td>
+<td> object shared by callbacks on the same level, may be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> <em class="structfield"><code>nb</code></em>;</span></p></td>
+<td> number of bytes remaining in chunk, has to be decremented after
+correctly after reading from stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> <em class="structfield"><code>finalize</code></em>;</span></p></td>
+<td> for container chunks the callback function is called before
+and after processing possible sub-chunks, the second time <em class="parameter"><code>finalize</code></em> is set
+to TRUE
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-iff-ldata"></a><h3>g3d_iff_ldata</h3>
+<pre class="programlisting">#define g3d_iff_ldata G3DIffLocal
+</pre>
+<p>
+IFF local data (deprecated).</p>
+<p>
+
+</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

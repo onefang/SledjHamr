@@ -1,0 +1,44 @@
+<!-- ##### SECTION Title ##### -->
+types
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### TYPEDEF G3DSingle ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF G3DDouble ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF G3DFloat ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO G3D_FLOAT_IS_DOUBLE ##### -->
+<para>
+
+</para>
+
+
+

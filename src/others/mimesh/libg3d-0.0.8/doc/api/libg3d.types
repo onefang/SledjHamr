@@ -1,0 +1,2 @@
+#include <g3d/g3d.h>
+#include <glib-object.h>

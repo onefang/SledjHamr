@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>quat</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-vector.html" title="vector">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-vector.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td> </td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-quat.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-quat.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-quat"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-quat.top_of_page"></a>quat</span></h2>
+<p>quat — quaternion helpers</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-quat.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/quat.h&gt;
+
+typedef             <a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-add" title="g3d_quat_add ()">g3d_quat_add</a>                        (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *qr,
+                                                         <a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q1,
+                                                         <a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q2);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-normalize" title="g3d_quat_normalize ()">g3d_quat_normalize</a>                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-rotate" title="g3d_quat_rotate ()">g3d_quat_rotate</a>                     (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a> *axis,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> angle);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-to-matrix" title="g3d_quat_to_matrix ()">g3d_quat_to_matrix</a>                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-to-rotation-xyz" title="g3d_quat_to_rotation_xyz ()">g3d_quat_to_rotation_xyz</a>            (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *rx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ry,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *rz);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-quat.html#g3d-quat-trackball" title="g3d_quat_trackball ()">g3d_quat_trackball</a>                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x1,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y1,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x2,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y2,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-quat.description"></a><h2>Description</h2>
+<p>
+</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-quat.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DQuat"></a><h3>G3DQuat</h3>
+<pre class="programlisting">typedef G3DFloat G3DQuat;
+</pre>
+<p>
+Quaternion element type.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-add"></a><h3>g3d_quat_add ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_add                        (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *qr,
+                                                         <a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q1,
+                                                         <a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q2);</pre>
+<p>
+Add two quats.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>qr</code></em> :</span></p></td>
+<td> result quat
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q1</code></em> :</span></p></td>
+<td> first quat
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q2</code></em> :</span></p></td>
+<td> second quat
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-normalize"></a><h3>g3d_quat_normalize ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_normalize                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q);</pre>
+<p>
+normalize the quaternion to a length of 1.0.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q</code></em> :</span></p></td>
+<td> a quaternion
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-rotate"></a><h3>g3d_quat_rotate ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_rotate                     (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a> *axis,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> angle);</pre>
+<p>
+Encode a rotation around an axis into quaternion.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q</code></em> :</span></p></td>
+<td> resulting quat
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>axis</code></em> :</span></p></td>
+<td> rotation axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>angle</code></em> :</span></p></td>
+<td> rotation angle
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-to-matrix"></a><h3>g3d_quat_to_matrix ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_to_matrix                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Convert a quaternion to a transformation matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q</code></em> :</span></p></td>
+<td> source quat
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> resulting matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-to-rotation-xyz"></a><h3>g3d_quat_to_rotation_xyz ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_to_rotation_xyz            (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *rx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ry,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *rz);</pre>
+<p>
+Calculate the rotation around the three coordinate axes from a given
+quaternion.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q</code></em> :</span></p></td>
+<td> a quaternion
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rx</code></em> :</span></p></td>
+<td> rotation around x axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ry</code></em> :</span></p></td>
+<td> rotation around y axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rz</code></em> :</span></p></td>
+<td> rotation around z axis
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-quat-trackball"></a><h3>g3d_quat_trackball ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_quat_trackball                  (<a class="link" href="libg3d-quat.html#G3DQuat" title="G3DQuat">G3DQuat</a> *q,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x1,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y1,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> x2,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> y2,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r);</pre>
+<p>
+Emulate a virtual trackball movement and return rotation as quaternion.
+The x and y values of the starting and end point of the movement have
+to be in the range -1.0 .. 1.0.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>q</code></em> :</span></p></td>
+<td> resulting quaternion
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>x1</code></em> :</span></p></td>
+<td> x value of first point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>y1</code></em> :</span></p></td>
+<td> y value of first point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>x2</code></em> :</span></p></td>
+<td> x value of second point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>y2</code></em> :</span></p></td>
+<td> y value of second point
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>r</code></em> :</span></p></td>
+<td> radius of virtual trackball, usually 0.8
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

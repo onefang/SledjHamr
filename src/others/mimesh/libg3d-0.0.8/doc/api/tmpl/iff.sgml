@@ -1,0 +1,242 @@
+<!-- ##### SECTION Title ##### -->
+iff
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO G3D_IFF_PAD1 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_PAD2 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_PAD4 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_PAD8 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_LE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_LEN16 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_SUBCHUNK_LEN16 ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_IFF_MKID ##### -->
+<para>
+
+</para>
+
+@a: 
+@b: 
+@c: 
+@d: 
+
+
+<!-- ##### FUNCTION g3d_iff_check ##### -->
+<para>
+
+</para>
+
+@stream: 
+@id: 
+@len: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_read_chunk ##### -->
+<para>
+
+</para>
+
+@stream: 
+@id: 
+@len: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_handle_chunk ##### -->
+<para>
+
+</para>
+
+@global: 
+@plocal: 
+@chunks: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_chunk_matches ##### -->
+<para>
+
+</para>
+
+@id: 
+@tid: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_read_ctnr ##### -->
+<para>
+
+</para>
+
+@global: 
+@local: 
+@chunks: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_id_to_text ##### -->
+<para>
+
+</para>
+
+@id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_open ##### -->
+<para>
+
+</para>
+
+@filename: 
+@id: 
+@len: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_iff_readchunk ##### -->
+<para>
+
+</para>
+
+@f: 
+@id: 
+@len: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DIffChunkCallback ##### -->
+<para>
+
+</para>
+
+@global: 
+@local: 
+@Returns: 
+
+
+<!-- ##### MACRO g3d_iff_chunk_callback ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT G3DIffChunkInfo ##### -->
+<para>
+
+</para>
+
+@id: 
+@description: 
+@container: 
+@callback: 
+
+<!-- ##### MACRO g3d_iff_chunk_info ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT G3DIffGlobal ##### -->
+<para>
+
+</para>
+
+@context: 
+@model: 
+@stream: 
+@flags: 
+@user_data: 
+@f: 
+@max_fpos: 
+
+<!-- ##### MACRO g3d_iff_gdata ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT G3DIffLocal ##### -->
+<para>
+
+</para>
+
+@id: 
+@parent_id: 
+@object: 
+@level: 
+@level_object: 
+@nb: 
+@finalize: 
+
+<!-- ##### MACRO g3d_iff_ldata ##### -->
+<para>
+
+</para>
+
+
+

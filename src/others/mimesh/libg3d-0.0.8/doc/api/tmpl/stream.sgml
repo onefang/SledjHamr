@@ -1,0 +1,391 @@
+<!-- ##### SECTION Title ##### -->
+stream
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT G3DStream ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION g3d_stream_open_file ##### -->
+<para>
+
+</para>
+
+@filename: 
+@mode: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_open_structured_file ##### -->
+<para>
+
+</para>
+
+@filename: 
+@subfile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_open_structured_file_from_stream ##### -->
+<para>
+
+</para>
+
+@stream: 
+@subfile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_open_zip ##### -->
+<para>
+
+</para>
+
+@filename: 
+@subfile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_open_zip_from_stream ##### -->
+<para>
+
+</para>
+
+@stream: 
+@subfile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_open_gzip_from_stream ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_from_buffer ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@title: 
+@free_buffer: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_zlib_inflate_stream ##### -->
+<para>
+
+</para>
+
+@stream: 
+@cmp_size: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_new_custom ##### -->
+<para>
+
+</para>
+
+@flags: 
+@uri: 
+@readfunc: 
+@readlinefunc: 
+@seekfunc: 
+@tellfunc: 
+@sizefunc: 
+@eoffunc: 
+@closefunc: 
+@data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_close ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_skip ##### -->
+<para>
+
+</para>
+
+@stream: 
+@offset: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_seek ##### -->
+<para>
+
+</para>
+
+@stream: 
+@offset: 
+@whence: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_tell ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_size ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_eof ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_is_seekable ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_get_uri ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_line ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read ##### -->
+<para>
+
+</para>
+
+@stream: 
+@ptr: 
+@size: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_line ##### -->
+<para>
+
+</para>
+
+@stream: 
+@buf: 
+@size: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_int8 ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_int16_be ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_int16_le ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_int32_be ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_int32_le ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_float_be ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_float_le ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_double_be ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_double_le ##### -->
+<para>
+
+</para>
+
+@stream: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_stream_read_cstr ##### -->
+<para>
+
+</para>
+
+@stream: 
+@buffer: 
+@max_len: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamCloseFunc ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamEofFunc ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamReadFunc ##### -->
+<para>
+
+</para>
+
+@ptr: 
+@size: 
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamReadLineFunc ##### -->
+<para>
+
+</para>
+
+@buf: 
+@size: 
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamSeekFunc ##### -->
+<para>
+
+</para>
+
+@data: 
+@offset: 
+@whence: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamSizeFunc ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION G3DStreamTellFunc ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+
+

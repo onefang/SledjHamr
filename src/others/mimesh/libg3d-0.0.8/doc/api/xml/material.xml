@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-material">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-material.top_of_page">material</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>material</refname>
+<refpurpose>Material generation and manipulation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-material.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/material.h&gt;
+
+                    <link linkend="G3DMaterial">G3DMaterial</link>;
+<link linkend="G3DMaterial">G3DMaterial</link>*        <link linkend="g3d-material-new">g3d_material_new</link>                    (void);
+<link linkend="void">void</link>                <link linkend="g3d-material-free">g3d_material_free</link>                   (<link linkend="G3DMaterial">G3DMaterial</link> *material);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-material.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+A material contains all color, shading and texture information for a
+<link linkend="G3DFace"><type>G3DFace</type></link>.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-material.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DMaterial" role="struct">
+<title>G3DMaterial</title>
+<indexterm zone="G3DMaterial"><primary>G3DMaterial</primary></indexterm><programlisting>typedef struct {
+	gchar *name;
+	G3DFloat r, g, b, a;
+	G3DFloat shininess;
+	G3DFloat specular[4];
+	guint32 flags;
+
+	G3DImage *tex_image;
+} G3DMaterial;
+</programlisting>
+<para>
+A material object.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>name</structfield>;</term>
+<listitem><simpara> name of material
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>r</structfield>;</term>
+<listitem><simpara> red component of color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>g</structfield>;</term>
+<listitem><simpara> green component of color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>b</structfield>;</term>
+<listitem><simpara> blue component of color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>a</structfield>;</term>
+<listitem><simpara> alpha component of color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>shininess</structfield>;</term>
+<listitem><simpara> shiny color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DFloat">G3DFloat</link>&nbsp;<structfield>specular</structfield>[4];</term>
+<listitem><simpara> specular color
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="guint32">guint32</link>&nbsp;<structfield>flags</structfield>;</term>
+<listitem><simpara> flags
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="G3DImage">G3DImage</link>&nbsp;*<structfield>tex_image</structfield>;</term>
+<listitem><simpara> texture image (optional, may be NULL)
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-material-new" role="function">
+<title>g3d_material_new ()</title>
+<indexterm zone="g3d-material-new"><primary>g3d_material_new</primary></indexterm><programlisting><link linkend="G3DMaterial">G3DMaterial</link>*        g3d_material_new                    (void);</programlisting>
+<para>
+Generates a new material with a default color.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the new material or NULL on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-material-free" role="function">
+<title>g3d_material_free ()</title>
+<indexterm zone="g3d-material-free"><primary>g3d_material_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_material_free                   (<link linkend="G3DMaterial">G3DMaterial</link> *material);</programlisting>
+<para>
+Frees all memory allocated for that material.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>material</parameter>&nbsp;:</term>
+<listitem><simpara> the material to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

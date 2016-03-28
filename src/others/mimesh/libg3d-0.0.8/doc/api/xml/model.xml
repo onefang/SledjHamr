@@ -1,0 +1,285 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-model">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-model.top_of_page">model</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>model</refname>
+<refpurpose>Model manipulation functions</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-model.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/g3d.h&gt;
+
+#define             <link linkend="G3D-MODEL-CENTER:CAPS">G3D_MODEL_CENTER</link>
+#define             <link linkend="G3D-MODEL-NOCHECK:CAPS">G3D_MODEL_NOCHECK</link>
+#define             <link linkend="G3D-MODEL-OPTIMIZE:CAPS">G3D_MODEL_OPTIMIZE</link>
+#define             <link linkend="G3D-MODEL-SCALE:CAPS">G3D_MODEL_SCALE</link>
+                    <link linkend="G3DModel">G3DModel</link>;
+<link linkend="G3DModel">G3DModel</link>*           <link linkend="g3d-model-new">g3d_model_new</link>                       (void);
+<link linkend="G3DModel">G3DModel</link>*           <link linkend="g3d-model-load">g3d_model_load</link>                      (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename);
+<link linkend="G3DModel">G3DModel</link>*           <link linkend="g3d-model-load-full">g3d_model_load_full</link>                 (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="guint32">guint32</link> flags);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-model-check">g3d_model_check</link>                     (<link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-model-center">g3d_model_center</link>                    (<link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-model-transform">g3d_model_transform</link>                 (<link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="void">void</link>                <link linkend="g3d-model-clear">g3d_model_clear</link>                     (<link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="void">void</link>                <link linkend="g3d-model-free">g3d_model_free</link>                      (<link linkend="G3DModel">G3DModel</link> *model);
+<link linkend="G3DObject">G3DObject</link>*          <link linkend="g3d-model-get-object-by-name">g3d_model_get_object_by_name</link>        (<link linkend="G3DModel">G3DModel</link> *model,
+                                                         const <link linkend="gchar">gchar</link> *name);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-model.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+A model is a group of objects. All information loaded from a file by libg3d
+is found in this model.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-model.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3D-MODEL-CENTER:CAPS" role="macro">
+<title>G3D_MODEL_CENTER</title>
+<indexterm zone="G3D-MODEL-CENTER:CAPS"><primary>G3D_MODEL_CENTER</primary></indexterm><programlisting>#define G3D_MODEL_CENTER          (1 &lt;&lt; 1)
+</programlisting>
+<para>
+The model should be centered around the (0,0,0).</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-MODEL-NOCHECK:CAPS" role="macro">
+<title>G3D_MODEL_NOCHECK</title>
+<indexterm zone="G3D-MODEL-NOCHECK:CAPS"><primary>G3D_MODEL_NOCHECK</primary></indexterm><programlisting>#define G3D_MODEL_NOCHECK         (1 &lt;&lt; 3)
+</programlisting>
+<para>
+The common checks should be disabled. The checks include:
+<itemizedlist>
+<listitem>faces have at least 3 indices</listitem>
+<listitem>face indices are &lt;= number of vertices</listitem>
+<listitem>material of faces is not NULL</listitem>
+</itemizedlist></para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-MODEL-OPTIMIZE:CAPS" role="macro">
+<title>G3D_MODEL_OPTIMIZE</title>
+<indexterm zone="G3D-MODEL-OPTIMIZE:CAPS"><primary>G3D_MODEL_OPTIMIZE</primary></indexterm><programlisting>#define G3D_MODEL_OPTIMIZE        (1 &lt;&lt; 2)
+</programlisting>
+<para>
+The model material/object/face lists should be serialized to some private
+arrays (deprecated).</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-MODEL-SCALE:CAPS" role="macro">
+<title>G3D_MODEL_SCALE</title>
+<indexterm zone="G3D-MODEL-SCALE:CAPS"><primary>G3D_MODEL_SCALE</primary></indexterm><programlisting>#define G3D_MODEL_SCALE           (1 &lt;&lt; 0)
+</programlisting>
+<para>
+The model should be scaled to a maximum extension of +/- 10.0.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DModel" role="struct">
+<title>G3DModel</title>
+<indexterm zone="G3DModel"><primary>G3DModel</primary></indexterm><programlisting>typedef struct {
+	gchar *filename;
+	GSList *materials;
+	GSList *objects;
+} G3DModel;
+</programlisting>
+<para>
+A 3D model.</para>
+<para>
+
+</para><variablelist role="struct">
+<varlistentry>
+<term><link linkend="gchar">gchar</link>&nbsp;*<structfield>filename</structfield>;</term>
+<listitem><simpara> file name or URI of loaded model, may be set by application
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GSList">GSList</link>&nbsp;*<structfield>materials</structfield>;</term>
+<listitem><simpara> list of materials (<link linkend="G3DMaterial"><type>G3DMaterial</type></link>)
+</simpara></listitem>
+</varlistentry>
+<varlistentry>
+<term><link linkend="GSList">GSList</link>&nbsp;*<structfield>objects</structfield>;</term>
+<listitem><simpara> list of objects (<link linkend="G3DObject"><type>G3DObject</type></link>)
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-new" role="function">
+<title>g3d_model_new ()</title>
+<indexterm zone="g3d-model-new"><primary>g3d_model_new</primary></indexterm><programlisting><link linkend="G3DModel">G3DModel</link>*           g3d_model_new                       (void);</programlisting>
+<para>
+This functions allocates and initializes a new G3DModel.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> a newly allocated G3DModel
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-load" role="function">
+<title>g3d_model_load ()</title>
+<indexterm zone="g3d-model-load"><primary>g3d_model_load</primary></indexterm><programlisting><link linkend="G3DModel">G3DModel</link>*           g3d_model_load                      (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename);</programlisting>
+<para>
+Loads a model from a file. The model is checked, centered, resized,
+optimized.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> the file name of the model to load
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the loaded model or NULL in case of an error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-load-full" role="function">
+<title>g3d_model_load_full ()</title>
+<indexterm zone="g3d-model-load-full"><primary>g3d_model_load_full</primary></indexterm><programlisting><link linkend="G3DModel">G3DModel</link>*           g3d_model_load_full                 (<link linkend="G3DContext">G3DContext</link> *context,
+                                                         const <link linkend="gchar">gchar</link> *filename,
+                                                         <link linkend="guint32">guint32</link> flags);</programlisting>
+<para>
+Loads a model from a file. Depending on <parameter>flags</parameter> the model is checked,
+centered, resized, optimized.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>context</parameter>&nbsp;:</term>
+<listitem><simpara> a valid context
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>filename</parameter>&nbsp;:</term>
+<listitem><simpara> the file name of the model to load
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>flags</parameter>&nbsp;:</term>
+<listitem><simpara> object manipulation flags
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the loaded model or NULL in case of an error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-check" role="function">
+<title>g3d_model_check ()</title>
+<indexterm zone="g3d-model-check"><primary>g3d_model_check</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_model_check                     (<link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Checks whether a model returned by plugin is valid.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model to check
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-center" role="function">
+<title>g3d_model_center ()</title>
+<indexterm zone="g3d-model-center"><primary>g3d_model_center</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_model_center                    (<link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Translates all object coordinates that the object center is at (0, 0, 0)</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model to center
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-transform" role="function">
+<title>g3d_model_transform ()</title>
+<indexterm zone="g3d-model-transform"><primary>g3d_model_transform</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_model_transform                 (<link linkend="G3DModel">G3DModel</link> *model,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Transform all toplevel objects in model with matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> transformation matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-clear" role="function">
+<title>g3d_model_clear ()</title>
+<indexterm zone="g3d-model-clear"><primary>g3d_model_clear</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_model_clear                     (<link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Removes all objects from a model.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model to clear
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-free" role="function">
+<title>g3d_model_free ()</title>
+<indexterm zone="g3d-model-free"><primary>g3d_model_free</primary></indexterm><programlisting><link linkend="void">void</link>                g3d_model_free                      (<link linkend="G3DModel">G3DModel</link> *model);</programlisting>
+<para>
+Frees all memory allocated for the model including all objects, materials
+and textures.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-model-get-object-by-name" role="function">
+<title>g3d_model_get_object_by_name ()</title>
+<indexterm zone="g3d-model-get-object-by-name"><primary>g3d_model_get_object_by_name</primary></indexterm><programlisting><link linkend="G3DObject">G3DObject</link>*          g3d_model_get_object_by_name        (<link linkend="G3DModel">G3DModel</link> *model,
+                                                         const <link linkend="gchar">gchar</link> *name);</programlisting>
+<para>
+Searches the object tree for an object with the given name.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>model</parameter>&nbsp;:</term>
+<listitem><simpara> the model containing all objects
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> the name of the requested object
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the requested object or NULL if non was found
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-types">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-types.top_of_page">types</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>types</refname>
+<refpurpose>Basic types</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-types.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/types.h&gt;
+
+typedef             <link linkend="G3DSingle">G3DSingle</link>;
+typedef             <link linkend="G3DDouble">G3DDouble</link>;
+typedef             <link linkend="G3DFloat">G3DFloat</link>;
+#define             <link linkend="G3D-FLOAT-IS-DOUBLE:CAPS">G3D_FLOAT_IS_DOUBLE</link>
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-types.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Some basic type abstractions used in libg3d.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-types.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DSingle" role="typedef">
+<title>G3DSingle</title>
+<indexterm zone="G3DSingle"><primary>G3DSingle</primary></indexterm><programlisting>typedef gfloat G3DSingle;
+</programlisting>
+<para>
+Single-precision floating point number.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DDouble" role="typedef">
+<title>G3DDouble</title>
+<indexterm zone="G3DDouble"><primary>G3DDouble</primary></indexterm><programlisting>typedef gdouble G3DDouble;
+</programlisting>
+<para>
+Double-precision floating point number.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3DFloat" role="typedef">
+<title>G3DFloat</title>
+<indexterm zone="G3DFloat"><primary>G3DFloat</primary></indexterm><para>
+Default floating point type. If used consistently in the library (not the
+case at the moment) this type can be switched between single and double
+precision at compile-time.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="G3D-FLOAT-IS-DOUBLE:CAPS" role="macro">
+<title>G3D_FLOAT_IS_DOUBLE</title>
+<indexterm zone="G3D-FLOAT-IS-DOUBLE:CAPS"><primary>G3D_FLOAT_IS_DOUBLE</primary></indexterm><programlisting>#define             G3D_FLOAT_IS_DOUBLE</programlisting>
+<para>
+A flag indicating type of <link linkend="G3DFloat"><type>G3DFloat</type></link>. It is TRUE if <link linkend="G3DFloat"><type>G3DFloat</type></link> is double and
+FALSE if <link linkend="G3DFloat"><type>G3DFloat</type></link> is single precision.</para>
+<para>
+
+</para></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

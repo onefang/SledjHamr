@@ -1,0 +1,139 @@
+<!-- ##### SECTION Title ##### -->
+model
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO G3D_MODEL_CENTER ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_MODEL_NOCHECK ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_MODEL_OPTIMIZE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO G3D_MODEL_SCALE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT G3DModel ##### -->
+<para>
+
+</para>
+
+@filename: 
+@materials: 
+@objects: 
+
+<!-- ##### FUNCTION g3d_model_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_load ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_load_full ##### -->
+<para>
+
+</para>
+
+@context: 
+@filename: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_check ##### -->
+<para>
+
+</para>
+
+@model: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_center ##### -->
+<para>
+
+</para>
+
+@model: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_transform ##### -->
+<para>
+
+</para>
+
+@model: 
+@matrix: 
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_model_clear ##### -->
+<para>
+
+</para>
+
+@model: 
+
+
+<!-- ##### FUNCTION g3d_model_free ##### -->
+<para>
+
+</para>
+
+@model: 
+
+
+<!-- ##### FUNCTION g3d_model_get_object_by_name ##### -->
+<para>
+
+</para>
+
+@model: 
+@name: 
+@Returns: 
+
+

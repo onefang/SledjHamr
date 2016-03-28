@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>vector</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-matrix.html" title="matrix">
+<link rel="next" href="libg3d-quat.html" title="quat">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-matrix.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-quat.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-vector.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-vector.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-vector"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-vector.top_of_page"></a>vector</span></h2>
+<p>vector — Vector manipulation and calculation</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-vector.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/vector.h&gt;
+
+typedef             <a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a>;
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-vector.html#g3d-vector-normal" title="g3d_vector_normal ()">g3d_vector_normal</a>                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ax,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ay,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> az,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> bx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> by,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> bz,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-vector.html#g3d-vector-unify" title="g3d_vector_unify ()">g3d_vector_unify</a>                    (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-vector.html#g3d-vector-transform" title="g3d_vector_transform ()">g3d_vector_transform</a>                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-vector.description"></a><h2>Description</h2>
+<p>
+A vector is a one-dimensional array of floating point data.
+</p>
+<p>
+Declare it as statically as:
+</p>
+<p>
+G3DVector vector[3];
+</p>
+<p>
+or allocate it dynamically with:
+</p>
+<p>
+G3DVector *vector = g3d_vector_new(3, 1);</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-vector.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DVector"></a><h3>G3DVector</h3>
+<pre class="programlisting">typedef G3DFloat G3DVector;
+</pre>
+<p>
+Vector element type.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-vector-normal"></a><h3>g3d_vector_normal ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_vector_normal                   (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ax,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> ay,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> az,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> bx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> by,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> bz,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);</pre>
+<p>
+calculate the normal from a plane defined by two vectors</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ax</code></em> :</span></p></td>
+<td> x component first vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ay</code></em> :</span></p></td>
+<td> y component first vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>az</code></em> :</span></p></td>
+<td> z component first vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bx</code></em> :</span></p></td>
+<td> x component second vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>by</code></em> :</span></p></td>
+<td> y component second vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bz</code></em> :</span></p></td>
+<td> z component second vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nx</code></em> :</span></p></td>
+<td> x component resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ny</code></em> :</span></p></td>
+<td> y component resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nz</code></em> :</span></p></td>
+<td> z component resulting normal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-vector-unify"></a><h3>g3d_vector_unify ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_vector_unify                    (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nx,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *ny,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *nz);</pre>
+<p>
+Transforms the given vector to the unit vector.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nx</code></em> :</span></p></td>
+<td> x component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ny</code></em> :</span></p></td>
+<td> y component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>nz</code></em> :</span></p></td>
+<td> z component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-vector-transform"></a><h3>g3d_vector_transform ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_vector_transform                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *x,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *y,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> *z,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Transforms the given vector corresponding to the given matrix</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>x</code></em> :</span></p></td>
+<td> x component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>y</code></em> :</span></p></td>
+<td> y component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>z</code></em> :</span></p></td>
+<td> z component of vector
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> transformation matrix (4x4)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

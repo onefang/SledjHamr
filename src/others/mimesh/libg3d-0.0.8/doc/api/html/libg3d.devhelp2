@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="libg3d Reference Manual" link="index.html" author="" name="libg3d" version="2">
+  <chapters>
+    <sub name="Application interface" link="ch01.html">
+      <sub name="types" link="libg3d-types.html"/>
+      <sub name="context" link="libg3d-context.html"/>
+      <sub name="model" link="libg3d-model.html"/>
+      <sub name="object" link="libg3d-object.html"/>
+      <sub name="face" link="libg3d-face.html"/>
+      <sub name="material" link="libg3d-material.html"/>
+      <sub name="texture" link="libg3d-texture.html"/>
+    </sub>
+    <sub name="Plugin interface" link="ch02.html">
+      <sub name="plugins" link="libg3d-plugins.html"/>
+      <sub name="stream" link="libg3d-stream.html"/>
+      <sub name="iff" link="libg3d-iff.html"/>
+      <sub name="read" link="libg3d-read.html"/>
+      <sub name="primitive" link="libg3d-primitive.html"/>
+      <sub name="matrix" link="libg3d-matrix.html"/>
+      <sub name="vector" link="libg3d-vector.html"/>
+      <sub name="quat" link="libg3d-quat.html"/>
+    </sub>
+  </chapters>
+  <functions>
+    <keyword type="typedef" name="G3DSingle" link="libg3d-types.html#G3DSingle"/>
+    <keyword type="typedef" name="G3DDouble" link="libg3d-types.html#G3DDouble"/>
+    <keyword type="typedef" name="G3DFloat" link="libg3d-types.html#G3DFloat"/>
+    <keyword type="macro" name="G3D_FLOAT_IS_DOUBLE" link="libg3d-types.html#G3D-FLOAT-IS-DOUBLE:CAPS"/>
+    <keyword type="struct" name="G3DContext" link="libg3d-context.html#G3DContext"/>
+    <keyword type="function" name="g3d_context_new ()" link="libg3d-context.html#g3d-context-new"/>
+    <keyword type="function" name="g3d_context_free ()" link="libg3d-context.html#g3d-context-free"/>
+    <keyword type="function" name="G3DSetBgColorFunc ()" link="libg3d-context.html#G3DSetBgColorFunc"/>
+    <keyword type="function" name="G3DUpdateInterfaceFunc ()" link="libg3d-context.html#G3DUpdateInterfaceFunc"/>
+    <keyword type="function" name="G3DUpdateProgressBarFunc ()" link="libg3d-context.html#G3DUpdateProgressBarFunc"/>
+    <keyword type="function" name="g3d_context_update_interface ()" link="libg3d-context.html#g3d-context-update-interface"/>
+    <keyword type="function" name="g3d_context_set_update_interface_func ()" link="libg3d-context.html#g3d-context-set-update-interface-func"/>
+    <keyword type="function" name="g3d_context_update_progress_bar ()" link="libg3d-context.html#g3d-context-update-progress-bar"/>
+    <keyword type="function" name="g3d_context_set_update_progress_bar_func ()" link="libg3d-context.html#g3d-context-set-update-progress-bar-func"/>
+    <keyword type="function" name="g3d_context_set_bgcolor ()" link="libg3d-context.html#g3d-context-set-bgcolor"/>
+    <keyword type="function" name="g3d_context_set_set_bgcolor_func ()" link="libg3d-context.html#g3d-context-set-set-bgcolor-func"/>
+    <keyword type="macro" name="G3D_MODEL_CENTER" link="libg3d-model.html#G3D-MODEL-CENTER:CAPS"/>
+    <keyword type="macro" name="G3D_MODEL_NOCHECK" link="libg3d-model.html#G3D-MODEL-NOCHECK:CAPS"/>
+    <keyword type="macro" name="G3D_MODEL_OPTIMIZE" link="libg3d-model.html#G3D-MODEL-OPTIMIZE:CAPS"/>
+    <keyword type="macro" name="G3D_MODEL_SCALE" link="libg3d-model.html#G3D-MODEL-SCALE:CAPS"/>
+    <keyword type="struct" name="G3DModel" link="libg3d-model.html#G3DModel"/>
+    <keyword type="function" name="g3d_model_new ()" link="libg3d-model.html#g3d-model-new"/>
+    <keyword type="function" name="g3d_model_load ()" link="libg3d-model.html#g3d-model-load"/>
+    <keyword type="function" name="g3d_model_load_full ()" link="libg3d-model.html#g3d-model-load-full"/>
+    <keyword type="function" name="g3d_model_check ()" link="libg3d-model.html#g3d-model-check"/>
+    <keyword type="function" name="g3d_model_center ()" link="libg3d-model.html#g3d-model-center"/>
+    <keyword type="function" name="g3d_model_transform ()" link="libg3d-model.html#g3d-model-transform"/>
+    <keyword type="function" name="g3d_model_clear ()" link="libg3d-model.html#g3d-model-clear"/>
+    <keyword type="function" name="g3d_model_free ()" link="libg3d-model.html#g3d-model-free"/>
+    <keyword type="function" name="g3d_model_get_object_by_name ()" link="libg3d-model.html#g3d-model-get-object-by-name"/>
+    <keyword type="struct" name="G3DObject" link="libg3d-object.html#G3DObject"/>
+    <keyword type="struct" name="G3DTransformation" link="libg3d-object.html#G3DTransformation"/>
+    <keyword type="function" name="g3d_object_free ()" link="libg3d-object.html#g3d-object-free"/>
+    <keyword type="function" name="g3d_object_radius ()" link="libg3d-object.html#g3d-object-radius"/>
+    <keyword type="function" name="g3d_object_scale ()" link="libg3d-object.html#g3d-object-scale"/>
+    <keyword type="function" name="g3d_object_transform ()" link="libg3d-object.html#g3d-object-transform"/>
+    <keyword type="function" name="g3d_object_transform_normals ()" link="libg3d-object.html#g3d-object-transform-normals"/>
+    <keyword type="function" name="g3d_object_duplicate ()" link="libg3d-object.html#g3d-object-duplicate"/>
+    <keyword type="function" name="g3d_object_optimize ()" link="libg3d-object.html#g3d-object-optimize"/>
+    <keyword type="function" name="g3d_object_smooth ()" link="libg3d-object.html#g3d-object-smooth"/>
+    <keyword type="function" name="g3d_object_merge ()" link="libg3d-object.html#g3d-object-merge"/>
+    <keyword type="macro" name="G3D_FLAG_MAT_TWOSIDE" link="libg3d-face.html#G3D-FLAG-MAT-TWOSIDE:CAPS"/>
+    <keyword type="macro" name="G3D_FLAG_FAC_NORMALS" link="libg3d-face.html#G3D-FLAG-FAC-NORMALS:CAPS"/>
+    <keyword type="macro" name="G3D_FLAG_FAC_TEXMAP" link="libg3d-face.html#G3D-FLAG-FAC-TEXMAP:CAPS"/>
+    <keyword type="struct" name="G3DFace" link="libg3d-face.html#G3DFace"/>
+    <keyword type="function" name="g3d_face_get_normal ()" link="libg3d-face.html#g3d-face-get-normal"/>
+    <keyword type="function" name="g3d_face_free ()" link="libg3d-face.html#g3d-face-free"/>
+    <keyword type="struct" name="G3DMaterial" link="libg3d-material.html#G3DMaterial"/>
+    <keyword type="function" name="g3d_material_new ()" link="libg3d-material.html#g3d-material-new"/>
+    <keyword type="function" name="g3d_material_free ()" link="libg3d-material.html#g3d-material-free"/>
+    <keyword type="macro" name="G3D_FLAG_IMG_GREYSCALE" link="libg3d-texture.html#G3D-FLAG-IMG-GREYSCALE:CAPS"/>
+    <keyword type="enum" name="enum G3DTexEnv" link="libg3d-texture.html#G3DTexEnv"/>
+    <keyword type="struct" name="G3DImage" link="libg3d-texture.html#G3DImage"/>
+    <keyword type="function" name="g3d_texture_load_cached ()" link="libg3d-texture.html#g3d-texture-load-cached"/>
+    <keyword type="function" name="g3d_texture_load_from_stream ()" link="libg3d-texture.html#g3d-texture-load-from-stream"/>
+    <keyword type="function" name="g3d_texture_load ()" link="libg3d-texture.html#g3d-texture-load"/>
+    <keyword type="function" name="g3d_texture_free ()" link="libg3d-texture.html#g3d-texture-free"/>
+    <keyword type="function" name="g3d_texture_prepare ()" link="libg3d-texture.html#g3d-texture-prepare"/>
+    <keyword type="function" name="g3d_texture_flip_y ()" link="libg3d-texture.html#g3d-texture-flip-y"/>
+    <keyword type="function" name="g3d_texture_merge_alpha ()" link="libg3d-texture.html#g3d-texture-merge-alpha"/>
+    <keyword type="enum" name="enum G3DPluginType" link="libg3d-plugins.html#G3DPluginType"/>
+    <keyword type="function" name="G3DPluginInitFunc ()" link="libg3d-plugins.html#G3DPluginInitFunc"/>
+    <keyword type="function" name="G3DPluginCleanupFunc ()" link="libg3d-plugins.html#G3DPluginCleanupFunc"/>
+    <keyword type="function" name="G3DPluginLoadModelFunc ()" link="libg3d-plugins.html#G3DPluginLoadModelFunc"/>
+    <keyword type="function" name="G3DPluginLoadModelFromStreamFunc ()" link="libg3d-plugins.html#G3DPluginLoadModelFromStreamFunc"/>
+    <keyword type="function" name="G3DPluginLoadImageFunc ()" link="libg3d-plugins.html#G3DPluginLoadImageFunc"/>
+    <keyword type="function" name="G3DPluginLoadImageStreamFunc ()" link="libg3d-plugins.html#G3DPluginLoadImageStreamFunc"/>
+    <keyword type="function" name="G3DPluginGetDescFunc ()" link="libg3d-plugins.html#G3DPluginGetDescFunc"/>
+    <keyword type="function" name="G3DPluginGetExtFunc ()" link="libg3d-plugins.html#G3DPluginGetExtFunc"/>
+    <keyword type="struct" name="G3DPlugin" link="libg3d-plugins.html#G3DPlugin"/>
+    <keyword type="function" name="g3d_plugins_init ()" link="libg3d-plugins.html#g3d-plugins-init"/>
+    <keyword type="function" name="g3d_plugins_cleanup ()" link="libg3d-plugins.html#g3d-plugins-cleanup"/>
+    <keyword type="function" name="g3d_plugins_load_model ()" link="libg3d-plugins.html#g3d-plugins-load-model"/>
+    <keyword type="function" name="g3d_plugins_load_model_from_stream ()" link="libg3d-plugins.html#g3d-plugins-load-model-from-stream"/>
+    <keyword type="function" name="g3d_plugins_load_image ()" link="libg3d-plugins.html#g3d-plugins-load-image"/>
+    <keyword type="function" name="g3d_plugins_load_image_from_stream ()" link="libg3d-plugins.html#g3d-plugins-load-image-from-stream"/>
+    <keyword type="function" name="g3d_plugins_get_image_extensions ()" link="libg3d-plugins.html#g3d-plugins-get-image-extensions"/>
+    <keyword type="struct" name="G3DStream" link="libg3d-stream.html#G3DStream"/>
+    <keyword type="function" name="g3d_stream_open_file ()" link="libg3d-stream.html#g3d-stream-open-file"/>
+    <keyword type="function" name="g3d_stream_open_structured_file ()" link="libg3d-stream.html#g3d-stream-open-structured-file"/>
+    <keyword type="function" name="g3d_stream_open_structured_file_from_stream ()" link="libg3d-stream.html#g3d-stream-open-structured-file-from-stream"/>
+    <keyword type="function" name="g3d_stream_open_zip ()" link="libg3d-stream.html#g3d-stream-open-zip"/>
+    <keyword type="function" name="g3d_stream_open_zip_from_stream ()" link="libg3d-stream.html#g3d-stream-open-zip-from-stream"/>
+    <keyword type="function" name="g3d_stream_open_gzip_from_stream ()" link="libg3d-stream.html#g3d-stream-open-gzip-from-stream"/>
+    <keyword type="function" name="g3d_stream_from_buffer ()" link="libg3d-stream.html#g3d-stream-from-buffer"/>
+    <keyword type="function" name="g3d_stream_zlib_inflate_stream ()" link="libg3d-stream.html#g3d-stream-zlib-inflate-stream"/>
+    <keyword type="function" name="g3d_stream_new_custom ()" link="libg3d-stream.html#g3d-stream-new-custom"/>
+    <keyword type="function" name="g3d_stream_close ()" link="libg3d-stream.html#g3d-stream-close"/>
+    <keyword type="function" name="g3d_stream_skip ()" link="libg3d-stream.html#g3d-stream-skip"/>
+    <keyword type="function" name="g3d_stream_seek ()" link="libg3d-stream.html#g3d-stream-seek"/>
+    <keyword type="function" name="g3d_stream_tell ()" link="libg3d-stream.html#g3d-stream-tell"/>
+    <keyword type="function" name="g3d_stream_size ()" link="libg3d-stream.html#g3d-stream-size"/>
+    <keyword type="function" name="g3d_stream_eof ()" link="libg3d-stream.html#g3d-stream-eof"/>
+    <keyword type="function" name="g3d_stream_is_seekable ()" link="libg3d-stream.html#g3d-stream-is-seekable"/>
+    <keyword type="function" name="g3d_stream_get_uri ()" link="libg3d-stream.html#g3d-stream-get-uri"/>
+    <keyword type="function" name="g3d_stream_line ()" link="libg3d-stream.html#g3d-stream-line"/>
+    <keyword type="function" name="g3d_stream_read ()" link="libg3d-stream.html#g3d-stream-read"/>
+    <keyword type="function" name="g3d_stream_read_line ()" link="libg3d-stream.html#g3d-stream-read-line"/>
+    <keyword type="function" name="g3d_stream_read_int8 ()" link="libg3d-stream.html#g3d-stream-read-int8"/>
+    <keyword type="function" name="g3d_stream_read_int16_be ()" link="libg3d-stream.html#g3d-stream-read-int16-be"/>
+    <keyword type="function" name="g3d_stream_read_int16_le ()" link="libg3d-stream.html#g3d-stream-read-int16-le"/>
+    <keyword type="function" name="g3d_stream_read_int32_be ()" link="libg3d-stream.html#g3d-stream-read-int32-be"/>
+    <keyword type="function" name="g3d_stream_read_int32_le ()" link="libg3d-stream.html#g3d-stream-read-int32-le"/>
+    <keyword type="function" name="g3d_stream_read_float_be ()" link="libg3d-stream.html#g3d-stream-read-float-be"/>
+    <keyword type="function" name="g3d_stream_read_float_le ()" link="libg3d-stream.html#g3d-stream-read-float-le"/>
+    <keyword type="function" name="g3d_stream_read_double_be ()" link="libg3d-stream.html#g3d-stream-read-double-be"/>
+    <keyword type="function" name="g3d_stream_read_double_le ()" link="libg3d-stream.html#g3d-stream-read-double-le"/>
+    <keyword type="function" name="g3d_stream_read_cstr ()" link="libg3d-stream.html#g3d-stream-read-cstr"/>
+    <keyword type="function" name="G3DStreamCloseFunc ()" link="libg3d-stream.html#G3DStreamCloseFunc"/>
+    <keyword type="function" name="G3DStreamEofFunc ()" link="libg3d-stream.html#G3DStreamEofFunc"/>
+    <keyword type="function" name="G3DStreamReadFunc ()" link="libg3d-stream.html#G3DStreamReadFunc"/>
+    <keyword type="function" name="G3DStreamReadLineFunc ()" link="libg3d-stream.html#G3DStreamReadLineFunc"/>
+    <keyword type="function" name="G3DStreamSeekFunc ()" link="libg3d-stream.html#G3DStreamSeekFunc"/>
+    <keyword type="function" name="G3DStreamSizeFunc ()" link="libg3d-stream.html#G3DStreamSizeFunc"/>
+    <keyword type="function" name="G3DStreamTellFunc ()" link="libg3d-stream.html#G3DStreamTellFunc"/>
+    <keyword type="macro" name="G3D_IFF_PAD1" link="libg3d-iff.html#G3D-IFF-PAD1:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_PAD2" link="libg3d-iff.html#G3D-IFF-PAD2:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_PAD4" link="libg3d-iff.html#G3D-IFF-PAD4:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_PAD8" link="libg3d-iff.html#G3D-IFF-PAD8:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_LE" link="libg3d-iff.html#G3D-IFF-LE:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_LEN16" link="libg3d-iff.html#G3D-IFF-LEN16:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_SUBCHUNK_LEN16" link="libg3d-iff.html#G3D-IFF-SUBCHUNK-LEN16:CAPS"/>
+    <keyword type="macro" name="G3D_IFF_MKID()" link="libg3d-iff.html#G3D-IFF-MKID:CAPS"/>
+    <keyword type="function" name="g3d_iff_check ()" link="libg3d-iff.html#g3d-iff-check"/>
+    <keyword type="function" name="g3d_iff_read_chunk ()" link="libg3d-iff.html#g3d-iff-read-chunk"/>
+    <keyword type="function" name="g3d_iff_handle_chunk ()" link="libg3d-iff.html#g3d-iff-handle-chunk"/>
+    <keyword type="function" name="g3d_iff_chunk_matches ()" link="libg3d-iff.html#g3d-iff-chunk-matches"/>
+    <keyword type="function" name="g3d_iff_read_ctnr ()" link="libg3d-iff.html#g3d-iff-read-ctnr"/>
+    <keyword type="function" name="g3d_iff_id_to_text ()" link="libg3d-iff.html#g3d-iff-id-to-text"/>
+    <keyword type="function" name="g3d_iff_open ()" link="libg3d-iff.html#g3d-iff-open"/>
+    <keyword type="function" name="g3d_iff_readchunk ()" link="libg3d-iff.html#g3d-iff-readchunk"/>
+    <keyword type="function" name="G3DIffChunkCallback ()" link="libg3d-iff.html#G3DIffChunkCallback"/>
+    <keyword type="macro" name="g3d_iff_chunk_callback" link="libg3d-iff.html#g3d-iff-chunk-callback"/>
+    <keyword type="struct" name="G3DIffChunkInfo" link="libg3d-iff.html#G3DIffChunkInfo"/>
+    <keyword type="macro" name="g3d_iff_chunk_info" link="libg3d-iff.html#g3d-iff-chunk-info"/>
+    <keyword type="struct" name="G3DIffGlobal" link="libg3d-iff.html#G3DIffGlobal"/>
+    <keyword type="macro" name="g3d_iff_gdata" link="libg3d-iff.html#g3d-iff-gdata"/>
+    <keyword type="struct" name="G3DIffLocal" link="libg3d-iff.html#G3DIffLocal"/>
+    <keyword type="macro" name="g3d_iff_ldata" link="libg3d-iff.html#g3d-iff-ldata"/>
+    <keyword type="function" name="g3d_read_int8 ()" link="libg3d-read.html#g3d-read-int8"/>
+    <keyword type="function" name="g3d_read_int16_be ()" link="libg3d-read.html#g3d-read-int16-be"/>
+    <keyword type="function" name="g3d_read_int16_le ()" link="libg3d-read.html#g3d-read-int16-le"/>
+    <keyword type="function" name="g3d_read_int32_be ()" link="libg3d-read.html#g3d-read-int32-be"/>
+    <keyword type="function" name="g3d_read_int32_le ()" link="libg3d-read.html#g3d-read-int32-le"/>
+    <keyword type="function" name="g3d_read_float_be ()" link="libg3d-read.html#g3d-read-float-be"/>
+    <keyword type="function" name="g3d_read_float_le ()" link="libg3d-read.html#g3d-read-float-le"/>
+    <keyword type="function" name="g3d_read_double_be ()" link="libg3d-read.html#g3d-read-double-be"/>
+    <keyword type="function" name="g3d_read_double_le ()" link="libg3d-read.html#g3d-read-double-le"/>
+    <keyword type="function" name="g3d_read_cstr ()" link="libg3d-read.html#g3d-read-cstr"/>
+    <keyword type="function" name="g3d_primitive_cube ()" link="libg3d-primitive.html#g3d-primitive-cube"/>
+    <keyword type="function" name="g3d_primitive_box ()" link="libg3d-primitive.html#g3d-primitive-box"/>
+    <keyword type="function" name="g3d_primitive_box_strip_2d ()" link="libg3d-primitive.html#g3d-primitive-box-strip-2d"/>
+    <keyword type="function" name="g3d_primitive_mesh ()" link="libg3d-primitive.html#g3d-primitive-mesh"/>
+    <keyword type="function" name="g3d_primitive_cylinder ()" link="libg3d-primitive.html#g3d-primitive-cylinder"/>
+    <keyword type="function" name="g3d_primitive_tube ()" link="libg3d-primitive.html#g3d-primitive-tube"/>
+    <keyword type="function" name="g3d_primitive_sphere ()" link="libg3d-primitive.html#g3d-primitive-sphere"/>
+    <keyword type="typedef" name="G3DMatrix" link="libg3d-matrix.html#G3DMatrix"/>
+    <keyword type="function" name="g3d_matrix_identity ()" link="libg3d-matrix.html#g3d-matrix-identity"/>
+    <keyword type="function" name="g3d_matrix_multiply ()" link="libg3d-matrix.html#g3d-matrix-multiply"/>
+    <keyword type="function" name="g3d_matrix_translate ()" link="libg3d-matrix.html#g3d-matrix-translate"/>
+    <keyword type="function" name="g3d_matrix_rotate ()" link="libg3d-matrix.html#g3d-matrix-rotate"/>
+    <keyword type="function" name="g3d_matrix_rotate_xyz ()" link="libg3d-matrix.html#g3d-matrix-rotate-xyz"/>
+    <keyword type="function" name="g3d_matrix_scale ()" link="libg3d-matrix.html#g3d-matrix-scale"/>
+    <keyword type="function" name="g3d_matrix_transpose ()" link="libg3d-matrix.html#g3d-matrix-transpose"/>
+    <keyword type="function" name="g3d_matrix_determinant ()" link="libg3d-matrix.html#g3d-matrix-determinant"/>
+    <keyword type="function" name="g3d_matrix_dump ()" link="libg3d-matrix.html#g3d-matrix-dump"/>
+    <keyword type="typedef" name="G3DVector" link="libg3d-vector.html#G3DVector"/>
+    <keyword type="function" name="g3d_vector_normal ()" link="libg3d-vector.html#g3d-vector-normal"/>
+    <keyword type="function" name="g3d_vector_unify ()" link="libg3d-vector.html#g3d-vector-unify"/>
+    <keyword type="function" name="g3d_vector_transform ()" link="libg3d-vector.html#g3d-vector-transform"/>
+    <keyword type="typedef" name="G3DQuat" link="libg3d-quat.html#G3DQuat"/>
+    <keyword type="function" name="g3d_quat_add ()" link="libg3d-quat.html#g3d-quat-add"/>
+    <keyword type="function" name="g3d_quat_normalize ()" link="libg3d-quat.html#g3d-quat-normalize"/>
+    <keyword type="function" name="g3d_quat_rotate ()" link="libg3d-quat.html#g3d-quat-rotate"/>
+    <keyword type="function" name="g3d_quat_to_matrix ()" link="libg3d-quat.html#g3d-quat-to-matrix"/>
+    <keyword type="function" name="g3d_quat_to_rotation_xyz ()" link="libg3d-quat.html#g3d-quat-to-rotation-xyz"/>
+    <keyword type="function" name="g3d_quat_trackball ()" link="libg3d-quat.html#g3d-quat-trackball"/>
+  </functions>
+</book>

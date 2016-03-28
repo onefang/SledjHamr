@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-quat">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-quat.top_of_page">quat</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>quat</refname>
+<refpurpose>quaternion helpers</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-quat.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/quat.h&gt;
+
+typedef             <link linkend="G3DQuat">G3DQuat</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-add">g3d_quat_add</link>                        (<link linkend="G3DQuat">G3DQuat</link> *qr,
+                                                         <link linkend="G3DQuat">G3DQuat</link> *q1,
+                                                         <link linkend="G3DQuat">G3DQuat</link> *q2);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-normalize">g3d_quat_normalize</link>                  (<link linkend="G3DQuat">G3DQuat</link> *q);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-rotate">g3d_quat_rotate</link>                     (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DVector">G3DVector</link> *axis,
+                                                         <link linkend="G3DFloat">G3DFloat</link> angle);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-to-matrix">g3d_quat_to_matrix</link>                  (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-to-rotation-xyz">g3d_quat_to_rotation_xyz</link>            (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *rx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ry,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *rz);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-quat-trackball">g3d_quat_trackball</link>                  (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DFloat">G3DFloat</link> x1,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y1,
+                                                         <link linkend="G3DFloat">G3DFloat</link> x2,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y2,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-quat.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-quat.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DQuat" role="typedef">
+<title>G3DQuat</title>
+<indexterm zone="G3DQuat"><primary>G3DQuat</primary></indexterm><programlisting>typedef G3DFloat G3DQuat;
+</programlisting>
+<para>
+Quaternion element type.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="g3d-quat-add" role="function">
+<title>g3d_quat_add ()</title>
+<indexterm zone="g3d-quat-add"><primary>g3d_quat_add</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_add                        (<link linkend="G3DQuat">G3DQuat</link> *qr,
+                                                         <link linkend="G3DQuat">G3DQuat</link> *q1,
+                                                         <link linkend="G3DQuat">G3DQuat</link> *q2);</programlisting>
+<para>
+Add two quats.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>qr</parameter>&nbsp;:</term>
+<listitem><simpara> result quat
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>q1</parameter>&nbsp;:</term>
+<listitem><simpara> first quat
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>q2</parameter>&nbsp;:</term>
+<listitem><simpara> second quat
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-quat-normalize" role="function">
+<title>g3d_quat_normalize ()</title>
+<indexterm zone="g3d-quat-normalize"><primary>g3d_quat_normalize</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_normalize                  (<link linkend="G3DQuat">G3DQuat</link> *q);</programlisting>
+<para>
+normalize the quaternion to a length of 1.0.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>q</parameter>&nbsp;:</term>
+<listitem><simpara> a quaternion
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-quat-rotate" role="function">
+<title>g3d_quat_rotate ()</title>
+<indexterm zone="g3d-quat-rotate"><primary>g3d_quat_rotate</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_rotate                     (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DVector">G3DVector</link> *axis,
+                                                         <link linkend="G3DFloat">G3DFloat</link> angle);</programlisting>
+<para>
+Encode a rotation around an axis into quaternion.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>q</parameter>&nbsp;:</term>
+<listitem><simpara> resulting quat
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>axis</parameter>&nbsp;:</term>
+<listitem><simpara> rotation axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>angle</parameter>&nbsp;:</term>
+<listitem><simpara> rotation angle
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-quat-to-matrix" role="function">
+<title>g3d_quat_to_matrix ()</title>
+<indexterm zone="g3d-quat-to-matrix"><primary>g3d_quat_to_matrix</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_to_matrix                  (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Convert a quaternion to a transformation matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>q</parameter>&nbsp;:</term>
+<listitem><simpara> source quat
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-quat-to-rotation-xyz" role="function">
+<title>g3d_quat_to_rotation_xyz ()</title>
+<indexterm zone="g3d-quat-to-rotation-xyz"><primary>g3d_quat_to_rotation_xyz</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_to_rotation_xyz            (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *rx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *ry,
+                                                         <link linkend="G3DFloat">G3DFloat</link> *rz);</programlisting>
+<para>
+Calculate the rotation around the three coordinate axes from a given
+quaternion.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>q</parameter>&nbsp;:</term>
+<listitem><simpara> a quaternion
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rx</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around x axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ry</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around y axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rz</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around z axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-quat-trackball" role="function">
+<title>g3d_quat_trackball ()</title>
+<indexterm zone="g3d-quat-trackball"><primary>g3d_quat_trackball</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_quat_trackball                  (<link linkend="G3DQuat">G3DQuat</link> *q,
+                                                         <link linkend="G3DFloat">G3DFloat</link> x1,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y1,
+                                                         <link linkend="G3DFloat">G3DFloat</link> x2,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y2,
+                                                         <link linkend="G3DFloat">G3DFloat</link> r);</programlisting>
+<para>
+Emulate a virtual trackball movement and return rotation as quaternion.
+The x and y values of the starting and end point of the movement have
+to be in the range -1.0 .. 1.0.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>q</parameter>&nbsp;:</term>
+<listitem><simpara> resulting quaternion
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>x1</parameter>&nbsp;:</term>
+<listitem><simpara> x value of first point
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>y1</parameter>&nbsp;:</term>
+<listitem><simpara> y value of first point
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>x2</parameter>&nbsp;:</term>
+<listitem><simpara> x value of second point
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>y2</parameter>&nbsp;:</term>
+<listitem><simpara> y value of second point
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>r</parameter>&nbsp;:</term>
+<listitem><simpara> radius of virtual trackball, usually 0.8
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

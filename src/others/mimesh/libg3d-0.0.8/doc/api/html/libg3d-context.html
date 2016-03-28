@@ -1,0 +1,531 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>context</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch01.html" title="Application interface">
+<link rel="prev" href="libg3d-types.html" title="types">
+<link rel="next" href="libg3d-model.html" title="model">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-types.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-model.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-context.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-context.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-context"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-context.top_of_page"></a>context</span></h2>
+<p>context — Libg3d initialization and configuration</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-context.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/g3d.h&gt;
+
+                    <a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a>;
+<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a>*         <a class="link" href="libg3d-context.html#g3d-context-new" title="g3d_context_new ()">g3d_context_new</a>                     (void);
+void                <a class="link" href="libg3d-context.html#g3d-context-free" title="g3d_context_free ()">g3d_context_free</a>                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-context.html#G3DSetBgColorFunc" title="G3DSetBgColorFunc ()">*G3DSetBgColorFunc</a>)                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> g,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> b,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> a,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-context.html#G3DUpdateInterfaceFunc" title="G3DUpdateInterfaceFunc ()">*G3DUpdateInterfaceFunc</a>)           (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-context.html#G3DUpdateProgressBarFunc" title="G3DUpdateProgressBarFunc ()">*G3DUpdateProgressBarFunc</a>)         (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> percentage,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> show,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-context.html#g3d-context-update-interface" title="g3d_context_update_interface ()">g3d_context_update_interface</a>        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);
+void                <a class="link" href="libg3d-context.html#g3d-context-set-update-interface-func" title="g3d_context_set_update_interface_func ()">g3d_context_set_update_interface_func</a>
+                                                        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DUpdateInterfaceFunc" title="G3DUpdateInterfaceFunc ()">G3DUpdateInterfaceFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-context.html#g3d-context-update-progress-bar" title="g3d_context_update_progress_bar ()">g3d_context_update_progress_bar</a>     (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> percentage,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> visibility);
+void                <a class="link" href="libg3d-context.html#g3d-context-set-update-progress-bar-func" title="g3d_context_set_update_progress_bar_func ()">g3d_context_set_update_progress_bar_func</a>
+                                                        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DUpdateProgressBarFunc" title="G3DUpdateProgressBarFunc ()">G3DUpdateProgressBarFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-context.html#g3d-context-set-bgcolor" title="g3d_context_set_bgcolor ()">g3d_context_set_bgcolor</a>             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> g,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> b,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> a);
+void                <a class="link" href="libg3d-context.html#g3d-context-set-set-bgcolor-func" title="g3d_context_set_set_bgcolor_func ()">g3d_context_set_set_bgcolor_func</a>    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DSetBgColorFunc" title="G3DSetBgColorFunc ()">G3DSetBgColorFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-context.description"></a><h2>Description</h2>
+<p>
+All state information is saved in the context. It also serves as an
+interface to the application.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-context.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DContext"></a><h3>G3DContext</h3>
+<pre class="programlisting">typedef struct {
+} G3DContext;
+</pre>
+<p>
+Internal stuff for libg3d.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-new"></a><h3>g3d_context_new ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a>*         g3d_context_new                     (void);</pre>
+<p>
+Create a new context. This initializes the library (and also the
+plugin system so this has not to be done seperately).</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a valid context, or NULL on failure.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-free"></a><h3>g3d_context_free ()</h3>
+<pre class="programlisting">void                g3d_context_free                    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Cleans up the context and the plugin system and frees all reserved
+memory.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> the context to free
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DSetBgColorFunc"></a><h3>G3DSetBgColorFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DSetBgColorFunc)                (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> g,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> b,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> a,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Background color setting callback.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>r</code></em> :</span></p></td>
+<td> red component
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>g</code></em> :</span></p></td>
+<td> green component
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>b</code></em> :</span></p></td>
+<td> blue component
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>a</code></em> :</span></p></td>
+<td> alpha component
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque data as given to <a class="link" href="libg3d-context.html#g3d-context-set-set-bgcolor-func" title="g3d_context_set_set_bgcolor_func ()"><code class="function">g3d_context_set_set_bgcolor_func()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DUpdateInterfaceFunc"></a><h3>G3DUpdateInterfaceFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DUpdateInterfaceFunc)           (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Interface updating callback.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque data as given to <a class="link" href="libg3d-context.html#g3d-context-set-update-interface-func" title="g3d_context_set_update_interface_func ()"><code class="function">g3d_context_set_update_interface_func()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DUpdateProgressBarFunc"></a><h3>G3DUpdateProgressBarFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DUpdateProgressBarFunc)         (<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> percentage,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> show,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Progress updating callback.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>percentage</code></em> :</span></p></td>
+<td> progress of plugin operation
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>show</code></em> :</span></p></td>
+<td> <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"
+><span class="type">TRUE</span></a> if the progress bar should be visible, <a
+href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"
+><span class="type">FALSE</span></a> else
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> opaque data as given to
+<a class="link" href="libg3d-context.html#g3d-context-set-update-progress-bar-func" title="g3d_context_set_update_progress_bar_func ()"><code class="function">g3d_context_set_update_progress_bar_func()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-update-interface"></a><h3>g3d_context_update_interface ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_context_update_interface        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context);</pre>
+<p>
+Try to update the interface. This will call a function registered with
+<em class="parameter"><code>g3d_context_set_update_interface_func</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-set-update-interface-func"></a><h3>g3d_context_set_update_interface_func ()</h3>
+<pre class="programlisting">void                g3d_context_set_update_interface_func
+                                                        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DUpdateInterfaceFunc" title="G3DUpdateInterfaceFunc ()">G3DUpdateInterfaceFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Registers a callback function for updating the interface.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> the callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> user-defined opaque pointer
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-update-progress-bar"></a><h3>g3d_context_update_progress_bar ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_context_update_progress_bar     (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> percentage,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> visibility);</pre>
+<p>
+Try to update the progress bar.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>percentage</code></em> :</span></p></td>
+<td> the percentage to set on the progress bar
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>visibility</code></em> :</span></p></td>
+<td> show or hide the progress bar
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-set-update-progress-bar-func"></a><h3>g3d_context_set_update_progress_bar_func ()</h3>
+<pre class="programlisting">void                g3d_context_set_update_progress_bar_func
+                                                        (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DUpdateProgressBarFunc" title="G3DUpdateProgressBarFunc ()">G3DUpdateProgressBarFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Registers a callback function for updating the progress bar.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> the callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> user-defined opaque pointer
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-set-bgcolor"></a><h3>g3d_context_set_bgcolor ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_context_set_bgcolor             (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> r,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> g,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> b,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> a);</pre>
+<p>
+Try to set the background color. This will call a function registered
+with <em class="parameter"><code>g3d_context_set_set_bgcolor_func</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>r</code></em> :</span></p></td>
+<td> red component (range: 0.0 .. 1.0)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>g</code></em> :</span></p></td>
+<td> green component (range: 0.0 .. 1.0)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>b</code></em> :</span></p></td>
+<td> green component (range: 0.0 .. 1.0)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>a</code></em> :</span></p></td>
+<td> alpha component
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-context-set-set-bgcolor-func"></a><h3>g3d_context_set_set_bgcolor_func ()</h3>
+<pre class="programlisting">void                g3d_context_set_set_bgcolor_func    (<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext">G3DContext</a> *context,
+                                                         <a class="link" href="libg3d-context.html#G3DSetBgColorFunc" title="G3DSetBgColorFunc ()">G3DSetBgColorFunc</a> func,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> user_data);</pre>
+<p>
+Registers a callback function for setting the background color.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>context</code></em> :</span></p></td>
+<td> a valid context
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td> the callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td> user-defined opaque pointer
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-context.see-also"></a><h2>See Also</h2>
+<a class="link" href="libg3d-context.html#G3DContext" title="G3DContext"><span class="type">G3DContext</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

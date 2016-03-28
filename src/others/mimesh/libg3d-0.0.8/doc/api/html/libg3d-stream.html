@@ -1,0 +1,1535 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>stream</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch02.html" title="Plugin interface">
+<link rel="prev" href="libg3d-plugins.html" title="plugins">
+<link rel="next" href="libg3d-iff.html" title="iff">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-plugins.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-iff.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-stream.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-stream.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-stream"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-stream.top_of_page"></a>stream</span></h2>
+<p>stream — I/O abstraction layer for plugins</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-stream.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/stream.h&gt;
+
+                    <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>;
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-file" title="g3d_stream_open_file ()">g3d_stream_open_file</a>                (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *mode);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-structured-file" title="g3d_stream_open_structured_file ()">g3d_stream_open_structured_file</a>     (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-structured-file-from-stream" title="g3d_stream_open_structured_file_from_stream ()">g3d_stream_open_structured_file_from_stream</a>
+                                                        (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-zip" title="g3d_stream_open_zip ()">g3d_stream_open_zip</a>                 (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-zip-from-stream" title="g3d_stream_open_zip_from_stream ()">g3d_stream_open_zip_from_stream</a>     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-open-gzip-from-stream" title="g3d_stream_open_gzip_from_stream ()">g3d_stream_open_gzip_from_stream</a>    (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-from-buffer" title="g3d_stream_from_buffer ()">g3d_stream_from_buffer</a>              (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint8"
+>guint8</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *title,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> free_buffer);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-zlib-inflate-stream" title="g3d_stream_zlib_inflate_stream ()">g3d_stream_zlib_inflate_stream</a>      (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> cmp_size);
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          <a class="link" href="libg3d-stream.html#g3d-stream-new-custom" title="g3d_stream_new_custom ()">g3d_stream_new_custom</a>               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *uri,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamReadFunc" title="G3DStreamReadFunc ()">G3DStreamReadFunc</a> readfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamReadLineFunc" title="G3DStreamReadLineFunc ()">G3DStreamReadLineFunc</a> readlinefunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamSeekFunc" title="G3DStreamSeekFunc ()">G3DStreamSeekFunc</a> seekfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamTellFunc" title="G3DStreamTellFunc ()">G3DStreamTellFunc</a> tellfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamSizeFunc" title="G3DStreamSizeFunc ()">G3DStreamSizeFunc</a> sizefunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamEofFunc" title="G3DStreamEofFunc ()">G3DStreamEofFunc</a> eoffunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamCloseFunc" title="G3DStreamCloseFunc ()">G3DStreamCloseFunc</a> closefunc,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                <a class="link" href="libg3d-stream.html#g3d-stream-close" title="g3d_stream_close ()">g3d_stream_close</a>                    (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                <a class="link" href="libg3d-stream.html#g3d-stream-skip" title="g3d_stream_skip ()">g3d_stream_skip</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                <a class="link" href="libg3d-stream.html#g3d-stream-seek" title="g3d_stream_seek ()">g3d_stream_seek</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-IO-Channels.html#GSeekType"
+>GSeekType</a> whence);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             <a class="link" href="libg3d-stream.html#g3d-stream-tell" title="g3d_stream_tell ()">g3d_stream_tell</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             <a class="link" href="libg3d-stream.html#g3d-stream-size" title="g3d_stream_size ()">g3d_stream_size</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-stream.html#g3d-stream-eof" title="g3d_stream_eof ()">g3d_stream_eof</a>                      (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-stream.html#g3d-stream-is-seekable" title="g3d_stream_is_seekable ()">g3d_stream_is_seekable</a>              (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              <a class="link" href="libg3d-stream.html#g3d-stream-get-uri" title="g3d_stream_get_uri ()">g3d_stream_get_uri</a>                  (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a>             <a class="link" href="libg3d-stream.html#g3d-stream-line" title="g3d_stream_line ()">g3d_stream_line</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               <a class="link" href="libg3d-stream.html#g3d-stream-read" title="g3d_stream_read ()">g3d_stream_read</a>                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ptr,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              <a class="link" href="libg3d-stream.html#g3d-stream-read-line" title="g3d_stream_read_line ()">g3d_stream_read_line</a>                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buf,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-int8" title="g3d_stream_read_int8 ()">g3d_stream_read_int8</a>                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-int16-be" title="g3d_stream_read_int16_be ()">g3d_stream_read_int16_be</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-int16-le" title="g3d_stream_read_int16_le ()">g3d_stream_read_int16_le</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-int32-be" title="g3d_stream_read_int32_be ()">g3d_stream_read_int32_be</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-int32-le" title="g3d_stream_read_int32_le ()">g3d_stream_read_int32_le</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            <a class="link" href="libg3d-stream.html#g3d-stream-read-float-be" title="g3d_stream_read_float_be ()">g3d_stream_read_float_be</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            <a class="link" href="libg3d-stream.html#g3d-stream-read-float-le" title="g3d_stream_read_float_le ()">g3d_stream_read_float_le</a>            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           <a class="link" href="libg3d-stream.html#g3d-stream-read-double-be" title="g3d_stream_read_double_be ()">g3d_stream_read_double_be</a>           (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           <a class="link" href="libg3d-stream.html#g3d-stream-read-double-le" title="g3d_stream_read_double_le ()">g3d_stream_read_double_le</a>           (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              <a class="link" href="libg3d-stream.html#g3d-stream-read-cstr" title="g3d_stream_read_cstr ()">g3d_stream_read_cstr</a>                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> max_len);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                (<a class="link" href="libg3d-stream.html#G3DStreamCloseFunc" title="G3DStreamCloseFunc ()">*G3DStreamCloseFunc</a>)               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (<a class="link" href="libg3d-stream.html#G3DStreamEofFunc" title="G3DStreamEofFunc ()">*G3DStreamEofFunc</a>)                 (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               (<a class="link" href="libg3d-stream.html#G3DStreamReadFunc" title="G3DStreamReadFunc ()">*G3DStreamReadFunc</a>)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ptr,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              (<a class="link" href="libg3d-stream.html#G3DStreamReadLineFunc" title="G3DStreamReadLineFunc ()">*G3DStreamReadLineFunc</a>)            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buf,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                (<a class="link" href="libg3d-stream.html#G3DStreamSeekFunc" title="G3DStreamSeekFunc ()">*G3DStreamSeekFunc</a>)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-IO-Channels.html#GSeekType"
+>GSeekType</a> whence);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             (<a class="link" href="libg3d-stream.html#G3DStreamSizeFunc" title="G3DStreamSizeFunc ()">*G3DStreamSizeFunc</a>)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             (<a class="link" href="libg3d-stream.html#G3DStreamTellFunc" title="G3DStreamTellFunc ()">*G3DStreamTellFunc</a>)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-stream.description"></a><h2>Description</h2>
+<p>
+A stream is an abstraction for data input. It enables plugins to read
+data from a file, a memory buffer, a container file or some other medium.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-stream.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DStream"></a><h3>G3DStream</h3>
+<pre class="programlisting">typedef struct {
+} G3DStream;
+</pre>
+<p>
+An abstraction of input handling.</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-file"></a><h3>g3d_stream_open_file ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_file                (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *mode);</pre>
+<p>
+Opens a file with the C stdio routines.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> the name of the file to open
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>mode</code></em> :</span></p></td>
+<td> the mode to open the file, as given to <code class="function">fopen()</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-structured-file"></a><h3>g3d_stream_open_structured_file ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_structured_file     (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);</pre>
+<p>
+Open a file within a Structured File as <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> name of container file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>subfile</code></em> :</span></p></td>
+<td> name of (contained) sub-file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-structured-file-from-stream"></a><h3>g3d_stream_open_structured_file_from_stream ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_structured_file_from_stream
+                                                        (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);</pre>
+<p>
+Open a file within a Structured File which is opened as a stream. At the
+moment this only works for streams opened by <a class="link" href="libg3d-stream.html#g3d-stream-open-file" title="g3d_stream_open_file ()"><code class="function">g3d_stream_open_file()</code></a> as
+the file is directly opened again.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream of container file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>subfile</code></em> :</span></p></td>
+<td> name of (contained) sub-file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-zip"></a><h3>g3d_stream_open_zip ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_zip                 (const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *filename,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);</pre>
+<p>
+Open a file within a Zip archive.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>filename</code></em> :</span></p></td>
+<td> name of container file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>subfile</code></em> :</span></p></td>
+<td> name of (contained) sub-file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-zip-from-stream"></a><h3>g3d_stream_open_zip_from_stream ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_zip_from_stream     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *subfile);</pre>
+<p>
+Open a file within a Zip archive which is opened as a stream. At the
+moment this only works for streams opened by <a class="link" href="libg3d-stream.html#g3d-stream-open-file" title="g3d_stream_open_file ()"><code class="function">g3d_stream_open_file()</code></a> as
+the file is directly opened again.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream of container file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>subfile</code></em> :</span></p></td>
+<td> name of (contained) sub-file
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-open-gzip-from-stream"></a><h3>g3d_stream_open_gzip_from_stream ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_open_gzip_from_stream    (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Reads data from a gzip-compressed stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-from-buffer"></a><h3>g3d_stream_from_buffer ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_from_buffer              (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint8"
+>guint8</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *title,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> free_buffer);</pre>
+<p>
+Use a buffer in memory as <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>buffer</code></em> :</span></p></td>
+<td> memory buffer to use
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>size</code></em> :</span></p></td>
+<td> size of buffer
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>title</code></em> :</span></p></td>
+<td> optional title of stream, may be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>free_buffer</code></em> :</span></p></td>
+<td> whether to free the memory with <a
+href="/usr/share/gtk-doc/html/glib/glib-Memory-Allocation.html#g-free"
+><code class="function">g_free()</code></a> on <a class="link" href="libg3d-stream.html#g3d-stream-close" title="g3d_stream_close ()"><code class="function">g3d_stream_close()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-zlib-inflate-stream"></a><h3>g3d_stream_zlib_inflate_stream ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_zlib_inflate_stream      (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> cmp_size);</pre>
+<p>
+Opens a new stream to decompress zlib-deflated parts of a stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> a parent stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cmp_size</code></em> :</span></p></td>
+<td> the compressed size of the deflated part
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-new-custom"></a><h3>g3d_stream_new_custom ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a>*          g3d_stream_new_custom               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> flags,
+                                                         const <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *uri,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamReadFunc" title="G3DStreamReadFunc ()">G3DStreamReadFunc</a> readfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamReadLineFunc" title="G3DStreamReadLineFunc ()">G3DStreamReadLineFunc</a> readlinefunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamSeekFunc" title="G3DStreamSeekFunc ()">G3DStreamSeekFunc</a> seekfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamTellFunc" title="G3DStreamTellFunc ()">G3DStreamTellFunc</a> tellfunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamSizeFunc" title="G3DStreamSizeFunc ()">G3DStreamSizeFunc</a> sizefunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamEofFunc" title="G3DStreamEofFunc ()">G3DStreamEofFunc</a> eoffunc,
+                                                         <a class="link" href="libg3d-stream.html#G3DStreamCloseFunc" title="G3DStreamCloseFunc ()">G3DStreamCloseFunc</a> closefunc,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Creates a new <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> with custom callback functions.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td> stream capability flags
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>uri</code></em> :</span></p></td>
+<td> URI of new stream, must not be NULL
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>readfunc</code></em> :</span></p></td>
+<td> read callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>readlinefunc</code></em> :</span></p></td>
+<td> read line callback function, may be NULL in which case
+line reading is emulated with <a class="link" href="libg3d-stream.html#g3d-stream-read" title="g3d_stream_read ()"><code class="function">g3d_stream_read()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>seekfunc</code></em> :</span></p></td>
+<td> seek callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tellfunc</code></em> :</span></p></td>
+<td> tell callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>sizefunc</code></em> :</span></p></td>
+<td> size callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>eoffunc</code></em> :</span></p></td>
+<td> end-of-file callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>closefunc</code></em> :</span></p></td>
+<td> close callback function
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque data for all callback functions
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a newly allocated <a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a> or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-close"></a><h3>g3d_stream_close ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                g3d_stream_close                    (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Closes an open stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> 0 on success.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-skip"></a><h3>g3d_stream_skip ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                g3d_stream_skip                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset);</pre>
+<p>
+Skip a number of bytes (&gt;= 0) in stream even if it does not support
+seeking.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to skip bytes from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>offset</code></em> :</span></p></td>
+<td> number of bytes to skip
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> 0 on success, -1 else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-seek"></a><h3>g3d_stream_seek ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                g3d_stream_seek                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-IO-Channels.html#GSeekType"
+>GSeekType</a> whence);</pre>
+<p>
+Moves around the current position in the stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to seek in
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>offset</code></em> :</span></p></td>
+<td> number of bytes to seek
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>whence</code></em> :</span></p></td>
+<td> seek type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> 0 on success, -1 else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-tell"></a><h3>g3d_stream_tell ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             g3d_stream_tell                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Tells the current position in the stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to get position from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> current stream position
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-size"></a><h3>g3d_stream_size ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             g3d_stream_size                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Get the size in bytes of a stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to get size from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> size of stream in bytes
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-eof"></a><h3>g3d_stream_eof ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_stream_eof                      (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Checks whether the stream has reached its end.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE if no more data can be read, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-is-seekable"></a><h3>g3d_stream_is_seekable ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_stream_is_seekable              (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Get information whether it is possible to seek in a stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE if seekable, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-get-uri"></a><h3>g3d_stream_get_uri ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              g3d_stream_get_uri                  (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Get the URI of a stream</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> a non-NULL, zero-terminated string containing the URI of the
+string. This return value should not be freed.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-line"></a><h3>g3d_stream_line ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a>             g3d_stream_line                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Get the current line number from stream. This only works if line are
+consequently read with <a class="link" href="libg3d-stream.html#g3d-stream-read-line" title="g3d_stream_read_line ()"><code class="function">g3d_stream_read_line()</code></a>, so it's only applicable
+for text streams.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to get line from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> current line number, may be 0
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read"></a><h3>g3d_stream_read ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               g3d_stream_read                     (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ptr,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size);</pre>
+<p>
+Reads a number of bytes from the stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ptr</code></em> :</span></p></td>
+<td> pointer to memory storage
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>size</code></em> :</span></p></td>
+<td> number of bytes to read
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> number of bytes successfully read.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-line"></a><h3>g3d_stream_read_line ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              g3d_stream_read_line                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buf,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size);</pre>
+<p>
+Read a line (terminated by a newline character or end of file) from a
+stream.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> stream to read a line from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>buf</code></em> :</span></p></td>
+<td> an allocated buffer to be filled
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>size</code></em> :</span></p></td>
+<td> maximum length of line including terminating zero
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the read line or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-int8"></a><h3>g3d_stream_read_int8 ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_int8                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 1 byte signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-int16-be"></a><h3>g3d_stream_read_int16_be ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_int16_be            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 2 byte big-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-int16-le"></a><h3>g3d_stream_read_int16_le ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_int16_le            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 2 byte little-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-int32-be"></a><h3>g3d_stream_read_int32_be ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_int32_be            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 4 byte big-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-int32-le"></a><h3>g3d_stream_read_int32_le ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_int32_le            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 4 byte little-endian signed integer from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-float-be"></a><h3>g3d_stream_read_float_be ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            g3d_stream_read_float_be            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 4 byte big-endian floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-float-le"></a><h3>g3d_stream_read_float_le ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a>            g3d_stream_read_float_le            (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 4 byte little-endian floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-double-be"></a><h3>g3d_stream_read_double_be ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           g3d_stream_read_double_be           (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 8 byte big-endian double-precision floating point number from file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-double-le"></a><h3>g3d_stream_read_double_le ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-types.html#G3DDouble" title="G3DDouble">G3DDouble</a>           g3d_stream_read_double_le           (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream);</pre>
+<p>
+Read a 8 byte little-endian double-precision floating point number from
+file.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The read value, 0 in case of error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-stream-read-cstr"></a><h3>g3d_stream_read_cstr ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a>              g3d_stream_read_cstr                (<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream">G3DStream</a> *stream,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buffer,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint32"
+>gint32</a> max_len);</pre>
+<p>
+Read a string (terminated by '\0') from stream</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>stream</code></em> :</span></p></td>
+<td> the stream to read from
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>buffer</code></em> :</span></p></td>
+<td> the buffer to fill
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>max_len</code></em> :</span></p></td>
+<td> maximum number to read from stream
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> number of bytes read from stream
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamCloseFunc"></a><h3>G3DStreamCloseFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                (*G3DStreamCloseFunc)               (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-close" title="g3d_stream_close ()"><code class="function">g3d_stream_close()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> 0 on success, -1 else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamEofFunc"></a><h3>G3DStreamEofFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            (*G3DStreamEofFunc)                 (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-eof" title="g3d_stream_eof ()"><code class="function">g3d_stream_eof()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on stream end-of-file, FALSE else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamReadFunc"></a><h3>G3DStreamReadFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a>               (*G3DStreamReadFunc)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> ptr,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-read" title="g3d_stream_read ()"><code class="function">g3d_stream_read()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ptr</code></em> :</span></p></td>
+<td> buffer to read bytes into
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>size</code></em> :</span></p></td>
+<td> number of bytes to read
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> number of bytes actually read.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamReadLineFunc"></a><h3>G3DStreamReadLineFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>*              (*G3DStreamReadLineFunc)            (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *buf,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gsize"
+>gsize</a> size,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-read-line" title="g3d_stream_read_line ()"><code class="function">g3d_stream_read_line()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>buf</code></em> :</span></p></td>
+<td> buffer to read bytes into
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>size</code></em> :</span></p></td>
+<td> maximum size of buffer
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> The line buffer or NULL in case of an error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamSeekFunc"></a><h3>G3DStreamSeekFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"
+>gint</a>                (*G3DStreamSeekFunc)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a> offset,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-IO-Channels.html#GSeekType"
+>GSeekType</a> whence);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-seek" title="g3d_stream_seek ()"><code class="function">g3d_stream_seek()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>offset</code></em> :</span></p></td>
+<td> seek offset
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>whence</code></em> :</span></p></td>
+<td> seek type
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> 0 on success, -1 else.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamSizeFunc"></a><h3>G3DStreamSizeFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             (*G3DStreamSizeFunc)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-size" title="g3d_stream_size ()"><code class="function">g3d_stream_size()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> size of stream.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DStreamTellFunc"></a><h3>G3DStreamTellFunc ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#goffset"
+>goffset</a>             (*G3DStreamTellFunc)                (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data);</pre>
+<p>
+Callback function for <a class="link" href="libg3d-stream.html#g3d-stream-tell" title="g3d_stream_tell ()"><code class="function">g3d_stream_tell()</code></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td> opaque stream data
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> current stream position.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-stream.see-also"></a><h2>See Also</h2>
+<a class="link" href="libg3d-stream.html#G3DStream" title="G3DStream"><span class="type">G3DStream</span></a>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

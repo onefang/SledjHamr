@@ -1,0 +1,278 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="libg3d-matrix">
+<refmeta>
+<refentrytitle role="top_of_page" id="libg3d-matrix.top_of_page">matrix</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBG3D Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>matrix</refname>
+<refpurpose>Matrix manipulation and calculation</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="libg3d-matrix.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+
+#include &lt;g3d/matrix.h&gt;
+
+typedef             <link linkend="G3DMatrix">G3DMatrix</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-identity">g3d_matrix_identity</link>                 (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-multiply">g3d_matrix_multiply</link>                 (<link linkend="G3DMatrix">G3DMatrix</link> *m1,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *m2,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-translate">g3d_matrix_translate</link>                (<link linkend="G3DFloat">G3DFloat</link> x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-rotate">g3d_matrix_rotate</link>                   (<link linkend="G3DFloat">G3DFloat</link> angle,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ax,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ay,
+                                                         <link linkend="G3DFloat">G3DFloat</link> az,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-rotate-xyz">g3d_matrix_rotate_xyz</link>               (<link linkend="G3DFloat">G3DFloat</link> rx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ry,
+                                                         <link linkend="G3DFloat">G3DFloat</link> rz,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-scale">g3d_matrix_scale</link>                    (<link linkend="G3DFloat">G3DFloat</link> x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-transpose">g3d_matrix_transpose</link>                (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="G3DFloat">G3DFloat</link>            <link linkend="g3d-matrix-determinant">g3d_matrix_determinant</link>              (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+<link linkend="gboolean">gboolean</link>            <link linkend="g3d-matrix-dump">g3d_matrix_dump</link>                     (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libg3d-matrix.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+Matrices in libg3d have the following layout:
+</para>
+<para>
+G3DMatrix matrix[16]:
+</para>
+<para>
+matrix[col * 4 + row] = f;</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="libg3d-matrix.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="G3DMatrix" role="typedef">
+<title>G3DMatrix</title>
+<indexterm zone="G3DMatrix"><primary>G3DMatrix</primary></indexterm><programlisting>typedef G3DFloat G3DMatrix;
+</programlisting>
+<para>
+Matrix element type.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="g3d-matrix-identity" role="function">
+<title>g3d_matrix_identity ()</title>
+<indexterm zone="g3d-matrix-identity"><primary>g3d_matrix_identity</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_identity                 (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Sets the given matrix to the identity matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> 4x4 matrix (float[16])
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-multiply" role="function">
+<title>g3d_matrix_multiply ()</title>
+<indexterm zone="g3d-matrix-multiply"><primary>g3d_matrix_multiply</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_multiply                 (<link linkend="G3DMatrix">G3DMatrix</link> *m1,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *m2,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);</programlisting>
+<para>
+Multiplies the matrixes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>m1</parameter>&nbsp;:</term>
+<listitem><simpara> first matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>m2</parameter>&nbsp;:</term>
+<listitem><simpara> second matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rm</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-translate" role="function">
+<title>g3d_matrix_translate ()</title>
+<indexterm zone="g3d-matrix-translate"><primary>g3d_matrix_translate</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_translate                (<link linkend="G3DFloat">G3DFloat</link> x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);</programlisting>
+<para>
+Adds a translation to the the matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>x</parameter>&nbsp;:</term>
+<listitem><simpara> x translation
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>y</parameter>&nbsp;:</term>
+<listitem><simpara> y translation
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>z</parameter>&nbsp;:</term>
+<listitem><simpara> z translation
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rm</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-rotate" role="function">
+<title>g3d_matrix_rotate ()</title>
+<indexterm zone="g3d-matrix-rotate"><primary>g3d_matrix_rotate</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_rotate                   (<link linkend="G3DFloat">G3DFloat</link> angle,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ax,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ay,
+                                                         <link linkend="G3DFloat">G3DFloat</link> az,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);</programlisting>
+<para>
+Adds a rotation to the matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>angle</parameter>&nbsp;:</term>
+<listitem><simpara> rotation angle
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ax</parameter>&nbsp;:</term>
+<listitem><simpara> x component of rotation axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ay</parameter>&nbsp;:</term>
+<listitem><simpara> y component of rotation axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>az</parameter>&nbsp;:</term>
+<listitem><simpara> z component of rotation axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rm</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-rotate-xyz" role="function">
+<title>g3d_matrix_rotate_xyz ()</title>
+<indexterm zone="g3d-matrix-rotate-xyz"><primary>g3d_matrix_rotate_xyz</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_rotate_xyz               (<link linkend="G3DFloat">G3DFloat</link> rx,
+                                                         <link linkend="G3DFloat">G3DFloat</link> ry,
+                                                         <link linkend="G3DFloat">G3DFloat</link> rz,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);</programlisting>
+<para>
+Adds a rotation around the 3 coordinate system axes to the matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>rx</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around x axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>ry</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around y axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rz</parameter>&nbsp;:</term>
+<listitem><simpara> rotation around z axis
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rm</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-scale" role="function">
+<title>g3d_matrix_scale ()</title>
+<indexterm zone="g3d-matrix-scale"><primary>g3d_matrix_scale</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_scale                    (<link linkend="G3DFloat">G3DFloat</link> x,
+                                                         <link linkend="G3DFloat">G3DFloat</link> y,
+                                                         <link linkend="G3DFloat">G3DFloat</link> z,
+                                                         <link linkend="G3DMatrix">G3DMatrix</link> *rm);</programlisting>
+<para>
+Adds a scaling to the matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>x</parameter>&nbsp;:</term>
+<listitem><simpara> x factor
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>y</parameter>&nbsp;:</term>
+<listitem><simpara> y factor
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>z</parameter>&nbsp;:</term>
+<listitem><simpara> z factor
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>rm</parameter>&nbsp;:</term>
+<listitem><simpara> resulting matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-transpose" role="function">
+<title>g3d_matrix_transpose ()</title>
+<indexterm zone="g3d-matrix-transpose"><primary>g3d_matrix_transpose</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_transpose                (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Transposes the matrix.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> the matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE on success, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-determinant" role="function">
+<title>g3d_matrix_determinant ()</title>
+<indexterm zone="g3d-matrix-determinant"><primary>g3d_matrix_determinant</primary></indexterm><programlisting><link linkend="G3DFloat">G3DFloat</link>            g3d_matrix_determinant              (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+Calculate the determinant of the matrix (FIXME: not verified).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> the matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> the determinant.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="g3d-matrix-dump" role="function">
+<title>g3d_matrix_dump ()</title>
+<indexterm zone="g3d-matrix-dump"><primary>g3d_matrix_dump</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            g3d_matrix_dump                     (<link linkend="G3DMatrix">G3DMatrix</link> *matrix);</programlisting>
+<para>
+If debugging is enabled, this function dump the matrix to stderr.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>matrix</parameter>&nbsp;:</term>
+<listitem><simpara> the matrix
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> TRUE if matrix is dumped, FALSE else
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

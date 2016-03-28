@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>object</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libg3d Reference Manual">
+<link rel="up" href="ch01.html" title="Application interface">
+<link rel="prev" href="libg3d-model.html" title="model">
+<link rel="next" href="libg3d-face.html" title="face">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Application interface">
+<link rel="chapter" href="ch02.html" title="Plugin interface">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libg3d-model.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">libg3d Reference Manual</th>
+<td><a accesskey="n" href="libg3d-face.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#libg3d-object.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libg3d-object.description" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libg3d-object"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libg3d-object.top_of_page"></a>object</span></h2>
+<p>object — Object manipulation</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libg3d-object.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;g3d/object.h&gt;
+
+                    <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>;
+                    <a class="link" href="libg3d-object.html#G3DTransformation" title="G3DTransformation">G3DTransformation</a>;
+void                <a class="link" href="libg3d-object.html#g3d-object-free" title="g3d_object_free ()">g3d_object_free</a>                     (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a>             <a class="link" href="libg3d-object.html#g3d-object-radius" title="g3d_object_radius ()">g3d_object_radius</a>                   (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-scale" title="g3d_object_scale ()">g3d_object_scale</a>                    (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> scale);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-transform" title="g3d_object_transform ()">g3d_object_transform</a>                (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-transform-normals" title="g3d_object_transform_normals ()">g3d_object_transform_normals</a>        (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);
+<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          <a class="link" href="libg3d-object.html#g3d-object-duplicate" title="g3d_object_duplicate ()">g3d_object_duplicate</a>                (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-optimize" title="g3d_object_optimize ()">g3d_object_optimize</a>                 (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-smooth" title="g3d_object_smooth ()">g3d_object_smooth</a>                   (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="libg3d-object.html#g3d-object-merge" title="g3d_object_merge ()">g3d_object_merge</a>                    (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *o1,
+                                                         <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *o2);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-object.description"></a><h2>Description</h2>
+<p>
+Objects are parts of a model. In most file formats vertices and faces are
+grouped in some way into objects. Objects can be hierarchical, so what a
+model contains is basically an object tree.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="libg3d-object.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="G3DObject"></a><h3>G3DObject</h3>
+<pre class="programlisting">typedef struct {
+	gchar *name;
+
+	GSList *materials;
+	GSList *faces;
+	GSList *objects;
+
+	/* transformation, may be NULL */
+	G3DTransformation *transformation;
+
+	/* don't render this object */
+	gboolean hide;
+
+	/* vertices */
+	guint32 vertex_count;
+	G3DVector *vertex_data;
+} G3DObject;
+</pre>
+<p>
+A three-dimensional object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *<em class="structfield"><code>name</code></em>;</span></p></td>
+<td> name of object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *<em class="structfield"><code>materials</code></em>;</span></p></td>
+<td> list of materials
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *<em class="structfield"><code>faces</code></em>;</span></p></td>
+<td> list of faces
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"
+>GSList</a> *<em class="structfield"><code>objects</code></em>;</span></p></td>
+<td> list of sub-objects
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-object.html#G3DTransformation" title="G3DTransformation">G3DTransformation</a> *<em class="structfield"><code>transformation</code></em>;</span></p></td>
+<td> optional transformation
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a> <em class="structfield"><code>hide</code></em>;</span></p></td>
+<td> flag to disable object rendering
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>vertex_count</code></em>;</span></p></td>
+<td> number of vertices
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-vector.html#G3DVector" title="G3DVector">G3DVector</a> *<em class="structfield"><code>vertex_data</code></em>;</span></p></td>
+<td> vertex vector data
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="G3DTransformation"></a><h3>G3DTransformation</h3>
+<pre class="programlisting">typedef struct {
+	G3DMatrix matrix[16];
+	guint32 flags;
+} G3DTransformation;
+</pre>
+<p>
+A three-dimensional matrix transformation object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> <em class="structfield"><code>matrix</code></em>[16];</span></p></td>
+<td> the transformation matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint32"
+>guint32</a> <em class="structfield"><code>flags</code></em>;</span></p></td>
+<td> flags
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-free"></a><h3>g3d_object_free ()</h3>
+<pre class="programlisting">void                g3d_object_free                     (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);</pre>
+<p>
+Frees all memory allocated for that object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to free
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-radius"></a><h3>g3d_object_radius ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gdouble"
+>gdouble</a>             g3d_object_radius                   (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);</pre>
+<p>
+Calculates the radius of the object. This is the maximum from the
+center to a vertex.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to measure
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the radius of the given object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-scale"></a><h3>g3d_object_scale ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_scale                    (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-types.html#G3DFloat" title="G3DFloat">G3DFloat</a> scale);</pre>
+<p>
+Resizes the object by the factor <em class="parameter"><code>scale</code></em>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to scale
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>scale</code></em> :</span></p></td>
+<td> scale factor
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-transform"></a><h3>g3d_object_transform ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_transform                (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Multiplies all vertices of the object with the transformation matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to transform
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> the transformation matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-transform-normals"></a><h3>g3d_object_transform_normals ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_transform_normals        (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object,
+                                                         <a class="link" href="libg3d-matrix.html#G3DMatrix" title="G3DMatrix">G3DMatrix</a> *matrix);</pre>
+<p>
+Multiplies all normals of the object with the transformation matrix.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to transform
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>matrix</code></em> :</span></p></td>
+<td> the transformation matrix
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-duplicate"></a><h3>g3d_object_duplicate ()</h3>
+<pre class="programlisting"><a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a>*          g3d_object_duplicate                (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);</pre>
+<p>
+Duplicates an object with all vertices, faces and materials.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to duplicate
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> the new clone object
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-optimize"></a><h3>g3d_object_optimize ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_optimize                 (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);</pre>
+<p>
+Puts all vertex and face information into special arrays for faster
+rendering. It is deprecated and should not be used.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to optimize
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-smooth"></a><h3>g3d_object_smooth ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_smooth                   (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *object);</pre>
+<p>
+FIXME: unimplemented.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object</code></em> :</span></p></td>
+<td> the object to smooth
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="g3d-object-merge"></a><h3>g3d_object_merge ()</h3>
+<pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            g3d_object_merge                    (<a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *o1,
+                                                         <a class="link" href="libg3d-object.html#G3DObject" title="G3DObject">G3DObject</a> *o2);</pre>
+<p>
+Merges both objects into <em class="parameter"><code>o1</code></em>.
+FIXME: needs cleanup</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>o1</code></em> :</span></p></td>
+<td> first and target object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>o2</code></em> :</span></p></td>
+<td> second object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> TRUE on success, FALSE else
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

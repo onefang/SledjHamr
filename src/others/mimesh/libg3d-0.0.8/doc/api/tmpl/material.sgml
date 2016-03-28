@@ -1,0 +1,50 @@
+<!-- ##### SECTION Title ##### -->
+material
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT G3DMaterial ##### -->
+<para>
+
+</para>
+
+@name: 
+@r: 
+@g: 
+@b: 
+@a: 
+@shininess: 
+@specular: 
+@flags: 
+@tex_image: 
+
+<!-- ##### FUNCTION g3d_material_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION g3d_material_free ##### -->
+<para>
+
+</para>
+
+@material: 
+
+
