@@ -81,17 +81,19 @@ locale_d = baseDir .. '/locale'
 CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 
 -- Make sure any old servers are killed off.
-os.execute(baseDir .. '/bin//killem.sh')
+os.execute(baseDir .. '/bin/killem.sh')
 
 CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
+--CFLAGS = CFLAGS .. ' ' .. '-I ' .. baseDir .. '/include/luajit-2.0'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'elementary')
 CFLAGS = CFLAGS .. ' ' .. CFLAGOPTS
 
-LDFLAGS = '-L ' .. baseDir .. '/lib ' .. pkgConfig('libs-only-L', 'luajit')
+--LDFLAGS = '-L ' .. baseDir .. '/lib '
+LDFLAGS = '-L ' .. baseDir .. '/lib ' .. pkgConfig('libs-only-L', 'luajit') .. ' '
 libs = '-lLumbrJack -lRunnr -lSledjHamr -lwinFang ' .. pkgConfig('libs', 'elementary') .. ' ' .. pkgConfig('libs', 'luajit') .. ' -lm -Wl,-rpath,' .. baseDir .. '/lib -ldl'
 LFLAGS = '-d'
-EDJE_FLAGS = '-id ' .. baseDir .. '/media/images -fd ' .. baseDir .. '/media'
+EDJE_FLAGS = '-id ' .. baseDir .. '/media/images -fd ' .. baseDir .. '/media/fonts'
 
 
 if 'nil' == type(args) then
