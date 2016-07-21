@@ -83,6 +83,8 @@ CFLAGOPTS = readCommand('echo "$CFLAGOPTS"')
 -- Make sure any old servers are killed off.
 os.execute(baseDir .. '/bin/killem.sh')
 
+PKG_CONFIG_PATH = baseDir .. '/lib:' .. readCommand('echo $PKG_CONFIG_PATH')
+
 CFLAGS = '-g -Wall -I ' .. baseDir .. '/src/libraries'
 CFLAGS = CFLAGS .. ' ' .. pkgConfig('cflags', 'luajit')
 --CFLAGS = CFLAGS .. ' ' .. '-I ' .. baseDir .. '/include/luajit-2.0'
